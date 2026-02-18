@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { z } from 'zod';
 import prisma from '../lib/db.js';
+import { emitNewOrder, emitOrderStatusUpdate } from '../lib/socket.js';
 
 const orderItemOptionSchema = z.object({
   menuOptionValueId: z.string().min(1),
@@ -155,6 +156,13 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
     }
   }
 
+  emitNewOrder({
+    id: order.id,
+    orderNumber: order.orderNumber,
+    status: order.status,
+    orderType: order.orderType,
+  });
+
   res.status(201).json({ success: true, data: order });
 }
 
@@ -165,8 +173,13 @@ export async function listOrders(req: Request, res: Response): Promise<void> {
   const status = req.query.status as string | undefined;
   const orderType = req.query.orderType as string | undefined;
 
+  const includeItems = req.query.includeItems === 'true';
+
   const where: Record<string, unknown> = {};
-  if (status) where.status = status;
+  if (status) {
+    const statuses = status.split(',').map((s) => s.trim()).filter(Boolean);
+    where.status = statuses.length === 1 ? statuses[0] : { in: statuses };
+  }
   if (orderType) where.orderType = orderType;
 
   const [orders, total] = await Promise.all([
@@ -179,6 +192,7 @@ export async function listOrders(req: Request, res: Response): Promise<void> {
         customer: { select: { id: true, name: true, email: true } },
         location: { select: { id: true, name: true } },
         _count: { select: { items: true } },
+        ...(includeItems ? { items: { include: { options: true } } } : {}),
       },
     }),
     prisma.order.count({ where }),
@@ -272,6 +286,13 @@ export async function updateOrderStatus(req: Request<{ id: string }>, res: Respo
     include: {
       items: { include: { options: true } },
     },
+  });
+
+  emitOrderStatusUpdate({
+    id: updated.id,
+    orderNumber: updated.orderNumber,
+    status: updated.status,
+    orderType: updated.orderType,
   });
 
   res.json({ success: true, data: updated });

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { io } from 'socket.io-client';
 import { useAuth } from '../context/AuthContext.js';
 
 interface OrderItem {
@@ -72,6 +73,26 @@ export default function OrderStatus() {
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
   }, [id, token]);
+
+  // Real-time status updates via Socket.IO
+  useEffect(() => {
+    if (!id) return;
+
+    const socket = io({ path: '/socket.io', transports: ['websocket', 'polling'] });
+
+    socket.emit('join:order', id);
+
+    socket.on('order:statusUpdate', (data: { id: string; status: string }) => {
+      if (data.id === id) {
+        setOrder((prev) => prev ? { ...prev, status: data.status } : prev);
+      }
+    });
+
+    return () => {
+      socket.emit('leave:order', id);
+      socket.disconnect();
+    };
+  }, [id]);
 
   if (loading) {
     return (
