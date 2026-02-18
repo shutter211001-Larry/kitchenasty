@@ -2,6 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
+import rateLimit from 'express-rate-limit';
+import swaggerUi from 'swagger-ui-express';
 import dotenv from 'dotenv';
 import authRoutes from './routes/auth.routes.js';
 import locationRoutes from './routes/location.routes.js';
@@ -12,6 +14,7 @@ import reservationRoutes from './routes/reservation.routes.js';
 import couponRoutes from './routes/coupon.routes.js';
 import reviewRoutes from './routes/review.routes.js';
 import dashboardRoutes from './routes/dashboard.routes.js';
+import { openApiSpec } from './lib/openapi.js';
 
 dotenv.config();
 
@@ -27,10 +30,29 @@ export function createApp() {
   if (process.env.NODE_ENV !== 'test') {
     app.use(morgan('dev'));
   }
+
+  // Rate limiting
+  if (process.env.NODE_ENV !== 'test') {
+    const limiter = rateLimit({
+      windowMs: 15 * 60 * 1000, // 15 minutes
+      max: 100, // limit each IP to 100 requests per windowMs
+      standardHeaders: true,
+      legacyHeaders: false,
+      message: { success: false, error: 'Too many requests, please try again later.' },
+    });
+    app.use('/api/', limiter);
+  }
+
   // Stripe webhook needs raw body — register before JSON parser
   app.use('/api/payments/webhook', express.raw({ type: 'application/json' }));
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
+
+  // API Documentation
+  app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(openApiSpec, {
+    customCss: '.swagger-ui .topbar { display: none }',
+    customSiteTitle: 'KitchenAsty API Documentation',
+  }));
 
   // Health check
   app.get('/api/health', (_req, res) => {
@@ -39,9 +61,14 @@ export function createApp() {
       data: {
         status: 'ok',
         timestamp: new Date().toISOString(),
-        version: '0.1.0',
+        version: '1.0.0',
       },
     });
+  });
+
+  // OpenAPI spec endpoint
+  app.get('/api/openapi.json', (_req, res) => {
+    res.json(openApiSpec);
   });
 
   // Routes
