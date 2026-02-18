@@ -32,7 +32,8 @@ A self-hosted restaurant online ordering, table reservation, and management syst
 - **Coupon system** — CRUD for coupons (percentage, fixed, free delivery), validation with min order/usage limits/date restrictions, admin coupon management with create/edit forms
 - **Review system** — Customer review submission (1-5 stars + comment), admin moderation (approve/reject/delete), public approved reviews per location with average rating
 - **Dashboard & reports** — Admin dashboard with real-time metrics (orders today, revenue, reservations, customers), summary stats (weekly/monthly), recent orders list, top selling items
-- **Full test suite** — Unit, integration, and E2E tests (301 tests)
+- **Email notifications** — Branded HTML email templates for order confirmation, status updates, and reservation confirmations via Nodemailer
+- **Full test suite** — Unit, integration, and E2E tests (330 tests)
 - **CI/CD pipeline** — GitHub Actions with lint, test, audit, build, and artifact packaging
 
 ### Planned
@@ -40,7 +41,7 @@ A self-hosted restaurant online ordering, table reservation, and management syst
 - Menu item image upload
 - Real-time order status updates (Socket.IO) and kitchen display view
 - Advanced analytics and reporting charts
-- Email notifications and multi-language support
+- Multi-language support
 - Public REST API
 
 See [`PLAN.md`](PLAN.md) for the full roadmap.
