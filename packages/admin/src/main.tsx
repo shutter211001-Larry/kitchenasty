@@ -12,6 +12,8 @@ import MenuItemForm from './pages/MenuItemForm.js';
 import TableList from './pages/TableList.js';
 import OrderList from './pages/OrderList.js';
 import OrderDetailPage from './pages/OrderDetail.js';
+import ReservationList from './pages/ReservationList.js';
+import ReservationDetail from './pages/ReservationDetail.js';
 import './index.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
@@ -33,6 +35,8 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
           <Route path="/menu/items/:id" element={<MenuItemForm />} />
           <Route path="/orders" element={<OrderList />} />
           <Route path="/orders/:id" element={<OrderDetailPage />} />
+          <Route path="/reservations" element={<ReservationList />} />
+          <Route path="/reservations/:id" element={<ReservationDetail />} />
         </Routes>
       </AdminLayout>
     </BrowserRouter>

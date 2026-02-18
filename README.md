@@ -28,14 +28,14 @@ A self-hosted restaurant online ordering, table reservation, and management syst
 - **Table management** — CRUD for tables per location with capacity tracking and reservation protection
 - **Order management** — Admin order list with status/type filters, order detail view with items/totals, status workflow controls
 - **Order tracking** — Customer order history page, order status page with visual progress tracker, account integration
-- **Full test suite** — Unit, integration, and E2E tests (265 tests)
+- **Reservation system** — Customer booking with time slot availability, admin reservation list with status workflow (pending/confirmed/seated/completed), table assignment, date/status filters
+- **Full test suite** — Unit, integration, and E2E tests (257 tests)
 - **CI/CD pipeline** — GitHub Actions with lint, test, audit, build, and artifact packaging
 
 ### Planned
 
 - Menu item image upload
 - Real-time order status updates (Socket.IO) and kitchen display view
-- Table reservation system
 - Coupons, reviews, and analytics dashboard
 - Email notifications and multi-language support
 - Public REST API
@@ -300,6 +300,17 @@ Coupon, Allergen, Mealtime, CustomerGroup
 | POST | `/api/payments/create-intent` | Optional | Create Stripe payment intent |
 | POST | `/api/payments/webhook` | — | Stripe webhook handler |
 | POST | `/api/payments/cash` | Staff | Record cash payment |
+
+### Reservations
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| GET | `/api/reservations/availability` | — | Check time slot availability |
+| GET | `/api/reservations/my-reservations` | Customer | List customer's reservations |
+| POST | `/api/reservations` | Customer | Create reservation |
+| GET | `/api/reservations` | Staff | List all reservations |
+| GET | `/api/reservations/:id` | Any | Get reservation detail |
+| PATCH | `/api/reservations/:id` | Staff | Update reservation (status, table) |
+| DELETE | `/api/reservations/:id` | Staff | Delete reservation |
 
 ---
 
