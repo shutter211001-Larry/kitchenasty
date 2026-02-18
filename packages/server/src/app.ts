@@ -7,6 +7,7 @@ import authRoutes from './routes/auth.routes.js';
 import locationRoutes from './routes/location.routes.js';
 import menuRoutes from './routes/menu.routes.js';
 import orderRoutes from './routes/order.routes.js';
+import paymentRoutes from './routes/payment.routes.js';
 
 dotenv.config();
 
@@ -22,6 +23,8 @@ export function createApp() {
   if (process.env.NODE_ENV !== 'test') {
     app.use(morgan('dev'));
   }
+  // Stripe webhook needs raw body — register before JSON parser
+  app.use('/api/payments/webhook', express.raw({ type: 'application/json' }));
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
 
@@ -42,6 +45,7 @@ export function createApp() {
   app.use('/api/locations', locationRoutes);
   app.use('/api/menu', menuRoutes);
   app.use('/api/orders', orderRoutes);
+  app.use('/api/payments', paymentRoutes);
 
   // 404 handler
   app.use((_req, res) => {

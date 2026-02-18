@@ -4,6 +4,7 @@ import { useCart } from '../context/CartContext.js';
 import { useAuth } from '../context/AuthContext.js';
 
 type OrderType = 'delivery' | 'pickup';
+type PaymentMethod = 'cash' | 'stripe';
 
 const TAX_RATE = 0.08;
 const DELIVERY_FEE = 4.99;
@@ -14,6 +15,7 @@ export default function Checkout() {
   const navigate = useNavigate();
 
   const [orderType, setOrderType] = useState<OrderType>('delivery');
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cash');
   const [address, setAddress] = useState({ line1: '', line2: '', city: '', state: '', zip: '' });
   const [scheduledAt, setScheduledAt] = useState('');
   const [comment, setComment] = useState('');
@@ -60,6 +62,7 @@ export default function Checkout() {
 
       const body: Record<string, unknown> = {
         orderType: orderType.toUpperCase(),
+        paymentMethod,
         items: orderItems,
         comment: comment || undefined,
         scheduledAt: scheduledAt || undefined,
@@ -245,6 +248,52 @@ export default function Checkout() {
                 Apply
               </button>
             </div>
+          </div>
+
+          {/* Payment method */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Payment Method</h2>
+            <div className="space-y-2">
+              <label className={`flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition-colors ${
+                paymentMethod === 'cash'
+                  ? 'border-primary-600 bg-primary-50'
+                  : 'border-gray-200 hover:border-gray-300'
+              }`}>
+                <input
+                  type="radio"
+                  name="payment"
+                  checked={paymentMethod === 'cash'}
+                  onChange={() => setPaymentMethod('cash')}
+                  className="accent-primary-600"
+                />
+                <div>
+                  <span className="text-sm font-medium text-gray-900">Cash on Delivery/Pickup</span>
+                  <p className="text-xs text-gray-500">Pay when you receive your order</p>
+                </div>
+              </label>
+              <label className={`flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition-colors ${
+                paymentMethod === 'stripe'
+                  ? 'border-primary-600 bg-primary-50'
+                  : 'border-gray-200 hover:border-gray-300'
+              }`}>
+                <input
+                  type="radio"
+                  name="payment"
+                  checked={paymentMethod === 'stripe'}
+                  onChange={() => setPaymentMethod('stripe')}
+                  className="accent-primary-600"
+                />
+                <div>
+                  <span className="text-sm font-medium text-gray-900">Pay with Card</span>
+                  <p className="text-xs text-gray-500">Secure payment via Stripe</p>
+                </div>
+              </label>
+            </div>
+            {paymentMethod === 'stripe' && (
+              <p className="mt-3 text-xs text-gray-400">
+                You will be prompted to enter your card details after placing the order.
+              </p>
+            )}
           </div>
 
           {!user && (
