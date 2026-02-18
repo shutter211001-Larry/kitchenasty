@@ -9,6 +9,7 @@ import CategoryList from './pages/CategoryList.js';
 import CategoryForm from './pages/CategoryForm.js';
 import MenuItemList from './pages/MenuItemList.js';
 import MenuItemForm from './pages/MenuItemForm.js';
+import TableList from './pages/TableList.js';
 import './index.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
@@ -20,6 +21,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
           <Route path="/locations" element={<LocationList />} />
           <Route path="/locations/new" element={<LocationForm />} />
           <Route path="/locations/:id" element={<LocationForm />} />
+          <Route path="/locations/:locationId/tables" element={<TableList />} />
           <Route path="/menu" element={<Navigate to="/menu/items" replace />} />
           <Route path="/menu/categories" element={<CategoryList />} />
           <Route path="/menu/categories/new" element={<CategoryForm />} />

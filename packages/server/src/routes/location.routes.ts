@@ -12,6 +12,13 @@ import {
   updateDeliveryZone,
   deleteDeliveryZone,
 } from '../controllers/delivery-zone.controller.js';
+import {
+  listTables,
+  getTable,
+  createTable,
+  updateTable,
+  deleteTable,
+} from '../controllers/table.controller.js';
 import { authenticate, requireStaff, requireRole } from '../middleware/auth.js';
 
 const router = Router();
@@ -28,5 +35,12 @@ router.get('/:locationId/delivery-zones', listDeliveryZones);
 router.post('/:locationId/delivery-zones', authenticate, requireStaff, requireRole('SUPER_ADMIN', 'MANAGER'), createDeliveryZone);
 router.patch('/:locationId/delivery-zones/:zoneId', authenticate, requireStaff, requireRole('SUPER_ADMIN', 'MANAGER'), updateDeliveryZone);
 router.delete('/:locationId/delivery-zones/:zoneId', authenticate, requireStaff, requireRole('SUPER_ADMIN'), deleteDeliveryZone);
+
+// Tables - nested under locations
+router.get('/:locationId/tables', listTables);
+router.get('/:locationId/tables/:tableId', getTable);
+router.post('/:locationId/tables', authenticate, requireStaff, requireRole('SUPER_ADMIN', 'MANAGER'), createTable);
+router.patch('/:locationId/tables/:tableId', authenticate, requireStaff, requireRole('SUPER_ADMIN', 'MANAGER'), updateTable);
+router.delete('/:locationId/tables/:tableId', authenticate, requireStaff, requireRole('SUPER_ADMIN'), deleteTable);
 
 export default router;
