@@ -20,9 +20,10 @@ A self-hosted restaurant online ordering, table reservation, and management syst
 - **JWT authentication** — Staff login with role-based access control (Super Admin, Manager, Staff) and customer registration/login
 - **Admin panel** — Sidebar navigation, dashboard with metric cards, location list and form editor
 - **Customer storefront** — Responsive layout with header/footer, location selector, customer auth (login/register/account), 404 page
+- **Menu browsing** — Category sidebar with item counts, search with debounce, responsive grid of item cards, item detail modal with option selectors, quantity picker, and price calculation
 - **Menu management** — Category CRUD with nesting, menu item CRUD with options/allergens/mealtimes, stock tracking
 - **Table management** — CRUD for tables per location with capacity tracking and reservation protection
-- **Full test suite** — Unit, integration, and E2E tests (194 tests)
+- **Full test suite** — Unit, integration, and E2E tests (205 tests)
 - **CI/CD pipeline** — GitHub Actions with lint, test, audit, build, and artifact packaging
 
 ### Planned

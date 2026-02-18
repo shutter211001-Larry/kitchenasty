@@ -8,6 +8,7 @@ import Locations from './pages/Locations.js';
 import Login from './pages/Login.js';
 import Register from './pages/Register.js';
 import Account from './pages/Account.js';
+import Menu from './pages/Menu.js';
 import NotFound from './pages/NotFound.js';
 import './index.css';
 
@@ -19,6 +20,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
           <Route element={<Layout />}>
             <Route path="/" element={<Home />} />
             <Route path="/locations" element={<Locations />} />
+            <Route path="/menu" element={<Menu />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/account" element={<Account />} />
