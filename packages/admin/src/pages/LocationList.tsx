@@ -129,7 +129,13 @@ export default function LocationList() {
                     {loc._count.orders} orders &middot; {loc._count.tables} tables &middot;{' '}
                     {loc._count.deliveryZones} zones
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
+                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm space-x-3">
+                    <Link
+                      to={`/locations/${loc.id}/tables`}
+                      className="text-gray-600 hover:text-gray-900 font-medium"
+                    >
+                      Tables
+                    </Link>
                     <Link
                       to={`/locations/${loc.id}`}
                       className="text-primary-600 hover:text-primary-900 font-medium"

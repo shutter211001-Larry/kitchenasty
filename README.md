@@ -21,7 +21,8 @@ A self-hosted restaurant online ordering, table reservation, and management syst
 - **Admin panel** — Sidebar navigation, dashboard with metric cards, location list and form editor
 - **Customer storefront** — Landing page with hero section, navigation, and menu CTA
 - **Menu management** — Category CRUD with nesting, menu item CRUD with options/allergens/mealtimes, stock tracking
-- **Full test suite** — Unit, integration, and E2E tests (157 tests)
+- **Table management** — CRUD for tables per location with capacity tracking and reservation protection
+- **Full test suite** — Unit, integration, and E2E tests (180 tests)
 - **CI/CD pipeline** — GitHub Actions with lint, test, audit, build, and artifact packaging
 
 ### Planned
@@ -240,6 +241,15 @@ Coupon, Allergen, Mealtime, CustomerGroup
 | POST | `/api/locations/:id/delivery-zones` | Manager+ | Create zone |
 | PATCH | `/api/locations/:id/delivery-zones/:zoneId` | Manager+ | Update zone |
 | DELETE | `/api/locations/:id/delivery-zones/:zoneId` | Super Admin | Delete zone |
+
+### Tables
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| GET | `/api/locations/:id/tables` | — | List tables for location |
+| GET | `/api/locations/:id/tables/:tableId` | — | Get table detail |
+| POST | `/api/locations/:id/tables` | Manager+ | Create table |
+| PATCH | `/api/locations/:id/tables/:tableId` | Manager+ | Update table |
+| DELETE | `/api/locations/:id/tables/:tableId` | Super Admin | Delete table |
 
 ### Menu — Categories
 | Method | Endpoint | Auth | Description |
