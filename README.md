@@ -29,14 +29,15 @@ A self-hosted restaurant online ordering, table reservation, and management syst
 - **Order management** — Admin order list with status/type filters, order detail view with items/totals, status workflow controls
 - **Order tracking** — Customer order history page, order status page with visual progress tracker, account integration
 - **Reservation system** — Customer booking with time slot availability, admin reservation list with status workflow (pending/confirmed/seated/completed), table assignment, date/status filters
-- **Full test suite** — Unit, integration, and E2E tests (257 tests)
+- **Coupon system** — CRUD for coupons (percentage, fixed, free delivery), validation with min order/usage limits/date restrictions, admin coupon management with create/edit forms
+- **Full test suite** — Unit, integration, and E2E tests (283 tests)
 - **CI/CD pipeline** — GitHub Actions with lint, test, audit, build, and artifact packaging
 
 ### Planned
 
 - Menu item image upload
 - Real-time order status updates (Socket.IO) and kitchen display view
-- Coupons, reviews, and analytics dashboard
+- Reviews and analytics dashboard
 - Email notifications and multi-language support
 - Public REST API
 
@@ -300,6 +301,16 @@ Coupon, Allergen, Mealtime, CustomerGroup
 | POST | `/api/payments/create-intent` | Optional | Create Stripe payment intent |
 | POST | `/api/payments/webhook` | — | Stripe webhook handler |
 | POST | `/api/payments/cash` | Staff | Record cash payment |
+
+### Coupons
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| POST | `/api/coupons/validate` | — | Validate coupon code and calculate discount |
+| GET | `/api/coupons` | Staff | List all coupons |
+| GET | `/api/coupons/:id` | Staff | Get coupon detail |
+| POST | `/api/coupons` | Staff | Create coupon |
+| PATCH | `/api/coupons/:id` | Staff | Update coupon |
+| DELETE | `/api/coupons/:id` | Manager+ | Delete coupon |
 
 ### Reservations
 | Method | Endpoint | Auth | Description |

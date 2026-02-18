@@ -14,6 +14,8 @@ import OrderList from './pages/OrderList.js';
 import OrderDetailPage from './pages/OrderDetail.js';
 import ReservationList from './pages/ReservationList.js';
 import ReservationDetail from './pages/ReservationDetail.js';
+import CouponList from './pages/CouponList.js';
+import CouponForm from './pages/CouponForm.js';
 import './index.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
@@ -37,6 +39,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
           <Route path="/orders/:id" element={<OrderDetailPage />} />
           <Route path="/reservations" element={<ReservationList />} />
           <Route path="/reservations/:id" element={<ReservationDetail />} />
+          <Route path="/coupons" element={<CouponList />} />
+          <Route path="/coupons/new" element={<CouponForm />} />
+          <Route path="/coupons/:id" element={<CouponForm />} />
         </Routes>
       </AdminLayout>
     </BrowserRouter>
