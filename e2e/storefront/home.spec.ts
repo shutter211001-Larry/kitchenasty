@@ -6,56 +6,59 @@ test.describe('Storefront Home Page', () => {
     await expect(page).toHaveTitle('KitchenAsty - Order Online');
   });
 
-  test('displays the navigation bar with brand name', async ({ page }) => {
+  test('displays header with brand name', async ({ page }) => {
     await page.goto('/');
-    const nav = page.locator('nav');
-    await expect(nav).toBeVisible();
-    await expect(nav).toContainText('KitchenAsty');
+    const header = page.locator('header');
+    await expect(header).toBeVisible();
+    await expect(header).toContainText('KitchenAsty');
   });
 
-  test('displays navigation links', async ({ page }) => {
+  test('displays desktop navigation links', async ({ page }) => {
     await page.goto('/');
-
-    await expect(page.getByRole('link', { name: 'Menu', exact: true })).toBeVisible();
-    await expect(page.getByRole('link', { name: 'Reservations' })).toBeVisible();
-    await expect(page.getByRole('link', { name: 'Login' })).toBeVisible();
+    const nav = page.getByRole('navigation');
+    await expect(nav.getByRole('link', { name: 'Home' })).toBeVisible();
+    await expect(nav.getByRole('link', { name: 'Locations' })).toBeVisible();
+    await expect(nav.getByRole('link', { name: 'Menu' })).toBeVisible();
+    await expect(nav.getByRole('link', { name: 'Reservations' })).toBeVisible();
   });
 
   test('displays hero section with heading', async ({ page }) => {
     await page.goto('/');
-    const heading = page.getByRole('heading', { name: 'Order Delicious Food Online' });
-    await expect(heading).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Order Delicious Food Online' })).toBeVisible();
   });
 
-  test('displays description text', async ({ page }) => {
+  test('displays hero CTA buttons', async ({ page }) => {
     await page.goto('/');
-    await expect(
-      page.getByText('Browse our menu, place your order for delivery or pickup, and enjoy!')
-    ).toBeVisible();
+    await expect(page.getByRole('link', { name: 'View Menu' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Find a Location' })).toBeVisible();
   });
 
-  test('displays View Menu CTA button', async ({ page }) => {
+  test('displays feature cards', async ({ page }) => {
     await page.goto('/');
-    const ctaButton = page.getByRole('link', { name: 'View Menu' });
-    await expect(ctaButton).toBeVisible();
-    await expect(ctaButton).toHaveAttribute('href', '/menu');
+    await expect(page.getByText('Fast Delivery')).toBeVisible();
+    await expect(page.getByText('Easy Ordering')).toBeVisible();
+    await expect(page.getByText('Table Reservations')).toBeVisible();
   });
 
-  test('Menu nav link points to /menu', async ({ page }) => {
+  test('displays footer with links', async ({ page }) => {
     await page.goto('/');
-    const menuLink = page.getByRole('link', { name: 'Menu' }).first();
-    await expect(menuLink).toHaveAttribute('href', '/menu');
+    const footer = page.locator('footer');
+    await expect(footer).toBeVisible();
+    await expect(footer).toContainText('KitchenAsty');
+    await expect(footer).toContainText('Quick Links');
+    await expect(footer).toContainText('Account');
   });
 
-  test('Reservations nav link points to /reservations', async ({ page }) => {
+  test('displays sign up CTA section', async ({ page }) => {
     await page.goto('/');
-    const link = page.getByRole('link', { name: 'Reservations' });
-    await expect(link).toHaveAttribute('href', '/reservations');
+    await expect(page.getByRole('heading', { name: 'Ready to Order?' })).toBeVisible();
+    await expect(page.getByRole('main').getByRole('link', { name: 'Create Account' })).toBeVisible();
   });
 
-  test('Login nav link points to /login', async ({ page }) => {
+  test('Login and Sign Up links visible when not authenticated', async ({ page }) => {
     await page.goto('/');
-    const link = page.getByRole('link', { name: 'Login' });
-    await expect(link).toHaveAttribute('href', '/login');
+    const header = page.locator('header');
+    await expect(header.getByRole('link', { name: 'Login' })).toBeVisible();
+    await expect(header.getByRole('link', { name: 'Sign Up' })).toBeVisible();
   });
 });
