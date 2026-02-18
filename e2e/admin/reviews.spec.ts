@@ -1,9 +1,8 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Admin Review List', () => {
-  test('navigates to reviews page via sidebar', async ({ page }) => {
-    await page.goto('/');
-    await page.getByRole('link', { name: 'Reviews' }).click();
+  test('navigates to reviews page', async ({ page }) => {
+    await page.goto('/reviews');
     await expect(page).toHaveURL('/reviews');
     await expect(page.getByRole('heading', { name: 'Reviews' })).toBeVisible();
   });

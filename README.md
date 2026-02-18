@@ -31,14 +31,15 @@ A self-hosted restaurant online ordering, table reservation, and management syst
 - **Reservation system** — Customer booking with time slot availability, admin reservation list with status workflow (pending/confirmed/seated/completed), table assignment, date/status filters
 - **Coupon system** — CRUD for coupons (percentage, fixed, free delivery), validation with min order/usage limits/date restrictions, admin coupon management with create/edit forms
 - **Review system** — Customer review submission (1-5 stars + comment), admin moderation (approve/reject/delete), public approved reviews per location with average rating
-- **Full test suite** — Unit, integration, and E2E tests (298 tests)
+- **Dashboard & reports** — Admin dashboard with real-time metrics (orders today, revenue, reservations, customers), summary stats (weekly/monthly), recent orders list, top selling items
+- **Full test suite** — Unit, integration, and E2E tests (301 tests)
 - **CI/CD pipeline** — GitHub Actions with lint, test, audit, build, and artifact packaging
 
 ### Planned
 
 - Menu item image upload
 - Real-time order status updates (Socket.IO) and kitchen display view
-- Analytics dashboard
+- Advanced analytics and reporting charts
 - Email notifications and multi-language support
 - Public REST API
 
@@ -302,6 +303,11 @@ Coupon, Allergen, Mealtime, CustomerGroup
 | POST | `/api/payments/create-intent` | Optional | Create Stripe payment intent |
 | POST | `/api/payments/webhook` | — | Stripe webhook handler |
 | POST | `/api/payments/cash` | Staff | Record cash payment |
+
+### Dashboard
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| GET | `/api/dashboard/stats` | Staff | Get dashboard metrics, recent orders, top items |
 
 ### Reviews
 | Method | Endpoint | Auth | Description |
