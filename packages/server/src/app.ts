@@ -10,6 +10,7 @@ import orderRoutes from './routes/order.routes.js';
 import paymentRoutes from './routes/payment.routes.js';
 import reservationRoutes from './routes/reservation.routes.js';
 import couponRoutes from './routes/coupon.routes.js';
+import reviewRoutes from './routes/review.routes.js';
 
 dotenv.config();
 
@@ -50,6 +51,7 @@ export function createApp() {
   app.use('/api/payments', paymentRoutes);
   app.use('/api/reservations', reservationRoutes);
   app.use('/api/coupons', couponRoutes);
+  app.use('/api/reviews', reviewRoutes);
 
   // 404 handler
   app.use((_req, res) => {

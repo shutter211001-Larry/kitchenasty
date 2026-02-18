@@ -22,6 +22,7 @@ const navItems: NavItem[] = [
   { path: '/orders', label: 'Orders', icon: '📋' },
   { path: '/reservations', label: 'Reservations', icon: '🗓' },
   { path: '/coupons', label: 'Coupons', icon: '🏷' },
+  { path: '/reviews', label: 'Reviews', icon: '⭐' },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {

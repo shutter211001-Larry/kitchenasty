@@ -30,14 +30,15 @@ A self-hosted restaurant online ordering, table reservation, and management syst
 - **Order tracking** — Customer order history page, order status page with visual progress tracker, account integration
 - **Reservation system** — Customer booking with time slot availability, admin reservation list with status workflow (pending/confirmed/seated/completed), table assignment, date/status filters
 - **Coupon system** — CRUD for coupons (percentage, fixed, free delivery), validation with min order/usage limits/date restrictions, admin coupon management with create/edit forms
-- **Full test suite** — Unit, integration, and E2E tests (283 tests)
+- **Review system** — Customer review submission (1-5 stars + comment), admin moderation (approve/reject/delete), public approved reviews per location with average rating
+- **Full test suite** — Unit, integration, and E2E tests (298 tests)
 - **CI/CD pipeline** — GitHub Actions with lint, test, audit, build, and artifact packaging
 
 ### Planned
 
 - Menu item image upload
 - Real-time order status updates (Socket.IO) and kitchen display view
-- Reviews and analytics dashboard
+- Analytics dashboard
 - Email notifications and multi-language support
 - Public REST API
 
@@ -301,6 +302,15 @@ Coupon, Allergen, Mealtime, CustomerGroup
 | POST | `/api/payments/create-intent` | Optional | Create Stripe payment intent |
 | POST | `/api/payments/webhook` | — | Stripe webhook handler |
 | POST | `/api/payments/cash` | Staff | Record cash payment |
+
+### Reviews
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| GET | `/api/reviews/location/:locationId` | — | Get approved reviews with average rating |
+| POST | `/api/reviews` | Customer | Submit review |
+| GET | `/api/reviews` | Staff | List all reviews (including unapproved) |
+| PATCH | `/api/reviews/:id` | Staff | Moderate review (approve/reject) |
+| DELETE | `/api/reviews/:id` | Manager+ | Delete review |
 
 ### Coupons
 | Method | Endpoint | Auth | Description |
