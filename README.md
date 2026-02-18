@@ -1,0 +1,262 @@
+# KitchenAsty
+
+[![CI](https://github.com/mighty840/kitchenasty/actions/workflows/ci.yml/badge.svg)](https://github.com/mighty840/kitchenasty/actions/workflows/ci.yml)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=white)](https://react.dev/)
+[![Express](https://img.shields.io/badge/Express-4-000000?logo=express&logoColor=white)](https://expressjs.com/)
+[![Prisma](https://img.shields.io/badge/Prisma-5-2D3748?logo=prisma&logoColor=white)](https://www.prisma.io/)
+[![Playwright](https://img.shields.io/badge/Playwright-E2E-2EAD33?logo=playwright&logoColor=white)](https://playwright.dev/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+A self-hosted restaurant online ordering, table reservation, and management system. KitchenAsty enables restaurants, cafes, and takeaways to accept online orders for delivery and pickup, manage menus, handle table reservations, and run operations from a single admin panel — inspired by [TastyIgniter](https://tastyigniter.com/).
+
+---
+
+## Features
+
+### Implemented
+
+- **Multi-location management** — CRUD for restaurant locations with operating hours and delivery zones
+- **JWT authentication** — Staff login with role-based access control (Super Admin, Manager, Staff) and customer registration/login
+- **Admin panel** — Sidebar navigation, dashboard with metric cards, location list and form editor
+- **Customer storefront** — Landing page with hero section, navigation, and menu CTA
+- **Full test suite** — Unit, integration, and E2E tests (113 tests)
+- **CI/CD pipeline** — GitHub Actions with lint, test, audit, build, and artifact packaging
+
+### Planned
+
+- Menu management (categories, items, options, allergens, mealtimes)
+- Shopping cart and checkout with Stripe payments
+- Order management with kitchen display and real-time status updates
+- Table reservation system
+- Coupons, reviews, and analytics dashboard
+- Email notifications and multi-language support
+- Public REST API
+
+See [`PLAN.md`](PLAN.md) for the full roadmap.
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| **Backend** | [Node.js](https://nodejs.org/) + [Express](https://expressjs.com/) |
+| **Frontend (Admin)** | [React 18](https://react.dev/) + [Vite](https://vite.dev/) |
+| **Frontend (Storefront)** | [React 18](https://react.dev/) + [Vite](https://vite.dev/) |
+| **Database** | [PostgreSQL](https://www.postgresql.org/) + [Prisma ORM](https://www.prisma.io/) |
+| **Auth** | JWT ([jsonwebtoken](https://github.com/auth0/node-jsonwebtoken)) + [bcrypt](https://github.com/dcodeIO/bcrypt.js) |
+| **Validation** | [Zod](https://zod.dev/) |
+| **Styling** | [Tailwind CSS](https://tailwindcss.com/) |
+| **Testing** | [Vitest](https://vitest.dev/) + [Supertest](https://github.com/ladjs/supertest) + [Playwright](https://playwright.dev/) |
+| **CI/CD** | [GitHub Actions](https://github.com/features/actions) |
+| **Language** | [TypeScript](https://www.typescriptlang.org/) (strict mode) |
+
+---
+
+## Project Structure
+
+```
+kitchenasty/
+├── .github/workflows/     # CI pipeline
+├── e2e/                   # Playwright E2E tests
+│   ├── admin/             #   Admin panel tests
+│   └── storefront/        #   Customer storefront tests
+├── packages/
+│   ├── admin/             # React admin panel (Vite, port 5173)
+│   ├── server/            # Express API server (port 3000)
+│   ├── shared/            # Shared types and constants
+│   └── storefront/        # React customer storefront (Vite, port 5174)
+├── prisma/
+│   ├── schema.prisma      # Database schema (20 models)
+│   └── seed.ts            # Sample data seeder
+├── docker-compose.yml     # PostgreSQL for local dev
+├── playwright.config.ts   # E2E test configuration
+└── PLAN.md                # Full feature roadmap
+```
+
+The project uses **npm workspaces** as a monorepo. All packages share a single `node_modules` and `package-lock.json` at the root.
+
+---
+
+## Getting Started
+
+### Prerequisites
+
+- **Node.js** 22+
+- **Docker** (for PostgreSQL) or a local PostgreSQL instance
+- **npm** 10+
+
+### 1. Clone and install
+
+```bash
+git clone git@github.com:mighty840/kitchenasty.git
+cd kitchenasty
+npm install
+```
+
+### 2. Start the database
+
+```bash
+docker compose up -d
+```
+
+This starts PostgreSQL on `localhost:5432` with credentials `kitchenasty/kitchenasty`.
+
+### 3. Set up environment
+
+```bash
+cp packages/server/.env.example packages/server/.env
+```
+
+The defaults work out of the box with the Docker Compose setup.
+
+### 4. Run database migrations and seed
+
+```bash
+npx -w packages/server prisma migrate dev --schema ../../prisma/schema.prisma
+npx -w packages/server prisma db seed
+```
+
+### 5. Generate Prisma client
+
+```bash
+npx -w packages/server prisma generate --schema ../../prisma/schema.prisma
+```
+
+### 6. Start development servers
+
+```bash
+# Start all three in separate terminals:
+npm run dev:server      # API server → http://localhost:3000
+npm run dev:admin       # Admin panel → http://localhost:5173
+npm run dev:storefront  # Storefront  → http://localhost:5174
+```
+
+---
+
+## Commands
+
+### Development
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev:server` | Start Express API server with hot reload |
+| `npm run dev:admin` | Start admin panel dev server |
+| `npm run dev:storefront` | Start storefront dev server |
+
+### Testing
+
+| Command | Description |
+|---------|-------------|
+| `npm test` | Run all unit + integration tests |
+| `npm run test:unit` | Run unit tests only |
+| `npm run test:integration` | Run integration tests only |
+| `npm run test:e2e` | Run Playwright E2E tests (auto-starts dev servers) |
+
+### Database
+
+| Command | Description |
+|---------|-------------|
+| `docker compose up -d` | Start PostgreSQL |
+| `docker compose down` | Stop PostgreSQL |
+| `npx -w packages/server prisma migrate dev --schema ../../prisma/schema.prisma` | Run migrations |
+| `npx -w packages/server prisma db seed` | Seed sample data |
+| `npx -w packages/server prisma studio --schema ../../prisma/schema.prisma` | Open Prisma Studio GUI |
+
+### Build
+
+| Command | Description |
+|---------|-------------|
+| `npm run build` | Build all packages for production |
+
+---
+
+## CI Pipeline
+
+The GitHub Actions workflow runs on every push to `main` and on pull requests:
+
+| Job | Description |
+|-----|-------------|
+| **Lint** | TypeScript type-checking across all 4 packages |
+| **Unit Tests** | Shared + server unit tests via Vitest |
+| **Integration Tests** | API integration tests via Vitest + Supertest |
+| **E2E Tests** | Playwright browser tests for admin and storefront |
+| **Security Audit** | `npm audit` at high severity threshold |
+| **Build** | Compiles all packages and uploads dist artifacts |
+
+The **Build** job only runs after Lint, Unit, and Integration tests pass.
+
+---
+
+## Database Schema
+
+20 models covering the full restaurant domain:
+
+```
+Location ─── OperatingHour, DeliveryZone, Table
+    │
+Category ─── MenuItem ─── MenuOption ─── MenuOptionValue
+    │              │
+    │         MenuItemMealtime, MenuItemAllergen
+    │
+Customer ─── Address, Order ─── OrderItem ─── OrderItemOption
+    │              │
+    │         Payment, Review
+    │
+    └── Reservation ─── Table
+
+User (Staff) ─── Role (SUPER_ADMIN, MANAGER, STAFF)
+Coupon, Allergen, Mealtime, CustomerGroup
+```
+
+---
+
+## API Endpoints
+
+### Auth
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| POST | `/api/auth/staff/login` | — | Staff login |
+| POST | `/api/auth/staff/register` | Super Admin | Register new staff |
+| POST | `/api/auth/customer/register` | — | Customer registration |
+| POST | `/api/auth/customer/login` | — | Customer login |
+| GET | `/api/auth/me` | Any | Current user info |
+
+### Locations
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| GET | `/api/locations` | — | List locations (paginated) |
+| GET | `/api/locations/:id` | — | Get location detail |
+| POST | `/api/locations` | Manager+ | Create location |
+| PATCH | `/api/locations/:id` | Manager+ | Update location |
+| DELETE | `/api/locations/:id` | Super Admin | Delete location |
+
+### Delivery Zones
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| GET | `/api/locations/:id/delivery-zones` | — | List zones |
+| POST | `/api/locations/:id/delivery-zones` | Manager+ | Create zone |
+| PATCH | `/api/locations/:id/delivery-zones/:zoneId` | Manager+ | Update zone |
+| DELETE | `/api/locations/:id/delivery-zones/:zoneId` | Super Admin | Delete zone |
+
+---
+
+## Contributing
+
+1. Create a feature branch from `main`: `git checkout -b feature/your-feature`
+2. Make changes and add tests
+3. Ensure all tests pass: `npm test && npm run test:e2e`
+4. Push and open a pull request
+
+### Branch Naming
+
+- `feature/*` — New features
+- `fix/*` — Bug fixes
+- `chore/*` — Maintenance and tooling
+
+---
+
+## License
+
+MIT
