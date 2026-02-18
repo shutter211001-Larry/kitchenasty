@@ -1,8 +1,10 @@
 import { useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useCart } from '../context/CartContext.js';
 
 export default function CartDrawer() {
+  const { t } = useTranslation();
   const { items, isOpen, setIsOpen, updateQuantity, removeItem, clear, subtotal } = useCart();
 
   const handleKeyDown = useCallback(
@@ -34,11 +36,11 @@ export default function CartDrawer() {
       >
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-          <h2 className="text-lg font-bold text-gray-900">Your Cart</h2>
+          <h2 className="text-lg font-bold text-gray-900">{t('cart.title')}</h2>
           <button
             onClick={() => setIsOpen(false)}
             className="p-1.5 rounded-md hover:bg-gray-100 text-gray-500"
-            aria-label="Close cart"
+            aria-label={t('cart.close')}
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -53,12 +55,12 @@ export default function CartDrawer() {
               <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z" />
               </svg>
-              <p className="text-gray-500">Your cart is empty</p>
+              <p className="text-gray-500">{t('cart.empty')}</p>
               <button
                 onClick={() => setIsOpen(false)}
                 className="mt-4 text-primary-600 hover:text-primary-700 text-sm font-medium"
               >
-                Continue browsing
+                {t('cart.browsMenu')}
               </button>
             </div>
           ) : (
@@ -94,7 +96,7 @@ export default function CartDrawer() {
                           onClick={() => removeItem(item.id)}
                           className="ml-2 text-xs text-red-500 hover:text-red-700"
                         >
-                          Remove
+                          {t('cart.remove')}
                         </button>
                       </div>
                     </div>
@@ -113,22 +115,21 @@ export default function CartDrawer() {
         {items.length > 0 && (
           <div className="border-t border-gray-200 px-6 py-4 space-y-3">
             <div className="flex justify-between text-sm">
-              <span className="text-gray-600">Subtotal</span>
+              <span className="text-gray-600">{t('cart.subtotal')}</span>
               <span className="font-semibold text-gray-900">${subtotal.toFixed(2)}</span>
             </div>
-            <p className="text-xs text-gray-400">Tax and delivery fee calculated at checkout.</p>
             <Link
               to="/checkout"
               onClick={() => setIsOpen(false)}
               className="block text-center bg-primary-600 text-white py-2.5 rounded-lg font-semibold hover:bg-primary-700 transition-colors"
             >
-              Checkout
+              {t('cart.checkout')}
             </Link>
             <button
               onClick={clear}
               className="block w-full text-center text-sm text-gray-500 hover:text-gray-700"
             >
-              Clear Cart
+              {t('common.delete')}
             </button>
           </div>
         )}

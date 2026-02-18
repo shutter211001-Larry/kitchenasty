@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, Navigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext.js';
 
 interface OrderSummary {
@@ -32,6 +33,7 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 export default function OrderHistory() {
+  const { t } = useTranslation();
   const { user, token, isLoading: authLoading } = useAuth();
   const [orders, setOrders] = useState<OrderSummary[]>([]);
   const [pagination, setPagination] = useState<Pagination | null>(null);
@@ -72,9 +74,9 @@ export default function OrderHistory() {
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Order History</h1>
+        <h1 className="text-3xl font-bold text-gray-900">{t('orders.title')}</h1>
         <Link to="/account" className="text-primary-600 hover:text-primary-700 text-sm font-medium">
-          Back to Account
+          {t('nav.myAccount')}
         </Link>
       </div>
 
@@ -93,9 +95,9 @@ export default function OrderHistory() {
           <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
           </svg>
-          <p className="text-gray-500 mb-4">You haven't placed any orders yet.</p>
+          <p className="text-gray-500 mb-4">{t('orders.noOrders')}</p>
           <Link to="/menu" className="bg-primary-600 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-primary-700 transition-colors">
-            Browse Menu
+            {t('checkout.browseMenu')}
           </Link>
         </div>
       )}
@@ -139,17 +141,17 @@ export default function OrderHistory() {
                 onClick={() => setPage((p) => p - 1)}
                 className="px-4 py-2 text-sm border border-gray-300 rounded-lg disabled:opacity-40 hover:bg-gray-50"
               >
-                Previous
+                {t('locations.previous')}
               </button>
               <span className="text-sm text-gray-600">
-                Page {pagination.page} of {pagination.totalPages}
+                {pagination.page} / {pagination.totalPages}
               </span>
               <button
                 disabled={page >= pagination.totalPages}
                 onClick={() => setPage((p) => p + 1)}
                 className="px-4 py-2 text-sm border border-gray-300 rounded-lg disabled:opacity-40 hover:bg-gray-50"
               >
-                Next
+                {t('locations.next')}
               </button>
             </div>
           )}

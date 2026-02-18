@@ -16,6 +16,7 @@ import Reservations from './pages/Reservations.js';
 import OrderHistory from './pages/OrderHistory.js';
 import OrderStatus from './pages/OrderStatus.js';
 import NotFound from './pages/NotFound.js';
+import './i18n/index.js';
 import './index.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(

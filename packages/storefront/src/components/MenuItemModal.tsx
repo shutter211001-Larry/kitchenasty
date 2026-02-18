@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useCart } from '../context/CartContext.js';
 
 interface OptionValue {
@@ -43,6 +44,7 @@ interface Props {
 }
 
 export default function MenuItemModal({ itemId, onClose }: Props) {
+  const { t } = useTranslation();
   const { addItem } = useCart();
   const [item, setItem] = useState<MenuItemDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -232,7 +234,7 @@ export default function MenuItemModal({ itemId, onClose }: Props) {
                       <div className="flex items-center gap-2 mb-2">
                         <h3 className="text-sm font-semibold text-gray-900">{opt.name}</h3>
                         {opt.isRequired && (
-                          <span className="text-xs text-red-500 font-medium">Required</span>
+                          <span className="text-xs text-red-500 font-medium">{t('common.required')}</span>
                         )}
                       </div>
 
@@ -309,7 +311,7 @@ export default function MenuItemModal({ itemId, onClose }: Props) {
                     onClick={handleAddToCart}
                     className="bg-primary-600 text-white px-6 py-2.5 rounded-lg font-semibold hover:bg-primary-700 transition-colors"
                   >
-                    Add to Cart &mdash; ${calculateTotal().toFixed(2)}
+                    {t('menu.addToCart')} &mdash; ${calculateTotal().toFixed(2)}
                   </button>
                 </div>
               </div>

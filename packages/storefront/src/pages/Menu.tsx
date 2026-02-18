@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useApi } from '../hooks/useApi.js';
 import MenuItemModal from '../components/MenuItemModal.js';
 
@@ -33,6 +34,7 @@ interface MenuResponse {
 }
 
 export default function Menu() {
+  const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   const [selectedCategory, setSelectedCategory] = useState<string | null>(
     searchParams.get('category')
@@ -100,8 +102,8 @@ export default function Menu() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Our Menu</h1>
-        <p className="mt-2 text-gray-600">Browse our selection of delicious dishes.</p>
+        <h1 className="text-3xl font-bold text-gray-900">{t('menu.title')}</h1>
+        <p className="mt-2 text-gray-600">{t('home.heroDescription').split('.')[0]}.</p>
       </div>
 
       {/* Search bar */}
@@ -122,7 +124,7 @@ export default function Menu() {
           </svg>
           <input
             type="text"
-            placeholder="Search menu..."
+            placeholder={t('menu.searchPlaceholder')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
@@ -138,7 +140,7 @@ export default function Menu() {
         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h7" />
         </svg>
-        {mobileCategoriesOpen ? 'Hide Categories' : 'Show Categories'}
+        {mobileCategoriesOpen ? t('menu.categories') : t('menu.categories')}
       </button>
 
       <div className="flex flex-col md:flex-row gap-8">
@@ -153,10 +155,10 @@ export default function Menu() {
                   : 'text-gray-600 hover:bg-gray-100'
               }`}
             >
-              All Items
+              {t('menu.allCategories')}
             </button>
             {categoriesLoading && (
-              <div className="px-3 py-2 text-sm text-gray-400">Loading...</div>
+              <div className="px-3 py-2 text-sm text-gray-400">{t('common.loading')}</div>
             )}
             {activeCategories.map((cat) => (
               <button
@@ -185,15 +187,13 @@ export default function Menu() {
 
           {itemsError && (
             <div className="bg-red-50 text-red-700 p-4 rounded-lg">
-              Failed to load menu items. Please try again later.
+              {t('common.error')}
             </div>
           )}
 
           {!itemsLoading && !itemsError && activeItems.length === 0 && (
             <div className="text-center py-12">
-              <p className="text-gray-500">
-                {debouncedSearch ? 'No items match your search.' : 'No items available in this category.'}
-              </p>
+              <p className="text-gray-500">{t('menu.noItems')}</p>
             </div>
           )}
 
@@ -233,7 +233,7 @@ export default function Menu() {
                         </span>
                         {item._count.options > 0 && (
                           <span className="text-xs text-primary-500 bg-primary-50 px-2 py-0.5 rounded-full">
-                            Customizable
+                            {t('menu.options')}
                           </span>
                         )}
                       </div>
@@ -250,17 +250,17 @@ export default function Menu() {
                     onClick={() => setPage((p) => p - 1)}
                     className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg disabled:opacity-40 hover:bg-gray-50"
                   >
-                    Previous
+                    {t('locations.previous')}
                   </button>
                   <span className="text-sm text-gray-600">
-                    Page {pagination.page} of {pagination.totalPages}
+                    {pagination.page} / {pagination.totalPages}
                   </span>
                   <button
                     disabled={page >= pagination.totalPages}
                     onClick={() => setPage((p) => p + 1)}
                     className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg disabled:opacity-40 hover:bg-gray-50"
                   >
-                    Next
+                    {t('locations.next')}
                   </button>
                 </div>
               )}

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext.js';
 import { Link } from 'react-router-dom';
 
@@ -33,6 +34,7 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 export default function Reservations() {
+  const { t } = useTranslation();
   const { user, token } = useAuth();
   const [locations, setLocations] = useState<Location[]>([]);
   const [myReservations, setMyReservations] = useState<Reservation[]>([]);
@@ -89,11 +91,11 @@ export default function Reservations() {
     setSuccess('');
 
     if (!user) {
-      setError('Please log in to make a reservation.');
+      setError(t('reservations.loginRequired'));
       return;
     }
     if (!locationId || !date || !time) {
-      setError('Please select a location, date, and time.');
+      setError(t('reservations.selectDateFirst'));
       return;
     }
 
@@ -109,7 +111,7 @@ export default function Reservations() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to create reservation');
-      setSuccess('Reservation created! We will confirm it shortly.');
+      setSuccess('Reservation created!');
       setTime('');
       setComment('');
     } catch (err: any) {
@@ -123,28 +125,28 @@ export default function Reservations() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">Table Reservations</h1>
+      <h1 className="text-3xl font-bold text-gray-900 mb-8">{t('reservations.title')}</h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Booking Form */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Book a Table</h2>
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('reservations.bookTable')}</h2>
 
           {!user && (
             <div className="bg-yellow-50 text-yellow-800 text-sm p-3 rounded-lg mb-4">
-              Please <Link to="/login" className="underline font-medium">log in</Link> to make a reservation.
+              <Link to="/login" className="underline font-medium">{t('nav.login')}</Link> {t('reservations.loginRequired').toLowerCase()}
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('reservations.location')}</label>
               <select
                 value={locationId}
                 onChange={(e) => setLocationId(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none"
               >
-                <option value="">Select a location</option>
+                <option value="">{t('reservations.selectLocation')}</option>
                 {locations.map((loc) => (
                   <option key={loc.id} value={loc.id}>{loc.name}</option>
                 ))}
@@ -153,7 +155,7 @@ export default function Reservations() {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('reservations.date')}</label>
                 <input
                   type="date"
                   value={date}
@@ -163,14 +165,14 @@ export default function Reservations() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Party Size</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('reservations.partySize')}</label>
                 <select
                   value={partySize}
                   onChange={(e) => setPartySize(parseInt(e.target.value))}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none"
                 >
                   {Array.from({ length: 20 }, (_, i) => i + 1).map((n) => (
-                    <option key={n} value={n}>{n} {n === 1 ? 'guest' : 'guests'}</option>
+                    <option key={n} value={n}>{n} {n === 1 ? t('reservations.guest', { count: n }) : t('reservations.guests', { count: n })}</option>
                   ))}
                 </select>
               </div>
@@ -179,13 +181,13 @@ export default function Reservations() {
             {/* Time Slots */}
             {locationId && date && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Available Times</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('reservations.availableSlots')}</label>
                 {loadingSlots ? (
                   <div className="flex justify-center py-4">
                     <div className="w-6 h-6 border-3 border-primary-200 border-t-primary-600 rounded-full animate-spin" />
                   </div>
                 ) : slots.length === 0 ? (
-                  <p className="text-gray-500 text-sm">No time slots available.</p>
+                  <p className="text-gray-500 text-sm">{t('reservations.noSlots')}</p>
                 ) : (
                   <div className="grid grid-cols-4 gap-2">
                     {slots.map((slot) => (
@@ -211,12 +213,11 @@ export default function Reservations() {
             )}
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Special Requests</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('reservations.specialRequests')}</label>
               <textarea
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
                 rows={2}
-                placeholder="Any dietary requirements or preferences..."
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none resize-none"
               />
             </div>
@@ -229,18 +230,18 @@ export default function Reservations() {
               disabled={submitting || !user}
               className="w-full bg-primary-600 text-white py-2.5 rounded-lg font-medium hover:bg-primary-700 transition-colors disabled:opacity-50"
             >
-              {submitting ? 'Booking...' : 'Book Table'}
+              {submitting ? t('reservations.booking') : t('reservations.bookNow')}
             </button>
           </form>
         </div>
 
         {/* My Reservations */}
         <div>
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">My Reservations</h2>
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('reservations.myReservations')}</h2>
           {!user ? (
-            <p className="text-gray-500 text-sm">Log in to see your reservations.</p>
+            <p className="text-gray-500 text-sm">{t('reservations.loginRequired')}</p>
           ) : myReservations.length === 0 ? (
-            <p className="text-gray-500 text-sm">You have no reservations yet.</p>
+            <p className="text-gray-500 text-sm">{t('reservations.noReservations')}</p>
           ) : (
             <div className="space-y-3">
               {myReservations.map((r) => (
@@ -254,8 +255,8 @@ export default function Reservations() {
                     </span>
                   </div>
                   <div className="text-sm text-gray-500">
-                    {r.location.name} &middot; {r.partySize} guest{r.partySize !== 1 ? 's' : ''}
-                    {r.table && ` &middot; Table: ${r.table.name}`}
+                    {r.location.name} &middot; {r.partySize} {r.partySize === 1 ? t('reservations.guest', { count: 1 }) : t('reservations.guests', { count: r.partySize })}
+                    {r.table && ` \u00B7 Table: ${r.table.name}`}
                   </div>
                   {r.comment && (
                     <p className="text-xs text-gray-400 mt-1 italic">{r.comment}</p>

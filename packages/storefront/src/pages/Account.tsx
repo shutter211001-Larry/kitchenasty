@@ -1,7 +1,9 @@
 import { useAuth } from '../context/AuthContext.js';
 import { Navigate, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 export default function Account() {
+  const { t } = useTranslation();
   const { user, isLoading, logout } = useAuth();
 
   if (isLoading) {
@@ -18,24 +20,24 @@ export default function Account() {
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">My Account</h1>
+      <h1 className="text-3xl font-bold text-gray-900 mb-8">{t('account.title')}</h1>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         {/* Profile */}
         <div className="p-6 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Profile</h2>
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('account.personalInfo')}</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm text-gray-500 mb-1">Name</label>
+              <label className="block text-sm text-gray-500 mb-1">{t('auth.name')}</label>
               <p className="text-gray-900 font-medium">{user.name}</p>
             </div>
             <div>
-              <label className="block text-sm text-gray-500 mb-1">Email</label>
+              <label className="block text-sm text-gray-500 mb-1">{t('account.emailLabel')}</label>
               <p className="text-gray-900">{user.email}</p>
             </div>
             {user.phone && (
               <div>
-                <label className="block text-sm text-gray-500 mb-1">Phone</label>
+                <label className="block text-sm text-gray-500 mb-1">{t('account.phoneLabel')}</label>
                 <p className="text-gray-900">{user.phone}</p>
               </div>
             )}
@@ -44,16 +46,16 @@ export default function Account() {
 
         {/* Quick Links */}
         <div className="p-6 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Links</h2>
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('footer.quickLinks')}</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Link to="/account/orders" className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-              <h3 className="font-medium text-gray-900">Order History</h3>
-              <p className="text-sm text-gray-500 mt-1">View your past orders and reorder.</p>
+              <h3 className="font-medium text-gray-900">{t('account.orderHistory')}</h3>
+              <p className="text-sm text-gray-500 mt-1">{t('account.orderHistoryDesc')}</p>
             </Link>
-            <div className="p-4 bg-gray-50 rounded-lg">
-              <h3 className="font-medium text-gray-900">Reservations</h3>
-              <p className="text-sm text-gray-500 mt-1">Manage your table reservations.</p>
-            </div>
+            <Link to="/reservations" className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+              <h3 className="font-medium text-gray-900">{t('nav.reservations')}</h3>
+              <p className="text-sm text-gray-500 mt-1">{t('reservations.myReservations')}</p>
+            </Link>
           </div>
         </div>
 
@@ -63,7 +65,7 @@ export default function Account() {
             onClick={logout}
             className="text-red-600 hover:text-red-700 font-medium text-sm"
           >
-            Sign Out
+            {t('nav.logout')}
           </button>
         </div>
       </div>

@@ -1,8 +1,10 @@
 import { useState, FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext.js';
 
 export default function Register() {
+  const { t } = useTranslation();
   const { register } = useAuth();
   const navigate = useNavigate();
   const [name, setName] = useState('');
@@ -37,8 +39,8 @@ export default function Register() {
     <div className="min-h-[calc(100vh-12rem)] flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Create Account</h1>
-          <p className="mt-2 text-gray-600">Sign up to start ordering from KitchenAsty.</p>
+          <h1 className="text-3xl font-bold text-gray-900">{t('auth.registerTitle')}</h1>
+          <p className="mt-2 text-gray-600">{t('auth.registerSubtitle')}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="bg-white p-8 rounded-xl shadow-sm border border-gray-200">
@@ -48,7 +50,7 @@ export default function Register() {
 
           <div className="mb-4">
             <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-              Full Name
+              {t('auth.name')}
             </label>
             <input
               id="name"
@@ -63,7 +65,7 @@ export default function Register() {
 
           <div className="mb-4">
             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-              Email
+              {t('auth.email')}
             </label>
             <input
               id="email"
@@ -78,7 +80,7 @@ export default function Register() {
 
           <div className="mb-4">
             <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
-              Phone <span className="text-gray-400">(optional)</span>
+              {t('auth.phone')}
             </label>
             <input
               id="phone"
@@ -92,7 +94,7 @@ export default function Register() {
 
           <div className="mb-4">
             <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-              Password
+              {t('auth.password')}
             </label>
             <input
               id="password"
@@ -102,13 +104,12 @@ export default function Register() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
-              placeholder="At least 6 characters"
             />
           </div>
 
           <div className="mb-6">
             <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
-              Confirm Password
+              {t('auth.password')}
             </label>
             <input
               id="confirmPassword"
@@ -117,7 +118,6 @@ export default function Register() {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
-              placeholder="Re-enter your password"
             />
           </div>
 
@@ -126,13 +126,13 @@ export default function Register() {
             disabled={loading}
             className="w-full bg-primary-600 text-white py-2.5 rounded-lg font-semibold hover:bg-primary-700 transition-colors disabled:opacity-50"
           >
-            {loading ? 'Creating account...' : 'Create Account'}
+            {loading ? t('auth.creating') : t('auth.createAccount')}
           </button>
 
           <p className="text-center text-sm text-gray-600 mt-4">
-            Already have an account?{' '}
+            {t('auth.hasAccount')}{' '}
             <Link to="/login" className="text-primary-600 hover:text-primary-700 font-medium">
-              Sign in
+              {t('auth.loginLink')}
             </Link>
           </p>
         </form>

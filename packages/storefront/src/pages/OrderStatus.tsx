@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext.js';
 
 interface OrderItem {
@@ -29,44 +30,34 @@ interface OrderDetail {
   items: OrderItem[];
 }
 
-const STATUS_STEPS = [
-  { key: 'PENDING', label: 'Order Placed' },
-  { key: 'CONFIRMED', label: 'Confirmed' },
-  { key: 'PREPARING', label: 'Preparing' },
-  { key: 'READY', label: 'Ready' },
-];
-
-const DELIVERY_STEPS = [
-  { key: 'PENDING', label: 'Order Placed' },
-  { key: 'CONFIRMED', label: 'Confirmed' },
-  { key: 'PREPARING', label: 'Preparing' },
-  { key: 'READY', label: 'Ready' },
-  { key: 'OUT_FOR_DELIVERY', label: 'Out for Delivery' },
-  { key: 'DELIVERED', label: 'Delivered' },
-];
-
-const PICKUP_STEPS = [
-  { key: 'PENDING', label: 'Order Placed' },
-  { key: 'CONFIRMED', label: 'Confirmed' },
-  { key: 'PREPARING', label: 'Preparing' },
-  { key: 'READY', label: 'Ready for Pickup' },
-  { key: 'PICKED_UP', label: 'Picked Up' },
-];
-
-function getSteps(orderType: string) {
-  return orderType === 'DELIVERY' ? DELIVERY_STEPS : PICKUP_STEPS;
-}
-
-function getStepIndex(steps: typeof STATUS_STEPS, status: string): number {
+function getStepIndex(steps: { key: string; label: string }[], status: string): number {
   return steps.findIndex((s) => s.key === status);
 }
 
 export default function OrderStatus() {
+  const { t } = useTranslation();
   const { id } = useParams();
   const { token } = useAuth();
   const [order, setOrder] = useState<OrderDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+
+  const DELIVERY_STEPS = [
+    { key: 'PENDING', label: t('orderStatus.placed') },
+    { key: 'CONFIRMED', label: t('orderStatus.confirmed') },
+    { key: 'PREPARING', label: t('orderStatus.preparing') },
+    { key: 'READY', label: t('orderStatus.ready') },
+    { key: 'OUT_FOR_DELIVERY', label: t('orderStatus.outForDelivery') },
+    { key: 'DELIVERED', label: t('orderStatus.delivered') },
+  ];
+
+  const PICKUP_STEPS = [
+    { key: 'PENDING', label: t('orderStatus.placed') },
+    { key: 'CONFIRMED', label: t('orderStatus.confirmed') },
+    { key: 'PREPARING', label: t('orderStatus.preparing') },
+    { key: 'READY', label: t('orderStatus.readyForPickup') },
+    { key: 'PICKED_UP', label: t('orderStatus.pickedUp') },
+  ];
 
   useEffect(() => {
     const headers: Record<string, string> = {};
@@ -93,42 +84,42 @@ export default function OrderStatus() {
   if (error || !order) {
     return (
       <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="bg-red-50 text-red-700 p-4 rounded-lg mb-4">{error || 'Order not found'}</div>
+        <div className="bg-red-50 text-red-700 p-4 rounded-lg mb-4">{error || t('orders.errorLoading')}</div>
         <Link to="/account/orders" className="text-primary-600 hover:text-primary-700 text-sm font-medium">
-          Back to Order History
+          {t('orders.backToOrders')}
         </Link>
       </div>
     );
   }
 
   const isCancelled = order.status === 'CANCELLED';
-  const steps = getSteps(order.orderType);
+  const steps = order.orderType === 'DELIVERY' ? DELIVERY_STEPS : PICKUP_STEPS;
   const currentStep = getStepIndex(steps, order.status);
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Order #{order.orderNumber}</h1>
+          <h1 className="text-2xl font-bold text-gray-900">#{order.orderNumber}</h1>
           <p className="text-sm text-gray-500 mt-1">
-            Placed on {new Date(order.createdAt).toLocaleString()}
+            {new Date(order.createdAt).toLocaleString()}
           </p>
         </div>
         <Link to="/account/orders" className="text-primary-600 hover:text-primary-700 text-sm font-medium">
-          All Orders
+          {t('orders.title')}
         </Link>
       </div>
 
       {/* Status Tracker */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-6">Order Status</h2>
+        <h2 className="text-lg font-semibold text-gray-900 mb-6">{t('orders.status')}</h2>
 
         {isCancelled ? (
           <div className="flex items-center gap-3 p-4 bg-red-50 rounded-lg">
             <svg className="w-6 h-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
-            <span className="font-medium text-red-700">This order has been cancelled.</span>
+            <span className="font-medium text-red-700">{t('orderStatus.cancelledMessage')}</span>
           </div>
         ) : (
           <div className="relative">
@@ -160,7 +151,6 @@ export default function OrderStatus() {
                 );
               })}
             </div>
-            {/* Progress bar behind circles */}
             <div className="absolute top-4 left-0 right-0 h-0.5 bg-gray-200 -translate-y-1/2" style={{ marginLeft: `${100 / (steps.length * 2)}%`, marginRight: `${100 / (steps.length * 2)}%` }}>
               <div
                 className="h-full bg-primary-600 transition-all duration-500"
@@ -169,17 +159,11 @@ export default function OrderStatus() {
             </div>
           </div>
         )}
-
-        {order.scheduledAt && (
-          <div className="mt-4 p-3 bg-blue-50 rounded-lg text-sm text-blue-700">
-            Scheduled for {new Date(order.scheduledAt).toLocaleString()}
-          </div>
-        )}
       </div>
 
       {/* Order Items */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Items</h2>
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('orders.items')}</h2>
         <div className="space-y-3">
           {order.items.map((item) => (
             <div key={item.id} className="flex justify-between items-start py-2 border-b border-gray-100 last:border-0">
@@ -193,9 +177,6 @@ export default function OrderStatus() {
                     {item.options.map((o) => `${o.name}: ${o.value}`).join(', ')}
                   </div>
                 )}
-                {item.comment && (
-                  <div className="text-xs text-gray-400 mt-0.5 italic">Note: {item.comment}</div>
-                )}
               </div>
               <span className="font-medium text-gray-900">${item.subtotal.toFixed(2)}</span>
             </div>
@@ -204,51 +185,30 @@ export default function OrderStatus() {
 
         <div className="border-t border-gray-200 mt-4 pt-4 space-y-1 text-sm">
           <div className="flex justify-between">
-            <span className="text-gray-600">Subtotal</span>
+            <span className="text-gray-600">{t('checkout.subtotal')}</span>
             <span>${order.subtotal.toFixed(2)}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-gray-600">Tax</span>
+            <span className="text-gray-600">{t('checkout.tax')}</span>
             <span>${order.tax.toFixed(2)}</span>
           </div>
           {order.deliveryFee > 0 && (
             <div className="flex justify-between">
-              <span className="text-gray-600">Delivery Fee</span>
+              <span className="text-gray-600">{t('checkout.deliveryFee')}</span>
               <span>${order.deliveryFee.toFixed(2)}</span>
             </div>
           )}
           {order.discount > 0 && (
             <div className="flex justify-between text-green-600">
-              <span>Discount</span>
+              <span>{t('checkout.discount')}</span>
               <span>-${order.discount.toFixed(2)}</span>
             </div>
           )}
           <div className="flex justify-between font-bold text-base pt-2 border-t border-gray-200">
-            <span>Total</span>
+            <span>{t('checkout.total')}</span>
             <span className="text-primary-600">${order.total.toFixed(2)}</span>
           </div>
         </div>
-      </div>
-
-      {/* Order Details */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Details</h2>
-        <dl className="grid grid-cols-2 gap-4 text-sm">
-          <div>
-            <dt className="text-gray-500">Order Type</dt>
-            <dd className="font-medium text-gray-900">{order.orderType}</dd>
-          </div>
-          <div>
-            <dt className="text-gray-500">Location</dt>
-            <dd className="font-medium text-gray-900">{order.location.name}</dd>
-          </div>
-        </dl>
-        {order.comment && (
-          <div className="mt-4 p-3 bg-gray-50 rounded-lg">
-            <p className="text-xs text-gray-500 mb-1">Order Notes</p>
-            <p className="text-sm text-gray-700">{order.comment}</p>
-          </div>
-        )}
       </div>
 
       <div className="mt-8 flex justify-center gap-4">
@@ -256,13 +216,13 @@ export default function OrderStatus() {
           to="/menu"
           className="bg-primary-600 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-primary-700 transition-colors"
         >
-          Order Again
+          {t('home.viewMenu')}
         </Link>
         <Link
           to="/account/orders"
           className="border border-gray-300 text-gray-700 px-6 py-2.5 rounded-lg font-medium hover:bg-gray-50 transition-colors"
         >
-          All Orders
+          {t('orders.title')}
         </Link>
       </div>
     </div>

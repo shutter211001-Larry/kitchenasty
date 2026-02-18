@@ -17,7 +17,7 @@ test.describe('Storefront Cart & Checkout', () => {
       await page.goto('/');
       await page.locator('header').getByLabel('Open cart').first().click();
       await expect(page.getByText('Your cart is empty')).toBeVisible();
-      await expect(page.getByText('Continue browsing')).toBeVisible();
+      await expect(page.getByText('Browse Menu')).toBeVisible();
     });
 
     test('cart drawer closes on close button', async ({ page }) => {

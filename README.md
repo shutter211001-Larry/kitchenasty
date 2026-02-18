@@ -34,6 +34,7 @@ A self-hosted restaurant online ordering, table reservation, and management syst
 - **Dashboard & reports** — Admin dashboard with real-time metrics (orders today, revenue, reservations, customers), summary stats (weekly/monthly), recent orders list, top selling items
 - **Email notifications** — Branded HTML email templates for order confirmation, status updates, and reservation confirmations via Nodemailer
 - **API documentation** — Interactive Swagger UI at `/api/docs`, OpenAPI 3.0.3 spec at `/api/openapi.json`, rate limiting (100 req/15min per IP)
+- **Multi-language support** — i18n with react-i18next, language switcher in header, English and Spanish translations for all storefront pages
 - **Full test suite** — Unit, integration, and E2E tests (330 tests)
 - **CI/CD pipeline** — GitHub Actions with lint, test, audit, build, and artifact packaging
 
@@ -42,7 +43,6 @@ A self-hosted restaurant online ordering, table reservation, and management syst
 - Menu item image upload
 - Real-time order status updates (Socket.IO) and kitchen display view
 - Advanced analytics and reporting charts
-- Multi-language support
 
 See [`PLAN.md`](PLAN.md) for the full roadmap.
 

@@ -1,6 +1,8 @@
 import { Link, useLocation, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 export default function OrderConfirmation() {
+  const { t } = useTranslation();
   const { id } = useParams();
   const location = useLocation();
   const order = location.state?.order;
@@ -13,12 +15,12 @@ export default function OrderConfirmation() {
         </svg>
       </div>
 
-      <h1 className="text-3xl font-bold text-gray-900 mb-2">Order Placed!</h1>
-      <p className="text-gray-600 mb-2">Thank you for your order.</p>
+      <h1 className="text-3xl font-bold text-gray-900 mb-2">{t('orderConfirmation.title')}</h1>
+      <p className="text-gray-600 mb-2">{t('orderConfirmation.thankYou')}</p>
 
       {(order?.orderNumber || id) && (
         <p className="text-sm text-gray-500 mb-6">
-          Order {order?.orderNumber ? `#${order.orderNumber}` : `ID: ${id}`}
+          {t('orderConfirmation.orderNumber')} {order?.orderNumber ? `#${order.orderNumber}` : `ID: ${id}`}
         </p>
       )}
 
@@ -26,19 +28,19 @@ export default function OrderConfirmation() {
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 text-left mb-8">
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
-              <span className="text-gray-500">Type</span>
+              <span className="text-gray-500">{t('checkout.orderType')}</span>
               <p className="font-medium text-gray-900">{order.orderType}</p>
             </div>
             <div>
-              <span className="text-gray-500">Status</span>
+              <span className="text-gray-500">{t('orders.status')}</span>
               <p className="font-medium text-gray-900">{order.status}</p>
             </div>
             <div>
-              <span className="text-gray-500">Subtotal</span>
+              <span className="text-gray-500">{t('checkout.subtotal')}</span>
               <p className="font-medium text-gray-900">${order.subtotal?.toFixed(2)}</p>
             </div>
             <div>
-              <span className="text-gray-500">Total</span>
+              <span className="text-gray-500">{t('checkout.total')}</span>
               <p className="font-bold text-primary-600">${order.total?.toFixed(2)}</p>
             </div>
           </div>
@@ -50,13 +52,13 @@ export default function OrderConfirmation() {
           to="/menu"
           className="bg-primary-600 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-primary-700 transition-colors"
         >
-          Order More
+          {t('orderConfirmation.orderMore')}
         </Link>
         <Link
           to="/"
           className="border border-gray-300 text-gray-700 px-6 py-2.5 rounded-lg font-medium hover:bg-gray-50 transition-colors"
         >
-          Back to Home
+          {t('notFound.backHome')}
         </Link>
       </div>
     </div>

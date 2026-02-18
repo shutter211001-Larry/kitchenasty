@@ -1,19 +1,22 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext.js';
 import { useCart } from '../context/CartContext.js';
+import LanguageSwitcher from './LanguageSwitcher.js';
 
 export default function Header() {
+  const { t } = useTranslation();
   const { user, logout } = useAuth();
   const { itemCount, setIsOpen: openCart } = useCart();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const navLinks = [
-    { to: '/', label: 'Home' },
-    { to: '/locations', label: 'Locations' },
-    { to: '/menu', label: 'Menu' },
-    { to: '/reservations', label: 'Reservations' },
+    { to: '/', label: t('nav.home') },
+    { to: '/locations', label: t('nav.locations') },
+    { to: '/menu', label: t('nav.menu') },
+    { to: '/reservations', label: t('nav.reservations') },
   ];
 
   function isActive(path: string) {
@@ -50,12 +53,13 @@ export default function Header() {
             ))}
           </nav>
 
-          {/* Desktop auth + cart */}
+          {/* Desktop auth + cart + language */}
           <div className="hidden md:flex items-center gap-3">
+            <LanguageSwitcher />
             <button
               onClick={() => openCart(true)}
               className="relative p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md"
-              aria-label="Open cart"
+              aria-label={t('nav.openCart')}
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z" />
@@ -78,7 +82,7 @@ export default function Header() {
                   onClick={logout}
                   className="text-sm text-gray-500 hover:text-gray-700"
                 >
-                  Logout
+                  {t('nav.logout')}
                 </button>
               </>
             ) : (
@@ -87,13 +91,13 @@ export default function Header() {
                   to="/login"
                   className="text-sm text-gray-600 hover:text-gray-900"
                 >
-                  Login
+                  {t('nav.login')}
                 </Link>
                 <Link
                   to="/register"
                   className="text-sm bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors"
                 >
-                  Sign Up
+                  {t('nav.signUp')}
                 </Link>
               </>
             )}
@@ -104,7 +108,7 @@ export default function Header() {
             <button
               onClick={() => openCart(true)}
               className="relative p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md"
-              aria-label="Open cart"
+              aria-label={t('nav.openCart')}
             >
               <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z" />
@@ -118,7 +122,7 @@ export default function Header() {
           <button
             className="p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100"
             onClick={() => setMobileOpen(!mobileOpen)}
-            aria-label="Toggle menu"
+            aria-label={t('nav.toggleMenu')}
           >
             {mobileOpen ? (
               <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -152,6 +156,9 @@ export default function Header() {
                 {link.label}
               </Link>
             ))}
+            <div className="px-3 py-2">
+              <LanguageSwitcher />
+            </div>
             <div className="border-t border-gray-200 pt-3 mt-3">
               {user ? (
                 <>
@@ -160,13 +167,13 @@ export default function Header() {
                     onClick={() => setMobileOpen(false)}
                     className="block px-3 py-2 text-base font-medium text-gray-600 hover:text-gray-900"
                   >
-                    My Account
+                    {t('nav.myAccount')}
                   </Link>
                   <button
                     onClick={() => { logout(); setMobileOpen(false); }}
                     className="block w-full text-left px-3 py-2 text-base font-medium text-gray-500 hover:text-gray-700"
                   >
-                    Logout
+                    {t('nav.logout')}
                   </button>
                 </>
               ) : (
@@ -176,14 +183,14 @@ export default function Header() {
                     onClick={() => setMobileOpen(false)}
                     className="block px-3 py-2 text-base font-medium text-gray-600 hover:text-gray-900"
                   >
-                    Login
+                    {t('nav.login')}
                   </Link>
                   <Link
                     to="/register"
                     onClick={() => setMobileOpen(false)}
                     className="block px-3 py-2 text-base font-medium text-primary-600 hover:text-primary-700"
                   >
-                    Sign Up
+                    {t('nav.signUp')}
                   </Link>
                 </>
               )}

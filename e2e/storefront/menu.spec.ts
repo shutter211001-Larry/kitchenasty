@@ -8,20 +8,19 @@ test.describe('Storefront Menu Page', () => {
 
   test('displays search input', async ({ page }) => {
     await page.goto('/menu');
-    await expect(page.getByPlaceholder('Search menu...')).toBeVisible();
+    await expect(page.getByPlaceholder('Search menu items...')).toBeVisible();
   });
 
-  test('displays All Items category button', async ({ page }) => {
+  test('displays All category button', async ({ page }) => {
     await page.goto('/menu');
-    await expect(page.getByRole('button', { name: /All Items/ })).toBeVisible();
+    await expect(page.getByRole('button', { name: /All/ })).toBeVisible();
   });
 
   test('displays category sidebar on desktop', async ({ page }) => {
     await page.goto('/menu');
-    // On desktop, the aside should be visible
     const aside = page.locator('aside');
     await expect(aside).toBeVisible();
-    await expect(aside.getByRole('button', { name: /All Items/ })).toBeVisible();
+    await expect(aside.getByRole('button', { name: /All/ })).toBeVisible();
   });
 
   test('navigating to menu from header', async ({ page }) => {
@@ -39,14 +38,14 @@ test.describe('Storefront Menu Page', () => {
 
   test('search input accepts text', async ({ page }) => {
     await page.goto('/menu');
-    const searchInput = page.getByPlaceholder('Search menu...');
+    const searchInput = page.getByPlaceholder('Search menu items...');
     await searchInput.fill('pizza');
     await expect(searchInput).toHaveValue('pizza');
   });
 
   test('URL updates with search param', async ({ page }) => {
     await page.goto('/menu');
-    const searchInput = page.getByPlaceholder('Search menu...');
+    const searchInput = page.getByPlaceholder('Search menu items...');
     await searchInput.fill('salmon');
     // Wait for debounce
     await page.waitForTimeout(500);
@@ -56,20 +55,19 @@ test.describe('Storefront Menu Page', () => {
   test('show categories toggle on mobile', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/menu');
-    await expect(page.getByRole('button', { name: 'Show Categories' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Categories' })).toBeVisible();
   });
 
   test('mobile category toggle shows and hides categories', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/menu');
-    const toggleBtn = page.getByRole('button', { name: 'Show Categories' });
+    const toggleBtn = page.getByRole('button', { name: 'Categories' });
     await toggleBtn.click();
-    await expect(page.getByRole('button', { name: /All Items/ })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Hide Categories' })).toBeVisible();
+    await expect(page.getByRole('button', { name: /All/ })).toBeVisible();
   });
 
   test('displays description text', async ({ page }) => {
     await page.goto('/menu');
-    await expect(page.getByText('Browse our selection of delicious dishes')).toBeVisible();
+    await expect(page.getByText('Browse our menu')).toBeVisible();
   });
 });

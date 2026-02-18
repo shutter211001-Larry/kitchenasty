@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useApi } from '../hooks/useApi.js';
 
 interface Location {
@@ -15,13 +16,14 @@ interface Location {
 }
 
 export default function Locations() {
+  const { t } = useTranslation();
   const { data: locations, error, isLoading } = useApi<Location[]>('/api/locations');
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Our Locations</h1>
-        <p className="mt-2 text-gray-600">Find a KitchenAsty near you and start ordering.</p>
+        <h1 className="text-3xl font-bold text-gray-900">{t('locations.title')}</h1>
+        <p className="mt-2 text-gray-600">{t('locations.subtitle')}</p>
       </div>
 
       {isLoading && (
@@ -32,12 +34,12 @@ export default function Locations() {
 
       {error && (
         <div className="bg-red-50 text-red-700 p-4 rounded-lg">
-          Failed to load locations. Please try again later.
+          {t('common.error')}
         </div>
       )}
 
       {locations && locations.length === 0 && (
-        <p className="text-gray-500 text-center py-12">No locations available yet.</p>
+        <p className="text-gray-500 text-center py-12">{t('locations.noLocations')}</p>
       )}
 
       {locations && locations.length > 0 && (
@@ -65,12 +67,12 @@ export default function Locations() {
                 <div className="flex gap-2 mb-4">
                   {loc.acceptsDelivery && (
                     <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-medium">
-                      Delivery
+                      {t('checkout.delivery')}
                     </span>
                   )}
                   {loc.acceptsPickup && (
                     <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-medium">
-                      Pickup
+                      {t('checkout.pickup')}
                     </span>
                   )}
                 </div>
@@ -78,7 +80,7 @@ export default function Locations() {
                   to={`/menu?location=${loc.id}`}
                   className="block text-center bg-primary-600 text-white py-2 rounded-lg font-medium hover:bg-primary-700 transition-colors"
                 >
-                  Order Now
+                  {t('locations.viewMenu')}
                 </Link>
               </div>
             </div>

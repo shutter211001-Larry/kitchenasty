@@ -1,5 +1,6 @@
 import { useState, FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useCart } from '../context/CartContext.js';
 import { useAuth } from '../context/AuthContext.js';
 
@@ -10,6 +11,7 @@ const TAX_RATE = 0.08;
 const DELIVERY_FEE = 4.99;
 
 export default function Checkout() {
+  const { t } = useTranslation();
   const { items, subtotal, clear } = useCart();
   const { user, token } = useAuth();
   const navigate = useNavigate();
@@ -30,13 +32,12 @@ export default function Checkout() {
   if (items.length === 0) {
     return (
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
-        <h1 className="text-2xl font-bold text-gray-900 mb-4">Your cart is empty</h1>
-        <p className="text-gray-600 mb-6">Add some items to your cart before checking out.</p>
+        <h1 className="text-2xl font-bold text-gray-900 mb-4">{t('checkout.emptyCart')}</h1>
         <Link
           to="/menu"
           className="inline-block bg-primary-600 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-primary-700 transition-colors"
         >
-          Browse Menu
+          {t('checkout.browseMenu')}
         </Link>
       </div>
     );
@@ -87,7 +88,7 @@ export default function Checkout() {
       clear();
       navigate(`/order/${data.data.id}`, { state: { order: data.data } });
     } catch (err: any) {
-      setError(err.message || 'Something went wrong');
+      setError(err.message || t('common.error'));
     } finally {
       setLoading(false);
     }
@@ -95,7 +96,7 @@ export default function Checkout() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">Checkout</h1>
+      <h1 className="text-3xl font-bold text-gray-900 mb-8">{t('checkout.title')}</h1>
 
       <form onSubmit={handleSubmit} className="flex flex-col lg:flex-row gap-8">
         {/* Left: Form */}
@@ -106,7 +107,7 @@ export default function Checkout() {
 
           {/* Order type */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Order Type</h2>
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('checkout.orderType')}</h2>
             <div className="flex gap-3">
               <button
                 type="button"
@@ -117,7 +118,7 @@ export default function Checkout() {
                     : 'border-gray-200 text-gray-600 hover:border-gray-300'
                 }`}
               >
-                Delivery
+                {t('checkout.delivery')}
               </button>
               <button
                 type="button"
@@ -128,7 +129,7 @@ export default function Checkout() {
                     : 'border-gray-200 text-gray-600 hover:border-gray-300'
                 }`}
               >
-                Pickup
+                {t('checkout.pickup')}
               </button>
             </div>
           </div>
@@ -136,19 +137,19 @@ export default function Checkout() {
           {/* Delivery address */}
           {orderType === 'delivery' && (
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Delivery Address</h2>
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('checkout.deliveryAddress')}</h2>
               <div className="space-y-3">
                 <input
                   type="text"
                   required
-                  placeholder="Address line 1"
+                  placeholder={t('checkout.addressLine1')}
                   value={address.line1}
                   onChange={(e) => setAddress({ ...address, line1: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none text-sm"
                 />
                 <input
                   type="text"
-                  placeholder="Address line 2 (optional)"
+                  placeholder={t('checkout.addressLine2')}
                   value={address.line2}
                   onChange={(e) => setAddress({ ...address, line2: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none text-sm"
@@ -157,7 +158,7 @@ export default function Checkout() {
                   <input
                     type="text"
                     required
-                    placeholder="City"
+                    placeholder={t('checkout.city')}
                     value={address.city}
                     onChange={(e) => setAddress({ ...address, city: e.target.value })}
                     className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none text-sm"
@@ -165,7 +166,7 @@ export default function Checkout() {
                   <input
                     type="text"
                     required
-                    placeholder="State"
+                    placeholder={t('checkout.state')}
                     value={address.state}
                     onChange={(e) => setAddress({ ...address, state: e.target.value })}
                     className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none text-sm"
@@ -173,7 +174,7 @@ export default function Checkout() {
                   <input
                     type="text"
                     required
-                    placeholder="ZIP"
+                    placeholder={t('checkout.zipCode')}
                     value={address.zip}
                     onChange={(e) => setAddress({ ...address, zip: e.target.value })}
                     className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none text-sm"
@@ -185,7 +186,7 @@ export default function Checkout() {
 
           {/* Schedule */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">When</h2>
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('checkout.scheduling')}</h2>
             <div className="space-y-3">
               <label className="flex items-center gap-3">
                 <input
@@ -195,7 +196,7 @@ export default function Checkout() {
                   onChange={() => setScheduledAt('')}
                   className="accent-primary-600"
                 />
-                <span className="text-sm text-gray-700">As soon as possible</span>
+                <span className="text-sm text-gray-700">{t('checkout.asap')}</span>
               </label>
               <label className="flex items-center gap-3">
                 <input
@@ -205,7 +206,7 @@ export default function Checkout() {
                   onChange={() => setScheduledAt(getDefaultScheduleTime())}
                   className="accent-primary-600"
                 />
-                <span className="text-sm text-gray-700">Schedule for later</span>
+                <span className="text-sm text-gray-700">{t('checkout.scheduled')}</span>
               </label>
               {scheduledAt && (
                 <input
@@ -220,9 +221,8 @@ export default function Checkout() {
 
           {/* Notes */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Order Notes</h2>
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('checkout.orderNotes')}</h2>
             <textarea
-              placeholder="Any special instructions?"
               value={comment}
               onChange={(e) => setComment(e.target.value)}
               rows={3}
@@ -232,11 +232,10 @@ export default function Checkout() {
 
           {/* Coupon */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Coupon Code</h2>
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('checkout.couponCode')}</h2>
             <div className="flex gap-2">
               <input
                 type="text"
-                placeholder="Enter coupon code"
                 value={couponCode}
                 onChange={(e) => setCouponCode(e.target.value)}
                 className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none text-sm"
@@ -245,14 +244,14 @@ export default function Checkout() {
                 type="button"
                 className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50"
               >
-                Apply
+                {t('checkout.apply')}
               </button>
             </div>
           </div>
 
           {/* Payment method */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Payment Method</h2>
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('checkout.paymentMethod')}</h2>
             <div className="space-y-2">
               <label className={`flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition-colors ${
                 paymentMethod === 'cash'
@@ -266,10 +265,7 @@ export default function Checkout() {
                   onChange={() => setPaymentMethod('cash')}
                   className="accent-primary-600"
                 />
-                <div>
-                  <span className="text-sm font-medium text-gray-900">Cash on Delivery/Pickup</span>
-                  <p className="text-xs text-gray-500">Pay when you receive your order</p>
-                </div>
+                <span className="text-sm font-medium text-gray-900">{t('checkout.cashOnDelivery')}</span>
               </label>
               <label className={`flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition-colors ${
                 paymentMethod === 'stripe'
@@ -283,22 +279,14 @@ export default function Checkout() {
                   onChange={() => setPaymentMethod('stripe')}
                   className="accent-primary-600"
                 />
-                <div>
-                  <span className="text-sm font-medium text-gray-900">Pay with Card</span>
-                  <p className="text-xs text-gray-500">Secure payment via Stripe</p>
-                </div>
+                <span className="text-sm font-medium text-gray-900">{t('checkout.creditCard')}</span>
               </label>
             </div>
-            {paymentMethod === 'stripe' && (
-              <p className="mt-3 text-xs text-gray-400">
-                You will be prompted to enter your card details after placing the order.
-              </p>
-            )}
           </div>
 
           {!user && (
             <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg text-sm text-blue-700">
-              <Link to="/login" className="font-medium underline">Sign in</Link> to save your order history, or continue as guest.
+              <Link to="/login" className="font-medium underline">{t('nav.login')}</Link>
             </div>
           )}
         </div>
@@ -306,7 +294,7 @@ export default function Checkout() {
         {/* Right: Order summary */}
         <div className="lg:w-80 shrink-0">
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 sticky top-24">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Order Summary</h2>
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('checkout.orderSummary')}</h2>
 
             <div className="space-y-3 mb-4">
               {items.map((item) => {
@@ -332,21 +320,21 @@ export default function Checkout() {
 
             <div className="border-t border-gray-200 pt-3 space-y-2 text-sm">
               <div className="flex justify-between">
-                <span className="text-gray-600">Subtotal</span>
+                <span className="text-gray-600">{t('checkout.subtotal')}</span>
                 <span className="text-gray-900">${subtotal.toFixed(2)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-600">Tax</span>
+                <span className="text-gray-600">{t('checkout.tax')}</span>
                 <span className="text-gray-900">${tax.toFixed(2)}</span>
               </div>
               {orderType === 'delivery' && (
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Delivery fee</span>
+                  <span className="text-gray-600">{t('checkout.deliveryFee')}</span>
                   <span className="text-gray-900">${deliveryFee.toFixed(2)}</span>
                 </div>
               )}
               <div className="flex justify-between border-t border-gray-200 pt-2 font-bold text-base">
-                <span>Total</span>
+                <span>{t('checkout.total')}</span>
                 <span className="text-primary-600">${total.toFixed(2)}</span>
               </div>
             </div>
@@ -356,7 +344,7 @@ export default function Checkout() {
               disabled={loading}
               className="w-full mt-4 bg-primary-600 text-white py-3 rounded-lg font-semibold hover:bg-primary-700 transition-colors disabled:opacity-50"
             >
-              {loading ? 'Placing order...' : `Place Order — $${total.toFixed(2)}`}
+              {loading ? t('checkout.processing') : `${t('checkout.placeOrder')} — $${total.toFixed(2)}`}
             </button>
           </div>
         </div>
