@@ -20,12 +20,13 @@ A self-hosted restaurant online ordering, table reservation, and management syst
 - **JWT authentication** — Staff login with role-based access control (Super Admin, Manager, Staff) and customer registration/login
 - **Admin panel** — Sidebar navigation, dashboard with metric cards, location list and form editor
 - **Customer storefront** — Landing page with hero section, navigation, and menu CTA
-- **Full test suite** — Unit, integration, and E2E tests (113 tests)
+- **Menu management** — Category CRUD with nesting, menu item CRUD with options/allergens/mealtimes, stock tracking
+- **Full test suite** — Unit, integration, and E2E tests (157 tests)
 - **CI/CD pipeline** — GitHub Actions with lint, test, audit, build, and artifact packaging
 
 ### Planned
 
-- Menu management (categories, items, options, allergens, mealtimes)
+- Menu item image upload
 - Shopping cart and checkout with Stripe payments
 - Order management with kitchen display and real-time status updates
 - Table reservation system
@@ -239,6 +240,35 @@ Coupon, Allergen, Mealtime, CustomerGroup
 | POST | `/api/locations/:id/delivery-zones` | Manager+ | Create zone |
 | PATCH | `/api/locations/:id/delivery-zones/:zoneId` | Manager+ | Update zone |
 | DELETE | `/api/locations/:id/delivery-zones/:zoneId` | Super Admin | Delete zone |
+
+### Menu — Categories
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| GET | `/api/menu/categories` | — | List categories (with children) |
+| GET | `/api/menu/categories/:id` | — | Get category with items |
+| POST | `/api/menu/categories` | Manager+ | Create category |
+| PATCH | `/api/menu/categories/:id` | Manager+ | Update category |
+| DELETE | `/api/menu/categories/:id` | Super Admin | Delete category |
+
+### Menu — Items
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| GET | `/api/menu/items` | — | List items (paginated, filterable) |
+| GET | `/api/menu/items/:id` | — | Get item with options/allergens |
+| POST | `/api/menu/items` | Manager+ | Create item with options |
+| PATCH | `/api/menu/items/:id` | Manager+ | Update item |
+| DELETE | `/api/menu/items/:id` | Super Admin | Delete item |
+
+### Menu — Allergens & Mealtimes
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| GET | `/api/menu/allergens` | — | List allergens |
+| POST | `/api/menu/allergens` | Manager+ | Create allergen |
+| DELETE | `/api/menu/allergens/:id` | Super Admin | Delete allergen |
+| GET | `/api/menu/mealtimes` | — | List mealtimes |
+| POST | `/api/menu/mealtimes` | Manager+ | Create mealtime |
+| PATCH | `/api/menu/mealtimes/:id` | Manager+ | Update mealtime |
+| DELETE | `/api/menu/mealtimes/:id` | Super Admin | Delete mealtime |
 
 ---
 

@@ -1,9 +1,24 @@
 import { Link, useLocation } from 'react-router-dom';
 
-const navItems = [
+interface NavItem {
+  path: string;
+  label: string;
+  icon: string;
+  children?: { path: string; label: string }[];
+}
+
+const navItems: NavItem[] = [
   { path: '/', label: 'Dashboard', icon: '□' },
   { path: '/locations', label: 'Locations', icon: '◎' },
-  { path: '/menu', label: 'Menu', icon: '☰' },
+  {
+    path: '/menu',
+    label: 'Menu',
+    icon: '☰',
+    children: [
+      { path: '/menu/items', label: 'Items' },
+      { path: '/menu/categories', label: 'Categories' },
+    ],
+  },
   { path: '/orders', label: 'Orders', icon: '📋' },
   { path: '/reservations', label: 'Reservations', icon: '🗓' },
 ];
@@ -26,18 +41,36 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 ? location.pathname === '/'
                 : location.pathname.startsWith(item.path);
             return (
-              <Link
-                key={item.path}
-                to={item.path}
-                className={`flex items-center px-6 py-3 text-sm transition-colors ${
-                  isActive
-                    ? 'bg-gray-800 text-primary-400 border-r-2 border-primary-400'
-                    : 'text-gray-300 hover:bg-gray-800 hover:text-white'
-                }`}
-              >
-                <span className="mr-3">{item.icon}</span>
-                {item.label}
-              </Link>
+              <div key={item.path}>
+                <Link
+                  to={item.children ? item.children[0].path : item.path}
+                  className={`flex items-center px-6 py-3 text-sm transition-colors ${
+                    isActive
+                      ? 'bg-gray-800 text-primary-400 border-r-2 border-primary-400'
+                      : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                  }`}
+                >
+                  <span className="mr-3">{item.icon}</span>
+                  {item.label}
+                </Link>
+                {item.children && isActive && (
+                  <div className="bg-gray-950">
+                    {item.children.map((child) => (
+                      <Link
+                        key={child.path}
+                        to={child.path}
+                        className={`block pl-14 pr-6 py-2 text-xs transition-colors ${
+                          location.pathname.startsWith(child.path)
+                            ? 'text-primary-400'
+                            : 'text-gray-400 hover:text-white'
+                        }`}
+                      >
+                        {child.label}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
             );
           })}
         </nav>

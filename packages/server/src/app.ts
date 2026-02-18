@@ -5,6 +5,7 @@ import morgan from 'morgan';
 import dotenv from 'dotenv';
 import authRoutes from './routes/auth.routes.js';
 import locationRoutes from './routes/location.routes.js';
+import menuRoutes from './routes/menu.routes.js';
 
 dotenv.config();
 
@@ -38,6 +39,7 @@ export function createApp() {
   // Routes
   app.use('/api/auth', authRoutes);
   app.use('/api/locations', locationRoutes);
+  app.use('/api/menu', menuRoutes);
 
   // 404 handler
   app.use((_req, res) => {
