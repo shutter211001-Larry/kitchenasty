@@ -54,5 +54,13 @@ services:
     depends_on:
       - server
 
+  docs:
+    build:
+      context: .
+      dockerfile: packages/docs/Dockerfile
+    container_name: kitchenasty-docs
+    ports:
+      - "5175:80"
+
 volumes:
   pgdata:
