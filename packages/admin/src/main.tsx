@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import AdminLayout from './components/AdminLayout.js';
+import Login from './pages/Login.js';
 import Dashboard from './pages/Dashboard.js';
 import LocationList from './pages/LocationList.js';
 import LocationForm from './pages/LocationForm.js';
@@ -20,10 +21,30 @@ import ReviewList from './pages/ReviewList.js';
 import KitchenDisplay from './pages/KitchenDisplay.js';
 import './index.css';
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
+function App() {
+  const [token, setToken] = useState(() => localStorage.getItem('token') || '');
+
+  function handleLogin(newToken: string) {
+    localStorage.setItem('token', newToken);
+    setToken(newToken);
+  }
+
+  function handleLogout() {
+    localStorage.removeItem('token');
+    setToken('');
+  }
+
+  if (!token) {
+    return (
+      <BrowserRouter>
+        <Login onLogin={handleLogin} />
+      </BrowserRouter>
+    );
+  }
+
+  return (
     <BrowserRouter>
-      <AdminLayout>
+      <AdminLayout onLogout={handleLogout}>
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/locations" element={<LocationList />} />
@@ -49,5 +70,11 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         </Routes>
       </AdminLayout>
     </BrowserRouter>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
+    <App />
   </React.StrictMode>,
 );

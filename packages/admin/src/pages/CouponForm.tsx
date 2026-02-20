@@ -1,8 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 
-const API_BASE = 'http://localhost:3000';
-
 export default function CouponForm() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -22,12 +20,12 @@ export default function CouponForm() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
-  const token = localStorage.getItem('admin_token') || '';
+  const token = localStorage.getItem('token') || '';
 
   useEffect(() => {
     if (!id) return;
     setLoading(true);
-    fetch(`${API_BASE}/api/coupons/${id}`, {
+    fetch(`/api/coupons/${id}`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => {
@@ -70,7 +68,7 @@ export default function CouponForm() {
     };
 
     try {
-      const url = isEdit ? `${API_BASE}/api/coupons/${id}` : `${API_BASE}/api/coupons`;
+      const url = isEdit ? `/api/coupons/${id}` : `/api/coupons`;
       const res = await fetch(url, {
         method: isEdit ? 'PATCH' : 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },

@@ -57,8 +57,6 @@ const STATUS_COLORS: Record<string, string> = {
 
 const CHART_COLORS = ['#ea580c', '#f97316', '#fb923c', '#fdba74', '#fed7aa', '#7c3aed', '#2563eb', '#059669'];
 
-const API_BASE = 'http://localhost:3000';
-
 export default function Dashboard() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
@@ -68,10 +66,10 @@ export default function Dashboard() {
   const [tab, setTab] = useState<'overview' | 'analytics'>('overview');
   const [analyticsDays, setAnalyticsDays] = useState(30);
 
-  const token = localStorage.getItem('admin_token') || '';
+  const token = localStorage.getItem('token') || '';
 
   useEffect(() => {
-    fetch(`${API_BASE}/api/dashboard/stats`, {
+    fetch(`/api/dashboard/stats`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => {
@@ -85,7 +83,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     setAnalyticsLoading(true);
-    fetch(`${API_BASE}/api/dashboard/analytics?days=${analyticsDays}`, {
+    fetch(`/api/dashboard/analytics?days=${analyticsDays}`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => {

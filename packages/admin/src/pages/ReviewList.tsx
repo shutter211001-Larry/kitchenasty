@@ -17,8 +17,6 @@ interface Pagination {
   totalPages: number;
 }
 
-const API_BASE = 'http://localhost:3000';
-
 function StarRating({ rating }: { rating: number }) {
   return (
     <span className="text-yellow-400">
@@ -37,14 +35,14 @@ export default function ReviewList() {
   const [page, setPage] = useState(1);
   const [filter, setFilter] = useState('');
 
-  const token = localStorage.getItem('admin_token') || '';
+  const token = localStorage.getItem('token') || '';
 
   useEffect(() => {
     setLoading(true);
     const params = new URLSearchParams({ page: String(page), limit: '20' });
     if (filter) params.set('isApproved', filter);
 
-    fetch(`${API_BASE}/api/reviews?${params}`, {
+    fetch(`/api/reviews?${params}`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => {
@@ -61,7 +59,7 @@ export default function ReviewList() {
 
   async function moderate(id: string, isApproved: boolean) {
     try {
-      const res = await fetch(`${API_BASE}/api/reviews/${id}`, {
+      const res = await fetch(`/api/reviews/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ isApproved }),
@@ -75,7 +73,7 @@ export default function ReviewList() {
 
   async function deleteReview(id: string) {
     try {
-      const res = await fetch(`${API_BASE}/api/reviews/${id}`, {
+      const res = await fetch(`/api/reviews/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });

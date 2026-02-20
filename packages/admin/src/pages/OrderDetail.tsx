@@ -45,8 +45,6 @@ const STATUS_COLORS: Record<string, string> = {
   CANCELLED: 'bg-red-100 text-red-800',
 };
 
-const API_BASE = 'http://localhost:3000';
-
 export default function OrderDetailPage() {
   const { id } = useParams();
   const [order, setOrder] = useState<OrderDetail | null>(null);
@@ -54,10 +52,10 @@ export default function OrderDetailPage() {
   const [error, setError] = useState('');
   const [updating, setUpdating] = useState(false);
 
-  const token = localStorage.getItem('admin_token') || '';
+  const token = localStorage.getItem('token') || '';
 
   useEffect(() => {
-    fetch(`${API_BASE}/api/orders/${id}`, {
+    fetch(`/api/orders/${id}`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => {
@@ -72,7 +70,7 @@ export default function OrderDetailPage() {
   async function updateStatus(newStatus: string) {
     setUpdating(true);
     try {
-      const res = await fetch(`${API_BASE}/api/orders/${id}/status`, {
+      const res = await fetch(`/api/orders/${id}/status`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

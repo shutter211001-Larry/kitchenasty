@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures.js';
 
 test.describe('Admin Table Management', () => {
   // Tables are accessed via /locations/:locationId/tables

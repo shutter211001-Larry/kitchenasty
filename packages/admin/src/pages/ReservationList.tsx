@@ -28,8 +28,6 @@ const STATUS_COLORS: Record<string, string> = {
   CANCELLED: 'bg-red-100 text-red-800',
 };
 
-const API_BASE = 'http://localhost:3000';
-
 export default function ReservationList() {
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [pagination, setPagination] = useState<Pagination | null>(null);
@@ -39,7 +37,7 @@ export default function ReservationList() {
   const [statusFilter, setStatusFilter] = useState('');
   const [dateFilter, setDateFilter] = useState('');
 
-  const token = localStorage.getItem('admin_token') || '';
+  const token = localStorage.getItem('token') || '';
 
   useEffect(() => {
     setLoading(true);
@@ -47,7 +45,7 @@ export default function ReservationList() {
     if (statusFilter) params.set('status', statusFilter);
     if (dateFilter) params.set('date', dateFilter);
 
-    fetch(`${API_BASE}/api/reservations?${params}`, {
+    fetch(`/api/reservations?${params}`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => {
@@ -64,7 +62,7 @@ export default function ReservationList() {
 
   async function updateStatus(id: string, status: string) {
     try {
-      const res = await fetch(`${API_BASE}/api/reservations/${id}`, {
+      const res = await fetch(`/api/reservations/${id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
