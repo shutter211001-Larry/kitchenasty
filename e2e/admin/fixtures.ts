@@ -13,9 +13,11 @@ export const test = base.extend({
     const token = body.data?.token;
 
     if (token) {
-      // Set token in localStorage before navigating
+      // Set token in localStorage and reload so the app picks it up
       await page.goto('/');
       await page.evaluate((t) => localStorage.setItem('token', t), token);
+      await page.reload();
+      await page.waitForLoadState('networkidle');
     }
 
     await use(page);
