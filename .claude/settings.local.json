@@ -26,7 +26,10 @@
       "mcp__plugin_playwright_playwright__browser_fill_form",
       "mcp__plugin_playwright_playwright__browser_click",
       "Skill(commit-commands:commit)",
-      "WebFetch(domain:www.getapp.com)"
+      "WebFetch(domain:www.getapp.com)",
+      "WebFetch(domain:intlayer.org)",
+      "mcp__plugin_context7_context7__resolve-library-id",
+      "mcp__plugin_context7_context7__query-docs"
     ]
   }
 }
