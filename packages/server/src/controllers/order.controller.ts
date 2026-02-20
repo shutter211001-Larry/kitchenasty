@@ -491,6 +491,7 @@ export async function updateOrderStatus(req: Request<{ id: string }>, res: Respo
     orderNumber: updated.orderNumber,
     status: updated.status,
     orderType: updated.orderType,
+    customerId: updated.customerId,
   });
 
   // Send status update email

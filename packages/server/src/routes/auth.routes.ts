@@ -8,6 +8,7 @@ import {
   getMe,
 } from '../controllers/auth.controller.js';
 import { handleSocialCallback } from '../controllers/social-auth.controller.js';
+import { savePushToken } from '../controllers/push-token.controller.js';
 import { authenticate, requireRole } from '../middleware/auth.js';
 
 const router = Router();
@@ -37,6 +38,9 @@ if (process.env.FACEBOOK_APP_ID) {
     handleSocialCallback
   );
 }
+
+// Push notifications token
+router.post('/push-token', authenticate, savePushToken);
 
 // Current user info
 router.get('/me', authenticate, getMe);

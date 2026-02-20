@@ -27,6 +27,8 @@ jobs:
         run: npx -w packages/admin tsc --noEmit
       - name: TypeScript check (storefront)
         run: npx -w packages/storefront tsc --noEmit
+      - name: TypeScript check (mobile)
+        run: npx -w packages/mobile tsc --noEmit
 
   test-unit:
     name: Unit Tests
@@ -143,6 +145,8 @@ jobs:
         run: npm run build -w packages/admin
       - name: Build storefront
         run: npm run build -w packages/storefront
+      - name: Build docs
+        run: npm run build -w packages/docs
       - name: Upload admin build
         uses: actions/upload-artifact@v4
         with:
