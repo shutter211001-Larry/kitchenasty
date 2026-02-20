@@ -3,12 +3,14 @@ import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext.js';
 import { useCart } from '../context/CartContext.js';
+import { useTheme } from '../context/ThemeContext.js';
 import LanguageSwitcher from './LanguageSwitcher.js';
 
 export default function Header() {
   const { t } = useTranslation();
   const { user, logout } = useAuth();
   const { itemCount, setIsOpen: openCart } = useCart();
+  const { settings } = useTheme();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -25,15 +27,19 @@ export default function Header() {
   }
 
   return (
-    <header className="bg-white shadow-sm sticky top-0 z-50">
+    <header className="bg-white dark:bg-gray-900 shadow-sm sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">K</span>
-            </div>
-            <span className="text-xl font-bold text-gray-900">KitchenAsty</span>
+            {settings.logo ? (
+              <img src={settings.logo} alt={settings.siteName} className="w-8 h-8 rounded-lg object-cover" />
+            ) : (
+              <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-sm">{settings.siteName.charAt(0)}</span>
+              </div>
+            )}
+            <span className="text-xl font-bold text-gray-900 dark:text-white">{settings.siteName}</span>
           </Link>
 
           {/* Desktop nav */}
@@ -44,8 +50,8 @@ export default function Header() {
                 to={link.to}
                 className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                   isActive(link.to)
-                    ? 'text-primary-600 bg-primary-50'
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                    ? 'text-primary-600 bg-primary-50 dark:bg-primary-900/30'
+                    : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-800'
                 }`}
               >
                 {link.label}
@@ -140,7 +146,7 @@ export default function Header() {
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <div className="md:hidden border-t border-gray-200 bg-white">
+        <div className="md:hidden border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
           <div className="px-4 py-3 space-y-1">
             {navLinks.map((link) => (
               <Link

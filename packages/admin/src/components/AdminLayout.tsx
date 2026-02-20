@@ -27,6 +27,16 @@ const navItems: NavItem[] = [
   { path: '/automation', label: 'Automation', icon: '⚡' },
   { path: '/loyalty', label: 'Loyalty', icon: '🎁' },
   {
+    path: '/design',
+    label: 'Design',
+    icon: '🎨',
+    children: [
+      { path: '/design/landing', label: 'Landing Page' },
+      { path: '/design/branding', label: 'Branding' },
+      { path: '/design/theme', label: 'Theme' },
+    ],
+  },
+  {
     path: '/legal',
     label: 'Legal',
     icon: '⚖',

@@ -463,6 +463,39 @@ async function main() {
     },
   });
 
+  // Site settings
+  await prisma.siteSettings.upsert({
+    where: { id: 'default' },
+    update: {},
+    create: {
+      id: 'default',
+      siteName: 'KitchenAsty',
+      siteTitle: 'KitchenAsty - Order Online',
+      colorPrimary: '#ea580c',
+      colorSecondary: '#9333ea',
+      darkMode: 'light',
+      heroSection: {
+        title: 'Delicious food, delivered to your door',
+        subtitle: 'Order from our menu for pickup or delivery. Fresh ingredients, amazing flavors.',
+        ctaPrimaryText: 'View Menu',
+        ctaPrimaryLink: '/menu',
+        ctaSecondaryText: 'Find Location',
+        ctaSecondaryLink: '/locations',
+      },
+      featuresSection: [
+        { icon: '⚡', title: 'Fast Delivery', description: 'Get your food delivered in 30 minutes or less' },
+        { icon: '✔', title: 'Easy Ordering', description: 'Order online with just a few clicks' },
+        { icon: '🍽', title: 'Table Reservations', description: 'Book a table at your favorite location' },
+      ],
+      ctaSection: {
+        title: 'Ready to Order?',
+        description: 'Create an account to start ordering and earn loyalty points.',
+        buttonText: 'Create Account',
+        buttonLink: '/register',
+      },
+    },
+  });
+
   // Legal pages
   await prisma.legalPage.upsert({
     where: { slug: 'privacy-policy' },

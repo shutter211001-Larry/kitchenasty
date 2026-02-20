@@ -19,6 +19,7 @@ import automationRoutes from './routes/automation.routes.js';
 import loyaltyRoutes from './routes/loyalty.routes.js';
 import legalRoutes from './routes/legal.routes.js';
 import consentRoutes from './routes/consent.routes.js';
+import settingsRoutes from './routes/settings.routes.js';
 import { openApiSpec } from './lib/openapi.js';
 import { initPassport } from './lib/passport.js';
 import passport from 'passport';
@@ -102,6 +103,7 @@ export function createApp() {
   app.use('/api/loyalty', loyaltyRoutes);
   app.use('/api/legal', legalRoutes);
   app.use('/api/consent', consentRoutes);
+  app.use('/api/settings', settingsRoutes);
 
   // 404 handler
   app.use((_req, res) => {

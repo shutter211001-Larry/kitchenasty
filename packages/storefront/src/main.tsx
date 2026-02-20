@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext.js';
 import { CartProvider } from './context/CartContext.js';
+import { ThemeProvider } from './context/ThemeContext.js';
 import Layout from './components/Layout.js';
 import Home from './pages/Home.js';
 import Locations from './pages/Locations.js';
@@ -25,6 +26,7 @@ import './index.css';
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <BrowserRouter>
+      <ThemeProvider>
       <AuthProvider>
         <CartProvider>
         <Routes>
@@ -48,6 +50,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         </Routes>
         </CartProvider>
       </AuthProvider>
+      </ThemeProvider>
     </BrowserRouter>
   </React.StrictMode>,
 );

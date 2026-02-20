@@ -27,6 +27,9 @@ import LegalPageList from './pages/LegalPageList.js';
 import LegalPageForm from './pages/LegalPageForm.js';
 import CookieCategoryList from './pages/CookieCategoryList.js';
 import ConsentLog from './pages/ConsentLog.js';
+import DesignLanding from './pages/DesignLanding.js';
+import DesignBranding from './pages/DesignBranding.js';
+import DesignTheme from './pages/DesignTheme.js';
 import './index.css';
 
 function App() {
@@ -85,6 +88,10 @@ function App() {
           <Route path="/legal/pages/:slug" element={<LegalPageForm />} />
           <Route path="/legal/cookies" element={<CookieCategoryList />} />
           <Route path="/legal/consent" element={<ConsentLog />} />
+          <Route path="/design" element={<Navigate to="/design/landing" replace />} />
+          <Route path="/design/landing" element={<DesignLanding />} />
+          <Route path="/design/branding" element={<DesignBranding />} />
+          <Route path="/design/theme" element={<DesignTheme />} />
         </Routes>
       </AdminLayout>
     </BrowserRouter>

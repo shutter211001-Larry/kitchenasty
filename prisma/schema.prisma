@@ -574,6 +574,28 @@ model LoyaltyTransaction {
 }
 
 // ============================================================
+// SITE SETTINGS
+// ============================================================
+
+model SiteSettings {
+  id              String   @id @default("default")
+  siteName        String   @default("KitchenAsty")
+  siteTitle       String   @default("KitchenAsty - Order Online")
+  favicon         String?
+  logo            String?
+  colorPrimary    String   @default("#ea580c")
+  colorSecondary  String   @default("#9333ea")
+  darkMode        String   @default("light") // "light" | "dark" | "system"
+  heroSection     Json?    // { title, subtitle, ctaPrimaryText, ctaPrimaryLink, ctaSecondaryText, ctaSecondaryLink, backgroundImage }
+  featuresSection Json?    // [{ icon, title, description }]
+  ctaSection      Json?    // { title, description, buttonText, buttonLink }
+  updatedAt       DateTime @updatedAt
+  createdAt       DateTime @default(now())
+
+  @@map("site_settings")
+}
+
+// ============================================================
 // AUTOMATION
 // ============================================================
 

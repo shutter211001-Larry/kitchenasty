@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { View, Text, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useCartStore } from '@/store/cart.store';
+import { useThemeColors } from '@/hooks/useThemeColors';
 
 function CartTabBarButton() {
   const router = useRouter();
@@ -24,8 +25,8 @@ function CartTabBarButton() {
   );
 }
 
-function TabIcon({ name, focused }: { name: string; focused?: boolean }) {
-  const color = focused ? '#EA580C' : '#6B7280';
+function TabIcon({ name, focused, activeColor }: { name: string; focused?: boolean; activeColor?: string }) {
+  const color = focused ? (activeColor || '#EA580C') : '#6B7280';
   // Simple text-based icons for now — can be replaced with @expo/vector-icons
   const icons: Record<string, string> = {
     home: '\u2302',
@@ -41,11 +42,12 @@ function TabIcon({ name, focused }: { name: string; focused?: boolean }) {
 
 export default function TabsLayout() {
   const { t } = useTranslation();
+  const { primary600 } = useThemeColors();
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: '#EA580C',
+        tabBarActiveTintColor: primary600,
         tabBarInactiveTintColor: '#6B7280',
         headerRight: () => <CartTabBarButton />,
         headerRightContainerStyle: { paddingRight: 16 },
@@ -55,28 +57,28 @@ export default function TabsLayout() {
         name="index"
         options={{
           title: t('nav.home'),
-          tabBarIcon: ({ focused }) => <TabIcon name="home" focused={focused} />,
+          tabBarIcon: ({ focused }) => <TabIcon name="home" focused={focused} activeColor={primary600} />,
         }}
       />
       <Tabs.Screen
         name="menu"
         options={{
           title: t('nav.menu'),
-          tabBarIcon: ({ focused }) => <TabIcon name="menu" focused={focused} />,
+          tabBarIcon: ({ focused }) => <TabIcon name="menu" focused={focused} activeColor={primary600} />,
         }}
       />
       <Tabs.Screen
         name="orders"
         options={{
           title: t('orders.title'),
-          tabBarIcon: ({ focused }) => <TabIcon name="orders" focused={focused} />,
+          tabBarIcon: ({ focused }) => <TabIcon name="orders" focused={focused} activeColor={primary600} />,
         }}
       />
       <Tabs.Screen
         name="account"
         options={{
           title: t('account.title'),
-          tabBarIcon: ({ focused }) => <TabIcon name="account" focused={focused} />,
+          tabBarIcon: ({ focused }) => <TabIcon name="account" focused={focused} activeColor={primary600} />,
         }}
       />
     </Tabs>

@@ -2,17 +2,20 @@ import { useEffect } from 'react';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useAuthStore } from '@/store/auth.store';
+import { useSettingsStore } from '@/store/settings.store';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 import '@/i18n';
 import '../global.css';
 
 export default function RootLayout() {
   const restoreSession = useAuthStore((s) => s.restoreSession);
+  const fetchSettings = useSettingsStore((s) => s.fetchSettings);
   usePushNotifications();
 
   useEffect(() => {
     restoreSession();
-  }, [restoreSession]);
+    fetchSettings();
+  }, [restoreSession, fetchSettings]);
 
   return (
     <>

@@ -1,8 +1,10 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useTheme } from '../context/ThemeContext.js';
 
 export default function Footer() {
   const { t } = useTranslation();
+  const { settings } = useTheme();
 
   return (
     <footer className="bg-gray-900 text-gray-400">
@@ -11,10 +13,14 @@ export default function Footer() {
           {/* Brand */}
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">K</span>
-              </div>
-              <span className="text-xl font-bold text-white">KitchenAsty</span>
+              {settings.logo ? (
+                <img src={settings.logo} alt={settings.siteName} className="w-8 h-8 rounded-lg object-cover" />
+              ) : (
+                <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
+                  <span className="text-white font-bold text-sm">{settings.siteName.charAt(0)}</span>
+                </div>
+              )}
+              <span className="text-xl font-bold text-white">{settings.siteName}</span>
             </div>
             <p className="text-sm">
               {t('footer.description')}
@@ -57,7 +63,7 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-gray-800 mt-8 pt-8 text-center text-sm">
-          <p>&copy; {new Date().getFullYear()} KitchenAsty. {t('footer.allRightsReserved')}</p>
+          <p>&copy; {new Date().getFullYear()} {settings.siteName}. {t('footer.allRightsReserved')}</p>
         </div>
       </div>
     </footer>
