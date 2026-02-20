@@ -12,6 +12,7 @@
 
 <p align="center">
   <a href="https://github.com/mighty840/kitchenasty/actions/workflows/ci.yml"><img src="https://github.com/mighty840/kitchenasty/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
+  <a href="https://mighty840.github.io/kitchenasty/"><img src="https://img.shields.io/badge/Docs-GitHub%20Pages-blue?logo=readthedocs&logoColor=white" alt="Docs" /></a>
   <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-5.7-blue?logo=typescript&logoColor=white" alt="TypeScript" /></a>
   <a href="https://react.dev/"><img src="https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=white" alt="React" /></a>
   <a href="https://nodejs.org/"><img src="https://img.shields.io/badge/Node.js-22-339933?logo=nodedotjs&logoColor=white" alt="Node.js" /></a>
@@ -171,7 +172,13 @@ kitchenasty/
 
 ## Documentation
 
-Full API reference (endpoints, request/response schemas), database schema diagrams, and CI pipeline details are available in the **[docs site](packages/docs/)**.
+Full documentation is available at **[mighty840.github.io/kitchenasty](https://mighty840.github.io/kitchenasty/)**, including:
+
+- [Getting Started Guide](https://mighty840.github.io/kitchenasty/guide/introduction.html)
+- [Self-Hosting Guide](https://mighty840.github.io/kitchenasty/self-hosting/overview.html) — server setup, Docker, reverse proxy, SSL, backups
+- [Mobile App Publishing](https://mighty840.github.io/kitchenasty/mobile-app/overview.html) — developer accounts, building, app store submission
+- [API Reference](https://mighty840.github.io/kitchenasty/api/overview.html) — all endpoints with request/response schemas
+- [Configuration](https://mighty840.github.io/kitchenasty/configuration/environment-variables.html) — environment variables, payments, email, social login
 
 Interactive Swagger UI is served at [`/api/docs`](http://localhost:3000/api/docs) when the server is running.
 
@@ -190,4 +197,4 @@ See [`PLAN.md`](PLAN.md) for the full roadmap and feature ideas.
 
 ## License
 
-[MIT](https://opensource.org/licenses/MIT)
+This project is licensed under the [MIT License](LICENSE).

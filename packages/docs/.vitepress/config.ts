@@ -165,6 +165,16 @@ export default defineConfig({
           ],
         },
       ],
+      '/legal/': [
+        {
+          text: 'Legal',
+          items: [
+            { text: 'License', link: '/legal/license' },
+            { text: 'Privacy Policy', link: '/legal/privacy-policy' },
+            { text: 'Impressum', link: '/legal/impressum' },
+          ],
+        },
+      ],
     },
 
     search: {
@@ -181,8 +191,8 @@ export default defineConfig({
     },
 
     footer: {
-      message: 'Released under the MIT License.',
-      copyright: 'Copyright KitchenAsty contributors',
+      message: 'Released under the <a href="/legal/license">MIT License</a>. <a href="/legal/privacy-policy">Privacy Policy</a> · <a href="/legal/impressum">Impressum</a>',
+      copyright: 'Copyright &copy; 2025 KitchenAsty Contributors',
     },
   },
 })
