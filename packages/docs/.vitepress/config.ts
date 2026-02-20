@@ -191,7 +191,7 @@ export default defineConfig({
     },
 
     footer: {
-      message: 'Released under the <a href="/legal/license">MIT License</a>. <a href="/legal/privacy-policy">Privacy Policy</a> · <a href="/legal/impressum">Impressum</a>',
+      message: `Released under the <a href="${base}legal/license.html">MIT License</a>. <a href="${base}legal/privacy-policy.html">Privacy Policy</a> · <a href="${base}legal/impressum.html">Impressum</a>`,
       copyright: 'Copyright &copy; 2025 KitchenAsty Contributors',
     },
   },
