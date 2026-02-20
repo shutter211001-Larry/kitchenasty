@@ -1,9 +1,37 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, OrderStatus } from '@prisma/client';
+import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
 async function main() {
   console.log('Seeding database...');
+
+  // Create admin user
+  const hashedPassword = await bcrypt.hash('admin123', 10);
+  await prisma.user.upsert({
+    where: { email: 'admin@kitchenasty.com' },
+    update: {},
+    create: {
+      email: 'admin@kitchenasty.com',
+      password: hashedPassword,
+      name: 'Admin',
+      role: 'SUPER_ADMIN',
+      isActive: true,
+    },
+  });
+
+  // Create a customer
+  const customerPassword = await bcrypt.hash('customer123', 10);
+  const customer = await prisma.customer.upsert({
+    where: { email: 'customer@example.com' },
+    update: {},
+    create: {
+      email: 'customer@example.com',
+      password: customerPassword,
+      name: 'John Doe',
+      phone: '(555) 987-6543',
+    },
+  });
 
   // Create allergens
   const allergens = await Promise.all(
@@ -366,7 +394,79 @@ async function main() {
     },
   });
 
+  // Sample orders
+  const orderStatuses: OrderStatus[] = ['PENDING', 'CONFIRMED', 'PREPARING', 'READY', 'DELIVERED', 'PICKED_UP'];
+  const orderTypes = ['DELIVERY', 'PICKUP'] as const;
+  for (let i = 0; i < 15; i++) {
+    const status = orderStatuses[i % orderStatuses.length];
+    const orderType = orderTypes[i % 2];
+    const daysAgo = Math.floor(i / 2);
+    const createdAt = new Date();
+    createdAt.setDate(createdAt.getDate() - daysAgo);
+    createdAt.setHours(10 + (i % 12), (i * 17) % 60);
+
+    await prisma.order.create({
+      data: {
+        orderNumber: `KA-SEED-${String(i + 1).padStart(3, '0')}`,
+        customerId: customer.id,
+        locationId: location.id,
+        orderType,
+        status,
+        subtotal: 20 + i * 5,
+        tax: (20 + i * 5) * 0.08,
+        deliveryFee: orderType === 'DELIVERY' ? 4.99 : 0,
+        total: (20 + i * 5) * 1.08 + (orderType === 'DELIVERY' ? 4.99 : 0),
+        createdAt,
+        items: {
+          create: [
+            {
+              menuItemId: margherita.id,
+              name: 'Margherita Pizza',
+              quantity: 1 + (i % 3),
+              unitPrice: 14.99,
+              subtotal: 14.99 * (1 + (i % 3)),
+            },
+            ...(i % 2 === 0 ? [{
+              menuItemId: lemonade.id,
+              name: 'Fresh Lemonade',
+              quantity: 2,
+              unitPrice: 4.99,
+              subtotal: 9.98,
+            }] : []),
+          ],
+        },
+      },
+    });
+  }
+
+  // Sample reviews
+  await prisma.review.createMany({
+    data: [
+      { customerId: customer.id, locationId: location.id, orderId: undefined, rating: 5, comment: 'Excellent food and fast delivery!', isApproved: true },
+      { customerId: customer.id, locationId: location.id, orderId: undefined, rating: 4, comment: 'Great pizza, will order again.', isApproved: true },
+      { customerId: customer.id, locationId: location.id, orderId: undefined, rating: 5, comment: 'Best restaurant in town!', isApproved: false },
+    ],
+    skipDuplicates: true,
+  });
+
+  // Sample reservation
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  await prisma.reservation.create({
+    data: {
+      customerId: customer.id,
+      locationId: location.id,
+      date: tomorrow,
+      time: '19:00',
+      partySize: 4,
+      status: 'PENDING',
+    },
+  });
+
   console.log('Seed completed successfully!');
+  console.log('');
+  console.log('Admin login: admin@kitchenasty.com / admin123');
+  console.log('Customer login: customer@example.com / customer123');
 }
 
 main()

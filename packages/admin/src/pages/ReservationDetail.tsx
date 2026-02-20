@@ -29,8 +29,6 @@ const STATUS_COLORS: Record<string, string> = {
   CANCELLED: 'bg-red-100 text-red-800',
 };
 
-const API_BASE = 'http://localhost:3000';
-
 export default function ReservationDetail() {
   const { id } = useParams();
   const [reservation, setReservation] = useState<ReservationData | null>(null);
@@ -39,10 +37,10 @@ export default function ReservationDetail() {
   const [error, setError] = useState('');
   const [updating, setUpdating] = useState(false);
 
-  const token = localStorage.getItem('admin_token') || '';
+  const token = localStorage.getItem('token') || '';
 
   useEffect(() => {
-    fetch(`${API_BASE}/api/reservations/${id}`, {
+    fetch(`/api/reservations/${id}`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => {
@@ -52,7 +50,7 @@ export default function ReservationDetail() {
       .then((data) => {
         setReservation(data.data);
         // Fetch tables for the location
-        return fetch(`${API_BASE}/api/locations/${data.data.location.id}/tables`, {
+        return fetch(`/api/locations/${data.data.location.id}/tables`, {
           headers: { Authorization: `Bearer ${token}` },
         });
       })
@@ -65,7 +63,7 @@ export default function ReservationDetail() {
   async function updateReservation(updates: Record<string, unknown>) {
     setUpdating(true);
     try {
-      const res = await fetch(`${API_BASE}/api/reservations/${id}`, {
+      const res = await fetch(`/api/reservations/${id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

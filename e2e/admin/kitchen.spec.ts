@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures.js';
 
 test.describe('Kitchen Display', () => {
   test('loads the kitchen display page', async ({ page }) => {

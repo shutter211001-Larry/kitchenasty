@@ -32,8 +32,6 @@ const STATUS_COLORS: Record<string, string> = {
   CANCELLED: 'bg-red-100 text-red-800',
 };
 
-const API_BASE = 'http://localhost:3000';
-
 export default function OrderList() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [pagination, setPagination] = useState<Pagination | null>(null);
@@ -43,7 +41,7 @@ export default function OrderList() {
   const [statusFilter, setStatusFilter] = useState('');
   const [typeFilter, setTypeFilter] = useState('');
 
-  const token = localStorage.getItem('admin_token') || '';
+  const token = localStorage.getItem('token') || '';
 
   useEffect(() => {
     setLoading(true);
@@ -51,7 +49,7 @@ export default function OrderList() {
     if (statusFilter) params.set('status', statusFilter);
     if (typeFilter) params.set('orderType', typeFilter);
 
-    fetch(`${API_BASE}/api/orders?${params}`, {
+    fetch(`/api/orders?${params}`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => {

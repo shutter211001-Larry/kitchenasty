@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures.js';
 
 test.describe('Admin Reservation List', () => {
   test('navigates to reservations page via sidebar', async ({ page }) => {

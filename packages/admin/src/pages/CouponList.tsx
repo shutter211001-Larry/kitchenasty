@@ -29,8 +29,6 @@ const TYPE_LABELS: Record<string, string> = {
   FREE_DELIVERY: 'Free Delivery',
 };
 
-const API_BASE = 'http://localhost:3000';
-
 export default function CouponList() {
   const [coupons, setCoupons] = useState<Coupon[]>([]);
   const [pagination, setPagination] = useState<Pagination | null>(null);
@@ -38,11 +36,11 @@ export default function CouponList() {
   const [error, setError] = useState('');
   const [page, setPage] = useState(1);
 
-  const token = localStorage.getItem('admin_token') || '';
+  const token = localStorage.getItem('token') || '';
 
   useEffect(() => {
     setLoading(true);
-    fetch(`${API_BASE}/api/coupons?page=${page}&limit=20`, {
+    fetch(`/api/coupons?page=${page}&limit=20`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => {
@@ -59,7 +57,7 @@ export default function CouponList() {
 
   async function toggleActive(id: string, isActive: boolean) {
     try {
-      const res = await fetch(`${API_BASE}/api/coupons/${id}`, {
+      const res = await fetch(`/api/coupons/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ isActive }),
