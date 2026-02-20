@@ -63,6 +63,7 @@ model Customer {
   reservations          Reservation[]
   reviews               Review[]
   loyaltyTransactions   LoyaltyTransaction[]
+  cookieConsents        CookieConsent[]
 
   @@map("customers")
 }
@@ -575,6 +576,48 @@ model LoyaltyTransaction {
 // ============================================================
 // AUTOMATION
 // ============================================================
+
+// ============================================================
+// LEGAL & CONSENT
+// ============================================================
+
+model LegalPage {
+  id        String   @id @default(cuid())
+  slug      String   @unique        // "privacy-policy" | "impressum"
+  title     String
+  content   String   @db.Text
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  @@map("legal_pages")
+}
+
+model CookieCategory {
+  id          String   @id @default(cuid())
+  name        String   @unique       // "essential" | "analytics" | "marketing"
+  label       String
+  description String
+  isRequired  Boolean  @default(false)
+  isActive    Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  consents CookieConsent[]
+  @@map("cookie_categories")
+}
+
+model CookieConsent {
+  id               String         @id @default(cuid())
+  customerId       String?
+  customer         Customer?      @relation(fields: [customerId], references: [id])
+  cookieCategoryId String
+  cookieCategory   CookieCategory @relation(fields: [cookieCategoryId], references: [id], onDelete: Cascade)
+  accepted         Boolean
+  ipAddress        String?
+  userAgent        String?
+  createdAt        DateTime       @default(now())
+  @@map("cookie_consents")
+}
 
 model AutomationRule {
   id         String   @id @default(cuid())

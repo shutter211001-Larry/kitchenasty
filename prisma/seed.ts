@@ -463,6 +463,76 @@ async function main() {
     },
   });
 
+  // Legal pages
+  await prisma.legalPage.upsert({
+    where: { slug: 'privacy-policy' },
+    update: {},
+    create: {
+      slug: 'privacy-policy',
+      title: 'Privacy Policy',
+      content: `# Privacy Policy
+
+We value your privacy. This policy explains how KitchenAsty collects, uses, and protects your personal information.
+
+## Information We Collect
+
+- **Account information**: name, email address, phone number
+- **Order information**: delivery addresses, order history, payment details
+- **Usage data**: cookies, browsing behavior, device information
+
+## How We Use Your Information
+
+We use your information to process orders, improve our services, and communicate with you about promotions and updates.
+
+## Your Rights
+
+You have the right to access, correct, or delete your personal data at any time by contacting us.
+
+## Contact
+
+If you have questions about this policy, please email us at privacy@kitchenasty.com.`,
+    },
+  });
+
+  await prisma.legalPage.upsert({
+    where: { slug: 'impressum' },
+    update: {},
+    create: {
+      slug: 'impressum',
+      title: 'Impressum',
+      content: `# Impressum
+
+## Company Information
+
+**KitchenAsty**
+123 Main Street
+San Francisco, CA 94102
+United States
+
+**Email:** info@kitchenasty.com
+**Phone:** (555) 123-4567
+
+## Responsible for Content
+
+KitchenAsty Management Team`,
+    },
+  });
+
+  // Cookie categories
+  const cookieCategories = [
+    { name: 'essential', label: 'Essential Cookies', description: 'Required for the website to function properly. These cannot be disabled.', isRequired: true, sortOrder: 0 },
+    { name: 'analytics', label: 'Analytics Cookies', description: 'Help us understand how visitors interact with our website.', isRequired: false, sortOrder: 1 },
+    { name: 'marketing', label: 'Marketing Cookies', description: 'Used to deliver personalized advertisements and track campaigns.', isRequired: false, sortOrder: 2 },
+  ];
+
+  for (const cat of cookieCategories) {
+    await prisma.cookieCategory.upsert({
+      where: { name: cat.name },
+      update: {},
+      create: cat,
+    });
+  }
+
   console.log('Seed completed successfully!');
   console.log('');
   console.log('Admin login: admin@kitchenasty.com / admin123');

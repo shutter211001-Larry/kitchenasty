@@ -16,6 +16,8 @@ import Reservations from './pages/Reservations.js';
 import OrderHistory from './pages/OrderHistory.js';
 import OrderStatus from './pages/OrderStatus.js';
 import AuthCallback from './pages/AuthCallback.js';
+import PrivacyPolicy from './pages/PrivacyPolicy.js';
+import Impressum from './pages/Impressum.js';
 import NotFound from './pages/NotFound.js';
 import './i18n/index.js';
 import './index.css';
@@ -39,6 +41,8 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
             <Route path="/account" element={<Account />} />
             <Route path="/account/orders" element={<OrderHistory />} />
             <Route path="/orders/:id" element={<OrderStatus />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+            <Route path="/impressum" element={<Impressum />} />
             <Route path="*" element={<NotFound />} />
           </Route>
         </Routes>

@@ -26,6 +26,16 @@ const navItems: NavItem[] = [
   { path: '/kitchen', label: 'Kitchen', icon: '🍳' },
   { path: '/automation', label: 'Automation', icon: '⚡' },
   { path: '/loyalty', label: 'Loyalty', icon: '🎁' },
+  {
+    path: '/legal',
+    label: 'Legal',
+    icon: '⚖',
+    children: [
+      { path: '/legal/pages', label: 'Pages' },
+      { path: '/legal/cookies', label: 'Cookie Categories' },
+      { path: '/legal/consent', label: 'Consent Log' },
+    ],
+  },
 ];
 
 export default function AdminLayout({ children, onLogout }: { children: React.ReactNode; onLogout?: () => void }) {

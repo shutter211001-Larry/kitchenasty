@@ -39,6 +39,20 @@ export default function Footer() {
               <li><Link to="/register" className="hover:text-white transition-colors">{t('footer.createAccount')}</Link></li>
               <li><Link to="/account" className="hover:text-white transition-colors">{t('nav.myAccount')}</Link></li>
             </ul>
+
+            <h3 className="text-white font-semibold mb-3 mt-6">Legal</h3>
+            <ul className="space-y-2 text-sm">
+              <li><Link to="/privacy-policy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
+              <li><Link to="/impressum" className="hover:text-white transition-colors">Impressum</Link></li>
+              <li>
+                <button
+                  onClick={() => window.dispatchEvent(new Event('open-cookie-settings'))}
+                  className="hover:text-white transition-colors"
+                >
+                  Cookie Settings
+                </button>
+              </li>
+            </ul>
           </div>
         </div>
 

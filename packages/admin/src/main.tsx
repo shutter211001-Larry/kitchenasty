@@ -23,6 +23,10 @@ import AutomationRuleList from './pages/AutomationRuleList.js';
 import AutomationRuleForm from './pages/AutomationRuleForm.js';
 import DeliveryZoneList from './pages/DeliveryZoneList.js';
 import CustomerLoyalty from './pages/CustomerLoyalty.js';
+import LegalPageList from './pages/LegalPageList.js';
+import LegalPageForm from './pages/LegalPageForm.js';
+import CookieCategoryList from './pages/CookieCategoryList.js';
+import ConsentLog from './pages/ConsentLog.js';
 import './index.css';
 
 function App() {
@@ -76,6 +80,11 @@ function App() {
           <Route path="/automation/:id" element={<AutomationRuleForm />} />
           <Route path="/locations/:locationId/delivery-zones" element={<DeliveryZoneList />} />
           <Route path="/loyalty" element={<CustomerLoyalty />} />
+          <Route path="/legal" element={<Navigate to="/legal/pages" replace />} />
+          <Route path="/legal/pages" element={<LegalPageList />} />
+          <Route path="/legal/pages/:slug" element={<LegalPageForm />} />
+          <Route path="/legal/cookies" element={<CookieCategoryList />} />
+          <Route path="/legal/consent" element={<ConsentLog />} />
         </Routes>
       </AdminLayout>
     </BrowserRouter>
