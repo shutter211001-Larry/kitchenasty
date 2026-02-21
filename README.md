@@ -32,8 +32,10 @@
 
 <p align="center">
   <a href="#quick-start">Quick Start</a> &middot;
+  <a href="https://mighty840.github.io/kitchenasty/">Docs</a> &middot;
   <a href="https://github.com/mighty840/kitchenasty/issues/new?template=bug_report.md">Report Bug</a> &middot;
-  <a href="https://github.com/mighty840/kitchenasty/issues/new?template=feature_request.md">Request Feature</a>
+  <a href="https://github.com/mighty840/kitchenasty/issues/new?template=feature_request.md">Request Feature</a> &middot;
+  <a href="https://github.com/mighty840/kitchenasty/discussions">Discussions</a>
 </p>
 
 ---
@@ -202,12 +204,25 @@ Interactive Swagger UI is served at [`/api/docs`](http://localhost:3000/api/docs
 
 ## Contributing
 
+We welcome contributions of all kinds! Please read our **[Contributing Guide](CONTRIBUTING.md)** to get started.
+
 1. Fork the repository and create a feature branch from `main`
 2. Make changes and add tests
 3. Ensure all tests pass: `npm test && npm run test:e2e`
 4. Push and open a pull request
 
+Looking for a good starting point? Check out issues labeled [`good first issue`](https://github.com/mighty840/kitchenasty/labels/good%20first%20issue).
+
 See [`PLAN.md`](PLAN.md) for the full roadmap and feature ideas.
+
+---
+
+## Community
+
+- [GitHub Discussions](https://github.com/mighty840/kitchenasty/discussions) — Ask questions, share ideas, get help
+- [Issue Tracker](https://github.com/mighty840/kitchenasty/issues) — Report bugs and request features
+- [Security Policy](SECURITY.md) — Report vulnerabilities responsibly
+- [Code of Conduct](CODE_OF_CONDUCT.md) — Our community standards
 
 ---
 
