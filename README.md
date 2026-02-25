@@ -31,6 +31,10 @@
 </p>
 
 <p align="center">
+  <a href="https://www.producthunt.com/products/kitchenasty?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-kitchenasty" target="_blank" rel="noopener noreferrer"><img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1084792&theme=light&t=1772014081416" alt="KitchenAsty - Open-source, self-hosted restaurant ordering and management | Product Hunt" width="250" height="54" /></a>
+</p>
+
+<p align="center">
   <a href="https://demo.kitchenasty.com"><strong>Live Demo</strong></a> &middot;
   <a href="#quick-start">Quick Start</a> &middot;
   <a href="https://mighty840.github.io/kitchenasty/">Docs</a> &middot;
