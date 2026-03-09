@@ -51,7 +51,7 @@
 
 ---
 
-KitchenAsty enables restaurants, cafes, and takeaways to accept online orders for delivery and pickup, manage menus, handle table reservations, and run day-to-day operations from a single admin panel. Built as a modern TypeScript monorepo with separate admin and storefront frontends, a REST API with real-time WebSocket updates, and a full test suite with 330+ tests.
+KitchenAsty enables restaurants, cafes, and takeaways to accept online orders for delivery and pickup, manage menus, handle table reservations, and run day-to-day operations from a single admin panel. Built as a modern TypeScript monorepo with separate admin and storefront frontends, a REST API with real-time WebSocket updates, and a full test suite with 350+ tests.
 
 ---
 
@@ -95,6 +95,13 @@ KitchenAsty enables restaurants, cafes, and takeaways to accept online orders fo
 - Role-based settings access (MANAGER vs SUPER_ADMIN)
 - Test email functionality to verify SMTP configuration
 
+### Storefront Templates
+
+- 10 pre-designed templates (Classic, Modern, Rustic, Elegant, Minimal, Bold, Coastal, Garden, Urban, Artisan)
+- One-click template switching from admin settings with live preview
+- Each template includes header, hero, features section, and footer
+- Templates respect restaurant branding (colors, logo, name)
+
 ### Analytics & Automation
 
 - Dashboard with real-time metrics: orders, revenue, reservations, customers
@@ -107,10 +114,17 @@ KitchenAsty enables restaurants, cafes, and takeaways to accept online orders fo
 - i18n with react-i18next and language switcher
 - English, Spanish, French, German, Italian, and Portuguese translations
 
+### Observability & Developer Tools
+
+- Structured logging with Pino (JSON in production, pretty-printed in dev)
+- Request tracing with unique `x-request-id` per request
+- API metrics dashboard with response time charts and endpoint performance
+- Audit logging for all admin mutations (SUPER_ADMIN only)
+
 ### Developer Experience
 
 - TypeScript strict mode across the entire monorepo
-- Vitest unit/integration + Playwright E2E (330+ tests)
+- Vitest unit/integration + Playwright E2E (350+ tests)
 - GitHub Actions CI: lint, test, audit, build, and artifact packaging
 - Docker Compose for local PostgreSQL, npm workspaces for monorepo
 
@@ -130,6 +144,7 @@ KitchenAsty enables restaurants, cafes, and takeaways to accept online orders fo
 | **Charts** | [Recharts](https://recharts.org/) |
 | **File Upload** | [Multer](https://github.com/expressjs/multer) |
 | **Styling** | [Tailwind CSS](https://tailwindcss.com/) |
+| **Logging** | [Pino](https://getpino.io/) |
 | **Testing** | [Vitest](https://vitest.dev/) + [Supertest](https://github.com/ladjs/supertest) + [Playwright](https://playwright.dev/) |
 | **CI/CD** | [GitHub Actions](https://github.com/features/actions) |
 | **Language** | [TypeScript](https://www.typescriptlang.org/) (strict mode) |
@@ -190,7 +205,7 @@ kitchenasty/
 │   ├── shared/            # Shared types and constants
 │   └── storefront/        # React customer storefront (Vite, port 5174)
 ├── prisma/
-│   ├── schema.prisma      # Database schema (20 models)
+│   ├── schema.prisma      # Database schema (22 models)
 │   └── seed.ts            # Sample data seeder
 ├── docker-compose.yml     # PostgreSQL for local dev
 ├── playwright.config.ts   # E2E test configuration

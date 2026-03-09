@@ -5,6 +5,52 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-03-09
+
+### Added
+
+#### Storefront Template System
+- 10 pre-designed storefront templates (Classic, Modern, Rustic, Elegant, Minimal, Bold, Coastal, Garden, Urban, Artisan)
+- Template preview and one-click switching from admin settings
+- Each template includes a unique header, hero, features section, and footer
+- Templates respect restaurant branding (colors, logo, name)
+
+#### Structured Logging
+- Replaced all `console.*` calls with Pino structured logger
+- JSON log output in production, pretty-printed in development
+- Module-specific child loggers (server, email, SMS, automation, metrics)
+- Configurable log level via `LOG_LEVEL` environment variable
+
+#### Request Tracing
+- Unique request ID (`x-request-id`) assigned to every API request
+- Request IDs propagated through logs for end-to-end tracing
+- pino-http middleware for automatic HTTP request/response logging
+
+#### API Metrics
+- Per-request metrics collection (method, path, status, response time)
+- Admin dashboard with real-time API metrics charts (Recharts)
+- Endpoint performance table with request count, avg/p95 response times, error rates
+- Time range filtering (1h, 6h, 24h, 48h, 7d)
+- Accessible to MANAGER and SUPER_ADMIN roles
+
+#### Audit Logging
+- Automatic audit trail for all create, update, and delete operations
+- Tracks user, action, entity, entity ID, IP address, and request ID
+- Paginated audit log viewer in admin with entity/action/search filters
+- Restricted to SUPER_ADMIN role
+
+#### Demo Seeding
+- Demo restaurant "Saffron & Sage" seed data with images and branding
+
+### Changed
+- Replaced morgan HTTP logger with pino-http
+- Added `ApiMetric` and `AuditLog` Prisma models
+- Admin navigation now includes Developer section (API Metrics, Audit Log)
+
+### Fixed
+- ElegantHeader template missing semantic `<nav>` element for navigation links
+- E2E test stability improvements for template switching race conditions
+
 ## [0.1.0] - 2026-02-23
 
 Initial release of KitchenAsty — a self-hosted, full-stack restaurant ordering
@@ -141,4 +187,5 @@ and management platform.
 - GitHub issue templates (bug report, feature request) and PR template
 - Funding configuration
 
+[0.2.0]: https://github.com/mighty840/kitchenasty/releases/tag/v0.2.0
 [0.1.0]: https://github.com/mighty840/kitchenasty/releases/tag/v0.1.0
