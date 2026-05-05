@@ -84,6 +84,7 @@ function toPublicSettings(settings: Awaited<ReturnType<typeof getOrCreateSetting
       deliveryEnabled: isTrue(order.deliveryEnabled, true),
       pickupEnabled: isTrue(order.pickupEnabled, true),
       allowGuestCheckout: isTrue(order.allowGuestCheckout, true),
+      taxRate: order.taxRate !== undefined ? Number(order.taxRate) : 0,
     } : undefined,
     paymentSettings: {
       cashEnabled: isTrue(payment.cashEnabled, true),

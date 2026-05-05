@@ -9,7 +9,8 @@ import { useTheme } from '../context/ThemeContext.js';
 type OrderType = 'delivery' | 'pickup';
 type PaymentMethod = 'cash' | 'stripe' | 'paypal';
 
-const TAX_RATE = 0.08;
+// Default tax rate fallback if settings not loaded
+const DEFAULT_TAX_RATE = 0;
 
 export default function Checkout() {
   const { t } = useTranslation();
@@ -48,7 +49,8 @@ export default function Checkout() {
   const [loyaltyRedeem, setLoyaltyRedeem] = useState(0);
   const loyaltyDiscount = loyaltyRedeem / 100;
 
-  const tax = subtotal * TAX_RATE;
+  const currentTaxRate = orderSettings?.taxRate ?? DEFAULT_TAX_RATE;
+  const tax = subtotal * currentTaxRate;
   const currentDeliveryFee = orderType === 'delivery' ? deliveryFee : 0;
   const total = subtotal + tax + currentDeliveryFee - loyaltyDiscount;
 
@@ -453,49 +455,44 @@ export default function Checkout() {
           {!user && (
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
               <h2 className="text-lg font-semibold text-gray-900 mb-4">聯絡資訊</h2>
-              {settings.orderSettings?.allowGuestCheckout !== false ? (
-                <>
-                  <p className="text-sm text-gray-600 mb-3">
+              <div className="space-y-4">
+                {settings.showMembership !== false && (
+                  <p className="text-sm text-gray-600">
                     <Link to="/login" className="text-primary-600 hover:text-primary-700 font-medium underline">
                       {t('nav.login')}
                     </Link>{' '}
+                    或{' '}
+                    <Link to="/register" className="text-primary-600 hover:text-primary-700 font-medium underline">
+                      註冊會員
+                    </Link>{' '}
                     以享有會員優惠，或直接以訪客身份結帳：
                   </p>
-                  <div className="space-y-3">
-                    <input
-                      type="text"
-                      required
-                      placeholder="姓名 *"
-                      value={guestName}
-                      onChange={(e) => setGuestName(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none text-sm"
-                    />
-                    <input
-                      type="email"
-                      required
-                      placeholder="電子郵件 *"
-                      value={guestEmail}
-                      onChange={(e) => setGuestEmail(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none text-sm"
-                    />
-                    <input
-                      type="tel"
-                      placeholder="電話 (選填)"
-                      value={guestPhone}
-                      onChange={(e) => setGuestPhone(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none text-sm"
-                    />
-                  </div>
-                </>
-              ) : (
-                <div className="text-center py-4">
-                  <p className="text-gray-600 mb-4">本商店僅限會員下單，請先登入或註冊帳戶。</p>
-                  <div className="flex gap-3 justify-center">
-                    <Link to="/login" className="px-6 py-2 bg-primary-600 text-white rounded-lg font-medium">登入</Link>
-                    <Link to="/register" className="px-6 py-2 border border-gray-300 rounded-lg font-medium">註冊</Link>
-                  </div>
+                )}
+                
+                <div className="space-y-3">
+                  <input
+                    type="text"
+                    placeholder="姓名 (選填)"
+                    value={guestName}
+                    onChange={(e) => setGuestName(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none text-sm"
+                  />
+                  <input
+                    type="email"
+                    placeholder="電子郵件 (選填)"
+                    value={guestEmail}
+                    onChange={(e) => setGuestEmail(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none text-sm"
+                  />
+                  <input
+                    type="tel"
+                    placeholder="電話 (選填)"
+                    value={guestPhone}
+                    onChange={(e) => setGuestPhone(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none text-sm"
+                  />
                 </div>
-              )}
+              </div>
             </div>
           )}
         </div>
