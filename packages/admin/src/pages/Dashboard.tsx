@@ -292,6 +292,7 @@ function AnalyticsPanel({
   days: number;
   onDaysChange: (d: number) => void;
 }) {
+  const { t } = useTranslation();
   if (loading) {
     return (
       <div className="flex justify-center py-12">
