@@ -17,11 +17,11 @@ function ClassicHeader() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const navLinks = [
-    { to: '/', label: t('nav.home') },
-    { to: '/locations', label: t('nav.locations') },
-    { to: '/menu', label: t('nav.menu') },
-    { to: '/reservations', label: t('nav.reservations') },
-  ];
+    settings.navShowHome !== false && { to: '/', label: t('nav.home') },
+    settings.navShowLocations !== false && { to: '/locations', label: t('nav.locations') },
+    settings.navShowMenu !== false && { to: '/menu', label: t('nav.menu') },
+    settings.navShowReservations !== false && { to: '/reservations', label: t('nav.reservations') },
+  ].filter(Boolean) as { to: string; label: string }[];
 
   function isActive(path: string) {
     if (path === '/') return location.pathname === '/';
@@ -78,36 +78,38 @@ function ClassicHeader() {
                 </span>
               )}
             </button>
-            {user ? (
-              <>
-                <Link
-                  to="/account"
-                  className="text-sm text-gray-600 hover:text-gray-900"
-                >
-                  {user.name}
-                </Link>
-                <button
-                  onClick={logout}
-                  className="text-sm text-gray-500 hover:text-gray-700"
-                >
-                  {t('nav.logout')}
-                </button>
-              </>
-            ) : (
-              <>
-                <Link
-                  to="/login"
-                  className="text-sm text-gray-600 hover:text-gray-900"
-                >
-                  {t('nav.login')}
-                </Link>
-                <Link
-                  to="/register"
-                  className="text-sm bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors"
-                >
-                  {t('nav.signUp')}
-                </Link>
-              </>
+            {settings.showMembership !== false && (
+              user ? (
+                <>
+                  <Link
+                    to="/account"
+                    className="text-sm text-gray-600 hover:text-gray-900"
+                  >
+                    {user.name}
+                  </Link>
+                  <button
+                    onClick={logout}
+                    className="text-sm text-gray-500 hover:text-gray-700"
+                  >
+                    {t('nav.logout')}
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    to="/login"
+                    className="text-sm text-gray-600 hover:text-gray-900"
+                  >
+                    {t('nav.login')}
+                  </Link>
+                  <Link
+                    to="/register"
+                    className="text-sm bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors"
+                  >
+                    {t('nav.signUp')}
+                  </Link>
+                </>
+              )
             )}
           </div>
 
@@ -167,42 +169,44 @@ function ClassicHeader() {
             <div className="px-3 py-2">
               <LanguageSwitcher />
             </div>
-            <div className="border-t border-gray-200 pt-3 mt-3">
-              {user ? (
-                <>
-                  <Link
-                    to="/account"
-                    onClick={() => setMobileOpen(false)}
-                    className="block px-3 py-2 text-base font-medium text-gray-600 hover:text-gray-900"
-                  >
-                    {t('nav.myAccount')}
-                  </Link>
-                  <button
-                    onClick={() => { logout(); setMobileOpen(false); }}
-                    className="block w-full text-left px-3 py-2 text-base font-medium text-gray-500 hover:text-gray-700"
-                  >
-                    {t('nav.logout')}
-                  </button>
-                </>
-              ) : (
-                <>
-                  <Link
-                    to="/login"
-                    onClick={() => setMobileOpen(false)}
-                    className="block px-3 py-2 text-base font-medium text-gray-600 hover:text-gray-900"
-                  >
-                    {t('nav.login')}
-                  </Link>
-                  <Link
-                    to="/register"
-                    onClick={() => setMobileOpen(false)}
-                    className="block px-3 py-2 text-base font-medium text-primary-600 hover:text-primary-700"
-                  >
-                    {t('nav.signUp')}
-                  </Link>
-                </>
-              )}
-            </div>
+            {settings.showMembership !== false && (
+              <div className="border-t border-gray-200 pt-3 mt-3">
+                {user ? (
+                  <>
+                    <Link
+                      to="/account"
+                      onClick={() => setMobileOpen(false)}
+                      className="block px-3 py-2 text-base font-medium text-gray-600 hover:text-gray-900"
+                    >
+                      {t('nav.myAccount')}
+                    </Link>
+                    <button
+                      onClick={() => { logout(); setMobileOpen(false); }}
+                      className="block w-full text-left px-3 py-2 text-base font-medium text-gray-500 hover:text-gray-700"
+                    >
+                      {t('nav.logout')}
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Link
+                      to="/login"
+                      onClick={() => setMobileOpen(false)}
+                      className="block px-3 py-2 text-base font-medium text-gray-600 hover:text-gray-900"
+                    >
+                      {t('nav.login')}
+                    </Link>
+                    <Link
+                      to="/register"
+                      onClick={() => setMobileOpen(false)}
+                      className="block px-3 py-2 text-base font-medium text-primary-600 hover:text-primary-700"
+                    >
+                      {t('nav.signUp')}
+                    </Link>
+                  </>
+                )}
+              </div>
+            )}
           </div>
         </div>
       )}

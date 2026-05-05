@@ -56,10 +56,16 @@ function toPublicSettings(settings: Awaited<ReturnType<typeof getOrCreateSetting
     heroSection: settings.heroSection,
     featuresSection: settings.featuresSection,
     ctaSection: settings.ctaSection,
+    navShowHome: (settings.generalSettings as any)?.navShowHome ?? true,
+    navShowLocations: (settings.generalSettings as any)?.navShowLocations ?? true,
+    navShowMenu: (settings.generalSettings as any)?.navShowMenu ?? true,
+    navShowReservations: (settings.generalSettings as any)?.navShowReservations ?? true,
+    showMembership: (settings.generalSettings as any)?.showMembership ?? true,
     orderSettings: settings.orderSettings ? {
       enabled: (settings.orderSettings as any).enabled,
       deliveryEnabled: (settings.orderSettings as any).deliveryEnabled,
       pickupEnabled: (settings.orderSettings as any).pickupEnabled,
+      allowGuestCheckout: (settings.orderSettings as any).allowGuestCheckout ?? true,
     } : undefined,
     paymentSettings: settings.paymentSettings ? {
       cashEnabled: (settings.paymentSettings as any).cashEnabled,
@@ -190,12 +196,18 @@ const generalSettingsSchema = z.object({
   currencySymbol: z.string().max(5).optional(),
   currencyPosition: z.enum(['before', 'after']).optional(),
   googleMapsApiKey: z.string().optional(),
+  navShowHome: z.boolean().optional(),
+  navShowLocations: z.boolean().optional(),
+  navShowMenu: z.boolean().optional(),
+  navShowReservations: z.boolean().optional(),
+  showMembership: z.boolean().optional(),
 });
 
 const orderSettingsSchema = z.object({
   enabled: z.boolean().optional(),
   deliveryEnabled: z.boolean().optional(),
   pickupEnabled: z.boolean().optional(),
+  allowGuestCheckout: z.boolean().optional(),
   minOrderDelivery: z.number().min(0).optional(),
   minOrderPickup: z.number().min(0).optional(),
   deliveryLeadTime: z.number().min(0).optional(),

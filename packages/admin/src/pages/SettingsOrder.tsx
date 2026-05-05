@@ -11,6 +11,7 @@ export default function SettingsOrder() {
   const [enabled, setEnabled] = useState(true);
   const [deliveryEnabled, setDeliveryEnabled] = useState(true);
   const [pickupEnabled, setPickupEnabled] = useState(true);
+  const [allowGuestCheckout, setAllowGuestCheckout] = useState(true);
   const [minOrderDelivery, setMinOrderDelivery] = useState(0);
   const [minOrderPickup, setMinOrderPickup] = useState(0);
   const [deliveryLeadTime, setDeliveryLeadTime] = useState(30);
@@ -29,6 +30,7 @@ export default function SettingsOrder() {
           if (d.enabled !== undefined) setEnabled(d.enabled);
           if (d.deliveryEnabled !== undefined) setDeliveryEnabled(d.deliveryEnabled);
           if (d.pickupEnabled !== undefined) setPickupEnabled(d.pickupEnabled);
+          if (d.allowGuestCheckout !== undefined) setAllowGuestCheckout(d.allowGuestCheckout);
           if (d.minOrderDelivery !== undefined) setMinOrderDelivery(d.minOrderDelivery);
           if (d.minOrderPickup !== undefined) setMinOrderPickup(d.minOrderPickup);
           if (d.deliveryLeadTime !== undefined) setDeliveryLeadTime(d.deliveryLeadTime);
@@ -56,6 +58,7 @@ export default function SettingsOrder() {
           enabled, 
           deliveryEnabled, 
           pickupEnabled, 
+          allowGuestCheckout,
           minOrderDelivery, 
           minOrderPickup, 
           deliveryLeadTime, 
@@ -134,6 +137,14 @@ export default function SettingsOrder() {
         </div>
 
         <div className="pt-4 border-t border-gray-100 space-y-4">
+          <label className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg border border-blue-100 cursor-pointer">
+            <input type="checkbox" checked={allowGuestCheckout} onChange={(e) => setAllowGuestCheckout(e.target.checked)} className="w-4 h-4 text-primary-600 rounded" />
+            <div>
+              <p className="text-sm font-bold text-gray-900">允許訪客結帳 (不強制加入會員)</p>
+              <p className="text-xs text-gray-500">開啟後，客人不需要登入帳號即可直接點餐結帳</p>
+            </div>
+          </label>
+
           <label className="flex items-center gap-3">
             <input type="checkbox" checked={enableFutureOrdering} onChange={(e) => setEnableFutureOrdering(e.target.checked)} className="w-4 h-4 text-primary-600 rounded" />
             <span className="text-sm font-medium text-gray-700">允許預約未來訂單 (Scheduled orders)</span>
