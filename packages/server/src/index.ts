@@ -9,6 +9,6 @@ const httpServer = createServer(app);
 
 initSocket(httpServer);
 
-httpServer.listen(PORT, () => {
-  serverLogger.info(`KitchenAsty server running on http://localhost:${PORT}`);
+httpServer.listen(Number(PORT), '0.0.0.0', () => {
+  serverLogger.info(`KitchenAsty server running on http://0.0.0.0:${PORT}`);
 });
