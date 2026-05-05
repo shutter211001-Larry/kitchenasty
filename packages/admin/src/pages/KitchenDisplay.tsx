@@ -45,6 +45,7 @@ export default function KitchenDisplay() {
   const [loading, setLoading] = useState(true);
   const [socket, setSocket] = useState<Socket | null>(null);
   const [updating, setUpdating] = useState<string | null>(null);
+  const [socketError, setSocketError] = useState<string | null>(null);
   const [lastRefresh, setLastRefresh] = useState(new Date());
 
   const fetchOrders = useCallback(() => {
@@ -65,11 +66,32 @@ export default function KitchenDisplay() {
 
   // Socket.IO connection for real-time updates
   useEffect(() => {
-    const socketUrl = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
-    const s = io(socketUrl || window.location.origin, { path: '/socket.io', transports: ['websocket', 'polling'] });
+    // Derive socket URL from VITE_API_URL or window.location.origin
+    // If VITE_API_URL is "https://api.example.com/api", we want "https://api.example.com"
+    const apiBase = (import.meta.env.VITE_API_URL || '').replace(/\/api$/, '').replace(/\/$/, '');
+    const socketUrl = apiBase || window.location.origin;
+    
+    console.log('Attempting socket connection to:', socketUrl);
+    
+    const s = io(socketUrl, { 
+      path: '/socket.io', 
+      transports: ['websocket', 'polling'],
+      reconnectionAttempts: 5,
+      timeout: 10000
+    });
+    
     setSocket(s);
 
-    s.emit('join:kitchen');
+    s.on('connect', () => {
+      console.log('Socket connected successfully');
+      setSocketError(null);
+      s.emit('join:kitchen');
+    });
+
+    s.on('connect_error', (err) => {
+      console.error('Socket connection error:', err);
+      setSocketError(err.message);
+    });
 
     s.on('order:new', () => {
       fetchOrders();
@@ -154,7 +176,7 @@ export default function KitchenDisplay() {
           <div className="flex items-center gap-2" role="status">
             <div className={`w-2 h-2 rounded-full ${socket?.connected ? 'bg-green-400' : 'bg-red-400'}`} />
             <span className="text-xs text-gray-400">
-              {socket?.connected ? 'Live' : 'Disconnected'}
+              {socket?.connected ? 'Live' : socketError ? `Disconnected (${socketError})` : 'Disconnected'}
             </span>
           </div>
         </div>
