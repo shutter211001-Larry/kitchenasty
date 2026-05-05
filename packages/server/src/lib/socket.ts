@@ -11,9 +11,11 @@ let io: Server | null = null;
 export function initSocket(httpServer: HttpServer): Server {
   io = new Server(httpServer, {
     cors: {
-      origin: process.env.CORS_ORIGINS?.split(',') || ['http://localhost:5173', 'http://localhost:5174'],
+      origin: process.env.CORS_ORIGINS?.split(',') || ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:3000'],
+      methods: ["GET", "POST"],
       credentials: true,
     },
+    allowEIO3: true // Support older clients if any
   });
 
   io.on('connection', (socket: Socket) => {

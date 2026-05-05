@@ -41,7 +41,8 @@ export function createApp() {
   app.use(requestId);
   app.use(helmet());
   app.use(cors({
-    origin: process.env.CORS_ORIGINS?.split(',') || ['http://localhost:5173', 'http://localhost:5174'],
+    origin: process.env.CORS_ORIGINS?.split(',') || ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:3000'],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     credentials: true,
   }));
   if (process.env.NODE_ENV !== 'test') {
