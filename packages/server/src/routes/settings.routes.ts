@@ -21,9 +21,13 @@ import {
   updateReviewSettings,
   getAdvancedSettings,
   updateAdvancedSettings,
+  debugSettings,
 } from '../controllers/settings.controller.js';
 
 const router = Router();
+
+// Debug raw data
+router.get('/debug', debugSettings);
 
 // Existing branding/design routes
 router.get('/', getSettings);

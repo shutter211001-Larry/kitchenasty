@@ -102,6 +102,11 @@ export async function getSettings(_req: Request, res: Response): Promise<void> {
   res.json({ success: true, data: toPublicSettings(settings) });
 }
 
+export async function debugSettings(_req: Request, res: Response): Promise<void> {
+  const settings = await getOrCreateSettings();
+  res.json({ success: true, raw: settings });
+}
+
 export async function updateSettings(req: Request, res: Response): Promise<void> {
   const parsed = updateSettingsSchema.safeParse(req.body);
   if (!parsed.success) {

@@ -34,14 +34,13 @@ export default function ModernFooter() {
           <div>
             <h3 className="text-white font-medium mb-4 text-sm uppercase tracking-wider">{t('footer.quickLinks')}</h3>
             <ul className="space-y-3 text-sm">
-              {settings.navShowMenu !== false && <li><Link to="/menu" className="hover:text-primary-400 transition-colors">{t('nav.menu')}</Link></li>}
-              {settings.navShowLocations !== false && <li><Link to="/locations" className="hover:text-primary-400 transition-colors">{t('nav.locations')}</Link></li>}
-              {settings.navShowReservations !== false && <li><Link to="/reservations" className="hover:text-primary-400 transition-colors">{t('nav.reservations')}</Link></li>}
+              {settings.navShowMenu !== false && settings.navShowMenu !== 'false' && <li><Link to="/menu" className="hover:text-primary-400 transition-colors">{t('nav.menu')}</Link></li>}
+              {settings.navShowLocations !== false && settings.navShowLocations !== 'false' && <li><Link to="/locations" className="hover:text-primary-400 transition-colors">{t('nav.locations')}</Link></li>}
+              {settings.navShowReservations !== false && settings.navShowReservations !== 'false' && <li><Link to="/reservations" className="hover:text-primary-400 transition-colors">{t('nav.reservations')}</Link></li>}
             </ul>
           </div>
 
-          {/* Account */}
-          {settings.showMembership !== false && (
+          {settings.showMembership !== false && settings.showMembership !== 'false' && (
             <div>
               <h3 className="text-white font-medium mb-4 text-sm uppercase tracking-wider">{t('footer.account')}</h3>
               <ul className="space-y-3 text-sm">
