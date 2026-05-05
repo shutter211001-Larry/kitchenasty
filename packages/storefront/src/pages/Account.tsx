@@ -2,10 +2,12 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext.js';
 import { Navigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useTheme } from '../context/ThemeContext.js';
 
 export default function Account() {
   const { t } = useTranslation();
   const { user, token, isLoading, logout } = useAuth();
+  const { settings } = useTheme();
   const [loyaltyPoints, setLoyaltyPoints] = useState<number | null>(null);
 
   useEffect(() => {
@@ -78,10 +80,12 @@ export default function Account() {
               <h3 className="font-medium text-gray-900">{t('account.orderHistory')}</h3>
               <p className="text-sm text-gray-500 mt-1">{t('account.orderHistoryDesc')}</p>
             </Link>
-            <Link to="/reservations" className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-              <h3 className="font-medium text-gray-900">{t('nav.reservations')}</h3>
-              <p className="text-sm text-gray-500 mt-1">{t('reservations.myReservations')}</p>
-            </Link>
+            {settings.navShowReservations !== false && settings.navShowReservations !== 'false' && (
+              <Link to="/reservations" className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                <h3 className="font-medium text-gray-900">{t('nav.reservations')}</h3>
+                <p className="text-sm text-gray-500 mt-1">{t('reservations.myReservations')}</p>
+              </Link>
+            )}
           </div>
         </div>
 
