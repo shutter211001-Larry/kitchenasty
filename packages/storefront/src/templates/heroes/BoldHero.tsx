@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { useTheme } from '../../context/ThemeContext.js';
 
 interface HeroProps {
   hero: { title?: string; subtitle?: string; ctaPrimaryText?: string; ctaPrimaryLink?: string; ctaSecondaryText?: string; ctaSecondaryLink?: string; backgroundImage?: string } | null;
@@ -6,6 +7,8 @@ interface HeroProps {
 }
 
 export default function BoldHero({ hero, t }: HeroProps) {
+  const { settings } = useTheme();
+
   return (
     <section className="bg-white dark:bg-gray-950">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -21,18 +24,27 @@ export default function BoldHero({ hero, t }: HeroProps) {
             </p>
 
             <div className="flex flex-wrap gap-4">
-              <Link
-                to={hero?.ctaPrimaryLink || '/menu'}
-                className="bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-8 py-4 font-bold text-lg uppercase tracking-wider hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors"
-              >
-                {hero?.ctaPrimaryText || t('home.viewMenu')}
-              </Link>
-              <Link
-                to={hero?.ctaSecondaryLink || '/locations'}
-                className="border-2 border-gray-900 dark:border-white text-gray-900 dark:text-white px-8 py-4 font-bold text-lg uppercase tracking-wider hover:bg-gray-900 hover:text-white dark:hover:bg-white dark:hover:text-gray-900 transition-colors"
-              >
-                {hero?.ctaSecondaryText || t('home.findLocation')}
-              </Link>
+              {settings.navShowMenu !== false && settings.navShowMenu !== 'false' && (
+                <Link
+                  to={hero?.ctaPrimaryLink || '/menu'}
+                  className="bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-8 py-4 font-bold text-lg uppercase tracking-wider hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors"
+                >
+                  {hero?.ctaPrimaryText || t('home.viewMenu')}
+                </Link>
+              )}
+              {(() => {
+                const link = hero?.ctaSecondaryLink || '/locations';
+                if (link === '/locations' && (settings.navShowLocations === false || settings.navShowLocations === 'false')) return null;
+                if (link === '/reservations' && (settings.navShowReservations === false || settings.navShowReservations === 'false')) return null;
+                return (
+                  <Link
+                    to={link}
+                    className="border-2 border-gray-900 dark:border-white text-gray-900 dark:text-white px-8 py-4 font-bold text-lg uppercase tracking-wider hover:bg-gray-900 hover:text-white dark:hover:bg-white dark:hover:text-gray-900 transition-colors"
+                  >
+                    {hero?.ctaSecondaryText || t('home.findLocation')}
+                  </Link>
+                );
+              })()}
             </div>
           </div>
 

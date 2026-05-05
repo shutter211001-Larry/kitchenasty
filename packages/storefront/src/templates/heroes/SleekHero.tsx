@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { useTheme } from '../../context/ThemeContext.js';
 
 interface HeroProps {
   hero: { title?: string; subtitle?: string; ctaPrimaryText?: string; ctaPrimaryLink?: string; ctaSecondaryText?: string; ctaSecondaryLink?: string; backgroundImage?: string } | null;
@@ -6,6 +7,8 @@ interface HeroProps {
 }
 
 export default function SleekHero({ hero, t }: HeroProps) {
+  const { settings } = useTheme();
+
   return (
     <section className="relative bg-gray-950 overflow-hidden min-h-[70vh] flex items-center">
       {/* Subtle glow effects */}
@@ -42,19 +45,28 @@ export default function SleekHero({ hero, t }: HeroProps) {
         </h1>
 
         <div className="flex flex-wrap justify-center gap-4">
-          <Link
-            to={hero?.ctaPrimaryLink || '/menu'}
-            className="relative group bg-gradient-to-r from-cyan-500 to-primary-500 text-white px-8 py-3.5 rounded-lg font-semibold transition-all duration-300 shadow-lg shadow-cyan-500/25 hover:shadow-xl hover:shadow-cyan-500/30"
-          >
-            <span className="absolute inset-0 rounded-lg bg-gradient-to-r from-cyan-500 to-primary-500 opacity-0 group-hover:opacity-100 blur transition-opacity" />
-            <span className="relative">{hero?.ctaPrimaryText || t('home.viewMenu')}</span>
-          </Link>
-          <Link
-            to={hero?.ctaSecondaryLink || '/locations'}
-            className="border border-gray-700 text-gray-300 px-8 py-3.5 rounded-lg font-semibold hover:border-gray-500 hover:text-white transition-colors backdrop-blur-sm"
-          >
-            {hero?.ctaSecondaryText || t('home.findLocation')}
-          </Link>
+          {settings.navShowMenu !== false && settings.navShowMenu !== 'false' && (
+            <Link
+              to={hero?.ctaPrimaryLink || '/menu'}
+              className="relative group bg-gradient-to-r from-cyan-500 to-primary-500 text-white px-8 py-3.5 rounded-lg font-semibold transition-all duration-300 shadow-lg shadow-cyan-500/25 hover:shadow-xl hover:shadow-cyan-500/30"
+            >
+              <span className="absolute inset-0 rounded-lg bg-gradient-to-r from-cyan-500 to-primary-500 opacity-0 group-hover:opacity-100 blur transition-opacity" />
+              <span className="relative">{hero?.ctaPrimaryText || t('home.viewMenu')}</span>
+            </Link>
+          )}
+          {(() => {
+            const link = hero?.ctaSecondaryLink || '/locations';
+            if (link === '/locations' && (settings.navShowLocations === false || settings.navShowLocations === 'false')) return null;
+            if (link === '/reservations' && (settings.navShowReservations === false || settings.navShowReservations === 'false')) return null;
+            return (
+              <Link
+                to={link}
+                className="border border-gray-700 text-gray-300 px-8 py-3.5 rounded-lg font-semibold hover:border-gray-500 hover:text-white transition-colors backdrop-blur-sm"
+              >
+                {hero?.ctaSecondaryText || t('home.findLocation')}
+              </Link>
+            );
+          })()}
         </div>
       </div>
     </section>

@@ -33,7 +33,7 @@ export default function ModernHero({ hero, t }: HeroProps) {
             </h1>
 
             <div className="flex flex-wrap gap-4">
-              {settings.navShowMenu !== false && (
+              {settings.navShowMenu !== false && settings.navShowMenu !== 'false' && (
                 <Link
                   to={hero?.ctaPrimaryLink || '/menu'}
                   className="bg-primary-600 text-white px-8 py-3.5 rounded-2xl font-semibold hover:bg-primary-700 transition-colors shadow-lg shadow-primary-600/25"
@@ -43,8 +43,8 @@ export default function ModernHero({ hero, t }: HeroProps) {
               )}
               {(() => {
                 const link = hero?.ctaSecondaryLink || '/locations';
-                if (link === '/locations' && settings.navShowLocations === false) return null;
-                if (link === '/reservations' && settings.navShowReservations === false) return null;
+                if (link === '/locations' && (settings.navShowLocations === false || settings.navShowLocations === 'false')) return null;
+                if (link === '/reservations' && (settings.navShowReservations === false || settings.navShowReservations === 'false')) return null;
                 return (
                   <Link
                     to={link}

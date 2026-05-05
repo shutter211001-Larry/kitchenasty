@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { useTheme } from '../../context/ThemeContext.js';
 
 interface HeroProps {
   hero: { title?: string; subtitle?: string; ctaPrimaryText?: string; ctaPrimaryLink?: string; ctaSecondaryText?: string; ctaSecondaryLink?: string; backgroundImage?: string } | null;
@@ -6,6 +7,7 @@ interface HeroProps {
 }
 
 export default function ElegantHero({ hero, t }: HeroProps) {
+  const { settings } = useTheme();
   const bgStyle = hero?.backgroundImage
     ? { backgroundImage: `url(${hero.backgroundImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }
     : undefined;
@@ -39,18 +41,27 @@ export default function ElegantHero({ hero, t }: HeroProps) {
         </p>
 
         <div className="flex flex-wrap justify-center gap-4">
-          <Link
-            to={hero?.ctaPrimaryLink || '/menu'}
-            className="border border-amber-300 text-amber-100 px-8 py-3 text-sm tracking-widest uppercase hover:bg-amber-300 hover:text-gray-900 transition-all duration-300"
-          >
-            {hero?.ctaPrimaryText || t('home.viewMenu')}
-          </Link>
-          <Link
-            to={hero?.ctaSecondaryLink || '/locations'}
-            className="border border-white/30 text-white/80 px-8 py-3 text-sm tracking-widest uppercase hover:border-white hover:text-white transition-all duration-300"
-          >
-            {hero?.ctaSecondaryText || t('home.findLocation')}
-          </Link>
+          {settings.navShowMenu !== false && settings.navShowMenu !== 'false' && (
+            <Link
+              to={hero?.ctaPrimaryLink || '/menu'}
+              className="border border-amber-300 text-amber-100 px-8 py-3 text-sm tracking-widest uppercase hover:bg-amber-300 hover:text-gray-900 transition-all duration-300"
+            >
+              {hero?.ctaPrimaryText || t('home.viewMenu')}
+            </Link>
+          )}
+          {(() => {
+            const link = hero?.ctaSecondaryLink || '/locations';
+            if (link === '/locations' && (settings.navShowLocations === false || settings.navShowLocations === 'false')) return null;
+            if (link === '/reservations' && (settings.navShowReservations === false || settings.navShowReservations === 'false')) return null;
+            return (
+              <Link
+                to={link}
+                className="border border-white/30 text-white/80 px-8 py-3 text-sm tracking-widest uppercase hover:border-white hover:text-white transition-all duration-300"
+              >
+                {hero?.ctaSecondaryText || t('home.findLocation')}
+              </Link>
+            );
+          })()}
         </div>
       </div>
     </section>
