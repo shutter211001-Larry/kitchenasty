@@ -22,6 +22,11 @@ export default function Home() {
 
   return (
     <>
+      {/* DEBUG INFO - Will remove after verification */}
+      <div style={{ position: 'fixed', top: 0, left: 0, background: 'rgba(0,0,0,0.8)', color: '#0f0', padding: '10px', zIndex: 9999, fontSize: '12px', pointerEvents: 'none' }}>
+        DEBUG: Menu={String(settings.navShowMenu)} | Res={String(settings.navShowReservations)} | Loc={String(settings.navShowLocations)} | Member={String(settings.showMembership)}
+      </div>
+
       {/* Hero */}
       {HeroVariant ? (
         <Suspense fallback={<div className="h-96 bg-primary-600" />}>
@@ -84,7 +89,7 @@ function ClassicHero({ hero, t }: { hero: HeroSection | null; t: (k: string) => 
             {hero?.subtitle || t('home.heroDescription')}
           </p>
           <div className="flex flex-wrap gap-4">
-            {settings.navShowMenu !== false && settings.navShowMenu !== 'false' && (
+            {(settings.navShowMenu === true || settings.navShowMenu === 'true') && (
               <Link
                 to={hero?.ctaPrimaryLink || '/menu'}
                 className="bg-white text-primary-700 px-6 py-3 rounded-lg font-semibold hover:bg-primary-50 transition-colors"
@@ -95,8 +100,8 @@ function ClassicHero({ hero, t }: { hero: HeroSection | null; t: (k: string) => 
             {hero?.ctaSecondaryText && (
               (() => {
                 const link = hero?.ctaSecondaryLink || '/locations';
-                if (link === '/locations' && (settings.navShowLocations === false || settings.navShowLocations === 'false')) return null;
-                if (link === '/reservations' && (settings.navShowReservations === false || settings.navShowReservations === 'false')) return null;
+                if (link === '/locations' && (settings.navShowLocations !== true && settings.navShowLocations !== 'true')) return null;
+                if (link === '/reservations' && (settings.navShowReservations !== true && settings.navShowReservations !== 'true')) return null;
                 return (
                   <Link
                     to={link}
@@ -137,13 +142,13 @@ function ClassicFeatures({ features, t }: { features: FeatureItem[] | null; t: (
           ))
         ) : (
           <>
-            {settings.navShowMenu !== false && settings.navShowMenu !== 'false' && (
+            {(settings.navShowMenu === true || settings.navShowMenu === 'true') && (
               <FeatureCard icon="clock" title={t('home.fastDelivery')} description={t('home.fastDeliveryDesc')} />
             )}
-            {settings.navShowLocations !== false && settings.navShowLocations !== 'false' && (
+            {(settings.navShowLocations === true || settings.navShowLocations === 'true') && (
               <FeatureCard icon="clipboard" title={t('home.easyOrdering')} description={t('home.easyOrderingDesc')} />
             )}
-            {settings.navShowReservations !== false && settings.navShowReservations !== 'false' && (
+            {(settings.navShowReservations === true || settings.navShowReservations === 'true') && (
               <FeatureCard icon="calendar" title={t('home.tableReservations')} description={t('home.tableReservationsDesc')} />
             )}
           </>
@@ -164,7 +169,7 @@ function ClassicCta({ cta, t }: { cta: CtaSection | null; t: (k: string) => stri
   const { settings } = useTheme();
   
   // If membership is disabled and this is the default register CTA, hide the whole section
-  if ((settings.showMembership === false || settings.showMembership === 'false') && (!cta?.buttonLink || cta.buttonLink === '/register')) {
+  if ((settings.showMembership !== true && settings.showMembership !== 'true') && (!cta?.buttonLink || cta.buttonLink === '/register')) {
     return null;
   }
 
