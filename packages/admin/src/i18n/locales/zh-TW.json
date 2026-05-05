@@ -42,7 +42,8 @@
     "name": "名稱",
     "description": "描述",
     "createdAt": "建立時間",
-    "updatedAt": "更新時間"
+    "updatedAt": "更新時間",
+    "refresh": "重新整理"
   },
   "dashboard": {
     "title": "控制面板",
@@ -94,7 +95,9 @@
     "pending": "待製作",
     "preparing": "製作中",
     "ready": "待取餐",
-    "completed": "已完成"
+    "completed": "已完成",
+    "justNow": "剛剛",
+    "ago": "前"
   },
   "locations": {
     "title": "分店管理",

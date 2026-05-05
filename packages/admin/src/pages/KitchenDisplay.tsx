@@ -65,7 +65,8 @@ export default function KitchenDisplay() {
 
   // Socket.IO connection for real-time updates
   useEffect(() => {
-    const s = io({ path: '/socket.io', transports: ['websocket', 'polling'] });
+    const socketUrl = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
+    const s = io(socketUrl || window.location.origin, { path: '/socket.io', transports: ['websocket', 'polling'] });
     setSocket(s);
 
     s.emit('join:kitchen');
