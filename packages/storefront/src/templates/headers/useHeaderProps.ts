@@ -14,10 +14,10 @@ export function useHeaderProps() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const navLinks = [
-    settings.navShowHome !== false && { to: '/', label: t('nav.home') },
-    settings.navShowLocations !== false && { to: '/locations', label: t('nav.locations') },
-    settings.navShowMenu !== false && { to: '/menu', label: t('nav.menu') },
-    settings.navShowReservations !== false && { to: '/reservations', label: t('nav.reservations') },
+    settings.navShowHome !== false && settings.navShowHome !== 'false' && { to: '/', label: t('nav.home') },
+    settings.navShowLocations !== false && settings.navShowLocations !== 'false' && { to: '/locations', label: t('nav.locations') },
+    settings.navShowMenu !== false && settings.navShowMenu !== 'false' && { to: '/menu', label: t('nav.menu') },
+    settings.navShowReservations !== false && settings.navShowReservations !== 'false' && { to: '/reservations', label: t('nav.reservations') },
   ].filter(Boolean) as { to: string; label: string }[];
 
   function isActive(path: string) {

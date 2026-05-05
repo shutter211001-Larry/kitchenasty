@@ -34,22 +34,27 @@ function ClassicFooter() {
           <div>
             <h3 className="text-white font-semibold mb-3">{t('footer.quickLinks')}</h3>
             <ul className="space-y-2 text-sm">
-              <li><Link to="/menu" className="hover:text-white transition-colors">{t('nav.menu')}</Link></li>
-              <li><Link to="/locations" className="hover:text-white transition-colors">{t('nav.locations')}</Link></li>
-              <li><Link to="/reservations" className="hover:text-white transition-colors">{t('nav.reservations')}</Link></li>
+              {settings.navShowMenu !== false && settings.navShowMenu !== 'false' && <li><Link to="/menu" className="hover:text-white transition-colors">{t('nav.menu')}</Link></li>}
+              {settings.navShowLocations !== false && settings.navShowLocations !== 'false' && <li><Link to="/locations" className="hover:text-white transition-colors">{t('nav.locations')}</Link></li>}
+              {settings.navShowReservations !== false && settings.navShowReservations !== 'false' && <li><Link to="/reservations" className="hover:text-white transition-colors">{t('nav.reservations')}</Link></li>}
             </ul>
           </div>
 
           {/* Account */}
-          <div>
-            <h3 className="text-white font-semibold mb-3">{t('footer.account')}</h3>
-            <ul className="space-y-2 text-sm">
-              <li><Link to="/login" className="hover:text-white transition-colors">{t('nav.login')}</Link></li>
-              <li><Link to="/register" className="hover:text-white transition-colors">{t('footer.createAccount')}</Link></li>
-              <li><Link to="/account" className="hover:text-white transition-colors">{t('nav.myAccount')}</Link></li>
-            </ul>
+          {settings.showMembership !== false && settings.showMembership !== 'false' && (
+            <div>
+              <h3 className="text-white font-semibold mb-3">{t('footer.account')}</h3>
+              <ul className="space-y-2 text-sm mb-6">
+                <li><Link to="/login" className="hover:text-white transition-colors">{t('nav.login')}</Link></li>
+                <li><Link to="/register" className="hover:text-white transition-colors">{t('footer.createAccount')}</Link></li>
+                <li><Link to="/account" className="hover:text-white transition-colors">{t('nav.myAccount')}</Link></li>
+              </ul>
+            </div>
+          )}
 
-            <h3 className="text-white font-semibold mb-3 mt-6">Legal</h3>
+          {/* Legal */}
+          <div>
+            <h3 className="text-white font-semibold mb-3">Legal</h3>
             <ul className="space-y-2 text-sm">
               <li><Link to="/privacy-policy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
               <li><Link to="/impressum" className="hover:text-white transition-colors">Impressum</Link></li>

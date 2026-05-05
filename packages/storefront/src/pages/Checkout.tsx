@@ -393,11 +393,11 @@ export default function Checkout() {
           )}
 
           {/* Payment method */}
-          {(paymentSettings?.stripeEnabled || paymentSettings?.paypalEnabled || paymentSettings?.cashEnabled) && (
+          {(paymentSettings?.stripeEnabled === true || paymentSettings?.paypalEnabled === true || paymentSettings?.cashEnabled === true) && (
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
               <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('checkout.paymentMethod')}</h2>
               <div className="space-y-2">
-                {paymentSettings?.cashEnabled && (
+                {paymentSettings?.cashEnabled === true && (
                   <label className={`flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition-colors ${
                     paymentMethod === 'cash'
                       ? 'border-primary-600 bg-primary-50'
@@ -413,7 +413,7 @@ export default function Checkout() {
                     <span className="text-sm font-medium text-gray-900">{t('checkout.cashOnDelivery')}</span>
                   </label>
                 )}
-                {paymentSettings?.stripeEnabled && (
+                {paymentSettings?.stripeEnabled === true && (
                   <label className={`flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition-colors ${
                     paymentMethod === 'stripe'
                       ? 'border-primary-600 bg-primary-50'
@@ -429,7 +429,7 @@ export default function Checkout() {
                     <span className="text-sm font-medium text-gray-900">{t('checkout.creditCard')}</span>
                   </label>
                 )}
-                {paymentSettings?.paypalEnabled && (
+                {paymentSettings?.paypalEnabled === true && (
                   <label className={`flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition-colors ${
                     paymentMethod === 'paypal'
                       ? 'border-primary-600 bg-primary-50'

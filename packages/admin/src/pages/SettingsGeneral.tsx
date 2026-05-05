@@ -2,10 +2,24 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
 const TIMEZONES = [
-  'UTC', 'America/New_York', 'America/Chicago', 'America/Denver', 'America/Los_Angeles',
-  'America/Anchorage', 'Pacific/Honolulu', 'Europe/London', 'Europe/Berlin', 'Europe/Paris',
-  'Europe/Rome', 'Europe/Madrid', 'Asia/Tokyo', 'Asia/Taipei', 'Asia/Shanghai', 'Asia/Kolkata',
-  'Asia/Dubai', 'Australia/Sydney', 'Pacific/Auckland',
+  { value: 'Asia/Taipei', label: '台北 (GMT+8) - 台灣標準時間' },
+  { value: 'UTC', label: 'UTC (格林威治標準時間)' },
+  { value: 'Asia/Tokyo', label: '東京 (GMT+9)' },
+  { value: 'Asia/Shanghai', label: '上海/北京 (GMT+8)' },
+  { value: 'Asia/Hong_Kong', label: '香港 (GMT+8)' },
+  { value: 'Asia/Singapore', label: '新加坡 (GMT+8)' },
+  { value: 'Asia/Dubai', label: '杜拜 (GMT+4)' },
+  { value: 'Asia/Kolkata', label: '印度 (GMT+5:30)' },
+  { value: 'Europe/London', label: '倫敦 (GMT+0)' },
+  { value: 'Europe/Berlin', label: '柏林 (GMT+1)' },
+  { value: 'Europe/Paris', label: '巴黎 (GMT+1)' },
+  { value: 'Europe/Rome', label: '羅馬 (GMT+1)' },
+  { value: 'America/New_York', label: '紐約 (GMT-5)' },
+  { value: 'America/Chicago', label: '芝加哥 (GMT-6)' },
+  { value: 'America/Denver', label: '丹佛 (GMT-7)' },
+  { value: 'America/Los_Angeles', label: '洛杉磯 (GMT-8)' },
+  { value: 'Australia/Sydney', label: '雪梨 (GMT+11)' },
+  { value: 'Pacific/Auckland', label: '奧克蘭 (GMT+13)' },
 ];
 
 export default function SettingsGeneral() {
@@ -70,13 +84,13 @@ export default function SettingsGeneral() {
       });
       const data = await res.json();
       if (data.success) {
-        setSuccess('General settings updated');
+        setSuccess('一般設定已更新');
         setTimeout(() => setSuccess(''), 3000);
       } else {
-        setError(typeof data.error === 'string' ? data.error : 'Failed to save');
+        setError(typeof data.error === 'string' ? data.error : '儲存失敗');
       }
     } catch {
-      setError('Network error');
+      setError('網路連線錯誤');
     } finally {
       setSaving(false);
     }
@@ -157,7 +171,7 @@ export default function SettingsGeneral() {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">時區</label>
               <select value={timezone} onChange={(e) => setTimezone(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                {TIMEZONES.map((tz) => <option key={tz} value={tz}>{tz}</option>)}
+                {TIMEZONES.map((tz) => <option key={tz.value} value={tz.value}>{tz.label}</option>)}
               </select>
             </div>
             <div>
