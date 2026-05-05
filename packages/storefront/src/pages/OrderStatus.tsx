@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { io } from 'socket.io-client';
 import { useAuth } from '../context/AuthContext.js';
+import { API_BASE } from '../lib/api.js';
 
 interface OrderItem {
   id: string;
@@ -64,7 +65,7 @@ export default function OrderStatus() {
     const headers: Record<string, string> = {};
     if (token) headers.Authorization = `Bearer ${token}`;
 
-    fetch(`/api/orders/${id}`, { headers })
+    fetch(`${API_BASE}/orders/${id}`, { headers })
       .then((res) => {
         if (!res.ok) throw new Error('Failed to load order');
         return res.json();
@@ -78,7 +79,8 @@ export default function OrderStatus() {
   useEffect(() => {
     if (!id) return;
 
-    const socket = io({ path: '/socket.io', transports: ['websocket', 'polling'] });
+    const socketHost = API_BASE.replace(/\/api$/, '') || window.location.origin;
+    const socket = io(socketHost, { path: '/socket.io', transports: ['websocket', 'polling'] });
 
     socket.emit('join:order', id);
 

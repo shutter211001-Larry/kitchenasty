@@ -1,4 +1,5 @@
 import { useState, useEffect, FormEvent } from 'react';
+import { API_BASE } from '../lib/api.js';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useCart } from '../context/CartContext.js';
@@ -48,7 +49,7 @@ export default function Checkout() {
 
   // Check busy mode on mount
   useEffect(() => {
-    fetch('/api/locations')
+    fetch(`${API_BASE}/locations`)
       .then((res) => res.json())
       .then((data) => {
         const loc = data.data?.[0];
@@ -63,7 +64,7 @@ export default function Checkout() {
   // Fetch loyalty balance for logged-in users
   useEffect(() => {
     if (token) {
-      fetch('/api/loyalty/balance', {
+      fetch(`${API_BASE}/loyalty/balance`, {
         headers: { Authorization: `Bearer ${token}` },
       })
         .then((res) => res.json())
@@ -149,7 +150,7 @@ export default function Checkout() {
       const headers: Record<string, string> = { 'Content-Type': 'application/json' };
       if (token) headers.Authorization = `Bearer ${token}`;
 
-      const res = await fetch('/api/orders', {
+      const res = await fetch(`${API_BASE}/orders`, {
         method: 'POST',
         headers,
         body: JSON.stringify(body),
