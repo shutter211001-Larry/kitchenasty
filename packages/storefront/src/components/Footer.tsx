@@ -34,14 +34,14 @@ function ClassicFooter() {
           <div>
             <h3 className="text-white font-semibold mb-3">{t('footer.quickLinks')}</h3>
             <ul className="space-y-2 text-sm">
-              {settings.navShowMenu !== false && settings.navShowMenu !== 'false' && <li><Link to="/menu" className="hover:text-white transition-colors">{t('nav.menu')}</Link></li>}
-              {settings.navShowLocations !== false && settings.navShowLocations !== 'false' && <li><Link to="/locations" className="hover:text-white transition-colors">{t('nav.locations')}</Link></li>}
-              {settings.navShowReservations !== false && settings.navShowReservations !== 'false' && <li><Link to="/reservations" className="hover:text-white transition-colors">{t('nav.reservations')}</Link></li>}
+              {(settings.navShowMenu === true || settings.navShowMenu === 'true') && <li><Link to="/menu" className="hover:text-white transition-colors">{t('nav.menu')}</Link></li>}
+              {(settings.navShowLocations === true || settings.navShowLocations === 'true') && <li><Link to="/locations" className="hover:text-white transition-colors">{t('nav.locations')}</Link></li>}
+              {(settings.navShowReservations === true || settings.navShowReservations === 'true') && <li><Link to="/reservations" className="hover:text-white transition-colors">{t('nav.reservations')}</Link></li>}
             </ul>
           </div>
 
           {/* Account */}
-          {settings.showMembership !== false && settings.showMembership !== 'false' && (
+          {(settings.showMembership === true || settings.showMembership === 'true') && (
             <div>
               <h3 className="text-white font-semibold mb-3">{t('footer.account')}</h3>
               <ul className="space-y-2 text-sm mb-6">

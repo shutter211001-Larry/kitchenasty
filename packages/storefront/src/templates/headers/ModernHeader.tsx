@@ -32,7 +32,7 @@ export default function ModernHeader() {
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z" /></svg>
               {itemCount > 0 && <span className="absolute -top-0.5 -right-0.5 bg-gradient-to-r from-primary-500 to-secondary-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-medium">{itemCount > 9 ? '9+' : itemCount}</span>}
             </button>
-            {settings.showMembership !== false && (
+            {(settings.showMembership === true || settings.showMembership === 'true') && (
               user ? (
                 <>
                   <Link to="/account" className="text-sm text-gray-600 hover:text-gray-900">{user.name}</Link>
@@ -66,7 +66,7 @@ export default function ModernHeader() {
               <Link key={link.to} to={link.to} onClick={() => setMobileOpen(false)} className={`block px-3 py-2 rounded-lg text-sm ${isActive(link.to) ? 'text-primary-600 bg-primary-50' : 'text-gray-600'}`}>{link.label}</Link>
             ))}
             <div className="px-3 py-2"><LanguageSwitcher /></div>
-            {settings.showMembership !== false && (
+            {(settings.showMembership === true || settings.showMembership === 'true') && (
               <div className="border-t border-gray-200/50 pt-3 mt-3">
                 {user ? (
                   <>

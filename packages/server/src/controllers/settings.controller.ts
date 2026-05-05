@@ -56,6 +56,11 @@ function toPublicSettings(settings: Awaited<ReturnType<typeof getOrCreateSetting
   const payment = getJson(settings.paymentSettings);
   const reservation = getJson(settings.reservationSettings);
 
+  const isTrue = (val: any, defaultVal: boolean) => {
+    if (val === undefined || val === null) return defaultVal;
+    return val === true || val === 'true';
+  };
+
   return {
     id: settings.id,
     siteName: settings.siteName,
@@ -69,28 +74,24 @@ function toPublicSettings(settings: Awaited<ReturnType<typeof getOrCreateSetting
     heroSection: settings.heroSection,
     featuresSection: settings.featuresSection,
     ctaSection: settings.ctaSection,
-    navShowHome: general.navShowHome ?? true,
-    navShowLocations: general.navShowLocations ?? true,
-    navShowMenu: general.navShowMenu ?? true,
-    navShowReservations: general.navShowReservations ?? true,
-    showMembership: general.showMembership ?? true,
+    navShowHome: isTrue(general.navShowHome, true),
+    navShowLocations: isTrue(general.navShowLocations, true),
+    navShowMenu: isTrue(general.navShowMenu, true),
+    navShowReservations: isTrue(general.navShowReservations, true),
+    showMembership: isTrue(general.showMembership, true),
     orderSettings: settings.orderSettings ? {
-      enabled: order.enabled,
-      deliveryEnabled: order.deliveryEnabled,
-      pickupEnabled: order.pickupEnabled,
-      allowGuestCheckout: order.allowGuestCheckout ?? true,
+      enabled: isTrue(order.enabled, true),
+      deliveryEnabled: isTrue(order.deliveryEnabled, true),
+      pickupEnabled: isTrue(order.pickupEnabled, true),
+      allowGuestCheckout: isTrue(order.allowGuestCheckout, true),
     } : undefined,
-    paymentSettings: settings.paymentSettings ? {
-      cashEnabled: payment.cashEnabled ?? true,
-      stripeEnabled: payment.stripeEnabled ?? false,
-      paypalEnabled: payment.paypalEnabled ?? false,
-    } : {
-      cashEnabled: true,
-      stripeEnabled: false,
-      paypalEnabled: false
+    paymentSettings: {
+      cashEnabled: isTrue(payment.cashEnabled, true),
+      stripeEnabled: isTrue(payment.stripeEnabled, false),
+      paypalEnabled: isTrue(payment.paypalEnabled, false),
     },
     reservationSettings: settings.reservationSettings ? {
-      enabled: reservation.enabled,
+      enabled: isTrue(reservation.enabled, true),
     } : undefined,
     createdAt: settings.createdAt,
     updatedAt: settings.updatedAt,
