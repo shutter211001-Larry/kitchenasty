@@ -22,10 +22,6 @@ export default function Home() {
 
   return (
     <>
-      {/* DEBUG INFO - Will remove after verification */}
-      <div style={{ position: 'fixed', top: 0, left: 0, background: 'rgba(0,0,0,0.8)', color: '#0f0', padding: '10px', zIndex: 9999, fontSize: '12px', pointerEvents: 'none' }}>
-        DEBUG: Menu={String(settings.navShowMenu)} | Res={String(settings.navShowReservations)} | Loc={String(settings.navShowLocations)} | Member={String(settings.showMembership)}
-      </div>
 
       {/* Hero */}
       {HeroVariant ? (
