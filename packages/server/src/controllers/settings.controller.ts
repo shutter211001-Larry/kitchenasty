@@ -68,10 +68,14 @@ function toPublicSettings(settings: Awaited<ReturnType<typeof getOrCreateSetting
       allowGuestCheckout: (settings.orderSettings as any).allowGuestCheckout ?? true,
     } : undefined,
     paymentSettings: settings.paymentSettings ? {
-      cashEnabled: (settings.paymentSettings as any).cashEnabled,
-      stripeEnabled: (settings.paymentSettings as any).stripeEnabled,
-      paypalEnabled: (settings.paymentSettings as any).paypalEnabled,
-    } : undefined,
+      cashEnabled: (settings.paymentSettings as any).cashEnabled ?? true,
+      stripeEnabled: (settings.paymentSettings as any).stripeEnabled ?? false,
+      paypalEnabled: (settings.paymentSettings as any).paypalEnabled ?? false,
+    } : {
+      cashEnabled: true,
+      stripeEnabled: false,
+      paypalEnabled: false
+    },
     reservationSettings: settings.reservationSettings ? {
       enabled: (settings.reservationSettings as any).enabled,
     } : undefined,
