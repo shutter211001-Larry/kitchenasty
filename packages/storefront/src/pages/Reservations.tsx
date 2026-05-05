@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext.js';
 import { Link } from 'react-router-dom';
+import { useTheme } from '../context/ThemeContext.js';
 
 interface Location {
   id: string;
@@ -36,6 +37,7 @@ const STATUS_COLORS: Record<string, string> = {
 export default function Reservations() {
   const { t } = useTranslation();
   const { user, token } = useAuth();
+  const { settings } = useTheme();
   const [locations, setLocations] = useState<Location[]>([]);
   const [myReservations, setMyReservations] = useState<Reservation[]>([]);
 
@@ -132,7 +134,7 @@ export default function Reservations() {
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('reservations.bookTable')}</h2>
 
-          {!user && (
+          {!user && (settings.showMembership !== false && settings.showMembership !== 'false') && (
             <div className="bg-yellow-50 text-yellow-800 text-sm p-3 rounded-lg mb-4">
               <Link to="/login" className="underline font-medium">{t('nav.login')}</Link> {t('reservations.loginRequired').toLowerCase()}
             </div>

@@ -1,10 +1,12 @@
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useTheme } from '../context/ThemeContext.js';
 
 export default function OrderConfirmation() {
   const { t } = useTranslation();
   const { id } = useParams();
   const location = useLocation();
+  const { settings } = useTheme();
   const order = location.state?.order;
 
   return (
@@ -48,12 +50,14 @@ export default function OrderConfirmation() {
       )}
 
       <div className="flex justify-center gap-4">
-        <Link
-          to="/menu"
-          className="bg-primary-600 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-primary-700 transition-colors"
-        >
-          {t('orderConfirmation.orderMore')}
-        </Link>
+        {settings.navShowMenu !== false && settings.navShowMenu !== 'false' && (
+          <Link
+            to="/menu"
+            className="bg-primary-600 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-primary-700 transition-colors"
+          >
+            {t('orderConfirmation.orderMore')}
+          </Link>
+        )}
         <Link
           to="/"
           className="border border-gray-300 text-gray-700 px-6 py-2.5 rounded-lg font-medium hover:bg-gray-50 transition-colors"

@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useApi } from '../hooks/useApi.js';
+import { useTheme } from '../context/ThemeContext.js';
 
 interface Location {
   id: string;
@@ -17,6 +18,7 @@ interface Location {
 
 export default function Locations() {
   const { t } = useTranslation();
+  const { settings } = useTheme();
   const { data: locations, error, isLoading } = useApi<Location[]>('/api/locations');
 
   return (
@@ -76,12 +78,14 @@ export default function Locations() {
                     </span>
                   )}
                 </div>
-                <Link
-                  to={`/menu?location=${loc.id}`}
-                  className="block text-center bg-primary-600 text-white py-2 rounded-lg font-medium hover:bg-primary-700 transition-colors"
-                >
-                  {t('locations.viewMenu')}
-                </Link>
+                {settings.navShowMenu !== false && settings.navShowMenu !== 'false' && (
+                  <Link
+                    to={`/menu?location=${loc.id}`}
+                    className="block text-center bg-primary-600 text-white py-2 rounded-lg font-medium hover:bg-primary-700 transition-colors"
+                  >
+                    {t('locations.viewMenu')}
+                  </Link>
+                )}
               </div>
             </div>
           ))}
