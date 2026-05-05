@@ -37,7 +37,7 @@ const createOrderSchema = z.object({
     lng: z.number().optional(),
   }).optional(),
   guestName: z.string().optional(),
-  guestEmail: z.string().email().optional(),
+  guestEmail: z.string().email().optional().or(z.literal('')),
   guestPhone: z.string().optional(),
   loyaltyPointsRedeem: z.number().int().min(0).optional(),
   userLat: z.number().optional(),
@@ -72,13 +72,8 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
   // Get customer ID from auth if available
   const customerId = (req as any).user?.type === 'customer' ? (req as any).user.id : null;
 
-  // Guest checkout: require name + email if not authenticated
-  if (!customerId) {
-    if (!guestName || !guestEmail) {
-      res.status(400).json({ success: false, error: 'Guest name and email are required for guest checkout' });
-      return;
-    }
-  }
+  // Guest checkout: default name to 'Guest' if not provided
+  const finalGuestName = guestName || 'Guest';
 
   // Validate scheduledAt
   if (scheduledAt) {
@@ -265,8 +260,12 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
     }
   }
 
-  const TAX_RATE = 0.08;
-  const tax = subtotal * TAX_RATE;
+  // Fetch site settings for tax rate
+  const siteSettings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
+  const orderSettings = (siteSettings?.orderSettings as any) || {};
+  const currentTaxRate = orderSettings.taxRate !== undefined ? Number(orderSettings.taxRate) : 0;
+
+  const tax = subtotal * currentTaxRate;
   const total = subtotal + tax + deliveryFee - loyaltyDiscount;
 
   // Calculate distance and tag remote status
@@ -290,7 +289,7 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
       total,
       comment,
       scheduledAt: scheduledAt ? new Date(scheduledAt) : null,
-      guestName: customerId ? undefined : guestName,
+      guestName: customerId ? undefined : finalGuestName,
       guestEmail: customerId ? undefined : guestEmail,
       guestPhone: customerId ? undefined : guestPhone,
       userLat,
