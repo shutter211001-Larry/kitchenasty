@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { API_BASE } from '../lib/api.js';
 
 interface HeroSection {
   title?: string;
@@ -124,7 +125,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [isDark, setIsDark] = useState(false);
 
   useEffect(() => {
-    fetch('/api/settings')
+    fetch(`${API_BASE}/settings`)
       .then((res) => res.json())
       .then((json) => {
         if (json.success && json.data) {
