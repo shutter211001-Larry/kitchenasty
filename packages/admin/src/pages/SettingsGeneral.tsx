@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 const TIMEZONES = [
   'UTC', 'America/New_York', 'America/Chicago', 'America/Denver', 'America/Los_Angeles',
   'America/Anchorage', 'Pacific/Honolulu', 'Europe/London', 'Europe/Berlin', 'Europe/Paris',
-  'Europe/Rome', 'Europe/Madrid', 'Asia/Tokyo', 'Asia/Shanghai', 'Asia/Kolkata',
+  'Europe/Rome', 'Europe/Madrid', 'Asia/Tokyo', 'Asia/Taipei', 'Asia/Shanghai', 'Asia/Kolkata',
   'Asia/Dubai', 'Australia/Sydney', 'Pacific/Auckland',
 ];
 

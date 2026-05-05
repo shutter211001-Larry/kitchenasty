@@ -11,8 +11,8 @@ interface SettingsCard {
 
 const cards: SettingsCard[] = [
   {
-    title: 'General',
-    description: 'Restaurant name, timezone, currency, contact info',
+    title: '一般設定',
+    description: '餐廳名稱、時區、貨幣、聯絡資訊',
     link: '/settings/general',
     roles: ['SUPER_ADMIN', 'MANAGER'],
     icon: (
@@ -22,8 +22,8 @@ const cards: SettingsCard[] = [
     ),
   },
   {
-    title: 'Orders',
-    description: 'Min order values, lead times, tipping, tax',
+    title: '訂單與外送',
+    description: '起送金額、準備時間、小費與稅率設定',
     link: '/settings/order',
     roles: ['SUPER_ADMIN', 'MANAGER'],
     icon: (
@@ -33,8 +33,8 @@ const cards: SettingsCard[] = [
     ),
   },
   {
-    title: 'Reservations',
-    description: 'Booking intervals, stay time, auto-confirmation',
+    title: '訂位服務',
+    description: '預約間隔、用餐時間、自動確認設定',
     link: '/settings/reservation',
     roles: ['SUPER_ADMIN', 'MANAGER'],
     icon: (
@@ -44,8 +44,8 @@ const cards: SettingsCard[] = [
     ),
   },
   {
-    title: 'Mail',
-    description: 'SMTP configuration and sender settings',
+    title: '郵件設定',
+    description: 'SMTP 伺服器與發件者資訊配置',
     link: '/settings/mail',
     roles: ['SUPER_ADMIN'],
     icon: (
@@ -55,8 +55,8 @@ const cards: SettingsCard[] = [
     ),
   },
   {
-    title: 'Payment Gateways',
-    description: 'Stripe, PayPal, cash payment config',
+    title: '支付方式',
+    description: 'Stripe, PayPal 與現金支付配置',
     link: '/settings/payment',
     roles: ['SUPER_ADMIN'],
     icon: (
@@ -66,8 +66,8 @@ const cards: SettingsCard[] = [
     ),
   },
   {
-    title: 'Reviews',
-    description: 'Moderation, auto-approve, requirements',
+    title: '顧客評價',
+    description: '審核機制、自動核准與評價門檻設定',
     link: '/settings/review',
     roles: ['SUPER_ADMIN', 'MANAGER'],
     icon: (
@@ -77,8 +77,8 @@ const cards: SettingsCard[] = [
     ),
   },
   {
-    title: 'Advanced',
-    description: 'Maintenance mode and rate limiting',
+    title: '進階設定',
+    description: '維護模式與系統速率限制設定',
     link: '/settings/advanced',
     roles: ['SUPER_ADMIN'],
     icon: (
@@ -98,7 +98,7 @@ export default function Settings() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Settings</h1>
+      <h1 className="text-2xl font-bold text-gray-900 mb-6">系統設定中心</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {visibleCards.map((card) => (
           <Link

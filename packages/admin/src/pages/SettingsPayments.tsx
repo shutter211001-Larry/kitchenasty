@@ -65,13 +65,13 @@ export default function SettingsPayments() {
           if (data.data.stripeWebhookSecret) setStripeWebhookSecret(data.data.stripeWebhookSecret);
           if (data.data.paypalClientSecret) setPaypalClientSecret(data.data.paypalClientSecret);
         }
-        setSuccess('Payment settings updated');
+        setSuccess('支付設定已更新');
         setTimeout(() => setSuccess(''), 3000);
       } else {
-        setError(typeof data.error === 'string' ? data.error : 'Failed to save');
+        setError(typeof data.error === 'string' ? data.error : '儲存失敗');
       }
     } catch {
-      setError('Network error');
+      setError('網路連線錯誤');
     } finally {
       setSaving(false);
     }

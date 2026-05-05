@@ -39,62 +39,62 @@ export default function SettingsAdvanced() {
       });
       const data = await res.json();
       if (data.success) {
-        setSuccess('Advanced settings updated');
+        setSuccess('進階設定已更新');
         setTimeout(() => setSuccess(''), 3000);
       } else {
-        setError(typeof data.error === 'string' ? data.error : 'Failed to save');
+        setError(typeof data.error === 'string' ? data.error : '儲存失敗');
       }
     } catch {
-      setError('Network error');
+      setError('網路連線錯誤');
     } finally {
       setSaving(false);
     }
   }
 
-  if (loading) return <div className="p-6 text-gray-500">Loading...</div>;
+  if (loading) return <div className="p-6 text-gray-500">載入中...</div>;
 
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <Link to="/settings" className="text-sm text-primary-600 hover:text-primary-700">&larr; Back to Settings</Link>
-          <h1 className="text-2xl font-bold text-gray-900 mt-1">Advanced Settings</h1>
+          <Link to="/settings" className="text-sm text-primary-600 hover:text-primary-700">&larr; 返回設定</Link>
+          <h1 className="text-2xl font-bold text-gray-900 mt-1">進階設定</h1>
         </div>
         <button onClick={handleSave} disabled={saving} className="px-4 py-2 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700 disabled:opacity-50">
-          {saving ? 'Saving...' : 'Save Changes'}
+          {saving ? '儲存中...' : '儲存變更'}
         </button>
       </div>
 
       {error && <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">{error}</div>}
       {success && <div className="mb-4 p-3 bg-green-50 border border-green-200 text-green-700 rounded-lg text-sm">{success}</div>}
 
-      <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-4">
+      <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-6">
         <div>
-          <label className="flex items-center gap-3">
+          <label className="flex items-center gap-3 cursor-pointer">
             <input type="checkbox" checked={maintenanceMode} onChange={(e) => setMaintenanceMode(e.target.checked)} className="w-4 h-4 text-primary-600 rounded" />
-            <span className="text-sm font-medium text-gray-700">Maintenance Mode</span>
+            <span className="text-sm font-medium text-gray-700">啟用維護模式</span>
           </label>
           {maintenanceMode && (
             <div className="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-sm text-red-700 font-medium">Warning: The storefront will be unavailable to customers while maintenance mode is enabled.</p>
+              <p className="text-sm text-red-700 font-medium font-bold">警告：啟用維護模式後，顧客將暫時無法進入點餐網站。</p>
             </div>
           )}
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Maintenance Message</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">維護公告訊息</label>
           <textarea
             value={maintenanceMessage}
             onChange={(e) => setMaintenanceMessage(e.target.value)}
             rows={3}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-            placeholder="We're currently performing maintenance. Please check back soon."
+            placeholder="網站維護中，請稍候再試。"
           />
         </div>
 
-        <label className="flex items-center gap-3">
+        <label className="flex items-center gap-3 cursor-pointer">
           <input type="checkbox" checked={enableRateLimiting} onChange={(e) => setEnableRateLimiting(e.target.checked)} className="w-4 h-4 text-primary-600 rounded" />
-          <span className="text-sm font-medium text-gray-700">Enable rate limiting</span>
+          <span className="text-sm font-medium text-gray-700">啟用請求速率限制 (Rate Limiting)</span>
         </label>
       </div>
     </div>
