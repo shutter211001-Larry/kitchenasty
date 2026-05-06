@@ -31,12 +31,14 @@ const STATUS_COLORS: Record<string, string> = {
   DELIVERED: 'bg-green-200 text-green-900',
   PICKED_UP: 'bg-green-200 text-green-900',
   CANCELLED: 'bg-red-100 text-red-800',
+  HISTORY: 'bg-gray-100 text-gray-800',
 };
 
 export default function OrderHistory() {
   const { t } = useTranslation();
   const { user, token, isLoading: authLoading } = useAuth();
   const { settings } = useTheme();
+  const { recentOrders } = useRecentOrders();
   const [orders, setOrders] = useState<OrderSummary[]>([]);
   const [pagination, setPagination] = useState<Pagination | null>(null);
   const [loading, setLoading] = useState(true);
@@ -44,7 +46,10 @@ export default function OrderHistory() {
   const [page, setPage] = useState(1);
 
   useEffect(() => {
-    if (!token) return;
+    if (!token) {
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     fetch(`/api/orders/my-orders?page=${page}&limit=10`, {
       headers: { Authorization: `Bearer ${token}` },
@@ -69,17 +74,38 @@ export default function OrderHistory() {
     );
   }
 
-  if (!user) {
-    return <Navigate to="/login" replace />;
-  }
+  const displayOrders = user ? orders : (recentOrders as any[]).map(ro => ({
+    id: ro.id,
+    orderNumber: ro.orderNumber,
+    status: 'HISTORY',
+    total: ro.total || 0,
+    orderType: ro.orderType || 'PICKUP',
+    createdAt: ro.date,
+    location: { name: '最近的訂單' },
+    _count: { items: 0 }
+  }));
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">{t('orders.title')}</h1>
-        {settings.showMembership && (
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">
+            {user ? t('orders.title') : '最近的訂單 (訪客)'}
+          </h1>
+          {!user && (
+            <p className="text-sm text-gray-500 mt-1">
+              這些是存放在此瀏覽器中的訂單紀錄。
+            </p>
+          )}
+        </div>
+        {user && settings.showMembership && (
           <Link to="/account" className="text-primary-600 hover:text-primary-700 text-sm font-medium">
             {t('nav.myAccount')}
+          </Link>
+        )}
+        {!user && (
+          <Link to="/login" className="text-primary-600 hover:text-primary-700 text-sm font-medium">
+            登入以查看完整紀錄
           </Link>
         )}
       </div>
@@ -94,7 +120,7 @@ export default function OrderHistory() {
         <div className="bg-red-50 text-red-700 p-4 rounded-lg mb-4">{error}</div>
       )}
 
-      {!loading && !error && orders.length === 0 && (
+      {!loading && !error && displayOrders.length === 0 && (
         <div className="text-center py-16">
           <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
@@ -108,10 +134,10 @@ export default function OrderHistory() {
         </div>
       )}
 
-      {!loading && orders.length > 0 && (
+      {!loading && displayOrders.length > 0 && (
         <>
           <div className="space-y-4">
-            {orders.map((order) => (
+            {displayOrders.map((order) => (
               <Link
                 key={order.id}
                 to={`/orders/${order.id}`}
