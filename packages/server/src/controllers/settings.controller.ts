@@ -386,13 +386,13 @@ export async function sendTestEmail(req: Request, res: Response): Promise<void> 
   }
 
   const mail = await getSettingsGroup('mailSettings');
-  const host = mail.smtpHost || process.env.SMTP_HOST || 'localhost';
+  const host = (mail.smtpHost || process.env.SMTP_HOST || 'localhost').trim();
   const port = mail.smtpPort || parseInt(process.env.SMTP_PORT || '1025');
-  const user = mail.smtpUser || process.env.SMTP_USER;
-  const pass = mail.smtpPass || process.env.SMTP_PASS;
-  const senderName = mail.senderName || 'KitchenAsty';
-  const senderEmail = mail.senderEmail || 'noreply@kitchenasty.com';
-  const encryption = mail.encryption || 'none';
+  const user = (mail.smtpUser || process.env.SMTP_USER || '').trim();
+  const pass = (mail.smtpPass || process.env.SMTP_PASS || '').trim();
+  const senderName = (mail.senderName || 'KitchenAsty').trim();
+  const senderEmail = (mail.senderEmail || 'noreply@kitchenasty.com').trim();
+  const encryption = (mail.encryption || 'none').trim();
 
   try {
     const transporter = nodemailer.createTransport({
@@ -416,7 +416,7 @@ export async function sendTestEmail(req: Request, res: Response): Promise<void> 
     res.json({ success: true, message: 'Test email sent successfully' });
   } catch (err: any) {
     let message = err.message || 'Failed to send test email';
-    if (err.code === 'ETIMEDOUT') message = 'Connection timeout: The server could not reach the SMTP host. Port 587 might be blocked by the hosting environment.';
+    if (err.code === 'ETIMEDOUT') message = `Connection timeout: Could not reach ${host}:${port}. This port might be blocked by the environment or the mail provider.`;
     if (err.code === 'ECONNREFUSED') message = 'Connection refused: The SMTP host rejected the connection. Check your host and port.';
     if (err.code === 'EAUTH') message = 'Authentication failed: Check your username and app password.';
     
