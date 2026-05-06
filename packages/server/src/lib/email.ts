@@ -39,14 +39,32 @@ async function getMailConfig(): Promise<{ transporter: Transporter; from: string
   }
 
   const from = process.env.EMAIL_FROM || `${senderName} <${senderEmail}>`;
+  const serviceType = process.env.MAIL_SERVICE_TYPE || 'SMTP';
 
-  const transporter = nodemailer.createTransport({
-    host,
-    port,
-    secure,
-    auth: user ? { user, pass } : undefined,
-    ...(requireTLS ? { requireTLS: true } : {}),
-  });
+  let transporter: Transporter;
+
+  if (serviceType === 'GMAIL_API' && process.env.GOOGLE_CLIENT_ID) {
+    transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        type: 'OAuth2',
+        user: user || process.env.SMTP_USER,
+        clientId: process.env.GOOGLE_CLIENT_ID,
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+        refreshToken: process.env.GOOGLE_REFRESH_TOKEN,
+      },
+    });
+  } else {
+    transporter = nodemailer.createTransport({
+      host,
+      port,
+      secure,
+      auth: user ? { user, pass } : undefined,
+      ...(requireTLS ? { requireTLS: true } : {}),
+      connectionTimeout: 15000,
+      family: 0,
+    } as any);
+  }
 
   cachedTransporter = transporter;
   cachedFrom = from;

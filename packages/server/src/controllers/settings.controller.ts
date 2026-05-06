@@ -386,6 +386,16 @@ export async function sendTestEmail(req: Request, res: Response): Promise<void> 
   }
 
   const mail = await getSettingsGroup('mailSettings');
+  
+  // Use environment variables for sensitive OAuth2 data if available
+  const serviceType = process.env.MAIL_SERVICE_TYPE || 'SMTP';
+  const oauth2Config = {
+    user: mail.smtpUser || process.env.SMTP_USER,
+    clientId: process.env.GOOGLE_CLIENT_ID,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    refreshToken: process.env.GOOGLE_REFRESH_TOKEN,
+  };
+
   const host = (mail.smtpHost || process.env.SMTP_HOST || 'localhost').trim();
   const port = mail.smtpPort || parseInt(process.env.SMTP_PORT || '1025');
   const user = (mail.smtpUser || process.env.SMTP_USER || '').trim();
@@ -395,8 +405,22 @@ export async function sendTestEmail(req: Request, res: Response): Promise<void> 
   const encryption = (mail.encryption || 'none').trim();
 
   try {
-    // Fallback for Resend API if SMTP is blocked
-    if (host.toLowerCase().includes('resend')) {
+    let transporter;
+
+    if (serviceType === 'GMAIL_API' && oauth2Config.clientId) {
+      // Use Gmail API via OAuth2
+      transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          type: 'OAuth2',
+          user: oauth2Config.user,
+          clientId: oauth2Config.clientId,
+          clientSecret: oauth2Config.clientSecret,
+          refreshToken: oauth2Config.refreshToken,
+        },
+      });
+    } else if (host.toLowerCase().includes('resend')) {
+      // Existing Resend API Fallback...
       const apiResponse = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: {
@@ -407,7 +431,7 @@ export async function sendTestEmail(req: Request, res: Response): Promise<void> 
           from: senderEmail.includes('resend.dev') ? senderEmail : `${senderName} <onboarding@resend.dev>`,
           to: [to],
           subject: 'KitchenAsty — Test Email (via API)',
-          html: '<div style="font-family:sans-serif;padding:20px"><h2>Test Email</h2><p>This email was sent via the Resend HTTP API to bypass SMTP blocking.</p></div>',
+          html: '<div style="font-family:sans-serif;padding:20px"><h2>Test Email</h2><p>This email was sent via the Resend HTTP API.</p></div>',
         }),
       });
 
@@ -416,18 +440,19 @@ export async function sendTestEmail(req: Request, res: Response): Promise<void> 
       
       res.json({ success: true, message: 'Test email sent successfully via API' });
       return;
+    } else {
+      // Standard SMTP
+      transporter = nodemailer.createTransport({
+        host,
+        port,
+        secure: encryption === 'ssl',
+        auth: user ? { user, pass } : undefined,
+        ...(encryption === 'tls' ? { requireTLS: true } : {}),
+        connectionTimeout: 15000,
+        greetingTimeout: 15000,
+        family: 0,
+      } as any);
     }
-
-    const transporter = nodemailer.createTransport({
-      host,
-      port,
-      secure: encryption === 'ssl',
-      auth: user ? { user, pass } : undefined,
-      ...(encryption === 'tls' ? { requireTLS: true } : {}),
-      connectionTimeout: 15000,
-      greetingTimeout: 15000,
-      family: 0,
-    } as any);
 
     await transporter.sendMail({
       from: `${senderName} <${senderEmail}>`,
