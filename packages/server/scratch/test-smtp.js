@@ -5,7 +5,7 @@ const config = {
   host: 'smtp.gmail.com',
   port: 587,               // 或是 587
   user: 'shutter211001@gmail.com',
-  pass: 'kddudyzjikwoxywx',   // 請填入 16 位元的 App Password
+  pass: 'REMOVED_FOR_SECURITY',   // 請填入 16 位元的 App Password
   encryption: 'tls',       // 若 Port 465 請用 ssl，若 587 請用 tls
   to: 'shutter211001@gmail.com'
 };

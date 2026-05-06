@@ -7,6 +7,7 @@ build/
 .env.*.local
 *.log
 .DS_Store
+/packages/server/scratch/
 coverage/
 test-results/
 playwright-report/
