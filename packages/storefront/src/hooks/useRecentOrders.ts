@@ -6,6 +6,7 @@ interface RecentOrder {
   date: string;
   total?: number;
   orderType?: string;
+  itemCount?: number;
 }
 
 export function useRecentOrders() {

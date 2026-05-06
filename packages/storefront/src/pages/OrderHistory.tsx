@@ -119,7 +119,7 @@ export default function OrderHistory() {
     orderType: ro.orderType || 'PICKUP',
     createdAt: ro.date,
     location: { name: t('orders.recentGuestOrders') },
-    _count: { items: 0 }
+    _count: { items: ro.itemCount || 0 }
   }));
 
   return (

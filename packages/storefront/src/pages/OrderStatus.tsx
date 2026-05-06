@@ -87,7 +87,8 @@ export default function OrderStatus() {
             orderNumber: data.data.orderNumber,
             date: data.data.createdAt,
             total: data.data.total,
-            orderType: data.data.orderType
+            orderType: data.data.orderType,
+            itemCount: data.data.items?.length || 0
           });
         }
       })

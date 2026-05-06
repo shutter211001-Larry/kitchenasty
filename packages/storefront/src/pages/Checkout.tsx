@@ -197,6 +197,7 @@ export default function Checkout() {
         date: new Date().toISOString(),
         total: data.data.total,
         orderType: data.data.orderType,
+        itemCount: data.data.items?.length || 0,
       });
       navigate(`/orders/${data.data.id}`, { state: { order: data.data } });
     } catch (err: any) {
