@@ -97,11 +97,11 @@ export async function sendEmail(options: EmailOptions): Promise<void> {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: new URLSearchParams({
-          client_id: process.env.GOOGLE_CLIENT_ID,
-          client_secret: process.env.GOOGLE_CLIENT_SECRET,
+          client_id: process.env.GOOGLE_CLIENT_ID!,
+          client_secret: process.env.GOOGLE_CLIENT_SECRET!,
           refresh_token: process.env.GOOGLE_REFRESH_TOKEN!,
           grant_type: 'refresh_token',
-        }),
+        } as any),
       });
       const tokenData = await tokenRes.json();
       const accessToken = tokenData.access_token;
