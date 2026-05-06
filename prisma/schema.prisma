@@ -360,7 +360,7 @@ model Order {
   orderNumber String      @unique
   pickupNumber String?     @db.VarChar(10) // 001-999 loop
   customerId  String?
-  customer    Customer?   @relation(fields: [customerId], references: [id])
+  customer    Customer?   @relation(fields: [customerId], references: [id], onDelete: Cascade)
   locationId  String
   location    Location    @relation(fields: [locationId], references: [id])
   addressId   String?
@@ -502,7 +502,7 @@ model Table {
 model Reservation {
   id         String            @id @default(cuid())
   customerId String
-  customer   Customer          @relation(fields: [customerId], references: [id])
+  customer   Customer          @relation(fields: [customerId], references: [id], onDelete: Cascade)
   locationId String
   location   Location          @relation(fields: [locationId], references: [id])
   tableId    String?
@@ -552,7 +552,7 @@ model Coupon {
 model Review {
   id         String   @id @default(cuid())
   customerId String
-  customer   Customer @relation(fields: [customerId], references: [id])
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
   locationId String
   location   Location @relation(fields: [locationId], references: [id])
   orderId    String?
@@ -579,7 +579,7 @@ enum LoyaltyTransactionType {
 model LoyaltyTransaction {
   id          String                 @id @default(cuid())
   customerId  String
-  customer    Customer               @relation(fields: [customerId], references: [id])
+  customer    Customer               @relation(fields: [customerId], references: [id], onDelete: Cascade)
   type        LoyaltyTransactionType
   points      Int
   description String?
@@ -659,7 +659,7 @@ model CookieCategory {
 model CookieConsent {
   id               String         @id @default(cuid())
   customerId       String?
-  customer         Customer?      @relation(fields: [customerId], references: [id])
+  customer         Customer?      @relation(fields: [customerId], references: [id], onDelete: Cascade)
   cookieCategoryId String
   cookieCategory   CookieCategory @relation(fields: [cookieCategoryId], references: [id], onDelete: Cascade)
   accepted         Boolean

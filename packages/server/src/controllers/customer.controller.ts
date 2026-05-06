@@ -138,19 +138,23 @@ export async function updateCustomer(req: Request<{ id: string }>, res: Response
 export async function deleteCustomer(req: Request<{ id: string }>, res: Response): Promise<void> {
   const targetId = req.params.id;
 
-  const existing = await prisma.customer.findUnique({ where: { id: targetId } });
-  if (!existing) {
-    res.status(404).json({ success: false, error: 'Customer not found' });
-    return;
+  try {
+    const existing = await prisma.customer.findUnique({ where: { id: targetId } });
+    if (!existing) {
+      res.status(404).json({ success: false, error: 'Customer not found' });
+      return;
+    }
+
+    await prisma.customer.delete({
+      where: { id: targetId },
+    });
+
+    auditLog(req, { action: 'delete', entity: 'Customer', entityId: targetId });
+
+    res.json({ success: true, data: { message: 'Customer deleted' } });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message || 'Failed to delete customer' });
   }
-
-  await prisma.customer.delete({
-    where: { id: targetId },
-  });
-
-  auditLog(req, { action: 'delete', entity: 'Customer', entityId: targetId });
-
-  res.json({ success: true, data: { message: 'Customer deleted' } });
 }
 
 // ============================================================
