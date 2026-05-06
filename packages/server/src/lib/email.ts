@@ -89,6 +89,53 @@ export async function sendEmail(options: EmailOptions): Promise<void> {
   if (process.env.NODE_ENV === 'test') return;
 
   try {
+    const serviceType = process.env.MAIL_SERVICE_TYPE || 'SMTP';
+    
+    if (serviceType === 'GMAIL_API' && process.env.GOOGLE_CLIENT_ID) {
+      // Get Access Token
+      const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+          client_id: process.env.GOOGLE_CLIENT_ID,
+          client_secret: process.env.GOOGLE_CLIENT_SECRET,
+          refresh_token: process.env.GOOGLE_REFRESH_TOKEN!,
+          grant_type: 'refresh_token',
+        }),
+      });
+      const tokenData = await tokenRes.json();
+      const accessToken = tokenData.access_token;
+
+      // Construct MIME Message
+      const message = [
+        `To: ${options.to}`,
+        `Subject: ${options.subject}`,
+        'Content-Type: text/html; charset=utf-8',
+        '',
+        options.html,
+      ].join('\r\n');
+
+      const encodedMessage = Buffer.from(message).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+
+      // Send via API
+      const user = process.env.SMTP_USER || 'me';
+      const apiRes = await fetch(`https://gmail.googleapis.com/gmail/v1/users/${user}/messages/send`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ raw: encodedMessage }),
+      });
+
+      if (!apiRes.ok) {
+        const errData = await apiRes.json();
+        throw new Error(errData.error?.message || 'Gmail API error');
+      }
+      return;
+    }
+
+    // Fallback to SMTP
     const { transporter, from } = await getMailConfig();
     await transporter.sendMail({
       from,

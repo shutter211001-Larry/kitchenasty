@@ -408,17 +408,49 @@ export async function sendTestEmail(req: Request, res: Response): Promise<void> 
     let transporter;
 
     if (serviceType === 'GMAIL_API' && oauth2Config.clientId) {
-      // Use Gmail API via OAuth2
-      transporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-          type: 'OAuth2',
-          user: oauth2Config.user,
-          clientId: oauth2Config.clientId,
-          clientSecret: oauth2Config.clientSecret,
-          refreshToken: oauth2Config.refreshToken,
+      // Use Gmail REST API via HTTP (Bypasses SMTP port blocking)
+      const getAccessToken = async () => {
+        const response = await fetch('https://oauth2.googleapis.com/token', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({
+            client_id: oauth2Config.clientId!,
+            client_secret: oauth2Config.clientSecret!,
+            refresh_token: oauth2Config.refreshToken!,
+            grant_type: 'refresh_token',
+          }),
+        });
+        const data = await response.json();
+        return data.access_token;
+      };
+
+      const accessToken = await getAccessToken();
+      const message = [
+        `To: ${to}`,
+        `Subject: KitchenAsty — Test Email (Gmail API)`,
+        'Content-Type: text/html; charset=utf-8',
+        '',
+        '<div style="font-family:sans-serif;padding:20px"><h2>Test Email</h2><p>This was sent via Gmail REST API (HTTP) to bypass SMTP blocking.</p></div>',
+      ].join('\r\n');
+
+      const encodedMessage = Buffer.from(message).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+
+      const apiResponse = await fetch(`https://gmail.googleapis.com/gmail/v1/users/${oauth2Config.user}/messages/send`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
         },
+        body: JSON.stringify({ raw: encodedMessage }),
       });
+
+      if (!apiResponse.ok) {
+        const errData = await apiResponse.json();
+        throw new Error(errData.error?.message || 'Gmail API error');
+      }
+
+      res.json({ success: true, message: 'Test email sent successfully via Gmail API' });
+      return;
     } else if (host.toLowerCase().includes('resend')) {
       // Existing Resend API Fallback...
       const apiResponse = await fetch('https://api.resend.com/emails', {
