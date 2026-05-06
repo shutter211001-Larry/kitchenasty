@@ -83,6 +83,7 @@ interface EmailOptions {
   to: string;
   subject: string;
   html: string;
+  text?: string;
 }
 
 export async function sendEmail(options: EmailOptions): Promise<void> {
@@ -142,6 +143,7 @@ export async function sendEmail(options: EmailOptions): Promise<void> {
       to: options.to,
       subject: options.subject,
       html: options.html,
+      text: options.text,
     });
   } catch (err) {
     emailLogger.error({ err }, 'Failed to send email');

@@ -12,7 +12,7 @@ const router = Router();
 
 // All customer routes require staff authentication
 router.use(authenticate);
-router.use(requireRole(['SUPER_ADMIN', 'MANAGER']));
+router.use(requireRole('SUPER_ADMIN', 'MANAGER'));
 
 router.get('/', listCustomers);
 router.get('/:id', getCustomer);
