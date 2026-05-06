@@ -213,7 +213,7 @@ export default function Checkout() {
 
       {isBusy && (
         <div className="bg-amber-50 border border-amber-300 text-amber-800 p-4 rounded-lg mb-6">
-          <p className="font-semibold">Currently Unavailable</p>
+          <p className="font-semibold">{t('checkout.currentlyUnavailable')}</p>
           <p className="text-sm mt-1">{busyMessage}</p>
         </div>
       )}
@@ -465,12 +465,12 @@ export default function Checkout() {
           {/* Guest info or login prompt */}
           {!user && (
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">聯絡資訊</h2>
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('checkout.contactInfo')}</h2>
               <div className="space-y-4">
                 {settings.showMembership !== false && (
                   <div className="bg-primary-50 border border-primary-100 p-4 rounded-lg mb-4">
                     <p className="text-sm text-primary-800 font-medium mb-3">
-                      💡 登入會員可享有紅利點數回饋！
+                      {t('checkout.loginBenefit')}
                     </p>
                     <div className="flex flex-wrap gap-2">
                       <a
@@ -478,7 +478,7 @@ export default function Checkout() {
                         className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors shadow-sm"
                       >
                         <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="w-4 h-4" />
-                        Google 快速登入
+                        {t('checkout.googleLogin')}
                       </a>
                       <Link
                         to="/login"
@@ -490,7 +490,7 @@ export default function Checkout() {
                         to="/register"
                         className="px-4 py-2 text-sm font-medium text-primary-600 hover:text-primary-700 underline"
                       >
-                        註冊帳號
+                        {t('nav.register')}
                       </Link>
                     </div>
                   </div>
@@ -499,21 +499,21 @@ export default function Checkout() {
                 <div className="space-y-3">
                   <input
                     type="text"
-                    placeholder="姓名 (選填)"
+                    placeholder={t('checkout.nameOptional')}
                     value={guestName}
                     onChange={(e) => setGuestName(e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none text-sm"
                   />
                   <input
                     type="email"
-                    placeholder="電子郵件 (選填)"
+                    placeholder={t('checkout.emailOptional')}
                     value={guestEmail}
                     onChange={(e) => setGuestEmail(e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none text-sm"
                   />
                   <input
                     type="tel"
-                    placeholder="電話 (選填)"
+                    placeholder={t('checkout.phoneOptional')}
                     value={guestPhone}
                     onChange={(e) => setGuestPhone(e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none text-sm"
@@ -568,7 +568,7 @@ export default function Checkout() {
               )}
               {loyaltyDiscount > 0 && (
                 <div className="flex justify-between text-green-600">
-                  <span>Loyalty Discount</span>
+                  <span>{t('checkout.loyaltyDiscount')}</span>
                   <span>-${loyaltyDiscount.toFixed(2)}</span>
                 </div>
               )}
@@ -584,7 +584,7 @@ export default function Checkout() {
               className="w-full mt-4 bg-primary-600 text-white py-3 rounded-lg font-semibold hover:bg-primary-700 transition-colors disabled:opacity-50"
             >
               {isBusy
-                ? 'Currently Unavailable'
+                ? t('checkout.currentlyUnavailable')
                 : loading
                   ? t('checkout.processing')
                   : `${t('checkout.placeOrder')} — $${total.toFixed(2)}`}
