@@ -263,17 +263,26 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
   // Fetch site settings for tax rate
   const siteSettings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
   const orderSettings = (siteSettings?.orderSettings as any) || {};
-  const currentTaxRate = orderSettings.taxRate !== undefined ? Number(orderSettings.taxRate) : 0;
+  let currentTaxRate = orderSettings.taxRate !== undefined ? Number(orderSettings.taxRate) : 0;
+  if (isNaN(currentTaxRate)) currentTaxRate = 0;
 
-  const tax = subtotal * currentTaxRate;
+  const tax = subtotal * (currentTaxRate / 100);
   const total = subtotal + tax + deliveryFee - loyaltyDiscount;
 
+  if (isNaN(total)) {
+    res.status(400).json({ success: false, error: 'Calculation error: invalid amounts' });
+    return;
+  }
+
   // Calculate distance and tag remote status
-  let distance = null;
+  let distance: number | null = null;
   let isRemote = false;
   if (userLat != null && userLon != null && location.lat != null && location.lng != null) {
-    distance = calculateDistance(userLat, userLon, location.lat, location.lng);
-    isRemote = distance > 20; // 20 meter threshold
+    const calculated = calculateDistance(userLat, userLon, location.lat, location.lng);
+    if (!isNaN(calculated)) {
+      distance = calculated;
+      isRemote = distance > 20; // 20 meter threshold
+    }
   }
 
   const order = await prisma.order.create({

@@ -47,6 +47,7 @@ export default function KitchenDisplay() {
   const [isConnected, setIsConnected] = useState(false);
   const [updating, setUpdating] = useState<string | null>(null);
   const [socketError, setSocketError] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
   const [lastRefresh, setLastRefresh] = useState(new Date());
 
   const fetchOrders = useCallback(() => {
@@ -75,7 +76,7 @@ export default function KitchenDisplay() {
     
     const s = io(socketUrl, { 
       path: '/socket.io', 
-      transports: ['polling'], // Force polling only for diagnosis
+      transports: ['websocket', 'polling'],
       reconnectionAttempts: 10,
       timeout: 20000,
     });
@@ -132,8 +133,9 @@ export default function KitchenDisplay() {
         }
         return prev.map((o) => o.id === orderId ? { ...o, status: newStatus } : o);
       });
-    } catch {
-      // Refresh on error
+    } catch (err: any) {
+      setActionError(err.response?.data?.error || err.message || 'Failed to update order status');
+      setTimeout(() => setActionError(null), 5000);
       fetchOrders();
     } finally {
       setUpdating(null);
@@ -146,7 +148,9 @@ export default function KitchenDisplay() {
     try {
       await api.patch(`/orders/${orderId}/status`, { status: completedStatus });
       setOrders((prev) => prev.filter((o) => o.id !== orderId));
-    } catch {
+    } catch (err: any) {
+      setActionError(err.response?.data?.error || err.message || 'Failed to complete order');
+      setTimeout(() => setActionError(null), 5000);
       fetchOrders();
     } finally {
       setUpdating(null);
@@ -175,7 +179,13 @@ export default function KitchenDisplay() {
   }));
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gray-100 relative">
+      {/* Global Action Error Toast */}
+      {actionError && (
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 bg-red-600 text-white px-6 py-3 rounded-lg shadow-lg font-medium animate-bounce">
+          {actionError}
+        </div>
+      )}
       {/* Header */}
       <div className="bg-gray-900 text-white px-6 py-3 flex items-center justify-between">
         <div className="flex items-center gap-4">

@@ -49,8 +49,9 @@ export default function Checkout() {
   const [loyaltyRedeem, setLoyaltyRedeem] = useState(0);
   const loyaltyDiscount = loyaltyRedeem / 100;
 
-  const currentTaxRate = orderSettings?.taxRate ?? DEFAULT_TAX_RATE;
-  const tax = subtotal * currentTaxRate;
+  let currentTaxRate = orderSettings?.taxRate ?? DEFAULT_TAX_RATE;
+  if (isNaN(currentTaxRate)) currentTaxRate = 0;
+  const tax = subtotal * (currentTaxRate / 100);
   const currentDeliveryFee = orderType === 'delivery' ? deliveryFee : 0;
   const total = subtotal + tax + currentDeliveryFee - loyaltyDiscount;
 
