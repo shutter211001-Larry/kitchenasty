@@ -418,7 +418,7 @@ export async function sendTestEmail(req: Request, res: Response): Promise<void> 
             client_secret: oauth2Config.clientSecret!,
             refresh_token: oauth2Config.refreshToken!,
             grant_type: 'refresh_token',
-          }),
+          } as any),
         });
         const data = await response.json();
         return data.access_token;
