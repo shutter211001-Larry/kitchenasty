@@ -18,7 +18,7 @@ export default function AuthCallback() {
 
     if (token) {
       loginWithToken(token);
-      navigate('/account');
+      navigate('/');
     } else {
       navigate('/login');
     }

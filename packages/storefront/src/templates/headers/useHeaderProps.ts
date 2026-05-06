@@ -7,7 +7,7 @@ import { useTheme } from '../../context/ThemeContext.js';
 
 export function useHeaderProps() {
   const { t } = useTranslation();
-  const { user, logout } = useAuth();
+  const { user, logout, isLoading } = useAuth();
   const { itemCount, setIsOpen: openCart } = useCart();
   const { settings } = useTheme();
   const location = useLocation();
@@ -25,5 +25,5 @@ export function useHeaderProps() {
     return location.pathname.startsWith(path);
   }
 
-  return { t, user, logout, itemCount, openCart, settings, navLinks, isActive, mobileOpen, setMobileOpen };
+  return { t, user, logout, isLoading, itemCount, openCart, settings, navLinks, isActive, mobileOpen, setMobileOpen };
 }

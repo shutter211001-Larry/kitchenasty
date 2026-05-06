@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 
 interface Customer {
@@ -28,15 +28,18 @@ export default function CustomerList() {
   const [search, setSearch] = useState('');
   const [isGuestFilter, setIsGuestFilter] = useState('');
   
-  const [showPromoModal, setShowPromoModal] = useState(false);
-  const [promoSubject, setPromoSubject] = useState('');
-  const [promoContent, setPromoContent] = useState('');
-  const [promoSending, setPromoSending] = useState(false);
-  const [promoStatus, setPromoStatus] = useState('');
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
+  const [editForm, setEditForm] = useState({ name: '', phone: '', loyaltyPoints: 0 });
+  const [editLoading, setEditLoading] = useState(false);
+
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const token = localStorage.getItem('token') || '';
 
-  useEffect(() => {
+  const fetchCustomers = useCallback(() => {
     setLoading(true);
     const params = new URLSearchParams({ page: String(page), limit: '20' });
     if (search) params.set('search', search);
@@ -56,6 +59,10 @@ export default function CustomerList() {
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
   }, [page, search, isGuestFilter, token]);
+
+  useEffect(() => {
+    fetchCustomers();
+  }, [fetchCustomers]);
 
   async function handleSendPromo(e: React.FormEvent) {
     e.preventDefault();
@@ -84,6 +91,57 @@ export default function CustomerList() {
       setError(err.message);
     } finally {
       setPromoSending(false);
+    }
+  }
+
+  function openEdit(customer: Customer) {
+    setEditingCustomer(customer);
+    setEditForm({
+      name: customer.name,
+      phone: customer.phone || '',
+      loyaltyPoints: customer.loyaltyPoints,
+    });
+    setShowEditModal(true);
+  }
+
+  async function handleUpdate(e: React.FormEvent) {
+    e.preventDefault();
+    if (!editingCustomer) return;
+    setEditLoading(true);
+    try {
+      const res = await fetch(`/api/customers/${editingCustomer.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(editForm),
+      });
+      if (!res.ok) throw new Error('Update failed');
+      setShowEditModal(false);
+      fetchCustomers();
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setEditLoading(false);
+    }
+  }
+
+  async function handleDelete() {
+    if (!deletingId) return;
+    setDeleteLoading(true);
+    try {
+      const res = await fetch(`/api/customers/${deletingId}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error('Delete failed');
+      setShowDeleteModal(false);
+      fetchCustomers();
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setDeleteLoading(false);
     }
   }
 
@@ -144,6 +202,7 @@ export default function CustomerList() {
                   <th className="text-left px-4 py-3 font-medium text-gray-600">紅利點數</th>
                   <th className="text-left px-4 py-3 font-medium text-gray-600">訂單數</th>
                   <th className="text-left px-4 py-3 font-medium text-gray-600">註冊日期</th>
+                  <th className="text-right px-4 py-3 font-medium text-gray-600">操作</th>
                 </tr>
               </thead>
               <tbody>
@@ -160,6 +219,28 @@ export default function CustomerList() {
                     <td className="px-4 py-3 font-medium text-orange-600">{customer.loyaltyPoints}</td>
                     <td className="px-4 py-3 text-gray-600">{customer._count.orders}</td>
                     <td className="px-4 py-3 text-gray-500">{new Date(customer.createdAt).toLocaleDateString()}</td>
+                    <td className="px-4 py-3 text-right">
+                      <div className="flex justify-end gap-2">
+                        <button
+                          onClick={() => openEdit(customer)}
+                          className="p-1.5 text-gray-400 hover:text-primary-600 transition-colors"
+                          title="編輯"
+                        >
+                          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                          </svg>
+                        </button>
+                        <button
+                          onClick={() => { setDeletingId(customer.id); setShowDeleteModal(true); }}
+                          className="p-1.5 text-gray-400 hover:text-red-600 transition-colors"
+                          title="刪除"
+                        >
+                          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        </button>
+                      </div>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -190,6 +271,98 @@ export default function CustomerList() {
         </>
       )}
 
+      {/* Edit Customer Modal */}
+      {showEditModal && editingCustomer && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-[60]">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+              <h2 className="text-lg font-bold">編輯會員資訊</h2>
+              <button onClick={() => setShowEditModal(false)} className="text-gray-400 hover:text-gray-600">✕</button>
+            </div>
+            <form onSubmit={handleUpdate} className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">姓名</label>
+                <input
+                  required
+                  type="text"
+                  value={editForm.name}
+                  onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-primary-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">電話</label>
+                <input
+                  type="text"
+                  value={editForm.phone}
+                  onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-primary-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">紅利點數</label>
+                <input
+                  required
+                  type="number"
+                  value={editForm.loyaltyPoints}
+                  onChange={(e) => setEditForm({ ...editForm, loyaltyPoints: parseInt(e.target.value) || 0 })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-primary-500"
+                />
+              </div>
+
+              <div className="flex justify-end gap-3 mt-6">
+                <button
+                  type="button"
+                  onClick={() => setShowEditModal(false)}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg"
+                >
+                  取消
+                </button>
+                <button
+                  type="submit"
+                  disabled={editLoading}
+                  className="bg-primary-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-primary-700 disabled:opacity-50"
+                >
+                  {editLoading ? '儲存中...' : '儲存變更'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-[60]">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-sm overflow-hidden">
+            <div className="p-6 text-center">
+              <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <h2 className="text-xl font-bold text-gray-900 mb-2">確認刪除會員？</h2>
+              <p className="text-gray-500 text-sm mb-6">此動作無法復原。該會員的所有訂單紀錄與紅利點數將一併移除。</p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowDeleteModal(false)}
+                  className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
+                >
+                  取消
+                </button>
+                <button
+                  onClick={handleDelete}
+                  disabled={deleteLoading}
+                  className="flex-1 bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-700 disabled:opacity-50"
+                >
+                  {deleteLoading ? '刪除中...' : '確認刪除'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Promotional Email Modal */}
       {showPromoModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-[60]">
@@ -214,7 +387,7 @@ export default function CustomerList() {
               </div>
 
               <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-1">郵件內容 (HTML 可)</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">郵件內容 (HTML 可內嵌)</label>
                 <textarea
                   required
                   rows={6}

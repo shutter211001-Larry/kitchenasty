@@ -68,7 +68,9 @@ export default function ModernHeader() {
             <div className="px-3 py-2"><LanguageSwitcher /></div>
             {settings.showMembership && (
               <div className="border-t border-gray-200/50 pt-3 mt-3">
-                {user ? (
+                {isLoading ? (
+                  <div className="px-3 py-2 text-sm text-gray-500">載入中...</div>
+                ) : user ? (
                   <>
                     <Link to="/account" onClick={() => setMobileOpen(false)} className="block px-3 py-2 text-sm text-gray-600">{t('nav.myAccount')}</Link>
                     <button onClick={() => { logout(); setMobileOpen(false); }} className="block w-full text-left px-3 py-2 text-sm text-gray-500">{t('nav.logout')}</button>
