@@ -1,18 +1,20 @@
 import { Suspense } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '../context/AuthContext.js';
 import { useTheme } from '../context/ThemeContext.js';
 import { footerVariants } from '../templates/footers/index.js';
 import type { TemplateId } from '../templates/index.js';
 
 function ClassicFooter() {
   const { t } = useTranslation();
+  const { user, isLoading } = useAuth();
   const { settings } = useTheme();
 
   return (
     <footer className="bg-gray-900 text-gray-400">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand */}
           <div>
             <div className="flex items-center gap-2 mb-4">
@@ -44,10 +46,17 @@ function ClassicFooter() {
           {settings.showMembership && (
             <div>
               <h3 className="text-white font-semibold mb-3">{t('footer.account')}</h3>
-              <ul className="space-y-2 text-sm mb-6">
-                <li><Link to="/login" className="hover:text-white transition-colors">{t('nav.login')}</Link></li>
-                <li><Link to="/register" className="hover:text-white transition-colors">{t('footer.createAccount')}</Link></li>
-                <li><Link to="/account" className="hover:text-white transition-colors">{t('nav.myAccount')}</Link></li>
+              <ul className="space-y-2 text-sm">
+                {isLoading ? (
+                  <li className="text-gray-500 italic">載入中...</li>
+                ) : user ? (
+                  <li><Link to="/account" className="hover:text-white transition-colors">我的帳戶 ({user.name})</Link></li>
+                ) : (
+                  <>
+                    <li><Link to="/login" className="hover:text-white transition-colors">{t('nav.login')}</Link></li>
+                    <li><Link to="/register" className="hover:text-white transition-colors">{t('footer.createAccount')}</Link></li>
+                  </>
+                )}
               </ul>
             </div>
           )}
