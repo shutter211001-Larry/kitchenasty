@@ -36,6 +36,7 @@ dotenv.config();
 
 export function createApp() {
   const app = express();
+  app.set('trust proxy', true);
 
   // Middleware
   app.use(requestId);
