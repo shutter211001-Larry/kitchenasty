@@ -43,13 +43,21 @@ export function createApp() {
   const corsOrigins = process.env.CORS_ORIGINS?.split(',') || ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:3000'];
   app.use(cors({
     origin: (origin, callback) => {
-      if (!origin || corsOrigins.includes('*') || corsOrigins.includes(origin)) {
+      if (!origin || corsOrigins.includes('*')) {
+        return callback(null, true);
+      }
+      // Allow configured origins + any local development IPs
+      const isLocal = origin.includes('localhost') || origin.includes('127.0.0.1') || origin.includes('192.168.') || origin.includes('10.');
+      const isAllowed = corsOrigins.includes(origin) || isLocal;
+      
+      if (isAllowed) {
         callback(null, true);
       } else {
-        callback(new Error('Not allowed by CORS'));
+        // Return false instead of throwing a hard error to avoid 500s
+        callback(null, false);
       }
     },
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     credentials: true,
   }));
   if (process.env.NODE_ENV !== 'test') {
