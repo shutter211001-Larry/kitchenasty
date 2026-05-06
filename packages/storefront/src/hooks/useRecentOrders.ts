@@ -4,6 +4,8 @@ interface RecentOrder {
   id: string;
   orderNumber: string;
   date: string;
+  total?: number;
+  orderType?: string;
 }
 
 export function useRecentOrders() {

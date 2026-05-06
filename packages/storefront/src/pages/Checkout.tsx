@@ -195,6 +195,8 @@ export default function Checkout() {
         id: data.data.id,
         orderNumber: data.data.orderNumber,
         date: new Date().toISOString(),
+        total: data.data.total,
+        orderType: data.data.orderType,
       });
       navigate(`/order/${data.data.id}`, { state: { order: data.data } });
     } catch (err: any) {

@@ -82,7 +82,9 @@ export default function OrderStatus() {
           addOrder({
             id: data.data.id,
             orderNumber: data.data.orderNumber,
-            date: data.data.createdAt
+            date: data.data.createdAt,
+            total: data.data.total,
+            orderType: data.data.orderType
           });
         }
       })
