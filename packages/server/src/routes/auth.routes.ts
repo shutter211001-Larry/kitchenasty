@@ -21,11 +21,13 @@ router.post('/staff/register', authenticate, requireRole('SUPER_ADMIN'), staffRe
 router.post('/customer/register', customerRegister);
 router.post('/customer/login', customerLogin);
 
+const STOREFRONT_URL = process.env.STOREFRONT_URL || 'http://localhost:5174';
+
 // Social login — Google
-if (process.env.GOOGLE_CLIENT_ID) {
+if (process.env.GOOGLE_LOGIN_CLIENT_ID) {
   router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'], session: false }));
   router.get('/google/callback',
-    passport.authenticate('google', { session: false, failureRedirect: '/login' }),
+    passport.authenticate('google', { session: false, failureRedirect: `${STOREFRONT_URL}/login?error=auth_failed` }),
     handleSocialCallback
   );
 }
@@ -34,7 +36,7 @@ if (process.env.GOOGLE_CLIENT_ID) {
 if (process.env.FACEBOOK_APP_ID) {
   router.get('/facebook', passport.authenticate('facebook', { scope: ['email'], session: false }));
   router.get('/facebook/callback',
-    passport.authenticate('facebook', { session: false, failureRedirect: '/login' }),
+    passport.authenticate('facebook', { session: false, failureRedirect: `${STOREFRONT_URL}/login?error=auth_failed` }),
     handleSocialCallback
   );
 }

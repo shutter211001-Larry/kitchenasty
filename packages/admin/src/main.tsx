@@ -41,6 +41,7 @@ import StaffList from './pages/StaffList.js';
 import StaffInvite from './pages/StaffInvite.js';
 import StaffEdit from './pages/StaffEdit.js';
 import AcceptInvite from './pages/AcceptInvite.js';
+import CustomerList from './pages/CustomerList.js';
 import Settings from './pages/Settings.js';
 import DeveloperMetrics from './pages/DeveloperMetrics.js';
 import AuditLog from './pages/AuditLog.js';
@@ -84,6 +85,7 @@ function AppRoutes() {
         <Route path="/reservations" element={<ReservationList />} />
         <Route path="/reservations/:id" element={<ReservationDetail />} />
         <Route path="/reviews" element={<ReviewList />} />
+        <Route path="/customers" element={<RequireRole roles={['SUPER_ADMIN', 'MANAGER']}><CustomerList /></RequireRole>} />
         <Route path="/kitchen" element={<KitchenDisplay />} />
 
         {/* MANAGER+ */}

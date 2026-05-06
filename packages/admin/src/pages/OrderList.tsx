@@ -159,6 +159,23 @@ export default function OrderList() {
     }
   }
 
+  async function handleCheckReminders() {
+    try {
+      setLoading(true);
+      const res = await fetch('/api/orders/reminders', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to send reminders');
+      alert(`提醒已發送！\n${data.data.message}`);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
@@ -201,6 +218,12 @@ export default function OrderList() {
               下載範本
             </button>
           )}
+          <button
+            onClick={handleCheckReminders}
+            className="bg-orange-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-orange-600 transition-colors flex items-center gap-2"
+          >
+            🔔 狀態提醒
+          </button>
         </div>
       </div>
 

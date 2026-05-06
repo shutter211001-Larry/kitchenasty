@@ -4,8 +4,8 @@ import { Strategy as FacebookStrategy } from 'passport-facebook';
 import prisma from './db.js';
 
 export function initPassport() {
-  const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
-  const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
+  const GOOGLE_CLIENT_ID = process.env.GOOGLE_LOGIN_CLIENT_ID;
+  const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_LOGIN_CLIENT_SECRET;
   const FACEBOOK_APP_ID = process.env.FACEBOOK_APP_ID;
   const FACEBOOK_APP_SECRET = process.env.FACEBOOK_APP_SECRET;
   const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
@@ -24,15 +24,27 @@ export function initPassport() {
             if (!email) return done(new Error('No email in Google profile'));
 
             let customer = await prisma.customer.findUnique({ where: { email } });
+            
             if (!customer) {
               customer = await prisma.customer.create({
                 data: {
                   email,
                   name: profile.displayName || email,
                   password: null,
+                  isGuest: false,
+                },
+              });
+            } else if (customer.isGuest) {
+              // Convert guest to full member
+              customer = await prisma.customer.update({
+                where: { id: customer.id },
+                data: {
+                  isGuest: false,
+                  name: customer.name || profile.displayName || email,
                 },
               });
             }
+            
             done(null, { id: customer.id, email: customer.email, type: 'customer' as const });
           } catch (err) {
             done(err as Error);

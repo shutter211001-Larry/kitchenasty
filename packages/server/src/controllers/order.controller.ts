@@ -764,3 +764,69 @@ export async function importOrders(req: Request, res: Response): Promise<void> {
     res.status(500).json({ success: false, error: err.message });
   }
 }
+// ============================================================
+// ORDER STATUS REMINDERS
+// ============================================================
+
+export async function checkOrderReminders(req: Request, res: Response): Promise<void> {
+  // Find orders that are PENDING or CONFIRMED for more than 15 mins
+  // Or READY for more than 30 mins
+  const fifteenMinsAgo = new Date(Date.now() - 15 * 60 * 1000);
+  const thirtyMinsAgo = new Date(Date.now() - 30 * 60 * 1000);
+
+  const staleOrders = await prisma.order.findMany({
+    where: {
+      OR: [
+        { status: 'PENDING', createdAt: { lt: fifteenMinsAgo } },
+        { status: 'CONFIRMED', createdAt: { lt: fifteenMinsAgo } },
+        { status: 'READY', updatedAt: { lt: thirtyMinsAgo } },
+      ],
+    },
+    include: {
+      customer: { select: { email: true, name: true } },
+    }
+  });
+
+  if (staleOrders.length === 0) {
+    res.json({ success: true, data: { message: 'No stale orders found', count: 0 } });
+    return;
+  }
+
+  const results = await Promise.allSettled(
+    staleOrders.map(order => {
+      const email = order.customer?.email || order.guestEmail;
+      if (!email) return Promise.resolve();
+
+      let message = '';
+      if (order.status === 'READY') {
+        message = `Your order #${order.orderNumber} is ready for pickup! Please come and get it.`;
+      } else {
+        message = `We are still working on your order #${order.orderNumber}. We apologize for the delay and will update you soon!`;
+      }
+
+      return sendEmail({
+        to: email,
+        subject: `Update on your order #${order.orderNumber}`,
+        text: message,
+        html: `<p>${message}</p>`
+      });
+    })
+  );
+
+  const successful = results.filter(r => r.status === 'fulfilled').length;
+
+  auditLog(req, { 
+    action: 'update', 
+    entity: 'Order', 
+    details: { action: 'status_reminders', count: staleOrders.length, successful } 
+  });
+
+  res.json({
+    success: true,
+    data: {
+      message: `Sent reminders for ${successful} orders`,
+      totalStale: staleOrders.length,
+      successful
+    }
+  });
+}

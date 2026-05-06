@@ -1,6 +1,7 @@
 import { Suspense } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '../context/AuthContext.js';
 import { useTheme } from '../context/ThemeContext.js';
 import { heroVariants } from '../templates/heroes/index.js';
 import { featureVariants } from '../templates/features/index.js';
@@ -163,8 +164,9 @@ interface CtaSection {
 
 function ClassicCta({ cta, t }: { cta: CtaSection | null; t: (k: string) => string }) {
   const { settings } = useTheme();
+  const { user } = useAuth();
   
-  if (!settings.showMembership && (!cta?.buttonLink || cta.buttonLink === '/register')) {
+  if (user || (!settings.showMembership && (!cta?.buttonLink || cta.buttonLink === '/register'))) {
     return null;
   }
 

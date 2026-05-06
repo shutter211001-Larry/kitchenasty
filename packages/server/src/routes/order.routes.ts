@@ -1,7 +1,11 @@
 import { Router } from 'express';
 import { authenticate, optionalAuth, requireStaff, requireRole } from '../middleware/auth.js';
 import multer from 'multer';
-import { createOrder, listOrders, listCustomerOrders, getOrder, updateOrderStatus, deleteOrder, exportOrders, importOrders, downloadOrderTemplate } from '../controllers/order.controller.js';
+import { 
+  createOrder, listOrders, listCustomerOrders, getOrder, 
+  updateOrderStatus, deleteOrder, exportOrders, importOrders, 
+  downloadOrderTemplate, checkOrderReminders 
+} from '../controllers/order.controller.js';
 
 const router = Router();
 const upload = multer({ storage: multer.memoryStorage() });
@@ -19,6 +23,7 @@ router.get('/template', authenticate, requireRole('SUPER_ADMIN', 'MANAGER'), dow
 router.post('/import', authenticate, requireRole('SUPER_ADMIN', 'MANAGER'), upload.single('file'), importOrders);
 router.get('/:id', authenticate, getOrder);
 router.patch('/:id/status', authenticate, requireStaff, updateOrderStatus);
+router.post('/reminders', authenticate, requireStaff, checkOrderReminders);
 router.delete('/:id', authenticate, requireRole('SUPER_ADMIN', 'MANAGER'), deleteOrder);
 
 export default router;

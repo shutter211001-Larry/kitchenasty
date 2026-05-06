@@ -18,6 +18,7 @@ const navItems: NavItem[] = [
   { path: '/orders', label: 'nav.orders', icon: '\uD83D\uDCCB', roles: ['SUPER_ADMIN', 'MANAGER', 'STAFF'] },
   { path: '/reservations', label: 'nav.reservations', icon: '\uD83D\uDDD3', roles: ['SUPER_ADMIN', 'MANAGER', 'STAFF'] },
   { path: '/reviews', label: 'nav.reviews', icon: '\u2B50', roles: ['SUPER_ADMIN', 'MANAGER', 'STAFF'] },
+  { path: '/customers', label: 'nav.customers', icon: '\uD83D\uDC65', roles: ['SUPER_ADMIN', 'MANAGER'] },
   { path: '/kitchen', label: 'nav.kitchen', icon: '\uD83C\uDF73', roles: ['SUPER_ADMIN', 'MANAGER', 'STAFF'] },
   { path: '/locations', label: 'nav.locations', icon: '\u25CE', roles: ['SUPER_ADMIN', 'MANAGER'] },
   {

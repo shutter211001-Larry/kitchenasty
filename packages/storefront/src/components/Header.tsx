@@ -10,7 +10,7 @@ import type { TemplateId } from '../templates/index.js';
 
 function ClassicHeader() {
   const { t } = useTranslation();
-  const { user, logout } = useAuth();
+  const { user, logout, isLoading } = useAuth();
   const { itemCount, setIsOpen: openCart } = useCart();
   const { settings } = useTheme();
   const location = useLocation();
@@ -79,7 +79,9 @@ function ClassicHeader() {
               )}
             </button>
             {settings.showMembership && (
-              user ? (
+              isLoading ? (
+                <div className="w-5 h-5 border-2 border-gray-200 border-t-primary-600 rounded-full animate-spin" />
+              ) : user ? (
                 <>
                   <Link
                     to="/account"
@@ -171,7 +173,9 @@ function ClassicHeader() {
             </div>
             {settings.showMembership && (
               <div className="border-t border-gray-200 pt-3 mt-3">
-                {user ? (
+                {isLoading ? (
+                  <div className="px-3 py-2 text-sm text-gray-500">載入中...</div>
+                ) : user ? (
                   <>
                     <Link
                       to="/account"
