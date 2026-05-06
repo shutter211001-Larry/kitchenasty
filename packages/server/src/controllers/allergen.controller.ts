@@ -4,6 +4,7 @@ import prisma from '../lib/db.js';
 
 const createAllergenSchema = z.object({
   name: z.string().min(1),
+  nameTranslations: z.record(z.string()).optional(),
 });
 
 export async function listAllergens(_req: Request, res: Response): Promise<void> {
