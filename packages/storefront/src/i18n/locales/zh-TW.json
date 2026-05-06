@@ -147,9 +147,11 @@
     "tax": "稅金",
     "deliveryFee": "運費",
     "discount": "折扣",
+    "loyaltyDiscount": "紅利點數折扣",
     "total": "總計",
     "placeOrder": "確認點餐",
     "processing": "處理中...",
+    "currentlyUnavailable": "目前不接受點餐",
     "guestCheckout": "訪客結帳",
     "guestEmail": "接收訂單進度的電子郵件"
   },
