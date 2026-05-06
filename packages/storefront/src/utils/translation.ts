@@ -10,12 +10,18 @@ export const getTranslated = (
   if (translations && typeof translations === 'object') {
     // 1. Try target language
     if (translations[lang]) return translations[lang];
+    
+    // 2. For non-Chinese users, if target language is missing, try English fallback before Base
+    if (!lang.startsWith('zh') && lang !== 'en' && translations['en']) {
+      return translations['en'];
+    }
   }
-  // 2. Fallback to base
+
+  // 3. Fallback to base (e.g., Chinese name written in the main field)
   if (base) return base;
-  
-  // 3. Final fallback to English if base is empty
-  if (translations && typeof translations === 'object' && lang !== 'en' && translations['en']) {
+
+  // 4. Final safety fallback to English
+  if (translations && typeof translations === 'object' && translations['en']) {
     return translations['en'];
   }
 
