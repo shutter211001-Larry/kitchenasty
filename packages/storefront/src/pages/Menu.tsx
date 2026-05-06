@@ -153,11 +153,10 @@ export default function Menu() {
           <nav className="space-y-1">
             <button
               onClick={() => handleCategoryClick(null)}
-              className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                !selectedCategory
+              className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors ${!selectedCategory
                   ? 'bg-primary-50 text-primary-700'
                   : 'text-gray-600 hover:bg-gray-100'
-              }`}
+                }`}
             >
               {t('menu.allCategories')}
             </button>
@@ -168,11 +167,10 @@ export default function Menu() {
               <button
                 key={cat.id}
                 onClick={() => handleCategoryClick(cat.id)}
-                className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  selectedCategory === cat.id
+                className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors ${selectedCategory === cat.id
                     ? 'bg-primary-50 text-primary-700'
                     : 'text-gray-600 hover:bg-gray-100'
-                }`}
+                  }`}
               >
                 {getTranslated(cat.name, cat.nameTranslations, i18n.language)}
                 <span className="text-gray-400 ml-1 text-xs">({cat._count.menuItems})</span>

@@ -10,9 +10,14 @@ export const getTranslated = (
   if (translations && typeof translations === 'object') {
     // 1. Try target language
     if (translations[lang]) return translations[lang];
-    // 2. Fallback to English
-    if (lang !== 'en' && translations['en']) return translations['en'];
   }
-  // 3. Fallback to base
+  // 2. Fallback to base
+  if (base) return base;
+  
+  // 3. Final fallback to English if base is empty
+  if (translations && typeof translations === 'object' && lang !== 'en' && translations['en']) {
+    return translations['en'];
+  }
+
   return base;
 };
