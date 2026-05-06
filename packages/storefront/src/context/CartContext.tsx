@@ -3,8 +3,10 @@ import React, { createContext, useContext, useState, useCallback } from 'react';
 export interface CartItemOption {
   optionId: string;
   optionName: string;
+  optionNameTranslations?: Record<string, string>;
   valueId: string;
   valueName: string;
+  valueNameTranslations?: Record<string, string>;
   priceModifier: number;
 }
 
@@ -12,6 +14,7 @@ export interface CartItem {
   id: string; // unique cart line ID
   menuItemId: string;
   name: string;
+  nameTranslations?: Record<string, string>;
   price: number;
   quantity: number;
   options: CartItemOption[];

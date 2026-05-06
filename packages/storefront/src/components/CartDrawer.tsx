@@ -2,9 +2,10 @@ import { useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useCart } from '../context/CartContext.js';
+import { getTranslated } from '../utils/translation.js';
 
 export default function CartDrawer() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { items, isOpen, setIsOpen, updateQuantity, removeItem, clear, subtotal } = useCart();
 
   const handleKeyDown = useCallback(
@@ -72,10 +73,12 @@ export default function CartDrawer() {
                   <div key={item.id} className="flex gap-3 pb-4 border-b border-gray-100">
                     {/* Item info */}
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-medium text-gray-900 text-sm">{item.name}</h3>
+                      <h3 className="font-medium text-gray-900 text-sm">
+                        {getTranslated(item.name, item.nameTranslations, i18n.language)}
+                      </h3>
                       {item.options.length > 0 && (
                         <p className="text-xs text-gray-500 mt-0.5">
-                          {item.options.map((o) => o.valueName).join(', ')}
+                          {item.options.map((o) => getTranslated(o.valueName, o.valueNameTranslations, i18n.language)).join(', ')}
                         </p>
                       )}
                       <div className="flex items-center gap-2 mt-2">

@@ -126,14 +126,17 @@ export default function MenuItemModal({ itemId, onClose }: Props) {
         .map((v) => ({
           optionId: opt.id,
           optionName: opt.name,
+          optionNameTranslations: opt.nameTranslations,
           valueId: v.id,
           valueName: v.name,
+          valueNameTranslations: v.nameTranslations,
           priceModifier: v.priceModifier,
         }));
     });
     addItem({
       menuItemId: item.id,
       name: item.name,
+      nameTranslations: item.nameTranslations,
       price: item.price,
       quantity,
       options: cartOptions,
