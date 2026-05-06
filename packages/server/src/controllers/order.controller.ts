@@ -473,10 +473,12 @@ export async function getOrder(req: Request<{ id: string }>, res: Response): Pro
     return;
   }
 
-  const user = req.user!;
-  if (user.type !== 'staff' && order.customerId !== user.id) {
-    res.status(403).json({ success: false, error: 'Access denied' });
-    return;
+  const user = req.user;
+  if (order.customerId) {
+    if (!user || (user.type !== 'staff' && order.customerId !== user.id)) {
+      res.status(403).json({ success: false, error: 'Access denied' });
+      return;
+    }
   }
 
   res.json({ success: true, data: order });
