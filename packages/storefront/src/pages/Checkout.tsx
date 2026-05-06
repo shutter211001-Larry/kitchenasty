@@ -458,16 +458,32 @@ export default function Checkout() {
               <h2 className="text-lg font-semibold text-gray-900 mb-4">聯絡資訊</h2>
               <div className="space-y-4">
                 {settings.showMembership !== false && (
-                  <p className="text-sm text-gray-600">
-                    <Link to="/login" className="text-primary-600 hover:text-primary-700 font-medium underline">
-                      {t('nav.login')}
-                    </Link>{' '}
-                    或{' '}
-                    <Link to="/register" className="text-primary-600 hover:text-primary-700 font-medium underline">
-                      註冊會員
-                    </Link>{' '}
-                    以享有會員優惠，或直接以訪客身份結帳：
-                  </p>
+                  <div className="bg-primary-50 border border-primary-100 p-4 rounded-lg mb-4">
+                    <p className="text-sm text-primary-800 font-medium mb-3">
+                      💡 登入會員可享有紅利點數回饋！
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      <a
+                        href="/api/auth/google"
+                        className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors shadow-sm"
+                      >
+                        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="w-4 h-4" />
+                        Google 快速登入
+                      </a>
+                      <Link
+                        to="/login"
+                        className="px-4 py-2 text-sm font-medium text-primary-600 hover:text-primary-700 underline"
+                      >
+                        {t('nav.login')}
+                      </Link>
+                      <Link
+                        to="/register"
+                        className="px-4 py-2 text-sm font-medium text-primary-600 hover:text-primary-700 underline"
+                      >
+                        註冊帳號
+                      </Link>
+                    </div>
+                  </div>
                 )}
                 
                 <div className="space-y-3">

@@ -129,6 +129,25 @@ export default function Register() {
             {loading ? t('auth.creating') : t('auth.createAccount')}
           </button>
 
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-300" />
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="bg-white px-2 text-gray-500">或使用社交帳號註冊</span>
+            </div>
+          </div>
+
+          <div className="flex gap-3">
+            <a
+              href="/api/auth/google"
+              className="w-full flex items-center justify-center gap-2 py-2.5 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+            >
+              <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="w-5 h-5" />
+              使用 Google 帳號快速註冊
+            </a>
+          </div>
+
           <p className="text-center text-sm text-gray-600 mt-4">
             {t('auth.hasAccount')}{' '}
             <Link to="/login" className="text-primary-600 hover:text-primary-700 font-medium">
