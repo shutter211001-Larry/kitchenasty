@@ -384,16 +384,28 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
     }
   }
 
-  // Send confirmation email
+  // Send confirmation email if enabled
   const recipientEmail = order.customer?.email || guestEmail;
   if (recipientEmail) {
-    const emailContent = orderConfirmationEmail({
-      orderNumber: order.orderNumber,
-      orderType: order.orderType,
-      total: order.total,
-      items: order.items.map((i) => ({ name: i.name, quantity: i.quantity, subtotal: i.subtotal })),
-    });
-    sendEmail({ to: recipientEmail, ...emailContent }).catch(() => {});
+    let shouldSend = true;
+    try {
+      const settings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
+      const orderSettings = (settings?.orderSettings as any) || {};
+      const notifications = orderSettings.emailNotifications || {};
+      if (notifications['PLACED'] === false) {
+        shouldSend = false;
+      }
+    } catch (e) {}
+
+    if (shouldSend) {
+      const emailContent = orderConfirmationEmail({
+        orderNumber: order.orderNumber,
+        orderType: order.orderType,
+        total: order.total,
+        items: order.items.map((i) => ({ name: i.name, quantity: i.quantity, subtotal: i.subtotal })),
+      });
+      sendEmail({ to: recipientEmail, ...emailContent }).catch(() => {});
+    }
   }
 
   emitNewOrder({
@@ -555,11 +567,26 @@ export async function updateOrderStatus(req: Request<{ id: string }>, res: Respo
     customerId: updated.customerId,
   });
 
-  // Send status update email
+  // Send status update email if enabled in settings
   const recipientEmail = order.customer?.email || order.guestEmail;
   if (recipientEmail) {
-    const emailContent = orderStatusEmail({ orderNumber: order.orderNumber, status });
-    sendEmail({ to: recipientEmail, ...emailContent }).catch(() => {});
+    let shouldSend = true;
+    try {
+      const settings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
+      const orderSettings = (settings?.orderSettings as any) || {};
+      const notifications = orderSettings.emailNotifications || {};
+      // If the status is explicitly disabled, don't send
+      if (notifications[status] === false) {
+        shouldSend = false;
+      }
+    } catch (e) {
+      // Default to send if settings fetch fails
+    }
+
+    if (shouldSend) {
+      const emailContent = orderStatusEmail({ orderNumber: order.orderNumber, status });
+      sendEmail({ to: recipientEmail, ...emailContent }).catch(() => {});
+    }
   }
 
   // Emit event for automation rules
