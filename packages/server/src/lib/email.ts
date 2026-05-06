@@ -91,7 +91,7 @@ export async function sendEmail(options: EmailOptions): Promise<void> {
 
   try {
     const serviceType = process.env.MAIL_SERVICE_TYPE || 'SMTP';
-    
+
     if (serviceType === 'GMAIL_API' && process.env.GOOGLE_CLIENT_ID) {
       // Get Access Token
       const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
@@ -143,7 +143,6 @@ export async function sendEmail(options: EmailOptions): Promise<void> {
       to: options.to,
       subject: options.subject,
       html: options.html,
-      text: options.text,
     });
   } catch (err) {
     emailLogger.error({ err }, 'Failed to send email');
