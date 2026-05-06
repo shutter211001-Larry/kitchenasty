@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '../context/AuthContext.js';
 
 interface OrderItem {
   id: string;
@@ -55,6 +56,8 @@ export default function OrderDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [updating, setUpdating] = useState(false);
+  const { user } = useAuth();
+  const canManage = user?.role === 'SUPER_ADMIN' || user?.role === 'MANAGER';
 
   const token = localStorage.getItem('token') || '';
 
@@ -88,6 +91,22 @@ export default function OrderDetailPage() {
     } catch (err: any) {
       setError(err.message);
     } finally {
+      setUpdating(false);
+    }
+  }
+
+  async function handleDelete() {
+    if (!window.confirm('確定要刪除這筆訂單嗎？此操作無法復原。')) return;
+    try {
+      setUpdating(true);
+      const res = await fetch(`/api/orders/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error('刪除失敗');
+      window.location.href = '/orders';
+    } catch (err: any) {
+      setError(err.message);
       setUpdating(false);
     }
   }
@@ -233,6 +252,21 @@ export default function OrderDetailPage() {
               ))}
             </div>
           </div>
+
+          {/* Delete Action */}
+          {canManage && (
+            <div className="bg-red-50 rounded-xl border border-red-100 p-6">
+              <h2 className="text-lg font-semibold text-red-900 mb-2">危險區域</h2>
+              <p className="text-xs text-red-600 mb-4">刪除訂單後將無法復原，請謹慎操作。</p>
+              <button
+                disabled={updating}
+                onClick={handleDelete}
+                className="w-full bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-700 transition-colors disabled:opacity-40"
+              >
+                刪除訂單
+              </button>
+            </div>
+          )}
 
           {/* Order info */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">

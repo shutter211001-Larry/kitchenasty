@@ -1,5 +1,8 @@
 import { Request, Response } from 'express';
 import { z } from 'zod';
+import * as XLSX from 'xlsx';
+import path from 'path';
+import fs from 'fs';
 import prisma from '../lib/db.js';
 import { emitNewOrder, emitOrderStatusUpdate } from '../lib/socket.js';
 import { isPointInPolygon } from '../lib/geo.js';
@@ -42,6 +45,7 @@ const createOrderSchema = z.object({
   loyaltyPointsRedeem: z.number().int().min(0).optional(),
   userLat: z.number().optional(),
   userLon: z.number().optional(),
+  locationId: z.string().optional(),
 });
 
 function generateOrderNumber(): string {
@@ -61,7 +65,7 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
   const { 
     orderType, items, comment, scheduledAt, address, 
     guestName, guestEmail, guestPhone, loyaltyPointsRedeem,
-    userLat, userLon 
+    userLat, userLon, locationId
   } = parsed.data;
 
   if (orderType === 'DELIVERY' && !address) {
@@ -96,13 +100,15 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
     }
   }
 
-  // Get first location as default (for now)
+  // Get location (specified or default)
   const location = await prisma.location.findFirst({
-    where: { isActive: true },
+    where: { 
+      ...(locationId ? { id: locationId } : { isActive: true })
+    },
     include: { operatingHours: true },
   });
   if (!location) {
-    res.status(400).json({ success: false, error: 'No active location found' });
+    res.status(400).json({ success: false, error: locationId ? 'Specified location not found' : 'No active location found' });
     return;
   }
 
@@ -561,4 +567,200 @@ export async function updateOrderStatus(req: Request<{ id: string }>, res: Respo
   } catch {}
 
   res.json({ success: true, data: updated });
+}
+
+export async function deleteOrder(req: Request<{ id: string }>, res: Response): Promise<void> {
+  const { id } = req.params;
+
+  const order = await prisma.order.findUnique({
+    where: { id },
+  });
+
+  if (!order) {
+    res.status(404).json({ success: false, error: 'Order not found' });
+    return;
+  }
+
+  // Delete associated items and options first (if not handled by cascade)
+  // Our schema usually handles this with onDelete: Cascade, but let's be safe or just delete the order
+  await prisma.order.delete({
+    where: { id },
+  });
+
+  auditLog(req, { action: 'delete', entity: 'Order', entityId: id, details: { orderNumber: order.orderNumber } });
+
+  res.json({ success: true, message: 'Order deleted successfully' });
+}
+
+export async function exportOrders(req: Request, res: Response): Promise<void> {
+  const { startDate, endDate } = req.query;
+
+  if (!startDate || !endDate) {
+    res.status(400).json({ success: false, error: 'Start date and end date are required' });
+    return;
+  }
+
+  const start = new Date(startDate as string);
+  const end = new Date(endDate as string);
+  end.setHours(23, 59, 59, 999);
+
+  const orders = await prisma.order.findMany({
+    where: {
+      createdAt: {
+        gte: start,
+        lte: end,
+      },
+    },
+    include: {
+      customer: { select: { name: true, email: true } },
+      location: { select: { name: true } },
+      items: {
+        include: {
+          options: true,
+        },
+      },
+    },
+    orderBy: { createdAt: 'desc' },
+  });
+
+  const exportData = orders.map((order) => ({
+    'Order Number': order.orderNumber,
+    'Date': order.createdAt.toLocaleString(),
+    'Customer': order.customer?.name || order.guestName || 'Guest',
+    'Email': order.customer?.email || order.guestEmail || '',
+    'Type': order.orderType,
+    'Status': order.status,
+    'Location': order.location.name,
+    'Subtotal': order.subtotal,
+    'Tax': order.tax,
+    'Delivery Fee': order.deliveryFee,
+    'Discount': order.discount,
+    'Total': order.total,
+    'Items Count': order.items.length,
+    'Items Details': order.items.map(i => `${i.name} x${i.quantity}`).join(', '),
+  }));
+
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.json_to_sheet(exportData);
+  XLSX.utils.book_append_sheet(wb, ws, 'Orders');
+
+  const buf = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
+
+  res.setHeader('Content-Disposition', `attachment; filename="orders_${startDate}_${endDate}.xlsx"`);
+  res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+  res.send(buf);
+}
+
+export async function downloadOrderTemplate(req: Request, res: Response): Promise<void> {
+  const templateData = [
+    {
+      'Order Number': 'KA-SAMPLE-001',
+      'Date': new Date().toISOString().split('T')[0],
+      'Customer': '王小明',
+      'Email': 'customer@example.com',
+      'Phone': '0912345678',
+      'Type': 'PICKUP',
+      'Status': 'DELIVERED',
+      'Location': 'Main Store',
+      'Total': 100.00,
+    }
+  ];
+
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.json_to_sheet(templateData);
+  XLSX.utils.book_append_sheet(wb, ws, 'Template');
+
+  const buf = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
+
+  res.setHeader('Content-Disposition', 'attachment; filename="order_import_template.xlsx"');
+  res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+  res.send(buf);
+}
+
+export async function importOrders(req: Request, res: Response): Promise<void> {
+  if (!req.file) {
+    res.status(400).json({ success: false, error: 'No file uploaded' });
+    return;
+  }
+
+  try {
+    const workbook = XLSX.read(req.file.buffer, { type: 'buffer' });
+    const sheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[sheetName];
+    const data = XLSX.utils.sheet_to_json(worksheet) as any[];
+
+    const results = {
+      total: data.length,
+      success: 0,
+      failed: 0,
+      errors: [] as string[],
+    };
+
+    // Get all locations for mapping
+    const locations = await prisma.location.findMany();
+    const locationMap = new Map(locations.map(l => [l.name.toLowerCase(), l.id]));
+
+    for (const row of data) {
+      try {
+        const orderNumber = row['Order Number'] || row['orderNumber'] || generateOrderNumber();
+        const total = parseFloat(row['Total'] || row['total'] || '0');
+        const orderType = (row['Type'] || row['orderType'] || 'PICKUP').toUpperCase() as any;
+        const status = (row['Status'] || row['status'] || 'DELIVERED').toUpperCase() as any;
+        const createdAt = row['Date'] || row['createdAt'] ? new Date(row['Date'] || row['createdAt']) : new Date();
+        const locationName = row['Location'] || row['locationName'];
+        
+        let locationId = row['locationId'];
+        if (!locationId && locationName) {
+          locationId = locationMap.get(locationName.toLowerCase());
+        }
+
+        if (!locationId) {
+          if (locations.length > 0) {
+            locationId = locations[0].id;
+          } else {
+            throw new Error(`Location not found: ${locationName}`);
+          }
+        }
+
+        const guestName = row['Customer'] || row['guestName'] || 'Imported Guest';
+        const guestEmail = row['Email'] || row['guestEmail'];
+        const guestPhone = row['Phone'] || row['guestPhone'];
+
+        const order = await prisma.order.create({
+          data: {
+            orderNumber,
+            total,
+            subtotal: total, // Simple mapping
+            orderType,
+            status,
+            createdAt,
+            locationId,
+            guestName,
+            guestEmail,
+            guestPhone,
+            items: {
+              create: {
+                name: 'Imported Order Item',
+                quantity: 1,
+                unitPrice: total,
+                subtotal: total,
+                menuItemId: (await prisma.menuItem.findFirst())?.id || 'placeholder',
+              }
+            }
+          }
+        });
+
+        results.success++;
+      } catch (err: any) {
+        results.failed++;
+        results.errors.push(`Row ${results.success + results.failed}: ${err.message}`);
+      }
+    }
+
+    auditLog(req, { action: 'create', entity: 'Order', details: { action: 'bulk_import', ...results } });
+
+    res.json({ success: true, data: results });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
 }

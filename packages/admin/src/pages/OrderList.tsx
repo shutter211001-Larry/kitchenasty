@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '../context/AuthContext.js';
 
 interface Order {
   id: string;
@@ -45,6 +46,8 @@ export default function OrderList() {
   const [page, setPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState('');
   const [typeFilter, setTypeFilter] = useState('');
+  const { user } = useAuth();
+  const canManage = user?.role === 'SUPER_ADMIN' || user?.role === 'MANAGER';
 
   const token = localStorage.getItem('token') || '';
 
@@ -69,10 +72,135 @@ export default function OrderList() {
       .finally(() => setLoading(false));
   }, [page, statusFilter, typeFilter, token]);
 
+  async function handleDelete(id: string) {
+    if (!window.confirm('確定要刪除這筆訂單嗎？此操作無法復原。')) return;
+    try {
+      const res = await fetch(`/api/orders/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error('刪除失敗');
+      setOrders(orders.filter(o => o.id !== id));
+    } catch (err: any) {
+      setError(err.message);
+    }
+  }
+
+  async function handleExport() {
+    const startDate = prompt('請輸入起始日期 (YYYY-MM-DD)', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
+    const endDate = prompt('請輸入結束日期 (YYYY-MM-DD)', new Date().toISOString().split('T')[0]);
+
+    if (!startDate || !endDate) return;
+
+    try {
+      setLoading(true);
+      const res = await fetch(`/api/orders/export?startDate=${startDate}&endDate=${endDate}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error('匯出失敗');
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `orders_${startDate}_${endDate}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleImport(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      setLoading(true);
+      const res = await api.upload<{ data: { success: number, failed: number, errors: string[] } }>('/orders/import', formData);
+      alert(`匯入完成！成功: ${res.data.success}, 失敗: ${res.data.failed}`);
+      if (res.data.errors.length > 0) {
+        console.error('Import errors:', res.data.errors);
+      }
+      window.location.reload();
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+      if (e.target) e.target.value = ''; // Reset input
+    }
+  }
+
+  async function handleDownloadTemplate() {
+    try {
+      setLoading(true);
+      const res = await fetch('/api/orders/template', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error('下載失敗');
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'order_import_template.xlsx';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-gray-900">{t('orders.title')}</h1>
+        <div className="flex items-center gap-3">
+          <Link
+            to="/orders/new"
+            className="bg-primary-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary-700 transition-colors flex items-center gap-2"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            + 新增訂單
+          </Link>
+          {canManage && (
+            <button
+              onClick={handleExport}
+              className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-700 transition-colors flex items-center gap-2"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              匯出報表 (Excel)
+            </button>
+          )}
+          {canManage && (
+            <label className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors flex items-center gap-2 cursor-pointer">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+              </svg>
+              匯入報表
+              <input type="file" className="hidden" accept=".xlsx, .xls, .csv" onChange={handleImport} />
+            </label>
+          )}
+          {canManage && (
+            <button
+              onClick={handleDownloadTemplate}
+              className="text-primary-600 hover:text-primary-700 text-xs font-medium"
+            >
+              下載範本
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Filters */}
@@ -182,12 +310,22 @@ export default function OrderList() {
                       {new Date(order.createdAt).toLocaleDateString()}
                     </td>
                     <td className="px-4 py-3">
-                      <Link
-                        to={`/orders/${order.id}`}
-                        className="text-primary-600 hover:text-primary-700 text-xs font-medium"
-                      >
-                        {t('common.view') || '查看'}
-                      </Link>
+                      <div className="flex items-center gap-3">
+                        <Link
+                          to={`/orders/${order.id}`}
+                          className="text-primary-600 hover:text-primary-700 text-xs font-medium"
+                        >
+                          {t('common.view') || '查看'}
+                        </Link>
+                        {canManage && (
+                          <button
+                            onClick={() => handleDelete(order.id)}
+                            className="text-red-600 hover:text-red-700 text-xs font-medium"
+                          >
+                            {t('common.delete') || '刪除'}
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
