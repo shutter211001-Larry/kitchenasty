@@ -41,6 +41,8 @@ interface MenuItemDetail {
   category: { id: string; name: string; nameTranslations?: Record<string, string> };
   options: MenuOption[];
   allergens: Allergen[];
+  unit: string | null;
+  unitTranslations: Record<string, string> | null;
 }
 
 interface Props {
@@ -205,7 +207,10 @@ export default function MenuItemModal({ itemId, onClose }: Props) {
             <div className="p-6">
               <div className="flex items-start justify-between gap-3 mb-2">
                 <h2 className="text-xl font-bold text-gray-900">{getTranslated(item.name, item.nameTranslations, i18n.language)}</h2>
-                <span className="text-xl font-bold text-primary-600">${item.price.toFixed(2)}</span>
+                <div className="flex flex-col items-end">
+                  <span className="text-xl font-bold text-primary-600">${item.price.toFixed(2)}</span>
+                  <span className="text-[10px] text-gray-400">/ {getTranslated(item.unit || '份', item.unitTranslations || {}, i18n.language)}</span>
+                </div>
               </div>
 
               <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">

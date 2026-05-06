@@ -221,6 +221,8 @@ model MenuItem {
   image       String?
   isActive    Boolean @default(true)
   sortOrder   Int     @default(0)
+  unit        String? @default("份")
+  unitTranslations Json? // { "en": "pcs", "ko": "개" }
 
   // Stock
   trackStock Boolean @default(false)

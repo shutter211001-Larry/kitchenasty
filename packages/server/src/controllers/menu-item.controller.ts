@@ -34,6 +34,8 @@ const createMenuItemSchema = z.object({
   sortOrder: z.number().int().min(0).default(0),
   trackStock: z.boolean().default(false),
   stockQty: z.number().int().min(0).default(0),
+  unit: z.string().optional(),
+  unitTranslations: z.record(z.string()).optional(),
   orderType: z.enum(['DELIVERY', 'PICKUP']).nullable().optional(),
   categoryId: z.string().min(1),
   locationId: z.string().optional(),

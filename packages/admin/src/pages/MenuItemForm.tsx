@@ -33,6 +33,8 @@ interface MenuItemData {
   trackStock: boolean;
   stockQty: number;
   categoryId: string;
+  unit: string;
+  unitTranslations: Record<string, string>;
 }
 
 interface CategoryOption {
@@ -64,6 +66,8 @@ const emptyItem: MenuItemData = {
   trackStock: false,
   stockQty: 0,
   categoryId: '',
+  unit: '份',
+  unitTranslations: {},
 };
 
 const LANGUAGES = [
@@ -134,6 +138,8 @@ export default function MenuItemForm() {
           trackStock: item.trackStock,
           stockQty: item.stockQty,
           categoryId: item.categoryId,
+          unit: item.unit || '份',
+          unitTranslations: item.unitTranslations || {},
         });
         if (item.image) setImageUrl(item.image);
         if (item.options?.length) {
@@ -291,7 +297,7 @@ export default function MenuItemForm() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-semibold text-gray-800">
-          {isEdit ? 'Edit Menu Item' : 'New Menu Item'}
+          {isEdit ? '編輯產品' : '新增產品'}
         </h2>
         <button onClick={() => navigate('/menu/items')} className="text-gray-500 hover:text-gray-700 text-sm">
           Back to Menu Items
@@ -305,12 +311,12 @@ export default function MenuItemForm() {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-8">
-        {/* Basic Info */}
+        {/* 基本資訊 */}
         <section className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Basic Information</h3>
+          <h3 className="text-lg font-medium text-gray-900 mb-4">基本資訊 (Basic Information)</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Name *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">名稱 (Name) *</label>
               <input
                 type="text"
                 value={form.name}
@@ -320,7 +326,7 @@ export default function MenuItemForm() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Slug *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">網址別名 (Slug) *</label>
               <input
                 type="text"
                 value={form.slug}
@@ -331,7 +337,7 @@ export default function MenuItemForm() {
               />
             </div>
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">描述 (Description)</label>
               <textarea
                 value={form.description}
                 onChange={(e) => updateField('description', e.target.value)}
@@ -340,21 +346,21 @@ export default function MenuItemForm() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Category *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">分類 (Category) *</label>
               <select
                 value={form.categoryId}
                 onChange={(e) => updateField('categoryId', e.target.value)}
                 required
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
               >
-                <option value="">Select category</option>
+                <option value="">請選擇分類</option>
                 {categories.map((c) => (
                   <option key={c.id} value={c.id}>{c.name}</option>
                 ))}
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Price *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">價格 (Price) *</label>
               <input
                 type="number"
                 value={form.price}
@@ -366,7 +372,17 @@ export default function MenuItemForm() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Sort Order</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">單位 (如：杯、份)</label>
+              <input
+                type="text"
+                value={form.unit}
+                onChange={(e) => updateField('unit', e.target.value)}
+                placeholder="預設單位"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">排序 (Sort Order)</label>
               <input
                 type="number"
                 value={form.sortOrder}
@@ -383,7 +399,7 @@ export default function MenuItemForm() {
                   onChange={(e) => updateField('isActive', e.target.checked)}
                   className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
                 />
-                <span className="text-sm text-gray-700">Active</span>
+                <span className="text-sm text-gray-700">上架 (Active)</span>
               </label>
               <label className="flex items-center gap-2">
                 <input
@@ -392,11 +408,11 @@ export default function MenuItemForm() {
                   onChange={(e) => updateField('trackStock', e.target.checked)}
                   className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
                 />
-                <span className="text-sm text-gray-700">Track Stock</span>
+                <span className="text-sm text-gray-700">追蹤庫存 (Track Stock)</span>
               </label>
               {form.trackStock && (
                 <div className="flex items-center gap-2">
-                  <label className="text-sm text-gray-700">Qty:</label>
+                  <label className="text-sm text-gray-700">庫存數量:</label>
                   <input
                     type="number"
                     value={form.stockQty}
@@ -407,12 +423,34 @@ export default function MenuItemForm() {
                 </div>
               )}
             </div>
+
+            {/* Unit Translations */}
+            <div className="mt-4 bg-gray-50 p-3 rounded-lg border border-gray-100">
+              <p className="text-[10px] font-bold text-gray-400 uppercase mb-2 tracking-wider">單位翻譯 (Unit Translations)</p>
+              <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-2">
+                {LANGUAGES.map((lang) => (
+                  <div key={lang.code}>
+                    <label className="block text-[9px] text-gray-400 uppercase">{lang.code}</label>
+                    <input
+                      type="text"
+                      value={form.unitTranslations[lang.code] || ''}
+                      onChange={(e) => {
+                        const newTrans = { ...form.unitTranslations, [lang.code]: e.target.value };
+                        updateField('unitTranslations', newTrans);
+                      }}
+                      placeholder={lang.label}
+                      className="w-full text-[10px] border border-gray-200 rounded px-1.5 py-1 focus:border-primary-300 outline-none"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </section>
 
         {/* Translations */}
         <section className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Translations</h3>
+          <h3 className="text-lg font-medium text-gray-900 mb-4">多語言翻譯 (Translations)</h3>
           <div className="space-y-6">
             {LANGUAGES.map((lang) => (
               <div key={lang.code} className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border border-gray-100 rounded-lg">
@@ -420,7 +458,7 @@ export default function MenuItemForm() {
                   <span className="text-sm font-bold text-primary-600">{lang.label} ({lang.code})</span>
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-500 mb-1">Name ({lang.code})</label>
+                  <label className="block text-xs text-gray-500 mb-1">名稱 ({lang.code})</label>
                   <input
                     type="text"
                     value={form.nameTranslations[lang.code] || ''}
@@ -432,7 +470,7 @@ export default function MenuItemForm() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-500 mb-1">Description ({lang.code})</label>
+                  <label className="block text-xs text-gray-500 mb-1">描述 ({lang.code})</label>
                   <textarea
                     value={form.descriptionTranslations[lang.code] || ''}
                     onChange={(e) => {
@@ -492,48 +530,48 @@ export default function MenuItemForm() {
           </section>
         )}
 
-        {/* Menu Options */}
+        {/* 產品選項 */}
         <section className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-medium text-gray-900">Menu Options</h3>
+            <h3 className="text-lg font-medium text-gray-900">產品選項 (Menu Options)</h3>
             <button type="button" onClick={addOption} className="text-primary-600 hover:text-primary-700 text-sm font-medium">
-              + Add Option Group
+              + 新增選項組
             </button>
           </div>
           {options.length === 0 && (
-            <p className="text-sm text-gray-400">No options configured. Add option groups like "Size", "Toppings", etc.</p>
+            <p className="text-sm text-gray-400">尚未設定選項。可以新增如「尺寸」、「甜度」、「配料」等選項組。</p>
           )}
           <div className="space-y-6">
             {options.map((opt, optIdx) => (
               <div key={optIdx} className="border border-gray-200 rounded-lg p-4">
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-sm font-medium text-gray-700">Option Group #{optIdx + 1}</span>
+                  <span className="text-sm font-medium text-gray-700">選項組 #{optIdx + 1}</span>
                   <button type="button" onClick={() => removeOption(optIdx)} className="text-red-500 hover:text-red-700 text-sm">
-                    Remove Group
+                    刪除此組
                   </button>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
                   <div>
-                    <label className="block text-xs text-gray-500 mb-1">Name *</label>
+                    <label className="block text-xs text-gray-500 mb-1">名稱 *</label>
                     <input
                       type="text"
                       value={opt.name}
                       onChange={(e) => updateOption(optIdx, 'name', e.target.value)}
-                      placeholder="e.g. Size"
+                      placeholder="例如：尺寸、甜度"
                       className="w-full border border-gray-300 rounded px-2 py-1 text-sm"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs text-gray-500 mb-1">Display Type</label>
+                    <label className="block text-xs text-gray-500 mb-1">顯示類型</label>
                     <select
                       value={opt.displayType}
                       onChange={(e) => updateOption(optIdx, 'displayType', e.target.value)}
                       className="w-full border border-gray-300 rounded px-2 py-1 text-sm"
                     >
-                      <option value="SELECT">Select</option>
-                      <option value="RADIO">Radio</option>
-                      <option value="CHECKBOX">Checkbox</option>
-                      <option value="QUANTITY">Quantity</option>
+                      <option value="SELECT">下拉選單 (Select)</option>
+                      <option value="RADIO">單選按鈕 (Radio)</option>
+                      <option value="CHECKBOX">複選框 (Checkbox)</option>
+                      <option value="QUANTITY">數量選擇 (Quantity)</option>
                     </select>
                   </div>
                   <div className="flex items-center gap-4 mt-4">
@@ -544,7 +582,7 @@ export default function MenuItemForm() {
                         onChange={(e) => updateOption(optIdx, 'isRequired', e.target.checked)}
                         className="rounded border-gray-300 text-primary-600"
                       />
-                      <span className="text-xs text-gray-700">Required</span>
+                      <span className="text-xs text-gray-700">必填 (Required)</span>
                     </label>
                   </div>
                 </div>
@@ -568,12 +606,12 @@ export default function MenuItemForm() {
                   ))}
                 </div>
 
-                {/* Option Values */}
+                {/* 選項值 */}
                 <div className="ml-4 space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-medium text-gray-500">Values</span>
+                    <span className="text-xs font-medium text-gray-500">選項內容 (Values)</span>
                     <button type="button" onClick={() => addOptionValue(optIdx)} className="text-primary-600 text-xs font-medium">
-                      + Add Value
+                      + 新增選項內容
                     </button>
                   </div>
                   {opt.values.map((val, valIdx) => (
@@ -583,7 +621,7 @@ export default function MenuItemForm() {
                         type="text"
                         value={val.name}
                         onChange={(e) => updateOptionValue(optIdx, valIdx, 'name', e.target.value)}
-                        placeholder="Value name"
+                        placeholder="選項名稱 (如：大杯、半糖)"
                         className="flex-1 border border-gray-300 rounded px-2 py-1 text-sm"
                       />
                       <div className="flex items-center gap-1">
@@ -603,7 +641,7 @@ export default function MenuItemForm() {
                           onChange={(e) => updateOptionValue(optIdx, valIdx, 'isDefault', e.target.checked)}
                           className="rounded border-gray-300 text-primary-600"
                         />
-                        <span className="text-xs text-gray-500">Default</span>
+                        <span className="text-xs text-gray-500">預設值</span>
                       </label>
                       {opt.values.length > 1 && (
                         <button type="button" onClick={() => removeOptionValue(optIdx, valIdx)} className="text-red-400 hover:text-red-600 text-xs" aria-label={`Remove value ${val.name || valIdx + 1}`}>
@@ -639,11 +677,11 @@ export default function MenuItemForm() {
         {/* Allergens & Mealtimes */}
         <section className="bg-white rounded-lg shadow p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Allergens */}
+            {/* 過敏原 (Allergens) */}
             <div>
-              <h3 className="text-lg font-medium text-gray-900 mb-3">Allergens</h3>
+              <h3 className="text-lg font-medium text-gray-900 mb-3">過敏原 (Allergens)</h3>
               {allergens.length === 0 ? (
-                <p className="text-sm text-gray-400">No allergens defined.</p>
+                <p className="text-sm text-gray-400">尚未設定過敏原。</p>
               ) : (
                 <div className="space-y-2">
                   {allergens.map((a) => (
@@ -667,11 +705,11 @@ export default function MenuItemForm() {
               )}
             </div>
 
-            {/* Mealtimes */}
+            {/* 用餐時段 (Mealtimes) */}
             <div>
-              <h3 className="text-lg font-medium text-gray-900 mb-3">Mealtimes</h3>
+              <h3 className="text-lg font-medium text-gray-900 mb-3">用餐時段 (Mealtimes)</h3>
               {mealtimes.length === 0 ? (
-                <p className="text-sm text-gray-400">No mealtimes defined.</p>
+                <p className="text-sm text-gray-400">尚未設定用餐時段。</p>
               ) : (
                 <div className="space-y-2">
                   {mealtimes.map((m) => (
