@@ -39,7 +39,7 @@ interface LocationData {
   lng?: number;
 }
 
-const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+const DAYS = ['星期日 (Sunday)', '星期一 (Monday)', '星期二 (Tuesday)', '星期三 (Wednesday)', '星期四 (Thursday)', '星期五 (Friday)', '星期六 (Saturday)'];
 
 const defaultHours: OperatingHour[] = DAYS.map((_, i) => ({
   dayOfWeek: i,
@@ -176,13 +176,13 @@ export default function LocationForm() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-semibold text-gray-800">
-          {isEdit ? 'Edit Location' : 'New Location'}
+          {isEdit ? '編輯門市' : '新增門市'}
         </h2>
         <button
           onClick={() => navigate('/locations')}
           className="text-gray-500 hover:text-gray-700 text-sm"
         >
-          Back to Locations
+          返回門市列表
         </button>
       </div>
 
@@ -195,10 +195,10 @@ export default function LocationForm() {
       <form onSubmit={handleSubmit} className="space-y-8">
         {/* Basic Info */}
         <section className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Basic Information</h3>
+          <h3 className="text-lg font-medium text-gray-900 mb-4">基本資訊</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Name *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">名稱 *</label>
               <input
                 type="text"
                 value={form.name}
@@ -208,7 +208,7 @@ export default function LocationForm() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Slug *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">網址代稱 (Slug) *</label>
               <input
                 type="text"
                 value={form.slug}
@@ -219,7 +219,7 @@ export default function LocationForm() {
               />
             </div>
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">描述 (Description)</label>
               <textarea
                 value={form.description}
                 onChange={(e) => updateField('description', e.target.value)}
@@ -228,7 +228,7 @@ export default function LocationForm() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">電話</label>
               <input
                 type="text"
                 value={form.phone}
@@ -250,10 +250,10 @@ export default function LocationForm() {
 
         {/* Address */}
         <section className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Address</h3>
+          <h3 className="text-lg font-medium text-gray-900 mb-4">地址資訊</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Street Address *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">詳細地址 *</label>
               <input
                 type="text"
                 value={form.address}
@@ -263,7 +263,7 @@ export default function LocationForm() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">City *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">城市 *</label>
               <input
                 type="text"
                 value={form.city}
@@ -273,7 +273,7 @@ export default function LocationForm() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">State</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">省份/區域</label>
               <input
                 type="text"
                 value={form.state}
@@ -282,7 +282,7 @@ export default function LocationForm() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Postal Code *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">郵遞區號 *</label>
               <input
                 type="text"
                 value={form.postalCode}
@@ -292,7 +292,7 @@ export default function LocationForm() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Country</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">國家 (Country Code)</label>
               <input
                 type="text"
                 value={form.country}
@@ -325,7 +325,7 @@ export default function LocationForm() {
 
         {/* Service Settings */}
         <section className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Service Settings</h3>
+          <h3 className="text-lg font-medium text-gray-900 mb-4">服務與營運設定</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <label className="flex items-center gap-2">
               <input
@@ -334,7 +334,7 @@ export default function LocationForm() {
                 onChange={(e) => updateField('isActive', e.target.checked)}
                 className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
               />
-              <span className="text-sm text-gray-700">Active</span>
+              <span className="text-sm text-gray-700">營運中 (Active)</span>
             </label>
             <label className="flex items-center gap-2">
               <input
@@ -343,7 +343,7 @@ export default function LocationForm() {
                 onChange={(e) => updateField('deliveryEnabled', e.target.checked)}
                 className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
               />
-              <span className="text-sm text-gray-700">Delivery Enabled</span>
+              <span className="text-sm text-gray-700">提供外送 (Delivery)</span>
             </label>
             <label className="flex items-center gap-2">
               <input
@@ -352,10 +352,10 @@ export default function LocationForm() {
                 onChange={(e) => updateField('pickupEnabled', e.target.checked)}
                 className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
               />
-              <span className="text-sm text-gray-700">Pickup Enabled</span>
+              <span className="text-sm text-gray-700">提供自取 (Pickup)</span>
             </label>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Min Order (Delivery) $</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">外送最低消 ($)</label>
               <input
                 type="number"
                 value={form.minOrderDelivery}
@@ -366,7 +366,7 @@ export default function LocationForm() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Delivery Lead Time (min)</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">外送預計時間 (分鐘)</label>
               <input
                 type="number"
                 value={form.deliveryLeadTime}
@@ -376,7 +376,7 @@ export default function LocationForm() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Pickup Lead Time (min)</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">自取預計時間 (分鐘)</label>
               <input
                 type="number"
                 value={form.pickupLeadTime}
@@ -390,7 +390,7 @@ export default function LocationForm() {
 
         {/* Operating Hours */}
         <section className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Operating Hours</h3>
+          <h3 className="text-lg font-medium text-gray-900 mb-4">營業時間</h3>
           <div className="space-y-3">
             {hours.map((hour, index) => (
               <div key={hour.dayOfWeek} className="flex items-center gap-4">
@@ -406,7 +406,7 @@ export default function LocationForm() {
                     }}
                     className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
                   />
-                  <span className="text-xs text-gray-500">Open</span>
+                  <span className="text-xs text-gray-500">營業</span>
                 </label>
                 <input
                   type="time"
@@ -439,24 +439,24 @@ export default function LocationForm() {
         {/* Delivery Zones */}
         <section className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-medium text-gray-900">Delivery Zones</h3>
+            <h3 className="text-lg font-medium text-gray-900">外送區域</h3>
             <button
               type="button"
               onClick={addZone}
               className="text-primary-600 hover:text-primary-700 text-sm font-medium"
             >
-              + Add Zone
+              + 新增區域
             </button>
           </div>
           {zones.length === 0 && (
-            <p className="text-sm text-gray-400">No delivery zones configured.</p>
+            <p className="text-sm text-gray-400">尚未設定外送區域。</p>
           )}
           <div className="space-y-3">
             {zones.map((zone, index) => (
               <div key={index} className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg">
                 <input
                   type="text"
-                  placeholder="Zone name"
+                  placeholder="區域名稱"
                   value={zone.name}
                   onChange={(e) => {
                     const updated = [...zones];
@@ -469,7 +469,7 @@ export default function LocationForm() {
                   <span className="text-xs text-gray-500">$</span>
                   <input
                     type="number"
-                    placeholder="Charge"
+                    placeholder="運費"
                     value={zone.charge}
                     onChange={(e) => {
                       const updated = [...zones];
@@ -485,7 +485,7 @@ export default function LocationForm() {
                   <span className="text-xs text-gray-500">Min $</span>
                   <input
                     type="number"
-                    placeholder="Min order"
+                    placeholder="最低消費"
                     value={zone.minOrder}
                     onChange={(e) => {
                       const updated = [...zones];
@@ -516,14 +516,14 @@ export default function LocationForm() {
             onClick={() => navigate('/locations')}
             className="px-6 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50"
           >
-            Cancel
+            取消
           </button>
           <button
             type="submit"
             disabled={saving}
             className="px-6 py-2 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700 disabled:opacity-50 transition-colors"
           >
-            {saving ? 'Saving...' : isEdit ? 'Update Location' : 'Create Location'}
+            {saving ? '儲存中...' : isEdit ? '更新門市資訊' : '建立門市'}
           </button>
         </div>
       </form>
