@@ -76,7 +76,7 @@ export default function KitchenDisplay() {
     
     const s = io(socketUrl, { 
       path: '/socket.io', 
-      transports: ['websocket', 'polling'],
+      transports: ['polling', 'websocket'], // Use polling first to bypass proxy/load-balancer issues, then upgrade
       reconnectionAttempts: 10,
       timeout: 20000,
     });

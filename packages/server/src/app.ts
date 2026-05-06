@@ -40,13 +40,7 @@ export function createApp() {
   // Middleware
   app.use(requestId);
   app.use(helmet());
-  const corsOrigins = process.env.CORS_ORIGINS?.split(',').map(s => s.trim().replace(/\/$/, '')) || [
-    'http://localhost:5173', 
-    'http://localhost:5174', 
-    'http://localhost:3000',
-    'https://admin-panel-production-7660.up.railway.app',
-    'https://storefront-production-31e8.up.railway.app'
-  ];
+  const corsOrigins = process.env.CORS_ORIGINS?.split(',') || ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:3000'];
   app.use(cors({
     origin: (origin, callback) => {
       if (!origin || corsOrigins.includes('*')) {
