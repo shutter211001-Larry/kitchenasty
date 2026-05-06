@@ -395,6 +395,29 @@ export async function sendTestEmail(req: Request, res: Response): Promise<void> 
   const encryption = (mail.encryption || 'none').trim();
 
   try {
+    // Fallback for Resend API if SMTP is blocked
+    if (host.toLowerCase().includes('resend')) {
+      const apiResponse = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${pass}`,
+        },
+        body: JSON.stringify({
+          from: senderEmail.includes('resend.dev') ? senderEmail : `${senderName} <onboarding@resend.dev>`,
+          to: [to],
+          subject: 'KitchenAsty — Test Email (via API)',
+          html: '<div style="font-family:sans-serif;padding:20px"><h2>Test Email</h2><p>This email was sent via the Resend HTTP API to bypass SMTP blocking.</p></div>',
+        }),
+      });
+
+      const apiData = await apiResponse.json();
+      if (!apiResponse.ok) throw new Error(apiData.message || 'Resend API error');
+      
+      res.json({ success: true, message: 'Test email sent successfully via API' });
+      return;
+    }
+
     const transporter = nodemailer.createTransport({
       host,
       port,
