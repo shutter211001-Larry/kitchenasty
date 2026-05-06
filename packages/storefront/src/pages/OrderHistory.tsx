@@ -3,6 +3,7 @@ import { Link, Navigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext.js';
 import { useTheme } from '../context/ThemeContext.js';
+import { useRecentOrders } from '../hooks/useRecentOrders.js';
 
 interface OrderSummary {
   id: string;
