@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { api } from '../lib/api.js';
 
@@ -549,6 +549,25 @@ export default function MenuItemForm() {
                   </div>
                 </div>
 
+                {/* Option Group Translations */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-2 mb-4 bg-gray-50 p-2 rounded">
+                  {LANGUAGES.map((lang) => (
+                    <div key={lang.code}>
+                      <label className="block text-[10px] text-gray-400 uppercase">{lang.code}</label>
+                      <input
+                        type="text"
+                        value={opt.nameTranslations?.[lang.code] || ''}
+                        onChange={(e) => {
+                          const newTrans = { ...(opt.nameTranslations || {}), [lang.code]: e.target.value };
+                          updateOption(optIdx, 'nameTranslations', newTrans);
+                        }}
+                        placeholder={lang.label}
+                        className="w-full text-[10px] border border-gray-200 rounded px-1.5 py-0.5 focus:border-primary-300 outline-none"
+                      />
+                    </div>
+                  ))}
+                </div>
+
                 {/* Option Values */}
                 <div className="ml-4 space-y-2">
                   <div className="flex items-center justify-between">
@@ -558,7 +577,8 @@ export default function MenuItemForm() {
                     </button>
                   </div>
                   {opt.values.map((val, valIdx) => (
-                    <div key={valIdx} className="flex items-center gap-2">
+                    <React.Fragment key={valIdx}>
+                    <div className="flex items-center gap-2">
                       <input
                         type="text"
                         value={val.name}
@@ -591,6 +611,24 @@ export default function MenuItemForm() {
                         </button>
                       )}
                     </div>
+                    {/* Value Translations */}
+                    <div className="flex flex-wrap gap-2 mb-3 ml-2 border-l-2 border-gray-100 pl-2">
+                      {LANGUAGES.map((lang) => (
+                        <div key={lang.code} className="flex items-center gap-1">
+                          <span className="text-[9px] text-gray-400 w-4">{lang.code}:</span>
+                          <input
+                            type="text"
+                            value={val.nameTranslations?.[lang.code] || ''}
+                            onChange={(e) => {
+                              const newTrans = { ...(val.nameTranslations || {}), [lang.code]: e.target.value };
+                              updateOptionValue(optIdx, valIdx, 'nameTranslations', newTrans);
+                            }}
+                            className="text-[9px] w-20 border border-gray-100 rounded px-1 py-0.5 focus:border-primary-200 outline-none"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </React.Fragment>
                   ))}
                 </div>
               </div>
