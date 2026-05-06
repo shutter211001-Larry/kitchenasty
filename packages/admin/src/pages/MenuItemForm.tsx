@@ -71,6 +71,7 @@ const emptyItem: MenuItemData = {
 };
 
 const LANGUAGES = [
+  { code: 'zh-TW', label: '繁體中文 (Traditional Chinese)' },
   { code: 'en', label: '英文 (English)' },
   { code: 'ja', label: '日文 (Japanese)' },
   { code: 'ko', label: '韓文 (Korean)' },
