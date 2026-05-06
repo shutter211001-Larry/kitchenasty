@@ -16,6 +16,7 @@ interface CategoryData {
 const LANGUAGES = [
   { code: 'en', label: 'English' },
   { code: 'ja', label: 'Japanese' },
+  { code: 'ko', label: 'Korean' },
   { code: 'th', label: 'Thai' },
   { code: 'tl', label: 'Filipino' },
   { code: 'vi', label: 'Vietnamese' },

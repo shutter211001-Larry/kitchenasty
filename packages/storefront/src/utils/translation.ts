@@ -7,8 +7,12 @@ export const getTranslated = (
   translations: any,
   lang: string
 ): string => {
-  if (translations && typeof translations === 'object' && translations[lang]) {
-    return translations[lang];
+  if (translations && typeof translations === 'object') {
+    // 1. Try target language
+    if (translations[lang]) return translations[lang];
+    // 2. Fallback to English
+    if (lang !== 'en' && translations['en']) return translations['en'];
   }
+  // 3. Fallback to base
   return base;
 };
