@@ -268,9 +268,14 @@ export default function KitchenDisplay() {
                       {/* Order header */}
                       <div className="flex items-center justify-between mb-2">
                         <div>
-                          <span className="font-mono text-sm font-bold text-gray-900">
-                            #{order.orderNumber}
-                          </span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xl font-black text-primary-600 bg-primary-50 px-2 rounded">
+                              {order.pickupNumber || '---'}
+                            </span>
+                            <span className="font-mono text-xs text-gray-400">
+                              #{order.orderNumber}
+                            </span>
+                          </div>
                           <span className={`ml-2 text-xs px-1.5 py-0.5 rounded font-medium ${order.orderType === 'DELIVERY'
                               ? 'bg-blue-100 text-blue-700'
                               : 'bg-green-100 text-green-700'

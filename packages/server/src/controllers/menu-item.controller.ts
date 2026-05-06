@@ -5,6 +5,7 @@ import { auditLog } from '../lib/audit.js';
 
 const menuOptionValueSchema = z.object({
   name: z.string().min(1),
+  nameTranslations: z.record(z.string()).optional(),
   priceModifier: z.number().default(0),
   isDefault: z.boolean().default(false),
   sortOrder: z.number().int().min(0).default(0),
@@ -12,6 +13,7 @@ const menuOptionValueSchema = z.object({
 
 const menuOptionSchema = z.object({
   name: z.string().min(1),
+  nameTranslations: z.record(z.string()).optional(),
   displayType: z.enum(['SELECT', 'RADIO', 'CHECKBOX', 'QUANTITY']).default('SELECT'),
   isRequired: z.boolean().default(false),
   minSelect: z.number().int().min(0).default(0),
@@ -22,8 +24,10 @@ const menuOptionSchema = z.object({
 
 const createMenuItemSchema = z.object({
   name: z.string().min(1),
+  nameTranslations: z.record(z.string()).optional(),
   slug: z.string().min(1).regex(/^[a-z0-9-]+$/, 'Slug must be lowercase alphanumeric with hyphens'),
   description: z.string().optional(),
+  descriptionTranslations: z.record(z.string()).optional(),
   price: z.number().min(0),
   image: z.string().optional(),
   isActive: z.boolean().default(true),
@@ -125,13 +129,20 @@ export async function createMenuItem(req: Request, res: Response): Promise<void>
       options: options ? {
         create: options.map((opt) => ({
           name: opt.name,
+          nameTranslations: opt.nameTranslations,
           displayType: opt.displayType,
           isRequired: opt.isRequired,
           minSelect: opt.minSelect,
           maxSelect: opt.maxSelect,
           sortOrder: opt.sortOrder,
           values: {
-            create: opt.values,
+            create: opt.values.map((v) => ({
+              name: v.name,
+              nameTranslations: v.nameTranslations,
+              priceModifier: v.priceModifier,
+              isDefault: v.isDefault,
+              sortOrder: v.sortOrder,
+            })),
           },
         })),
       } : undefined,
@@ -179,13 +190,20 @@ export async function updateMenuItem(req: Request<{ id: string }>, res: Response
         deleteMany: {},
         create: options.map((opt) => ({
           name: opt.name,
+          nameTranslations: opt.nameTranslations,
           displayType: opt.displayType,
           isRequired: opt.isRequired,
           minSelect: opt.minSelect,
           maxSelect: opt.maxSelect,
           sortOrder: opt.sortOrder,
           values: {
-            create: opt.values,
+            create: opt.values.map((v) => ({
+              name: v.name,
+              nameTranslations: v.nameTranslations,
+              priceModifier: v.priceModifier,
+              isDefault: v.isDefault,
+              sortOrder: v.sortOrder,
+            })),
           },
         })),
       } : undefined,

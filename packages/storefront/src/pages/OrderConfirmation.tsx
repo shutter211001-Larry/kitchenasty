@@ -20,6 +20,15 @@ export default function OrderConfirmation() {
       <h1 className="text-3xl font-bold text-gray-900 mb-2">{t('orderConfirmation.title')}</h1>
       <p className="text-gray-600 mb-2">{t('orderConfirmation.thankYou')}</p>
 
+      {order?.pickupNumber && (
+        <div className="mb-8">
+          <p className="text-sm text-gray-500 mb-1">您的取餐號碼 / Pickup No.</p>
+          <div className="text-6xl font-black text-primary-600 tracking-tighter">
+            {order.pickupNumber}
+          </div>
+        </div>
+      )}
+
       {(order?.orderNumber || id) && (
         <p className="text-sm text-gray-500 mb-6">
           {t('orderConfirmation.orderNumber')} {order?.orderNumber ? `#${order.orderNumber}` : `ID: ${id}`}

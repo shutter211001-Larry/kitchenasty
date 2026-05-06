@@ -187,8 +187,10 @@ model DeliveryZone {
 model Category {
   id          String  @id @default(cuid())
   name        String
+  nameTranslations Json? // { "en": "...", "ja": "...", "th": "...", "tl": "...", "vi": "...", "id": "..." }
   slug        String  @unique
   description String?
+  descriptionTranslations Json?
   image       String?
   sortOrder   Int     @default(0)
   isActive    Boolean @default(true)
@@ -211,8 +213,10 @@ model Category {
 model MenuItem {
   id          String  @id @default(cuid())
   name        String
+  nameTranslations Json?
   slug        String  @unique
   description String?
+  descriptionTranslations Json?
   price       Float
   image       String?
   isActive    Boolean @default(true)
@@ -247,6 +251,7 @@ model MenuOption {
   menuItemId  String
   menuItem    MenuItem             @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
   name        String
+  nameTranslations Json?
   displayType MenuOptionDisplayType @default(SELECT)
   isRequired  Boolean              @default(false)
   minSelect   Int                  @default(0)
@@ -270,6 +275,7 @@ model MenuOptionValue {
   menuOptionId    String
   menuOption      MenuOption @relation(fields: [menuOptionId], references: [id], onDelete: Cascade)
   name            String
+  nameTranslations Json?
   priceModifier   Float      @default(0)
   isDefault       Boolean    @default(false)
   sortOrder       Int        @default(0)
@@ -348,6 +354,7 @@ enum OrderStatus {
 model Order {
   id          String      @id @default(cuid())
   orderNumber String      @unique
+  pickupNumber String?     @db.VarChar(10) // 001-999 loop
   customerId  String?
   customer    Customer?   @relation(fields: [customerId], references: [id])
   locationId  String

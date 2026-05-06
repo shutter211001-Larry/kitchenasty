@@ -1,10 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useCart } from '../context/CartContext.js';
+import { getTranslated } from '../utils/translation.js';
 
 interface OptionValue {
   id: string;
   name: string;
+  nameTranslations?: Record<string, string>;
   priceModifier: number;
   isDefault: boolean;
   sortOrder: number;
@@ -13,6 +15,7 @@ interface OptionValue {
 interface MenuOption {
   id: string;
   name: string;
+  nameTranslations?: Record<string, string>;
   displayType: 'SELECT' | 'RADIO' | 'CHECKBOX' | 'QUANTITY';
   isRequired: boolean;
   minSelect: number;
@@ -28,12 +31,14 @@ interface Allergen {
 interface MenuItemDetail {
   id: string;
   name: string;
+  nameTranslations?: Record<string, string>;
   slug: string;
   description: string | null;
+  descriptionTranslations?: Record<string, string>;
   price: number;
   image: string | null;
   isActive: boolean;
-  category: { id: string; name: string };
+  category: { id: string; name: string; nameTranslations?: Record<string, string> };
   options: MenuOption[];
   allergens: Allergen[];
 }
@@ -44,7 +49,7 @@ interface Props {
 }
 
 export default function MenuItemModal({ itemId, onClose }: Props) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { addItem } = useCart();
   const [item, setItem] = useState<MenuItemDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -177,7 +182,7 @@ export default function MenuItemModal({ itemId, onClose }: Props) {
             {/* Image */}
             <div className="h-48 relative">
               {item.image ? (
-                <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                <img src={item.image} alt={getTranslated(item.name, item.nameTranslations, i18n.language)} className="w-full h-full object-cover" />
               ) : (
                 <div className="w-full h-full bg-gradient-to-br from-primary-100 to-primary-200 flex items-center justify-center">
                   <svg className="w-16 h-16 text-primary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -199,16 +204,16 @@ export default function MenuItemModal({ itemId, onClose }: Props) {
             {/* Content */}
             <div className="p-6">
               <div className="flex items-start justify-between gap-3 mb-2">
-                <h2 className="text-xl font-bold text-gray-900">{item.name}</h2>
+                <h2 className="text-xl font-bold text-gray-900">{getTranslated(item.name, item.nameTranslations, i18n.language)}</h2>
                 <span className="text-xl font-bold text-primary-600">${item.price.toFixed(2)}</span>
               </div>
 
               <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
-                {item.category.name}
+                {getTranslated(item.category.name, item.category.nameTranslations, i18n.language)}
               </span>
 
               {item.description && (
-                <p className="text-gray-600 mt-3 text-sm">{item.description}</p>
+                <p className="text-gray-600 mt-3 text-sm">{getTranslated(item.description, item.descriptionTranslations, i18n.language)}</p>
               )}
 
               {/* Allergens */}
@@ -233,7 +238,7 @@ export default function MenuItemModal({ itemId, onClose }: Props) {
                   {item.options.map((opt) => (
                     <div key={opt.id}>
                       <div className="flex items-center gap-2 mb-2">
-                        <h3 className="text-sm font-semibold text-gray-900">{opt.name}</h3>
+                        <h3 className="text-sm font-semibold text-gray-900">{getTranslated(opt.name, opt.nameTranslations, i18n.language)}</h3>
                         {opt.isRequired && (
                           <span className="text-xs text-red-500 font-medium">{t('common.required')}</span>
                         )}
@@ -248,7 +253,7 @@ export default function MenuItemModal({ itemId, onClose }: Props) {
                           {!opt.isRequired && <option value="">None</option>}
                           {opt.values.map((val) => (
                             <option key={val.id} value={val.id}>
-                              {val.name}
+                              {getTranslated(val.name, val.nameTranslations, i18n.language)}
                               {val.priceModifier !== 0 && ` (+$${val.priceModifier.toFixed(2)})`}
                             </option>
                           ))}
@@ -274,7 +279,7 @@ export default function MenuItemModal({ itemId, onClose }: Props) {
                                   onChange={() => handleSelect(opt.id, val.id, opt.displayType, opt.maxSelect)}
                                   className="accent-primary-600"
                                 />
-                                <span className="text-sm text-gray-900 flex-1">{val.name}</span>
+                                <span className="text-sm text-gray-900 flex-1">{getTranslated(val.name, val.nameTranslations, i18n.language)}</span>
                                 {val.priceModifier !== 0 && (
                                   <span className="text-xs text-gray-500">
                                     +${val.priceModifier.toFixed(2)}

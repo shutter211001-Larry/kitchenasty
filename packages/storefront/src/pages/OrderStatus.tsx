@@ -19,6 +19,7 @@ interface OrderItem {
 interface OrderDetail {
   id: string;
   orderNumber: string;
+  pickupNumber: string | null;
   orderType: string;
   status: string;
   subtotal: number;
@@ -127,7 +128,15 @@ export default function OrderStatus() {
     <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">#{order.orderNumber}</h1>
+          {order.pickupNumber && (
+            <div className="mb-2">
+              <span className="text-xs text-gray-400 font-medium uppercase tracking-wider">Pickup No.</span>
+              <div className="text-5xl font-black text-primary-600 leading-none">
+                {order.pickupNumber}
+              </div>
+            </div>
+          )}
+          <h1 className="text-xl font-bold text-gray-900">#{order.orderNumber}</h1>
           <p className="text-sm text-gray-500 mt-1">
             {new Date(order.createdAt).toLocaleString()}
           </p>

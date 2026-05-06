@@ -4,6 +4,7 @@ import { api } from '../lib/api.js';
 
 interface OptionValue {
   name: string;
+  nameTranslations?: Record<string, string>;
   priceModifier: number;
   isDefault: boolean;
   sortOrder: number;
@@ -11,6 +12,7 @@ interface OptionValue {
 
 interface MenuOption {
   name: string;
+  nameTranslations?: Record<string, string>;
   displayType: 'SELECT' | 'RADIO' | 'CHECKBOX' | 'QUANTITY';
   isRequired: boolean;
   minSelect: number;
@@ -21,8 +23,10 @@ interface MenuOption {
 
 interface MenuItemData {
   name: string;
+  nameTranslations: Record<string, string>;
   slug: string;
   description: string;
+  descriptionTranslations: Record<string, string>;
   price: number;
   isActive: boolean;
   sortOrder: number;
@@ -50,8 +54,10 @@ interface MealtimeOption {
 
 const emptyItem: MenuItemData = {
   name: '',
+  nameTranslations: {},
   slug: '',
   description: '',
+  descriptionTranslations: {},
   price: 0,
   isActive: true,
   sortOrder: 0,
@@ -59,6 +65,15 @@ const emptyItem: MenuItemData = {
   stockQty: 0,
   categoryId: '',
 };
+
+const LANGUAGES = [
+  { code: 'en', label: 'English' },
+  { code: 'ja', label: 'Japanese' },
+  { code: 'th', label: 'Thai' },
+  { code: 'tl', label: 'Filipino' },
+  { code: 'vi', label: 'Vietnamese' },
+  { code: 'id', label: 'Indonesian' },
+];
 
 const emptyOptionValue: OptionValue = { name: '', priceModifier: 0, isDefault: false, sortOrder: 0 };
 const emptyOption: MenuOption = {
@@ -108,8 +123,10 @@ export default function MenuItemForm() {
         const item = res.data;
         setForm({
           name: item.name,
+          nameTranslations: item.nameTranslations || {},
           slug: item.slug,
           description: item.description || '',
+          descriptionTranslations: item.descriptionTranslations || {},
           price: item.price,
           isActive: item.isActive,
           sortOrder: item.sortOrder,
@@ -121,6 +138,7 @@ export default function MenuItemForm() {
         if (item.options?.length) {
           setOptions(item.options.map((o: any) => ({
             name: o.name,
+            nameTranslations: o.nameTranslations || {},
             displayType: o.displayType,
             isRequired: o.isRequired,
             minSelect: o.minSelect,
@@ -128,6 +146,7 @@ export default function MenuItemForm() {
             sortOrder: o.sortOrder,
             values: o.values.map((v: any) => ({
               name: v.name,
+              nameTranslations: v.nameTranslations || {},
               priceModifier: v.priceModifier,
               isDefault: v.isDefault,
               sortOrder: v.sortOrder,
@@ -387,6 +406,44 @@ export default function MenuItemForm() {
                 </div>
               )}
             </div>
+          </div>
+        </section>
+
+        {/* Translations */}
+        <section className="bg-white rounded-lg shadow p-6">
+          <h3 className="text-lg font-medium text-gray-900 mb-4">Translations</h3>
+          <div className="space-y-6">
+            {LANGUAGES.map((lang) => (
+              <div key={lang.code} className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border border-gray-100 rounded-lg">
+                <div className="md:col-span-2">
+                  <span className="text-sm font-bold text-primary-600">{lang.label} ({lang.code})</span>
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">Name ({lang.code})</label>
+                  <input
+                    type="text"
+                    value={form.nameTranslations[lang.code] || ''}
+                    onChange={(e) => {
+                      const newTrans = { ...form.nameTranslations, [lang.code]: e.target.value };
+                      updateField('nameTranslations', newTrans);
+                    }}
+                    className="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:ring-1 focus:ring-primary-500 outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">Description ({lang.code})</label>
+                  <textarea
+                    value={form.descriptionTranslations[lang.code] || ''}
+                    onChange={(e) => {
+                      const newTrans = { ...form.descriptionTranslations, [lang.code]: e.target.value };
+                      updateField('descriptionTranslations', newTrans);
+                    }}
+                    rows={1}
+                    className="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:ring-1 focus:ring-primary-500 outline-none"
+                  />
+                </div>
+              </div>
+            ))}
           </div>
         </section>
 

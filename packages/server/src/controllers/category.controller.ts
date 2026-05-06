@@ -5,8 +5,10 @@ import { auditLog } from '../lib/audit.js';
 
 const createCategorySchema = z.object({
   name: z.string().min(1),
+  nameTranslations: z.record(z.string()).optional(),
   slug: z.string().min(1).regex(/^[a-z0-9-]+$/, 'Slug must be lowercase alphanumeric with hyphens'),
   description: z.string().optional(),
+  descriptionTranslations: z.record(z.string()).optional(),
   image: z.string().optional(),
   sortOrder: z.number().int().min(0).default(0),
   isActive: z.boolean().default(true),

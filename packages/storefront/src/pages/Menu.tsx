@@ -3,10 +3,12 @@ import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useApi } from '../hooks/useApi.js';
 import MenuItemModal from '../components/MenuItemModal.js';
+import { getTranslated } from '../utils/translation.js';
 
 interface Category {
   id: string;
   name: string;
+  nameTranslations?: Record<string, string>;
   slug: string;
   isActive: boolean;
   parentId: string | null;
@@ -17,14 +19,16 @@ interface Category {
 interface MenuItem {
   id: string;
   name: string;
+  nameTranslations?: Record<string, string>;
   slug: string;
   description: string | null;
+  descriptionTranslations?: Record<string, string>;
   price: number;
   image: string | null;
   isActive: boolean;
   trackStock: boolean;
   stockQty: number;
-  category: { id: string; name: string };
+  category: { id: string; name: string; nameTranslations?: Record<string, string> };
   _count: { options: number; allergens: number; mealtimes: number };
 }
 
@@ -34,7 +38,7 @@ interface MenuResponse {
 }
 
 export default function Menu() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   const [selectedCategory, setSelectedCategory] = useState<string | null>(
     searchParams.get('category')
@@ -170,7 +174,7 @@ export default function Menu() {
                     : 'text-gray-600 hover:bg-gray-100'
                 }`}
               >
-                {cat.name}
+                {getTranslated(cat.name, cat.nameTranslations, i18n.language)}
                 <span className="text-gray-400 ml-1 text-xs">({cat._count.menuItems})</span>
               </button>
             ))}
@@ -207,7 +211,7 @@ export default function Menu() {
                     className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow text-left"
                   >
                     {item.image ? (
-                      <img src={item.image} alt={item.name} className="h-40 w-full object-cover" />
+                      <img src={item.image} alt={getTranslated(item.name, item.nameTranslations, i18n.language)} className="h-40 w-full object-cover" />
                     ) : (
                       <div className="h-40 bg-gradient-to-br from-primary-100 to-primary-200 flex items-center justify-center">
                         <svg className="w-12 h-12 text-primary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -217,17 +221,17 @@ export default function Menu() {
                     )}
                     <div className="p-4">
                       <div className="flex items-start justify-between gap-2">
-                        <h3 className="font-semibold text-gray-900">{item.name}</h3>
+                        <h3 className="font-semibold text-gray-900">{getTranslated(item.name, item.nameTranslations, i18n.language)}</h3>
                         <span className="text-primary-600 font-bold whitespace-nowrap">
                           ${item.price.toFixed(2)}
                         </span>
                       </div>
                       {item.description && (
-                        <p className="text-sm text-gray-500 mt-1 line-clamp-2">{item.description}</p>
+                        <p className="text-sm text-gray-500 mt-1 line-clamp-2">{getTranslated(item.description, item.descriptionTranslations, i18n.language)}</p>
                       )}
                       <div className="flex items-center gap-2 mt-3">
                         <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
-                          {item.category.name}
+                          {getTranslated(item.category.name, item.category.nameTranslations, i18n.language)}
                         </span>
                         {item._count.options > 0 && (
                           <span className="text-xs text-primary-500 bg-primary-50 px-2 py-0.5 rounded-full">

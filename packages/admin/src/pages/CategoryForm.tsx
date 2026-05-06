@@ -4,12 +4,23 @@ import { api } from '../lib/api.js';
 
 interface CategoryData {
   name: string;
+  nameTranslations: Record<string, string>;
   slug: string;
   description: string;
+  descriptionTranslations: Record<string, string>;
   sortOrder: number;
   isActive: boolean;
   parentId: string;
 }
+
+const LANGUAGES = [
+  { code: 'en', label: 'English' },
+  { code: 'ja', label: 'Japanese' },
+  { code: 'th', label: 'Thai' },
+  { code: 'tl', label: 'Filipino' },
+  { code: 'vi', label: 'Vietnamese' },
+  { code: 'id', label: 'Indonesian' },
+];
 
 interface CategoryOption {
   id: string;
@@ -18,8 +29,10 @@ interface CategoryOption {
 
 const emptyCategory: CategoryData = {
   name: '',
+  nameTranslations: {},
   slug: '',
   description: '',
+  descriptionTranslations: {},
   sortOrder: 0,
   isActive: true,
   parentId: '',
@@ -49,8 +62,10 @@ export default function CategoryForm() {
         const cat = res.data;
         setForm({
           name: cat.name,
+          nameTranslations: cat.nameTranslations || {},
           slug: cat.slug,
           description: cat.description || '',
+          descriptionTranslations: cat.descriptionTranslations || {},
           sortOrder: cat.sortOrder,
           isActive: cat.isActive,
           parentId: cat.parentId || '',
@@ -180,6 +195,44 @@ export default function CategoryForm() {
                 <span className="text-sm text-gray-700">Active</span>
               </label>
             </div>
+          </div>
+        </section>
+
+        {/* Translations */}
+        <section className="bg-white rounded-lg shadow p-6">
+          <h3 className="text-lg font-medium text-gray-900 mb-4">Translations</h3>
+          <div className="space-y-6">
+            {LANGUAGES.map((lang) => (
+              <div key={lang.code} className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border border-gray-100 rounded-lg">
+                <div className="md:col-span-2">
+                  <span className="text-sm font-bold text-primary-600">{lang.label} ({lang.code})</span>
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">Name ({lang.code})</label>
+                  <input
+                    type="text"
+                    value={form.nameTranslations[lang.code] || ''}
+                    onChange={(e) => {
+                      const newTrans = { ...form.nameTranslations, [lang.code]: e.target.value };
+                      updateField('nameTranslations', newTrans);
+                    }}
+                    className="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:ring-1 focus:ring-primary-500 outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">Description ({lang.code})</label>
+                  <textarea
+                    value={form.descriptionTranslations[lang.code] || ''}
+                    onChange={(e) => {
+                      const newTrans = { ...form.descriptionTranslations, [lang.code]: e.target.value };
+                      updateField('descriptionTranslations', newTrans);
+                    }}
+                    rows={1}
+                    className="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:ring-1 focus:ring-primary-500 outline-none"
+                  />
+                </div>
+              </div>
+            ))}
           </div>
         </section>
 

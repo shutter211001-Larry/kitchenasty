@@ -285,9 +285,26 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
     }
   }
 
+  // Generate pickup number (001-999 loop)
+  const lastOrder = await prisma.order.findFirst({
+    where: { locationId: location.id },
+    orderBy: { createdAt: 'desc' },
+    select: { pickupNumber: true },
+  });
+
+  let nextPickup = 1;
+  if (lastOrder?.pickupNumber) {
+    const lastNum = parseInt(lastOrder.pickupNumber, 10);
+    if (!isNaN(lastNum)) {
+      nextPickup = (lastNum % 999) + 1;
+    }
+  }
+  const pickupNumber = String(nextPickup).padStart(3, '0');
+
   const order = await prisma.order.create({
     data: {
       orderNumber: generateOrderNumber(),
+      pickupNumber,
       customerId,
       locationId: location.id,
       orderType,
