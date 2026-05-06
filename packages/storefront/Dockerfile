@@ -15,6 +15,9 @@ COPY packages/shared/ packages/shared/
 RUN npm run build -w packages/shared
 
 COPY packages/storefront/ packages/storefront/
+ARG VITE_API_URL
+ENV VITE_API_URL=${VITE_API_URL}
+
 RUN npm run build -w packages/storefront
 
 FROM nginx:alpine
