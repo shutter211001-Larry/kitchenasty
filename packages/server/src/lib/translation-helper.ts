@@ -43,9 +43,11 @@ export async function autoTranslateMenuItem(data: any, existingData?: any) {
     logger.info({ fieldsCount: fieldsToTranslate.length }, `Auto-translating menu item: ${data.name}`);
     const translations = await translateFields(fieldsToTranslate, SUPPORTED_LANGUAGES);
     logger.debug({ translationsReceived: Object.keys(translations) }, 'AI translation received');
+    logger.info(`[DEBUG] Received translations object from AI: ${JSON.stringify(translations)}`);
 
     if (translations.name) {
       data.nameTranslations = { ...(data.nameTranslations || {}), ...translations.name };
+      logger.info(`[DEBUG] Final nameTranslations: ${JSON.stringify(data.nameTranslations)}`);
     }
     if (translations.description) {
       data.descriptionTranslations = { ...(data.descriptionTranslations || {}), ...translations.description };
