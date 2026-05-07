@@ -143,7 +143,17 @@ function applyColorVars(prefix: string, hex: string) {
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [settings, setSettings] = useState<SiteSettings>(defaultSettings);
+  const [settings, setSettings] = useState<SiteSettings>(() => {
+    const cached = localStorage.getItem('site_settings');
+    if (cached) {
+      try {
+        return { ...defaultSettings, ...JSON.parse(cached) };
+      } catch (e) {
+        return defaultSettings;
+      }
+    }
+    return defaultSettings;
+  });
   const [isDark, setIsDark] = useState(false);
 
   useEffect(() => {
@@ -158,7 +168,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
           if (data.heroSection?.backgroundImage) {
             data.heroSection.backgroundImage = getFullUrl(data.heroSection.backgroundImage);
           }
-          setSettings(prev => ({ ...prev, ...data }));
+          const finalSettings = { ...defaultSettings, ...data };
+          setSettings(finalSettings);
+          localStorage.setItem('site_settings', JSON.stringify(finalSettings));
         }
       })
       .catch(() => {});

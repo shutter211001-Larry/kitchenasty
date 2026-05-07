@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useCart } from '../context/CartContext.js';
 import { getTranslated } from '../utils/translation.js';
+import { useApi } from '../hooks/useApi.js';
+import { API_BASE } from '../lib/api.js';
 import { getFullUrl } from '../utils/url.js';
 
 interface OptionValue {
