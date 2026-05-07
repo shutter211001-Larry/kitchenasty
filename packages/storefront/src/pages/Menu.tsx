@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useApi } from '../hooks/useApi.js';
 import MenuItemModal from '../components/MenuItemModal.js';
 import { getTranslated } from '../utils/translation.js';
+import { getFullUrl } from '../utils/url.js';
 
 interface Category {
   id: string;
@@ -77,7 +78,11 @@ export default function Menu() {
         return res.json();
       })
       .then((json) => {
-        setItems(json.data);
+        const data = json.data.map((item: MenuItem) => ({
+          ...item,
+          image: getFullUrl(item.image)
+        }));
+        setItems(data);
         setPagination(json.pagination);
       })
       .catch((err) => setItemsError(err.message))

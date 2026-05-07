@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { API_BASE } from '../lib/api.js';
+import { getFullUrl } from '../utils/url.js';
 
 interface HeroSection {
   title?: string;
@@ -150,7 +151,14 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       .then((res) => res.json())
       .then((json) => {
         if (json.success && json.data) {
-          setSettings(prev => ({ ...prev, ...json.data }));
+          const data = json.data;
+          // Normalize paths
+          if (data.logo) data.logo = getFullUrl(data.logo);
+          if (data.favicon) data.favicon = getFullUrl(data.favicon);
+          if (data.heroSection?.backgroundImage) {
+            data.heroSection.backgroundImage = getFullUrl(data.heroSection.backgroundImage);
+          }
+          setSettings(prev => ({ ...prev, ...data }));
         }
       })
       .catch(() => {});

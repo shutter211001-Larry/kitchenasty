@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useCart } from '../context/CartContext.js';
 import { getTranslated } from '../utils/translation.js';
+import { getFullUrl } from '../utils/url.js';
 
 interface OptionValue {
   id: string;
@@ -67,7 +68,9 @@ export default function MenuItemModal({ itemId, onClose }: Props) {
         return res.json();
       })
       .then((json) => {
-        setItem(json.data);
+        const data = json.data;
+        if (data.image) data.image = getFullUrl(data.image);
+        setItem(data);
         // Set defaults
         const defaults: Record<string, string[]> = {};
         for (const opt of json.data.options) {

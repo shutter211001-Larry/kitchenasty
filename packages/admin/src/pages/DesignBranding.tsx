@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { getFullUrl } from '../utils/url.js';
 
 export default function DesignBranding() {
   const token = localStorage.getItem('token') || '';
@@ -22,8 +23,8 @@ export default function DesignBranding() {
         if (res.success && res.data) {
           setSiteName(res.data.siteName);
           setSiteTitle(res.data.siteTitle);
-          setLogo(res.data.logo);
-          setFavicon(res.data.favicon);
+          setLogo(getFullUrl(res.data.logo));
+          setFavicon(getFullUrl(res.data.favicon));
         }
       })
       .catch(() => {})
@@ -66,8 +67,8 @@ export default function DesignBranding() {
       });
       const data = await res.json();
       if (data.success && data.data) {
-        if (type === 'logo') setLogo(data.data.logo);
-        else setFavicon(data.data.favicon);
+        if (type === 'logo') setLogo(getFullUrl(data.data.logo));
+        else setFavicon(getFullUrl(data.data.favicon));
         setSuccess(`${type === 'logo' ? '標誌 (Logo)' : '網站圖示 (Favicon)'} 已成功上傳`);
         setTimeout(() => setSuccess(''), 3000);
       } else {
