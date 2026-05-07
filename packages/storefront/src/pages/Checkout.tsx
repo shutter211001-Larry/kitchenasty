@@ -93,6 +93,8 @@ export default function Checkout() {
         }
       })
       .catch(() => {});
+  }, []);
+
   // Intersection Observer for the checkout button
   useEffect(() => {
     const observer = new IntersectionObserver(
