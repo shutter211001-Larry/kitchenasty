@@ -2,89 +2,108 @@
 @tailwind components;
 @tailwind utilities;
 
+/* 
+  ==========================================================================
+  PURE SEMANTIC DESIGN SYSTEM
+  ==========================================================================
+  Objects are defined by their Environment (Surfaces).
+  Typography is context-agnostic and relies on inherited tokens.
+*/
+
 :root {
-  /* --- 1. Brand Colors --- */
-  --color-primary-50: #fff7ed;
-  --color-primary-100: #ffedd5;
-  --color-primary-200: #fed7aa;
-  --color-primary-300: #fdba74;
-  --color-primary-400: #fb923c;
-  --color-primary-500: #f97316;
-  --color-primary-600: #ea580c;
-  --color-primary-700: #c2410c;
-  --color-primary-800: #9a3412;
-  --color-primary-900: #7c2d12;
-  --color-primary-950: #431407;
+  /* --- 1. Brand Tokens --- */
+  --brand-primary: #ea580c;
+  --brand-primary-dark: #c2410c;
+  
+  /* --- 2. Environment Tokens (Light Mode) --- */
+  --env-bg-base: #ffffff;
+  --env-text-main: #111827;
+  --env-text-sub: #4b5563;
+  --env-text-hint: #94a3b8;
 
-  --color-secondary-50: #f8faf2;
-  --color-secondary-500: #cfd69a;
-  --color-secondary-950: #1a1c0e;
-
-  /* --- 2. Surface Definitions (Light Mode) --- */
-  --surface-base: #ffffff;
-  --surface-card: #ffffff;
-  --surface-brand: var(--color-primary-600);
-
-  /* --- 3. Semantic Text Tokens (Light Mode Defaults) --- */
-  --text-main: #111827; /* Slate 900 */
-  --text-sub: #4b5563;  /* Gray 600 */
-  --text-hint: #94a3b8; /* Slate 400 */
+  --env-card-bg: #ffffff;
+  --env-card-text-main: #111827;
+  --env-card-text-sub: #4b5563;
 }
 
 html.dark {
   color-scheme: dark;
   
-  /* --- 2. Surface Definitions (Dark Mode) --- */
-  --surface-base: #0f172a; /* Slate 950 */
-  --surface-card: #ffffff; /* Keep cards WHITE as per design */
-  --surface-brand: var(--color-primary-600);
+  /* --- 2. Environment Tokens (Dark Mode) --- */
+  --env-bg-base: #0f172a;
+  --env-text-main: #f8fafc;
+  --env-text-sub: #cbd5e1;
+  --env-text-hint: #64748b;
 
-  /* --- 3. Semantic Text Tokens (Dark Mode Defaults) --- */
-  --text-main: #f8fafc; /* Slate 50 */
-  --text-sub: #cbd5e1;  /* Slate 300 */
-  --text-hint: #64748b; /* Slate 500 */
+  /* Card remains WHITE in dark mode as per design preference */
+  --env-card-bg: #ffffff;
+  --env-card-text-main: #111827;
+  --env-card-text-sub: #4b5563;
 }
 
-/* --- 4. Object Logic: Surface Overrides --- */
-/* Each surface type re-defines what "main" and "sub" text looks like inside it */
+/* --- 3. Surface Objects --- */
 
-.surface-base {
-  background-color: var(--surface-base);
-  color: var(--text-main);
+/* The root surface (Page) */
+body {
+  background-color: var(--env-bg-base);
+  --color-text-main: var(--env-text-main);
+  --color-text-sub: var(--env-text-sub);
+  --color-text-hint: var(--env-text-hint);
+  color: var(--color-text-main);
 }
 
+/* The Card surface (Items, Modals, Drawers) */
 .surface-card, .bg-white {
-  background-color: var(--surface-card);
-  /* Force dark text inside cards regardless of global theme */
-  --text-main: #111827; 
-  --text-sub: #4b5563;
-  --text-hint: #94a3b8;
-  border: 1px solid color-mix(in srgb, var(--text-main), transparent 90%);
+  background-color: var(--env-card-bg) !important;
+  --color-text-main: var(--env-card-text-main) !important;
+  --color-text-sub: var(--env-card-text-sub) !important;
+  --color-text-hint: var(--env-text-hint);
+  color: var(--color-text-main);
 }
 
+/* The Brand surface (Hero, Buttons) */
 .surface-brand, .bg-primary-600 {
-  background-color: var(--surface-brand);
-  /* Scientific Contrast for Brand areas */
+  background-color: var(--brand-primary);
+  /* Scientific Contrast */
   @supports (color: oklch(from white l 0 0)) {
-    --text-main: oklch(from var(--surface-brand) clamp(0.05, calc((l - 0.45) * -1000), 0.95) 0 0);
-    --text-sub: color-mix(in srgb, var(--text-main), transparent 20%);
+    --color-text-main: oklch(from var(--brand-primary) clamp(0.05, calc((l - 0.45) * -1000), 0.95) 0 0);
+    --color-text-sub: color-mix(in srgb, var(--color-text-main), transparent 20%);
   }
-  color: var(--text-main);
+  color: var(--color-text-main);
 }
 
-/* --- 5. Semantic Typography Classes --- */
-.text-main { color: var(--text-main) !important; }
-.text-sub  { color: var(--text-sub) !important; }
-.text-hint { color: var(--text-hint) !important; }
+/* --- 4. Typography Objects --- */
 
-/* --- 6. Helper Utilities --- */
+.text-main { color: var(--color-text-main) !important; }
+.text-sub  { color: var(--color-text-sub) !important; }
+.text-hint { color: var(--color-text-hint) !important; }
+
+/* --- 5. Component Logic --- */
+
 .btn-primary {
   @apply px-6 py-3 rounded-xl font-bold transition-all hover:brightness-110 active:scale-95;
-  background-color: var(--surface-brand);
-  color: var(--text-main);
+  background-color: var(--brand-primary);
+  /* Scientific Contrast */
+  @supports (color: oklch(from white l 0 0)) {
+    color: oklch(from var(--brand-primary) clamp(0.05, calc((l - 0.45) * -1000), 0.95) 0 0);
+  }
 }
 
-html.dark body {
-  background-color: var(--surface-base);
-  color: var(--text-main);
+.cart-badge {
+  @apply rounded-full flex items-center justify-center font-medium;
+  background-color: var(--brand-primary);
+  /* Scientific Contrast */
+  @supports (color: oklch(from white l 0 0)) {
+    color: oklch(from var(--brand-primary) clamp(0.05, calc((l - 0.45) * -1000), 0.95) 0 0);
+  }
+}
+
+/* Global Fix for Cart Badge in any Header */
+header button[aria-label*="art"] span,
+header button[aria-label*="購物車"] span {
+  background-color: var(--brand-primary) !important;
+  /* Use the calculation logic */
+  @supports (color: oklch(from white l 0 0)) {
+    color: oklch(from var(--brand-primary) clamp(0.05, calc((l - 0.45) * -1000), 0.95) 0 0) !important;
+  }
 }
