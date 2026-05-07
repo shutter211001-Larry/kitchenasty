@@ -24,11 +24,22 @@
 
   /* Environment-Aware Smart Text System */
   --current-bg: #ffffff; /* Default background */
-  --smart-text: oklch(from var(--current-bg) clamp(0.05, calc((l - 0.45) * -1000), 0.95) 0 0);
+  --smart-text: #111827; /* Fallback: Slate 900 for older browsers */
 }
 
 html.dark {
   --current-bg: #0f172a;
+  --smart-text: #f8fafc; /* Fallback: Slate 50 for older browsers */
+}
+
+/* Modern Browser Logic (Relative Color Syntax) */
+@supports (color: oklch(from white l 0 0)) {
+  :root {
+    --smart-text: oklch(from var(--current-bg) clamp(0.05, calc((l - 0.45) * -1000), 0.95) 0 0);
+  }
+  html.dark {
+    --smart-text: oklch(from var(--current-bg) clamp(0.05, calc((l - 0.45) * -1000), 0.95) 0 0);
+  }
 }
 
 /* Map background classes to set the environment variable without forcing a color change */
@@ -50,17 +61,23 @@ html.dark .bg-gray-50 { --current-bg: #f9fafb; }
 html.dark .bg-gray-900 { --current-bg: #111827; }
 
 /* Apply the Smart Text color to common text classes */
-.text-gray-900, .text-gray-800, .text-gray-700 {
-  color: var(--smart-text);
+.text-gray-900, .text-gray-800, .text-gray-700, .text-smart {
+  /* Default Fallback */
+  color: #111827; 
+  
+  /* Dynamic calculation based on LOCAL --current-bg */
+  @supports (color: oklch(from white l 0 0)) {
+    color: oklch(from var(--current-bg) clamp(0.05, calc((l - 0.45) * -1000), 0.95) 0 0);
+  }
 }
-
-/* Optional: specific utility if needed */
-.text-smart { color: var(--smart-text); }
 
 /* Fallback for secondary/muted text in the current environment */
 .text-gray-500, .text-gray-400 {
-  /* Slightly more transparent or muted version of the smart text */
-  color: color-mix(in srgb, var(--smart-text), transparent 30%);
+  color: #64748b;
+  @supports (color: oklch(from white l 0 0)) {
+    --local-smart: oklch(from var(--current-bg) clamp(0.05, calc((l - 0.45) * -1000), 0.95) 0 0);
+    color: color-mix(in srgb, var(--local-smart), transparent 30%);
+  }
 }
 
 /* Placeholder visibility based on current bg */
