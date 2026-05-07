@@ -1,5 +1,4 @@
-import fetch from 'node-fetch';
-import { logger } from './logger.js';
+import logger from './logger.js';
 
 const GEMINI_API_KEY = process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY;
 

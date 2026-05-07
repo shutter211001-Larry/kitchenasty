@@ -1,5 +1,5 @@
 import { translateContent, translateFields } from './ai.js';
-import { logger } from './logger.js';
+import logger from './logger.js';
 
 export const SUPPORTED_LANGUAGES = ['en', 'th', 'id', 'vi', 'tl', 'es', 'fr', 'de', 'it', 'pt'];
 
