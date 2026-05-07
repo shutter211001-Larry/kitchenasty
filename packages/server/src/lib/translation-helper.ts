@@ -8,7 +8,7 @@ export const SUPPORTED_LANGUAGES = ['en', 'th', 'id', 'vi', 'tl', 'es', 'fr', 'd
  */
 export async function autoTranslateMenuItem(data: any, existingData?: any) {
   try {
-    const fieldsToTranslate = [];
+    const fieldsToTranslate: { key: string; value: string }[] = [];
 
     const shouldTranslate = (field: string, translationsField: string) => {
       if (!data[field]) return false;
@@ -68,7 +68,7 @@ export async function autoTranslateMenuItem(data: any, existingData?: any) {
  */
 export async function autoTranslateCategory(data: any, existingData?: any) {
   try {
-    const fieldsToTranslate = [];
+    const fieldsToTranslate: { key: string; value: string }[] = [];
 
     const shouldTranslate = (field: string, translationsField: string) => {
       if (!data[field]) return false;
@@ -119,7 +119,7 @@ export async function autoTranslateSiteSettings(data: any, existingData?: any) {
       const existingHero = existingData?.heroSection || {};
       hero.translations = existingHero.translations || {};
 
-      const fields = [];
+      const fields: { key: string; value: string }[] = [];
       const checkAndPush = (key: string) => {
         if (!hero[key]) return;
         if (existingData && hero[key] === existingHero[key] && hero.translations[key] && Object.keys(hero.translations[key]).length >= SUPPORTED_LANGUAGES.length) return;
@@ -146,7 +146,7 @@ export async function autoTranslateSiteSettings(data: any, existingData?: any) {
         const existingFeature = existingFeatures[i] || {};
         feature.translations = existingFeature.translations || {};
 
-        const fields = [];
+        const fields: { key: string; value: string }[] = [];
         const checkAndPush = (key: string) => {
           if (!feature[key]) return;
           if (existingData && feature[key] === existingFeature[key] && feature.translations[key] && Object.keys(feature.translations[key]).length >= SUPPORTED_LANGUAGES.length) return;
@@ -169,7 +169,7 @@ export async function autoTranslateSiteSettings(data: any, existingData?: any) {
       const existingCta = existingData?.ctaSection || {};
       cta.translations = existingCta.translations || {};
 
-      const fields = [];
+      const fields: { key: string; value: string }[] = [];
       const checkAndPush = (key: string) => {
         if (!cta[key]) return;
         if (existingData && cta[key] === existingCta[key] && cta.translations[key] && Object.keys(cta.translations[key]).length >= SUPPORTED_LANGUAGES.length) return;
@@ -198,7 +198,7 @@ export async function autoTranslateSiteSettings(data: any, existingData?: any) {
  */
 export async function autoTranslateAllergen(data: any, existingData?: any) {
   try {
-    const fieldsToTranslate = [];
+    const fieldsToTranslate: { key: string; value: string }[] = [];
 
     const shouldTranslate = (field: string, translationsField: string) => {
       if (!data[field]) return false;
@@ -231,7 +231,7 @@ export async function autoTranslateAllergen(data: any, existingData?: any) {
  */
 export async function autoTranslateMealtime(data: any, existingData?: any) {
   try {
-    const fieldsToTranslate = [];
+    const fieldsToTranslate: { key: string; value: string }[] = [];
 
     const shouldTranslate = (field: string, translationsField: string) => {
       if (!data[field]) return false;
