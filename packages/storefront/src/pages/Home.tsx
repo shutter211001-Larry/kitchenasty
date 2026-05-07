@@ -23,12 +23,16 @@ export default function Home() {
   const FeaturesVariant = featureVariants[templateId];
   const CtaVariant = ctaVariants[templateId];
 
+  // Placeholder to maintain brand identity during lazy loading
+  const HeroPlaceholder = (
+    <ClassicHero hero={hero} t={t} lang={lang} isPlaceholder={true} />
+  );
+
   return (
     <>
-
       {/* Hero */}
       {HeroVariant ? (
-        <Suspense fallback={<div className="h-96 bg-primary-600" />}>
+        <Suspense fallback={HeroPlaceholder}>
           <HeroVariant hero={hero} t={t} lang={lang} />
         </Suspense>
       ) : (
@@ -37,7 +41,7 @@ export default function Home() {
 
       {/* Features */}
       {FeaturesVariant ? (
-        <Suspense fallback={<div className="h-64" />}>
+        <Suspense fallback={<div className="h-64 animate-pulse bg-surface-soft" />}>
           <FeaturesVariant features={features} t={t} lang={lang} />
         </Suspense>
       ) : (
@@ -46,7 +50,7 @@ export default function Home() {
 
       {/* CTA */}
       {CtaVariant ? (
-        <Suspense fallback={<div className="h-48 bg-surface" />}>
+        <Suspense fallback={<div className="h-48 animate-pulse bg-surface-soft" />}>
           <CtaVariant cta={cta} t={t} lang={lang} />
         </Suspense>
       ) : (
@@ -68,39 +72,53 @@ interface HeroSection {
   backgroundImage?: string;
 }
 
-function ClassicHero({ hero, t, lang }: { hero: HeroSection | null; t: (k: string) => string; lang: string }) {
+function ClassicHero({ 
+  hero, 
+  t, 
+  lang, 
+  isPlaceholder = false 
+}: { 
+  hero: HeroSection | null; 
+  t: (k: string) => string; 
+  lang: string;
+  isPlaceholder?: boolean;
+}) {
   const { settings } = useTheme();
-  const heroStyle = hero?.backgroundImage
-    ? { backgroundImage: `url(${hero.backgroundImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }
-    : undefined;
+  
+  // Use custom image, or the high-end default we just created for brand identity
+  const bgImage = hero?.backgroundImage || '/images/default-hero.png';
+  
+  const heroStyle = { 
+    backgroundImage: `url(${bgImage})`, 
+    backgroundSize: 'cover', 
+    backgroundPosition: 'center' 
+  };
 
   return (
     <section
-      className="relative min-h-[60vh] flex items-center overflow-hidden surface-brand"
+      className={`relative min-h-[60vh] flex items-center overflow-hidden surface-brand ${isPlaceholder ? '' : 'animate-in fade-in duration-700'}`}
       style={heroStyle}
     >
       {/* Smart Contrast Overlay */}
-      {hero?.backgroundImage && (
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
-      )}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60" />
       
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28 w-full flex justify-center">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32 w-full flex justify-center">
         <div className="max-w-4xl text-center">
-          {/* Welcome Message Container with Glassmorphism for independent contrast detection */}
-          <div className={`inline-block p-2 rounded-2xl ${hero?.backgroundImage ? 'backdrop-blur-sm bg-black/10' : ''}`}>
-            <h1 className="text-4xl lg:text-7xl font-black mb-6 leading-tight text-white drop-shadow-xl">
+          {/* Welcome Message with enhanced typography */}
+          <div className="inline-block p-2 rounded-2xl">
+            <h1 className="text-4xl lg:text-7xl font-black mb-6 leading-tight text-white drop-shadow-2xl">
               {getTranslated(hero?.title || '', (hero as any)?.translations?.title, lang) || t('home.heroTitle')}
             </h1>
-            <p className="text-lg lg:text-2xl mb-10 max-w-2xl mx-auto text-white/90 drop-shadow-md">
+            <p className="text-lg lg:text-2xl mb-10 max-w-2xl mx-auto text-white/90 font-medium drop-shadow-lg">
               {getTranslated(hero?.subtitle || '', (hero as any)?.translations?.subtitle, lang) || t('home.heroDescription')}
             </p>
           </div>
           
-          <div className="flex flex-wrap gap-6 mt-4 justify-center">
+          <div className={`flex flex-wrap gap-6 mt-4 justify-center ${isPlaceholder ? 'opacity-0' : 'animate-in slide-in-from-bottom-4 duration-1000'}`}>
             {settings.navShowMenu && (
               <Link
                 to={hero?.ctaPrimaryLink || '/menu'}
-                className="bg-white text-primary-700 px-10 py-4 rounded-xl font-bold hover:bg-primary-50 transition-all transform hover:scale-105 shadow-xl text-lg"
+                className="bg-white text-primary-700 px-10 py-4 rounded-xl font-bold hover:bg-primary-50 transition-all transform hover:scale-105 shadow-2xl text-lg"
               >
                 {getTranslated(hero?.ctaPrimaryText || '', (hero as any)?.translations?.ctaPrimaryText, lang) || t('home.viewMenu')}
               </Link>
