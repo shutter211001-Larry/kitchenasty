@@ -41,7 +41,7 @@ export default function LanguageSwitcher() {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-48 surface-card border border-input rounded-2xl shadow-xl z-[100] py-2 animate-in fade-in slide-in-from-top-2 duration-200">
+        <div className="absolute right-0 mt-2 w-48 bg-surface border border-input rounded-2xl shadow-xl z-[100] py-2 animate-in fade-in slide-in-from-top-2 duration-200">
           <div className="max-h-64 overflow-y-auto scrollbar-hide">
             {SUPPORTED_LANGUAGES.map((lang) => (
               <button
@@ -52,8 +52,8 @@ export default function LanguageSwitcher() {
                 }}
                 className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors ${
                   i18n.language === lang.code
-                    ? 'bg-primary-50 text-primary-600 font-semibold'
-                    : 'text-sub hover:text-main hover:bg-surface-soft'
+                    ? 'bg-primary-600 text-white font-semibold'
+                    : 'text-main hover:bg-surface-soft'
                 }`}
               >
                 <span className="text-lg leading-none flex items-center justify-center">
@@ -61,7 +61,7 @@ export default function LanguageSwitcher() {
                 </span>
                 <span>{lang.name}</span>
                 {i18n.language === lang.code && (
-                  <svg className="ml-auto w-4 h-4 text-primary-600" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="ml-auto w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
                 )}

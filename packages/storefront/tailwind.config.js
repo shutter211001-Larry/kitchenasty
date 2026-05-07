@@ -25,6 +25,12 @@ export default {
           950: 'var(--color-secondary-950, #1a1c0e)',
           contrast: 'var(--secondary-contrast)',
         },
+        // Environment Tokens Mapping
+        surface: 'var(--env-bg-surface)',
+        base: 'var(--env-bg-base)',
+        main: 'var(--env-text-main)',
+        sub: 'var(--env-text-sub)',
+        hint: 'var(--env-text-hint)',
       },
     },
   },
