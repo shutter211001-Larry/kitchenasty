@@ -15,7 +15,7 @@ type PaymentMethod = 'cash' | 'stripe' | 'paypal';
 const DEFAULT_TAX_RATE = 0;
 
 export default function Checkout() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { items, subtotal, clear } = useCart();
   const { user, token } = useAuth();
   const { settings } = useTheme();
@@ -559,10 +559,18 @@ export default function Checkout() {
                   <div key={item.id} className="flex justify-between text-sm">
                     <div>
                       <span className="text-hint mr-1">{item.quantity}x</span>
-                      <span className="text-sub">{item.name}</span>
+                      <span className="text-sub">
+                        {item.nameTranslations?.[i18n.language] || 
+                         item.nameTranslations?.['en'] || 
+                         item.name}
+                      </span>
                       {item.options.length > 0 && (
                         <p className="text-xs text-hint ml-5">
-                          {item.options.map((o) => o.valueName).join(', ')}
+                          {item.options.map((o) => (
+                            o.valueNameTranslations?.[i18n.language] || 
+                            o.valueNameTranslations?.['en'] || 
+                            o.valueName
+                          )).join(', ')}
                         </p>
                       )}
                     </div>
