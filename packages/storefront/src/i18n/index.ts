@@ -15,7 +15,7 @@ import ja from './locales/ja.json';
 import ko from './locales/ko.json';
 
 export const SUPPORTED_LANGUAGES = [
-  { code: 'zh-TW', name: '繁體中文', flag: '<img src="/flag_tw.svg" alt="Taiwan" class="w-6 h-4 object-contain" />' },
+  { code: 'zh-TW', name: '繁體中文', flag: '🇹🇼' },
   { code: 'en', name: 'English', flag: '🇺🇸' },
   { code: 'ja', name: '日本語', flag: '🇯🇵' },
   { code: 'ko', name: '한국어', flag: '🇰🇷' },

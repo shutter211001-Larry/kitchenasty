@@ -38,8 +38,7 @@ export default function DesignLanding() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    fetch('/api/settings')
-      .then((r) => r.json())
+    api.get<{ data: any }>('/settings')
       .then((res) => {
         if (res.success && res.data) {
           if (res.data.heroSection) setHero(res.data.heroSection);
@@ -56,20 +55,19 @@ export default function DesignLanding() {
     setError('');
     setSuccess('');
     try {
-      const res = await fetch('/api/settings', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ heroSection: hero, featuresSection: features, ctaSection: cta }),
+      const res = await api.put<{ success: boolean; error?: string }>('/settings', { 
+        heroSection: hero, 
+        featuresSection: features, 
+        ctaSection: cta 
       });
-      const data = await res.json();
-      if (data.success) {
+      if (res.success) {
         setSuccess('首頁內容已成功更新');
         setTimeout(() => setSuccess(''), 3000);
       } else {
-        setError(data.error || '儲存失敗');
+        setError(res.error || '儲存失敗');
       }
-    } catch {
-      setError('網路連線錯誤');
+    } catch (err: any) {
+      setError(err.message || '網路連線錯誤');
     } finally {
       setSaving(false);
     }

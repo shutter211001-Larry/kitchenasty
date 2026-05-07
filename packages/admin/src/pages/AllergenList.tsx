@@ -25,6 +25,7 @@ export default function AllergenList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isAdding, setIsAdding] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [newName, setNewName] = useState('');
   const [newNameTranslations, setNewNameTranslations] = useState<Record<string, string>>({});
 
@@ -47,6 +48,7 @@ export default function AllergenList() {
     e.preventDefault();
     if (!newName) return;
 
+    setIsSaving(true);
     try {
       await api.post('/menu/allergens', {
         name: newName,
@@ -58,6 +60,8 @@ export default function AllergenList() {
       fetchAllergens();
     } catch (err: any) {
       alert(err.message);
+    } finally {
+      setIsSaving(false);
     }
   }
 
@@ -117,8 +121,12 @@ export default function AllergenList() {
             </div>
           </div>
           <div className="flex justify-end mt-4">
-            <button type="submit" className="bg-primary-600 text-white px-6 py-2 rounded-lg text-sm font-bold hover:bg-primary-700">
-              儲存過敏原
+            <button 
+              type="submit" 
+              disabled={isSaving}
+              className="bg-primary-600 text-white px-6 py-2 rounded-lg text-sm font-bold hover:bg-primary-700 disabled:opacity-50"
+            >
+              {isSaving ? '儲存中...' : '儲存過敏原'}
             </button>
           </div>
         </form>

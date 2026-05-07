@@ -27,6 +27,7 @@ export default function MealtimeList() {
   const [mealtimes, setMealtimes] = useState<Mealtime[]>([]);
   const [loading, setLoading] = useState(true);
   const [isAdding, setIsAdding] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [form, setForm] = useState({
     name: '',
     nameTranslations: {} as Record<string, string>,
@@ -53,6 +54,7 @@ export default function MealtimeList() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setIsSaving(true);
     try {
       await api.post('/menu/mealtimes', form);
       setIsAdding(false);
@@ -60,6 +62,8 @@ export default function MealtimeList() {
       fetchMealtimes();
     } catch (err: any) {
       alert(err.message);
+    } finally {
+      setIsSaving(false);
     }
   }
 
@@ -161,8 +165,12 @@ export default function MealtimeList() {
           </div>
 
           <div className="flex justify-end pt-4">
-            <button type="submit" className="bg-primary-600 text-white px-8 py-2 rounded-lg text-sm font-bold shadow-sm hover:bg-primary-700">
-              儲存時段設定
+            <button 
+              type="submit" 
+              disabled={isSaving}
+              className="bg-primary-600 text-white px-8 py-2 rounded-lg text-sm font-bold shadow-sm hover:bg-primary-700 disabled:opacity-50"
+            >
+              {isSaving ? '儲存中...' : '儲存時段設定'}
             </button>
           </div>
         </form>
