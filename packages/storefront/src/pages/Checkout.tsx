@@ -439,7 +439,9 @@ export default function Checkout() {
                     paymentMethod === 'cash'
                       ? 'border-primary-600 bg-primary-50'
                       : 'border-input hover:border-gray-300'
-                  }`}>
+                  }`}
+                  style={paymentMethod === 'cash' ? { color: '#9a3412' } : {}}
+                  >
                     <input
                       type="radio"
                       name="payment"
@@ -447,7 +449,7 @@ export default function Checkout() {
                       onChange={() => setPaymentMethod('cash')}
                       className="accent-primary-600"
                     />
-                    <span className="text-sm font-medium text-main">{t('checkout.cashOnDelivery')}</span>
+                    <span className="text-sm font-bold">{t('checkout.cashOnDelivery')}</span>
                   </label>
                 )}
                 {paymentSettings?.stripeEnabled && (
@@ -455,7 +457,9 @@ export default function Checkout() {
                     paymentMethod === 'stripe'
                       ? 'border-primary-600 bg-primary-50'
                       : 'border-input hover:border-gray-300'
-                  }`}>
+                  }`}
+                  style={paymentMethod === 'stripe' ? { color: '#9a3412' } : {}}
+                  >
                     <input
                       type="radio"
                       name="payment"
@@ -463,7 +467,7 @@ export default function Checkout() {
                       onChange={() => setPaymentMethod('stripe')}
                       className="accent-primary-600"
                     />
-                    <span className="text-sm font-medium text-main">{t('checkout.creditCard')}</span>
+                    <span className="text-sm font-bold">{t('checkout.creditCard')}</span>
                   </label>
                 )}
                 {paymentSettings?.paypalEnabled && (
@@ -471,7 +475,9 @@ export default function Checkout() {
                     paymentMethod === 'paypal'
                       ? 'border-primary-600 bg-primary-50'
                       : 'border-input hover:border-gray-300'
-                  }`}>
+                  }`}
+                  style={paymentMethod === 'paypal' ? { color: '#9a3412' } : {}}
+                  >
                     <input
                       type="radio"
                       name="payment"
@@ -479,7 +485,7 @@ export default function Checkout() {
                       onChange={() => setPaymentMethod('paypal')}
                       className="accent-primary-600"
                     />
-                    <span className="text-sm font-medium text-main">PayPal</span>
+                    <span className="text-sm font-bold">PayPal</span>
                   </label>
                 )}
               </div>
@@ -506,13 +512,13 @@ export default function Checkout() {
                       </a>
                       <Link
                         to="/login"
-                        className="px-4 py-2 text-sm font-medium text-primary-600 hover:text-primary-700 underline"
+                        className="px-4 py-2 text-sm font-semibold text-primary-500 hover:text-primary-400 underline decoration-primary-500/30 underline-offset-4 transition-colors"
                       >
                         {t('nav.login')}
                       </Link>
                       <Link
                         to="/register"
-                        className="px-4 py-2 text-sm font-medium text-primary-600 hover:text-primary-700 underline"
+                        className="px-4 py-2 text-sm font-semibold text-primary-500 hover:text-primary-400 underline decoration-primary-500/30 underline-offset-4 transition-colors"
                       >
                         {t('nav.register')}
                       </Link>
@@ -579,27 +585,27 @@ export default function Checkout() {
 
             <div className="border-t pt-3 space-y-2 text-sm border-input">
               <div className="flex justify-between">
-                <span className="text-sub">{t('checkout.subtotal')}</span>
+                <span className="text-main font-medium">{t('checkout.subtotal')}</span>
                 <span className="text-main">${subtotal.toFixed(2)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-sub">{t('checkout.tax')}</span>
+                <span className="text-main font-medium">{t('checkout.tax')}</span>
                 <span className="text-main">${tax.toFixed(2)}</span>
               </div>
               {orderType === 'delivery' && (
                 <div className="flex justify-between">
-                  <span className="text-sub">{t('checkout.deliveryFee')}</span>
+                  <span className="text-main font-medium">{t('checkout.deliveryFee')}</span>
                   <span className="text-main">${currentDeliveryFee.toFixed(2)}</span>
                 </div>
               )}
               {loyaltyDiscount > 0 && (
-                <div className="flex justify-between text-green-600">
+                <div className="flex justify-between text-green-600 font-medium">
                   <span>{t('checkout.loyaltyDiscount')}</span>
                   <span>-${loyaltyDiscount.toFixed(2)}</span>
                 </div>
               )}
-              <div className="flex justify-between border-t border-input pt-2 font-bold text-base">
-                <span>{t('checkout.total')}</span>
+              <div className="flex justify-between border-t border-input pt-2 font-bold text-lg">
+                <span className="text-main">{t('checkout.total')}</span>
                 <span className="text-primary-600">${total.toFixed(2)}</span>
               </div>
             </div>
