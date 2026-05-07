@@ -84,17 +84,28 @@ export default function OrderHistory() {
   }
 
   useEffect(() => {
+    if (!token) {
+      setLoading(false);
+      return;
+    }
+
+    // Check store busy status
+    fetch(`${API_BASE}/locations`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.data?.[0]?.isBusy) setIsStoreBusy(true);
+      })
+      .catch(() => { });
+
     // Load from cache first
-    if (token) {
-      const cached = localStorage.getItem(`orders_cache_${page}`);
-      if (cached) {
-        try {
-          const parsed = JSON.parse(cached);
-          setOrders(parsed.data);
-          setPagination(parsed.pagination);
-          setLoading(false);
-        } catch (e) { }
-      }
+    const cached = localStorage.getItem(`orders_cache_${page}`);
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached);
+        setOrders(parsed.data);
+        setPagination(parsed.pagination);
+        setLoading(false);
+      } catch (e) { }
     }
 
     setLoading(true);
@@ -102,7 +113,7 @@ export default function OrderHistory() {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => {
-        if (!res.ok) throw new Error('BUSY_OR_ERROR');
+        if (!res.ok) throw new Error(`API_ERROR_${res.status}`);
         return res.json();
       })
       .then((data) => {
@@ -112,9 +123,9 @@ export default function OrderHistory() {
         localStorage.setItem(`orders_cache_${page}`, JSON.stringify(data));
       })
       .catch((err) => {
-        if (err.message !== 'BUSY_OR_ERROR') {
-          setError(err.message);
-        } else if (!orders.length) {
+        console.error('Order fetch failed:', err);
+        // Only show error if we have NO orders to display (including cache)
+        if (!orders.length) {
           setError(t('orders.errorLoading'));
         }
       })

@@ -70,8 +70,12 @@ export default function OrderStatus() {
   ];
 
   useEffect(() => {
-    const headers: Record<string, string> = {};
-    if (token) headers.Authorization = `Bearer ${token}`;
+    if (!id || !token) {
+      setLoading(false);
+      return;
+    }
+
+    const headers: Record<string, string> = { Authorization: `Bearer ${token}` };
 
     // Try to load from cache first for instant feedback
     const cachedOrder = localStorage.getItem(`order_cache_${id}`);
@@ -87,7 +91,7 @@ export default function OrderStatus() {
     fetch(`${API_BASE}/orders/${id}`, { headers })
       .then((res) => {
         if (res.status === 403) throw new Error('LINKED_TO_ACCOUNT');
-        if (!res.ok) throw new Error('BUSY_OR_ERROR');
+        if (!res.ok) throw new Error(`API_ERROR_${res.status}`);
         return res.json();
       })
       .then((data) => {
@@ -107,15 +111,11 @@ export default function OrderStatus() {
         }
       })
       .catch((err) => {
+        console.error('Order fetch failed:', err);
         if (err.message === 'LINKED_TO_ACCOUNT') {
           setError(t('orders.linkedToAccount'));
-        } else if (err.message === 'BUSY_OR_ERROR') {
-          // If we have cached order, we still show it but might show a general error if no cache at all
-          if (!order) {
-            setError(t('orders.errorLoading'));
-          }
-        } else {
-          setError(err.message);
+        } else if (!order) {
+          setError(t('orders.errorLoading'));
         }
       })
       .finally(() => setLoading(false));
