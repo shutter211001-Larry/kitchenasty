@@ -1,4 +1,4 @@
-import { Suspense, useState } from 'react';
+import { Suspense, useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext.js';
@@ -17,6 +17,30 @@ function ClassicHeader() {
   const { recentOrders } = useRecentOrders();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const headerRef = useRef<HTMLElement>(null);
+
+  // Close mobile menu on scroll or click outside
+  useEffect(() => {
+    if (!mobileOpen) return;
+
+    const handleScroll = () => {
+      setMobileOpen(false);
+    };
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (headerRef.current && !headerRef.current.contains(event.target as Node)) {
+        setMobileOpen(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    document.addEventListener('mousedown', handleClickOutside);
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [mobileOpen]);
 
   const navLinks = [
     settings.navShowHome && { to: '/', label: t('nav.home') },
@@ -31,7 +55,7 @@ function ClassicHeader() {
   }
 
   return (
-    <header className="surface-card shadow-sm sticky top-0 z-50">
+    <header ref={headerRef} className="surface-card shadow-sm sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
