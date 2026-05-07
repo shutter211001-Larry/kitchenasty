@@ -155,6 +155,9 @@
     "contactInfo": "Contact Information",
     "loginBenefit": "💡 Login to earn loyalty points!",
     "googleLogin": "Sign in with Google",
+    "nameOptional": "Name (optional)",
+    "emailOptional": "Email (optional)",
+    "phoneOptional": "Phone (optional)",
     "guestCheckout": "Guest Checkout",
     "guestEmail": "Email for order updates"
   },
