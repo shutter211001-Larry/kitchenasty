@@ -27,8 +27,9 @@ export async function autoTranslateMenuItem(data: any) {
 
     if (fieldsToTranslate.length === 0) return data;
 
-    logger.info(`Auto-translating menu item: ${data.name}`);
+    logger.info({ fieldsCount: fieldsToTranslate.length }, `Auto-translating menu item: ${data.name}`);
     const translations = await translateFields(fieldsToTranslate, SUPPORTED_LANGUAGES);
+    logger.debug({ translationsReceived: Object.keys(translations) }, 'AI translation received');
 
     if (translations.name) {
       data.nameTranslations = { ...(data.nameTranslations || {}), ...translations.name };
@@ -64,7 +65,9 @@ export async function autoTranslateCategory(data: any) {
 
     if (fieldsToTranslate.length === 0) return data;
 
+    logger.info({ fieldsCount: fieldsToTranslate.length }, `Auto-translating category: ${data.name}`);
     const translations = await translateFields(fieldsToTranslate, SUPPORTED_LANGUAGES);
+    logger.debug({ translationsReceived: Object.keys(translations) }, 'AI translation received for category');
 
     if (translations.name) {
       data.nameTranslations = { ...(data.nameTranslations || {}), ...translations.name };
