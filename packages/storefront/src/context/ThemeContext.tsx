@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { API_BASE } from '../lib/api.js';
 import { getFullUrl } from '../utils/url.js';
 
@@ -88,10 +88,6 @@ const ThemeContext = createContext<ThemeContextType>({
   isInitialized: false,
 });
 
-/**
- * Generate a 50–900 shade palette from a single hex color.
- * Uses HSL lightness shifts to produce 10 shades.
- */
 function hexToHsl(hex: string): [number, number, number] {
   const r = parseInt(hex.slice(1, 3), 16) / 255;
   const g = parseInt(hex.slice(3, 5), 16) / 255;
@@ -165,7 +161,6 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       .then((json) => {
         if (json.success && json.data) {
           const data = json.data;
-          // Normalize paths
           if (data.logo) data.logo = getFullUrl(data.logo);
           if (data.favicon) data.favicon = getFullUrl(data.favicon);
           if (data.heroSection?.backgroundImage) {
@@ -178,34 +173,25 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         }
       })
       .catch(() => {
-        setIsInitialized(true); // Proceed even on error to avoid infinite loading
+        setIsInitialized(true);
       });
   }, []);
 
-  // Apply CSS variables when colors change
   useEffect(() => {
     applyColorVars('primary', settings.colorPrimary);
     applyColorVars('secondary', settings.colorSecondary);
   }, [settings.colorPrimary, settings.colorSecondary]);
 
-  // Manage dark mode
   useEffect(() => {
     const { darkMode } = settings;
     let dark = false;
-    if (darkMode === 'dark') {
-      dark = true;
-    } else if (darkMode === 'system') {
-      dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    }
+    if (darkMode === 'dark') dark = true;
+    else if (darkMode === 'system') dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     setIsDark(dark);
-    if (dark) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
+    if (dark) document.documentElement.classList.add('dark');
+    else document.documentElement.classList.remove('dark');
   }, [settings.darkMode]);
 
-  // Update document title and favicon
   useEffect(() => {
     document.title = settings.siteTitle;
   }, [settings.siteTitle]);
@@ -227,7 +213,6 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       {children}
     </ThemeContext.Provider>
   );
-}
 }
 
 export function useTheme() {
