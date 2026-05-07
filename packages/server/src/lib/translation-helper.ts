@@ -277,17 +277,25 @@ export async function autoTranslateDietaryPreference(data: any, existingData?: a
       fieldsToTranslate.push({ key: 'name', value: data.name });
     }
 
-    if (fieldsToTranslate.length === 0) return data;
+    if (fieldsToTranslate.length === 0) {
+      logger.info(`[DEBUG] No fields to translate for dietary preference: ${data.name}`);
+      return data;
+    }
 
     logger.info({ fieldsCount: fieldsToTranslate.length }, `Auto-translating dietary preference: ${data.name}`);
     const translations = await translateFields(fieldsToTranslate, SUPPORTED_LANGUAGES);
+    logger.info(`[DEBUG] Received translations for dietary preference from AI: ${JSON.stringify(translations)}`);
 
     if (translations.name) {
       data.nameTranslations = { ...(data.nameTranslations || {}), ...translations.name };
+      logger.info(`[DEBUG] Final nameTranslations for ${data.name}: ${JSON.stringify(data.nameTranslations)}`);
+    } else {
+      logger.warn(`[DEBUG] AI failed to provide translation for field 'name' for dietary preference: ${data.name}`);
     }
 
     return data;
   } catch (error) {
+    logger.error(error as any, '[DEBUG] Auto-translation for dietary preference failed:');
     return data;
   }
 }

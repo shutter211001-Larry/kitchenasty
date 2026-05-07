@@ -88,7 +88,8 @@ export async function translateContent(
  */
 export async function translateFields(
   fields: { key: string; value: string }[],
-  targetLanguages: string[]
+  targetLanguages: string[],
+  sourceLanguage: string = 'Traditional Chinese'
 ): Promise<{ [key: string]: TranslationResult }> {
   const apiKey = getApiKey();
   if (!apiKey) {
@@ -103,7 +104,7 @@ export async function translateFields(
   // For now, let's group them into one big prompt if possible
   const prompt = `
     You are a professional translator for a global food ordering platform.
-    Translate the following fields into these languages: ${targetLanguages.join(', ')}.
+    Translate the following fields from ${sourceLanguage} into these languages: ${targetLanguages.join(', ')}.
     
     Fields:
     ${fields.map(f => `${f.key}: "${f.value}"`).join('\n')}
@@ -133,12 +134,14 @@ export async function translateFields(
     const resultText = data.candidates?.[0]?.content?.parts?.[0]?.text;
     
     if (!resultText) {
+       logger.warn('[DEBUG] Empty response from Gemini in translateFields');
        return {};
     }
 
+    logger.info(`[DEBUG] Raw AI response from translateFields: ${resultText}`);
     return parseJSONWithMarkdownFallback(resultText);
   } catch (error) {
-    logger.error(error as any, 'Batch translation failed:');
+    logger.error(error as any, '[DEBUG] Batch translation failed:');
     return {};
   }
 }
