@@ -2,9 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Environment-Aware Smart Text System */
 :root {
-  /* Primary Colors (Shades will be injected by ThemeContext) */
+  /* --- 1. Brand Colors --- */
   --color-primary-50: #fff7ed;
   --color-primary-100: #ffedd5;
   --color-primary-200: #fed7aa;
@@ -17,98 +16,80 @@
   --color-primary-900: #7c2d12;
   --color-primary-950: #431407;
 
-  /* Secondary Colors */
   --color-secondary-50: #f8faf2;
   --color-secondary-500: #cfd69a;
   --color-secondary-950: #1a1c0e;
 
-  /* Environment-Aware Smart Text System */
-  --current-bg: #ffffff; /* Default background */
-  --smart-text: #111827; /* Fallback: Slate 900 for older browsers */
+  /* --- 2. Surface Definitions (Light Mode) --- */
+  --surface-base: #ffffff;
+  --surface-card: #ffffff;
+  --surface-brand: var(--color-primary-600);
+
+  /* --- 3. Semantic Text Tokens (Light Mode Defaults) --- */
+  --text-main: #111827; /* Slate 900 */
+  --text-sub: #4b5563;  /* Gray 600 */
+  --text-hint: #94a3b8; /* Slate 400 */
 }
-
-html.dark {
-  --current-bg: #0f172a;
-  --smart-text: #f8fafc; /* Fallback: Slate 50 for older browsers */
-}
-
-/* Modern Browser Logic (Relative Color Syntax) */
-@supports (color: oklch(from white l 0 0)) {
-  :root {
-    --smart-text: oklch(from var(--current-bg) clamp(0.05, calc((l - 0.45) * -1000), 0.95) 0 0);
-  }
-  html.dark {
-    --smart-text: oklch(from var(--current-bg) clamp(0.05, calc((l - 0.45) * -1000), 0.95) 0 0);
-  }
-}
-
-/* Map background classes to set the environment variable without forcing a color change */
-.bg-white { --current-bg: #ffffff; }
-.bg-gray-50 { --current-bg: #f9fafb; }
-.bg-gray-100 { --current-bg: #f3f4f6; }
-.bg-gray-900 { --current-bg: #111827; }
-.bg-slate-900 { --current-bg: #0f172a; }
-.bg-primary-600 { --current-bg: var(--color-primary-600); }
-.bg-primary-500 { --current-bg: var(--color-primary-500); }
-.bg-secondary-500 { --current-bg: var(--color-secondary-500); }
-
-/* Support for common overlays on images */
-.bg-black\/40, .bg-black\/50, .bg-black\/60 { --current-bg: #1a1a1a; }
-
-/* In dark mode, we ONLY update the background variable if the component actually changes its background */
-html.dark .bg-white { --current-bg: #ffffff; } 
-html.dark .bg-gray-50 { --current-bg: #f9fafb; }
-html.dark .bg-gray-900 { --current-bg: #111827; }
-
-/* Apply the Smart Text color to common text classes */
-.text-gray-900, .text-gray-800, .text-gray-700, .text-smart {
-  /* Step 1: Base Fallback (Light Mode default) */
-  color: #111827; 
-}
-
-/* Step 2: Dark Mode Global Fallback */
-html.dark .text-gray-900, html.dark .text-gray-800, html.dark .text-gray-700, html.dark .text-smart {
-  color: #f1f5f9;
-}
-
-/* Step 3: Local Override for Light Containers (The "Context" part) */
-/* If we are inside a light background, force dark text regardless of theme */
-.bg-white .text-gray-900, .bg-white .text-gray-800, .bg-white .text-gray-700, .bg-white .text-smart,
-.bg-gray-50 .text-gray-900, .bg-gray-50 .text-gray-800, .bg-gray-50 .text-gray-700, .bg-gray-50 .text-smart {
-  color: #111827 !important;
-}
-
-/* Step 4: Scientific Precision (if supported) */
-@supports (color: oklch(from white l 0 0)) {
-  .text-gray-900, .text-gray-800, .text-gray-700, .text-smart {
-    color: oklch(from var(--current-bg) clamp(0.05, calc((l - 0.45) * -1000), 0.95) 0 0);
-  }
-  
-  /* Ensure the scientific logic also respects local overrides */
-  .bg-white .text-gray-900, .bg-white .text-smart {
-    --current-bg: #ffffff;
-  }
-}
-
-/* Fallback for secondary/muted text */
-.text-gray-500, .text-gray-400 {
-  color: #64748b;
-}
-html.dark .text-gray-500, html.dark .text-gray-400 {
-  color: #cbd5e1;
-}
-
-/* Placeholder visibility based on current bg */
-::placeholder {
-  color: #94a3b8;
-  opacity: 1;
-}
-
-/* Global Utility for Smart Text */
-.text-smart-primary { color: var(--primary-contrast); }
-.text-smart-secondary { color: var(--secondary-contrast); }
-.bg-smart-primary { background-color: var(--color-primary-600); color: var(--primary-contrast); }
 
 html.dark {
   color-scheme: dark;
+  
+  /* --- 2. Surface Definitions (Dark Mode) --- */
+  --surface-base: #0f172a; /* Slate 950 */
+  --surface-card: #1e293b; /* Slate 800 */
+  --surface-brand: var(--color-primary-600);
+
+  /* --- 3. Semantic Text Tokens (Dark Mode Defaults) --- */
+  --text-main: #f8fafc; /* Slate 50 */
+  --text-sub: #cbd5e1;  /* Slate 300 */
+  --text-hint: #64748b; /* Slate 500 */
+}
+
+/* --- 4. Object Logic: Surface Overrides --- */
+/* Each surface type re-defines what "main" and "sub" text looks like inside it */
+
+.surface-base {
+  background-color: var(--surface-base);
+  color: var(--text-main);
+}
+
+.surface-card {
+  background-color: var(--surface-card);
+  border: 1px solid color-mix(in srgb, var(--text-main), transparent 90%);
+}
+
+.surface-brand {
+  background-color: var(--surface-brand);
+  /* Scientific Contrast for Brand areas */
+  @supports (color: oklch(from white l 0 0)) {
+    --text-main: oklch(from var(--surface-brand) clamp(0.05, calc((l - 0.45) * -1000), 0.95) 0 0);
+    --text-sub: color-mix(in srgb, var(--text-main), transparent 20%);
+  }
+  color: var(--text-main);
+}
+
+/* --- 5. Semantic Typography Classes --- */
+.text-main { color: var(--text-main) !important; }
+.text-sub  { color: var(--text-sub) !important; }
+.text-hint { color: var(--text-hint) !important; }
+
+/* --- 6. Helper Utilities --- */
+.btn-primary {
+  @apply px-6 py-3 rounded-xl font-bold transition-all hover:brightness-110 active:scale-95;
+  background-color: var(--surface-brand);
+  color: var(--text-main);
+}
+
+/* Compatibility with existing Tailwind background classes */
+.bg-white, .surface-card-compat {
+  background-color: var(--surface-card);
+}
+
+.bg-primary-600, .surface-brand-compat {
+  background-color: var(--surface-brand);
+}
+
+html.dark body {
+  background-color: var(--surface-base);
+  color: var(--text-main);
 }

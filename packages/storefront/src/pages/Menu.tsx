@@ -111,8 +111,8 @@ export default function Menu() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-smart">{t('menu.title')}</h1>
-        <p className="mt-2 text-gray-600">{t('home.heroDescription').split('.')[0]}.</p>
+        <h1 className="text-3xl font-bold text-main">{t('menu.title')}</h1>
+        <p className="mt-2 text-sub">{t('home.heroDescription').split('.')[0]}.</p>
       </div>
 
       {/* Search bar */}
@@ -211,7 +211,7 @@ export default function Menu() {
                   <button
                     key={item.id}
                     onClick={() => setSelectedItemId(item.id)}
-                    className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow text-left"
+                    className="surface-card rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow text-left"
                   >
                     {item.image ? (
                       <img src={item.image} alt={getTranslated(item.name, item.nameTranslations, i18n.language)} className="h-40 w-full object-cover" />
@@ -222,16 +222,16 @@ export default function Menu() {
                         </svg>
                       </div>
                     )}
-                    <div className="p-4">
-                      <div className="flex items-start justify-between gap-2">
-                        <h3 className="font-semibold text-smart">{getTranslated(item.name, item.nameTranslations, i18n.language)}</h3>
-                        <span className="text-primary-600 font-bold whitespace-nowrap">
-                          ${item.price.toFixed(2)}
-                        </span>
-                      </div>
-                      {item.description && (
-                        <p className="text-sm text-gray-500 mt-1 line-clamp-2">{getTranslated(item.description, item.descriptionTranslations, i18n.language)}</p>
-                      )}
+                      <div className="p-4">
+                        <div className="flex items-start justify-between gap-2">
+                          <h3 className="font-semibold text-main">{getTranslated(item.name, item.nameTranslations, i18n.language)}</h3>
+                          <span className="text-primary-600 font-bold whitespace-nowrap">
+                            ${item.price.toFixed(2)}
+                          </span>
+                        </div>
+                        {item.description && (
+                          <p className="text-sm text-sub mt-1 line-clamp-2">{getTranslated(item.description, item.descriptionTranslations, i18n.language)}</p>
+                        )}
                       <div className="flex items-center gap-2 mt-3">
                         <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
                           {getTranslated(item.category.name, item.category.nameTranslations, i18n.language)}

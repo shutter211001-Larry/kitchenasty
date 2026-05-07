@@ -126,11 +126,11 @@ export default function OrderHistory() {
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">
+          <h1 className="text-3xl font-bold text-main">
             {user ? t('orders.title') : t('orders.recentGuestOrders')}
           </h1>
           {!user && (
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="text-sm text-sub mt-1">
               {t('orders.recentGuestOrdersDesc')}
             </p>
           )}
@@ -210,7 +210,7 @@ export default function OrderHistory() {
               <Link
                 key={order.id}
                 to={`/orders/${order.id}`}
-                className="block bg-white rounded-xl shadow-sm border border-gray-200 p-5 hover:shadow-md transition-shadow"
+                className="block surface-card rounded-xl shadow-sm p-5 hover:shadow-md transition-shadow"
               >
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-3">

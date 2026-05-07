@@ -74,15 +74,15 @@ function ClassicHero({ hero, t }: { hero: HeroSection | null; t: (k: string) => 
 
   return (
     <section
-      className="bg-primary-600"
+      className="bg-gradient-to-br from-primary-600 to-primary-800 surface-brand"
       style={heroStyle}
     >
-      <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28${hero?.backgroundImage ? ' bg-black/40' : ' bg-primary-600'}`}>
+      <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28${hero?.backgroundImage ? ' bg-black/40' : ''}`}>
         <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-4xl lg:text-6xl font-extrabold mb-6 leading-tight text-smart">
+          <h1 className="text-4xl lg:text-6xl font-extrabold mb-6 leading-tight text-main">
             {hero?.title || t('home.heroTitle')}
           </h1>
-          <p className="text-lg lg:text-xl mb-10 max-w-2xl mx-auto text-smart opacity-80">
+          <p className="text-lg lg:text-xl mb-10 max-w-2xl mx-auto text-sub">
             {hero?.subtitle || t('home.heroDescription')}
           </p>
           <div className="flex flex-wrap justify-center gap-6">
@@ -135,8 +135,8 @@ function ClassicFeatures({ features, t }: { features: FeatureItem[] | null; t: (
               <div className="w-14 h-14 bg-primary-100 dark:bg-primary-900/30 text-primary-600 rounded-xl flex items-center justify-center mx-auto mb-4 text-2xl">
                 {feature.icon}
               </div>
-              <h3 className="text-lg font-semibold text-smart mb-2">{feature.title}</h3>
-              <p className="text-gray-600 dark:text-gray-400 text-sm">{feature.description}</p>
+              <h3 className="text-lg font-semibold text-main mb-2">{feature.title}</h3>
+              <p className="text-sub text-sm">{feature.description}</p>
             </div>
           ))
         ) : (
@@ -175,10 +175,10 @@ function ClassicCta({ cta, t }: { cta: CtaSection | null; t: (k: string) => stri
   return (
     <section className="bg-gray-100 dark:bg-gray-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
-        <h2 className="text-2xl font-bold text-smart mb-4">
+        <h2 className="text-2xl font-bold text-main mb-4">
           {cta?.title || t('home.readyToOrder')}
         </h2>
-        <p className="text-gray-600 dark:text-gray-400 mb-6">
+        <p className="text-sub mb-6">
           {cta?.description || t('home.readyToOrderDesc')}
         </p>
         <Link
