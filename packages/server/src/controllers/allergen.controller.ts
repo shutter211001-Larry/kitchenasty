@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { z } from 'zod';
 import prisma from '../lib/db.js';
+import { autoTranslateAllergen } from '../lib/translation-helper.js';
 
 const createAllergenSchema = z.object({
   name: z.string().min(1),
@@ -29,7 +30,9 @@ export async function createAllergen(req: Request, res: Response): Promise<void>
     return;
   }
 
-  const allergen = await prisma.allergen.create({ data: parsed.data });
+  const translatedData = await autoTranslateAllergen(parsed.data);
+
+  const allergen = await prisma.allergen.create({ data: translatedData });
   res.status(201).json({ success: true, data: allergen });
 }
 

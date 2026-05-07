@@ -117,10 +117,10 @@ export async function updateSettings(req: Request, res: Response): Promise<void>
     return;
   }
 
-  await getOrCreateSettings();
+  const existingSettings = await getOrCreateSettings();
 
   // Auto-translate
-  const translatedData = await autoTranslateSiteSettings(parsed.data);
+  const translatedData = await autoTranslateSiteSettings(parsed.data, existingSettings);
 
   const settings = await prisma.siteSettings.update({
     where: { id: 'default' },

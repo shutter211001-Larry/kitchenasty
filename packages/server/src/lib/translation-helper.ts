@@ -111,31 +111,54 @@ export async function autoTranslateCategory(data: any, existingData?: any) {
 /**
  * Automatically translates site settings sections.
  */
-export async function autoTranslateSiteSettings(data: any) {
+export async function autoTranslateSiteSettings(data: any, existingData?: any) {
   try {
     // Translate Hero Section
     if (data.heroSection) {
       const hero = data.heroSection;
+      const existingHero = existingData?.heroSection || {};
+      hero.translations = existingHero.translations || {};
+
       const fields = [];
-      if (hero.title) fields.push({ key: 'title', value: hero.title });
-      if (hero.subtitle) fields.push({ key: 'subtitle', value: hero.subtitle });
-      if (hero.ctaPrimaryText) fields.push({ key: 'ctaPrimaryText', value: hero.ctaPrimaryText });
-      if (hero.ctaSecondaryText) fields.push({ key: 'ctaSecondaryText', value: hero.ctaSecondaryText });
+      const checkAndPush = (key: string) => {
+        if (!hero[key]) return;
+        if (existingData && hero[key] === existingHero[key] && hero.translations[key] && Object.keys(hero.translations[key]).length >= SUPPORTED_LANGUAGES.length) return;
+        fields.push({ key, value: hero[key] });
+      };
+
+      checkAndPush('title');
+      checkAndPush('subtitle');
+      checkAndPush('ctaPrimaryText');
+      checkAndPush('ctaSecondaryText');
 
       if (fields.length > 0) {
-        hero.translations = await translateFields(fields, SUPPORTED_LANGUAGES);
+        const newTranslations = await translateFields(fields, SUPPORTED_LANGUAGES);
+        hero.translations = { ...hero.translations, ...newTranslations };
       }
     }
 
     // Translate Features Section
     if (data.featuresSection && Array.isArray(data.featuresSection)) {
-      for (const feature of data.featuresSection) {
+      const existingFeatures = Array.isArray(existingData?.featuresSection) ? existingData.featuresSection : [];
+      
+      for (let i = 0; i < data.featuresSection.length; i++) {
+        const feature = data.featuresSection[i];
+        const existingFeature = existingFeatures[i] || {};
+        feature.translations = existingFeature.translations || {};
+
         const fields = [];
-        if (feature.title) fields.push({ key: 'title', value: feature.title });
-        if (feature.description) fields.push({ key: 'description', value: feature.description });
+        const checkAndPush = (key: string) => {
+          if (!feature[key]) return;
+          if (existingData && feature[key] === existingFeature[key] && feature.translations[key] && Object.keys(feature.translations[key]).length >= SUPPORTED_LANGUAGES.length) return;
+          fields.push({ key, value: feature[key] });
+        };
+
+        checkAndPush('title');
+        checkAndPush('description');
 
         if (fields.length > 0) {
-          feature.translations = await translateFields(fields, SUPPORTED_LANGUAGES);
+          const newTranslations = await translateFields(fields, SUPPORTED_LANGUAGES);
+          feature.translations = { ...feature.translations, ...newTranslations };
         }
       }
     }
@@ -143,19 +166,95 @@ export async function autoTranslateSiteSettings(data: any) {
     // Translate CTA Section
     if (data.ctaSection) {
       const cta = data.ctaSection;
+      const existingCta = existingData?.ctaSection || {};
+      cta.translations = existingCta.translations || {};
+
       const fields = [];
-      if (cta.title) fields.push({ key: 'title', value: cta.title });
-      if (cta.description) fields.push({ key: 'description', value: cta.description });
-      if (cta.buttonText) fields.push({ key: 'buttonText', value: cta.buttonText });
+      const checkAndPush = (key: string) => {
+        if (!cta[key]) return;
+        if (existingData && cta[key] === existingCta[key] && cta.translations[key] && Object.keys(cta.translations[key]).length >= SUPPORTED_LANGUAGES.length) return;
+        fields.push({ key, value: cta[key] });
+      };
+
+      checkAndPush('title');
+      checkAndPush('description');
+      checkAndPush('buttonText');
 
       if (fields.length > 0) {
-        cta.translations = await translateFields(fields, SUPPORTED_LANGUAGES);
+        const newTranslations = await translateFields(fields, SUPPORTED_LANGUAGES);
+        cta.translations = { ...cta.translations, ...newTranslations };
       }
     }
 
     return data;
   } catch (error) {
     logger.error(error as any, 'Site settings auto-translation failed:');
+    return data;
+  }
+}
+
+/**
+ * Automatically translates an allergen's fields.
+ */
+export async function autoTranslateAllergen(data: any, existingData?: any) {
+  try {
+    const fieldsToTranslate = [];
+
+    const shouldTranslate = (field: string, translationsField: string) => {
+      if (!data[field]) return false;
+      if (existingData && data[field] !== existingData[field]) return true;
+      if (!data[translationsField] || Object.keys(data[translationsField]).length < SUPPORTED_LANGUAGES.length) return true;
+      return false;
+    };
+
+    if (shouldTranslate('name', 'nameTranslations')) {
+      fieldsToTranslate.push({ key: 'name', value: data.name });
+    }
+
+    if (fieldsToTranslate.length === 0) return data;
+
+    logger.info({ fieldsCount: fieldsToTranslate.length }, `Auto-translating allergen: ${data.name}`);
+    const translations = await translateFields(fieldsToTranslate, SUPPORTED_LANGUAGES);
+
+    if (translations.name) {
+      data.nameTranslations = { ...(data.nameTranslations || {}), ...translations.name };
+    }
+
+    return data;
+  } catch (error) {
+    return data;
+  }
+}
+
+/**
+ * Automatically translates a mealtime's fields.
+ */
+export async function autoTranslateMealtime(data: any, existingData?: any) {
+  try {
+    const fieldsToTranslate = [];
+
+    const shouldTranslate = (field: string, translationsField: string) => {
+      if (!data[field]) return false;
+      if (existingData && data[field] !== existingData[field]) return true;
+      if (!data[translationsField] || Object.keys(data[translationsField]).length < SUPPORTED_LANGUAGES.length) return true;
+      return false;
+    };
+
+    if (shouldTranslate('name', 'nameTranslations')) {
+      fieldsToTranslate.push({ key: 'name', value: data.name });
+    }
+
+    if (fieldsToTranslate.length === 0) return data;
+
+    logger.info({ fieldsCount: fieldsToTranslate.length }, `Auto-translating mealtime: ${data.name}`);
+    const translations = await translateFields(fieldsToTranslate, SUPPORTED_LANGUAGES);
+
+    if (translations.name) {
+      data.nameTranslations = { ...(data.nameTranslations || {}), ...translations.name };
+    }
+
+    return data;
+  } catch (error) {
     return data;
   }
 }

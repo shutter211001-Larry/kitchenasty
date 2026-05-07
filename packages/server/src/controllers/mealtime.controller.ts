@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { z } from 'zod';
 import prisma from '../lib/db.js';
+import { autoTranslateMealtime } from '../lib/translation-helper.js';
 
 const createMealtimeSchema = z.object({
   name: z.string().min(1),
@@ -36,7 +37,9 @@ export async function createMealtime(req: Request, res: Response): Promise<void>
     return;
   }
 
-  const mealtime = await prisma.mealtime.create({ data: parsed.data });
+  const translatedData = await autoTranslateMealtime(parsed.data);
+
+  const mealtime = await prisma.mealtime.create({ data: translatedData });
   res.status(201).json({ success: true, data: mealtime });
 }
 
@@ -54,9 +57,11 @@ export async function updateMealtime(req: Request<{ id: string }>, res: Response
     return;
   }
 
+  const translatedData = await autoTranslateMealtime(parsed.data, existing);
+
   const mealtime = await prisma.mealtime.update({
     where: { id },
-    data: parsed.data,
+    data: translatedData,
   });
 
   res.json({ success: true, data: mealtime });
