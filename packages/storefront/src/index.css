@@ -86,6 +86,7 @@ body {
 
 .border-input { border-color: var(--env-border) !important; }
 .bg-surface { background-color: var(--env-bg-surface) !important; }
+.bg-surface-soft { background-color: color-mix(in srgb, var(--color-text-main), transparent 95%) !important; }
 
 /* --- 5. Component Logic --- */
 
