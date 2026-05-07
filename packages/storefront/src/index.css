@@ -3,6 +3,7 @@
 @tailwind utilities;
 
 :root {
+  /* Primary Colors */
   --color-primary-50: #fff7ed;
   --color-primary-100: #ffedd5;
   --color-primary-200: #fed7aa;
@@ -14,7 +15,22 @@
   --color-primary-800: #9a3412;
   --color-primary-900: #7c2d12;
   --color-primary-950: #431407;
+
+  /* Secondary Colors (Fallback/Default) */
+  --color-secondary-50: #f8faf2;
+  --color-secondary-500: #cfd69a;
+  --color-secondary-950: #1a1c0e;
+
+  /* Scientific Smart Contrast Logic */
+  /* This uses Relative Color Syntax (RCS) to flip text color based on background luminance */
+  --primary-contrast: oklch(from var(--color-primary-600) calc((l - 0.45) * -1000) 0 0);
+  --secondary-contrast: oklch(from var(--color-secondary-500) calc((l - 0.45) * -1000) 0 0);
 }
+
+/* Global Utility for Smart Text */
+.text-smart-primary { color: var(--primary-contrast); }
+.text-smart-secondary { color: var(--secondary-contrast); }
+.bg-smart-primary { background-color: var(--color-primary-600); color: var(--primary-contrast); }
 
 html.dark {
   color-scheme: dark;
