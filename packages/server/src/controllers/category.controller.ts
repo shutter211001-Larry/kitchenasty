@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { z } from 'zod';
 import prisma from '../lib/db.js';
 import { auditLog } from '../lib/audit.js';
+import { autoTranslateCategory } from '../lib/translation-helper.js';
 
 const createCategorySchema = z.object({
   name: z.string().min(1),
@@ -82,8 +83,10 @@ export async function createCategory(req: Request, res: Response): Promise<void>
     }
   }
 
+  const translatedData = await autoTranslateCategory(parsed.data);
+
   const category = await prisma.category.create({
-    data: parsed.data,
+    data: translatedData,
     include: { parent: true },
   });
 
@@ -118,9 +121,11 @@ export async function updateCategory(req: Request<{ id: string }>, res: Response
     }
   }
 
+  const translatedData = await autoTranslateCategory(parsed.data);
+
   const category = await prisma.category.update({
     where: { id },
-    data: parsed.data,
+    data: translatedData,
     include: { parent: true },
   });
 

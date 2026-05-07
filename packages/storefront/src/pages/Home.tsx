@@ -7,10 +7,12 @@ import { heroVariants } from '../templates/heroes/index.js';
 import { featureVariants } from '../templates/features/index.js';
 import { ctaVariants } from '../templates/ctas/index.js';
 import type { TemplateId } from '../templates/index.js';
+import { getTranslated } from '../utils/translation.js';
 
 export default function Home() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { settings } = useTheme();
+  const lang = i18n.language;
 
   const hero = settings.heroSection;
   const features = settings.featuresSection;
@@ -27,28 +29,28 @@ export default function Home() {
       {/* Hero */}
       {HeroVariant ? (
         <Suspense fallback={<div className="h-96 bg-primary-600" />}>
-          <HeroVariant hero={hero} t={t} />
+          <HeroVariant hero={hero} t={t} lang={lang} />
         </Suspense>
       ) : (
-        <ClassicHero hero={hero} t={t} />
+        <ClassicHero hero={hero} t={t} lang={lang} />
       )}
 
       {/* Features */}
       {FeaturesVariant ? (
         <Suspense fallback={<div className="h-64" />}>
-          <FeaturesVariant features={features} t={t} />
+          <FeaturesVariant features={features} t={t} lang={lang} />
         </Suspense>
       ) : (
-        <ClassicFeatures features={features} t={t} />
+        <ClassicFeatures features={features} t={t} lang={lang} />
       )}
 
       {/* CTA */}
       {CtaVariant ? (
         <Suspense fallback={<div className="h-48 bg-surface" />}>
-          <CtaVariant cta={cta} t={t} />
+          <CtaVariant cta={cta} t={t} lang={lang} />
         </Suspense>
       ) : (
-        <ClassicCta cta={cta} t={t} />
+        <ClassicCta cta={cta} t={t} lang={lang} />
       )}
     </>
   );
@@ -66,7 +68,7 @@ interface HeroSection {
   backgroundImage?: string;
 }
 
-function ClassicHero({ hero, t }: { hero: HeroSection | null; t: (k: string) => string }) {
+function ClassicHero({ hero, t, lang }: { hero: HeroSection | null; t: (k: string) => string; lang: string }) {
   const { settings } = useTheme();
   const heroStyle = hero?.backgroundImage
     ? { backgroundImage: `url(${hero.backgroundImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }
@@ -87,10 +89,10 @@ function ClassicHero({ hero, t }: { hero: HeroSection | null; t: (k: string) => 
           {/* Welcome Message Container with Glassmorphism for independent contrast detection */}
           <div className={`inline-block p-2 rounded-2xl ${hero?.backgroundImage ? 'backdrop-blur-sm bg-black/10' : ''}`}>
             <h1 className="text-4xl lg:text-7xl font-black mb-6 leading-tight text-white drop-shadow-xl">
-              {hero?.title || t('home.heroTitle')}
+              {getTranslated(hero?.title || '', (hero as any)?.translations?.title, lang) || t('home.heroTitle')}
             </h1>
             <p className="text-lg lg:text-2xl mb-10 max-w-2xl mx-auto text-white/90 drop-shadow-md">
-              {hero?.subtitle || t('home.heroDescription')}
+              {getTranslated(hero?.subtitle || '', (hero as any)?.translations?.subtitle, lang) || t('home.heroDescription')}
             </p>
           </div>
           
@@ -100,7 +102,7 @@ function ClassicHero({ hero, t }: { hero: HeroSection | null; t: (k: string) => 
                 to={hero?.ctaPrimaryLink || '/menu'}
                 className="bg-white text-primary-700 px-10 py-4 rounded-xl font-bold hover:bg-primary-50 transition-all transform hover:scale-105 shadow-xl text-lg"
               >
-                {hero?.ctaPrimaryText || t('home.viewMenu')}
+                {getTranslated(hero?.ctaPrimaryText || '', (hero as any)?.translations?.ctaPrimaryText, lang) || t('home.viewMenu')}
               </Link>
             )}
             {hero?.ctaSecondaryText && (
@@ -113,7 +115,7 @@ function ClassicHero({ hero, t }: { hero: HeroSection | null; t: (k: string) => 
                     to={link}
                     className="backdrop-blur-md bg-white/10 border-2 border-white/30 text-white px-10 py-4 rounded-xl font-bold hover:bg-white/20 transition-all transform hover:scale-105 text-lg"
                   >
-                    {hero?.ctaSecondaryText}
+                    {getTranslated(hero?.ctaSecondaryText || '', (hero as any)?.translations?.ctaSecondaryText, lang)}
                   </Link>
                 );
               })()
@@ -131,7 +133,7 @@ interface FeatureItem {
   description: string;
 }
 
-function ClassicFeatures({ features, t }: { features: FeatureItem[] | null; t: (k: string) => string }) {
+function ClassicFeatures({ features, t, lang }: { features: FeatureItem[] | null; t: (k: string) => string; lang: string }) {
   const { settings } = useTheme();
   return (
     <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
@@ -142,8 +144,12 @@ function ClassicFeatures({ features, t }: { features: FeatureItem[] | null; t: (
               <div className="w-14 h-14 bg-primary-100 dark:bg-primary-900/30 text-primary-600 rounded-xl flex items-center justify-center mx-auto mb-4 text-2xl">
                 {feature.icon}
               </div>
-              <h3 className="text-lg font-semibold text-main mb-2">{feature.title}</h3>
-              <p className="text-sub text-sm">{feature.description}</p>
+              <h3 className="text-lg font-semibold text-main mb-2">
+                {getTranslated(feature.title, (feature as any).translations?.title, lang)}
+              </h3>
+              <p className="text-sub text-sm">
+                {getTranslated(feature.description, (feature as any).translations?.description, lang)}
+              </p>
             </div>
           ))
         ) : (
@@ -171,7 +177,7 @@ interface CtaSection {
   buttonLink?: string;
 }
 
-function ClassicCta({ cta, t }: { cta: CtaSection | null; t: (k: string) => string }) {
+function ClassicCta({ cta, t, lang }: { cta: CtaSection | null; t: (k: string) => string; lang: string }) {
   const { settings } = useTheme();
   const { user } = useAuth();
   
@@ -183,16 +189,16 @@ function ClassicCta({ cta, t }: { cta: CtaSection | null; t: (k: string) => stri
     <section className="bg-surface">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
         <h2 className="text-2xl font-bold text-main mb-4">
-          {cta?.title || t('home.readyToOrder')}
+          {getTranslated(cta?.title || '', (cta as any)?.translations?.title, lang) || t('home.readyToOrder')}
         </h2>
         <p className="text-sub mb-6">
-          {cta?.description || t('home.readyToOrderDesc')}
+          {getTranslated(cta?.description || '', (cta as any)?.translations?.description, lang) || t('home.readyToOrderDesc')}
         </p>
         <Link
           to={cta?.buttonLink || '/register'}
           className="inline-block bg-primary-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-primary-700 transition-colors"
         >
-          {cta?.buttonText || t('home.createAccount')}
+          {getTranslated(cta?.buttonText || '', (cta as any)?.translations?.buttonText, lang) || t('home.createAccount')}
         </Link>
       </div>
     </section>

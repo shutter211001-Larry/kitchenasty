@@ -3,6 +3,7 @@ import { z } from 'zod';
 import nodemailer from 'nodemailer';
 import prisma from '../lib/db.js';
 import { auditLog } from '../lib/audit.js';
+import { autoTranslateSiteSettings } from '../lib/translation-helper.js';
 
 const updateSettingsSchema = z.object({
   siteName: z.string().min(1).optional(),
@@ -118,9 +119,12 @@ export async function updateSettings(req: Request, res: Response): Promise<void>
 
   await getOrCreateSettings();
 
+  // Auto-translate
+  const translatedData = await autoTranslateSiteSettings(parsed.data);
+
   const settings = await prisma.siteSettings.update({
     where: { id: 'default' },
-    data: parsed.data,
+    data: translatedData,
   });
 
   auditLog(req, { action: 'update', entity: 'SiteSettings', entityId: 'default', details: { fields: Object.keys(parsed.data) } });
