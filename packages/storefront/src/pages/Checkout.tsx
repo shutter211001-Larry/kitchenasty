@@ -1,4 +1,4 @@
-import { useState, useEffect, FormEvent } from 'react';
+import { useState, useEffect, FormEvent, useRef } from 'react';
 import { API_BASE } from '../lib/api.js';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -32,6 +32,8 @@ export default function Checkout() {
   const [couponCode, setCouponCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [isButtonVisible, setIsButtonVisible] = useState(true);
+  const submitButtonRef = useRef<HTMLButtonElement>(null);
 
   // Guest checkout fields
   const [guestName, setGuestName] = useState('');
@@ -91,7 +93,25 @@ export default function Checkout() {
         }
       })
       .catch(() => {});
-  }, []);
+  // Intersection Observer for the checkout button
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsButtonVisible(entry.isIntersecting);
+      },
+      { threshold: 0 }
+    );
+
+    if (submitButtonRef.current) {
+      observer.observe(submitButtonRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [items.length]);
+
+  const scrollToSubmit = () => {
+    submitButtonRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
 
   // Fetch loyalty balance for logged-in users
   useEffect(() => {
@@ -579,6 +599,7 @@ export default function Checkout() {
             </div>
 
             <button
+              ref={submitButtonRef}
               type="submit"
               disabled={loading || isBusy}
               className="w-full mt-4 bg-primary-600 text-white py-3 rounded-lg font-semibold hover:bg-primary-700 transition-colors disabled:opacity-50"
@@ -592,6 +613,25 @@ export default function Checkout() {
           </div>
         </div>
       </form>
+
+      {/* Mobile Floating Guide */}
+      {!isButtonVisible && !isBusy && items.length > 0 && (
+        <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/90 backdrop-blur-md border-t border-gray-200 shadow-[0_-4px_12px_rgba(0,0,0,0.1)] z-50 lg:hidden flex items-center justify-between animate-in slide-in-from-bottom duration-300">
+          <div className="flex flex-col">
+            <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">{t('checkout.total')}</span>
+            <span className="text-xl font-black text-primary-600 leading-none">${total.toFixed(2)}</span>
+          </div>
+          <button
+            onClick={scrollToSubmit}
+            className="bg-primary-600 text-white px-6 py-2.5 rounded-full font-bold text-sm shadow-lg shadow-primary-200 flex items-center gap-2 active:scale-95 transition-transform"
+          >
+            {t('checkout.placeOrder')}
+            <svg className="w-4 h-4 animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+            </svg>
+          </button>
+        </div>
+      )}
     </div>
   );
 }
