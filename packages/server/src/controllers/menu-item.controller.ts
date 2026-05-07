@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { z } from 'zod';
 import prisma from '../lib/db.js';
 import { auditLog } from '../lib/audit.js';
+import { autoTranslateMenuItem } from '../lib/translation-helper.js';
 
 const menuOptionValueSchema = z.object({
   name: z.string().min(1),
@@ -125,9 +126,12 @@ export async function createMenuItem(req: Request, res: Response): Promise<void>
     return;
   }
 
+  // Auto-translate fields before creation
+  const translatedData = await autoTranslateMenuItem(data);
+
   const item = await prisma.menuItem.create({
     data: {
-      ...data,
+      ...translatedData,
       options: options ? {
         create: options.map((opt) => ({
           name: opt.name,
@@ -184,10 +188,13 @@ export async function updateMenuItem(req: Request<{ id: string }>, res: Response
 
   const { options, allergenIds, mealtimeIds, ...data } = parsed.data;
 
+  // Auto-translate fields before update
+  const translatedData = await autoTranslateMenuItem(data);
+
   const item = await prisma.menuItem.update({
     where: { id },
     data: {
-      ...data,
+      ...translatedData,
       options: options ? {
         deleteMany: {},
         create: options.map((opt) => ({
