@@ -150,6 +150,9 @@
     "contactInfo": "Informasi Kontak",
     "loginBenefit": "💡 Masuk untuk mendapatkan poin loyalitas!",
     "googleLogin": "Masuk dengan Google",
+    "nameOptional": "Nama (opsional)",
+    "emailOptional": "Email (opsional)",
+    "phoneOptional": "Telepon (opsional)",
     "guestCheckout": "Checkout Tamu",
     "guestEmail": "Email untuk pembaruan pesanan"
   },
