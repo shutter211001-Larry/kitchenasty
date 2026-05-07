@@ -135,7 +135,7 @@ function ClassicFeatures({ features, t }: { features: FeatureItem[] | null; t: (
               <div className="w-14 h-14 bg-primary-100 dark:bg-primary-900/30 text-primary-600 rounded-xl flex items-center justify-center mx-auto mb-4 text-2xl">
                 {feature.icon}
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">{feature.title}</h3>
+              <h3 className="text-lg font-semibold text-smart mb-2">{feature.title}</h3>
               <p className="text-gray-600 dark:text-gray-400 text-sm">{feature.description}</p>
             </div>
           ))
@@ -175,7 +175,7 @@ function ClassicCta({ cta, t }: { cta: CtaSection | null; t: (k: string) => stri
   return (
     <section className="bg-gray-100 dark:bg-gray-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+        <h2 className="text-2xl font-bold text-smart mb-4">
           {cta?.title || t('home.readyToOrder')}
         </h2>
         <p className="text-gray-600 dark:text-gray-400 mb-6">
@@ -216,7 +216,7 @@ function FeatureCard({ icon, title, description }: { icon: string; title: string
       <div className="w-14 h-14 bg-primary-100 dark:bg-primary-900/30 text-primary-600 rounded-xl flex items-center justify-center mx-auto mb-4">
         {icons[icon] || icon}
       </div>
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">{title}</h3>
+      <h3 className="text-lg font-semibold text-smart mb-2">{title}</h3>
       <p className="text-gray-600 dark:text-gray-400 text-sm">{description}</p>
     </div>
   );

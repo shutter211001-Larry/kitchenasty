@@ -34,14 +34,20 @@ html.dark {
 /* Map background classes to set the environment variable without forcing a color change */
 .bg-white { --current-bg: #ffffff; }
 .bg-gray-50 { --current-bg: #f9fafb; }
+.bg-gray-100 { --current-bg: #f3f4f6; }
+.bg-gray-900 { --current-bg: #111827; }
+.bg-slate-900 { --current-bg: #0f172a; }
 .bg-primary-600 { --current-bg: var(--color-primary-600); }
 .bg-primary-500 { --current-bg: var(--color-primary-500); }
 .bg-secondary-500 { --current-bg: var(--color-secondary-500); }
 
+/* Support for common overlays on images */
+.bg-black\/40, .bg-black\/50, .bg-black\/60 { --current-bg: #1a1a1a; }
+
 /* In dark mode, we ONLY update the background variable if the component actually changes its background */
-/* We remove the forced background-color overrides to respect your design */
 html.dark .bg-white { --current-bg: #ffffff; } 
 html.dark .bg-gray-50 { --current-bg: #f9fafb; }
+html.dark .bg-gray-900 { --current-bg: #111827; }
 
 /* Apply the Smart Text color to common text classes */
 .text-gray-900, .text-gray-800, .text-gray-700 {

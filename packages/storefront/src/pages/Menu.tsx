@@ -111,7 +111,7 @@ export default function Menu() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">{t('menu.title')}</h1>
+        <h1 className="text-3xl font-bold text-smart">{t('menu.title')}</h1>
         <p className="mt-2 text-gray-600">{t('home.heroDescription').split('.')[0]}.</p>
       </div>
 
@@ -224,7 +224,7 @@ export default function Menu() {
                     )}
                     <div className="p-4">
                       <div className="flex items-start justify-between gap-2">
-                        <h3 className="font-semibold text-gray-900">{getTranslated(item.name, item.nameTranslations, i18n.language)}</h3>
+                        <h3 className="font-semibold text-smart">{getTranslated(item.name, item.nameTranslations, i18n.language)}</h3>
                         <span className="text-primary-600 font-bold whitespace-nowrap">
                           ${item.price.toFixed(2)}
                         </span>
