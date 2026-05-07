@@ -82,19 +82,19 @@ function ClassicHero({ hero, t }: { hero: HeroSection | null; t: (k: string) => 
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
       )}
       
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28 w-full">
-        <div className="max-w-4xl">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28 w-full flex justify-center">
+        <div className="max-w-4xl text-center">
           {/* Welcome Message Container with Glassmorphism for independent contrast detection */}
           <div className={`inline-block p-2 rounded-2xl ${hero?.backgroundImage ? 'backdrop-blur-sm bg-black/10' : ''}`}>
             <h1 className="text-4xl lg:text-7xl font-black mb-6 leading-tight text-white drop-shadow-xl">
               {hero?.title || t('home.heroTitle')}
             </h1>
-            <p className="text-lg lg:text-2xl mb-10 max-w-2xl text-white/90 drop-shadow-md">
+            <p className="text-lg lg:text-2xl mb-10 max-w-2xl mx-auto text-white/90 drop-shadow-md">
               {hero?.subtitle || t('home.heroDescription')}
             </p>
           </div>
           
-          <div className="flex flex-wrap gap-6 mt-4">
+          <div className="flex flex-wrap gap-6 mt-4 justify-center">
             {settings.navShowMenu && (
               <Link
                 to={hero?.ctaPrimaryLink || '/menu'}
