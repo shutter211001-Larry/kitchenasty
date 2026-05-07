@@ -38,9 +38,9 @@ export default function DesignLanding() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    api.get<{ data: any }>('/settings')
+    api.get<{ success: boolean; data: any }>('/settings')
       .then((res) => {
-        if (res.success && res.data) {
+        if (res.data) {
           if (res.data.heroSection) setHero(res.data.heroSection);
           if (res.data.featuresSection) setFeatures(res.data.featuresSection);
           if (res.data.ctaSection) setCta(res.data.ctaSection);
@@ -55,17 +55,13 @@ export default function DesignLanding() {
     setError('');
     setSuccess('');
     try {
-      const res = await api.put<{ success: boolean; error?: string }>('/settings', { 
+      await api.put<{ success: boolean; error?: string }>('/settings', { 
         heroSection: hero, 
         featuresSection: features, 
         ctaSection: cta 
       });
-      if (res.success) {
-        setSuccess('首頁內容已成功更新');
-        setTimeout(() => setSuccess(''), 3000);
-      } else {
-        setError(res.error || '儲存失敗');
-      }
+      setSuccess('首頁內容已成功更新');
+      setTimeout(() => setSuccess(''), 3000);
     } catch (err: any) {
       setError(err.message || '網路連線錯誤');
     } finally {
