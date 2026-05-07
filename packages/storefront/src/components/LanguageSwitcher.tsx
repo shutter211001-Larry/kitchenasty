@@ -26,7 +26,10 @@ export default function LanguageSwitcher() {
         className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full hover:bg-gray-50 dark:hover:bg-gray-700 transition-all shadow-sm active:scale-95"
         type="button"
       >
-        <span className="text-base leading-none">{currentLanguage.flag}</span>
+        <span 
+          className="text-base leading-none flex items-center justify-center"
+          dangerouslySetInnerHTML={{ __html: currentLanguage.flag }}
+        />
         <span className="hidden sm:inline">{currentLanguage.name}</span>
         <svg
           className={`w-4 h-4 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`}
@@ -54,7 +57,10 @@ export default function LanguageSwitcher() {
                     : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
                 }`}
               >
-                <span className="text-lg leading-none">{lang.flag}</span>
+                <span 
+                  className="text-lg leading-none flex items-center justify-center"
+                  dangerouslySetInnerHTML={{ __html: lang.flag }}
+                />
                 <span>{lang.name}</span>
                 {i18n.language === lang.code && (
                   <svg className="ml-auto w-4 h-4 text-primary-600" fill="currentColor" viewBox="0 0 20 20">
