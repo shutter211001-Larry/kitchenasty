@@ -39,17 +39,17 @@ export default function Register() {
     <div className="min-h-[calc(100vh-12rem)] flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">{t('auth.registerTitle')}</h1>
-          <p className="mt-2 text-gray-600">{t('auth.registerSubtitle')}</p>
+          <h1 className="text-3xl font-bold text-main">{t('auth.registerTitle')}</h1>
+          <p className="mt-2 text-sub">{t('auth.registerSubtitle')}</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-white p-8 rounded-xl shadow-sm border border-gray-200">
+        <form onSubmit={handleSubmit} className="surface-card p-8 rounded-xl shadow-sm border">
           {error && (
             <div className="bg-red-50 text-red-700 p-3 rounded-lg text-sm mb-4">{error}</div>
           )}
 
           <div className="mb-4">
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="name" className="block text-sm font-medium text-sub mb-1">
               {t('auth.name')}
             </label>
             <input
@@ -64,7 +64,7 @@ export default function Register() {
           </div>
 
           <div className="mb-4">
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="email" className="block text-sm font-medium text-sub mb-1">
               {t('auth.email')}
             </label>
             <input
@@ -79,7 +79,7 @@ export default function Register() {
           </div>
 
           <div className="mb-4">
-            <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="phone" className="block text-sm font-medium text-sub mb-1">
               {t('auth.phone')}
             </label>
             <input
@@ -93,7 +93,7 @@ export default function Register() {
           </div>
 
           <div className="mb-4">
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="password" className="block text-sm font-medium text-sub mb-1">
               {t('auth.password')}
             </label>
             <input
@@ -108,7 +108,7 @@ export default function Register() {
           </div>
 
           <div className="mb-6">
-            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="confirmPassword" className="block text-sm font-medium text-sub mb-1">
               {t('auth.password')}
             </label>
             <input
@@ -124,7 +124,7 @@ export default function Register() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-primary-600 text-white py-2.5 rounded-lg font-semibold hover:bg-primary-700 transition-colors disabled:opacity-50"
+            className="w-full btn-primary py-2.5"
           >
             {loading ? t('auth.creating') : t('auth.createAccount')}
           </button>
@@ -134,17 +134,17 @@ export default function Register() {
               <div className="w-full border-t border-gray-300" />
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="bg-white px-2 text-gray-500">或使用社交帳號註冊</span>
+              <span className="surface-card px-2 text-hint">{t('auth.socialRegister')}</span>
             </div>
           </div>
 
           <div className="flex gap-3">
             <a
               href="/api/auth/google"
-              className="w-full flex items-center justify-center gap-2 py-2.5 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+              className="w-full flex items-center justify-center gap-2 py-2.5 border border-gray-300 rounded-lg text-sm font-medium text-sub hover:bg-gray-50 transition-colors"
             >
               <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="w-5 h-5" />
-              使用 Google 帳號快速註冊
+              {t('auth.googleRegister')}
             </a>
           </div>
 

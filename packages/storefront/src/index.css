@@ -16,14 +16,17 @@
   --brand-primary-dark: #c2410c;
   
   /* --- 2. Environment Tokens (Light Mode) --- */
-  --env-bg-base: #ffffff;
-  --env-text-main: #111827;
-  --env-text-sub: #4b5563;
+  --env-bg-base: #f8fafc;
+  --env-bg-surface: #ffffff;
+  --env-border: #e2e8f0;
+  --env-text-main: #0f172a;
+  --env-text-sub: #475569;
   --env-text-hint: #94a3b8;
+  --env-input-bg: #ffffff;
 
   --env-card-bg: #ffffff;
-  --env-card-text-main: #111827;
-  --env-card-text-sub: #4b5563;
+  --env-card-text-main: #0f172a;
+  --env-card-text-sub: #475569;
 }
 
 html.dark {
@@ -31,9 +34,12 @@ html.dark {
   
   /* --- 2. Environment Tokens (Dark Mode) --- */
   --env-bg-base: #0f172a;
+  --env-bg-surface: #1e293b;
+  --env-border: #334155;
   --env-text-main: #f8fafc;
   --env-text-sub: #cbd5e1;
   --env-text-hint: #64748b;
+  --env-input-bg: #1e293b;
 
   /* Card remains WHITE in dark mode as per design preference */
   --env-card-bg: #ffffff;
@@ -77,6 +83,9 @@ body {
 .text-main { color: var(--color-text-main) !important; }
 .text-sub  { color: var(--color-text-sub) !important; }
 .text-hint { color: var(--color-text-hint) !important; }
+
+.border-input { border-color: var(--env-border) !important; }
+.bg-surface { background-color: var(--env-bg-surface) !important; }
 
 /* --- 5. Component Logic --- */
 

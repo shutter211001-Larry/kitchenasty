@@ -65,7 +65,11 @@
     "createAccount": "Create Account",
     "creating": "Creating account...",
     "hasAccount": "Already have an account?",
-    "loginLink": "Sign in"
+    "loginLink": "Sign in",
+    "orContinue": "Or continue with",
+    "googleSignIn": "Sign in with Google",
+    "googleRegister": "Sign up with Google",
+    "socialRegister": "Or register with social account"
   },
   "account": {
     "title": "My Account",

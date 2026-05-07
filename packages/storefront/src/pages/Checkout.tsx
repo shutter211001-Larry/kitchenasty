@@ -258,7 +258,7 @@ export default function Checkout() {
                   className={`flex-1 py-3 rounded-lg font-medium text-sm border-2 transition-colors ${
                     orderType === 'delivery'
                       ? 'border-primary-600 bg-primary-50 text-primary-700'
-                      : 'border-gray-200 text-sub hover:border-gray-300'
+                      : 'border-input text-sub hover:border-gray-300'
                   }`}
                 >
                   {t('checkout.delivery')}
@@ -269,7 +269,7 @@ export default function Checkout() {
                   className={`flex-1 py-3 rounded-lg font-medium text-sm border-2 transition-colors ${
                     orderType === 'pickup'
                       ? 'border-primary-600 bg-primary-50 text-primary-700'
-                      : 'border-gray-200 text-sub hover:border-gray-300'
+                      : 'border-input text-sub hover:border-gray-300'
                   }`}
                 >
                   {t('checkout.pickup')}
@@ -292,14 +292,14 @@ export default function Checkout() {
                   placeholder={t('checkout.addressLine1')}
                   value={address.line1}
                   onChange={(e) => setAddress({ ...address, line1: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none text-sm"
+                  className="w-full px-3 py-2 bg-surface border border-input rounded-lg focus:ring-2 focus:ring-primary-500 outline-none text-sm text-main"
                 />
                 <input
                   type="text"
                   placeholder={t('checkout.addressLine2')}
                   value={address.line2}
                   onChange={(e) => setAddress({ ...address, line2: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none text-sm"
+                  className="w-full px-3 py-2 bg-surface border border-input rounded-lg focus:ring-2 focus:ring-primary-500 outline-none text-sm text-main"
                 />
                 <div className="grid grid-cols-3 gap-3">
                   <input
@@ -308,7 +308,7 @@ export default function Checkout() {
                     placeholder={t('checkout.city')}
                     value={address.city}
                     onChange={(e) => setAddress({ ...address, city: e.target.value })}
-                    className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none text-sm"
+                    className="px-3 py-2 bg-surface border border-input rounded-lg focus:ring-2 focus:ring-primary-500 outline-none text-sm text-main"
                   />
                   <input
                     type="text"
@@ -316,7 +316,7 @@ export default function Checkout() {
                     placeholder={t('checkout.state')}
                     value={address.state}
                     onChange={(e) => setAddress({ ...address, state: e.target.value })}
-                    className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none text-sm"
+                    className="px-3 py-2 bg-surface border border-input rounded-lg focus:ring-2 focus:ring-primary-500 outline-none text-sm text-main"
                   />
                   <input
                     type="text"
@@ -324,7 +324,7 @@ export default function Checkout() {
                     placeholder={t('checkout.zipCode')}
                     value={address.zip}
                     onChange={(e) => setAddress({ ...address, zip: e.target.value })}
-                    className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none text-sm"
+                    className="px-3 py-2 bg-surface border border-input rounded-lg focus:ring-2 focus:ring-primary-500 outline-none text-sm text-main"
                   />
                 </div>
               </div>
@@ -333,8 +333,8 @@ export default function Checkout() {
 
           {/* Schedule */}
           {orderSettings?.enableFutureOrdering && (
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('checkout.scheduling')}</h2>
+            <div className="surface-card rounded-xl shadow-sm border p-6">
+              <h2 className="text-lg font-semibold text-main mb-4">{t('checkout.scheduling')}</h2>
               <div className="space-y-3">
                 <label className="flex items-center gap-3">
                   <input
@@ -354,14 +354,14 @@ export default function Checkout() {
                     onChange={() => setScheduledAt(getDefaultScheduleTime())}
                     className="accent-primary-600"
                   />
-                  <span className="text-sm text-gray-700">{t('checkout.scheduled')}</span>
+                  <span className="text-sm text-sub">{t('checkout.scheduled')}</span>
                 </label>
                 {scheduledAt && (
                   <input
                     type="datetime-local"
                     value={scheduledAt}
                     onChange={(e) => setScheduledAt(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none text-sm"
+                    className="w-full px-3 py-2 bg-surface border border-input rounded-lg focus:ring-2 focus:ring-primary-500 outline-none text-sm text-main"
                   />
                 )}
               </div>
@@ -375,7 +375,7 @@ export default function Checkout() {
               value={comment}
               onChange={(e) => setComment(e.target.value)}
               rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none text-sm resize-none"
+              className="w-full px-3 py-2 bg-surface border border-input rounded-lg focus:ring-2 focus:ring-primary-500 outline-none text-sm text-main resize-none"
             />
           </div>
 
@@ -387,11 +387,11 @@ export default function Checkout() {
                 type="text"
                 value={couponCode}
                 onChange={(e) => setCouponCode(e.target.value)}
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none text-sm"
+                className="flex-1 px-3 py-2 bg-surface border border-input rounded-lg focus:ring-2 focus:ring-primary-500 outline-none text-sm text-main"
               />
               <button
                 type="button"
-                className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-sub hover:bg-gray-50"
+                className="px-4 py-2 border border-input rounded-lg text-sm font-medium text-sub hover:bg-surface transition-colors"
               >
                 {t('checkout.apply')}
               </button>
@@ -414,10 +414,10 @@ export default function Checkout() {
                   step={100}
                   value={loyaltyRedeem}
                   onChange={(e) => setLoyaltyRedeem(Math.max(0, parseInt(e.target.value) || 0))}
-                  className="w-32 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none text-sm"
+                  className="w-32 px-3 py-2 bg-surface border border-input rounded-lg focus:ring-2 focus:ring-primary-500 outline-none text-sm text-main"
                   placeholder="0"
                 />
-                <span className="text-sm text-gray-600">points to redeem</span>
+                <span className="text-sm text-sub">points to redeem</span>
                 {loyaltyRedeem > 0 && (
                   <span className="text-sm font-medium text-green-600">
                     -${loyaltyDiscount.toFixed(2)}
@@ -429,14 +429,14 @@ export default function Checkout() {
 
           {/* Payment method */}
           {paymentSettings?.stripeEnabled || paymentSettings?.paypalEnabled || paymentSettings?.cashEnabled ? (
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('checkout.paymentMethod')}</h2>
+            <div className="surface-card rounded-xl shadow-sm border p-6">
+              <h2 className="text-lg font-semibold text-main mb-4">{t('checkout.paymentMethod')}</h2>
               <div className="space-y-2">
                 {paymentSettings?.cashEnabled && (
                   <label className={`flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition-colors ${
                     paymentMethod === 'cash'
                       ? 'border-primary-600 bg-primary-50'
-                      : 'border-gray-200 hover:border-gray-300'
+                      : 'border-input hover:border-gray-300'
                   }`}>
                     <input
                       type="radio"
@@ -452,7 +452,7 @@ export default function Checkout() {
                   <label className={`flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition-colors ${
                     paymentMethod === 'stripe'
                       ? 'border-primary-600 bg-primary-50'
-                      : 'border-gray-200 hover:border-gray-300'
+                      : 'border-input hover:border-gray-300'
                   }`}>
                     <input
                       type="radio"
@@ -461,14 +461,14 @@ export default function Checkout() {
                       onChange={() => setPaymentMethod('stripe')}
                       className="accent-primary-600"
                     />
-                    <span className="text-sm font-medium text-gray-900">{t('checkout.creditCard')}</span>
+                    <span className="text-sm font-medium text-main">{t('checkout.creditCard')}</span>
                   </label>
                 )}
                 {paymentSettings?.paypalEnabled && (
                   <label className={`flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition-colors ${
                     paymentMethod === 'paypal'
                       ? 'border-primary-600 bg-primary-50'
-                      : 'border-gray-200 hover:border-gray-300'
+                      : 'border-input hover:border-gray-300'
                   }`}>
                     <input
                       type="radio"
@@ -477,7 +477,7 @@ export default function Checkout() {
                       onChange={() => setPaymentMethod('paypal')}
                       className="accent-primary-600"
                     />
-                    <span className="text-sm font-medium text-gray-900">PayPal</span>
+                    <span className="text-sm font-medium text-main">PayPal</span>
                   </label>
                 )}
               </div>
@@ -486,18 +486,18 @@ export default function Checkout() {
 
           {/* Guest info or login prompt */}
           {!user && (
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('checkout.contactInfo')}</h2>
+            <div className="surface-card rounded-xl shadow-sm border p-6">
+              <h2 className="text-lg font-semibold text-main mb-4">{t('checkout.contactInfo')}</h2>
               <div className="space-y-4">
                 {settings.showMembership !== false && (
-                  <div className="bg-primary-50 border border-primary-100 p-4 rounded-lg mb-4">
-                    <p className="text-sm text-primary-800 font-medium mb-3">
+                  <div className="surface-brand/10 border border-brand-primary/20 p-4 rounded-lg mb-4">
+                    <p className="text-sm text-main font-medium mb-3">
                       {t('checkout.loginBenefit')}
                     </p>
                     <div className="flex flex-wrap gap-2">
                       <a
                         href="/api/auth/google"
-                        className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-sub hover:bg-gray-50 transition-colors shadow-sm"
+                        className="flex items-center gap-2 px-4 py-2 bg-surface border border-input rounded-lg text-sm font-medium text-sub hover:bg-surface/80 transition-colors shadow-sm"
                       >
                         <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="w-4 h-4" />
                         {t('checkout.googleLogin')}
@@ -524,21 +524,21 @@ export default function Checkout() {
                     placeholder={t('checkout.nameOptional')}
                     value={guestName}
                     onChange={(e) => setGuestName(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none text-sm"
+                    className="w-full px-3 py-2 bg-surface border border-input rounded-lg focus:ring-2 focus:ring-primary-500 outline-none text-sm text-main"
                   />
                   <input
                     type="email"
                     placeholder={t('checkout.emailOptional')}
                     value={guestEmail}
                     onChange={(e) => setGuestEmail(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none text-sm"
+                    className="w-full px-3 py-2 bg-surface border border-input rounded-lg focus:ring-2 focus:ring-primary-500 outline-none text-sm text-main"
                   />
                   <input
                     type="tel"
                     placeholder={t('checkout.phoneOptional')}
                     value={guestPhone}
                     onChange={(e) => setGuestPhone(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none text-sm"
+                    className="w-full px-3 py-2 bg-surface border border-input rounded-lg focus:ring-2 focus:ring-primary-500 outline-none text-sm text-main"
                   />
                 </div>
               </div>
@@ -548,8 +548,8 @@ export default function Checkout() {
 
         {/* Right: Order summary */}
         <div className="lg:w-80 shrink-0">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 sticky top-24">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('checkout.orderSummary')}</h2>
+          <div className="surface-card rounded-xl shadow-sm border p-6 sticky top-24">
+            <h2 className="text-lg font-semibold text-main mb-4">{t('checkout.orderSummary')}</h2>
 
             <div className="space-y-3 mb-4">
               {items.map((item) => {
@@ -557,8 +557,8 @@ export default function Checkout() {
                 return (
                   <div key={item.id} className="flex justify-between text-sm">
                     <div>
-                      <span className="text-gray-400 mr-1">{item.quantity}x</span>
-                      <span className="text-gray-700">{item.name}</span>
+                      <span className="text-hint mr-1">{item.quantity}x</span>
+                      <span className="text-sub">{item.name}</span>
                       {item.options.length > 0 && (
                         <p className="text-xs text-hint ml-5">
                           {item.options.map((o) => o.valueName).join(', ')}
@@ -573,7 +573,7 @@ export default function Checkout() {
               })}
             </div>
 
-            <div className="border-t border-gray-200 pt-3 space-y-2 text-sm">
+            <div className="border-t pt-3 space-y-2 text-sm border-input">
               <div className="flex justify-between">
                 <span className="text-sub">{t('checkout.subtotal')}</span>
                 <span className="text-main">${subtotal.toFixed(2)}</span>
@@ -584,8 +584,8 @@ export default function Checkout() {
               </div>
               {orderType === 'delivery' && (
                 <div className="flex justify-between">
-                  <span className="text-gray-600">{t('checkout.deliveryFee')}</span>
-                  <span className="text-gray-900">${currentDeliveryFee.toFixed(2)}</span>
+                  <span className="text-sub">{t('checkout.deliveryFee')}</span>
+                  <span className="text-main">${currentDeliveryFee.toFixed(2)}</span>
                 </div>
               )}
               {loyaltyDiscount > 0 && (
@@ -594,7 +594,7 @@ export default function Checkout() {
                   <span>-${loyaltyDiscount.toFixed(2)}</span>
                 </div>
               )}
-              <div className="flex justify-between border-t border-gray-200 pt-2 font-bold text-base">
+              <div className="flex justify-between border-t border-input pt-2 font-bold text-base">
                 <span>{t('checkout.total')}</span>
                 <span className="text-primary-600">${total.toFixed(2)}</span>
               </div>

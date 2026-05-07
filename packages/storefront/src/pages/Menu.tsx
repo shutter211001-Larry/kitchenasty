@@ -136,7 +136,7 @@ export default function Menu() {
             placeholder={t('menu.searchPlaceholder')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none text-main"
+            className="w-full pl-10 pr-4 py-2.5 bg-surface border border-input rounded-lg focus:ring-2 focus:ring-primary-500 outline-none text-main"
           />
         </div>
       </div>
@@ -160,7 +160,7 @@ export default function Menu() {
               onClick={() => handleCategoryClick(null)}
               className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors ${!selectedCategory
                   ? 'bg-primary-50 text-primary-700'
-                  : 'text-sub hover:bg-gray-100'
+                  : 'text-sub hover:bg-surface'
                 }`}
             >
               {t('menu.allCategories')}
@@ -174,7 +174,7 @@ export default function Menu() {
                 onClick={() => handleCategoryClick(cat.id)}
                 className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors ${selectedCategory === cat.id
                     ? 'bg-primary-50 text-primary-700'
-                    : 'text-gray-600 hover:bg-gray-100'
+                    : 'text-sub hover:bg-surface'
                   }`}
               >
                 {getTranslated(cat.name, cat.nameTranslations, i18n.language)}
@@ -233,7 +233,7 @@ export default function Menu() {
                           <p className="text-sm text-sub mt-1 line-clamp-2">{getTranslated(item.description, item.descriptionTranslations, i18n.language)}</p>
                         )}
                       <div className="flex items-center gap-2 mt-3">
-                        <span className="text-xs text-hint bg-gray-100 px-2 py-0.5 rounded-full">
+                        <span className="text-xs text-hint bg-surface px-2 py-0.5 rounded-full border border-input">
                           {getTranslated(item.category.name, item.category.nameTranslations, i18n.language)}
                         </span>
                         {item._count.options > 0 && (
@@ -253,7 +253,7 @@ export default function Menu() {
                   <button
                     disabled={page <= 1}
                     onClick={() => setPage((p) => p - 1)}
-                    className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg disabled:opacity-40 hover:bg-gray-50"
+                    className="px-3 py-1.5 text-sm border border-input rounded-lg disabled:opacity-40 hover:bg-surface text-sub transition-colors"
                   >
                     {t('locations.previous')}
                   </button>
@@ -263,7 +263,7 @@ export default function Menu() {
                   <button
                     disabled={page >= pagination.totalPages}
                     onClick={() => setPage((p) => p + 1)}
-                    className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg disabled:opacity-40 hover:bg-gray-50"
+                    className="px-3 py-1.5 text-sm border border-input rounded-lg disabled:opacity-40 hover:bg-surface text-sub transition-colors"
                   >
                     {t('locations.next')}
                   </button>

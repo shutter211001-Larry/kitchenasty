@@ -172,9 +172,9 @@ export default function OrderHistory() {
       )}
 
       {/* Find Order Form */}
-      <div className="bg-primary-50 rounded-xl border border-primary-100 p-6 mb-8">
-        <h2 className="text-lg font-bold text-primary-900 mb-2">{t('orders.findOrderTitle')}</h2>
-        <p className="text-sm text-primary-700 mb-4">{t('orders.findOrderDesc')}</p>
+      <div className="surface-brand rounded-xl p-6 mb-8">
+        <h2 className="text-lg font-bold mb-2">{t('orders.findOrderTitle')}</h2>
+        <p className="text-sm opacity-90 mb-4">{t('orders.findOrderDesc')}</p>
         <form onSubmit={handleLookup} className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <input
             type="email"
@@ -182,7 +182,7 @@ export default function OrderHistory() {
             required
             value={lookupEmail}
             onChange={(e) => setLookupEmail(e.target.value)}
-            className="px-4 py-2 border border-primary-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none"
+            className="px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-sm focus:ring-2 focus:ring-white/50 outline-none placeholder:text-white/50 text-white"
           />
           <input
             type="text"
@@ -190,17 +190,17 @@ export default function OrderHistory() {
             required
             value={lookupNumber}
             onChange={(e) => setLookupNumber(e.target.value)}
-            className="px-4 py-2 border border-primary-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none"
+            className="px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-sm focus:ring-2 focus:ring-white/50 outline-none placeholder:text-white/50 text-white"
           />
           <button
             type="submit"
             disabled={lookupLoading}
-            className="bg-primary-600 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-primary-700 transition-colors disabled:opacity-50"
+            className="bg-white text-primary-600 px-4 py-2 rounded-lg text-sm font-bold hover:bg-white/90 transition-colors disabled:opacity-50"
           >
             {lookupLoading ? t('orders.lookupSearching') : t('orders.lookupSubmit')}
           </button>
         </form>
-        {lookupError && <p className="text-xs text-red-600 mt-2">{lookupError}</p>}
+        {lookupError && <p className="text-xs text-white mt-2">{lookupError}</p>}
       </div>
 
       {!loading && displayOrders.length > 0 && (

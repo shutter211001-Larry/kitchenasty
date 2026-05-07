@@ -76,12 +76,12 @@ export default function Account() {
         <div className="p-6 border-b">
           <h2 className="text-lg font-semibold text-main mb-4">{t('footer.quickLinks')}</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <Link to="/account/orders" className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+            <Link to="/account/orders" className="p-4 bg-surface rounded-lg border border-input hover:bg-surface/80 transition-colors">
               <h3 className="font-medium text-main">{t('account.orderHistory')}</h3>
               <p className="text-sm text-sub mt-1">{t('account.orderHistoryDesc')}</p>
             </Link>
             {settings.navShowReservations && (
-              <Link to="/reservations" className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+              <Link to="/reservations" className="p-4 bg-surface rounded-lg border border-input hover:bg-surface/80 transition-colors">
                 <h3 className="font-medium text-main">{t('nav.reservations')}</h3>
                 <p className="text-sm text-sub mt-1">{t('reservations.myReservations')}</p>
               </Link>

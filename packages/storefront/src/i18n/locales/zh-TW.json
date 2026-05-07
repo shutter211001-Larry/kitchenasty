@@ -65,7 +65,11 @@
     "createAccount": "建立帳戶",
     "creating": "帳戶建立中...",
     "hasAccount": "已經有帳戶了？",
-    "loginLink": "前往登入"
+    "loginLink": "前往登入",
+    "orContinue": "或使用以下方式繼續",
+    "googleSignIn": "使用 Google 帳號登入",
+    "googleRegister": "使用 Google 帳號快速註冊",
+    "socialRegister": "或使用社交帳號註冊"
   },
   "account": {
     "title": "我的帳戶",

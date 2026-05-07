@@ -146,7 +146,7 @@ export default function Reservations() {
               <select
                 value={locationId}
                 onChange={(e) => setLocationId(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none"
+                className="w-full px-3 py-2 bg-surface border border-input rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none text-main"
               >
                 <option value="">{t('reservations.selectLocation')}</option>
                 {locations.map((loc) => (
@@ -163,7 +163,7 @@ export default function Reservations() {
                   value={date}
                   min={today}
                   onChange={(e) => setDate(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none"
+                  className="w-full px-3 py-2 bg-surface border border-input rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none text-main"
                 />
               </div>
               <div>
@@ -171,7 +171,7 @@ export default function Reservations() {
                 <select
                   value={partySize}
                   onChange={(e) => setPartySize(parseInt(e.target.value))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none"
+                  className="w-full px-3 py-2 bg-surface border border-input rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none text-main"
                 >
                   {Array.from({ length: 20 }, (_, i) => i + 1).map((n) => (
                     <option key={n} value={n}>{n} {n === 1 ? t('reservations.guest', { count: n }) : t('reservations.guests', { count: n })}</option>
@@ -189,7 +189,7 @@ export default function Reservations() {
                     <div className="w-6 h-6 border-3 border-primary-200 border-t-primary-600 rounded-full animate-spin" />
                   </div>
                 ) : slots.length === 0 ? (
-                  <p className="text-gray-500 text-sm">{t('reservations.noSlots')}</p>
+                  <p className="text-hint text-sm">{t('reservations.noSlots')}</p>
                 ) : (
                   <div className="grid grid-cols-4 gap-2">
                     {slots.map((slot) => (
@@ -202,8 +202,8 @@ export default function Reservations() {
                           time === slot.time
                             ? 'bg-primary-50 text-primary-700'
                             : slot.available
-                            ? 'text-sub hover:bg-gray-100'
-                            : 'bg-gray-50 text-hint cursor-not-allowed'
+                            ? 'text-sub hover:bg-surface'
+                            : 'bg-surface text-hint cursor-not-allowed opacity-50'
                         }`}
                       >
                         {slot.time}
@@ -220,7 +220,7 @@ export default function Reservations() {
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
                 rows={2}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none resize-none"
+                className="w-full px-3 py-2 bg-surface border border-input rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none text-main resize-none"
               />
             </div>
 
@@ -241,9 +241,9 @@ export default function Reservations() {
         <div>
           <h2 className="text-lg font-semibold text-main mb-4">{t('reservations.myReservations')}</h2>
           {!user ? (
-            <p className="text-gray-500 text-sm">{t('reservations.loginRequired')}</p>
+            <p className="text-hint text-sm">{t('reservations.loginRequired')}</p>
           ) : myReservations.length === 0 ? (
-            <p className="text-gray-500 text-sm">{t('reservations.noReservations')}</p>
+            <p className="text-hint text-sm">{t('reservations.noReservations')}</p>
           ) : (
             <div className="space-y-3">
               {myReservations.map((r) => (

@@ -166,7 +166,7 @@ export default function OrderStatus() {
           <h2 className="text-xl font-bold text-gray-900 mb-2">{error || t('orders.errorLoading')}</h2>
           <p className="text-gray-600 mb-6">{error === t('orders.linkedToAccount') ? '' : t('orders.errorLoadingDesc')}</p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Link to="/account/orders" className="bg-white text-gray-700 px-6 py-2 rounded-lg font-medium border border-gray-200 hover:bg-gray-50 transition-colors">
+            <Link to="/account/orders" className="bg-surface text-sub px-6 py-2 rounded-lg font-medium border border-input hover:bg-surface/80 transition-colors">
               {t('orders.backToOrders')}
             </Link>
             {error === t('orders.linkedToAccount') && (
@@ -263,7 +263,7 @@ export default function OrderStatus() {
                   <div key={step.key} className="flex flex-col items-center relative z-10">
                     <div
                       className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-500 ${
-                        isComplete ? 'surface-brand' : 'bg-gray-100 text-hint'
+                        isComplete ? 'surface-brand' : 'bg-surface text-hint border border-input'
                       } ${isCurrent ? 'ring-4 ring-primary-100 scale-110' : ''}`}
                     >
                       {isComplete ? (
@@ -282,7 +282,7 @@ export default function OrderStatus() {
               })}
             </div>
             {/* Progress Bar Background */}
-            <div className="absolute top-5 left-0 w-full h-1 bg-gray-100 -z-0" />
+            <div className="absolute top-5 left-0 w-full h-1 bg-surface -z-0" />
             {/* Active Progress Bar */}
             <div
               className="absolute top-5 left-0 h-1 bg-primary-600 transition-all duration-1000 ease-in-out -z-0"
@@ -294,10 +294,10 @@ export default function OrderStatus() {
 
       {/* Order Items */}
       <div className="surface-card rounded-xl shadow-sm border overflow-hidden">
-        <div className="p-4 bg-gray-50 border-b">
+        <div className="p-4 bg-surface border-b border-input">
           <h3 className="font-bold text-main">{t('orders.items')}</h3>
         </div>
-        <div className="divide-y divide-gray-100">
+        <div className="divide-y border-input">
           {order.items?.map((item: any) => (
             <div key={item.id} className="p-4">
               <div className="flex justify-between items-start">
@@ -308,7 +308,7 @@ export default function OrderStatus() {
                   {item.options?.length > 0 && (
                     <div className="mt-1 flex flex-wrap gap-1">
                       {item.options.map((opt: any) => (
-                        <span key={opt.id} className="text-[10px] bg-gray-100 text-sub px-1.5 py-0.5 rounded">
+                        <span key={opt.id} className="text-[10px] bg-surface text-sub px-1.5 py-0.5 rounded border border-input">
                           {opt.value}
                         </span>
                       ))}
@@ -321,7 +321,7 @@ export default function OrderStatus() {
             </div>
           ))}
         </div>
-        <div className="p-4 bg-gray-50 space-y-2">
+        <div className="p-4 bg-surface space-y-2 border-t border-input">
           <div className="flex justify-between text-sm text-sub">
             <span>{t('orders.subtotal')}</span>
             <span>${order.subtotal.toFixed(2)}</span>
@@ -338,7 +338,7 @@ export default function OrderStatus() {
               <span>-${order.discount.toFixed(2)}</span>
             </div>
           )}
-          <div className="flex justify-between font-bold text-base pt-2 border-t border-gray-200">
+          <div className="flex justify-between font-bold text-base pt-2 border-t border-input">
             <span>{t('checkout.total')}</span>
             <span className="text-primary-600">${order.total.toFixed(2)}</span>
           </div>
