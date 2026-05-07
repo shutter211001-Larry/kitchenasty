@@ -132,10 +132,10 @@ export default function OrderStatus() {
     const socket = io(socketHost, { path: '/socket.io', transports: ['websocket', 'polling'] });
 
     socket.on('connect', () => {
-      socket.emit('joinOrder', id);
+      socket.emit('join:order', id);
     });
 
-    socket.on('orderStatusUpdate', (data) => {
+    socket.on('order:statusUpdate', (data) => {
       if (data.id === id) {
         setOrder((prev: any) => prev ? ({ ...prev, status: data.status }) : null);
       }
