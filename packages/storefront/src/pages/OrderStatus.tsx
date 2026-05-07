@@ -70,12 +70,13 @@ export default function OrderStatus() {
   ];
 
   useEffect(() => {
-    if (!id || !token) {
+    if (!id) {
       setLoading(false);
       return;
     }
 
-    const headers: Record<string, string> = { Authorization: `Bearer ${token}` };
+    const headers: Record<string, string> = {};
+    if (token) headers.Authorization = `Bearer ${token}`;
 
     // Try to load from cache first for instant feedback
     const cachedOrder = localStorage.getItem(`order_cache_${id}`);
