@@ -31,16 +31,17 @@ html.dark {
   --current-bg: #0f172a;
 }
 
-/* Map background classes to set the environment variable */
-.bg-white { --current-bg: #ffffff; background-color: #ffffff; }
-.bg-gray-50 { --current-bg: #f9fafb; background-color: #f9fafb; }
-.bg-primary-600 { --current-bg: var(--color-primary-600); background-color: var(--color-primary-600); }
-.bg-primary-500 { --current-bg: var(--color-primary-500); background-color: var(--color-primary-500); }
-.bg-secondary-500 { --current-bg: var(--color-secondary-500); background-color: var(--color-secondary-500); }
+/* Map background classes to set the environment variable without forcing a color change */
+.bg-white { --current-bg: #ffffff; }
+.bg-gray-50 { --current-bg: #f9fafb; }
+.bg-primary-600 { --current-bg: var(--color-primary-600); }
+.bg-primary-500 { --current-bg: var(--color-primary-500); }
+.bg-secondary-500 { --current-bg: var(--color-secondary-500); }
 
-/* In dark mode, white/light backgrounds turn into slate-800 */
-html.dark .bg-white { --current-bg: #1e293b; background-color: #1e293b !important; }
-html.dark .bg-gray-50 { --current-bg: #0f172a; background-color: #0f172a !important; }
+/* In dark mode, we ONLY update the background variable if the component actually changes its background */
+/* We remove the forced background-color overrides to respect your design */
+html.dark .bg-white { --current-bg: #ffffff; } 
+html.dark .bg-gray-50 { --current-bg: #f9fafb; }
 
 /* Apply the Smart Text color to common text classes */
 .text-gray-900, .text-gray-800, .text-gray-700 {
