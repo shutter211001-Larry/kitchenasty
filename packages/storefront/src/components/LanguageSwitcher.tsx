@@ -26,7 +26,7 @@ export default function LanguageSwitcher() {
         className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-main bg-surface border border-input rounded-full hover:bg-surface-soft transition-all shadow-sm active:scale-95"
         type="button"
       >
-        <span className="text-base leading-none flex items-center justify-center">
+        <span className="text-xs font-bold leading-none flex items-center justify-center min-w-[20px] text-main">
           {currentLanguage.flag}
         </span>
         <span className="hidden sm:inline text-main">{currentLanguage.name}</span>

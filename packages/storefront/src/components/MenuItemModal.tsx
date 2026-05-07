@@ -240,7 +240,8 @@ export default function MenuItemModal({ itemId, onClose }: Props) {
                   {item.allergens.map((a) => (
                     <span
                       key={a.allergen.id}
-                      className="text-xs bg-red-50 text-red-700 px-2.5 py-1 rounded-full border border-red-200 font-bold"
+                      className="text-[10px] bg-red-100 px-1.5 py-0.5 rounded border border-red-200 font-bold uppercase tracking-tight"
+                      style={{ color: '#991b1b' }}
                     >
                       {getTranslated(a.allergen.name, a.allergen.nameTranslations, i18n.language)}
                     </span>
@@ -248,7 +249,8 @@ export default function MenuItemModal({ itemId, onClose }: Props) {
                   {item.dietaryPreferences?.map((d) => (
                     <span
                       key={d.dietaryPreference.id}
-                      className="text-xs bg-yellow-50 text-yellow-800 px-2.5 py-1 rounded-full border border-yellow-200 font-bold"
+                      className="text-[10px] bg-amber-100 px-1.5 py-0.5 rounded border border-amber-200 font-bold uppercase tracking-tight"
+                      style={{ color: '#78350f' }}
                     >
                       {getTranslated(d.dietaryPreference.name, d.dietaryPreference.nameTranslations, i18n.language)}
                     </span>

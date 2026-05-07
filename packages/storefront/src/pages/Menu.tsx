@@ -258,22 +258,28 @@ export default function Menu() {
                       </div>
 
                       {/* Divider and Tags */}
-                      {(item.allergens?.length > 0 || item.dietaryPreferences?.length > 0) && (
-                        <div className="mt-3 pt-3 border-t border-input/50">
-                          <div className="flex flex-wrap gap-1.5">
-                            {item.allergens?.map((a) => (
-                              <span key={a.allergen.id} className="text-[10px] bg-red-50 text-red-600 px-1.5 py-0.5 rounded border border-red-100 font-bold uppercase tracking-wider">
-                                {getTranslated(a.allergen.name, a.allergen.nameTranslations, i18n.language)}
-                              </span>
-                            ))}
-                            {item.dietaryPreferences?.map((d) => (
-                              <span key={d.dietaryPreference.id} className="text-[10px] bg-yellow-50 text-yellow-700 px-1.5 py-0.5 rounded border border-yellow-200 font-bold uppercase tracking-wider">
-                                {getTranslated(d.dietaryPreference.name, d.dietaryPreference.nameTranslations, i18n.language)}
-                              </span>
-                            ))}
-                          </div>
+                      <div className="mt-3 pt-3 border-t border-input/50">
+                        <div className="flex flex-wrap gap-1.5">
+                          {item.allergens?.map((a) => (
+                            <span 
+                              key={a.allergen.id} 
+                              className="text-[10px] bg-red-100 px-1.5 py-0.5 rounded border border-red-200 font-bold uppercase tracking-tight"
+                              style={{ color: '#991b1b' }}
+                            >
+                              {getTranslated(a.allergen.name, a.allergen.nameTranslations, i18n.language)}
+                            </span>
+                          ))}
+                          {item.dietaryPreferences?.map((d) => (
+                            <span 
+                              key={d.dietaryPreference.id} 
+                              className="text-[10px] bg-amber-100 px-1.5 py-0.5 rounded border border-amber-200 font-bold uppercase tracking-tight"
+                              style={{ color: '#78350f' }}
+                            >
+                              {getTranslated(d.dietaryPreference.name, d.dietaryPreference.nameTranslations, i18n.language)}
+                            </span>
+                          ))}
                         </div>
-                      )}
+                      </div>
                     </div>
                   </button>
                 ))}
