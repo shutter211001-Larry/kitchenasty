@@ -64,6 +64,7 @@ export interface SiteSettings {
 interface ThemeContextType {
   settings: SiteSettings;
   isDark: boolean;
+  isInitialized: boolean;
 }
 
 const defaultSettings: SiteSettings = {
@@ -84,6 +85,7 @@ const defaultSettings: SiteSettings = {
 const ThemeContext = createContext<ThemeContextType>({
   settings: defaultSettings,
   isDark: false,
+  isInitialized: false,
 });
 
 /**
@@ -143,6 +145,7 @@ function applyColorVars(prefix: string, hex: string) {
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
+  const [isInitialized, setIsInitialized] = useState(() => !!localStorage.getItem('site_settings'));
   const [settings, setSettings] = useState<SiteSettings>(() => {
     const cached = localStorage.getItem('site_settings');
     if (cached) {
@@ -171,9 +174,12 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
           const finalSettings = { ...defaultSettings, ...data };
           setSettings(finalSettings);
           localStorage.setItem('site_settings', JSON.stringify(finalSettings));
+          setIsInitialized(true);
         }
       })
-      .catch(() => {});
+      .catch(() => {
+        setIsInitialized(true); // Proceed even on error to avoid infinite loading
+      });
   }, []);
 
   // Apply CSS variables when colors change
@@ -217,10 +223,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   }, [settings.favicon]);
 
   return (
-    <ThemeContext.Provider value={{ settings, isDark }}>
+    <ThemeContext.Provider value={{ settings, isDark, isInitialized }}>
       {children}
     </ThemeContext.Provider>
   );
+}
 }
 
 export function useTheme() {
