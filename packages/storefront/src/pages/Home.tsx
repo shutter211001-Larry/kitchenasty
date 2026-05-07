@@ -74,15 +74,15 @@ function ClassicHero({ hero, t }: { hero: HeroSection | null; t: (k: string) => 
 
   return (
     <section
-      className="bg-gradient-to-br from-primary-600 to-primary-800 text-white"
+      className="bg-primary-600"
       style={heroStyle}
     >
-      <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28${hero?.backgroundImage ? ' bg-black/40' : ''}`}>
+      <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28${hero?.backgroundImage ? ' bg-black/40' : ' bg-primary-600'}`}>
         <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-4xl lg:text-6xl font-extrabold mb-6 leading-tight">
+          <h1 className="text-4xl lg:text-6xl font-extrabold mb-6 leading-tight text-smart">
             {hero?.title || t('home.heroTitle')}
           </h1>
-          <p className="text-lg lg:text-xl text-primary-100 mb-10 max-w-2xl mx-auto">
+          <p className="text-lg lg:text-xl mb-10 max-w-2xl mx-auto text-smart opacity-80">
             {hero?.subtitle || t('home.heroDescription')}
           </p>
           <div className="flex flex-wrap justify-center gap-6">
