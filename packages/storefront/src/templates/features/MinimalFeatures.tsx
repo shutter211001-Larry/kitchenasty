@@ -21,21 +21,21 @@ export default function MinimalFeatures({ features, t }: FeaturesProps) {
   ].filter(Boolean) as Array<{ icon: string; title: string; description: string }>;
 
   return (
-    <section className="py-16 px-4 bg-white dark:bg-gray-950">
+    <section className="py-16 px-4 bg-surface">
       <div className="max-w-2xl mx-auto">
-        <ul className="divide-y divide-gray-100 dark:divide-gray-800">
+        <ul className="divide-y border-input">
           {items.map((feature, i) => (
             <li key={i} className="flex items-start gap-5 py-8 first:pt-0 last:pb-0">
-              <span className="text-gray-400 dark:text-gray-500 mt-0.5 shrink-0">
+              <span className="text-hint mt-0.5 shrink-0">
                 {defaultIcons[feature.icon] ?? (
                   <span className="text-lg">{feature.icon}</span>
                 )}
               </span>
               <div>
-                <h3 className="text-base font-medium text-gray-900 dark:text-white mb-1">
+                <h3 className="text-base font-medium text-main mb-1">
                   {feature.title}
                 </h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
+                <p className="text-sm text-sub leading-relaxed">
                   {feature.description}
                 </p>
               </div>

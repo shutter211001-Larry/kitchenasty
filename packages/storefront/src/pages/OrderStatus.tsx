@@ -182,10 +182,10 @@ export default function OrderStatus() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
           </div>
-          <h2 className="text-xl font-bold text-gray-900 mb-2">{error || t('orders.errorLoading')}</h2>
-          <p className="text-gray-600 mb-6">{error === t('orders.linkedToAccount') ? '' : t('orders.errorLoadingDesc')}</p>
+          <h2 className="text-xl font-bold text-main mb-2">{error || t('orders.errorLoading')}</h2>
+          <p className="text-sub mb-6">{error === t('orders.linkedToAccount') ? '' : t('orders.errorLoadingDesc')}</p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Link to="/account/orders" className="bg-surface text-sub px-6 py-2 rounded-lg font-medium border border-input hover:bg-surface/80 transition-colors">
+            <Link to="/account/orders" className="bg-surface text-main px-6 py-2 rounded-lg font-medium border border-input hover:bg-surface/80 transition-colors">
               {t('orders.backToOrders')}
             </Link>
             {error === t('orders.linkedToAccount') && (
@@ -265,11 +265,11 @@ export default function OrderStatus() {
         <h2 className="text-lg font-semibold text-main mb-6">{t('orders.status')}</h2>
 
         {isCancelled ? (
-          <div className="flex items-center gap-3 p-4 bg-red-50 rounded-lg">
+          <div className="flex items-center gap-3 p-4 bg-red-50/10 border border-red-200/20 rounded-lg">
             <svg className="w-6 h-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
-            <span className="font-medium text-red-700">{t('orderStatus.cancelledMessage')}</span>
+            <span className="font-medium text-red-600">{t('orderStatus.cancelledMessage')}</span>
           </div>
         ) : (
           <div className="relative">
@@ -376,7 +376,7 @@ export default function OrderStatus() {
         {settings.showMembership && (
           <Link
             to="/account/orders"
-            className="border border-gray-300 text-gray-700 px-6 py-2.5 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+            className="border border-input text-main px-6 py-2.5 rounded-lg font-medium hover:bg-surface transition-colors"
           >
             {t('orders.title')}
           </Link>

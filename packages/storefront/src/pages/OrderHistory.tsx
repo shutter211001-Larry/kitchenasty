@@ -167,7 +167,7 @@ export default function OrderHistory() {
       )}
 
       {error && (
-        <div className="bg-red-50 text-red-700 p-4 rounded-lg mb-4">{error}</div>
+        <div className="bg-red-50/10 border border-red-200/20 text-red-600 p-4 rounded-lg mb-4">{error}</div>
       )}
 
       {!loading && !error && displayOrders.length === 0 && (
@@ -252,7 +252,7 @@ export default function OrderHistory() {
               <button
                 disabled={page <= 1}
                 onClick={() => setPage((p) => p - 1)}
-                className="px-4 py-2 text-sm border border-gray-300 rounded-lg disabled:opacity-40 hover:bg-gray-50"
+                className="px-4 py-2 text-sm border border-input rounded-lg disabled:opacity-40 hover:bg-surface text-main"
               >
                 {t('locations.previous')}
               </button>
@@ -262,7 +262,7 @@ export default function OrderHistory() {
               <button
                 disabled={page >= pagination.totalPages}
                 onClick={() => setPage((p) => p + 1)}
-                className="px-4 py-2 text-sm border border-gray-300 rounded-lg disabled:opacity-40 hover:bg-gray-50"
+                className="px-4 py-2 text-sm border border-input rounded-lg disabled:opacity-40 hover:bg-surface text-main"
               >
                 {t('locations.next')}
               </button>
