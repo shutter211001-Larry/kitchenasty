@@ -225,18 +225,23 @@ export default function MenuItemModal({ itemId, onClose }: Props) {
                   <span className="text-[10px] text-hint">/ {getTranslated(item.unit || '份', item.unitTranslations || {}, i18n.language)}</span>
                 </div>
               </div>
-
-              <span className="text-xs text-hint bg-gray-100 px-2 py-0.5 rounded-full">
-                {getTranslated(item.category.name, item.category.nameTranslations, i18n.language)}
-              </span>
-
               {item.description && (
-                <p className="text-sub mt-3 text-sm">{getTranslated(item.description, item.descriptionTranslations, i18n.language)}</p>
+                <p className="text-sub mt-2 text-sm leading-relaxed">{getTranslated(item.description, item.descriptionTranslations, i18n.language)}</p>
               )}
+
+              {/* Category Tag */}
+              <div className="mt-3">
+                <span 
+                  className="text-[10px] bg-gray-100 px-2 py-0.5 rounded border border-gray-200 font-bold uppercase tracking-tight"
+                  style={{ color: '#374151' }}
+                >
+                  {getTranslated(item.category.name, item.category.nameTranslations, i18n.language)}
+                </span>
+              </div>
 
               {/* Allergens & Dietary */}
               {(item.allergens.length > 0 || item.dietaryPreferences?.length > 0) && (
-                <div className="mt-4 flex flex-wrap gap-1.5">
+                <div className="mt-4 flex flex-wrap gap-1.5 opacity-90">
                   {item.allergens.map((a) => (
                     <span
                       key={a.allergen.id}
