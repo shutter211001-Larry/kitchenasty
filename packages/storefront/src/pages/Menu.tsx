@@ -136,7 +136,7 @@ export default function Menu() {
             placeholder={t('menu.searchPlaceholder')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+            className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none text-main"
           />
         </div>
       </div>
@@ -160,7 +160,7 @@ export default function Menu() {
               onClick={() => handleCategoryClick(null)}
               className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors ${!selectedCategory
                   ? 'bg-primary-50 text-primary-700'
-                  : 'text-gray-600 hover:bg-gray-100'
+                  : 'text-sub hover:bg-gray-100'
                 }`}
             >
               {t('menu.allCategories')}
@@ -178,7 +178,7 @@ export default function Menu() {
                   }`}
               >
                 {getTranslated(cat.name, cat.nameTranslations, i18n.language)}
-                <span className="text-gray-400 ml-1 text-xs">({cat._count.menuItems})</span>
+                <span className="text-hint ml-1 text-xs">({cat._count.menuItems})</span>
               </button>
             ))}
           </nav>
@@ -233,7 +233,7 @@ export default function Menu() {
                           <p className="text-sm text-sub mt-1 line-clamp-2">{getTranslated(item.description, item.descriptionTranslations, i18n.language)}</p>
                         )}
                       <div className="flex items-center gap-2 mt-3">
-                        <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
+                        <span className="text-xs text-hint bg-gray-100 px-2 py-0.5 rounded-full">
                           {getTranslated(item.category.name, item.category.nameTranslations, i18n.language)}
                         </span>
                         {item._count.options > 0 && (
@@ -257,7 +257,7 @@ export default function Menu() {
                   >
                     {t('locations.previous')}
                   </button>
-                  <span className="text-sm text-gray-600">
+                  <span className="text-sm text-sub">
                     {pagination.page} / {pagination.totalPages}
                   </span>
                   <button

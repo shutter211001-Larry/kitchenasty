@@ -223,14 +223,14 @@ export default function OrderStatus() {
         <div>
           {order.pickupNumber && (
             <div className="mb-2">
-              <span className="text-xs text-gray-400 font-medium uppercase tracking-wider">Pickup No.</span>
+              <span className="text-xs text-hint font-medium uppercase tracking-wider">Pickup No.</span>
               <div className="text-5xl font-black text-primary-600 leading-none">
                 {order.pickupNumber}
               </div>
             </div>
           )}
-          <h1 className="text-xl font-bold text-gray-900">#{order.orderNumber}</h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <h1 className="text-xl font-bold text-main">#{order.orderNumber}</h1>
+          <p className="text-sm text-sub mt-1">
             {new Date(order.createdAt).toLocaleString()}
           </p>
         </div>
@@ -242,8 +242,8 @@ export default function OrderStatus() {
       </div>
 
       {/* Status Tracker */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-6">{t('orders.status')}</h2>
+      <div className="surface-card rounded-xl shadow-sm border p-6 mb-6">
+        <h2 className="text-lg font-semibold text-main mb-6">{t('orders.status')}</h2>
 
         {isCancelled ? (
           <div className="flex items-center gap-3 p-4 bg-red-50 rounded-lg">
@@ -263,7 +263,7 @@ export default function OrderStatus() {
                   <div key={step.key} className="flex flex-col items-center relative z-10">
                     <div
                       className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-500 ${
-                        isComplete ? 'bg-primary-600 text-white' : 'bg-gray-100 text-gray-400'
+                        isComplete ? 'surface-brand' : 'bg-gray-100 text-hint'
                       } ${isCurrent ? 'ring-4 ring-primary-100 scale-110' : ''}`}
                     >
                       {isComplete ? (
@@ -274,7 +274,7 @@ export default function OrderStatus() {
                         <span className="text-xs font-bold">{idx + 1}</span>
                       )}
                     </div>
-                    <span className={`text-[10px] mt-2 font-bold uppercase tracking-tighter ${isComplete ? 'text-gray-900' : 'text-gray-400'}`}>
+                    <span className={`text-[10px] mt-2 font-bold uppercase tracking-tighter ${isComplete ? 'text-main' : 'text-hint'}`}>
                       {step.label}
                     </span>
                   </div>
@@ -293,43 +293,43 @@ export default function OrderStatus() {
       </div>
 
       {/* Order Items */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-        <div className="p-4 bg-gray-50 border-b border-gray-200">
-          <h3 className="font-bold text-gray-900">{t('orders.items')}</h3>
+      <div className="surface-card rounded-xl shadow-sm border overflow-hidden">
+        <div className="p-4 bg-gray-50 border-b">
+          <h3 className="font-bold text-main">{t('orders.items')}</h3>
         </div>
         <div className="divide-y divide-gray-100">
           {order.items?.map((item: any) => (
             <div key={item.id} className="p-4">
               <div className="flex justify-between items-start">
                 <div>
-                  <p className="font-bold text-gray-900">
+                  <p className="font-bold text-main">
                     {item.quantity}x {item.name}
                   </p>
                   {item.options?.length > 0 && (
                     <div className="mt-1 flex flex-wrap gap-1">
                       {item.options.map((opt: any) => (
-                        <span key={opt.id} className="text-[10px] bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded">
+                        <span key={opt.id} className="text-[10px] bg-gray-100 text-sub px-1.5 py-0.5 rounded">
                           {opt.value}
                         </span>
                       ))}
                     </div>
                   )}
-                  {item.comment && <p className="text-xs text-gray-500 mt-1 italic">"{item.comment}"</p>}
+                  {item.comment && <p className="text-xs text-sub mt-1 italic">"{item.comment}"</p>}
                 </div>
-                <span className="text-sm font-medium text-gray-900">${item.subtotal.toFixed(2)}</span>
+                <span className="text-sm font-medium text-main">${item.subtotal.toFixed(2)}</span>
               </div>
             </div>
           ))}
         </div>
         <div className="p-4 bg-gray-50 space-y-2">
-          <div className="flex justify-between text-sm text-gray-600">
+          <div className="flex justify-between text-sm text-sub">
             <span>{t('orders.subtotal')}</span>
             <span>${order.subtotal.toFixed(2)}</span>
           </div>
           {order.deliveryFee > 0 && (
             <div className="flex justify-between">
-              <span className="text-gray-600">{t('checkout.deliveryFee')}</span>
-              <span>${order.deliveryFee.toFixed(2)}</span>
+              <span className="text-sub">{t('checkout.deliveryFee')}</span>
+              <span className="text-main">${order.deliveryFee.toFixed(2)}</span>
             </div>
           )}
           {order.discount > 0 && (
@@ -349,7 +349,7 @@ export default function OrderStatus() {
         {settings.navShowMenu && (
           <Link
             to="/menu"
-            className="bg-primary-600 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-primary-700 transition-colors"
+            className="btn-primary"
           >
             {t('home.viewMenu')}
           </Link>

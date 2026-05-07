@@ -132,10 +132,10 @@ export default function Checkout() {
   if (items.length === 0) {
     return (
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
-        <h1 className="text-2xl font-bold text-gray-900 mb-4">{t('checkout.emptyCart')}</h1>
+        <h1 className="text-2xl font-bold text-main mb-4">{t('checkout.emptyCart')}</h1>
         <Link
           to="/menu"
-          className="inline-block bg-primary-600 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-primary-700 transition-colors"
+          className="inline-block btn-primary"
         >
           {t('checkout.browseMenu')}
         </Link>
@@ -231,7 +231,7 @@ export default function Checkout() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">{t('checkout.title')}</h1>
+      <h1 className="text-3xl font-bold text-main mb-8">{t('checkout.title')}</h1>
 
       {isBusy && (
         <div className="bg-amber-50 border border-amber-300 text-amber-800 p-4 rounded-lg mb-6">
@@ -249,8 +249,8 @@ export default function Checkout() {
 
           {/* Order type */}
           {orderSettings?.deliveryEnabled && orderSettings?.pickupEnabled && (
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('checkout.orderType')}</h2>
+            <div className="surface-card rounded-xl shadow-sm border p-6">
+              <h2 className="text-lg font-semibold text-main mb-4">{t('checkout.orderType')}</h2>
               <div className="flex gap-3">
                 <button
                   type="button"
@@ -258,7 +258,7 @@ export default function Checkout() {
                   className={`flex-1 py-3 rounded-lg font-medium text-sm border-2 transition-colors ${
                     orderType === 'delivery'
                       ? 'border-primary-600 bg-primary-50 text-primary-700'
-                      : 'border-gray-200 text-gray-600 hover:border-gray-300'
+                      : 'border-gray-200 text-sub hover:border-gray-300'
                   }`}
                 >
                   {t('checkout.delivery')}
@@ -269,7 +269,7 @@ export default function Checkout() {
                   className={`flex-1 py-3 rounded-lg font-medium text-sm border-2 transition-colors ${
                     orderType === 'pickup'
                       ? 'border-primary-600 bg-primary-50 text-primary-700'
-                      : 'border-gray-200 text-gray-600 hover:border-gray-300'
+                      : 'border-gray-200 text-sub hover:border-gray-300'
                   }`}
                 >
                   {t('checkout.pickup')}
@@ -280,8 +280,8 @@ export default function Checkout() {
 
           {/* Delivery address */}
           {orderType === 'delivery' && (
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('checkout.deliveryAddress')}</h2>
+            <div className="surface-card rounded-xl shadow-sm border p-6">
+              <h2 className="text-lg font-semibold text-main mb-4">{t('checkout.deliveryAddress')}</h2>
               {zoneError && (
                 <div className="bg-red-50 text-red-700 p-3 rounded-lg text-sm mb-3">{zoneError}</div>
               )}
@@ -344,7 +344,7 @@ export default function Checkout() {
                     onChange={() => setScheduledAt('')}
                     className="accent-primary-600"
                   />
-                  <span className="text-sm text-gray-700">{t('checkout.asap')}</span>
+                  <span className="text-sm text-sub">{t('checkout.asap')}</span>
                 </label>
                 <label className="flex items-center gap-3">
                   <input
@@ -369,8 +369,8 @@ export default function Checkout() {
           )}
 
           {/* Notes */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('checkout.orderNotes')}</h2>
+          <div className="surface-card rounded-xl shadow-sm border p-6">
+            <h2 className="text-lg font-semibold text-main mb-4">{t('checkout.orderNotes')}</h2>
             <textarea
               value={comment}
               onChange={(e) => setComment(e.target.value)}
@@ -380,8 +380,8 @@ export default function Checkout() {
           </div>
 
           {/* Coupon */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('checkout.couponCode')}</h2>
+          <div className="surface-card rounded-xl shadow-sm border p-6">
+            <h2 className="text-lg font-semibold text-main mb-4">{t('checkout.couponCode')}</h2>
             <div className="flex gap-2">
               <input
                 type="text"
@@ -391,7 +391,7 @@ export default function Checkout() {
               />
               <button
                 type="button"
-                className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50"
+                className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-sub hover:bg-gray-50"
               >
                 {t('checkout.apply')}
               </button>
@@ -400,9 +400,9 @@ export default function Checkout() {
 
           {/* Loyalty Points Redemption */}
           {user && loyaltyBalance > 0 && (
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Loyalty Points</h2>
-              <p className="text-sm text-gray-600 mb-3">
+            <div className="surface-card rounded-xl shadow-sm border p-6">
+              <h2 className="text-lg font-semibold text-main mb-4">Loyalty Points</h2>
+              <p className="text-sm text-sub mb-3">
                 You have <span className="font-bold text-primary-600">{loyaltyBalance}</span> points available
                 (100 points = $1.00)
               </p>
@@ -445,7 +445,7 @@ export default function Checkout() {
                       onChange={() => setPaymentMethod('cash')}
                       className="accent-primary-600"
                     />
-                    <span className="text-sm font-medium text-gray-900">{t('checkout.cashOnDelivery')}</span>
+                    <span className="text-sm font-medium text-main">{t('checkout.cashOnDelivery')}</span>
                   </label>
                 )}
                 {paymentSettings?.stripeEnabled && (
@@ -497,7 +497,7 @@ export default function Checkout() {
                     <div className="flex flex-wrap gap-2">
                       <a
                         href="/api/auth/google"
-                        className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors shadow-sm"
+                        className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-sub hover:bg-gray-50 transition-colors shadow-sm"
                       >
                         <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="w-4 h-4" />
                         {t('checkout.googleLogin')}
@@ -560,12 +560,12 @@ export default function Checkout() {
                       <span className="text-gray-400 mr-1">{item.quantity}x</span>
                       <span className="text-gray-700">{item.name}</span>
                       {item.options.length > 0 && (
-                        <p className="text-xs text-gray-400 ml-5">
+                        <p className="text-xs text-hint ml-5">
                           {item.options.map((o) => o.valueName).join(', ')}
                         </p>
                       )}
                     </div>
-                    <span className="text-gray-900 font-medium">
+                    <span className="text-main font-medium">
                       ${((item.price + optionsTotal) * item.quantity).toFixed(2)}
                     </span>
                   </div>
@@ -575,12 +575,12 @@ export default function Checkout() {
 
             <div className="border-t border-gray-200 pt-3 space-y-2 text-sm">
               <div className="flex justify-between">
-                <span className="text-gray-600">{t('checkout.subtotal')}</span>
-                <span className="text-gray-900">${subtotal.toFixed(2)}</span>
+                <span className="text-sub">{t('checkout.subtotal')}</span>
+                <span className="text-main">${subtotal.toFixed(2)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-600">{t('checkout.tax')}</span>
-                <span className="text-gray-900">${tax.toFixed(2)}</span>
+                <span className="text-sub">{t('checkout.tax')}</span>
+                <span className="text-main">${tax.toFixed(2)}</span>
               </div>
               {orderType === 'delivery' && (
                 <div className="flex justify-between">
@@ -604,7 +604,7 @@ export default function Checkout() {
               ref={submitButtonRef}
               type="submit"
               disabled={loading || isBusy}
-              className="w-full mt-4 bg-primary-600 text-white py-3 rounded-lg font-semibold hover:bg-primary-700 transition-colors disabled:opacity-50"
+              className="w-full mt-4 btn-primary disabled:opacity-50"
             >
               {isBusy
                 ? t('checkout.currentlyUnavailable')
@@ -618,14 +618,14 @@ export default function Checkout() {
 
       {/* Mobile Floating Guide */}
       {!isButtonVisible && !isBusy && items.length > 0 && (
-        <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/90 backdrop-blur-md border-t border-gray-200 shadow-[0_-4px_12px_rgba(0,0,0,0.1)] z-50 lg:hidden flex items-center justify-between animate-in slide-in-from-bottom duration-300">
+        <div className="fixed bottom-0 left-0 right-0 p-4 surface-card/90 backdrop-blur-md border-t shadow-[0_-4px_12px_rgba(0,0,0,0.1)] z-50 lg:hidden flex items-center justify-between animate-in slide-in-from-bottom duration-300">
           <div className="flex flex-col">
-            <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">{t('checkout.total')}</span>
+            <span className="text-[10px] text-hint font-bold uppercase tracking-wider">{t('checkout.total')}</span>
             <span className="text-xl font-black text-primary-600 leading-none">${total.toFixed(2)}</span>
           </div>
           <button
             onClick={scrollToSubmit}
-            className="bg-primary-600 text-white px-6 py-2.5 rounded-full font-bold text-sm shadow-lg shadow-primary-200 flex items-center gap-2 active:scale-95 transition-transform"
+            className="btn-primary px-6 py-2.5 rounded-full text-sm shadow-lg shadow-primary-200 flex items-center gap-2 active:scale-95 transition-transform"
           >
             {t('checkout.placeOrder')}
             <svg className="w-4 h-4 animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor">

@@ -158,13 +158,13 @@ export default function OrderHistory() {
       )}
 
       {!loading && !error && displayOrders.length === 0 && (
-        <div className="text-center py-12 bg-white rounded-xl border border-gray-200 shadow-sm mb-8">
-          <svg className="w-12 h-12 text-gray-300 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div className="text-center py-12 surface-card rounded-xl border shadow-sm mb-8">
+          <svg className="w-12 h-12 text-hint mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
           </svg>
-          <p className="text-gray-500 mb-4">{t('orders.noOrders')}</p>
+          <p className="text-sub mb-4">{t('orders.noOrders')}</p>
           {settings.navShowMenu && (
-            <Link to="/menu" className="bg-primary-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-primary-700 transition-colors">
+            <Link to="/menu" className="btn-primary px-6 py-2">
               {t('checkout.browseMenu')}
             </Link>
           )}
@@ -214,14 +214,14 @@ export default function OrderHistory() {
               >
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-3">
-                    <span className="font-mono text-sm font-medium text-gray-900">#{order.orderNumber}</span>
+                    <span className="font-mono text-sm font-medium text-main">#{order.orderNumber}</span>
                     <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_COLORS[order.status] || 'bg-gray-100'}`}>
                       {order.status.replace(/_/g, ' ')}
                     </span>
                   </div>
                   <span className="font-bold text-primary-600">${order.total.toFixed(2)}</span>
                 </div>
-                <div className="flex items-center gap-4 text-sm text-gray-500">
+                <div className="flex items-center gap-4 text-sm text-sub">
                   <span>{order.location.name}</span>
                   <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${order.orderType === 'DELIVERY' ? 'bg-blue-50 text-blue-700' : 'bg-green-50 text-green-700'
                     }`}>
@@ -243,7 +243,7 @@ export default function OrderHistory() {
               >
                 {t('locations.previous')}
               </button>
-              <span className="text-sm text-gray-600">
+              <span className="text-sm text-sub">
                 {pagination.page} / {pagination.totalPages}
               </span>
               <button

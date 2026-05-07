@@ -326,7 +326,7 @@ export default function MenuItemModal({ itemId, onClose }: Props) {
                   </div>
                   <button
                     onClick={handleAddToCart}
-                    className="bg-primary-600 text-white px-6 py-2.5 rounded-lg font-semibold hover:bg-primary-700 transition-colors"
+                    className="btn-primary px-6 py-2.5 rounded-lg"
                   >
                     {t('menu.addToCart')} &mdash; ${calculateTotal().toFixed(2)}
                   </button>

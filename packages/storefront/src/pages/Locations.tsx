@@ -24,8 +24,8 @@ export default function Locations() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">{t('locations.title')}</h1>
-        <p className="mt-2 text-gray-600">{t('locations.subtitle')}</p>
+        <h1 className="text-3xl font-bold text-main">{t('locations.title')}</h1>
+        <p className="mt-2 text-sub">{t('locations.subtitle')}</p>
       </div>
 
       {isLoading && (
@@ -49,7 +49,7 @@ export default function Locations() {
           {locations.filter((l) => l.isActive).map((loc) => (
             <div
               key={loc.id}
-              className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow"
+              className="surface-card rounded-xl shadow-sm border overflow-hidden hover:shadow-md transition-shadow"
             >
               <div className="h-40 bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center">
                 <svg className="w-16 h-16 text-white/30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -58,13 +58,13 @@ export default function Locations() {
                 </svg>
               </div>
               <div className="p-5">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">{loc.name}</h3>
-                <p className="text-sm text-gray-600 mb-1">{loc.address}</p>
-                <p className="text-sm text-gray-600 mb-3">
+                <h3 className="text-lg font-semibold text-main mb-2">{loc.name}</h3>
+                <p className="text-sm text-sub mb-1">{loc.address}</p>
+                <p className="text-sm text-sub mb-3">
                   {loc.city}, {loc.state} {loc.zip}
                 </p>
                 {loc.phone && (
-                  <p className="text-sm text-gray-500 mb-4">{loc.phone}</p>
+                  <p className="text-sm text-hint mb-4">{loc.phone}</p>
                 )}
                 <div className="flex gap-2 mb-4">
                   {loc.acceptsDelivery && (
@@ -81,7 +81,7 @@ export default function Locations() {
                 {settings.navShowMenu && (
                   <Link
                     to={`/menu?location=${loc.id}`}
-                    className="block text-center bg-primary-600 text-white py-2 rounded-lg font-medium hover:bg-primary-700 transition-colors"
+                    className="block text-center btn-primary py-2"
                   >
                     {t('locations.viewMenu')}
                   </Link>

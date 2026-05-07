@@ -17,12 +17,12 @@ export default function OrderConfirmation() {
         </svg>
       </div>
 
-      <h1 className="text-3xl font-bold text-gray-900 mb-2">{t('orderConfirmation.title')}</h1>
-      <p className="text-gray-600 mb-2">{t('orderConfirmation.thankYou')}</p>
+      <h1 className="text-3xl font-bold text-main mb-2">{t('orderConfirmation.title')}</h1>
+      <p className="text-sub mb-2">{t('orderConfirmation.thankYou')}</p>
 
       {order?.pickupNumber && (
         <div className="mb-8">
-          <p className="text-sm text-gray-500 mb-1">您的取餐號碼 / Pickup No.</p>
+          <p className="text-sm text-hint mb-1">您的取餐號碼 / Pickup No.</p>
           <div className="text-6xl font-black text-primary-600 tracking-tighter">
             {order.pickupNumber}
           </div>
@@ -30,28 +30,28 @@ export default function OrderConfirmation() {
       )}
 
       {(order?.orderNumber || id) && (
-        <p className="text-sm text-gray-500 mb-6">
+        <p className="text-sm text-hint mb-6">
           {t('orderConfirmation.orderNumber')} {order?.orderNumber ? `#${order.orderNumber}` : `ID: ${id}`}
         </p>
       )}
 
       {order && (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 text-left mb-8">
+        <div className="surface-card rounded-xl shadow-sm border p-6 text-left mb-8">
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
-              <span className="text-gray-500">{t('checkout.orderType')}</span>
-              <p className="font-medium text-gray-900">{order.orderType}</p>
+              <span className="text-hint">{t('checkout.orderType')}</span>
+              <p className="font-medium text-main">{order.orderType}</p>
             </div>
             <div>
-              <span className="text-gray-500">{t('orders.status')}</span>
-              <p className="font-medium text-gray-900">{order.status}</p>
+              <span className="text-hint">{t('orders.status')}</span>
+              <p className="font-medium text-main">{order.status}</p>
             </div>
             <div>
-              <span className="text-gray-500">{t('checkout.subtotal')}</span>
-              <p className="font-medium text-gray-900">${order.subtotal?.toFixed(2)}</p>
+              <span className="text-hint">{t('checkout.subtotal')}</span>
+              <p className="font-medium text-main">${order.subtotal?.toFixed(2)}</p>
             </div>
             <div>
-              <span className="text-gray-500">{t('checkout.total')}</span>
+              <span className="text-hint">{t('checkout.total')}</span>
               <p className="font-bold text-primary-600">${order.total?.toFixed(2)}</p>
             </div>
           </div>
@@ -62,14 +62,14 @@ export default function OrderConfirmation() {
         {settings.navShowMenu && (
           <Link
             to="/menu"
-            className="bg-primary-600 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-primary-700 transition-colors"
+            className="btn-primary"
           >
             {t('orderConfirmation.orderMore')}
           </Link>
         )}
         <Link
           to="/"
-          className="border border-gray-300 text-gray-700 px-6 py-2.5 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+          className="border border-gray-300 text-sub px-6 py-2.5 rounded-lg font-medium hover:bg-gray-50 transition-colors"
         >
           {t('notFound.backHome')}
         </Link>
