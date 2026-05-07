@@ -312,14 +312,14 @@ export default function MenuItemModal({ itemId, onClose }: Props) {
                   <div className="flex items-center gap-3">
                     <button
                       onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                      className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded-lg hover:bg-gray-50 text-gray-600"
+                      className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded-lg hover:bg-gray-50 text-sub"
                     >
                       -
                     </button>
-                    <span className="text-lg font-semibold w-8 text-center">{quantity}</span>
+                    <span className="text-lg font-semibold w-8 text-center text-main">{quantity}</span>
                     <button
                       onClick={() => setQuantity((q) => q + 1)}
-                      className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded-lg hover:bg-gray-50 text-gray-600"
+                      className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded-lg hover:bg-gray-50 text-sub"
                     >
                       +
                     </button>
