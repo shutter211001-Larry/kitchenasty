@@ -1,6 +1,8 @@
 import logger from './logger.js';
 
-const GEMINI_API_KEY = process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY;
+function getApiKey() {
+  return process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY;
+}
 
 export interface TranslationResult {
   [key: string]: string;
@@ -14,7 +16,8 @@ export async function translateContent(
   targetLanguages: string[],
   sourceLanguage: string = 'Traditional Chinese'
 ): Promise<TranslationResult> {
-  if (!GEMINI_API_KEY) {
+  const apiKey = getApiKey();
+  if (!apiKey) {
     logger.warn('AI Translation skipped: GEMINI_API_KEY not configured.');
     return {};
   }
@@ -38,7 +41,7 @@ export async function translateContent(
   `;
 
   try {
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -74,7 +77,8 @@ export async function translateFields(
   fields: { key: string; value: string }[],
   targetLanguages: string[]
 ): Promise<{ [key: string]: TranslationResult }> {
-  if (!GEMINI_API_KEY || fields.length === 0) return {};
+  const apiKey = getApiKey();
+  if (!apiKey || fields.length === 0) return {};
 
   const results: { [key: string]: TranslationResult } = {};
 
@@ -97,7 +101,7 @@ export async function translateFields(
   `;
 
   try {
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -110,6 +114,11 @@ export async function translateFields(
 
     const data: any = await response.json();
     const resultText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    
+    if (!resultText) {
+       return {};
+    }
+
     return JSON.parse(resultText.trim());
   } catch (error) {
     logger.error(error as any, 'Batch translation failed:');

@@ -1,10 +1,12 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import swaggerUi from 'swagger-ui-express';
 import path from 'path';
-import dotenv from 'dotenv';
 import authRoutes from './routes/auth.routes.js';
 import locationRoutes from './routes/location.routes.js';
 import menuRoutes from './routes/menu.routes.js';
@@ -32,8 +34,6 @@ import { metricsCollector } from './middleware/metricsCollector.js';
 
 // Initialize automation event listeners
 import './lib/events.js';
-
-dotenv.config();
 
 export function createApp() {
   const app = express();
