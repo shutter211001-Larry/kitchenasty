@@ -54,7 +54,7 @@ export async function translateContent(
   `;
 
   try {
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -91,7 +91,11 @@ export async function translateFields(
   targetLanguages: string[]
 ): Promise<{ [key: string]: TranslationResult }> {
   const apiKey = getApiKey();
-  if (!apiKey || fields.length === 0) return {};
+  if (!apiKey) {
+    logger.warn('AI Translation skipped: GEMINI_API_KEY not configured.');
+    return {};
+  }
+  if (fields.length === 0) return {};
 
   const results: { [key: string]: TranslationResult } = {};
 
@@ -114,7 +118,7 @@ export async function translateFields(
   `;
 
   try {
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
