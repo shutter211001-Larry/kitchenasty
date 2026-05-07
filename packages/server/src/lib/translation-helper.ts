@@ -42,7 +42,7 @@ export async function autoTranslateMenuItem(data: any) {
 
     return data;
   } catch (error) {
-    logger.error(error, 'Auto-translation helper failed:');
+    logger.error(error as any, 'Auto-translation helper failed:');
     return data;
   }
 }
@@ -126,7 +126,7 @@ export async function autoTranslateSiteSettings(data: any) {
 
     return data;
   } catch (error) {
-    logger.error(error, 'Site settings auto-translation failed:');
+    logger.error(error as any, 'Site settings auto-translation failed:');
     return data;
   }
 }
