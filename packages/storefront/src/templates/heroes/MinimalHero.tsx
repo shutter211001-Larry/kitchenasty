@@ -4,10 +4,10 @@ import { getTranslated } from '../../utils/translation.js';
 interface HeroProps {
   hero: { title?: string; subtitle?: string; ctaPrimaryText?: string; ctaPrimaryLink?: string; ctaSecondaryText?: string; ctaSecondaryLink?: string; backgroundImage?: string } | null;
   t: (key: string) => string;
-  lang: string;
+  lang?: string;
 }
 
-export default function MinimalHero({ hero, t, lang }: HeroProps) {
+export default function MinimalHero({ hero, t, lang = 'zh-TW' }: HeroProps) {
   return (
     <section className="bg-white dark:bg-gray-950">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-28 lg:py-40 text-center">

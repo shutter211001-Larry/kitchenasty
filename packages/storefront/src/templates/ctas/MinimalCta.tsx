@@ -5,10 +5,10 @@ import { getTranslated } from '../../utils/translation.js';
 interface CtaProps {
   cta: { title?: string; description?: string; buttonText?: string; buttonLink?: string } | null;
   t: (key: string) => string;
-  lang: string;
+  lang?: string;
 }
 
-export default function MinimalCta({ cta, t, lang }: CtaProps) {
+export default function MinimalCta({ cta, t, lang = 'zh-TW' }: CtaProps) {
   const { settings } = useTheme();
   const title = getTranslated(cta?.title || '', (cta as any)?.translations?.title, lang) || t('home.readyToOrder');
   const description = getTranslated(cta?.description || '', (cta as any)?.translations?.description, lang) || t('home.readyToOrderDesc');

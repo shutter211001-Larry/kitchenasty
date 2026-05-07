@@ -4,7 +4,7 @@ import { getTranslated } from '../../utils/translation.js';
 interface FeaturesProps {
   features: Array<{ icon: string; title: string; description: string }> | null;
   t: (key: string) => string;
-  lang: string;
+  lang?: string;
 }
 
 const defaultIcons: Record<string, React.ReactNode> = {
@@ -13,7 +13,7 @@ const defaultIcons: Record<string, React.ReactNode> = {
   calendar: <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>,
 };
 
-export default function MinimalFeatures({ features, t, lang }: FeaturesProps) {
+export default function MinimalFeatures({ features, t, lang = 'zh-TW' }: FeaturesProps) {
   const { settings } = useTheme();
 
   const items = features?.length ? features : [
