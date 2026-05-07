@@ -121,7 +121,7 @@ export async function updateCategory(req: Request<{ id: string }>, res: Response
     }
   }
 
-  const translatedData = await autoTranslateCategory(parsed.data);
+  const translatedData = await autoTranslateCategory(parsed.data, existing);
 
   const category = await prisma.category.update({
     where: { id },

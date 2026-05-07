@@ -8,6 +8,19 @@ export interface TranslationResult {
   [key: string]: string;
 }
 
+function parseJSONWithMarkdownFallback(text: string) {
+  let cleanedText = text.trim();
+  if (cleanedText.startsWith('```json')) {
+    cleanedText = cleanedText.substring(7);
+  } else if (cleanedText.startsWith('```')) {
+    cleanedText = cleanedText.substring(3);
+  }
+  if (cleanedText.endsWith('```')) {
+    cleanedText = cleanedText.slice(0, -3);
+  }
+  return JSON.parse(cleanedText.trim());
+}
+
 /**
  * Translates text into multiple languages using Gemini AI.
  */
@@ -63,7 +76,7 @@ export async function translateContent(
       throw new Error('Empty response from Gemini');
     }
 
-    return JSON.parse(resultText.trim());
+    return parseJSONWithMarkdownFallback(resultText);
   } catch (error) {
     logger.error(error as any, 'Translation failed:');
     return {};
@@ -119,7 +132,7 @@ export async function translateFields(
        return {};
     }
 
-    return JSON.parse(resultText.trim());
+    return parseJSONWithMarkdownFallback(resultText);
   } catch (error) {
     logger.error(error as any, 'Batch translation failed:');
     return {};

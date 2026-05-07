@@ -189,7 +189,7 @@ export async function updateMenuItem(req: Request<{ id: string }>, res: Response
   const { options, allergenIds, mealtimeIds, ...data } = parsed.data;
 
   // Auto-translate fields before update
-  const translatedData = await autoTranslateMenuItem(data);
+  const translatedData = await autoTranslateMenuItem(data, existing);
 
   const item = await prisma.menuItem.update({
     where: { id },

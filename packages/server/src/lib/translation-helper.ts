@@ -6,22 +6,32 @@ export const SUPPORTED_LANGUAGES = ['en', 'th', 'id', 'vi', 'tl', 'es', 'fr', 'd
 /**
  * Automatically translates a menu item's fields if they are missing translations.
  */
-export async function autoTranslateMenuItem(data: any) {
+export async function autoTranslateMenuItem(data: any, existingData?: any) {
   try {
     const fieldsToTranslate = [];
 
-    // Check name
-    if (data.name && (!data.nameTranslations || Object.keys(data.nameTranslations).length < SUPPORTED_LANGUAGES.length)) {
+    const shouldTranslate = (field: string, translationsField: string) => {
+      if (!data[field]) return false;
+      // If we have an existing item and the field changed, we should re-translate
+      if (existingData && data[field] !== existingData[field]) {
+        return true;
+      }
+      // Or if there are missing translations
+      if (!data[translationsField] || Object.keys(data[translationsField]).length < SUPPORTED_LANGUAGES.length) {
+        return true;
+      }
+      return false;
+    };
+
+    if (shouldTranslate('name', 'nameTranslations')) {
       fieldsToTranslate.push({ key: 'name', value: data.name });
     }
 
-    // Check description
-    if (data.description && (!data.descriptionTranslations || Object.keys(data.descriptionTranslations).length < SUPPORTED_LANGUAGES.length)) {
+    if (shouldTranslate('description', 'descriptionTranslations')) {
       fieldsToTranslate.push({ key: 'description', value: data.description });
     }
 
-    // Check unit
-    if (data.unit && (!data.unitTranslations || Object.keys(data.unitTranslations).length < SUPPORTED_LANGUAGES.length)) {
+    if (shouldTranslate('unit', 'unitTranslations')) {
       fieldsToTranslate.push({ key: 'unit', value: data.unit });
     }
 
@@ -51,15 +61,26 @@ export async function autoTranslateMenuItem(data: any) {
 /**
  * Automatically translates a category's fields.
  */
-export async function autoTranslateCategory(data: any) {
+export async function autoTranslateCategory(data: any, existingData?: any) {
   try {
     const fieldsToTranslate = [];
 
-    if (data.name && (!data.nameTranslations || Object.keys(data.nameTranslations).length < SUPPORTED_LANGUAGES.length)) {
+    const shouldTranslate = (field: string, translationsField: string) => {
+      if (!data[field]) return false;
+      if (existingData && data[field] !== existingData[field]) {
+        return true;
+      }
+      if (!data[translationsField] || Object.keys(data[translationsField]).length < SUPPORTED_LANGUAGES.length) {
+        return true;
+      }
+      return false;
+    };
+
+    if (shouldTranslate('name', 'nameTranslations')) {
       fieldsToTranslate.push({ key: 'name', value: data.name });
     }
 
-    if (data.description && (!data.descriptionTranslations || Object.keys(data.descriptionTranslations).length < SUPPORTED_LANGUAGES.length)) {
+    if (shouldTranslate('description', 'descriptionTranslations')) {
       fieldsToTranslate.push({ key: 'description', value: data.description });
     }
 
