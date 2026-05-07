@@ -14,12 +14,15 @@ export async function autoTranslateMenuItem(data: any, existingData?: any) {
       if (!data[field]) return false;
       // If we have an existing item and the field changed, we should re-translate
       if (existingData && data[field] !== existingData[field]) {
+        logger.info(`[DEBUG] Field ${field} changed from "${existingData[field]}" to "${data[field]}". Will re-translate.`);
         return true;
       }
       // Or if there are missing translations
       if (!data[translationsField] || Object.keys(data[translationsField]).length < SUPPORTED_LANGUAGES.length) {
+        logger.info(`[DEBUG] Field ${field} missing translations. Will re-translate.`);
         return true;
       }
+      logger.info(`[DEBUG] Field ${field} skipped translation (no changes and translations are full).`);
       return false;
     };
 
