@@ -22,9 +22,53 @@
   --color-secondary-950: #1a1c0e;
 
   /* Scientific Smart Contrast Logic */
-  /* This uses Relative Color Syntax (RCS) to flip text color based on background luminance */
-  --primary-contrast: oklch(from var(--color-primary-600) calc((l - 0.45) * -1000) 0 0);
-  --secondary-contrast: oklch(from var(--color-secondary-500) calc((l - 0.45) * -1000) 0 0);
+  /* Fallback for older browsers */
+  --primary-contrast: #ffffff;
+  --secondary-contrast: #000000;
+
+  /* Modern Browser Logic (Relative Color Syntax) */
+  /* Using a softer transition for a more 'premium' feel, while maintaining contrast */
+  @supports (color: oklch(from white l 0 0)) {
+    /* If Lightness < 0.45, use Slate 95 (light), else use Slate 950 (dark) */
+    --primary-contrast: oklch(from var(--color-primary-600) 
+      clamp(0.05, calc((l - 0.45) * -1000), 0.95) 0 0);
+    --secondary-contrast: oklch(from var(--color-secondary-500) 
+      clamp(0.05, calc((l - 0.45) * -1000), 0.95) 0 0);
+  }
+}
+
+/* Global Button & Background Overrides */
+.bg-primary-600, .bg-primary-500, .btn-primary, [class*="bg-primary-600"], [class*="bg-primary-500"] {
+  color: var(--primary-contrast) !important;
+}
+
+.bg-secondary-500, [class*="bg-secondary-500"] {
+  color: var(--secondary-contrast) !important;
+}
+
+/* Global Dark Mode Text Contrast Fix */
+html.dark {
+  color-scheme: dark;
+  background-color: #0f172a; 
+  color: #f1f5f9; /* Slate 100 - softer than white */
+}
+
+html.dark body {
+  background-color: #0f172a;
+  color: #f1f5f9;
+}
+
+/* Ensure common text containers adapt to dark mode even if they have light-mode classes */
+html.dark .text-gray-900 { color: #f8fafc !important; }
+html.dark .text-gray-700 { color: #f1f5f9 !important; }
+html.dark .text-gray-600 { color: #e2e8f0 !important; }
+html.dark .text-gray-500 { color: #cbd5e1 !important; } /* High visibility grey */
+html.dark .text-gray-400 { color: #94a3b8 !important; } /* Subtler but visible */
+
+/* Placeholder visibility */
+html.dark ::placeholder {
+  color: #64748b !important;
+  opacity: 1;
 }
 
 /* Global Utility for Smart Text */
