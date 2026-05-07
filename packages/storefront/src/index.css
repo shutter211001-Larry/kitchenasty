@@ -49,6 +49,17 @@ html.dark {
 
 /* --- 3. Surface Objects --- */
 
+/* The Strategy: Scientific Contrast */
+.surface-context {
+  background-color: var(--current-bg);
+  @supports (color: oklch(from white l 0 0)) {
+    --color-text-main: oklch(from var(--current-bg) clamp(0.05, calc((l - 0.45) * -1000), 0.95) 0 0) !important;
+    --color-text-sub: color-mix(in srgb, var(--color-text-main), transparent 25%) !important;
+    --color-text-hint: color-mix(in srgb, var(--color-text-main), transparent 50%) !important;
+  }
+  color: var(--color-text-main);
+}
+
 /* The root surface (Page) */
 body {
   background-color: var(--env-bg-base);
@@ -59,23 +70,15 @@ body {
 }
 
 /* The Card surface (Items, Modals, Drawers) */
-.surface-card, .bg-white {
-  background-color: var(--env-card-bg) !important;
-  --color-text-main: var(--env-card-text-main) !important;
-  --color-text-sub: var(--env-card-text-sub) !important;
-  --color-text-hint: var(--env-text-hint);
-  color: var(--color-text-main);
+.surface-card { 
+  --current-bg: var(--env-card-bg); 
+  @apply surface-context; 
 }
 
 /* The Brand surface (Hero, Buttons) */
 .surface-brand, .bg-primary-600 {
-  background-color: var(--brand-primary);
-  /* Scientific Contrast */
-  @supports (color: oklch(from white l 0 0)) {
-    --color-text-main: oklch(from var(--brand-primary) clamp(0.05, calc((l - 0.45) * -1000), 0.95) 0 0);
-    --color-text-sub: color-mix(in srgb, var(--color-text-main), transparent 20%);
-  }
-  color: var(--color-text-main);
+  --current-bg: var(--brand-primary);
+  @apply surface-context;
 }
 
 /* --- 4. Typography Objects --- */
@@ -85,7 +88,10 @@ body {
 .text-hint { color: var(--color-text-hint) !important; }
 
 .border-input { border-color: var(--env-border) !important; }
-.bg-surface { background-color: var(--env-bg-surface) !important; }
+.bg-surface { 
+  --current-bg: var(--env-bg-surface);
+  @apply surface-context;
+}
 .bg-surface-soft { background-color: color-mix(in srgb, var(--color-text-main), transparent 95%) !important; }
 
 /* --- 5. Component Logic --- */
