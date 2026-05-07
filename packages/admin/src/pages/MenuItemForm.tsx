@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { api } from '../lib/api.js';
+import { getFullUrl } from '../utils/url.js';
 
 interface OptionValue {
   name: string;
@@ -495,7 +496,7 @@ export default function MenuItemForm() {
               {imageUrl ? (
                 <div className="relative">
                   <img
-                    src={imageUrl}
+                    src={getFullUrl(imageUrl)!}
                     alt={form.name}
                     className="w-40 h-40 object-cover rounded-lg border border-gray-200"
                   />
