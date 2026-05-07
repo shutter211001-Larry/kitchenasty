@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useApi } from '../hooks/useApi.js';
 import { useTheme } from '../context/ThemeContext.js';
+import { API_BASE } from '../lib/api.js';
 
 interface Location {
   id: string;
