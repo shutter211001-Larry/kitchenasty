@@ -626,6 +626,7 @@ model SiteSettings {
   darkMode        String   @default("light") // "light" | "dark" | "system"
   storefrontTemplate String @default("classic")
   heroSection     Json?    // { title, subtitle, ctaPrimaryText, ctaPrimaryLink, ctaSecondaryText, ctaSecondaryLink, backgroundImage }
+  menuSection     Json?    // { title, description, translations: { title: {}, description: {} } }
   featuresSection Json?    // [{ icon, title, description }]
   ctaSection      Json?    // { title, description, buttonText, buttonLink }
 

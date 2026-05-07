@@ -186,6 +186,28 @@ export async function autoTranslateSiteSettings(data: any, existingData?: any) {
       }
     }
 
+    // Translate Menu Section
+    if (data.menuSection) {
+      const menu = data.menuSection;
+      const existingMenu = existingData?.menuSection || {};
+      menu.translations = existingMenu.translations || {};
+
+      const fields: { key: string; value: string }[] = [];
+      const checkAndPush = (key: string) => {
+        if (!menu[key]) return;
+        if (existingData && menu[key] === existingMenu[key] && menu.translations[key] && Object.keys(menu.translations[key]).length >= SUPPORTED_LANGUAGES.length) return;
+        fields.push({ key, value: menu[key] });
+      };
+
+      checkAndPush('title');
+      checkAndPush('description');
+
+      if (fields.length > 0) {
+        const newTranslations = await translateFields(fields, SUPPORTED_LANGUAGES);
+        menu.translations = { ...menu.translations, ...newTranslations };
+      }
+    }
+
     return data;
   } catch (error) {
     logger.error(error as any, 'Site settings auto-translation failed:');

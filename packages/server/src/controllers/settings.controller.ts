@@ -32,6 +32,10 @@ const updateSettingsSchema = z.object({
     buttonText: z.string().optional(),
     buttonLink: z.string().optional(),
   }).optional(),
+  menuSection: z.object({
+    title: z.string().optional(),
+    description: z.string().optional(),
+  }).optional(),
 });
 
 async function getOrCreateSettings() {
@@ -73,6 +77,7 @@ function toPublicSettings(settings: Awaited<ReturnType<typeof getOrCreateSetting
     darkMode: settings.darkMode,
     storefrontTemplate: settings.storefrontTemplate,
     heroSection: settings.heroSection,
+    menuSection: settings.menuSection,
     featuresSection: settings.featuresSection,
     ctaSection: settings.ctaSection,
     navShowHome: isTrue(general.navShowHome, true),

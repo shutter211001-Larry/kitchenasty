@@ -25,6 +25,11 @@ interface CtaSection {
   buttonLink?: string;
 }
 
+interface MenuSection {
+  title?: string;
+  description?: string;
+}
+
 export default function DesignLanding() {
   const token = localStorage.getItem('token') || '';
   const [loading, setLoading] = useState(true);
@@ -35,6 +40,7 @@ export default function DesignLanding() {
   const [hero, setHero] = useState<HeroSection>({});
   const [features, setFeatures] = useState<FeatureItem[]>([]);
   const [cta, setCta] = useState<CtaSection>({});
+  const [menu, setMenu] = useState<MenuSection>({});
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -44,6 +50,7 @@ export default function DesignLanding() {
           if (res.data.heroSection) setHero(res.data.heroSection);
           if (res.data.featuresSection) setFeatures(res.data.featuresSection);
           if (res.data.ctaSection) setCta(res.data.ctaSection);
+          if (res.data.menuSection) setMenu(res.data.menuSection);
         }
       })
       .catch(() => {})
@@ -58,7 +65,8 @@ export default function DesignLanding() {
       await api.put<{ success: boolean; error?: string }>('/settings', { 
         heroSection: hero, 
         featuresSection: features, 
-        ctaSection: cta 
+        ctaSection: cta,
+        menuSection: menu
       });
       setSuccess('首頁內容已成功更新');
       setTimeout(() => setSuccess(''), 3000);
@@ -340,6 +348,33 @@ export default function DesignLanding() {
               onChange={(e) => setCta({ ...cta, buttonLink: e.target.value })}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
               placeholder="/register"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Menu Page Section */}
+      <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">菜單頁面設定 (Menu Page Content)</h2>
+        <div className="grid grid-cols-1 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">菜單頁標題 (Menu Title)</label>
+            <input
+              type="text"
+              value={menu.title || ''}
+              onChange={(e) => setMenu({ ...menu, title: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+              placeholder="例如：美味菜單"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">菜單頁描述 (Menu Description)</label>
+            <textarea
+              value={menu.description || ''}
+              onChange={(e) => setMenu({ ...menu, description: e.target.value })}
+              rows={2}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+              placeholder="瀏覽我們的菜單，選擇外送或自取..."
             />
           </div>
         </div>

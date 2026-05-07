@@ -25,6 +25,15 @@ interface CtaSection {
   buttonLink?: string;
 }
 
+interface MenuSection {
+  title?: string;
+  description?: string;
+  translations?: {
+    title?: Record<string, string>;
+    description?: Record<string, string>;
+  };
+}
+
 export interface SiteSettings {
   id: string;
   siteName: string;
@@ -36,6 +45,7 @@ export interface SiteSettings {
   darkMode: 'light' | 'dark' | 'system';
   storefrontTemplate: string;
   heroSection: HeroSection | null;
+  menuSection: MenuSection | null;
   featuresSection: FeatureItem[] | null;
   ctaSection: CtaSection | null;
   orderSettings?: {
@@ -78,6 +88,7 @@ const defaultSettings: SiteSettings = {
   darkMode: 'light',
   storefrontTemplate: 'classic',
   heroSection: null,
+  menuSection: null,
   featuresSection: null,
   ctaSection: null,
 };

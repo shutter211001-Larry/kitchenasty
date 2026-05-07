@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useApi } from '../hooks/useApi.js';
+import { useTheme } from '../context/ThemeContext.js';
 import MenuItemModal from '../components/MenuItemModal.js';
 import { getTranslated } from '../utils/translation.js';
 import { getFullUrl } from '../utils/url.js';
@@ -52,6 +53,16 @@ export default function Menu() {
   const [page, setPage] = useState(1);
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const [mobileCategoriesOpen, setMobileCategoriesOpen] = useState(false);
+  const { settings } = useTheme();
+
+  // Dynamic titles from settings with fallback
+  const menuTitle = settings.menuSection?.translations?.title?.[i18n.language] 
+    || settings.menuSection?.title 
+    || t('menu.title');
+    
+  const menuDesc = settings.menuSection?.translations?.description?.[i18n.language] 
+    || settings.menuSection?.description 
+    || t('home.heroDescription').split('.')[0] + '.';
 
   const { data: categories, isLoading: categoriesLoading } = useApi<Category[]>(`${API_BASE}/menu/categories`);
 
@@ -114,8 +125,8 @@ export default function Menu() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-main">{t('menu.title')}</h1>
-        <p className="mt-2 text-sub">{t('home.heroDescription').split('.')[0]}.</p>
+        <h1 className="text-3xl font-bold text-main">{menuTitle}</h1>
+        <p className="mt-2 text-sub">{menuDesc}</p>
       </div>
 
       {/* Search bar */}
