@@ -162,6 +162,29 @@ export async function uploadFavicon(req: Request, res: Response): Promise<void> 
   res.json({ success: true, data: toPublicSettings(settings) });
 }
 
+export async function uploadHeroBackground(req: Request, res: Response): Promise<void> {
+  if (!req.file) {
+    res.status(400).json({ success: false, error: 'No file uploaded' });
+    return;
+  }
+
+  const settings = await getOrCreateSettings();
+  const heroSection = (settings.heroSection as any) || {};
+  const imagePath = `/uploads/${req.file.filename}`;
+  
+  const updated = await prisma.siteSettings.update({
+    where: { id: 'default' },
+    data: { 
+      heroSection: { 
+        ...heroSection, 
+        backgroundImage: imagePath 
+      } as any 
+    },
+  });
+
+  res.json({ success: true, data: toPublicSettings(updated) });
+}
+
 // ============================================================
 // SECRET MASKING UTILITIES
 // ============================================================

@@ -6,6 +6,7 @@ import {
   updateSettings,
   uploadLogo,
   uploadFavicon,
+  uploadHeroBackground,
   getGeneralSettings,
   updateGeneralSettings,
   getOrderSettings,
@@ -34,6 +35,7 @@ router.get('/', getSettings);
 router.put('/', authenticate, requireStaff, updateSettings);
 router.post('/logo', authenticate, requireStaff, upload.single('logo'), uploadLogo);
 router.post('/favicon', authenticate, requireStaff, upload.single('favicon'), uploadFavicon);
+router.post('/hero-background', authenticate, requireStaff, upload.single('image'), uploadHeroBackground);
 
 // General — MANAGER+
 router.get('/general', authenticate, requireRole('SUPER_ADMIN', 'MANAGER'), getGeneralSettings);

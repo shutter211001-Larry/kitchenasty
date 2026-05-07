@@ -1,4 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { api } from '../lib/api.js';
+import { getFullUrl } from '../utils/url.js';
 
 interface HeroSection {
   title?: string;
@@ -33,6 +35,7 @@ export default function DesignLanding() {
   const [hero, setHero] = useState<HeroSection>({});
   const [features, setFeatures] = useState<FeatureItem[]>([]);
   const [cta, setCta] = useState<CtaSection>({});
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     fetch('/api/settings')
@@ -84,6 +87,29 @@ export default function DesignLanding() {
     const updated = [...features];
     updated[index] = { ...updated[index], [field]: value };
     setFeatures(updated);
+  }
+
+  async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setSaving(true);
+    setError('');
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+      const res = await api.upload<{ data: { heroSection: HeroSection } }>('/settings/hero-background', formData);
+      if (res.data?.heroSection?.backgroundImage) {
+        setHero(res.data.heroSection);
+        setSuccess('背景圖片已上傳');
+        setTimeout(() => setSuccess(''), 3000);
+      }
+    } catch (err: any) {
+      setError(err.message || '上傳失敗');
+    } finally {
+      setSaving(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
   }
 
   if (loading) return <div className="p-6 text-gray-500">載入中...</div>;
@@ -175,14 +201,47 @@ export default function DesignLanding() {
             />
           </div>
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-1">背景圖片網址 (Background Image URL)</label>
-            <input
-              type="text"
-              value={hero.backgroundImage || ''}
-              onChange={(e) => setHero({ ...hero, backgroundImage: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-              placeholder="https://... or /uploads/..."
-            />
+            <label className="block text-sm font-medium text-gray-700 mb-1">背景圖片 (Background Image)</label>
+            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+              {hero.backgroundImage && (
+                <div className="relative group w-40 h-24 rounded-lg overflow-hidden border border-gray-200">
+                  <img
+                    src={getFullUrl(hero.backgroundImage)!}
+                    alt="Hero Preview"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              )}
+              <div className="flex-1 w-full">
+                <div className="flex gap-2 mb-2">
+                  <input
+                    type="text"
+                    value={hero.backgroundImage || ''}
+                    onChange={(e) => setHero({ ...hero, backgroundImage: e.target.value })}
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                    placeholder="https://... or /uploads/..."
+                  />
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    className="hidden"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={saving}
+                    className="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 disabled:opacity-50"
+                  >
+                    上傳圖片
+                  </button>
+                </div>
+                <p className="text-xs text-gray-500">
+                  建議使用 1920x1080px 以上的圖片。您可以直接上傳檔案，或輸入外部圖片網址。
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
