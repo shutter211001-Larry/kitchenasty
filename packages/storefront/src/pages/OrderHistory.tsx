@@ -89,14 +89,6 @@ export default function OrderHistory() {
       return;
     }
 
-    // Check store busy status
-    fetch(`${API_BASE}/locations`)
-      .then(res => res.json())
-      .then(data => {
-        if (data.data?.[0]?.isBusy) setIsStoreBusy(true);
-      })
-      .catch(() => { });
-
     // Load from cache first
     const cached = localStorage.getItem(`orders_cache_${page}`);
     if (cached) {
