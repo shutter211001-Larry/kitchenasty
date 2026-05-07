@@ -223,9 +223,8 @@ export default function OrderHistory() {
                 </div>
                 <div className="flex items-center gap-4 text-sm text-gray-500">
                   <span>{order.location.name}</span>
-                  <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                    order.orderType === 'DELIVERY' ? 'bg-blue-50 text-blue-700' : 'bg-green-50 text-green-700'
-                  }`}>
+                  <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${order.orderType === 'DELIVERY' ? 'bg-blue-50 text-blue-700' : 'bg-green-50 text-green-700'
+                    }`}>
                     {order.orderType}
                   </span>
                   <span>{order._count.items} item{order._count.items !== 1 ? 's' : ''}</span>
