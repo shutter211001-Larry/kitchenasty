@@ -66,7 +66,7 @@ export async function listMenuItems(req: Request, res: Response): Promise<void> 
       take: limit,
       orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
       include: {
-        category: { select: { id: true, name: true } },
+        category: { select: { id: true, name: true, nameTranslations: true } },
         _count: { select: { options: true, allergens: true, mealtimes: true, dietaryPreferences: true } },
       },
     }),
@@ -86,7 +86,7 @@ export async function getMenuItem(req: Request<{ id: string }>, res: Response): 
   const item = await prisma.menuItem.findUnique({
     where: { id },
     include: {
-      category: { select: { id: true, name: true } },
+      category: { select: { id: true, name: true, nameTranslations: true } },
       options: {
         orderBy: { sortOrder: 'asc' },
         include: {
@@ -165,7 +165,7 @@ export async function createMenuItem(req: Request, res: Response): Promise<void>
       } : undefined,
     },
     include: {
-      category: { select: { id: true, name: true } },
+      category: { select: { id: true, name: true, nameTranslations: true } },
       options: { include: { values: true } },
       allergens: { include: { allergen: true } },
       mealtimes: { include: { mealtime: true } },
@@ -236,7 +236,7 @@ export async function updateMenuItem(req: Request<{ id: string }>, res: Response
       } : undefined,
     },
     include: {
-      category: { select: { id: true, name: true } },
+      category: { select: { id: true, name: true, nameTranslations: true } },
       options: { include: { values: true } },
       allergens: { include: { allergen: true } },
       mealtimes: { include: { mealtime: true } },
@@ -292,7 +292,7 @@ export async function uploadMenuItemImage(req: Request<{ id: string }>, res: Res
     where: { id },
     data: { image: imagePath },
     include: {
-      category: { select: { id: true, name: true } },
+      category: { select: { id: true, name: true, nameTranslations: true } },
     },
   });
 
@@ -312,7 +312,7 @@ export async function deleteMenuItemImage(req: Request<{ id: string }>, res: Res
     where: { id },
     data: { image: null },
     include: {
-      category: { select: { id: true, name: true } },
+      category: { select: { id: true, name: true, nameTranslations: true } },
     },
   });
 
