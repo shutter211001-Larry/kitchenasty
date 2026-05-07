@@ -143,9 +143,16 @@
     "discount": "Rabatt",
     "total": "Gesamt",
     "placeOrder": "Bestellung Aufgeben",
-    "processing": "Wird verarbeitet...",
-    "guestCheckout": "Als Gast Bestellen",
-    "guestEmail": "E-Mail für Bestellupdates"
+    "currentlyUnavailable": "Derzeit nicht verfügbar",
+    "processing": "Verarbeitung...",
+    "contactInfo": "Kontaktinformationen",
+    "loginBenefit": "💡 Anmelden, um Punkte zu sammeln!",
+    "googleLogin": "Mit Google anmelden",
+    "nameOptional": "Name (optional)",
+    "emailOptional": "E-Mail (optional)",
+    "phoneOptional": "Telefon (optional)",
+    "guestCheckout": "Gast-Checkout",
+    "guestEmail": "E-Mail für Updates"
   },
   "orderConfirmation": {
     "title": "Bestellung Aufgegeben!",

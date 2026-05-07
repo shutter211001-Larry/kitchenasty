@@ -143,8 +143,15 @@
     "discount": "Desconto",
     "total": "Total",
     "placeOrder": "Fazer Pedido",
+    "currentlyUnavailable": "Atualmente indisponível",
     "processing": "Processando...",
-    "guestCheckout": "Pedir como Visitante",
+    "contactInfo": "Informações de contato",
+    "loginBenefit": "💡 Faça login para ganhar pontos!",
+    "googleLogin": "Entrar com Google",
+    "nameOptional": "Nome (opcional)",
+    "emailOptional": "E-mail (opcional)",
+    "phoneOptional": "Telefone (opcional)",
+    "guestCheckout": "Pagamento visitante",
     "guestEmail": "E-mail para atualizações do pedido"
   },
   "orderConfirmation": {

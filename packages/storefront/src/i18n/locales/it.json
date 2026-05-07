@@ -143,9 +143,16 @@
     "discount": "Sconto",
     "total": "Totale",
     "placeOrder": "Effettua Ordine",
-    "processing": "Elaborazione in corso...",
-    "guestCheckout": "Ordina come Ospite",
-    "guestEmail": "E-mail per aggiornamenti sull'ordine"
+    "currentlyUnavailable": "Attualmente non disponibile",
+    "processing": "Elaborazione...",
+    "contactInfo": "Informazioni di contatto",
+    "loginBenefit": "💡 Accedi per guadagnare punti!",
+    "googleLogin": "Accedi con Google",
+    "nameOptional": "Nome (opzionale)",
+    "emailOptional": "Email (opzionale)",
+    "phoneOptional": "Telefono (opzionale)",
+    "guestCheckout": "Pagamento ospite",
+    "guestEmail": "Email per aggiornamenti sull'ordine"
   },
   "orderConfirmation": {
     "title": "Ordine Effettuato!",
