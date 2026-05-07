@@ -20,8 +20,10 @@
     "reservations": "予約",
     "trackOrder": "注文を追跡",
     "trackRecentOrder": "最近の注文を追跡",
+    "trackRecentOrder": "最近の注文を追跡",
     "login": "ログイン",
     "signUp": "新規登録",
+    "register": "新規登録",
     "logout": "ログアウト",
     "myAccount": "マイアカウント",
     "openCart": "カートを開く",
@@ -149,9 +151,16 @@
     "discount": "割引",
     "total": "合計",
     "placeOrder": "注文を確定する",
+    "currentlyUnavailable": "現在ご利用いただけません",
     "processing": "処理中...",
+    "contactInfo": "連絡先情報",
+    "loginBenefit": "💡 ログインしてロイヤリティポイントを獲得しましょう！",
+    "googleLogin": "Googleでログイン",
+    "nameOptional": "お名前 (任意)",
+    "emailOptional": "メールアドレス (任意)",
+    "phoneOptional": "電話番号 (任意)",
     "guestCheckout": "ゲスト購入",
-    "guestEmail": "注文状況通知用メールアドレス"
+    "guestEmail": "注文状況の通知用メール"
   },
   "orderConfirmation": {
     "title": "注文が完了しました！",
