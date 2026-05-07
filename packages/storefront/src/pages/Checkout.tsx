@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useCart } from '../context/CartContext.js';
 import { useAuth } from '../context/AuthContext.js';
 import { useTheme } from '../context/ThemeContext.js';
+import { getFullUrl } from '../utils/url.js';
 import { useRecentOrders } from '../hooks/useRecentOrders.js';
 
 type OrderType = 'delivery' | 'pickup';
@@ -496,7 +497,7 @@ export default function Checkout() {
                     </p>
                     <div className="flex flex-wrap gap-2">
                       <a
-                        href="/api/auth/google"
+                        href={`${API_BASE}/auth/google`}
                         className="flex items-center gap-2 px-4 py-2 bg-surface border border-input rounded-lg text-sm font-medium text-sub hover:bg-surface/80 transition-colors shadow-sm"
                       >
                         <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="w-4 h-4" />

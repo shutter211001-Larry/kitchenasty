@@ -2,6 +2,7 @@ import { useState, FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext.js';
+import { API_BASE } from '../lib/api.js';
 
 export default function Register() {
   const { t } = useTranslation();
@@ -140,7 +141,7 @@ export default function Register() {
 
           <div className="flex gap-3">
             <a
-              href="/api/auth/google"
+              href={`${API_BASE}/auth/google`}
               className="w-full flex items-center justify-center gap-2 py-2.5 border border-gray-300 rounded-lg text-sm font-medium text-sub hover:bg-gray-50 transition-colors"
             >
               <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="w-5 h-5" />

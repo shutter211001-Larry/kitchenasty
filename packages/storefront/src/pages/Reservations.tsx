@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext.js';
 import { Link } from 'react-router-dom';
+import { API_BASE } from '../lib/api.js';
 import { useTheme } from '../context/ThemeContext.js';
 
 interface Location {
@@ -55,7 +56,7 @@ export default function Reservations() {
 
   // Load locations
   useEffect(() => {
-    fetch('/api/locations')
+    fetch(`${API_BASE}/locations`)
       .then((res) => res.json())
       .then((data) => setLocations(data.data || []))
       .catch(() => {});
@@ -64,7 +65,7 @@ export default function Reservations() {
   // Load customer reservations
   useEffect(() => {
     if (!token) return;
-    fetch('/api/reservations/my-reservations', {
+    fetch(`${API_BASE}/reservations/my-reservations`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => res.json())
@@ -80,7 +81,7 @@ export default function Reservations() {
     }
     setLoadingSlots(true);
     const params = new URLSearchParams({ locationId, date, partySize: String(partySize) });
-    fetch(`/api/reservations/availability?${params}`)
+    fetch(`${API_BASE}/reservations/availability?${params}`)
       .then((res) => res.json())
       .then((data) => setSlots(data.data?.slots || []))
       .catch(() => {})
@@ -103,7 +104,7 @@ export default function Reservations() {
 
     setSubmitting(true);
     try {
-      const res = await fetch('/api/reservations', {
+      const res = await fetch(`${API_BASE}/reservations`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

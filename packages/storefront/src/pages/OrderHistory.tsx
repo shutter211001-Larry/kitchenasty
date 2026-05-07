@@ -60,7 +60,7 @@ export default function OrderHistory() {
     setLookupError('');
     try {
       const num = lookupNumber.startsWith('#') ? lookupNumber : `#${lookupNumber}`;
-      const res = await fetch(`/api/orders/lookup?email=${encodeURIComponent(lookupEmail)}&orderNumber=${encodeURIComponent(num)}`);
+      const res = await fetch(`${API_BASE}/orders/lookup?email=${encodeURIComponent(lookupEmail)}&orderNumber=${encodeURIComponent(num)}`);
       const data = await res.json();
       if (data.success && data.data) {
         // Add to local history

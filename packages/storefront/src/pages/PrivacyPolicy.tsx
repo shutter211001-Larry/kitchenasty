@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import { API_BASE } from '../lib/api.js';
 
 export default function PrivacyPolicy() {
   const [page, setPage] = useState<{ title: string; content: string } | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/legal/privacy-policy')
+    fetch(`${API_BASE}/legal/privacy-policy`)
       .then((r) => r.json())
       .then((res) => {
         if (res.success) setPage(res.data);

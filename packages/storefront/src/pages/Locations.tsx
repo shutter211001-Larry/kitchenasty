@@ -19,7 +19,7 @@ interface Location {
 export default function Locations() {
   const { t } = useTranslation();
   const { settings } = useTheme();
-  const { data: locations, error, isLoading } = useApi<Location[]>('/api/locations');
+  const { data: locations, error, isLoading } = useApi<Location[]>(`${API_BASE}/locations`);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">

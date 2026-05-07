@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext.js';
 import { Navigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext.js';
+import { API_BASE } from '../lib/api.js';
 
 export default function Account() {
   const { t } = useTranslation();
@@ -12,7 +13,7 @@ export default function Account() {
 
   useEffect(() => {
     if (!token) return;
-    fetch('/api/loyalty/balance', {
+    fetch(`${API_BASE}/loyalty/balance`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => res.json())

@@ -62,7 +62,7 @@ export default function MenuItemModal({ itemId, onClose }: Props) {
 
   useEffect(() => {
     setLoading(true);
-    fetch(`/api/menu/items/${itemId}`)
+    fetch(`${API_BASE}/menu/items/${itemId}`)
       .then((res) => {
         if (!res.ok) throw new Error('Failed to load item');
         return res.json();

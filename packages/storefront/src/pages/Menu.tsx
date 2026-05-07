@@ -5,6 +5,7 @@ import { useApi } from '../hooks/useApi.js';
 import MenuItemModal from '../components/MenuItemModal.js';
 import { getTranslated } from '../utils/translation.js';
 import { getFullUrl } from '../utils/url.js';
+import { API_BASE } from '../lib/api.js';
 
 interface Category {
   id: string;
@@ -50,7 +51,7 @@ export default function Menu() {
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const [mobileCategoriesOpen, setMobileCategoriesOpen] = useState(false);
 
-  const { data: categories, isLoading: categoriesLoading } = useApi<Category[]>('/api/menu/categories');
+  const { data: categories, isLoading: categoriesLoading } = useApi<Category[]>(`${API_BASE}/menu/categories`);
 
   // Build items URL with filters
   const itemsUrl = buildItemsUrl(selectedCategory, debouncedSearch, page);
@@ -291,5 +292,5 @@ function buildItemsUrl(categoryId: string | null, search: string, page: number):
   if (search) params.set('search', search);
   if (page > 1) params.set('page', String(page));
   params.set('limit', '12');
-  return `/api/menu/items?${params}`;
+  return `${API_BASE}/menu/items?${params}`;
 }
