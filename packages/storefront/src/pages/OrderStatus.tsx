@@ -51,6 +51,8 @@ export default function OrderStatus() {
   const [error, setError] = useState('');
   const [claiming, setClaiming] = useState(false);
   const [claimSuccess, setClaimSuccess] = useState(false);
+  const [isUsingCache, setIsUsingCache] = useState(false);
+  const [isStoreBusy, setIsStoreBusy] = useState(false);
 
   const DELIVERY_STEPS = [
     { key: 'PENDING', label: t('orderStatus.placed') },
@@ -73,15 +75,38 @@ export default function OrderStatus() {
     const headers: Record<string, string> = {};
     if (token) headers.Authorization = `Bearer ${token}`;
 
+    // Try to load from cache first for instant feedback
+    const cachedOrder = localStorage.getItem(`order_cache_${id}`);
+    if (cachedOrder) {
+      try {
+        setOrder(JSON.parse(cachedOrder));
+        setLoading(false); // We can stop loading early if we have cache
+      } catch (e) {
+        console.error('Failed to parse cached order');
+      }
+    }
+
+    // Check if store is busy
+    fetch(`${API_BASE}/locations`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.data?.[0]?.isBusy) setIsStoreBusy(true);
+      })
+      .catch(() => {});
+
     fetch(`${API_BASE}/orders/${id}`, { headers })
       .then((res) => {
         if (res.status === 403) throw new Error('LINKED_TO_ACCOUNT');
-        if (!res.ok) throw new Error('Failed to load order');
+        if (!res.ok) throw new Error('BUSY_OR_ERROR');
         return res.json();
       })
       .then((data) => {
         setOrder(data.data);
+        setIsUsingCache(false);
         if (data.data) {
+          // Update cache
+          localStorage.setItem(`order_cache_${id}`, JSON.stringify(data.data));
+          
           addOrder({
             id: data.data.id,
             orderNumber: data.data.orderNumber,
@@ -95,6 +120,14 @@ export default function OrderStatus() {
       .catch((err) => {
         if (err.message === 'LINKED_TO_ACCOUNT') {
           setError(t('orders.linkedToAccount'));
+        } else if (err.message === 'BUSY_OR_ERROR') {
+          // If we have cached order, don't show error, just a warning
+          if (cachedOrder) {
+            console.warn('API fetch failed, but showing cached order due to busy mode.');
+            setIsUsingCache(true);
+          } else {
+            setError(t('orders.errorLoading'));
+          }
         } else {
           setError(err.message);
         }

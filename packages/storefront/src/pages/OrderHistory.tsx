@@ -45,6 +45,8 @@ export default function OrderHistory() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [page, setPage] = useState(1);
+  const [isStoreBusy, setIsStoreBusy] = useState(false);
+  const [isUsingCache, setIsUsingCache] = useState(false);
 
   // Lookup state
   const [lookupEmail, setLookupEmail] = useState('');
@@ -82,24 +84,50 @@ export default function OrderHistory() {
     }
   }
 
-  useEffect(() => {
-    if (!token) {
-      setLoading(false);
-      return;
+    // Check store busy status
+    fetch(`${API_BASE}/locations`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.data?.[0]?.isBusy) setIsStoreBusy(true);
+      })
+      .catch(() => { });
+
+    // Load from cache first
+    if (token) {
+      const cached = localStorage.getItem(`orders_cache_${page}`);
+      if (cached) {
+        try {
+          const parsed = JSON.parse(cached);
+          setOrders(parsed.data);
+          setPagination(parsed.pagination);
+          setIsUsingCache(true);
+          setLoading(false);
+        } catch (e) { }
+      }
     }
+
     setLoading(true);
-    fetch(`/api/orders/my-orders?page=${page}&limit=10`, {
+    fetch(`${API_BASE}/orders/my-orders?page=${page}&limit=10`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => {
-        if (!res.ok) throw new Error(t('orders.errorLoading'));
+        if (!res.ok) throw new Error('BUSY_OR_ERROR');
         return res.json();
       })
       .then((data) => {
         setOrders(data.data);
         setPagination(data.pagination);
+        setIsUsingCache(false);
+        // Save to cache
+        localStorage.setItem(`orders_cache_${page}`, JSON.stringify(data));
       })
-      .catch((err) => setError(err.message))
+      .catch((err) => {
+        if (err.message === 'BUSY_OR_ERROR' && isUsingCache) {
+          console.warn('API busy, using cached history');
+        } else {
+          setError(err.message === 'BUSY_OR_ERROR' ? t('orders.errorLoading') : err.message);
+        }
+      })
       .finally(() => setLoading(false));
   }, [token, page, t]);
 
@@ -140,10 +168,6 @@ export default function OrderHistory() {
             {t('nav.myAccount')}
           </Link>
         )}
-        {!user && (
-          <Link to="/login" className="text-primary-600 hover:text-primary-700 text-sm font-medium">
-            {t('orders.loginToViewFull')}
-          </Link>
         )}
       </div>
 
