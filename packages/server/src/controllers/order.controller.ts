@@ -494,8 +494,12 @@ export async function getOrder(req: Request<{ id: string }>, res: Response): Pro
       location: { select: { id: true, name: true } },
       items: {
         include: {
-          menuItem: { select: { id: true, name: true, slug: true } },
-          options: true,
+          menuItem: { select: { id: true, name: true, nameTranslations: true, slug: true } },
+          options: {
+            include: {
+              menuOptionValue: { select: { id: true, nameTranslations: true } }
+            }
+          },
         },
       },
     },
