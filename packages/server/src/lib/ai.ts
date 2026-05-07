@@ -4,44 +4,76 @@ function getApiKey() {
   return process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY;
 }
 
-let cachedModel: string | null = null;
+let cachedOrderedModels: string[] | null = null;
 
 /**
- * Strategy-based model discovery with fallback logic
+ * Fully dynamic model discovery. Identifies and prioritizes Flash models 
+ * to maximize quota availability without hardcoding specific versions.
  */
-async function getBestAvailableModel(apiKey: string): Promise<string> {
-  if (cachedModel) return cachedModel;
+async function getOrderedModels(apiKey: string): Promise<string[]> {
+  if (cachedOrderedModels) return cachedOrderedModels;
 
   try {
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
-    if (!response.ok) throw new Error(`ListModels failed: ${response.status}`);
+    if (!response.ok) {
+      logger.warn(`[DEBUG] ListModels failed (${response.status}), using static fallback.`);
+      return ['models/gemini-1.5-flash'];
+    }
     
     const data = await response.json();
-    const models = (data.models || []) as { name: string; supportedGenerationMethods: string[] }[];
+    const allModels = (data.models || []) as { name: string; supportedGenerationMethods: string[] }[];
     
-    // Define discovery strategy order
-    const strategy = ['gemini-1.5-flash', 'gemini-1.5-flash-latest', 'gemini-pro'];
-    for (const modelKey of strategy) {
-      const match = models.find(m => m.name.includes(modelKey) && m.supportedGenerationMethods.includes('generateContent'));
-      if (match) {
-        cachedModel = match.name; // e.g., "models/gemini-1.5-flash"
-        logger.info(`[DEBUG] AI Strategy selected model: ${cachedModel}`);
-        return cachedModel!;
-      }
-    }
+    // Filter for models that support content generation
+    const usable = allModels.filter(m => m.supportedGenerationMethods.includes('generateContent'));
     
-    // If no preferred model found, use first available that supports generateContent
-    const anyModel = models.find(m => m.supportedGenerationMethods.includes('generateContent'));
-    if (anyModel) {
-      cachedModel = anyModel.name;
-      return cachedModel!;
-    }
+    // Prioritize Flash models (higher quota, faster) over Pro models
+    const flashModels = usable.filter(m => m.name.toLowerCase().includes('flash'));
+    const otherModels = usable.filter(m => !m.name.toLowerCase().includes('flash'));
     
-    return 'models/gemini-1.5-flash'; // Static fallback
+    cachedOrderedModels = [...flashModels, ...otherModels].map(m => m.name);
+    logger.info(`[DEBUG] AI Strategy dynamic ordering: ${cachedOrderedModels.join(', ')}`);
+    
+    return cachedOrderedModels.length > 0 ? cachedOrderedModels : ['models/gemini-1.5-flash'];
   } catch (error) {
-    logger.error(error as any, '[DEBUG] Discovery failed, falling back to static default.');
-    return 'models/gemini-1.5-flash';
+    logger.error(error as any, '[DEBUG] Dynamic discovery failed.');
+    return ['models/gemini-1.5-flash'];
   }
+}
+
+/**
+ * High-availability fetch wrapper that automatically falls back to 
+ * the next available model if the current one fails (e.g., 429 Quota Exceeded).
+ */
+async function fetchWithFallback(apiKey: string, prompt: string): Promise<any> {
+  const models = await getOrderedModels(apiKey);
+  
+  for (const model of models) {
+    try {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/${model}:generateContent?key=${apiKey}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+        })
+      });
+
+      if (response.ok) {
+        return await response.json();
+      }
+
+      const errorBody = await response.json().catch(() => ({}));
+      logger.warn(`[DEBUG] Model ${model} failed (Status: ${response.status}). Reason: ${JSON.stringify(errorBody)}. Trying next...`);
+      
+      // If we hit a quota limit, clear cache to force re-discovery next time just in case
+      if (response.status === 429) {
+         // Optionally skip this model for the current process if it's exhausted
+      }
+    } catch (error) {
+      logger.error(`[DEBUG] Exception during fetch with ${model}, skipping to next.`);
+    }
+  }
+  
+  return null;
 }
 
 export interface TranslationResult {
@@ -58,7 +90,13 @@ function parseJSONWithMarkdownFallback(text: string) {
   if (cleanedText.endsWith('```')) {
     cleanedText = cleanedText.slice(0, -3);
   }
-  return JSON.parse(cleanedText.trim());
+  
+  try {
+    return JSON.parse(cleanedText.trim());
+  } catch (e) {
+    logger.error(`[DEBUG] JSON parsing failed. Raw text: ${text}`);
+    throw e;
+  }
 }
 
 /**
@@ -75,8 +113,6 @@ export async function translateContent(
     return {};
   }
   
-  logger.info(`[DEBUG] translateContent using API Key ending in: ...${apiKey.slice(-4)}`);
-
   if (!text || targetLanguages.length === 0) return {};
 
   const prompt = `
@@ -96,26 +132,11 @@ export async function translateContent(
   `;
 
   try {
-    const selectedModel = await getBestAvailableModel(apiKey);
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/${selectedModel}:generateContent?key=${apiKey}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-      })
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      logger.error(`[DEBUG] Gemini API HTTP ERROR in translateContent: ${response.status} - ${JSON.stringify(errorData)}`);
-      return {};
-    }
-
-    const data: any = await response.json();
-    const resultText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    const data = await fetchWithFallback(apiKey, prompt);
+    const resultText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
     
     if (!resultText) {
-      logger.warn({ fullResponse: data }, '[DEBUG] Empty response or safety block from Gemini in translateContent');
+      logger.warn('[DEBUG] No valid response from any AI model in translateContent');
       return {};
     }
 
@@ -141,12 +162,7 @@ export async function translateFields(
       return {};
     }
     
-    // Debug log to verify API key presence safely
-    logger.info(`[DEBUG] Using API Key ending in: ...${apiKey.slice(-4)}`);
-
     if (fields.length === 0) return {};
-
-    const results: { [key: string]: TranslationResult } = {};
 
     const prompt = `
       You are a professional translator for a global food ordering platform.
@@ -163,30 +179,15 @@ export async function translateFields(
       }
     `;
 
-    const selectedModel = await getBestAvailableModel(apiKey);
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/${selectedModel}:generateContent?key=${apiKey}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-      })
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      logger.error(`[DEBUG] Gemini API HTTP ERROR in translateFields: ${response.status} - ${JSON.stringify(errorData)}`);
-      return {};
-    }
-
-    const data: any = await response.json();
-    const resultText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    const data = await fetchWithFallback(apiKey, prompt);
+    const resultText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
     
     if (!resultText) {
-       logger.warn({ fullResponse: data }, '[DEBUG] Empty response or safety block from Gemini in translateFields');
+       logger.warn('[DEBUG] No valid response from any AI model in translateFields');
        return {};
     }
 
-    logger.info(`[DEBUG] Raw AI response from translateFields: ${resultText}`);
+    logger.info(`[DEBUG] Successful AI response: ${resultText}`);
     return parseJSONWithMarkdownFallback(resultText);
   } catch (error) {
     logger.error(error as any, '[DEBUG] Exception in translateFields:');
