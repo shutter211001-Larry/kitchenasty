@@ -319,7 +319,7 @@ export default function OrderStatus() {
 
       {/* Order Items */}
       <div className="surface-card rounded-xl shadow-sm border overflow-hidden">
-        <div className="p-4 bg-surface border-b border-input">
+        <div className="p-4 border-b border-input bg-surface-soft">
           <h3 className="font-bold text-main">{t('orders.items')}</h3>
         </div>
         <div className="divide-y border-input">
@@ -346,7 +346,7 @@ export default function OrderStatus() {
             </div>
           ))}
         </div>
-        <div className="p-4 bg-surface space-y-2 border-t border-input">
+        <div className="p-4 space-y-2 border-t border-input bg-surface-soft">
           <div className="flex justify-between text-sm text-sub">
             <span>{t('orders.subtotal')}</span>
             <span>${order.subtotal.toFixed(2)}</span>
