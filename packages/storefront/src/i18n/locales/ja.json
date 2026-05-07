@@ -18,6 +18,8 @@
     "locations": "店舗",
     "menu": "メニュー",
     "reservations": "予約",
+    "trackOrder": "注文を追跡",
+    "trackRecentOrder": "最近の注文を追跡",
     "login": "ログイン",
     "signUp": "新規登録",
     "logout": "ログアウト",

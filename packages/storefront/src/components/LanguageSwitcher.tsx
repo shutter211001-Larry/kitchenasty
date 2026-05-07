@@ -23,15 +23,15 @@ export default function LanguageSwitcher() {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-sub bg-surface border border-input rounded-full hover:bg-surface-soft hover:text-main transition-all shadow-sm active:scale-95"
+        className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-main bg-surface border border-input rounded-full hover:bg-surface-soft transition-all shadow-sm active:scale-95"
         type="button"
       >
         <span className="text-base leading-none flex items-center justify-center">
           {currentLanguage.flag}
         </span>
-        <span className="hidden sm:inline">{currentLanguage.name}</span>
+        <span className="hidden sm:inline text-main">{currentLanguage.name}</span>
         <svg
-          className={`w-4 h-4 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+          className={`w-4 h-4 text-sub transition-transform ${isOpen ? 'rotate-180' : ''}`}
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -41,7 +41,7 @@ export default function LanguageSwitcher() {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-48 bg-surface border border-input rounded-2xl shadow-xl z-[100] py-2 animate-in fade-in slide-in-from-top-2 duration-200">
+        <div className="absolute right-0 mt-2 w-48 surface-card border border-input rounded-2xl shadow-xl z-[100] py-2 animate-in fade-in slide-in-from-top-2 duration-200">
           <div className="max-h-64 overflow-y-auto scrollbar-hide">
             {SUPPORTED_LANGUAGES.map((lang) => (
               <button
