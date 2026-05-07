@@ -61,15 +61,12 @@ export async function translateContent(
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: {
-          response_mime_type: "application/json",
-        }
       })
     });
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      logger.error({ status: response.status, error: errorData }, '[DEBUG] Gemini API HTTP error in translateContent');
+      logger.error(`[DEBUG] Gemini API HTTP ERROR in translateContent: ${response.status} - ${JSON.stringify(errorData)}`);
       return {};
     }
 
@@ -130,15 +127,12 @@ export async function translateFields(
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: {
-          response_mime_type: "application/json",
-        }
       })
     });
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      logger.error({ status: response.status, error: errorData }, '[DEBUG] Gemini API HTTP error in translateFields');
+      logger.error(`[DEBUG] Gemini API HTTP ERROR in translateFields: ${response.status} - ${JSON.stringify(errorData)}`);
       return {};
     }
 
