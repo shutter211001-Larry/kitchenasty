@@ -30,6 +30,7 @@ const navItems: NavItem[] = [
       { path: '/menu/items', label: 'nav.menuItems' },
       { path: '/menu/categories', label: 'nav.categories' },
       { path: '/menu/allergens', label: 'nav.allergens' },
+      { path: '/menu/dietary', label: 'nav.dietary' },
       { path: '/menu/mealtimes', label: 'nav.mealtimes' },
     ],
   },

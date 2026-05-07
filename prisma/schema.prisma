@@ -243,6 +243,7 @@ model MenuItem {
   options    MenuOption[]
   mealtimes  MenuItemMealtime[]
   allergens  MenuItemAllergen[]
+  dietaryPreferences MenuItemDietaryPreference[]
   orderItems OrderItem[]
 
   @@map("menu_items")
@@ -333,6 +334,26 @@ model MenuItemAllergen {
 
   @@id([menuItemId, allergenId])
   @@map("menu_item_allergens")
+}
+
+model DietaryPreference {
+  id   String @id @default(cuid())
+  name String @unique
+  nameTranslations Json?
+
+  menuItems MenuItemDietaryPreference[]
+
+  @@map("dietary_preferences")
+}
+
+model MenuItemDietaryPreference {
+  menuItemId String
+  menuItem   MenuItem @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
+  dietaryPreferenceId String
+  dietaryPreference   DietaryPreference @relation(fields: [dietaryPreferenceId], references: [id], onDelete: Cascade)
+
+  @@id([menuItemId, dietaryPreferenceId])
+  @@map("menu_item_dietary_preferences")
 }
 
 // ============================================================

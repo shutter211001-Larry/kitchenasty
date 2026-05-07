@@ -27,6 +27,11 @@ import {
   updateMealtime,
   deleteMealtime,
 } from '../controllers/mealtime.controller.js';
+import {
+  listDietaryPreferences,
+  createDietaryPreference,
+  deleteDietaryPreference,
+} from '../controllers/dietary.controller.js';
 import { authenticate, requireStaff, requireRole } from '../middleware/auth.js';
 
 const router = Router();
@@ -57,5 +62,10 @@ router.get('/mealtimes', listMealtimes);
 router.post('/mealtimes', authenticate, requireStaff, requireRole('SUPER_ADMIN', 'MANAGER'), createMealtime);
 router.patch('/mealtimes/:id', authenticate, requireStaff, requireRole('SUPER_ADMIN', 'MANAGER'), updateMealtime);
 router.delete('/mealtimes/:id', authenticate, requireStaff, requireRole('SUPER_ADMIN'), deleteMealtime);
+
+// Dietary Preferences - read is open, write requires Manager+
+router.get('/dietary', listDietaryPreferences);
+router.post('/dietary', authenticate, requireStaff, requireRole('SUPER_ADMIN', 'MANAGER'), createDietaryPreference);
+router.delete('/dietary/:id', authenticate, requireStaff, requireRole('SUPER_ADMIN'), deleteDietaryPreference);
 
 export default router;

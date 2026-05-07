@@ -259,3 +259,35 @@ export async function autoTranslateMealtime(data: any, existingData?: any) {
   }
 }
 
+/**
+ * Automatically translates a dietary preference's fields.
+ */
+export async function autoTranslateDietaryPreference(data: any, existingData?: any) {
+  try {
+    const fieldsToTranslate: { key: string; value: string }[] = [];
+
+    const shouldTranslate = (field: string, translationsField: string) => {
+      if (!data[field]) return false;
+      if (existingData && data[field] !== existingData[field]) return true;
+      if (!data[translationsField] || Object.keys(data[translationsField]).length < SUPPORTED_LANGUAGES.length) return true;
+      return false;
+    };
+
+    if (shouldTranslate('name', 'nameTranslations')) {
+      fieldsToTranslate.push({ key: 'name', value: data.name });
+    }
+
+    if (fieldsToTranslate.length === 0) return data;
+
+    logger.info({ fieldsCount: fieldsToTranslate.length }, `Auto-translating dietary preference: ${data.name}`);
+    const translations = await translateFields(fieldsToTranslate, SUPPORTED_LANGUAGES);
+
+    if (translations.name) {
+      data.nameTranslations = { ...(data.nameTranslations || {}), ...translations.name };
+    }
+
+    return data;
+  } catch (error) {
+    return data;
+  }
+}

@@ -107,7 +107,8 @@
     "quantity": "數量",
     "selectOption": "選擇 {{name}}",
     "itemAdded": "已加入購物車！",
-    "allergens": "過敏原資訊"
+    "allergens": "過敏原資訊",
+    "dietary": "忌口資訊"
   },
   "cart": {
     "title": "您的購物車",

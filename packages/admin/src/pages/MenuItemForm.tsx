@@ -55,6 +55,11 @@ interface MealtimeOption {
   endTime: string;
 }
 
+interface DietaryOption {
+  id: string;
+  name: string;
+}
+
 const emptyItem: MenuItemData = {
   name: '',
   nameTranslations: {},
@@ -102,9 +107,11 @@ export default function MenuItemForm() {
   const [options, setOptions] = useState<MenuOption[]>([]);
   const [selectedAllergens, setSelectedAllergens] = useState<string[]>([]);
   const [selectedMealtimes, setSelectedMealtimes] = useState<string[]>([]);
+  const [selectedDietary, setSelectedDietary] = useState<string[]>([]);
   const [categories, setCategories] = useState<CategoryOption[]>([]);
   const [allergens, setAllergens] = useState<AllergenOption[]>([]);
   const [mealtimes, setMealtimes] = useState<MealtimeOption[]>([]);
+  const [dietary, setDietary] = useState<DietaryOption[]>([]);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(isEdit);
@@ -116,10 +123,12 @@ export default function MenuItemForm() {
       api.get<{ data: CategoryOption[] }>('/menu/categories'),
       api.get<{ data: AllergenOption[] }>('/menu/allergens'),
       api.get<{ data: MealtimeOption[] }>('/menu/mealtimes'),
-    ]).then(([catRes, allRes, mtRes]) => {
+      api.get<{ data: DietaryOption[] }>('/menu/dietary'),
+    ]).then(([catRes, allRes, mtRes, dieRes]) => {
       setCategories(catRes.data);
       setAllergens(allRes.data);
       setMealtimes(mtRes.data);
+      setDietary(dieRes.data);
     }).catch(() => { });
   }, []);
 
@@ -167,6 +176,9 @@ export default function MenuItemForm() {
         }
         if (item.mealtimes?.length) {
           setSelectedMealtimes(item.mealtimes.map((m: any) => m.mealtimeId));
+        }
+        if (item.dietaryPreferences?.length) {
+          setSelectedDietary(item.dietaryPreferences.map((d: any) => d.dietaryPreferenceId));
         }
         setLoading(false);
       })
@@ -275,9 +287,10 @@ export default function MenuItemForm() {
         price: Number(form.price),
         sortOrder: Number(form.sortOrder),
         stockQty: Number(form.stockQty),
-        options: options.length > 0 ? options : undefined,
+        options,
         allergenIds: selectedAllergens,
         mealtimeIds: selectedMealtimes,
+        dietaryPreferenceIds: selectedDietary,
       };
 
       if (isEdit) {
@@ -676,9 +689,9 @@ export default function MenuItemForm() {
           </div>
         </section>
 
-        {/* Allergens & Mealtimes */}
+        {/* Allergens & Mealtimes & Dietary */}
         <section className="bg-white rounded-lg shadow p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* 過敏原 (Allergens) */}
             <div>
               <h3 className="text-lg font-medium text-gray-900 mb-3">過敏原 (Allergens)</h3>
@@ -701,6 +714,34 @@ export default function MenuItemForm() {
                         className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
                       />
                       <span className="text-sm text-gray-700">{a.name}</span>
+                    </label>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* 忌口項目 (Dietary Preferences) */}
+            <div>
+              <h3 className="text-lg font-medium text-gray-900 mb-3">忌口項目 (Dietary)</h3>
+              {dietary.length === 0 ? (
+                <p className="text-sm text-gray-400">尚未設定忌口項目。</p>
+              ) : (
+                <div className="space-y-2">
+                  {dietary.map((d) => (
+                    <label key={d.id} className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={selectedDietary.includes(d.id)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedDietary((prev) => [...prev, d.id]);
+                          } else {
+                            setSelectedDietary((prev) => prev.filter((id) => id !== d.id));
+                          }
+                        }}
+                        className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                      />
+                      <span className="text-sm text-gray-700">{d.name}</span>
                     </label>
                   ))}
                 </div>

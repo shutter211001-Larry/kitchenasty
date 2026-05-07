@@ -43,6 +43,7 @@ const createMenuItemSchema = z.object({
   options: z.array(menuOptionSchema).optional(),
   allergenIds: z.array(z.string()).optional(),
   mealtimeIds: z.array(z.string()).optional(),
+  dietaryPreferenceIds: z.array(z.string()).optional(),
 });
 
 const updateMenuItemSchema = createMenuItemSchema.partial().omit({ slug: true });
@@ -66,7 +67,7 @@ export async function listMenuItems(req: Request, res: Response): Promise<void> 
       orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
       include: {
         category: { select: { id: true, name: true } },
-        _count: { select: { options: true, allergens: true, mealtimes: true } },
+        _count: { select: { options: true, allergens: true, mealtimes: true, dietaryPreferences: true } },
       },
     }),
     prisma.menuItem.count({ where }),
@@ -94,6 +95,7 @@ export async function getMenuItem(req: Request<{ id: string }>, res: Response): 
       },
       allergens: { include: { allergen: true } },
       mealtimes: { include: { mealtime: true } },
+      dietaryPreferences: { include: { dietaryPreference: true } },
     },
   });
 
@@ -112,7 +114,7 @@ export async function createMenuItem(req: Request, res: Response): Promise<void>
     return;
   }
 
-  const { options, allergenIds, mealtimeIds, ...data } = parsed.data;
+  const { options, allergenIds, mealtimeIds, dietaryPreferenceIds, ...data } = parsed.data;
 
   const existing = await prisma.menuItem.findUnique({ where: { slug: data.slug } });
   if (existing) {
@@ -158,12 +160,16 @@ export async function createMenuItem(req: Request, res: Response): Promise<void>
       mealtimes: mealtimeIds?.length ? {
         create: mealtimeIds.map((mealtimeId) => ({ mealtimeId })),
       } : undefined,
+      dietaryPreferences: dietaryPreferenceIds?.length ? {
+        create: dietaryPreferenceIds.map((dietaryPreferenceId) => ({ dietaryPreferenceId })),
+      } : undefined,
     },
     include: {
       category: { select: { id: true, name: true } },
       options: { include: { values: true } },
       allergens: { include: { allergen: true } },
       mealtimes: { include: { mealtime: true } },
+      dietaryPreferences: { include: { dietaryPreference: true } },
     },
   });
 
@@ -186,7 +192,7 @@ export async function updateMenuItem(req: Request<{ id: string }>, res: Response
     return;
   }
 
-  const { options, allergenIds, mealtimeIds, ...data } = parsed.data;
+  const { options, allergenIds, mealtimeIds, dietaryPreferenceIds, ...data } = parsed.data;
 
   // Auto-translate fields before update
   const translatedData = await autoTranslateMenuItem(data, existing);
@@ -224,12 +230,17 @@ export async function updateMenuItem(req: Request<{ id: string }>, res: Response
         deleteMany: {},
         create: mealtimeIds.map((mealtimeId) => ({ mealtimeId })),
       } : undefined,
+      dietaryPreferences: dietaryPreferenceIds !== undefined ? {
+        deleteMany: {},
+        create: dietaryPreferenceIds.map((dietaryPreferenceId) => ({ dietaryPreferenceId })),
+      } : undefined,
     },
     include: {
       category: { select: { id: true, name: true } },
       options: { include: { values: true } },
       allergens: { include: { allergen: true } },
       mealtimes: { include: { mealtime: true } },
+      dietaryPreferences: { include: { dietaryPreference: true } },
     },
   });
 

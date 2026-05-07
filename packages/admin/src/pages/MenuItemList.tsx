@@ -14,7 +14,7 @@ interface MenuItem {
   trackStock: boolean;
   stockQty: number;
   category: { id: string; name: string };
-  _count: { options: number; allergens: number; mealtimes: number };
+  _count: { options: number; allergens: number; mealtimes: number; dietaryPreferences: number };
 }
 
 interface Category {
@@ -175,7 +175,7 @@ export default function MenuItemList() {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-xs text-gray-500">
-                      {item._count.options} 個選項 &middot; {item._count.allergens} 個過敏原
+                      {item._count.options} 選項 &middot; {item._count.allergens} 過敏原 &middot; {item._count.dietaryPreferences} 忌口
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm space-x-3">
                       <Link to={`/menu/items/${item.id}`} className="text-primary-600 hover:text-primary-900 font-medium" aria-label={`編輯 ${item.name}`}>
