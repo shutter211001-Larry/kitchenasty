@@ -37,7 +37,7 @@ interface OrderDetail {
 function getStepIndex(steps: { key: string; label: string }[], status: string): number {
   return steps.findIndex((s) => s.key === status);
 }
-
+import { getTranslated } from '../utils/translation.js';
 import { useRecentOrders } from '../hooks/useRecentOrders.js';
 
 export default function OrderStatus() {
@@ -328,21 +328,13 @@ export default function OrderStatus() {
               <div className="flex justify-between items-start">
                 <div>
                   <p className="font-bold text-main">
-                    {item.quantity}x {
-                      item.menuItem?.nameTranslations?.[i18n.language] || 
-                      item.menuItem?.nameTranslations?.['en'] || 
-                      item.name
-                    }
+                    {item.quantity}x {getTranslated(item.name, (item as any).menuItem?.nameTranslations, i18n.language)}
                   </p>
                   {item.options?.length > 0 && (
                     <div className="mt-1 flex flex-wrap gap-1">
                       {item.options.map((opt: any) => (
                         <span key={opt.id} className="text-[10px] bg-surface text-sub px-1.5 py-0.5 rounded border border-input">
-                          {
-                            opt.menuOptionValue?.nameTranslations?.[i18n.language] || 
-                            opt.menuOptionValue?.nameTranslations?.['en'] || 
-                            opt.value
-                          }
+                          {getTranslated(opt.value, opt.menuOptionValue?.nameTranslations, i18n.language)}
                         </span>
                       ))}
                     </div>

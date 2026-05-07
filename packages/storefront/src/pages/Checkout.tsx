@@ -6,6 +6,7 @@ import { useCart } from '../context/CartContext.js';
 import { useAuth } from '../context/AuthContext.js';
 import { useTheme } from '../context/ThemeContext.js';
 import { getFullUrl } from '../utils/url.js';
+import { getTranslated } from '../utils/translation.js';
 import { useRecentOrders } from '../hooks/useRecentOrders.js';
 
 type OrderType = 'delivery' | 'pickup';
@@ -560,17 +561,11 @@ export default function Checkout() {
                     <div>
                       <span className="text-hint mr-1">{item.quantity}x</span>
                       <span className="text-sub">
-                        {item.nameTranslations?.[i18n.language] || 
-                         item.nameTranslations?.['en'] || 
-                         item.name}
+                        {getTranslated(item.name, item.nameTranslations, i18n.language)}
                       </span>
                       {item.options.length > 0 && (
                         <p className="text-xs text-hint ml-5">
-                          {item.options.map((o) => (
-                            o.valueNameTranslations?.[i18n.language] || 
-                            o.valueNameTranslations?.['en'] || 
-                            o.valueName
-                          )).join(', ')}
+                          {item.options.map((o) => getTranslated(o.valueName, o.valueNameTranslations, i18n.language)).join(', ')}
                         </p>
                       )}
                     </div>

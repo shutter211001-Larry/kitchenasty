@@ -7,23 +7,21 @@ export const getTranslated = (
   translations: any,
   lang: string
 ): string => {
-  if (translations && typeof translations === 'object') {
-    // 1. Try target language
-    if (translations[lang]) return translations[lang];
-    
-    // 2. For non-Chinese users, if target language is missing, try English fallback before Base
-    if (!lang.startsWith('zh') && lang !== 'en' && translations['en']) {
-      return translations['en'];
-    }
-  }
+  if (!translations || typeof translations !== 'object') return base || '';
+  
+  const shortLang = lang.split('-')[0];
 
-  // 3. Fallback to base (e.g., Chinese name written in the main field)
-  if (base) return base;
-
-  // 4. Final safety fallback to English
-  if (translations && typeof translations === 'object' && translations['en']) {
+  // 1. Try full language code (e.g., zh-TW, fr-FR)
+  if (translations[lang]) return translations[lang];
+  
+  // 2. Try short language code (e.g., zh, fr)
+  if (translations[shortLang]) return translations[shortLang];
+  
+  // 3. For non-Chinese/English users, try English fallback
+  if (!shortLang.startsWith('zh') && shortLang !== 'en' && translations['en']) {
     return translations['en'];
   }
 
-  return base;
+  // 4. Fallback to base string (usually traditional Chinese in this app)
+  return base || translations['en'] || '';
 };
