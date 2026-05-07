@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext.js';
@@ -12,6 +12,7 @@ export function useHeaderProps() {
   const { settings } = useTheme();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const headerRef = useRef<HTMLElement>(null);
 
   const navLinks = [
     settings.navShowHome && { to: '/', label: t('nav.home') },
@@ -25,5 +26,28 @@ export function useHeaderProps() {
     return location.pathname.startsWith(path);
   }
 
-  return { t, user, logout, isLoading, itemCount, openCart, settings, navLinks, isActive, mobileOpen, setMobileOpen };
+  // Auto-close mobile menu on scroll
+  useEffect(() => {
+    if (!mobileOpen) return;
+    
+    const handleScroll = () => {
+      setMobileOpen(false);
+    };
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (headerRef.current && !headerRef.current.contains(event.target as Node)) {
+        setMobileOpen(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    document.addEventListener('mousedown', handleClickOutside);
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [mobileOpen]);
+
+  return { t, user, logout, isLoading, itemCount, openCart, settings, navLinks, isActive, mobileOpen, setMobileOpen, headerRef };
 }
