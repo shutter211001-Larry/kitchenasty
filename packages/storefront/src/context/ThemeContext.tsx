@@ -219,8 +219,24 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     }
   }, [settings.favicon]);
 
+  const [isHeroLoaded, setIsHeroLoaded] = useState(false);
+
+  // Preload Hero Image
+  useEffect(() => {
+    const bgImage = settings.heroSection?.backgroundImage || '/images/default-hero.png';
+    if (!bgImage) {
+      setIsHeroLoaded(true);
+      return;
+    }
+
+    const img = new Image();
+    img.src = bgImage;
+    img.onload = () => setIsHeroLoaded(true);
+    img.onerror = () => setIsHeroLoaded(true); // Don't block the app if image fails
+  }, [settings.heroSection?.backgroundImage]);
+
   return (
-    <ThemeContext.Provider value={{ settings, isDark, isInitialized }}>
+    <ThemeContext.Provider value={{ settings, isDark, isInitialized: isInitialized && isHeroLoaded }}>
       {children}
     </ThemeContext.Provider>
   );

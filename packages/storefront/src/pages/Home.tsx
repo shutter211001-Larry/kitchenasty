@@ -72,26 +72,26 @@ interface HeroSection {
   backgroundImage?: string;
 }
 
-function ClassicHero({ 
-  hero, 
-  t, 
-  lang, 
-  isPlaceholder = false 
-}: { 
-  hero: HeroSection | null; 
-  t: (k: string) => string; 
+function ClassicHero({
+  hero,
+  t,
+  lang,
+  isPlaceholder = false
+}: {
+  hero: HeroSection | null;
+  t: (k: string) => string;
   lang: string;
   isPlaceholder?: boolean;
 }) {
   const { settings } = useTheme();
-  
+
   // Use custom image, or the high-end default we just created for brand identity
   const bgImage = hero?.backgroundImage || '/images/default-hero.png';
-  
-  const heroStyle = { 
-    backgroundImage: `url(${bgImage})`, 
-    backgroundSize: 'cover', 
-    backgroundPosition: 'center' 
+
+  const heroStyle = {
+    backgroundImage: `url(${bgImage})`,
+    backgroundSize: 'cover',
+    backgroundPosition: 'center'
   };
 
   return (
@@ -101,7 +101,7 @@ function ClassicHero({
     >
       {/* Smart Contrast Overlay */}
       <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60" />
-      
+
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32 w-full flex justify-center">
         <div className="max-w-4xl text-center">
           {/* Welcome Message with premium glass panel */}
@@ -113,7 +113,7 @@ function ClassicHero({
               {getTranslated(hero?.subtitle || '', (hero as any)?.translations?.subtitle, lang) || t('home.heroDescription')}
             </p>
           </div>
-          
+
           <div className={`flex flex-wrap gap-6 mt-4 justify-center ${isPlaceholder ? 'opacity-0' : 'animate-in slide-in-from-bottom-4 duration-1000'}`}>
             {settings.navShowMenu && (
               <Link
@@ -198,7 +198,7 @@ interface CtaSection {
 function ClassicCta({ cta, t, lang }: { cta: CtaSection | null; t: (k: string) => string; lang: string }) {
   const { settings } = useTheme();
   const { user } = useAuth();
-  
+
   if (user || (!settings.showMembership && (!cta?.buttonLink || cta.buttonLink === '/register'))) {
     return null;
   }
