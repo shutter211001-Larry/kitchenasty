@@ -20,6 +20,9 @@ export async function executeAction(
     case 'sms':
       await handleSmsAction(action, data);
       break;
+    case 'line':
+      await handleLineAction(action, data);
+      break;
     default:
       automationLogger.warn({ actionType: action.type }, 'Unknown action type');
   }
@@ -72,6 +75,22 @@ async function handleSmsAction(
   }
 }
 
+async function handleLineAction(
+  action: Action,
+  data: Record<string, unknown>
+): Promise<void> {
+  try {
+    const { sendLinePush } = await import('../controllers/line.controller.js');
+    const userId = await resolveLineRecipient(action.to as string, data);
+    if (!userId) return;
+
+    const body = interpolateTemplate(action.body as string || '', data);
+    await sendLinePush(userId, body);
+  } catch (err) {
+    automationLogger.error({ err }, 'LINE action failed');
+  }
+}
+
 function resolveRecipient(to: string | undefined, data: Record<string, unknown>): string | null {
   if (!to) return null;
 
@@ -100,4 +119,23 @@ function interpolateTemplate(template: string, data: Record<string, unknown>): s
     }, data);
     return value != null ? String(value) : '';
   });
+}
+
+async function resolveLineRecipient(to: string | undefined, data: Record<string, unknown>): Promise<string | null> {
+  if (!to) return null;
+
+  if (to === 'customer') {
+    const order = data.order as any;
+    if (order?.customerId) {
+      const { prisma } = await import('./db.js');
+      const customer = await prisma.customer.findUnique({
+        where: { id: order.customerId },
+        select: { lineUserId: true }
+      });
+      return customer?.lineUserId || null;
+    }
+    return null;
+  }
+
+  return to;
 }

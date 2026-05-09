@@ -201,13 +201,13 @@ export async function getMe(req: Request, res: Response): Promise<void> {
   if (req.user.type === 'staff') {
     const user = await prisma.user.findUnique({
       where: { id: req.user.id },
-      select: { id: true, email: true, name: true, role: true, phone: true, avatar: true },
+      select: { id: true, email: true, name: true, role: true, phone: true, avatar: true, lineUserId: true, lineDisplayName: true },
     });
     res.json({ success: true, data: { type: 'staff', user } });
   } else {
     const customer = await prisma.customer.findUnique({
       where: { id: req.user.id },
-      select: { id: true, email: true, name: true, phone: true },
+      select: { id: true, email: true, name: true, phone: true, lineUserId: true, lineDisplayName: true },
     });
     res.json({ success: true, data: { type: 'customer', customer } });
   }

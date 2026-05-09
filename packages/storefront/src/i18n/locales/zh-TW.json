@@ -89,7 +89,14 @@
     "viewOrders": "查看訂單",
     "pleaseLogin": "請先",
     "loginToView": "登入",
-    "toViewAccount": "以查看帳戶資訊。"
+    "toViewAccount": "以查看帳戶資訊。",
+    "lineBinding": "LINE 帳號連結",
+    "lineBindingDesc": "連結 LINE 帳號以接收訂單進度即時通知。",
+    "lineBound": "已連結 LINE 帳號",
+    "lineNotBound": "尚未連結 LINE 帳號",
+    "bindLine": "連結 LINE 帳號",
+    "unbindLine": "解除連結",
+    "lineId": "LINE 使用者 ID"
   },
   "locations": {
     "title": "分店資訊",

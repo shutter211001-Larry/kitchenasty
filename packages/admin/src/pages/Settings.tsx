@@ -98,6 +98,17 @@ const cards: SettingsCard[] = [
       </svg>
     ),
   },
+  {
+    title: 'LINE 整合',
+    description: '設定 LINE 官方帳號、Webhook 與會員綁定',
+    link: '/settings/line',
+    roles: ['SUPER_ADMIN'],
+    icon: (
+      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 20.25c4.97 0 9-3.694 9-8.25s-4.03-8.25-9-8.25-9 3.694-9 8.25c0 2.336 1.054 4.436 2.743 5.922-.163.6-.59 2.164-.675 2.476-.11.403.116.377.243.292.12-.08.6-.39 1.144-.757.173.11.353.212.54.306 1.554.78 3.328 1.21 5.005 1.21z" />
+      </svg>
+    ),
+  },
 ];
 
 export default function Settings() {

@@ -11,7 +11,7 @@ const createRuleSchema = z.object({
   event: z.string().refine((e) => VALID_EVENTS.includes(e), { message: `Event must be one of: ${VALID_EVENTS.join(', ')}` }),
   conditions: z.record(z.unknown()).nullable().optional(),
   actions: z.array(z.object({
-    type: z.enum(['email', 'webhook', 'sms']),
+    type: z.enum(['email', 'webhook', 'sms', 'line']),
   }).passthrough()).min(1),
   isActive: z.boolean().default(true),
 });

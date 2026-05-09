@@ -20,6 +20,8 @@ model User {
   role      Role     @default(STAFF)
   phone     String?
   avatar    String?
+  lineUserId String? @unique
+  lineDisplayName String?
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -50,6 +52,8 @@ model Customer {
   phone          String?
   isGuest        Boolean  @default(false)
   expoPushToken  String?
+  lineUserId     String? @unique
+  lineDisplayName String?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
@@ -637,6 +641,7 @@ model SiteSettings {
   mailSettings        Json?  // { smtpHost, smtpPort, smtpUser, smtpPass, senderName, senderEmail, encryption }
   paymentSettings     Json?  // { stripeEnabled, stripePublishableKey, stripeSecretKey, stripeWebhookSecret, paypalEnabled, paypalClientId, paypalClientSecret, paypalSandbox, cashEnabled }
   reviewSettings      Json?  // { enabled, requireOrder, autoApprove, minimumRating }
+  lineSettings        Json?  // { liffId }
   advancedSettings    Json?  // { maintenanceMode, maintenanceMessage, enableRateLimiting }
 
   updatedAt       DateTime @updatedAt
