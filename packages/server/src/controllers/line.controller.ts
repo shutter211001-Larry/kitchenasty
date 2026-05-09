@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { Client, WebhookEvent, MessageEvent, TextMessage } from '@line/bot-sdk';
 import prisma from '../lib/db.js';
+import { generateToken } from './auth.controller.js';
 
 async function getLineConfig() {
   const channelSecret = process.env.LINE_CHANNEL_SECRET;
@@ -144,6 +145,56 @@ export async function unbindLine(req: Request, res: Response) {
   } catch (err) {
     console.error('LINE Unbinding Error:', err);
     res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+}
+
+export async function lineLogin(req: Request, res: Response) {
+  const { lineUserId, lineDisplayName, email, name } = req.body;
+  if (!lineUserId) {
+    return res.status(400).json({ success: false, error: 'lineUserId is required' });
+  }
+
+  try {
+    // 1. Try to find by lineUserId
+    let customer = await prisma.customer.findUnique({ where: { lineUserId } });
+
+    // 2. If not found by ID, but we have an email, try to find by email (Integration!)
+    if (!customer && email) {
+      customer = await prisma.customer.findUnique({ where: { email } });
+      if (customer) {
+        // Link the LINE account to the existing account
+        customer = await prisma.customer.update({
+          where: { id: customer.id },
+          data: { lineUserId, lineDisplayName: customer.lineDisplayName || lineDisplayName }
+        });
+      }
+    }
+
+    // 3. If still not found, create a new customer
+    if (!customer) {
+      customer = await prisma.customer.create({
+        data: {
+          lineUserId,
+          lineDisplayName,
+          email: email || `${lineUserId}@line.pizzastudio.com`, // Fallback if no email permission
+          name: name || lineDisplayName || 'LINE User',
+          password: null,
+          isGuest: false
+        }
+      });
+    }
+
+    // Generate token
+    const token = generateToken({
+      id: customer.id,
+      email: customer.email,
+      type: 'customer'
+    });
+
+    res.json({ success: true, data: { token, customer: { id: customer.id, email: customer.email, name: customer.name, phone: customer.phone } } });
+  } catch (err: any) {
+    console.error('LINE Login Error:', err);
+    res.status(500).json({ success: false, error: err.message || 'Internal server error' });
   }
 }
 

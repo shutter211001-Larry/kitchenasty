@@ -2,11 +2,13 @@ import { useState, FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext.js';
+import { useTheme } from '../context/ThemeContext.js';
 import { API_BASE } from '../lib/api.js';
 
 export default function Login() {
   const { t } = useTranslation();
   const { login } = useAuth();
+  const { settings } = useTheme();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -86,7 +88,7 @@ export default function Login() {
             </div>
           </div>
 
-          <div className="flex gap-3">
+          <div className="flex flex-col gap-3">
             <a
               href={`${API_BASE}/auth/google`}
               className="w-full flex items-center justify-center gap-2 py-2.5 border border-gray-300 rounded-lg text-sm font-medium text-sub hover:bg-gray-50 transition-colors"
@@ -94,6 +96,51 @@ export default function Login() {
               <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="w-5 h-5" />
               {t('auth.googleSignIn')}
             </a>
+            
+            {settings.lineSettings?.liffId && (
+              <button
+                type="button"
+                onClick={async () => {
+                  try {
+                    const liff = (window as any).liff;
+                    if (!liff) return;
+                    await liff.init({ liffId: settings.lineSettings.liffId });
+                    if (!liff.isLoggedIn()) {
+                      liff.login();
+                      return;
+                    }
+                    const profile = await liff.getProfile();
+                    const userEmail = liff.getDecodedIDToken()?.email;
+
+                    const res = await fetch(`${API_BASE}/line/login`, {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        lineUserId: profile.userId,
+                        lineDisplayName: profile.displayName,
+                        email: userEmail,
+                        name: profile.displayName
+                      }),
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                      localStorage.setItem('kitchenasty_token', data.data.token);
+                      window.location.href = '/';
+                    } else {
+                      setError(data.error || 'LINE Login failed');
+                    }
+                  } catch (err: any) {
+                    setError('LINE Login failed: ' + err.message);
+                  }
+                }}
+                className="w-full flex items-center justify-center gap-2 py-2.5 bg-[#06C755] text-white rounded-lg text-sm font-bold hover:bg-[#05b34c] transition-colors"
+              >
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2c5.514 0 10 3.592 10 8.007 0 3.532-2.855 6.478-6.728 7.513-.337.07-.797.222-.912.511-.103.263-.068.675-.033 1.112.035.437.166 1.764.19 1.954.024.19.112.743-.243.812-.355.07-.944-.456-1.32-.821-.376-.365-1.74-2.023-2.373-2.857-2.73-.012-5.461-1.853-5.461-5.187C5 5.592 9.486 2 12 2z" />
+                </svg>
+                LINE 一鍵登入
+              </button>
+            )}
           </div>
 
           <p className="text-center text-sm text-sub mt-4">

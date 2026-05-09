@@ -54,6 +54,8 @@ model Customer {
   expoPushToken  String?
   lineUserId     String? @unique
   lineDisplayName String?
+  googleId       String? @unique
+  facebookId     String? @unique
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 

@@ -31,21 +31,23 @@ export function initPassport() {
                   email,
                   name: profile.displayName || email,
                   password: null,
+                  googleId: profile.id,
                   isGuest: false,
                 },
               });
-            } else if (customer.isGuest) {
-              // Convert guest to full member
+            } else {
+              // Update googleId and convert guest if needed
               customer = await prisma.customer.update({
                 where: { id: customer.id },
                 data: {
+                  googleId: customer.googleId || profile.id,
                   isGuest: false,
                   name: customer.name || profile.displayName || email,
                 },
               });
             }
 
-            // Always try to link orders with this email that are still marked as guest
+            // Link guest orders
             await prisma.order.updateMany({
               where: { guestEmail: email, customerId: null },
               data: { customerId: customer.id },
