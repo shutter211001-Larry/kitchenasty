@@ -21,14 +21,27 @@ export async function staffLogin(req: Request, res: Response): Promise<void> {
   }
 
   const { email, password } = parsed.data;
+  console.log(`[AUTH DEBUG] Attempting login for email: "${email}"`);
 
   const user = await prisma.user.findUnique({ where: { email } });
-  if (!user || !user.isActive) {
+  
+  if (!user) {
+    console.log(`[AUTH DEBUG] User not found for email: "${email}"`);
+    res.status(401).json({ success: false, error: 'Invalid credentials' });
+    return;
+  }
+
+  console.log(`[AUTH DEBUG] User found: ID=${user.id}, Role=${user.role}, IsActive=${user.isActive}`);
+
+  if (!user.isActive) {
+    console.log(`[AUTH DEBUG] Login failed: User is not active`);
     res.status(401).json({ success: false, error: 'Invalid credentials' });
     return;
   }
 
   const valid = await bcrypt.compare(password, user.password);
+  console.log(`[AUTH DEBUG] Password validation result: ${valid}`);
+
   if (!valid) {
     res.status(401).json({ success: false, error: 'Invalid credentials' });
     return;
