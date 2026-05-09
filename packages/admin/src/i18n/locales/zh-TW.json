@@ -112,5 +112,47 @@
     "latitude": "經度 (Latitude)",
     "longitude": "緯度 (Longitude)",
     "coordinates": "座標設定"
+  },
+  "automation": {
+    "title": "自動化規則",
+    "newRule": "新增規則",
+    "editRule": "編輯規則",
+    "ruleName": "規則名稱",
+    "event": "觸發事件",
+    "conditions": "執行條件 (JSON)",
+    "actions": "執行動作",
+    "active": "啟用狀態",
+    "isActive": "啟用中",
+    "isInactive": "已停用",
+    "addAction": "新增動作",
+    "remove": "移除",
+    "save": "儲存規則",
+    "create": "建立規則",
+    "update": "更新規則",
+    "events": {
+      "order_created": "訂單已建立",
+      "order_statusChanged": "訂單狀態變更",
+      "reservation_created": "預約已建立",
+      "review_submitted": "評價已提交"
+    },
+    "actionTypes": {
+      "email": "發送電子郵件",
+      "webhook": "觸發 Webhook",
+      "sms": "發送簡訊"
+    },
+    "placeholders": {
+      "name": "例如：發送訂單確認信",
+      "conditions": "例如：{ \"order.status\": \"CONFIRMED\" }",
+      "to": "收件者 (例如：'customer' 或特定信箱/電話)",
+      "subject": "主旨 (支援 {{order.orderNumber}})",
+      "body": "內容 (支援 {{order.orderNumber}}, {{order.status}})",
+      "webhookUrl": "Webhook URL (https://...)"
+    },
+    "messages": {
+      "confirmDelete": "確定要刪除此自動化規則嗎？",
+      "noRules": "目前尚無自動化規則。",
+      "createFirst": "建立您的第一條規則",
+      "invalidJson": "JSON 格式錯誤"
+    }
   }
 }
