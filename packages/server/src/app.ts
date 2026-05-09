@@ -28,6 +28,7 @@ import lineRoutes from './routes/line.routes.js';
 import { openApiSpec } from './lib/openapi.js';
 import { initPassport } from './lib/passport.js';
 import passport from 'passport';
+import prisma from './lib/db.js';
 import logger from './lib/logger.js';
 import { requestId } from './middleware/requestId.js';
 import { httpLogger } from './middleware/httpLogger.js';
@@ -151,7 +152,7 @@ export function createApp() {
       res.json({ 
         success: true, 
         userCount: users.length, 
-        emails: users.map(u => u.email),
+        emails: users.map((u: { email: string }) => u.email),
         connectedTo: dbUrl 
       });
     } catch (err: any) {
