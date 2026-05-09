@@ -151,6 +151,7 @@ export function createApp() {
       const productCount = await prisma.product.count();
       const categoryCount = await prisma.category.count();
       const locationCount = await prisma.location.count();
+      const settings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
       
       const dbUrl = process.env.DATABASE_URL?.replace(/:[^:@/]+@/, ':****@');
       res.json({ 
@@ -159,7 +160,8 @@ export function createApp() {
           users: userCount,
           products: productCount,
           categories: categoryCount,
-          locations: locationCount
+          locations: locationCount,
+          hasDefaultSettings: !!settings
         },
         connectedTo: dbUrl,
         cwd: process.cwd(),
