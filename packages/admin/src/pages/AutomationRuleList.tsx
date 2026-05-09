@@ -145,15 +145,3 @@ export default function AutomationRuleList() {
     </div>
   );
 }
-   刪除
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-    </div>
-  );
-}
