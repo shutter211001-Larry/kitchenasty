@@ -24,7 +24,7 @@ export default function SettingsLine() {
 
   async function fetchStatus() {
     try {
-      const res = await api.get<{ data: any }>('/line/status');
+      const res = await api.get<{ success: boolean; data: any }>('/line/status');
       if (res.success && res.data) {
         setStatus(res.data);
         setLiffId(res.data.liffId || '');
