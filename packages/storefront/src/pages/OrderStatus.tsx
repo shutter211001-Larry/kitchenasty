@@ -355,7 +355,7 @@ export default function OrderStatus() {
       </div>
 
       {/* Order Items */}
-      <div className="surface-card rounded-xl shadow-sm border overflow-hidden">
+      <div className="surface-card rounded-xl shadow-sm border overflow-hidden mb-6">
         <div className="p-4 border-b border-input bg-surface-soft">
           <h3 className="font-bold text-main">{t('orders.items')}</h3>
         </div>
@@ -407,13 +407,26 @@ export default function OrderStatus() {
         </div>
       </div>
 
+      {/* Custom Message */}
+      {settings.orderSettings?.orderStatusMessage && (
+        <div className="surface-card rounded-xl shadow-sm border p-6 mb-6 bg-primary-50/30 border-primary-100">
+          <p className="text-sm text-primary-900 font-medium whitespace-pre-wrap leading-relaxed">
+            {getTranslated(
+              settings.orderSettings.orderStatusMessage,
+              settings.orderSettings.orderStatusMessageTranslations,
+              i18n.language
+            )}
+          </p>
+        </div>
+      )}
+
       <div className="mt-8 flex justify-center gap-4">
         {settings.navShowMenu && (
           <Link
             to="/menu"
             className="btn-primary"
           >
-            {t('home.viewMenu')}
+            {t('home.orderMore')}
           </Link>
         )}
         {settings.showMembership && (

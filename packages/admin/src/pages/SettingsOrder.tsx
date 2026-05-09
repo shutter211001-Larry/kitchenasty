@@ -21,6 +21,7 @@ export default function SettingsOrder() {
   const [tipOptionsStr, setTipOptionsStr] = useState('10,15,20,25');
   const [taxRate, setTaxRate] = useState(0);
   const [enableCounterDisplay, setEnableCounterDisplay] = useState(false);
+  const [orderStatusMessage, setOrderStatusMessage] = useState('');
   const [emailNotifications, setEmailNotifications] = useState<Record<string, boolean>>({
     PLACED: true,
     CONFIRMED: true,
@@ -49,6 +50,7 @@ export default function SettingsOrder() {
           if (d.enableFutureOrdering !== undefined) setEnableFutureOrdering(d.enableFutureOrdering);
           if (d.enableTipping !== undefined) setEnableTipping(d.enableTipping);
           if (d.enableCounterDisplay !== undefined) setEnableCounterDisplay(d.enableCounterDisplay);
+          if (d.orderStatusMessage !== undefined) setOrderStatusMessage(d.orderStatusMessage);
           if (d.tipOptions) setTipOptionsStr(d.tipOptions.join(','));
           if (d.taxRate !== undefined) setTaxRate(d.taxRate);
           if (d.emailNotifications) {
@@ -81,6 +83,7 @@ export default function SettingsOrder() {
           enableFutureOrdering, 
           enableTipping, 
           enableCounterDisplay,
+          orderStatusMessage,
           tipOptions, 
           taxRate,
           emailNotifications 
@@ -188,6 +191,18 @@ export default function SettingsOrder() {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">稅率 (%)</label>
             <input type="number" min={0} max={100} step={0.01} value={taxRate} onChange={(e) => setTaxRate(parseFloat(e.target.value) || 0)} className="w-full max-w-xs px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500" />
+          </div>
+
+          <div className="pt-4 border-t border-gray-100">
+            <label className="block text-sm font-bold text-gray-900 mb-1">訂單狀態頁面提示文字</label>
+            <p className="text-xs text-gray-500 mb-2">此文字會顯示在顧客的「訂單追蹤」頁面，支援多語系自動翻譯。</p>
+            <textarea
+              value={orderStatusMessage}
+              onChange={(e) => setOrderStatusMessage(e.target.value)}
+              rows={3}
+              placeholder="例如：餐點現點現做，請耐心等候。感謝您的支持！"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500"
+            />
           </div>
         </div>
 
