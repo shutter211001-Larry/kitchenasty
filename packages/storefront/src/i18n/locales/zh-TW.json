@@ -149,6 +149,7 @@
     "apply": "套用",
     "couponApplied": "已套用優惠碼！",
     "paymentMethod": "付款方式",
+    "pleaseSelectPayment": "請選擇付款方式",
     "creditCard": "信用卡 (Stripe)",
     "cashOnDelivery": "現場付款/現金",
     "orderSummary": "訂單摘要",
