@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { Client, WebhookEvent, MessageEvent, TextMessage } from '@line/bot-sdk';
 import prisma from '../lib/db.js';
-import { generateToken } from './auth.controller.js';
+import { generateToken } from '../middleware/auth.js';
 
 async function getLineConfig() {
   const channelSecret = process.env.LINE_CHANNEL_SECRET;
