@@ -27,7 +27,8 @@ export default function Checkout() {
   const paymentSettings = settings.paymentSettings;
 
   const [orderType, setOrderType] = useState<OrderType>('pickup');
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cash');
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | null>(null);
+  const [showPaymentError, setShowPaymentError] = useState(false);
   const [address, setAddress] = useState({ line1: '', line2: '', city: '', state: '', zip: '' });
   const [scheduledAt, setScheduledAt] = useState('');
   const [comment, setComment] = useState('');
@@ -36,6 +37,7 @@ export default function Checkout() {
   const [error, setError] = useState('');
   const [isButtonVisible, setIsButtonVisible] = useState(true);
   const submitButtonRef = useRef<HTMLButtonElement>(null);
+  const paymentSectionRef = useRef<HTMLDivElement>(null);
 
   // Guest checkout fields
   const [guestName, setGuestName] = useState('');
@@ -72,14 +74,10 @@ export default function Checkout() {
     }
   }, [orderSettings]);
 
+  // We explicitly DO NOT auto-select payment method to force user choice
   useEffect(() => {
     if (paymentSettings) {
-      if (!paymentSettings.cashEnabled) {
-        if (paymentSettings.stripeEnabled) setPaymentMethod('stripe');
-        else if (paymentSettings.paypalEnabled) setPaymentMethod('paypal');
-      } else {
-        setPaymentMethod('cash');
-      }
+      setPaymentMethod(null);
     }
   }, [paymentSettings]);
 
@@ -148,6 +146,16 @@ export default function Checkout() {
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError('');
+    
+    // Validate payment method
+    if (!paymentMethod) {
+      setShowPaymentError(true);
+      paymentSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      // Shake animation is triggered by the class, but we can re-trigger it by toggling
+      setTimeout(() => setShowPaymentError(false), 2000); 
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -431,61 +439,88 @@ export default function Checkout() {
 
           {/* Payment method */}
           {paymentSettings?.stripeEnabled || paymentSettings?.paypalEnabled || paymentSettings?.cashEnabled ? (
-            <div className="surface-card rounded-xl shadow-sm border p-6">
-              <h2 className="text-lg font-semibold text-main mb-4">{t('checkout.paymentMethod')}</h2>
+            <div 
+              ref={paymentSectionRef}
+              className={`surface-card rounded-xl shadow-sm border p-6 transition-all duration-300 ${
+                showPaymentError ? 'border-red-500 ring-2 ring-red-100 animate-shake shadow-lg shadow-red-50' : ''
+              }`}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold text-main">{t('checkout.paymentMethod')}</h2>
+                {showPaymentError && (
+                  <span className="text-xs font-bold text-red-500 animate-pulse">
+                    ⚠️ {t('checkout.pleaseSelectPayment')}
+                  </span>
+                )}
+              </div>
               <div className="space-y-2">
                 {paymentSettings?.cashEnabled && (
-                  <label className={`flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition-colors ${
+                  <label className={`flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition-all ${
                     paymentMethod === 'cash'
-                      ? 'border-primary-600 bg-primary-50'
-                      : 'border-input hover:border-gray-300'
+                      ? 'border-primary-600 bg-primary-50 text-primary-700 shadow-sm'
+                      : 'border-input hover:border-gray-300 text-sub'
                   }`}
-                  style={paymentMethod === 'cash' ? { color: '#9a3412' } : {}}
                   >
                     <input
                       type="radio"
                       name="payment"
                       checked={paymentMethod === 'cash'}
-                      onChange={() => setPaymentMethod('cash')}
-                      className="accent-primary-600"
+                      onChange={() => {
+                        setPaymentMethod('cash');
+                        setShowPaymentError(false);
+                      }}
+                      className="accent-primary-600 w-4 h-4"
                     />
-                    <span className="text-sm font-bold">{t('checkout.cashOnDelivery')}</span>
+                    <div className="flex flex-col">
+                      <span className="text-sm font-bold">{t('checkout.cashOnDelivery')}</span>
+                      <span className="text-[10px] opacity-70">下單後現場支付</span>
+                    </div>
                   </label>
                 )}
                 {paymentSettings?.stripeEnabled && (
-                  <label className={`flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition-colors ${
+                  <label className={`flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition-all ${
                     paymentMethod === 'stripe'
-                      ? 'border-primary-600 bg-primary-50'
-                      : 'border-input hover:border-gray-300'
+                      ? 'border-primary-600 bg-primary-50 text-primary-700 shadow-sm'
+                      : 'border-input hover:border-gray-300 text-sub'
                   }`}
-                  style={paymentMethod === 'stripe' ? { color: '#9a3412' } : {}}
                   >
                     <input
                       type="radio"
                       name="payment"
                       checked={paymentMethod === 'stripe'}
-                      onChange={() => setPaymentMethod('stripe')}
-                      className="accent-primary-600"
+                      onChange={() => {
+                        setPaymentMethod('stripe');
+                        setShowPaymentError(false);
+                      }}
+                      className="accent-primary-600 w-4 h-4"
                     />
-                    <span className="text-sm font-bold">{t('checkout.creditCard')}</span>
+                    <div className="flex flex-col">
+                      <span className="text-sm font-bold">{t('checkout.creditCard')}</span>
+                      <span className="text-[10px] opacity-70">使用信用卡安全支付</span>
+                    </div>
                   </label>
                 )}
                 {paymentSettings?.paypalEnabled && (
-                  <label className={`flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition-colors ${
+                  <label className={`flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition-all ${
                     paymentMethod === 'paypal'
-                      ? 'border-primary-600 bg-primary-50'
-                      : 'border-input hover:border-gray-300'
+                      ? 'border-primary-600 bg-primary-50 text-primary-700 shadow-sm'
+                      : 'border-input hover:border-gray-300 text-sub'
                   }`}
-                  style={paymentMethod === 'paypal' ? { color: '#9a3412' } : {}}
                   >
                     <input
                       type="radio"
                       name="payment"
                       checked={paymentMethod === 'paypal'}
-                      onChange={() => setPaymentMethod('paypal')}
-                      className="accent-primary-600"
+                      onChange={() => {
+                        setPaymentMethod('paypal');
+                        setShowPaymentError(false);
+                      }}
+                      className="accent-primary-600 w-4 h-4"
                     />
-                    <span className="text-sm font-bold">PayPal</span>
+                    <div className="flex flex-col">
+                      <span className="text-sm font-bold">PayPal</span>
+                      <span className="text-[10px] opacity-70">使用 PayPal 帳戶支付</span>
+                    </div>
                   </label>
                 )}
               </div>
