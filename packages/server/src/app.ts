@@ -143,6 +143,22 @@ export function createApp() {
   app.use('/api/developer', developerRoutes);
   app.use('/api/line', lineRoutes);
 
+  // Temporary Debug Route
+  app.get('/api/debug-db', async (_req, res) => {
+    try {
+      const users = await prisma.user.findMany({ select: { email: true } });
+      const dbUrl = process.env.DATABASE_URL?.replace(/:[^:@/]+@/, ':****@'); // Mask password
+      res.json({ 
+        success: true, 
+        userCount: users.length, 
+        emails: users.map(u => u.email),
+        connectedTo: dbUrl 
+      });
+    } catch (err: any) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
   // 404 handler
   app.use((_req, res) => {
     res.status(404).json({
