@@ -51,6 +51,32 @@ export default function OrderStatus() {
   const [error, setError] = useState('');
   const [claiming, setClaiming] = useState(false);
   const [claimSuccess, setClaimSuccess] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
+
+  async function handleCancel() {
+    if (!window.confirm(t('common.confirmCancel') || '確定要取消這筆訂單嗎？')) return;
+    
+    setCancelling(true);
+    try {
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (token) headers.Authorization = `Bearer ${token}`;
+
+      const res = await fetch(`${API_BASE}/orders/${id}/cancel`, {
+        method: 'POST',
+        headers,
+      });
+      const data = await res.json();
+      if (data.success) {
+        setOrder({ ...order, status: 'CANCELLED' });
+      } else {
+        alert(data.error || '取消失敗');
+      }
+    } catch (e) {
+      alert('取消失敗，請稍後再試');
+    } finally {
+      setCancelling(false);
+    }
+  }
 
   const DELIVERY_STEPS = [
     { key: 'PENDING', label: t('orderStatus.placed') },
@@ -259,11 +285,22 @@ export default function OrderStatus() {
             {new Date(order.createdAt).toLocaleString()}
           </p>
         </div>
-        {(user || settings.showMembership) && (
-          <Link to="/account/orders" className="text-primary-600 hover:text-primary-700 text-sm font-medium">
-            {t('orders.title')}
-          </Link>
-        )}
+        <div className="flex flex-col items-end gap-2">
+          {order.status === 'PENDING' && (
+            <button
+              onClick={handleCancel}
+              disabled={cancelling}
+              className="text-red-500 hover:text-red-600 text-xs font-bold px-3 py-1.5 rounded-lg border border-red-200 hover:bg-red-50 transition-all disabled:opacity-50"
+            >
+              {cancelling ? t('checkout.processing') : '取消訂單'}
+            </button>
+          )}
+          {(user || settings.showMembership) && (
+            <Link to="/account/orders" className="text-primary-600 hover:text-primary-700 text-sm font-medium">
+              {t('orders.title')}
+            </Link>
+          )}
+        </div>
       </div>
 
       {/* Status Tracker */}

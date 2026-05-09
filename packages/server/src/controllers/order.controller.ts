@@ -623,6 +623,64 @@ export async function updateOrderStatus(req: Request<{ id: string }>, res: Respo
   res.json({ success: true, data: updated });
 }
 
+export async function cancelOrder(req: Request<{ id: string }>, res: Response): Promise<void> {
+  const { id } = req.params;
+  const user = req.user;
+
+  const order = await prisma.order.findUnique({
+    where: { id },
+  });
+
+  if (!order) {
+    res.status(404).json({ success: false, error: 'Order not found' });
+    return;
+  }
+
+  // Only allowed to cancel if status is PENDING
+  if (order.status !== 'PENDING') {
+    res.status(400).json({ success: false, error: 'Only pending orders can be cancelled' });
+    return;
+  }
+
+  // Permission check
+  let isOwner = false;
+  if (user) {
+    if (user.type === 'staff') {
+      isOwner = true; // Staff can always cancel
+    } else if (order.customerId === user.id) {
+      isOwner = true;
+    }
+  } else {
+    // For guests, we rely on the fact they have the unique order ID (CUID)
+    // and that the order is a guest order.
+    if (!order.customerId) {
+      isOwner = true; 
+    }
+  }
+
+  if (!isOwner) {
+    res.status(403).json({ success: false, error: 'You do not have permission to cancel this order' });
+    return;
+  }
+
+  const updated = await prisma.order.update({
+    where: { id },
+    data: { status: 'CANCELLED' },
+  });
+
+  auditLog(req, { action: 'update', entity: 'Order', entityId: id, details: { status: 'CANCELLED', previousStatus: order.status, cancelledBy: user ? 'user' : 'guest' } });
+
+  emitOrderStatusUpdate({
+    id: updated.id,
+    orderNumber: updated.orderNumber,
+    status: updated.status,
+    orderType: updated.orderType,
+    customerId: updated.customerId,
+  });
+
+  res.json({ success: true, data: updated });
+}
+
 export async function deleteOrder(req: Request<{ id: string }>, res: Response): Promise<void> {
   const { id } = req.params;
 

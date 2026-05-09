@@ -4,11 +4,15 @@ import multer from 'multer';
 import { 
   createOrder, listOrders, listCustomerOrders, getOrder, 
   updateOrderStatus, deleteOrder, exportOrders, importOrders, 
-  downloadOrderTemplate, checkOrderReminders, lookupOrder, claimOrder 
+  downloadOrderTemplate, checkOrderReminders, lookupOrder, claimOrder,
+  cancelOrder
 } from '../controllers/order.controller.js';
 
 const router = Router();
 const upload = multer({ storage: multer.memoryStorage() });
+
+// Customer: cancel order (optionalAuth - allows guest cancellation if pending)
+router.post('/:id/cancel', optionalAuth, cancelOrder);
 
 // Customer creates order (optionalAuth - allows guest checkout)
 router.post('/', optionalAuth, createOrder);

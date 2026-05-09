@@ -12,7 +12,8 @@
     "noResults": "查無結果",
     "viewAll": "查看全部",
     "required": "必填",
-    "guest": "顧客"
+    "guest": "顧客",
+    "confirmCancel": "確定要取消這筆訂單嗎？"
   },
   "nav": {
     "home": "首頁",
