@@ -55,6 +55,8 @@ export interface SiteSettings {
     allowGuestCheckout?: boolean;
     enableFutureOrdering?: boolean;
     taxRate?: number;
+    orderStatusMessage?: string;
+    orderStatusMessageTranslations?: Record<string, string>;
   };
   paymentSettings?: {
     cashEnabled?: boolean;
