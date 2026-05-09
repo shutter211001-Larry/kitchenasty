@@ -270,6 +270,7 @@ const orderSettingsSchema = z.object({
   pickupLeadTime: z.number().min(0).optional(),
   enableFutureOrdering: z.boolean().optional(),
   enableTipping: z.boolean().optional(),
+  enableCounterDisplay: z.boolean().optional(),
   tipOptions: z.array(z.number()).optional(),
   taxRate: z.number().min(0).max(100).optional(),
 });
