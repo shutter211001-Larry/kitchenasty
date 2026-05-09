@@ -55,8 +55,6 @@ export interface SiteSettings {
     allowGuestCheckout?: boolean;
     enableFutureOrdering?: boolean;
     taxRate?: number;
-    orderStatusMessage?: string;
-    orderStatusMessageTranslations?: Record<string, string>;
   };
   paymentSettings?: {
     cashEnabled?: boolean;
@@ -71,6 +69,8 @@ export interface SiteSettings {
   navShowMenu?: boolean;
   navShowReservations?: boolean;
   showMembership?: boolean;
+  orderStatusMessage?: string;
+  orderStatusMessageTranslations?: Record<string, string>;
 }
 
 interface ThemeContextType {

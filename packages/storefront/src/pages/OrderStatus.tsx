@@ -408,12 +408,12 @@ export default function OrderStatus() {
       </div>
 
       {/* Custom Message */}
-      {settings.orderSettings?.orderStatusMessage && (
+      {settings.orderStatusMessage && (
         <div className="surface-card rounded-xl shadow-sm border p-6 mb-6 bg-primary-50/30 border-primary-100">
           <p className="text-sm text-primary-900 font-medium whitespace-pre-wrap leading-relaxed">
             {getTranslated(
-              settings.orderSettings.orderStatusMessage,
-              settings.orderSettings.orderStatusMessageTranslations,
+              settings.orderStatusMessage,
+              settings.orderStatusMessageTranslations,
               i18n.language
             )}
           </p>

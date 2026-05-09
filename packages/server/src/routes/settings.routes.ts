@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { authenticate, requireStaff, requireRole } from '../middleware/auth.js';
+import { authenticate, requireStaff, requireRole, requirePermission } from '../middleware/auth.js';
 import { upload } from '../middleware/upload.js';
 import {
   getSettings,
@@ -38,12 +38,12 @@ router.post('/favicon', authenticate, requireStaff, upload.single('favicon'), up
 router.post('/hero-background', authenticate, requireStaff, upload.single('image'), uploadHeroBackground);
 
 // General — MANAGER+
-router.get('/general', authenticate, requireRole('SUPER_ADMIN', 'MANAGER'), getGeneralSettings);
-router.put('/general', authenticate, requireRole('SUPER_ADMIN', 'MANAGER'), updateGeneralSettings);
+router.get('/general', authenticate, requirePermission('UPDATE_GENERAL_SETTINGS', ['SUPER_ADMIN', 'MANAGER']), getGeneralSettings);
+router.put('/general', authenticate, requirePermission('UPDATE_GENERAL_SETTINGS', ['SUPER_ADMIN', 'MANAGER']), updateGeneralSettings);
 
 // Order — MANAGER+
-router.get('/order', authenticate, requireRole('SUPER_ADMIN', 'MANAGER'), getOrderSettings);
-router.put('/order', authenticate, requireRole('SUPER_ADMIN', 'MANAGER'), updateOrderSettings);
+router.get('/order', authenticate, requirePermission('UPDATE_ORDER_SETTINGS', ['SUPER_ADMIN', 'MANAGER']), getOrderSettings);
+router.put('/order', authenticate, requirePermission('UPDATE_ORDER_SETTINGS', ['SUPER_ADMIN', 'MANAGER']), updateOrderSettings);
 
 // Reservation — MANAGER+
 router.get('/reservation', authenticate, requireRole('SUPER_ADMIN', 'MANAGER'), getReservationSettings);
