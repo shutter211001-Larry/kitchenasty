@@ -255,8 +255,9 @@ export default function Account() {
                         確認連結
                       </button>
                     </div>
-                  </>
-                )}
+                    </>
+                  )}
+                </div>
               </div>
             )}
           </div>
