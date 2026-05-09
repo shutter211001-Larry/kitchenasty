@@ -140,7 +140,59 @@ export default function Account() {
                 <p className="text-sm text-sub mb-4">{t('account.lineBindingDesc')}</p>
                 
                 <div className="space-y-4">
-                  {settings.lineSettings?.officialAccountUrl && (
+                  {/* LIFF Automated Binding (Primary if LIFF ID is set) */}
+                  {settings.lineSettings?.liffId ? (
+                    <div className="mb-4">
+                      <button
+                        onClick={async () => {
+                          try {
+                            const liff = (window as any).liff;
+                            if (!liff) {
+                              alert('LINE SDK 尚未載入，請稍候');
+                              return;
+                            }
+                            await liff.init({ liffId: settings.lineSettings.liffId });
+                            if (!liff.isLoggedIn()) {
+                              liff.login();
+                              return;
+                            }
+                            const profile = await liff.getProfile();
+                            const lineUserId = profile.userId;
+                            const lineDisplayName = profile.displayName;
+
+                            const res = await fetch(`${API_BASE}/line/bind`, {
+                              method: 'POST',
+                              headers: { 
+                                'Content-Type': 'application/json',
+                                Authorization: `Bearer ${token}` 
+                              },
+                              body: JSON.stringify({ lineUserId, lineDisplayName }),
+                            });
+                            const data = await res.json();
+                            if (data.success) {
+                              alert('LINE 帳號連結成功！');
+                              window.location.reload();
+                            } else {
+                              alert(data.error || '連結失敗');
+                            }
+                          } catch (err: any) {
+                            console.error('LIFF Error:', err);
+                            alert('LINE 連結失敗: ' + (err.message || '未知錯誤'));
+                          }
+                        }}
+                        className="flex items-center justify-center gap-3 w-full py-4 bg-[#06C755] text-white rounded-xl font-bold hover:bg-[#05b34c] transition-all shadow-lg shadow-green-100"
+                      >
+                        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M12 2c5.514 0 10 3.592 10 8.007 0 3.532-2.855 6.478-6.728 7.513-.337.07-.797.222-.912.511-.103.263-.068.675-.033 1.112.035.437.166 1.764.19 1.954.024.19.112.743-.243.812-.355.07-.944-.456-1.32-.821-.376-.365-1.74-2.023-2.373-2.857-2.73-.012-5.461-1.853-5.461-5.187C5 5.592 9.486 2 12 2z" />
+                        </svg>
+                        一鍵連結 LINE 帳號
+                      </button>
+                      <p className="text-[10px] text-center text-hint mt-2">
+                        使用 LINE 官方快速連結技術，安全且無需輸入 ID
+                      </p>
+                    </div>
+                  ) : settings.lineSettings?.officialAccountUrl && (
+                    /* Manual Binding Link if no LIFF ID */
                     <div className="mb-4">
                       <a
                         href={settings.lineSettings.officialAccountUrl}
@@ -156,52 +208,55 @@ export default function Account() {
                     </div>
                   )}
 
-                  <div className="text-xs bg-gray-50 text-sub p-4 rounded-xl border border-gray-100">
-                    <p className="font-bold text-main mb-2">綁定三步驟：</p>
-                    <ol className="list-decimal list-inside space-y-2">
-                      <li>點擊上方按鈕關注我們的官方帳號</li>
-                      <li>在 LINE 對話框輸入 「<span className="text-primary-600 font-bold">id</span>」 並送出</li>
-                      <li>將得到的 ID 貼回下方完成連結</li>
-                    </ol>
-                  </div>
+                  {!settings.lineSettings?.liffId && (
+                    <>
+                      <div className="text-xs bg-gray-50 text-sub p-4 rounded-xl border border-gray-100">
+                        <p className="font-bold text-main mb-2">綁定三步驟：</p>
+                        <ol className="list-decimal list-inside space-y-2">
+                          <li>點擊上方按鈕關注我們的官方帳號</li>
+                          <li>在 LINE 對話框輸入 「<span className="text-primary-600 font-bold">id</span>」 並送出</li>
+                          <li>將得到的 ID 貼回下方完成連結</li>
+                        </ol>
+                      </div>
 
-                  <div className="flex gap-2">
-                    <input
-                      id="lineIdInput"
-                      type="text"
-                      placeholder="貼上您的 LINE ID (U...)"
-                      className="flex-1 px-4 py-2 text-sm border border-input rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
-                    />
-                    <button
-                      onClick={async () => {
-                        const input = document.getElementById('lineIdInput') as HTMLInputElement;
-                        const lineUserId = input.value.trim();
-                        if (!lineUserId) return alert('請輸入 ID');
-                        try {
-                          const res = await fetch(`${API_BASE}/line/bind`, {
-                            method: 'POST',
-                            headers: { 
-                              'Content-Type': 'application/json',
-                              Authorization: `Bearer ${token}` 
-                            },
-                            body: JSON.stringify({ lineUserId }),
-                          });
-                          const data = await res.json();
-                          if (data.success) {
-                            window.location.reload();
-                          } else {
-                            alert(data.error);
+                      <div className="flex gap-2">
+                        <input
+                          id="lineIdInput"
+                          type="text"
+                          placeholder="貼上您的 LINE ID (U...)"
+                          className="flex-1 px-4 py-2 text-sm border border-input rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
+                        />
+                        <button
+                          onClick={async () => {
+                            const input = document.getElementById('lineIdInput') as HTMLInputElement;
+                            const lineUserId = input.value.trim();
+                            if (!lineUserId) return alert('請輸入 ID');
+                            try {
+                              const res = await fetch(`${API_BASE}/line/bind`, {
+                                method: 'POST',
+                                headers: { 
+                                  'Content-Type': 'application/json',
+                                  Authorization: `Bearer ${token}` 
+                              },
+                              body: JSON.stringify({ lineUserId }),
+                            });
+                            const data = await res.json();
+                            if (data.success) {
+                              window.location.reload();
+                            } else {
+                              alert(data.error);
+                            }
+                          } catch (err) {
+                            alert('綁定失敗');
                           }
-                        } catch (err) {
-                          alert('綁定失敗');
-                        }
-                      }}
-                      className="px-6 py-2 text-sm font-bold text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors"
-                    >
-                      確認連結
-                    </button>
-                  </div>
-                </div>
+                        }}
+                        className="px-6 py-2 text-sm font-bold text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors"
+                      >
+                        確認連結
+                      </button>
+                    </div>
+                  </>
+                )}
               </div>
             )}
           </div>
