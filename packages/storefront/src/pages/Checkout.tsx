@@ -409,7 +409,7 @@ export default function Checkout() {
           </div>
 
           {/* Loyalty Points Redemption */}
-          {user && loyaltyBalance > 0 && (
+          {user && settings.loyaltyProgramEnabled && loyaltyBalance > 0 && (
             <div className="surface-card rounded-xl shadow-sm border p-6">
               <h2 className="text-lg font-semibold text-main mb-4">Loyalty Points</h2>
               <p className="text-sm text-sub mb-3">

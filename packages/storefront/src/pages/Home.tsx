@@ -178,7 +178,7 @@ function ClassicFeatures({ features, t, lang }: { features: FeatureItem[] | null
             {settings.navShowLocations && (
               <FeatureCard icon="clipboard" title={t('home.easyOrdering')} description={t('home.easyOrderingDesc')} />
             )}
-            {settings.navShowReservations && (
+            {settings.navShowLocations && settings.navShowReservations && (
               <FeatureCard icon="calendar" title={t('home.tableReservations')} description={t('home.tableReservationsDesc')} />
             )}
           </>

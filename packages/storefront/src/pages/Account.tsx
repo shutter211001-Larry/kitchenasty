@@ -62,7 +62,7 @@ export default function Account() {
         </div>
 
         {/* Loyalty Points */}
-        {loyaltyPoints !== null && (
+        {settings.loyaltyProgramEnabled && loyaltyPoints !== null && (
           <div className="p-6 border-b">
             <h2 className="text-lg font-semibold text-main mb-2">Loyalty Points</h2>
             <div className="flex items-baseline gap-3">
