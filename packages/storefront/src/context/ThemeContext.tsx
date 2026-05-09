@@ -69,6 +69,11 @@ export interface SiteSettings {
   navShowMenu?: boolean;
   navShowReservations?: boolean;
   showMembership?: boolean;
+  loyaltyProgramEnabled?: boolean;
+  lineSettings?: {
+    liffId?: string;
+    officialAccountUrl?: string;
+  };
   orderStatusMessage?: string;
   orderStatusMessageTranslations?: Record<string, string>;
 }
