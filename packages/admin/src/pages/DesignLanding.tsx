@@ -41,6 +41,7 @@ export default function DesignLanding() {
   const [features, setFeatures] = useState<FeatureItem[]>([]);
   const [cta, setCta] = useState<CtaSection>({});
   const [menu, setMenu] = useState<MenuSection>({});
+  const [orderStatusMessage, setOrderStatusMessage] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -51,6 +52,7 @@ export default function DesignLanding() {
           if (res.data.featuresSection) setFeatures(res.data.featuresSection);
           if (res.data.ctaSection) setCta(res.data.ctaSection);
           if (res.data.menuSection) setMenu(res.data.menuSection);
+          if (res.data.orderStatusMessage) setOrderStatusMessage(res.data.orderStatusMessage);
         }
       })
       .catch(() => {})
@@ -66,7 +68,8 @@ export default function DesignLanding() {
         heroSection: hero, 
         featuresSection: features, 
         ctaSection: cta,
-        menuSection: menu
+        menuSection: menu,
+        orderStatusMessage
       });
       setSuccess('首頁內容已成功更新');
       setTimeout(() => setSuccess(''), 3000);
@@ -375,6 +378,24 @@ export default function DesignLanding() {
               rows={2}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
               placeholder="瀏覽我們的菜單，選擇外送或自取..."
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Order Status Page Section */}
+      <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">訂單狀態頁面 (Order Status Page)</h2>
+        <div className="grid grid-cols-1 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">訂單狀態頁面提示文字</label>
+            <p className="text-xs text-gray-500 mb-2">此文字會顯示在顧客的「訂單追蹤」頁面，支援多語系自動翻譯。</p>
+            <textarea
+              value={orderStatusMessage}
+              onChange={(e) => setOrderStatusMessage(e.target.value)}
+              rows={3}
+              placeholder="例如：餐點現點現做，請耐心等候。感謝您的支持！"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
             />
           </div>
         </div>

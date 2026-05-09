@@ -87,6 +87,17 @@ const cards: SettingsCard[] = [
       </svg>
     ),
   },
+  {
+    title: '角色權限',
+    description: '微調店長與店員的細項操作權限',
+    link: '/settings/permissions',
+    roles: ['SUPER_ADMIN'],
+    icon: (
+      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.744c0 5.548 4.075 10.14 9 10.856a11.99 11.99 0 009-10.856c0-1.312-.21-2.574-.598-3.751A11.959 11.959 0 0112 2.714z" />
+      </svg>
+    ),
+  },
 ];
 
 export default function Settings() {

@@ -1,6 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import { Role } from '@prisma/client';
+import { Role, PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
 
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-change-me';
 
@@ -59,6 +61,60 @@ export function requireRole(...roles: Role[]) {
       return;
     }
     next();
+  };
+}
+
+export function requirePermission(action: string, fallbackRoles: Role[]) {
+  return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    if (!req.user || req.user.type !== 'staff' || !req.user.role) {
+      res.status(403).json({ success: false, error: 'Insufficient permissions' });
+      return;
+    }
+
+    const { role } = req.user;
+
+    // SUPER_ADMIN always has all permissions
+    if (role === 'SUPER_ADMIN') {
+      next();
+      return;
+    }
+
+    try {
+      const settings = await prisma.siteSettings.findUnique({
+        where: { id: 'default' },
+        select: { generalSettings: true }
+      });
+
+      const general = (settings?.generalSettings as any) || {};
+      const permissions = general.permissions || {};
+      const rolePerms = permissions[role] || {};
+
+      // If specific permission is defined, use it
+      if (rolePerms[action] === true) {
+        next();
+        return;
+      }
+      if (rolePerms[action] === false) {
+        res.status(403).json({ success: false, error: 'Access denied by system settings' });
+        return;
+      }
+
+      // Otherwise, fallback to the hardcoded role requirement
+      if (fallbackRoles.includes(role)) {
+        next();
+        return;
+      }
+
+      res.status(403).json({ success: false, error: 'Insufficient permissions' });
+    } catch (error) {
+      console.error('Permission check error:', error);
+      // Fail safe: use fallback roles if settings can't be read
+      if (fallbackRoles.includes(role)) {
+        next();
+      } else {
+        res.status(403).json({ success: false, error: 'Permission check failed' });
+      }
+    }
   };
 }
 
