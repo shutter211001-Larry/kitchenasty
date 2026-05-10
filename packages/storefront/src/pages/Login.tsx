@@ -141,7 +141,8 @@ export default function Login() {
               <button
                 type="button"
                 onClick={async () => {
-                    setLoading(true);
+                  setLoading(true);
+                  try {
                     const liff = (window as any).liff;
                     if (!liff) {
                       setError('LINE SDK not loaded');
