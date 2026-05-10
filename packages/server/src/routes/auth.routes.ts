@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
 import passport from 'passport';
 import * as authController from '../controllers/auth.controller.js';
 import { authenticate, generateToken } from '../middleware/auth.js';
@@ -15,14 +15,16 @@ router.post('/customer/register', authController.customerRegister);
 router.post('/customer/login', authController.customerLogin);
 
 // Social login callback handler
-const handleSocialCallback = (req: any, res: any) => {
-  if (!req.user) return res.redirect(`${STOREFRONT_URL}/login?error=auth_failed`);
+const handleSocialCallback = (req: Request, res: Response) => {
+  if (!req.user) return res.redirect(`${STOREFRONT_URL}/auth/callback?error=auth_failed`);
+  
+  const user = req.user as any;
   
   // Generate JWT token for the authenticated customer
   const token = generateToken({
-    id: req.user.id,
-    email: req.user.email,
-    type: req.user.type
+    id: user.id,
+    email: user.email,
+    type: user.type
   });
   
   res.redirect(`${STOREFRONT_URL}/auth/callback?token=${token}`);
@@ -30,7 +32,7 @@ const handleSocialCallback = (req: any, res: any) => {
 
 // Social login — Google
 if (process.env.GOOGLE_LOGIN_CLIENT_ID) {
-  router.get('/google', (req, res, next) => {
+  router.get('/google', (req: Request, res: Response, next: NextFunction) => {
     const state = req.query.state as string || '';
     passport.authenticate('google', { 
       scope: ['profile', 'email'], 
@@ -39,14 +41,17 @@ if (process.env.GOOGLE_LOGIN_CLIENT_ID) {
     })(req, res, next);
   });
 
-  router.get('/google/callback', (req, res, next) => {
+  router.get('/google/callback', (req: Request, res: Response, next: NextFunction) => {
     passport.authenticate('google', { session: false }, (err: any, user: any, info: any) => {
-      if (err) return res.redirect(`${STOREFRONT_URL}/login?error=server_error`);
+      if (err) {
+        console.error('Google Auth Error:', err);
+        return res.redirect(`${STOREFRONT_URL}/auth/callback?error=server_error`);
+      }
       if (!user) {
         if (info && info.message && info.message.includes('已被其他會員連結')) {
           return res.redirect(`${STOREFRONT_URL}/account?error=conflict&provider=google`);
         }
-        return res.redirect(`${STOREFRONT_URL}/login?error=auth_failed`);
+        return res.redirect(`${STOREFRONT_URL}/auth/callback?error=auth_failed`);
       }
       req.user = user;
       next();
