@@ -141,7 +141,6 @@ export default function SettingsPermissions() {
             ))}
           </div>
         </div>
-        </div>
       </div>
 
       <div className="flex justify-end pt-8">

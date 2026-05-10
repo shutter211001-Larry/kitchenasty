@@ -232,7 +232,6 @@ export default function SettingsGeneral() {
           >
             {saving ? '儲存中...' : '儲存所有變更'}
           </button>
-        </div>
       </div>
     </div>
   );
