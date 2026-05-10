@@ -65,6 +65,7 @@ export async function staffLogin(req: Request, res: Response): Promise<void> {
         role: user.role,
         lineUserId: user.lineUserId,
         lineDisplayName: user.lineDisplayName,
+        hasPassword: !!user.password,
       },
     },
   });
@@ -200,6 +201,7 @@ export async function customerLogin(req: Request, res: Response): Promise<void> 
         phone: customer.phone,
         lineUserId: customer.lineUserId,
         lineDisplayName: customer.lineDisplayName,
+        hasPassword: !!customer.password,
       },
     },
   });
@@ -224,9 +226,11 @@ export async function getMe(req: Request, res: Response): Promise<void> {
   } else {
     const customer = await prisma.customer.findUnique({
       where: { id: req.user.id },
-      select: { id: true, email: true, name: true, phone: true, lineUserId: true, lineDisplayName: true },
+      select: { id: true, email: true, name: true, phone: true, lineUserId: true, lineDisplayName: true, password: true },
     });
-    res.json({ success: true, data: { type: 'customer', customer } });
+    const customerData = { ...customer, hasPassword: !!customer?.password };
+    if (customerData) delete (customerData as any).password;
+    res.json({ success: true, data: { type: 'customer', customer: customerData } });
   }
 }
 export async function deleteMe(req: Request, res: Response): Promise<void> {

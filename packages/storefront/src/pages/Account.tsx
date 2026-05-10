@@ -113,23 +113,27 @@ export default function Account() {
                   </p>
                 </div>
                 <button
-                  onClick={async () => {
-                    if (!confirm('確定要解除 LINE 綁定嗎？')) return;
-                    try {
-                      const res = await fetch(`${API_BASE}/line/unbind`, {
-                        method: 'POST',
-                        headers: { Authorization: `Bearer ${token}` },
-                      });
-                      const data = await res.json();
-                      if (data.success) {
-                        window.location.reload();
-                      } else {
-                        alert(data.error);
-                      }
-                    } catch (err) {
-                      alert('操作失敗');
+                onClick={async () => {
+                  if (!(user as any).hasPassword) {
+                    if (!confirm('警告：您目前尚未設定帳號密碼。解除 LINE 連結後，如果您登出將無法再次登入此帳號！\n\n建議您先登出並使用「忘記密碼」功能設定密碼後再回來解除綁定。\n\n您確定仍要繼續解除連結嗎？')) return;
+                  } else {
+                    if (!confirm(t('account.unbindLineConfirm') || '確定要解除 LINE 連結嗎？')) return;
+                  }
+                  try {
+                    const res = await fetch(`${API_BASE}/line/unbind`, {
+                      method: 'POST',
+                      headers: { Authorization: `Bearer ${token}` },
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                      window.location.reload();
+                    } else {
+                      alert(data.error);
                     }
-                  }}
+                  } catch (err) {
+                    alert('操作失敗');
+                  }
+                }}
                   className="px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg border border-red-200 transition-colors"
                 >
                   {t('account.unbindLine')}
@@ -277,7 +281,11 @@ export default function Account() {
               <button
                 disabled={!user.lineUserId}
                 onClick={async () => {
-                  if (!confirm(t('account.unbindLineConfirm') || '確定要解除 LINE 連結嗎？')) return;
+                  if (!(user as any).hasPassword) {
+                    if (!confirm('警告：您目前尚未設定帳號密碼。解除 LINE 連結後，如果您登出將無法再次登入此帳號！\n\n建議您先登出並使用「忘記密碼」功能設定密碼後再回來解除綁定。\n\n您確定仍要繼續解除連結嗎？')) return;
+                  } else {
+                    if (!confirm(t('account.unbindLineConfirm') || '確定要解除 LINE 連結嗎？')) return;
+                  }
                   try {
                     const res = await fetch(`${API_BASE}/line/unbind`, {
                       method: 'POST',
