@@ -141,9 +141,13 @@ export default function Login() {
               <button
                 type="button"
                 onClick={async () => {
-                  try {
+                    setLoading(true);
                     const liff = (window as any).liff;
-                    if (!liff) return;
+                    if (!liff) {
+                      setError('LINE SDK not loaded');
+                      setLoading(false);
+                      return;
+                    }
                     await liff.init({ liffId: settings.lineSettings!.liffId });
                     if (!liff.isLoggedIn()) {
                       liff.login({ redirectUri: window.location.origin + '/login' });
@@ -168,9 +172,12 @@ export default function Login() {
                       window.location.href = redirectPath;
                     } else {
                       setError(data.error || 'LINE Login failed');
+                      setLoading(false);
                     }
                   } catch (err: any) {
-                    setError('LINE Login failed: ' + err.message);
+                    console.error('LINE Login error:', err);
+                    setError('LINE Login error: ' + (err.message || 'Unknown error'));
+                    setLoading(false);
                   }
                 }}
                 className="w-full flex items-center justify-center gap-2 py-2.5 bg-[#06C755] text-white rounded-lg text-sm font-bold hover:bg-[#05b34c] transition-colors"
