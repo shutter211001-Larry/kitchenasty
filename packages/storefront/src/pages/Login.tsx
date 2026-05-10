@@ -7,7 +7,7 @@ import { API_BASE } from '../lib/api.js';
 
 export default function Login() {
   const { t } = useTranslation();
-  const { login } = useAuth();
+  const { login, loginWithToken } = useAuth();
   const { settings } = useTheme();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -43,8 +43,8 @@ export default function Login() {
             });
             const data = await res.json();
             if (data.success) {
-              localStorage.setItem('token', data.data.token);
-              window.location.href = redirectPath;
+              loginWithToken(data.data.token);
+              navigate(redirectPath);
             }
           }
         } catch (err) {
@@ -53,7 +53,7 @@ export default function Login() {
       };
       initLiff();
     }
-  }, [settings.lineSettings?.liffId, redirectPath]);
+  }, [settings.lineSettings?.liffId, redirectPath, navigate, loginWithToken]);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
