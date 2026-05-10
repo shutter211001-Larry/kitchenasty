@@ -417,6 +417,30 @@ export async function mergeSocialAccount(req: Request, res: Response): Promise<v
         });
       }
 
+      // Transfer Loyalty Transactions
+      await tx.loyaltyTransaction.updateMany({
+        where: { customerId: sourceUser.id },
+        data: { customerId: currentUser.id },
+      });
+
+      // Transfer Reservations
+      await tx.reservation.updateMany({
+        where: { customerId: sourceUser.id },
+        data: { customerId: currentUser.id },
+      });
+
+      // Transfer Reviews
+      await tx.review.updateMany({
+        where: { customerId: sourceUser.id },
+        data: { customerId: currentUser.id },
+      });
+
+      // Transfer Addresses
+      await tx.address.updateMany({
+        where: { customerId: sourceUser.id },
+        data: { customerId: currentUser.id },
+      });
+
       // Unbind social ID from source
       await tx.customer.update({
         where: { id: sourceUser.id },
@@ -431,6 +455,11 @@ export async function mergeSocialAccount(req: Request, res: Response): Promise<v
         data: provider === 'google' 
           ? { googleId: socialId, googleEmail: (sourceUser as any).googleEmail } 
           : { lineUserId: socialId, lineDisplayName: (sourceUser as any).lineDisplayName },
+      });
+
+      // 4. FINAL STEP: Delete the now-empty source account
+      await tx.customer.delete({
+        where: { id: sourceUser.id }
       });
     });
 
