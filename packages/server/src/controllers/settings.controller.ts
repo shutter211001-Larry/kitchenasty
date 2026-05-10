@@ -101,6 +101,7 @@ function toPublicSettings(settings: Awaited<ReturnType<typeof getOrCreateSetting
       preOpeningBuffer: order.preOpeningBuffer !== undefined ? Number(order.preOpeningBuffer) : 30,
       postClosingBuffer: order.postClosingBuffer !== undefined ? Number(order.postClosingBuffer) : 30,
       timeSlotInterval: order.timeSlotInterval !== undefined ? Number(order.timeSlotInterval) : 15,
+      boardLeadTime: order.boardLeadTime !== undefined ? Number(order.boardLeadTime) : 60,
     } : undefined,
     paymentSettings: {
       cashEnabled: isTrue(payment.cashEnabled, true),
@@ -290,6 +291,7 @@ const orderSettingsSchema = z.object({
   postClosingBuffer: z.number().min(0).optional(),
   timeSlotInterval: z.number().min(5).max(120).optional(),
   taxRate: z.number().min(0).max(100).optional(),
+  boardLeadTime: z.number().min(0).max(1440).optional(),
 });
 
 const reservationSettingsSchema = z.object({

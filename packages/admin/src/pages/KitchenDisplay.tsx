@@ -54,6 +54,8 @@ export default function KitchenDisplay() {
   const [socketError, setSocketError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [lastRefresh, setLastRefresh] = useState(new Date());
+  const [boardLeadTime, setBoardLeadTime] = useState(60);
+  const [showScheduled, setShowScheduled] = useState(true);
 
   useEffect(() => {
     fetch('/api/settings/order', { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } })
@@ -61,6 +63,7 @@ export default function KitchenDisplay() {
       .then(res => {
         if (res.success && res.data) {
           setEnableCounterDisplay(!!res.data.enableCounterDisplay);
+          if (res.data.boardLeadTime !== undefined) setBoardLeadTime(res.data.boardLeadTime);
         }
       })
       .catch(() => {});
@@ -181,8 +184,8 @@ export default function KitchenDisplay() {
   };
 
   // Separate scheduled vs immediate orders
-  // Scheduled orders that are due within 60 minutes will be shown in the immediate columns
-  const LEAD_TIME_MS = 60 * 60 * 1000; // 60 minutes
+  // Scheduled orders that are due within the configured lead time will be shown in the immediate columns
+  const LEAD_TIME_MS = boardLeadTime * 60 * 1000;
   const now = new Date();
 
   const scheduledOrders = orders
@@ -239,31 +242,45 @@ export default function KitchenDisplay() {
         <>
           {/* Scheduled orders banner */}
           {scheduledOrders.length > 0 && (
-            <div className="mx-4 mt-4 bg-indigo-50 border border-indigo-200 rounded-lg p-4">
-              <h3 className="text-sm font-bold text-indigo-800 mb-2">
-                預約訂單 (Scheduled Orders: {scheduledOrders.length})
-              </h3>
-              <div className="flex flex-wrap gap-3">
-                {scheduledOrders.map((order) => (
-                  <div key={order.id} className="bg-white rounded-lg border border-indigo-200 px-3 py-2 text-xs">
-                    <span className="font-mono font-bold text-gray-900">#{order.orderNumber}</span>
-                    <span className={`ml-2 px-1.5 py-0.5 rounded font-medium ${order.orderType === 'DELIVERY' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'
-                      }`}>
-                      {order.orderType === 'DELIVERY' ? '外送' : '自取'}
-                    </span>
-                    <span className="ml-2 text-indigo-600 font-medium">
-                      {new Date(order.scheduledAt!).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                    </span>
-                    <span className="ml-2 text-gray-500 font-bold">
-                      {order.customer?.name || order.guestName || '顧客'}
-                    </span>
-                    {!enableCounterDisplay && (order.customer?.phone || order.guestPhone) && (
-                      <span className="ml-1 text-blue-600">({order.customer?.phone || order.guestPhone})</span>
-                    )}
-                    <span className="ml-2 text-gray-400">{order.items.length} 個品項</span>
+            <div className="mx-4 mt-4 bg-indigo-50 border border-indigo-200 rounded-lg overflow-hidden">
+              <button
+                onClick={() => setShowScheduled(!showScheduled)}
+                className="w-full flex items-center justify-between p-4 hover:bg-indigo-100/50 transition-colors"
+              >
+                <h3 className="text-sm font-bold text-indigo-800">
+                  預約訂單 (Scheduled Orders: {scheduledOrders.length})
+                </h3>
+                <svg
+                  className={`w-5 h-5 text-indigo-500 transition-transform ${showScheduled ? 'rotate-180' : ''}`}
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              {showScheduled && (
+                <div className="px-4 pb-4">
+                  <div className="flex flex-wrap gap-3">
+                    {scheduledOrders.map((order) => (
+                      <div key={order.id} className="bg-white rounded-lg border border-indigo-200 px-3 py-2 text-xs shadow-sm">
+                        <span className="font-mono font-bold text-gray-900">#{order.orderNumber}</span>
+                        <span className={`ml-2 px-1.5 py-0.5 rounded font-medium ${order.orderType === 'DELIVERY' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'
+                          }`}>
+                          {order.orderType === 'DELIVERY' ? '外送' : '自取'}
+                        </span>
+                        <span className="ml-2 text-indigo-600 font-medium">
+                          {new Date(order.scheduledAt!).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                        <span className="ml-2 text-gray-800 font-bold">
+                          {order.customer?.name || order.guestName || '顧客'}
+                        </span>
+                        <span className="ml-2 text-gray-400">{order.items.length} 個品項</span>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
+                </div>
+              )}
             </div>
           )}
           <div className="grid grid-cols-4 gap-4 p-4 h-[calc(100vh-52px)] overflow-hidden">

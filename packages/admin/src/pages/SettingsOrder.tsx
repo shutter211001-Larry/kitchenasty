@@ -23,6 +23,7 @@ export default function SettingsOrder() {
   const [enableTipping, setEnableTipping] = useState(false);
   const [tipOptionsStr, setTipOptionsStr] = useState('10,15,20,25');
   const [taxRate, setTaxRate] = useState(0);
+  const [boardLeadTime, setBoardLeadTime] = useState(60);
   const [enableCounterDisplay, setEnableCounterDisplay] = useState(false);
   const [emailNotifications, setEmailNotifications] = useState<Record<string, boolean>>({
     PLACED: true,
@@ -57,6 +58,7 @@ export default function SettingsOrder() {
           if (d.enableCounterDisplay !== undefined) setEnableCounterDisplay(d.enableCounterDisplay);
           if (d.tipOptions) setTipOptionsStr(d.tipOptions.join(','));
           if (d.taxRate !== undefined) setTaxRate(d.taxRate);
+          if (d.boardLeadTime !== undefined) setBoardLeadTime(d.boardLeadTime);
           if (d.emailNotifications) {
             setEmailNotifications((prev) => ({ ...prev, ...d.emailNotifications }));
           }
@@ -92,6 +94,7 @@ export default function SettingsOrder() {
           enableCounterDisplay,
           tipOptions, 
           taxRate,
+          boardLeadTime,
           emailNotifications 
         }),
       });
@@ -240,6 +243,23 @@ export default function SettingsOrder() {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">稅率 (%)</label>
             <input type="number" min={0} max={100} step={0.01} value={taxRate} onChange={(e) => setTaxRate(parseFloat(e.target.value) || 0)} className="w-full max-w-xs px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500" />
+          </div>
+
+          <div className="p-4 bg-orange-50 rounded-lg border border-orange-100">
+            <label className="block text-sm font-bold text-orange-800 mb-1">看板顯示提前量 (分鐘)</label>
+            <input 
+              type="number" 
+              min={0} 
+              max={1440} 
+              value={boardLeadTime} 
+              onChange={(e) => setBoardLeadTime(parseInt(e.target.value) || 0)} 
+              className="w-full max-w-xs px-3 py-2 border border-orange-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500" 
+            />
+            <p className="text-xs text-orange-600 mt-2">
+              設定預約訂單在取餐前多久會自動出現在看板的狀態欄位（待處理/製作中）中。
+              <br />
+              例如：設定 60 分鐘，則 12:00 取餐的訂單會在 11:00 出現在看板上。
+            </p>
           </div>
         </div>
 
