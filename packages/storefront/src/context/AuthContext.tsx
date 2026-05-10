@@ -43,12 +43,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const isExplicitLogout = localStorage.getItem('explicit_logout') === 'true';
     const hasToken = !!localStorage.getItem('token');
 
-    if (!liffId || isExplicitLogout || hasToken) return;
+    if (!liffId || isExplicitLogout || hasToken) {
+      if (!hasToken) setIsLoading(false);
+      return;
+    }
 
     const initLiff = async () => {
       try {
         const liff = (window as any).liff;
-        if (!liff) return;
+        if (!liff) {
+          setIsLoading(false);
+          return;
+        }
 
         await liff.init({ liffId });
         
@@ -76,6 +82,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       } catch (err) {
         console.warn('Global LIFF init/login skipped:', err);
+      } finally {
+        setIsLoading(false);
       }
     };
 

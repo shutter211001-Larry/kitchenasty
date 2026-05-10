@@ -18,42 +18,6 @@ export default function Login() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Auto-login if LIFF is already authorized and user hasn't explicitly logged out
-  useEffect(() => {
-    if (settings.lineSettings?.liffId && localStorage.getItem('explicit_logout') !== 'true') {
-      const initLiff = async () => {
-        try {
-          const liff = (window as any).liff;
-          if (!liff) return;
-          await liff.init({ liffId: settings.lineSettings!.liffId });
-          if (liff.isLoggedIn()) {
-            // Already logged into LINE, try to login to Kitchenasty
-            const profile = await liff.getProfile();
-            const userEmail = liff.getDecodedIDToken()?.email;
-            
-            const res = await fetch(`${API_BASE}/line/login`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                lineUserId: profile.userId,
-                lineDisplayName: profile.displayName,
-                email: userEmail,
-                name: profile.displayName
-              }),
-            });
-            const data = await res.json();
-            if (data.success) {
-              loginWithToken(data.data.token);
-              navigate(redirectPath);
-            }
-          }
-        } catch (err) {
-          console.warn('Auto LIFF login skipped:', err);
-        }
-      };
-      initLiff();
-    }
-  }, [settings.lineSettings?.liffId, redirectPath, navigate, loginWithToken]);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
