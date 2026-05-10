@@ -7,6 +7,7 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import swaggerUi from 'swagger-ui-express';
 import path from 'path';
+import fs from 'fs';
 import authRoutes from './routes/auth.routes.js';
 import locationRoutes from './routes/location.routes.js';
 import menuRoutes from './routes/menu.routes.js';
@@ -146,8 +147,24 @@ export function createApp() {
 
 
   // Serve Storefront static files in production
-  // dist/app.js is in packages/server/dist, so we go up two levels to get to packages/server, then up one more to root
-  const storefrontDist = path.resolve(__dirname, '../../storefront/dist');
+  // Try multiple possible locations for the storefront dist
+  const possiblePaths = [
+    path.resolve(__dirname, '../../storefront/dist'),
+    path.resolve(process.cwd(), '../storefront/dist'),
+    path.resolve(process.cwd(), 'packages/storefront/dist'),
+    path.resolve(process.cwd(), 'dist')
+  ];
+
+  let storefrontDist = possiblePaths[0];
+  for (const p of possiblePaths) {
+    if (fs.existsSync(p) && fs.existsSync(path.join(p, 'index.html'))) {
+      storefrontDist = p;
+      break;
+    }
+  }
+
+  console.log(`[DEBUG] Serving storefront from: ${storefrontDist} (Exists: ${fs.existsSync(storefrontDist)})`);
+
   app.use(express.static(storefrontDist));
 
   // Serve Admin static files
@@ -160,7 +177,12 @@ export function createApp() {
       res.status(404).json({ success: false, error: 'Not Found' });
       return;
     }
-    res.sendFile(path.join(storefrontDist, 'index.html'));
+    const indexPath = path.join(storefrontDist, 'index.html');
+    if (fs.existsSync(indexPath)) {
+      res.sendFile(indexPath);
+    } else {
+      res.status(404).send(`Storefront index.html not found at ${indexPath}. Current directory: ${process.cwd()}. Dirname: ${__dirname}`);
+    }
   });
 
   // Error handler
