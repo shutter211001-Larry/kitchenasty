@@ -153,6 +153,12 @@ export default function Checkout() {
   }, [items.length]);
 
   const scrollToSubmit = () => {
+    if (!paymentMethod) {
+      setShowPaymentError(true);
+      paymentSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      setTimeout(() => setShowPaymentError(false), 2000);
+      return;
+    }
     submitButtonRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   };
 
