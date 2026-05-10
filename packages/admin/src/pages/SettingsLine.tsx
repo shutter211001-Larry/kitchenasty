@@ -73,8 +73,15 @@ export default function SettingsLine() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">LINE 整合設定</h1>
-          <p className="text-sm text-gray-500 mt-1">透過系統環境變數配置您的 LINE 官方帳號</p>
+          <p className="text-sm text-gray-500 mt-1">配置您的 LINE 官方帳號與一鍵登入功能</p>
         </div>
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          className="px-6 py-2 bg-primary-600 text-white rounded-lg font-bold hover:bg-primary-700 transition-colors shadow-sm disabled:opacity-50"
+        >
+          {saving ? '儲存中...' : '儲存設定'}
+        </button>
       </div>
 
       {error && <div className="bg-red-50 text-red-700 p-4 rounded-lg mb-6">{error}</div>}
@@ -124,6 +131,9 @@ export default function SettingsLine() {
               </div>
             </div>
           </div>
+          <p className="text-xs text-gray-400 mt-4 italic">
+            * 密鑰類型的環境變數需在 Railway 介面設定後重啟服務方可生效。
+          </p>
         </div>
 
         <div className="bg-white rounded-lg border border-gray-200 p-6">
@@ -158,27 +168,32 @@ export default function SettingsLine() {
         <div className="bg-white rounded-lg border border-gray-200 p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-gray-900">進階設定 (LIFF)</h2>
-            <button
-              onClick={handleSave}
-              disabled={saving}
-              className="text-primary-600 font-medium hover:text-primary-700 text-sm disabled:opacity-50"
-            >
-              {saving ? '儲存中...' : '儲存'}
-            </button>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">LIFF ID (選填)</label>
-            <input
-              type="text"
-              value={liffId}
-              onChange={(e) => setLiffId(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500"
-              placeholder="若有建立 LIFF 應用程式請填寫於此"
-            />
-            <p className="text-xs text-gray-500 mt-2">
-              LIFF ID 為公開資訊，可在此直接修改。目前綁定流程仍可不使用 LIFF 完成。
-            </p>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">LIFF ID (建議填寫)</label>
+              <input
+                type="text"
+                value={liffId}
+                onChange={(e) => setLiffId(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500"
+                placeholder="例如 2000000000-XXXXXXXX"
+              />
+              <p className="text-xs text-gray-500 mt-2">
+                填寫此 ID 後，前台將會開啟「一鍵自動綁定」與「一鍵登入」功能，大幅提升轉換率。
+              </p>
+            </div>
           </div>
+        </div>
+
+        <div className="flex justify-end pt-4">
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="px-10 py-3 bg-primary-600 text-white rounded-xl font-bold hover:bg-primary-700 transition-all shadow-lg disabled:opacity-50"
+          >
+            {saving ? '儲存中...' : '儲存所有設定'}
+          </button>
         </div>
       </div>
     </div>

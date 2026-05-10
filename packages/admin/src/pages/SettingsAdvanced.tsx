@@ -60,7 +60,7 @@ export default function SettingsAdvanced() {
           <Link to="/settings" className="text-sm text-primary-600 hover:text-primary-700">&larr; 返回設定</Link>
           <h1 className="text-2xl font-bold text-gray-900 mt-1">進階設定</h1>
         </div>
-        <button onClick={handleSave} disabled={saving} className="px-4 py-2 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700 disabled:opacity-50">
+        <button onClick={handleSave} disabled={saving} className="px-6 py-2 bg-primary-600 text-white rounded-lg font-bold hover:bg-primary-700 transition-colors shadow-sm disabled:opacity-50">
           {saving ? '儲存中...' : '儲存變更'}
         </button>
       </div>
@@ -96,6 +96,16 @@ export default function SettingsAdvanced() {
           <input type="checkbox" checked={enableRateLimiting} onChange={(e) => setEnableRateLimiting(e.target.checked)} className="w-4 h-4 text-primary-600 rounded" />
           <span className="text-sm font-medium text-gray-700">啟用請求速率限制 (Rate Limiting)</span>
         </label>
+      </div>
+
+      <div className="flex justify-end pt-4">
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          className="px-10 py-3 bg-primary-600 text-white rounded-xl font-bold hover:bg-primary-700 transition-all shadow-lg disabled:opacity-50"
+        >
+          {saving ? '儲存中...' : '儲存所有變更'}
+        </button>
       </div>
     </div>
   );

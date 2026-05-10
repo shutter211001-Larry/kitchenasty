@@ -62,7 +62,7 @@ export default function SettingsReviews() {
           <Link to="/settings" className="text-sm text-primary-600 hover:text-primary-700">&larr; 返回設定</Link>
           <h1 className="text-2xl font-bold text-gray-900 mt-1">評價設定</h1>
         </div>
-        <button onClick={handleSave} disabled={saving} className="px-4 py-2 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700 disabled:opacity-50">
+        <button onClick={handleSave} disabled={saving} className="px-6 py-2 bg-primary-600 text-white rounded-lg font-bold hover:bg-primary-700 transition-colors shadow-sm disabled:opacity-50">
           {saving ? '儲存中...' : '儲存變更'}
         </button>
       </div>
@@ -91,6 +91,16 @@ export default function SettingsReviews() {
           <input type="number" min={1} max={5} value={minimumRating} onChange={(e) => setMinimumRating(parseInt(e.target.value) || 1)} className="w-full max-w-xs px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500" />
           <p className="mt-1 text-xs text-gray-500">限制顧客必須給予幾顆星以上才能提交評論</p>
         </div>
+      </div>
+
+      <div className="flex justify-end pt-4">
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          className="px-10 py-3 bg-primary-600 text-white rounded-xl font-bold hover:bg-primary-700 transition-all shadow-lg disabled:opacity-50"
+        >
+          {saving ? '儲存中...' : '儲存所有變更'}
+        </button>
       </div>
     </div>
   );
