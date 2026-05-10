@@ -11,9 +11,14 @@ export default function Account() {
   const { settings } = useTheme();
   const [showPasswordSetup, setShowPasswordSetup] = useState(false);
   const [newPassword, setNewPassword] = useState('');
+  const [oldPassword, setOldPassword] = useState('');
   const [isSettingPassword, setIsSettingPassword] = useState(false);
   const [loyaltyPoints, setLoyaltyPoints] = useState<number | null>(null);
   
+  // Change Password Modal
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+
   // Merge State
   const [showMergePrompt, setShowMergePrompt] = useState<{ provider: 'google' | 'line', id: string } | null>(null);
   const [mergePassword, setMergePassword] = useState('');
@@ -69,6 +74,46 @@ export default function Account() {
       alert('更新失敗，請檢查網路連線');
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleChangePassword = async () => {
+    if (newPassword.length < 6) {
+      alert(t('auth.passwordTooShort') || '密碼長度至少需要 6 位數');
+      return;
+    }
+    setIsChangingPassword(true);
+    try {
+      const res = await fetch(`${API_BASE}/auth/set-password`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}` 
+        },
+        body: JSON.stringify({ 
+          oldPassword: (user as any).hasPassword ? oldPassword : undefined,
+          password: newPassword 
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert(t('common.success') || '設定成功');
+        setShowPasswordModal(false);
+        setNewPassword('');
+        setOldPassword('');
+        // Refresh user data to update hasPassword state
+        const meRes = await fetch(`${API_BASE}/auth/me`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const meData = await meRes.json();
+        if (meData.success) updateUser(meData.data.customer);
+      } else {
+        alert(data.error || '設定失敗');
+      }
+    } catch (err) {
+      alert('操作失敗');
+    } finally {
+      setIsChangingPassword(false);
     }
   };
 
@@ -219,7 +264,6 @@ export default function Account() {
   }
 
   return (
-
     <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <h1 className="text-3xl font-bold text-main mb-8">{t('account.title')}</h1>
 
@@ -233,23 +277,22 @@ export default function Account() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
                 </svg>
               </div>
-              <h2 className="text-2xl font-bold text-main mb-3">偵測到帳號衝突</h2>
+              <h2 className="text-2xl font-bold text-main mb-3">{t('account.conflictTitle')}</h2>
               <p className="text-sub leading-relaxed mb-8">
-                您剛登入的 {showMergePrompt.provider === 'google' ? 'Google' : 'LINE'} 帳號已連結至另一個會員。
-                如果您希望整合帳號的 <span className="text-main font-bold">訂單記錄與紅利點數</span>，請通過安全驗證。
+                {t('account.conflictDesc', { provider: showMergePrompt.provider === 'google' ? 'Google' : 'LINE' })}
               </p>
 
               <div className="space-y-6">
                 {/* Option 1: Password (if they have one) */}
                 {(user as any).hasPassword ? (
                   <div className="space-y-2">
-                    <label className="block text-xs font-bold uppercase tracking-wider text-hint">方式 1：輸入目前帳號密碼</label>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-hint">{t('account.mergeOption1')}</label>
                     <div className="flex gap-2">
                       <input
                         type="password"
                         value={mergePassword}
                         onChange={(e) => setMergePassword(e.target.value)}
-                        placeholder="本站登入密碼"
+                        placeholder={t('auth.password')}
                         className="flex-1 px-4 py-3 bg-surface-soft border border-input rounded-xl outline-none focus:ring-2 focus:ring-primary-500 text-main transition-all"
                       />
                       <button
@@ -257,7 +300,7 @@ export default function Account() {
                         onClick={handleMergeSocial}
                         className="px-6 py-3 bg-primary-600 text-white font-bold rounded-xl hover:bg-primary-700 disabled:opacity-50 transition-all active:scale-95 shadow-lg shadow-primary-500/20"
                       >
-                        驗證
+                        {t('common.submit')}
                       </button>
                     </div>
                   </div>
@@ -265,10 +308,10 @@ export default function Account() {
                   <div className="p-4 bg-surface-soft rounded-xl border border-dashed border-input">
                     <p className="text-sm text-sub">您尚未設定本站密碼，建議先設定密碼以強化帳號安全。</p>
                     <button 
-                      onClick={() => { setShowMergePrompt(null); setShowPasswordSetup(true); }}
+                      onClick={() => { setShowMergePrompt(null); setShowPasswordModal(true); }}
                       className="text-sm font-bold text-primary-600 mt-2 hover:text-primary-700 transition-colors"
                     >
-                      立即前往設定密碼 →
+                      {t('account.setNewPassword')} →
                     </button>
                   </div>
                 )}
@@ -280,21 +323,21 @@ export default function Account() {
 
                 {/* Option 2: Re-verify Social */}
                 <div className="space-y-2">
-                  <label className="block text-xs font-bold uppercase tracking-wider text-hint">方式 2：重新驗證社交帳號</label>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-hint">{t('account.mergeOption2')}</label>
                   {isSocialVerified ? (
                     <div className="space-y-3">
                       <div className="w-full py-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800/50 rounded-xl flex items-center justify-center gap-2 text-green-700 dark:text-green-400 font-bold shadow-sm">
                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                         </svg>
-                        {showMergePrompt.provider === 'google' ? 'Google' : 'LINE'} 身份核對成功
+                        {showMergePrompt.provider === 'google' ? 'Google' : 'LINE'} {t('common.success')}
                       </div>
                       <button
                         onClick={handleMergeSocial}
                         disabled={isMerging}
                         className="w-full py-4 bg-primary-600 text-white font-bold rounded-xl hover:bg-primary-700 shadow-xl shadow-primary-500/30 transition-all active:scale-95"
                       >
-                        {isMerging ? '正在整合您的精彩紀錄...' : '立即合併帳號'}
+                        {isMerging ? t('common.loading') : t('account.mergeSocial')}
                       </button>
                     </div>
                   ) : (
@@ -311,7 +354,7 @@ export default function Account() {
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                       </svg>
-                      重新驗證 {showMergePrompt.provider === 'google' ? 'Google' : 'LINE'} 身份
+                      {t('auth.orContinue')} {showMergePrompt.provider === 'google' ? 'Google' : 'LINE'}
                     </button>
                   )}
                 </div>
@@ -319,7 +362,7 @@ export default function Account() {
                 <div className="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-xl border border-amber-100 dark:border-amber-800/50">
                   <p className="text-xs text-amber-700 dark:text-amber-400 font-medium leading-relaxed flex gap-2">
                     <span className="shrink-0">⚠️</span>
-                    <span>整合後，系統將合併兩個帳號的所有記錄。為了您的安全，若您無法通過上述驗證，將無法進行整合。</span>
+                    <span>{t('account.conflictWarning')}</span>
                   </p>
                 </div>
               </div>
@@ -332,8 +375,58 @@ export default function Account() {
                   }}
                   className="w-full py-2 text-sm font-medium text-hint hover:text-main transition-colors"
                 >
-                  取消，維持現狀
+                  {t('account.mergeCancel')}
                 </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Password Change Modal */}
+      {showPasswordModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="bg-surface border-input rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
+            <div className="p-8">
+              <h2 className="text-2xl font-bold text-main mb-6">
+                {(user as any).hasPassword ? t('account.changePassword') : t('account.setNewPassword')}
+              </h2>
+              <div className="space-y-4">
+                {(user as any).hasPassword && (
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-widest text-hint mb-1">{t('account.oldPassword')}</label>
+                    <input
+                      type="password"
+                      value={oldPassword}
+                      onChange={(e) => setOldPassword(e.target.value)}
+                      className="w-full px-4 py-3 bg-surface-soft border border-input rounded-xl outline-none focus:ring-2 focus:ring-primary-500 text-main"
+                    />
+                  </div>
+                )}
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-widest text-hint mb-1">{t('account.newPassword')}</label>
+                  <input
+                    type="password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    className="w-full px-4 py-3 bg-surface-soft border border-input rounded-xl outline-none focus:ring-2 focus:ring-primary-500 text-main"
+                  />
+                </div>
+                <div className="pt-4 flex flex-col gap-2">
+                  <button
+                    disabled={isChangingPassword}
+                    onClick={handleChangePassword}
+                    className="w-full py-3 bg-primary-600 text-white font-bold rounded-xl hover:bg-primary-700 shadow-lg shadow-primary-500/20 active:scale-95 transition-all"
+                  >
+                    {isChangingPassword ? t('common.loading') : t('common.save')}
+                  </button>
+                  <button
+                    onClick={() => { setShowPasswordModal(false); setNewPassword(''); setOldPassword(''); }}
+                    className="w-full py-3 text-sm font-bold text-hint hover:text-main"
+                  >
+                    {t('common.cancel')}
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -356,7 +449,7 @@ export default function Account() {
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                 </svg>
-                編輯資料
+                {t('common.edit')}
               </button>
             ) : (
               <div className="flex items-center gap-3">
@@ -365,7 +458,7 @@ export default function Account() {
                   onClick={handleUpdateProfile}
                   className="px-4 py-2 text-sm font-bold text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg border border-transparent hover:border-green-200 dark:hover:border-green-800 transition-all disabled:opacity-50"
                 >
-                  {isSaving ? '儲存中...' : '儲存變更'}
+                  {isSaving ? t('common.loading') : t('common.save')}
                 </button>
                 <button
                   onClick={() => {
@@ -374,7 +467,7 @@ export default function Account() {
                   }}
                   className="px-4 py-2 text-sm font-medium text-hint hover:text-main rounded-lg transition-all"
                 >
-                  取消
+                  {t('common.cancel')}
                 </button>
               </div>
             )}
@@ -404,14 +497,14 @@ export default function Account() {
                   className="w-full px-4 py-3 text-main bg-surface-soft border border-input rounded-xl outline-none focus:ring-2 focus:ring-primary-500 transition-all"
                 />
               ) : (
-                <p className="text-lg font-semibold text-main px-1">{user.phone || '尚未設定'}</p>
+                <p className="text-lg font-semibold text-main px-1">{user.phone || t('account.notProvided')}</p>
               )}
             </div>
             <div className="sm:col-span-2 space-y-1">
               <label className="block text-xs font-bold uppercase tracking-widest text-hint">{t('account.emailLabel')}</label>
               <div className="flex items-center gap-3 px-4 py-3 bg-surface-soft rounded-xl border border-input/50">
                 <p className="text-main font-medium">{user.email}</p>
-                <span className="px-2 py-0.5 text-[10px] font-bold bg-hint/20 text-hint rounded-md uppercase tracking-tighter">不可修改</span>
+                <span className="px-2 py-0.5 text-[10px] font-bold bg-hint/20 text-hint rounded-md uppercase tracking-tighter italic">Read Only</span>
               </div>
             </div>
           </div>
@@ -424,23 +517,47 @@ export default function Account() {
                <svg className="w-5 h-5 text-primary-500" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
               </svg>
-              <h2 className="text-lg font-bold text-main">會員紅利點數</h2>
+              <h2 className="text-lg font-bold text-main">{t('account.loyaltyPoints')}</h2>
             </div>
             <div className="flex items-end gap-3">
               <span className="text-5xl font-black text-primary-600 tracking-tight">{loyaltyPoints}</span>
               <div className="pb-1">
                 <span className="block text-sm font-bold text-main">Points</span>
-                <span className="block text-xs text-sub">約等值 ${(loyaltyPoints / 100).toFixed(2)}</span>
+                <span className="block text-xs text-sub">{t('account.pointsValue', { value: (loyaltyPoints / 100).toFixed(2) })}</span>
               </div>
             </div>
             <p className="text-xs text-sub mt-4 flex items-center gap-1.5">
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              消費 $1 累積 1 點。每 100 點可折抵 $1 訂單金額。
+              {t('account.loyaltyDesc')}
             </p>
           </div>
         )}
+
+        {/* Security / Password */}
+        <div className="p-8 border-b border-input">
+          <h2 className="text-lg font-bold text-main mb-6 flex items-center gap-2">
+            <svg className="w-5 h-5 text-hint" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+            </svg>
+            {t('account.securityTitle')}
+          </h2>
+          <div className="flex items-center justify-between p-5 bg-surface-soft/30 border border-input rounded-2xl">
+            <div>
+              <h3 className="font-bold text-main">{t('auth.password')}</h3>
+              <p className="text-xs text-sub mt-1">
+                {(user as any).hasPassword ? '••••••••' : '尚未設定密碼'}
+              </p>
+            </div>
+            <button
+              onClick={() => setShowPasswordModal(true)}
+              className="px-4 py-2 text-sm font-bold text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg border border-primary-200 dark:border-primary-800 transition-all"
+            >
+              {(user as any).hasPassword ? t('account.changePassword') : t('account.setNewPassword')}
+            </button>
+          </div>
+        </div>
 
         {/* Quick Links */}
         <div className="p-8 border-b border-input">
@@ -448,7 +565,7 @@ export default function Account() {
             <svg className="w-5 h-5 text-hint" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16m-7 6h7" />
             </svg>
-            快速連結
+            {t('footer.quickLinks')}
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Link to="/account/orders" className="group p-5 bg-surface border-2 border-input hover:border-primary-500/50 rounded-2xl transition-all shadow-sm hover:shadow-md">
@@ -488,7 +605,7 @@ export default function Account() {
             <svg className="w-5 h-5 text-hint" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
             </svg>
-            帳號安全與連結
+            {t('account.socialLinking')}
           </h2>
           
           <div className="space-y-6">
@@ -501,15 +618,15 @@ export default function Account() {
                       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                       </svg>
-                      安全過渡：設定登入密碼
+                      {t('account.passwordSetupTitle')}
                     </h3>
                     <p className="text-sm text-primary-700 dark:text-primary-300 leading-relaxed mb-6">
-                      為了保障您的權益，在解除社群帳號連結前，請先為您的 Email (<span className="font-bold underline">{user.email}</span>) 設定密碼。這能確保您未來仍能隨時透過 Email 登入。
+                      {t('account.passwordSetupDesc', { email: user.email })}
                     </p>
                     <div className="flex flex-col sm:flex-row gap-3">
                       <input
                         type="password"
-                        placeholder="請輸入新密碼 (至少 6 位)"
+                        placeholder={t('account.newPasswordPlaceholder')}
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
                         className="flex-1 px-5 py-3 text-main bg-white dark:bg-black/20 border border-primary-300 dark:border-primary-700 rounded-xl outline-none focus:ring-4 focus:ring-primary-500/20 transition-all"
@@ -519,13 +636,13 @@ export default function Account() {
                         onClick={handleSetPasswordAndUnbind}
                         className="px-8 py-3 bg-primary-600 text-white font-bold rounded-xl hover:bg-primary-700 shadow-lg shadow-primary-500/30 transition-all active:scale-95 disabled:opacity-50"
                       >
-                        {isSettingPassword ? '設定中...' : '確認並解除連結'}
+                        {isSettingPassword ? t('common.loading') : t('account.confirmUnbind')}
                       </button>
                       <button
                         onClick={() => setShowPasswordSetup(false)}
                         className="px-5 py-3 text-sm font-bold text-primary-700 dark:text-primary-300 hover:bg-primary-100 dark:hover:bg-primary-800 rounded-xl transition-all"
                       >
-                        我再想想
+                        {t('common.cancel')}
                       </button>
                     </div>
                   </div>
@@ -579,14 +696,14 @@ export default function Account() {
                   }}
                   className="px-6 py-2.5 text-sm font-bold text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl border border-red-200 dark:border-red-800 transition-all active:scale-95"
                 >
-                  解除連結
+                  {t('account.unbind')}
                 </button>
               ) : (
                 <button
                   onClick={handleLineAuth}
                   className="px-8 py-3.5 text-sm font-black bg-[#06C755] text-white rounded-xl hover:bg-[#05b34c] transition-all shadow-lg shadow-[#06C755]/20 active:scale-95"
                 >
-                  連結 LINE 帳號
+                  {t('account.bind')} LINE
                 </button>
               )}
             </div>
@@ -654,14 +771,14 @@ export default function Account() {
                   }}
                   className="px-6 py-2.5 text-sm font-bold text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl border border-red-200 dark:border-red-800 transition-all active:scale-95"
                 >
-                  解除連結
+                  {t('account.unbind')}
                 </button>
               ) : (
                 <a
                   href={`${API_BASE}/auth/google?prompt=select_account&state=${encodeURIComponent(JSON.stringify({ link: true, token: token, redirect: '/account' }))}`}
                   className="px-8 py-3.5 text-sm font-black bg-surface text-main rounded-xl border-2 border-input hover:border-primary-500/50 transition-all shadow-sm active:scale-95 flex items-center gap-2"
                 >
-                  連結 Google 帳號
+                  {t('account.bind')} Google
                 </a>
               )}
             </div>
@@ -672,7 +789,7 @@ export default function Account() {
         <div className="mt-8 border-t border-input">
           <details className="group">
             <summary className="flex items-center justify-between p-8 cursor-pointer list-none text-hint hover:text-main transition-all select-none">
-              <span className="text-sm font-bold tracking-widest uppercase">進階帳號管理</span>
+              <span className="text-sm font-bold tracking-widest uppercase">{t('account.advancedSettings')}</span>
               <div className="w-8 h-8 rounded-full bg-surface-soft flex items-center justify-center group-open:rotate-180 transition-all duration-300">
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 9l-7 7-7-7" />
@@ -682,9 +799,9 @@ export default function Account() {
             
             <div className="px-8 pb-8 animate-in fade-in slide-in-from-top-2 duration-300">
               <div className="p-6 rounded-2xl border-2 border-red-500/10 bg-red-500/[0.02]">
-                <h3 className="text-lg font-black text-red-600 mb-2">{t('account.dangerZone') || '危險區域'}</h3>
+                <h3 className="text-lg font-black text-red-600 mb-2">{t('account.dangerZone')}</h3>
                 <p className="text-sm text-sub mb-6 leading-relaxed">
-                  刪除帳號將會永久移除您的所有訂單紀錄、紅利點數以及個人設定。此操作無法復原，請審慎考慮。
+                  {t('account.dangerZoneDesc')}
                 </p>
                 <button
                   onClick={async () => {
@@ -731,7 +848,9 @@ export default function Account() {
       </div>
     </div>
   );
+
 }
+
 
 
 
