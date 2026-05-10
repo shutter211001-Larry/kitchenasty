@@ -22,7 +22,7 @@ export async function getStripe(): Promise<Stripe> {
   }
 
   cachedStripe = new Stripe(secretKey, {
-    apiVersion: '2026-02-25.clover',
+    apiVersion: '2026-01-28.clover' as any,
   });
   cachedKey = secretKey;
 
@@ -31,5 +31,5 @@ export async function getStripe(): Promise<Stripe> {
 
 // Default export for backwards compatibility
 export default new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder', {
-  apiVersion: '2026-02-25.clover',
+  apiVersion: '2026-01-28.clover' as any,
 });
