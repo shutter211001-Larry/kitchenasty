@@ -96,6 +96,41 @@ export default function Account() {
     }
   };
 
+  const handleLineAuth = async () => {
+    try {
+      const liff = (window as any).liff;
+      if (!liff) {
+        alert('LINE SDK 尚未載入，請稍候');
+        return;
+      }
+      await liff.init({ liffId: settings.lineSettings!.liffId });
+      if (!liff.isLoggedIn()) {
+        liff.login();
+        return;
+      }
+      const profile = await liff.getProfile();
+      const res = await fetch(`${API_BASE}/line/bind`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}` 
+        },
+        body: JSON.stringify({ lineUserId: profile.userId, lineDisplayName: profile.displayName }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert('LINE 連結成功！');
+        window.location.reload();
+      } else if (data.error && data.error.includes('已被其他會員連結')) {
+        setShowMergePrompt({ provider: 'line', id: profile.userId });
+      } else {
+        alert(data.error);
+      }
+    } catch (err) {
+      alert('操作失敗');
+    }
+  };
+
   const handleSetPasswordAndUnbind = async () => {
     if (newPassword.length < 6) {
       alert('密碼長度至少需要 6 位數');
@@ -233,9 +268,9 @@ export default function Account() {
                   <button
                     onClick={() => {
                       if (showMergePrompt.provider === 'google') {
-                        window.location.href = `${API_BASE}/auth/google?prompt=select_account&redirectUri=${encodeURIComponent(window.location.origin + '/account')}`;
+                        window.location.href = `${API_BASE}/auth/google?prompt=select_account&state=${encodeURIComponent('link=true')}&redirectUri=${encodeURIComponent(window.location.origin + '/account')}`;
                       } else {
-                        alert('請再次點擊連結按鈕以重新核對 LINE 身份');
+                        handleLineAuth();
                         setShowMergePrompt(null);
                       }
                     }}
@@ -445,40 +480,7 @@ export default function Account() {
                 </button>
               ) : (
                 <button
-                  onClick={async () => {
-                    try {
-                      const liff = (window as any).liff;
-                      if (!liff) {
-                        alert('LINE SDK 尚未載入，請稍候');
-                        return;
-                      }
-                      await liff.init({ liffId: settings.lineSettings!.liffId });
-                      if (!liff.isLoggedIn()) {
-                        liff.login();
-                        return;
-                      }
-                      const profile = await liff.getProfile();
-                      const res = await fetch(`${API_BASE}/line/bind`, {
-                        method: 'POST',
-                        headers: { 
-                          'Content-Type': 'application/json',
-                          Authorization: `Bearer ${token}` 
-                        },
-                        body: JSON.stringify({ lineUserId: profile.userId, lineDisplayName: profile.displayName }),
-                      });
-                      const data = await res.json();
-                      if (data.success) {
-                        alert('LINE 連結成功！');
-                        window.location.reload();
-                      } else if (data.error && data.error.includes('已被其他會員連結')) {
-                        setShowMergePrompt({ provider: 'line', id: profile.userId });
-                      } else {
-                        alert(data.error);
-                      }
-                    } catch (err) {
-                      alert('操作失敗');
-                    }
-                  }}
+                  onClick={handleLineAuth}
                   className="px-4 py-2 text-sm font-bold bg-[#06C755] text-white rounded-lg hover:bg-[#05b34c] transition-colors"
                 >
                   連結至 LINE 帳號
@@ -547,8 +549,8 @@ export default function Account() {
           </div>
         </div>
 
-        {/* Danger Zone - Collapsible for safety */}
-        <div className="mt-12 pt-12 border-t px-6">
+        {/* Danger Zone */}
+        <div className="mt-12 pt-12 border-t px-6 pb-12">
           <details className="group">
             <summary className="flex items-center justify-between cursor-pointer list-none text-hint hover:text-sub transition-colors">
               <span className="text-sm font-medium">進階帳號管理選項</span>
@@ -561,50 +563,32 @@ export default function Account() {
               <div className="surface-card rounded-xl border border-red-100 bg-red-50/30 overflow-hidden">
                 <div className="p-6">
                   <h3 className="text-lg font-bold text-red-700 mb-4">{t('account.dangerZone') || '危險區域'}</h3>
-                  
-                  <div className="space-y-6">
-                    <div className="h-px bg-red-100"></div>
+                  <div className="flex flex-col gap-4">
+                    <button
+                      onClick={async () => {
+                        if (!confirm(t('footer.deleteAccountWarning'))) return;
+                        if (!confirm(t('footer.deleteAccountFinalCheck'))) return;
 
-                    {/* Delete Account */}
-                    <div className="flex flex-col gap-4">
-                      <div>
-                        <h4 className="text-sm font-bold text-red-700">{t('footer.deleteAccount')}</h4>
-                        <div className="mt-2 p-4 bg-white border border-red-200 rounded-lg">
-                          <p className="text-xs text-red-600 leading-relaxed font-medium">
-                            {t('footer.deleteAccountWarning')}
-                          </p>
-                        </div>
-                      </div>
-                      
-                      <button
-                        onClick={async () => {
-                          const firstCheck = confirm(t('footer.deleteAccountWarning'));
-                          if (!firstCheck) return;
-                          
-                          const finalCheck = confirm(t('footer.deleteAccountFinalCheck'));
-                          if (!finalCheck) return;
-
-                          try {
-                            const res = await fetch(`${API_BASE}/auth/me`, {
-                              method: 'DELETE',
-                              headers: { Authorization: `Bearer ${token}` },
-                            });
-                            const data = await res.json();
-                            if (data.success) {
-                              alert('帳號已成功刪除。再見！');
-                              logout();
-                            } else {
-                              alert(data.error || '刪除失敗');
-                            }
-                          } catch (err) {
-                            alert('刪除失敗，請聯繫客服');
+                        try {
+                          const res = await fetch(`${API_BASE}/auth/me`, {
+                            method: 'DELETE',
+                            headers: { Authorization: `Bearer ${token}` },
+                          });
+                          const data = await res.json();
+                          if (data.success) {
+                            alert('帳號已成功刪除。再見！');
+                            logout();
+                          } else {
+                            alert(data.error || '刪除失敗');
                           }
-                        }}
-                        className="w-full sm:w-auto px-6 py-3 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition-colors shadow-sm"
-                      >
-                        {t('footer.deleteAccountConfirm')}
-                      </button>
-                    </div>
+                        } catch (err) {
+                          alert('刪除失敗，請聯繫客服');
+                        }
+                      }}
+                      className="w-full sm:w-auto px-6 py-3 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition-colors shadow-sm"
+                    >
+                      {t('footer.deleteAccountConfirm')}
+                    </button>
                   </div>
                 </div>
               </div>
