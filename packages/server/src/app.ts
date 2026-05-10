@@ -7,6 +7,7 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import swaggerUi from 'swagger-ui-express';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import authRoutes from './routes/auth.routes.js';
 import locationRoutes from './routes/location.routes.js';
 import menuRoutes from './routes/menu.routes.js';
@@ -38,6 +39,9 @@ import { metricsCollector } from './middleware/metricsCollector.js';
 import './lib/events.js';
 
 export function createApp() {
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = path.dirname(__filename);
+
   const app = express();
   // On Railway/Cloud providers, we trust the first proxy
   app.set('trust proxy', 1);
@@ -146,25 +150,20 @@ export function createApp() {
 
 
   // Serve Storefront static files in production
-  const storefrontDist = path.resolve(process.cwd(), '../storefront/dist');
+  // dist/app.js is in packages/server/dist, so we go up two levels to get to packages/server, then up one more to root
+  const storefrontDist = path.resolve(__dirname, '../../storefront/dist');
   app.use(express.static(storefrontDist));
 
-  // Serve Admin static files (optional, can be on a different path)
-  const adminDist = path.resolve(process.cwd(), '../admin/dist');
+  // Serve Admin static files
+  const adminDist = path.resolve(__dirname, '../../admin/dist');
   app.use('/admin', express.static(adminDist));
 
   // 404 / SPA Fallback
   app.use((req, res) => {
-    // If it's an API request, return 404 JSON
     if (req.url.startsWith('/api')) {
-      res.status(404).json({
-        success: false,
-        error: 'Not Found',
-      });
+      res.status(404).json({ success: false, error: 'Not Found' });
       return;
     }
-
-    // Otherwise, serve the Storefront index.html for SPA routing
     res.sendFile(path.join(storefrontDist, 'index.html'));
   });
 
