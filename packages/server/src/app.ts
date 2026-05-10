@@ -145,12 +145,27 @@ export function createApp() {
   app.use('/api/line', lineRoutes);
 
 
-  // 404 handler
-  app.use((_req, res) => {
-    res.status(404).json({
-      success: false,
-      error: 'Not Found',
-    });
+  // Serve Storefront static files in production
+  const storefrontDist = path.resolve(process.cwd(), '../storefront/dist');
+  app.use(express.static(storefrontDist));
+
+  // Serve Admin static files (optional, can be on a different path)
+  const adminDist = path.resolve(process.cwd(), '../admin/dist');
+  app.use('/admin', express.static(adminDist));
+
+  // 404 / SPA Fallback
+  app.use((req, res) => {
+    // If it's an API request, return 404 JSON
+    if (req.url.startsWith('/api')) {
+      res.status(404).json({
+        success: false,
+        error: 'Not Found',
+      });
+      return;
+    }
+
+    // Otherwise, serve the Storefront index.html for SPA routing
+    res.sendFile(path.join(storefrontDist, 'index.html'));
   });
 
   // Error handler
