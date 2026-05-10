@@ -25,7 +25,6 @@
     "login": "登入",
     "signUp": "註冊",
     "register": "註冊",
-    "register": "註冊",
     "logout": "登出",
     "myAccount": "我的帳戶",
     "myAccountWithName": "我的帳戶 ({{name}})",
@@ -204,9 +203,6 @@
     "placeOrder": "確認點餐",
     "currentlyUnavailable": "目前不接受點餐",
     "processing": "處理中...",
-    "contactInfo": "聯絡資訊",
-    "loginBenefit": "💡 登入會員可享有紅利點數回饋！",
-    "googleLogin": "Google 快速登入",
     "guestCheckout": "訪客結帳",
     "guestEmail": "接收訂單進度的電子郵件"
   },
@@ -255,8 +251,7 @@
     "lookupServerError": "搜尋時發生錯誤，請稍後再試。",
     "recentGuestOrders": "最近的訂單 (訪客)",
     "recentGuestOrdersDesc": "這些是存放在此瀏覽器中的訂單紀錄。",
-    "loginToViewFull": "登入以查看完整紀錄",
-    "linkedToAccount": "此訂單已關聯至會員帳號，請登入以查看詳細資訊。"
+    "loginToViewFull": "登入以查看完整紀錄"
   },
   "orderStatus": {
     "placed": "已下單",
