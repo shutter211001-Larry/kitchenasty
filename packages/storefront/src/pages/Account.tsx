@@ -177,7 +177,7 @@ export default function Account() {
   };
 
   const handleMergeSocial = async () => {
-    if (!showMergePrompt || !mergePassword) return;
+    if (!showMergePrompt || (!mergePassword && !isSocialVerified)) return;
     setIsMerging(true);
     try {
       const res = await fetch(`${API_BASE}/auth/social/merge`, {
