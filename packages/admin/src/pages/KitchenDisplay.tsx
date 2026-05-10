@@ -354,9 +354,8 @@ export default function KitchenDisplay() {
                         <span className="text-xs text-gray-400">{getTimeSince(order.createdAt)}</span>
                       </div>
 
-                      {/* Customer info for single-person operation */}
-                      {(!enableCounterDisplay) && (
-                        <div className="mb-3 p-2 bg-gray-50 rounded border border-gray-100">
+                      {/* Customer info */}
+                      <div className="mb-3 p-2 bg-gray-50 rounded border border-gray-100">
                           <div className="space-y-0.5">
                             <div className="flex items-center gap-2">
                               <span className="text-xs font-bold text-gray-700">
@@ -373,7 +372,6 @@ export default function KitchenDisplay() {
                             )}
                           </div>
                         </div>
-                      )}
 
                       {/* Items */}
                       <div className="space-y-1 mb-3">
@@ -429,12 +427,18 @@ export default function KitchenDisplay() {
                           </button>
                         )}
                         <button
-                          onClick={() => handleStatusUpdate(order.id, 'CANCELLED')}
+                          onClick={async () => {
+                            if (window.confirm('確定要取消此訂單嗎？')) {
+                              handleStatusUpdate(order.id, 'CANCELLED');
+                            }
+                          }}
                           disabled={updating === order.id}
-                          className="text-red-500 hover:text-red-700 text-xs font-medium px-2 py-2 rounded-lg hover:bg-red-50 transition-colors disabled:opacity-50"
-                          aria-label={`Cancel order ${order.orderNumber}`}
+                          className="px-2 bg-red-50 text-red-600 text-xs font-bold py-2 rounded-lg hover:bg-red-100 disabled:opacity-50 transition-all"
+                          title="取消訂單"
                         >
-                          取消
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
                         </button>
                       </div>
                     </div>

@@ -385,7 +385,7 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
       scheduledAt: scheduledAt ? new Date(scheduledAt) : null,
       guestName: customerId ? undefined : finalGuestName,
       guestEmail: customerId ? undefined : guestEmail,
-      guestPhone: customerId ? undefined : guestPhone,
+      guestPhone: guestPhone || undefined,
       userLat,
       userLon,
       distance,
