@@ -1,34 +1,32 @@
 import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
-import { Strategy as FacebookStrategy } from 'passport-facebook';
-import prisma from './db.js';
+import { PrismaClient } from '@prisma/client';
 
-export function initPassport() {
-  const GOOGLE_CLIENT_ID = process.env.GOOGLE_LOGIN_CLIENT_ID;
-  const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_LOGIN_CLIENT_SECRET;
-  const FACEBOOK_APP_ID = process.env.FACEBOOK_APP_ID;
-  const FACEBOOK_APP_SECRET = process.env.FACEBOOK_APP_SECRET;
-  const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
+const prisma = new PrismaClient();
 
-  if (GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET) {
+export const initPassport = () => {
+  // Google Strategy for Customers
+  if (process.env.GOOGLE_LOGIN_CLIENT_ID && process.env.GOOGLE_LOGIN_CLIENT_SECRET) {
     passport.use(
       new GoogleStrategy(
         {
-          clientID: GOOGLE_CLIENT_ID,
-          clientSecret: GOOGLE_CLIENT_SECRET,
-          callbackURL: `${BASE_URL}/api/auth/google/callback`,
+          clientID: process.env.GOOGLE_LOGIN_CLIENT_ID,
+          clientSecret: process.env.GOOGLE_LOGIN_CLIENT_SECRET,
+          callbackURL: `${process.env.SERVER_URL || 'http://localhost:3000'}/api/auth/google/callback`,
           passReqToCallback: true,
         },
-        async (req, _accessToken, _refreshToken, profile, done) => {
+        async (req, accessToken, refreshToken, profile, done) => {
           try {
             const email = profile.emails?.[0]?.value;
-            if (!email) return done(new Error('No email in Google profile'));
+            if (!email) {
+              return done(new Error('No email found from Google profile'), false);
+            }
 
+            // Check if user is logged in (Account Linking Flow)
             const loggedInUser = (req as any).user;
 
             if (loggedInUser && loggedInUser.type === 'customer') {
-            // LINKING: User is already logged in
-            if (loggedInUser) {
+              // LINKING: User is already logged in
               // 1. Check if this Google account is already linked to ANOTHER customer
               const existingLink = await prisma.customer.findUnique({
                 where: { googleId: profile.id }
@@ -50,7 +48,7 @@ export function initPassport() {
               return done(null, { id: customer.id, email: customer.email, type: 'customer' as const });
             }
 
-            // LOGIN/REGISTER: Try to find by googleId first, then by email
+            // LOGIN/REGISTER Flow
             let customer = await prisma.customer.findFirst({
               where: {
                 OR: [
@@ -61,6 +59,7 @@ export function initPassport() {
             });
 
             if (!customer) {
+              // Create new customer
               customer = await prisma.customer.create({
                 data: {
                   email,
@@ -72,7 +71,7 @@ export function initPassport() {
                 },
               });
             } else {
-              // Update googleId and convert guest if needed
+              // Update existing customer's googleId if not set
               customer = await prisma.customer.update({
                 where: { id: customer.id },
                 data: {
@@ -84,53 +83,20 @@ export function initPassport() {
               });
             }
 
-            // Link guest orders
-            await prisma.order.updateMany({
-              where: { guestEmail: email, customerId: null },
-              data: { customerId: customer.id },
-            });
-
-            done(null, { id: customer.id, email: customer.email, type: 'customer' as const });
-          } catch (err) {
-            done(err as Error);
+            return done(null, { id: customer.id, email: customer.email, type: 'customer' as const });
+          } catch (error) {
+            return done(error as Error, false);
           }
         }
       )
     );
   }
 
-  if (FACEBOOK_APP_ID && FACEBOOK_APP_SECRET) {
-    passport.use(
-      new FacebookStrategy(
-        {
-          clientID: FACEBOOK_APP_ID,
-          clientSecret: FACEBOOK_APP_SECRET,
-          callbackURL: `${BASE_URL}/api/auth/facebook/callback`,
-          profileFields: ['id', 'emails', 'name', 'displayName'],
-        },
-        async (_accessToken: string, _refreshToken: string, profile: any, done: any) => {
-          try {
-            const email = profile.emails?.[0]?.value;
-            if (!email) return done(new Error('No email in Facebook profile'));
+  passport.serializeUser((user: any, done) => {
+    done(null, user);
+  });
 
-            let customer = await prisma.customer.findUnique({ where: { email } });
-            if (!customer) {
-              customer = await prisma.customer.create({
-                data: {
-                  email,
-                  name: profile.displayName || email,
-                  password: null,
-                },
-              });
-            }
-            done(null, { id: customer.id, email: customer.email, type: 'customer' as const });
-          } catch (err) {
-            done(err as Error);
-          }
-        }
-      )
-    );
-  }
-
-  return passport;
-}
+  passport.deserializeUser((user: any, done) => {
+    done(null, user);
+  });
+};
