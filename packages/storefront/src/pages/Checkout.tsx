@@ -199,6 +199,18 @@ export default function Checkout() {
 
     setLoading(true);
 
+    // Additional validation for scheduled orders
+    if (scheduledAt) {
+      const hasPhone = user ? (user.phone || guestPhone) : guestPhone;
+      if (!hasPhone) {
+        setError(t('checkout.phoneRequiredForScheduled') || '預約訂單必須填寫聯絡電話');
+        setLoading(false);
+        // Scroll to contact info
+        document.getElementById('contact-info')?.scrollIntoView({ behavior: 'smooth' });
+        return;
+      }
+    }
+
     try {
       const orderItems = items.map((item) => ({
         menuItemId: item.menuItemId,
@@ -631,8 +643,8 @@ export default function Checkout() {
           ) : null}
 
           {/* Guest info or login prompt */}
-          {!user && (
-            <div className="surface-card rounded-xl shadow-sm border p-6">
+          {!user ? (
+            <div id="contact-info" className="surface-card rounded-xl shadow-sm border p-6">
               <h2 className="text-lg font-semibold text-main mb-4">{t('checkout.contactInfo')}</h2>
               <div className="space-y-4">
                 {settings.showMembership !== false && (
@@ -725,14 +737,33 @@ export default function Checkout() {
                   />
                   <input
                     type="tel"
-                    placeholder={t('checkout.phoneOptional')}
+                    required={!!scheduledAt}
+                    placeholder={scheduledAt ? (t('checkout.phoneRequired') || '電話號碼 (預約必填)') : (t('checkout.phoneOptional') || '電話號碼 (選填)')}
                     value={guestPhone}
                     onChange={(e) => setGuestPhone(e.target.value)}
-                    className="w-full px-3 py-2 bg-surface border border-input rounded-lg focus:ring-2 focus:ring-primary-500 outline-none text-sm text-main"
+                    className={`w-full px-3 py-2 bg-surface border rounded-lg focus:ring-2 focus:ring-primary-500 outline-none text-sm text-main ${
+                      scheduledAt ? 'border-amber-300' : 'border-input'
+                    }`}
                   />
                 </div>
               </div>
             </div>
+          ) : (
+            /* Logged in user: ensure phone if scheduled */
+            scheduledAt && !user.phone && (
+              <div id="contact-info" className="surface-card rounded-xl shadow-sm border p-6 border-amber-200 bg-amber-50/30">
+                <h2 className="text-lg font-semibold text-main mb-2">聯絡電話</h2>
+                <p className="text-sm text-amber-700 mb-4">預約訂單需要提供聯絡電話以便聯繫</p>
+                <input
+                  type="tel"
+                  required
+                  placeholder={t('checkout.phone') || '電話號碼'}
+                  value={guestPhone}
+                  onChange={(e) => setGuestPhone(e.target.value)}
+                  className="w-full px-3 py-2 bg-surface border border-amber-200 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none text-sm text-main"
+                />
+              </div>
+            )
           )}
         </div>
 

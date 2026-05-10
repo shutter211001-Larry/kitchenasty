@@ -98,6 +98,20 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
       res.status(400).json({ success: false, error: 'Scheduled time cannot be more than 7 days in the future' });
       return;
     }
+
+    // Require phone for scheduled orders
+    if (!guestPhone && !customerId) {
+      res.status(400).json({ success: false, error: 'Phone number is required for scheduled orders' });
+      return;
+    }
+
+    if (customerId) {
+      const customer = await prisma.customer.findUnique({ where: { id: customerId } });
+      if (!customer?.phone && !guestPhone) {
+        res.status(400).json({ success: false, error: 'Phone number is required for scheduled orders. Please provide a contact number.' });
+        return;
+      }
+    }
   }
 
   // Get location (specified or default)
