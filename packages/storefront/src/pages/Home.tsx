@@ -1,5 +1,5 @@
-import { Suspense } from 'react';
-import { Link } from 'react-router-dom';
+import { Suspense, useEffect } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext.js';
 import { useTheme } from '../context/ThemeContext.js';
@@ -8,10 +8,13 @@ import { featureVariants } from '../templates/features/index.js';
 import { ctaVariants } from '../templates/ctas/index.js';
 import type { TemplateId } from '../templates/index.js';
 import { getTranslated } from '../utils/translation.js';
+import { API_BASE } from '../lib/api.js';
 
 export default function Home() {
   const { t, i18n } = useTranslation();
   const { settings } = useTheme();
+  const { user } = useAuth();
+  const [searchParams] = useSearchParams();
   const lang = i18n.language;
 
   const hero = settings.heroSection;
@@ -22,6 +25,43 @@ export default function Home() {
   const HeroVariant = heroVariants[templateId];
   const FeaturesVariant = featureVariants[templateId];
   const CtaVariant = ctaVariants[templateId];
+
+  // Auto-login if LIFF is already authorized
+  useEffect(() => {
+    if (settings.lineSettings?.liffId && !user) {
+      const initLiff = async () => {
+        try {
+          const liff = (window as any).liff;
+          if (!liff) return;
+          await liff.init({ liffId: settings.lineSettings!.liffId });
+          if (liff.isLoggedIn()) {
+            const profile = await liff.getProfile();
+            const userEmail = liff.getDecodedIDToken()?.email;
+            
+            const res = await fetch(`${API_BASE}/line/login`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                lineUserId: profile.userId,
+                lineDisplayName: profile.displayName,
+                email: userEmail,
+                name: profile.displayName
+              }),
+            });
+            const data = await res.json();
+            if (data.success) {
+              localStorage.setItem('token', data.data.token);
+              // Force refresh to update all contexts with the new token
+              window.location.reload();
+            }
+          }
+        } catch (err) {
+          console.warn('Auto LIFF login skipped on Home:', err);
+        }
+      };
+      initLiff();
+    }
+  }, [settings.lineSettings?.liffId, user]);
 
   // Placeholder to maintain brand identity during lazy loading
   const HeroPlaceholder = (
