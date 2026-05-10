@@ -620,10 +620,17 @@ export async function updateOrderStatus(req: Request<{ id: string }>, res: Respo
   }
 
   // Send LINE push notification if customer has bound LINE account
+  console.log(`[LINE Notify] Checking notification for Order #${order.orderNumber}. Status: ${status}`);
   if (order.customer?.lineUserId) {
     try {
+      console.log(`[LINE Notify] Found lineUserId: ${order.customer.lineUserId} for customer: ${order.customer.name}`);
       const { sendLinePush } = await import('./line.controller.js');
       const settings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
+      
+      if (!settings) {
+        console.error('[LINE Notify] Could not find SiteSettings with ID "default"');
+      }
+
       const lineSettings = (settings?.lineSettings as any) || {};
       const lineNotifications = lineSettings.notifications || {};
       
@@ -641,15 +648,24 @@ export async function updateOrderStatus(req: Request<{ id: string }>, res: Respo
       const isEnabled = statusConfig ? statusConfig.enabled !== false : !!defaultStatusMap[status];
       const customMessage = statusConfig?.message || defaultStatusMap[status];
 
+      console.log(`[LINE Notify] isEnabled: ${isEnabled}, customMessage: ${customMessage}`);
+
       if (isEnabled && customMessage) {
         const lineMessage = `【訂單狀態更新】\n訂單編號：#${order.orderNumber}\n目前狀態：${customMessage}`;
-        sendLinePush(order.customer.lineUserId, lineMessage).catch(err => {
-          console.error('Error sending LINE notification:', err);
+        console.log(`[LINE Notify] Sending message to LINE...`);
+        sendLinePush(order.customer.lineUserId, lineMessage).then(() => {
+          console.log('[LINE Notify] sendLinePush call completed');
+        }).catch(err => {
+          console.error('[LINE Notify] sendLinePush FAILED:', err);
         });
+      } else {
+        console.log(`[LINE Notify] Notification skipped: isEnabled=${isEnabled}, hasMessage=${!!customMessage}`);
       }
     } catch (err) {
-      console.error('Failed to import or call sendLinePush:', err);
+      console.error('[LINE Notify] CRITICAL ERROR in notification logic:', err);
     }
+  } else {
+    console.log('[LINE Notify] Customer has no bound lineUserId. Skipping.');
   }
 
   // Emit event for automation rules
