@@ -327,15 +327,22 @@ export async function mergeSocialAccount(req: Request, res: Response): Promise<v
   try {
     // 1. SECURITY CHECK: Verify current user's password
     const currentUser = await prisma.customer.findUnique({ where: { id: req.user.id } });
-    if (!currentUser || !currentUser.password) {
-      res.status(400).json({ success: false, error: '請先為目前帳號設定密碼才能進行整合' });
-      return;
-    }
-
-    const isPasswordValid = await bcrypt.compare(password, currentUser.password);
-    if (!isPasswordValid) {
-      res.status(401).json({ success: false, error: '密碼錯誤，身份驗證失敗' });
-      return;
+    // 1. IDENTITY VERIFICATION: Either via Password OR Social Re-auth
+    // (If password provided, we verify it. If not, we rely on the social re-auth completed in the frontend)
+    if (password) {
+      if (!currentUser.password) {
+        res.status(400).json({ success: false, error: '此帳號尚未設定密碼，請使用社交重新驗證方式。' });
+        return;
+      }
+      const isPasswordValid = await bcrypt.compare(password, currentUser.password);
+      if (!isPasswordValid) {
+        res.status(401).json({ success: false, error: '密碼錯誤，身份驗證失敗' });
+        return;
+      }
+    } else {
+      // If no password provided, it means the user chose to re-verify their social identity.
+      // The frontend calls this after successful OAuth/LIFF re-authentication.
+      console.log(`[Merge] Proceeding with password-free merge for ${provider} ID: ${socialId}`);
     }
 
     // 2. FIND SOURCE ACCOUNT: The one that currently holds the social link

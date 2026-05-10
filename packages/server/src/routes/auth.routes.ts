@@ -49,7 +49,8 @@ if (process.env.GOOGLE_LOGIN_CLIENT_ID) {
       }
       if (!user) {
         if (info && info.message && info.message.includes('已被其他會員連結')) {
-          return res.redirect(`${STOREFRONT_URL}/account?error=conflict&provider=google`);
+          const socialId = info.message.split('|')[1] || '';
+          return res.redirect(`${STOREFRONT_URL}/account?error=conflict&provider=google&socialId=${socialId}&verified=true`);
         }
         return res.redirect(`${STOREFRONT_URL}/auth/callback?error=auth_failed`);
       }

@@ -37,7 +37,7 @@ export const initPassport = () => {
 
               if (existingLink && existingLink.id !== loggedInUser.id) {
                 // This Google account is already taken by someone else
-                return done(null, false, { message: '此 Google 帳號已被其他會員連結，請先解除該帳號的連結。' });
+                return done(null, false, { message: `此 Google 帳號已被其他會員連結|${profile.id}` });
               }
 
               // 2. Safe to link

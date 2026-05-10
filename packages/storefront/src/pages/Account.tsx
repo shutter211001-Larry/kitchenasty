@@ -18,6 +18,7 @@ export default function Account() {
   const [showMergePrompt, setShowMergePrompt] = useState<{ provider: 'google' | 'line', id: string } | null>(null);
   const [mergePassword, setMergePassword] = useState('');
   const [isMerging, setIsMerging] = useState(false);
+  const [isSocialVerified, setIsSocialVerified] = useState(false);
 
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({ name: '', phone: '' });
@@ -34,9 +35,13 @@ export default function Account() {
     const error = params.get('error');
     const provider = params.get('provider') as 'google' | 'line';
     const socialId = params.get('socialId');
+    const verified = params.get('verified');
 
     if (error === 'conflict' && provider) {
       setShowMergePrompt({ provider, id: socialId || '' });
+      if (verified === 'true') {
+        setIsSocialVerified(true);
+      }
       // Clean URL
       window.history.replaceState({}, document.title, window.location.pathname);
     }
@@ -109,6 +114,9 @@ export default function Account() {
         return;
       }
       const profile = await liff.getProfile();
+      // If we got the profile, it means we've successfully re-authenticated.
+      setIsSocialVerified(true);
+      
       const res = await fetch(`${API_BASE}/line/bind`, {
         method: 'POST',
         headers: { 
@@ -123,6 +131,7 @@ export default function Account() {
         window.location.reload();
       } else if (data.error && data.error.includes('已被其他會員連結')) {
         setShowMergePrompt({ provider: 'line', id: profile.userId });
+        setIsSocialVerified(true);
       } else {
         alert(data.error);
       }
@@ -265,22 +274,39 @@ export default function Account() {
                 {/* Option 2: Re-verify Social */}
                 <div>
                   <label className="block text-sm font-medium text-hint mb-1">方式 2：重新驗證社交帳號</label>
-                  <button
-                    onClick={() => {
-                      if (showMergePrompt.provider === 'google') {
-                        window.location.href = `${API_BASE}/auth/google?prompt=select_account&state=${encodeURIComponent('link=true')}&redirectUri=${encodeURIComponent(window.location.origin + '/account')}`;
-                      } else {
-                        handleLineAuth();
-                        setShowMergePrompt(null);
-                      }
-                    }}
-                    className="w-full py-2 border border-primary-200 text-primary-700 text-sm font-bold rounded-lg hover:bg-primary-50 transition-colors flex items-center justify-center gap-2"
-                  >
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                    </svg>
-                    重新驗證 {showMergePrompt.provider === 'google' ? 'Google' : 'LINE'} 身份
-                  </button>
+                  {isSocialVerified ? (
+                    <div className="space-y-3">
+                      <div className="w-full py-3 bg-green-50 border border-green-200 rounded-lg flex items-center justify-center gap-2 text-green-700 font-bold">
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                        </svg>
+                        {showMergePrompt.provider === 'google' ? 'Google' : 'LINE'} 身份核對成功
+                      </div>
+                      <button
+                        onClick={handleMergeSocial}
+                        disabled={isMerging}
+                        className="w-full py-3 bg-primary-600 text-white font-bold rounded-xl hover:bg-primary-700 shadow-lg shadow-primary-200 animate-in zoom-in-95 duration-300"
+                      >
+                        {isMerging ? '整合中...' : '立即合併帳號'}
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => {
+                        if (showMergePrompt.provider === 'google') {
+                          window.location.href = `${API_BASE}/auth/google?prompt=select_account&state=${encodeURIComponent('link=true')}&redirectUri=${encodeURIComponent(window.location.origin + '/account')}`;
+                        } else {
+                          handleLineAuth();
+                        }
+                      }}
+                      className="w-full py-2 border border-primary-200 text-primary-700 text-sm font-bold rounded-lg hover:bg-primary-50 transition-colors flex items-center justify-center gap-2"
+                    >
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                      </svg>
+                      重新驗證 {showMergePrompt.provider === 'google' ? 'Google' : 'LINE'} 身份
+                    </button>
+                  )}
                 </div>
                 
                 <div className="bg-amber-50 p-3 rounded-lg border border-amber-100">
