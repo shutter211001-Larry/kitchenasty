@@ -46,6 +46,7 @@ const createOrderSchema = z.object({
   userLat: z.number().optional(),
   userLon: z.number().optional(),
   locationId: z.string().optional(),
+  honeypot: z.string().optional(),
 });
 
 function generateOrderNumber(): string {
@@ -65,8 +66,15 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
   const { 
     orderType, items, comment, scheduledAt, address, 
     guestName, guestEmail, guestPhone, loyaltyPointsRedeem,
-    userLat, userLon, locationId
+    userLat, userLon, locationId, honeypot
   } = parsed.data;
+
+  // HONEYPOT check: Bots often fill all fields. If this hidden field is filled, reject it silently or with a generic error.
+  if (honeypot) {
+    auditLog(req, { action: 'honeypot_triggered', entity: 'Order', details: { ip: req.ip, honeypot } });
+    res.status(400).json({ success: false, error: 'Suspicious activity detected.' });
+    return;
+  }
 
   if (orderType === 'DELIVERY' && !address) {
     res.status(400).json({ success: false, error: 'Delivery address is required' });

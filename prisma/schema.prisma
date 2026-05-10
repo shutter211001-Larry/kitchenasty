@@ -39,6 +39,8 @@ model Customer {
   updatedAt           DateTime             @updatedAt
   groupId             String?
   loyaltyPoints       Int                  @default(0)
+  isWhitelisted       Boolean              @default(false)
+  isBlacklisted       Boolean              @default(false)
   expoPushToken       String?
   lineDisplayName     String?
   lineUserId          String?              @unique
@@ -588,6 +590,15 @@ model ApiMetric {
   @@index([createdAt])
   @@index([path, method])
   @@map("api_metrics")
+}
+
+model IPBlacklist {
+  id        String   @id @default(cuid())
+  ip        String   @unique
+  reason    String?
+  createdAt DateTime @default(now())
+
+  @@map("ip_blacklist")
 }
 
 model AuditLog {

@@ -8,6 +8,8 @@ interface Customer {
   phone: string | null;
   isGuest: boolean;
   loyaltyPoints: number;
+  isWhitelisted: boolean;
+  isBlacklisted: boolean;
   createdAt: string;
   _count: { orders: number; reservations: number };
 }
@@ -30,7 +32,7 @@ export default function CustomerList() {
   
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
-  const [editForm, setEditForm] = useState({ name: '', phone: '', loyaltyPoints: 0 });
+  const [editForm, setEditForm] = useState({ name: '', phone: '', loyaltyPoints: 0, isWhitelisted: false, isBlacklisted: false });
   const [editLoading, setEditLoading] = useState(false);
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -106,6 +108,8 @@ export default function CustomerList() {
       name: customer.name,
       phone: customer.phone || '',
       loyaltyPoints: customer.loyaltyPoints,
+      isWhitelisted: customer.isWhitelisted,
+      isBlacklisted: customer.isBlacklisted,
     });
     setShowEditModal(true);
   }
@@ -207,6 +211,7 @@ export default function CustomerList() {
                   <th className="text-left px-4 py-3 font-medium text-gray-600">類型</th>
                   <th className="text-left px-4 py-3 font-medium text-gray-600">紅利點數</th>
                   <th className="text-left px-4 py-3 font-medium text-gray-600">訂單數</th>
+                  <th className="text-left px-4 py-3 font-medium text-gray-600">狀態</th>
                   <th className="text-left px-4 py-3 font-medium text-gray-600">註冊日期</th>
                   <th className="text-right px-4 py-3 font-medium text-gray-600">操作</th>
                 </tr>
@@ -224,6 +229,19 @@ export default function CustomerList() {
                     </td>
                     <td className="px-4 py-3 font-medium text-orange-600">{customer.loyaltyPoints}</td>
                     <td className="px-4 py-3 text-gray-600">{customer._count.orders}</td>
+                    <td className="px-4 py-3">
+                      <div className="flex gap-1">
+                        {customer.isWhitelisted && (
+                          <span className="text-[10px] bg-green-100 text-green-700 px-1.5 py-0.5 rounded font-bold">白名單</span>
+                        )}
+                        {customer.isBlacklisted && (
+                          <span className="text-[10px] bg-red-100 text-red-700 px-1.5 py-0.5 rounded font-bold">黑名單</span>
+                        )}
+                        {!customer.isWhitelisted && !customer.isBlacklisted && (
+                          <span className="text-[10px] bg-gray-100 text-gray-400 px-1.5 py-0.5 rounded font-bold">一般</span>
+                        )}
+                      </div>
+                    </td>
                     <td className="px-4 py-3 text-gray-500">{new Date(customer.createdAt).toLocaleDateString()}</td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex justify-end gap-2">
@@ -314,6 +332,27 @@ export default function CustomerList() {
                   onChange={(e) => setEditForm({ ...editForm, loyaltyPoints: parseInt(e.target.value) || 0 })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-primary-500"
                 />
+              </div>
+
+              <div className="flex flex-col gap-3 pt-2">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={editForm.isWhitelisted}
+                    onChange={(e) => setEditForm({ ...editForm, isWhitelisted: e.target.checked, isBlacklisted: e.target.checked ? false : editForm.isBlacklisted })}
+                    className="w-4 h-4 accent-primary-600"
+                  />
+                  <span className="text-sm font-medium text-green-700">加入白名單 (排除防禦限制)</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={editForm.isBlacklisted}
+                    onChange={(e) => setEditForm({ ...editForm, isBlacklisted: e.target.checked, isWhitelisted: e.target.checked ? false : editForm.isWhitelisted })}
+                    className="w-4 h-4 accent-red-600"
+                  />
+                  <span className="text-sm font-medium text-red-700">加入黑名單 (禁止下單)</span>
+                </label>
               </div>
 
               <div className="flex justify-end gap-3 mt-6">

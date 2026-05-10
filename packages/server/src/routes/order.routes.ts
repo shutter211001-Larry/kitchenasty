@@ -7,15 +7,16 @@ import {
   downloadOrderTemplate, checkOrderReminders, lookupOrder, claimOrder,
   cancelOrder
 } from '../controllers/order.controller.js';
+import { checkIPBlacklist, checkCustomerBlacklist, orderRateLimiter } from '../middleware/security.js';
 
 const router = Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
 // Customer: cancel order (optionalAuth - allows guest cancellation if pending)
-router.post('/:id/cancel', optionalAuth, cancelOrder);
+router.post('/:id/cancel', optionalAuth, checkIPBlacklist, checkCustomerBlacklist, cancelOrder);
 
 // Customer creates order (optionalAuth - allows guest checkout)
-router.post('/', optionalAuth, createOrder);
+router.post('/', optionalAuth, checkIPBlacklist, checkCustomerBlacklist, orderRateLimiter, createOrder);
 
 // Lookup order by email/number (public)
 router.get('/lookup', lookupOrder);

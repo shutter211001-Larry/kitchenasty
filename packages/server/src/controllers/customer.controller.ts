@@ -40,6 +40,8 @@ export async function listCustomers(req: Request, res: Response): Promise<void> 
         phone: true,
         isGuest: true,
         loyaltyPoints: true,
+        isWhitelisted: true,
+        isBlacklisted: true,
         createdAt: true,
         groupId: true,
         group: { select: { id: true, name: true } },
@@ -103,6 +105,8 @@ const updateCustomerSchema = z.object({
   groupId: z.string().nullable().optional(),
   loyaltyPoints: z.number().int().optional(),
   isGuest: z.boolean().optional(),
+  isWhitelisted: z.boolean().optional(),
+  isBlacklisted: z.boolean().optional(),
 });
 
 export async function updateCustomer(req: Request<{ id: string }>, res: Response): Promise<void> {

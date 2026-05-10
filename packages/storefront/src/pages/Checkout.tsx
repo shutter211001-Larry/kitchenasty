@@ -43,6 +43,7 @@ export default function Checkout() {
   const [guestName, setGuestName] = useState('');
   const [guestEmail, setGuestEmail] = useState('');
   const [guestPhone, setGuestPhone] = useState('');
+  const [honeypot, setHoneypot] = useState('');
 
   // Dynamic delivery fee from zone check
   const [deliveryFee, setDeliveryFee] = useState(4.99);
@@ -237,6 +238,7 @@ export default function Checkout() {
         comment: comment || undefined,
         scheduledAt: scheduledAt || undefined,
         couponCode: couponCode || undefined,
+        honeypot: honeypot || undefined,
       };
 
       // Capture location (optional, won't block if fails)
@@ -312,6 +314,17 @@ export default function Checkout() {
       )}
 
       <form onSubmit={handleSubmit} className="flex flex-col lg:flex-row gap-8">
+        {/* Honeypot field - hidden from users but visible to bots */}
+        <div style={{ display: 'none', visibility: 'hidden' }} aria-hidden="true">
+          <input
+            type="text"
+            name="website"
+            value={honeypot}
+            onChange={(e) => setHoneypot(e.target.value)}
+            tabIndex={-1}
+            autoComplete="off"
+          />
+        </div>
         {/* Left: Form */}
         <div className="flex-1 space-y-6">
           {error && (

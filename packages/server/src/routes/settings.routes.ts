@@ -65,5 +65,23 @@ router.put('/review', authenticate, requireRole('SUPER_ADMIN', 'MANAGER'), updat
 // Advanced — SUPER_ADMIN only
 router.get('/advanced', authenticate, requireRole('SUPER_ADMIN'), getAdvancedSettings);
 router.put('/advanced', authenticate, requireRole('SUPER_ADMIN'), updateAdvancedSettings);
+router.get('/ip-blacklist', authenticate, requireRole('SUPER_ADMIN'), async (req, res) => {
+  const list = await (await import('../lib/db.js')).default.iPBlacklist.findMany({ orderBy: { createdAt: 'desc' } });
+  res.json({ success: true, data: list });
+});
+router.post('/ip-blacklist', authenticate, requireRole('SUPER_ADMIN'), async (req, res) => {
+  const { ip, reason } = req.body;
+  if (!ip) return res.status(400).json({ success: false, error: 'IP is required' });
+  await (await import('../lib/db.js')).default.iPBlacklist.upsert({
+    where: { ip },
+    update: { reason },
+    create: { ip, reason }
+  });
+  res.json({ success: true });
+});
+router.delete('/ip-blacklist/:ip', authenticate, requireRole('SUPER_ADMIN'), async (req, res) => {
+  await (await import('../lib/db.js')).default.iPBlacklist.delete({ where: { ip: req.params.ip } });
+  res.json({ success: true });
+});
 
 export default router;
