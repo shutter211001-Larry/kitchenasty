@@ -319,8 +319,8 @@ export async function mergeSocialAccount(req: Request, res: Response): Promise<v
   }
 
   const { provider, socialId, password } = req.body;
-  if (!provider || !socialId || !password) {
-    res.status(400).json({ success: false, error: 'Missing required fields' });
+  if (!provider || !socialId) {
+    res.status(400).json({ success: false, error: 'Missing required fields (provider, socialId)' });
     return;
   }
 

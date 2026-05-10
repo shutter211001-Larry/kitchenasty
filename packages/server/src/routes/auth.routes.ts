@@ -34,10 +34,13 @@ const handleSocialCallback = (req: Request, res: Response) => {
 if (process.env.GOOGLE_LOGIN_CLIENT_ID) {
   router.get('/google', (req: Request, res: Response, next: NextFunction) => {
     const state = req.query.state as string || '';
+    const prompt = req.query.prompt as string || 'select_account';
+    
     passport.authenticate('google', { 
       scope: ['profile', 'email'], 
       session: false,
-      state: state
+      state: state,
+      prompt: prompt
     })(req, res, next);
   });
 
