@@ -128,6 +128,7 @@ export default function Login() {
                 type="button"
                 onClick={async () => {
                   setLoading(true);
+                  try {
                     console.log('[Login] Starting LINE Login...');
                     const liff = (window as any).liff;
                     if (!liff) {
