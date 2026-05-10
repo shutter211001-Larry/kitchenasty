@@ -224,12 +224,20 @@ export async function getMe(req: Request, res: Response): Promise<void> {
       where: { id: req.user.id },
       select: { id: true, email: true, name: true, role: true, phone: true, avatar: true, lineUserId: true, lineDisplayName: true },
     });
+    if (!user) {
+      res.status(401).json({ success: false, error: 'User not found' });
+      return;
+    }
     res.json({ success: true, data: { type: 'staff', user } });
   } else {
     const customer = await prisma.customer.findUnique({
       where: { id: req.user.id },
       select: { id: true, email: true, name: true, phone: true, lineUserId: true, lineDisplayName: true, googleId: true, googleEmail: true, password: true },
     });
+    if (!customer) {
+      res.status(401).json({ success: false, error: 'Customer not found' });
+      return;
+    }
     const customerData = { ...customer, hasPassword: !!customer?.password };
     if (customerData) delete (customerData as any).password;
     res.json({ success: true, data: { type: 'customer', customer: customerData } });
@@ -243,7 +251,16 @@ export async function deleteMe(req: Request, res: Response): Promise<void> {
 
   try {
     if (req.user.type === 'customer') {
-      await prisma.customer.delete({ where: { id: req.user.id } });
+      try {
+        console.log(`[Delete] Attempting to delete customer ID: ${req.user.id}`);
+        await prisma.customer.delete({ where: { id: req.user.id } });
+      } catch (e: any) {
+        if (e.code === 'P2025') {
+          console.warn(`[Delete] Customer ID ${req.user.id} already gone or not found.`);
+        } else {
+          throw e;
+        }
+      }
       res.json({ success: true, message: 'Account deleted successfully' });
     } else {
       res.status(403).json({ success: false, error: 'Staff accounts cannot be deleted here' });
