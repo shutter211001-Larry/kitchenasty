@@ -537,7 +537,7 @@ export default function Account() {
                 </button>
               ) : (
                 <a
-                  href={`${API_BASE}/auth/google?redirectUri=${encodeURIComponent(window.location.origin + '/account')}`}
+                  href={`${API_BASE}/auth/google?state=${encodeURIComponent('link=true')}&redirectUri=${encodeURIComponent(window.location.origin + '/account')}`}
                   className="px-4 py-2 text-sm font-bold bg-white text-main rounded-lg border border-input hover:bg-gray-50 transition-colors flex items-center gap-2 shadow-sm"
                 >
                   連結至 Google 帳號

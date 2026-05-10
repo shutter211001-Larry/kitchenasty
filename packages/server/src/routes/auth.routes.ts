@@ -22,7 +22,14 @@ const handleSocialCallback = (req: any, res: any) => {
 
 // Social login — Google
 if (process.env.GOOGLE_LOGIN_CLIENT_ID) {
-  router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'], session: false }));
+  router.get('/google', (req, res, next) => {
+    const state = req.query.state as string || '';
+    passport.authenticate('google', { 
+      scope: ['profile', 'email'], 
+      session: false,
+      state: state
+    })(req, res, next);
+  });
   router.get('/google/callback', (req, res, next) => {
     passport.authenticate('google', { session: false }, (err: any, user: any, info: any) => {
       if (err) return res.redirect(`${STOREFRONT_URL}/login?error=server_error`);

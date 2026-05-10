@@ -22,11 +22,14 @@ export const initPassport = () => {
               return done(new Error('No email found from Google profile'), false);
             }
 
-            // Check if user is logged in (Account Linking Flow)
+            // Check if user is logged in AND wants to link (determined by a 'state' or 'prompt' usually, but here we can check for a 'link' flag)
+            // Note: We need a way to pass the 'link' intent from frontend to Google and back.
+            // For now, let's look at the 'state' if possible, or just be more careful.
             const loggedInUser = (req as any).user;
+            const isLinking = req.query.state && (req.query.state as string).includes('link=true');
 
-            if (loggedInUser && loggedInUser.type === 'customer') {
-              // LINKING: User is already logged in
+            if (loggedInUser && loggedInUser.type === 'customer' && isLinking) {
+              // LINKING: User is already logged in and explicitly wants to link
               // 1. Check if this Google account is already linked to ANOTHER customer
               const existingLink = await prisma.customer.findUnique({
                 where: { googleId: profile.id }
