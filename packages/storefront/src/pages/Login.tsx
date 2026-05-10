@@ -130,7 +130,7 @@ export default function Login() {
 
           <div className="flex flex-col gap-3">
             <a
-              href={`${API_BASE}/auth/google${redirectPath !== '/' ? `?state=${encodeURIComponent(`redirectUri=${redirectPath}`)}` : ''}`}
+              href={`${API_BASE}/auth/google?state=${encodeURIComponent(JSON.stringify({ redirect: redirectPath }))}`}
               className="w-full flex items-center justify-center gap-2 py-2.5 border border-gray-300 rounded-lg text-sm font-medium text-sub hover:bg-gray-50 transition-colors"
             >
               <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="w-5 h-5" />

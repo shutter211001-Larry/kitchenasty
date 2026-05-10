@@ -23,7 +23,21 @@ const handleSocialCallback = (req: Request, res: Response) => {
     email: user.email,
     type: user.type || 'customer',
   });
-  res.redirect(`${STOREFRONT_URL}/auth/callback?token=${token}`);
+  
+  // Extract redirect from state if present
+  let redirectPath = '/';
+  const stateStr = req.query.state as string;
+  if (stateStr) {
+    try {
+      const decodedStr = decodeURIComponent(stateStr);
+      if (decodedStr.startsWith('{')) {
+        const stateObj = JSON.parse(decodedStr);
+        if (stateObj.redirect) redirectPath = stateObj.redirect;
+      }
+    } catch (e) {}
+  }
+
+  res.redirect(`${STOREFRONT_URL}/auth/callback?token=${token}&redirect=${encodeURIComponent(redirectPath)}`);
 };
 
 // Social login — Google

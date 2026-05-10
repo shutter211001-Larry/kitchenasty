@@ -603,7 +603,7 @@ export default function Account() {
                 </button>
               ) : (
                 <a
-                  href={`${API_BASE}/auth/google?prompt=select_account&state=${encodeURIComponent(JSON.stringify({ link: true, token: token }))}`}
+                  href={`${API_BASE}/auth/google?prompt=select_account&state=${encodeURIComponent(JSON.stringify({ link: true, token: token, redirect: '/account' }))}`}
                   className="px-5 py-2.5 text-sm font-bold bg-white text-main rounded-lg border border-input hover:bg-gray-50 transition-colors flex items-center gap-2 shadow-sm"
                 >
                   連結帳號
