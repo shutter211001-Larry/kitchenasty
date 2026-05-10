@@ -7,7 +7,6 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import swaggerUi from 'swagger-ui-express';
 import path from 'path';
-import { fileURLToPath } from 'url';
 import authRoutes from './routes/auth.routes.js';
 import locationRoutes from './routes/location.routes.js';
 import menuRoutes from './routes/menu.routes.js';
@@ -39,9 +38,6 @@ import { metricsCollector } from './middleware/metricsCollector.js';
 import './lib/events.js';
 
 export function createApp() {
-  const __filename = fileURLToPath(import.meta.url);
-  const __dirname = path.dirname(__filename);
-
   const app = express();
   // On Railway/Cloud providers, we trust the first proxy
   app.set('trust proxy', 1);
