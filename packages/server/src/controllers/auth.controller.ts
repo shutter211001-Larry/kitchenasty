@@ -65,8 +65,6 @@ export async function staffLogin(req: Request, res: Response): Promise<void> {
         role: user.role,
         lineUserId: user.lineUserId,
         lineDisplayName: user.lineDisplayName,
-        googleId: user.googleId,
-        googleEmail: user.googleEmail,
         hasPassword: !!user.password,
       },
     },
