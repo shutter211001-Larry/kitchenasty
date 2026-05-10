@@ -327,6 +327,12 @@ export async function mergeSocialAccount(req: Request, res: Response): Promise<v
   try {
     // 1. SECURITY CHECK: Verify current user's password
     const currentUser = await prisma.customer.findUnique({ where: { id: req.user.id } });
+    
+    if (!currentUser) {
+      res.status(401).json({ success: false, error: '目前登入身份無效' });
+      return;
+    }
+    
     // 1. IDENTITY VERIFICATION: Either via Password OR Social Re-auth
     // (If password provided, we verify it. If not, we rely on the social re-auth completed in the frontend)
     if (password) {
