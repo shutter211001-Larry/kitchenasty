@@ -13,6 +13,9 @@ router.post('/webhook', handleWebhook);
 // Public login
 router.post('/login', lineLogin);
 
+// Connectivity test
+router.get('/test', (req, res) => res.json({ success: true, message: 'LINE API is reachable' }));
+
 // Protected binding
 router.post('/bind', authenticate, bindLine);
 router.post('/unbind', authenticate, unbindLine);
