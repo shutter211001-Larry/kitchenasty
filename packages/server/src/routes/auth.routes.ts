@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import passport from 'passport';
 import * as authController from '../controllers/auth.controller.js';
-import { authenticate } from '../middleware/auth.js';
+import { authenticate, generateToken } from '../middleware/auth.js';
 
 const router = Router();
 const STOREFRONT_URL = process.env.STOREFRONT_URL || 'http://localhost:5174';
@@ -16,8 +16,16 @@ router.post('/customer/login', authController.customerLogin);
 
 // Social login callback handler
 const handleSocialCallback = (req: any, res: any) => {
-  const token = (req.user as any).token || '';
-  res.redirect(`${STOREFRONT_URL}/login/callback?token=${token}`);
+  if (!req.user) return res.redirect(`${STOREFRONT_URL}/login?error=auth_failed`);
+  
+  // Generate JWT token for the authenticated customer
+  const token = generateToken({
+    id: req.user.id,
+    email: req.user.email,
+    type: req.user.type
+  });
+  
+  res.redirect(`${STOREFRONT_URL}/auth/callback?token=${token}`);
 };
 
 // Social login — Google
@@ -30,14 +38,12 @@ if (process.env.GOOGLE_LOGIN_CLIENT_ID) {
       state: state
     })(req, res, next);
   });
+
   router.get('/google/callback', (req, res, next) => {
     passport.authenticate('google', { session: false }, (err: any, user: any, info: any) => {
       if (err) return res.redirect(`${STOREFRONT_URL}/login?error=server_error`);
       if (!user) {
         if (info && info.message && info.message.includes('已被其他會員連結')) {
-          // In Google OAuth, we don't have the socialId easily here, 
-          // but we can tell the frontend to re-initiate or we could have saved it in session.
-          // For simplicity, we'll tell the frontend a conflict happened.
           return res.redirect(`${STOREFRONT_URL}/account?error=conflict&provider=google`);
         }
         return res.redirect(`${STOREFRONT_URL}/login?error=auth_failed`);
