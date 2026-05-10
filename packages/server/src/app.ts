@@ -144,49 +144,6 @@ export function createApp() {
   app.use('/api/developer', developerRoutes);
   app.use('/api/line', lineRoutes);
 
-  // Temporary Debug Route
-  app.get('/api/debug-db', async (req, res) => {
-    try {
-      const users = await prisma.user.count();
-      const menuItems = await prisma.menuItem.count();
-      const categories = await prisma.category.count();
-      const locations = await prisma.location.count();
-      const siteSettings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
-      const uploadsDir = path.join(process.cwd(), 'uploads');
-    
-    // Emergency: Try to add columns manually if they are missing
-    let migrationStatus = 'No migration needed';
-    if (req.query.fix === 'true') {
-      try {
-        await prisma.$executeRawUnsafe('ALTER TABLE "customers" ADD COLUMN IF NOT EXISTS "googleId" TEXT;');
-        await prisma.$executeRawUnsafe('ALTER TABLE "customers" ADD COLUMN IF NOT EXISTS "facebookId" TEXT;');
-        await prisma.$executeRawUnsafe('CREATE UNIQUE INDEX IF NOT EXISTS "customers_googleId_key" ON "customers"("googleId");');
-        await prisma.$executeRawUnsafe('CREATE UNIQUE INDEX IF NOT EXISTS "customers_facebookId_key" ON "customers"("facebookId");');
-        migrationStatus = 'Migration successful (columns added via Raw SQL)';
-      } catch (e: any) {
-        migrationStatus = 'Migration failed: ' + e.message;
-      }
-    }
-
-    res.json({
-      success: true,
-      counts: {
-        users,
-        menuItems,
-        categories,
-        locations,
-        hasDefaultSettings: !!siteSettings,
-      },
-      migrationStatus,
-      connectedTo: process.env.DATABASE_URL?.split('@')[1],
-      cwd: process.cwd(),
-      uploadsDir,
-      hint: 'Add ?fix=true to the URL to run emergency SQL migration'
-    });
-  } catch (error: any) {
-    res.status(500).json({ success: false, error: error.message });
-  }
-});
 
   // 404 handler
   app.use((_req, res) => {
