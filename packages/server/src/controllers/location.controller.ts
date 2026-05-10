@@ -219,15 +219,14 @@ export async function getAvailableSlots(req: Request, res: Response): Promise<vo
     const targetDate = new Date();
     targetDate.setDate(now.getDate() + i);
     const dayOfWeek = targetDate.getDay();
-    
-    const hours = (location as any).operatingHours.find((h: any) => h.dayOfWeek === dayOfWeek);
-    if (!hours || hours.isClosed) continue;
+    const sessions = (location as any).operatingHours.filter((h: any) => h.dayOfWeek === dayOfWeek && !h.isClosed);
+    if (sessions.length === 0) continue;
 
     const minStartTime = i === 0 ? new Date(now.getTime() + leadTime * 60000) : undefined;
 
     const daySlots = generateDaySlots(
       targetDate,
-      hours,
+      sessions,
       interval,
       { preOpeningBuffer, postClosingBuffer },
       minStartTime

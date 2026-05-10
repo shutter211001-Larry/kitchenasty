@@ -136,7 +136,6 @@ model OperatingHour {
   isClosed   Boolean  @default(false)
   location   Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
 
-  @@unique([locationId, dayOfWeek])
   @@map("operating_hours")
 }
 

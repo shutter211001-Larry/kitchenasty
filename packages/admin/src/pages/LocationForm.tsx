@@ -393,108 +393,121 @@ export default function LocationForm() {
           <div className="flex items-center justify-between mb-6">
             <div>
               <h3 className="text-lg font-bold text-gray-900">營業時間設定</h3>
-              <p className="text-sm text-gray-500">設定每週的營業時段，支援跨午夜營業。</p>
+              <p className="text-sm text-gray-500">設定每週的營業時段，支援跨午夜與多段營業。</p>
             </div>
             <button
               type="button"
               onClick={() => {
-                const firstDay = hours[1] || hours[0]; // Usually Monday
-                const updated = hours.map(h => ({ ...h, openTime: firstDay.openTime, closeTime: firstDay.closeTime, isClosed: firstDay.isClosed }));
-                setHours(updated);
+                const mondayHours = hours.filter(h => h.dayOfWeek === 1);
+                if (mondayHours.length === 0) return;
+                const newHours: OperatingHour[] = [];
+                for (let d = 0; d < 7; d++) {
+                  mondayHours.forEach(mh => {
+                    newHours.push({ ...mh, dayOfWeek: d });
+                  });
+                }
+                setHours(newHours);
               }}
               className="flex items-center gap-1.5 px-3 py-1.5 bg-primary-50 text-primary-700 rounded-lg text-xs font-semibold hover:bg-primary-100 transition-colors"
             >
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
               </svg>
-              套用到全週
+              以週一為準套用全週
             </button>
           </div>
 
-          <div className="space-y-4">
-            {hours.map((hour, index) => {
-              const isOvernight = !hour.isClosed && (
-                hour.closeTime < hour.openTime || 
-                (hour.closeTime === hour.openTime && hour.closeTime !== '00:00')
-              );
+          <div className="space-y-6">
+            {DAYS.map((dayName, dayIdx) => {
+              const sessions = hours.filter(h => h.dayOfWeek === dayIdx);
+              const isClosed = sessions.length === 0 || sessions.every(s => s.isClosed);
 
               return (
-                <div key={hour.dayOfWeek} className={`group flex flex-col sm:flex-row sm:items-center gap-4 p-4 rounded-xl border transition-all ${hour.isClosed ? 'bg-gray-50 border-gray-100 opacity-60' : 'bg-white border-gray-200 hover:border-primary-200 hover:shadow-sm'}`}>
-                  <div className="flex items-center gap-3 w-32">
-                    <div className={`w-2 h-2 rounded-full ${hour.isClosed ? 'bg-gray-300' : 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]'}`}></div>
-                    <span className="text-sm font-bold text-gray-700">{DAYS[hour.dayOfWeek].split(' ')[0]}</span>
+                <div key={dayIdx} className={`group flex flex-col gap-4 p-4 rounded-xl border transition-all ${isClosed ? 'bg-gray-50 border-gray-100' : 'bg-white border-gray-200 hover:border-primary-200 hover:shadow-sm'}`}>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-2 h-2 rounded-full ${isClosed ? 'bg-gray-300' : 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]'}`}></div>
+                      <span className="text-sm font-bold text-gray-700">{dayName.split(' ')[0]}</span>
+                      {isClosed && <span className="text-[10px] bg-gray-200 text-gray-600 px-1.5 py-0.5 rounded font-bold">店休</span>}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setHours(prev => [...prev, { dayOfWeek: dayIdx, openTime: '09:00', closeTime: '18:00', isClosed: false }]);
+                      }}
+                      className="text-xs font-semibold text-primary-600 hover:text-primary-700 flex items-center gap-1"
+                    >
+                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                      </svg>
+                      新增時段
+                    </button>
                   </div>
 
-                  <div className="flex items-center gap-4 flex-1">
-                    <label className="relative inline-flex items-center cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={!hour.isClosed}
-                        onChange={(e) => {
-                          const updated = [...hours];
-                          updated[index] = { ...hour, isClosed: !e.target.checked };
-                          setHours(updated);
-                        }}
-                        className="sr-only peer"
-                      />
-                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
-                      <span className="ml-2 text-xs font-medium text-gray-500 uppercase tracking-wider">{hour.isClosed ? '店休' : '營業'}</span>
-                    </label>
+                  <div className="space-y-3">
+                    {sessions.map((session, sIdx) => {
+                      const hourIdxInState = hours.findIndex(h => h === session);
+                      const isOvernight = !session.isClosed && (session.closeTime < session.openTime);
 
-                    {!hour.isClosed && (
-                      <div className="flex items-center gap-2 flex-1 animate-in fade-in zoom-in-95 duration-200">
-                        <div className="flex items-center bg-gray-50 rounded-lg border border-gray-200 p-1">
-                          <input
-                            type="time"
-                            value={hour.openTime}
-                            onChange={(e) => {
-                              const updated = [...hours];
-                              updated[index] = { ...hour, openTime: e.target.value };
+                      return (
+                        <div key={sIdx} className="flex flex-wrap items-center gap-4 animate-in fade-in slide-in-from-left-2 duration-200">
+                          <div className="flex items-center bg-gray-50 rounded-lg border border-gray-200 p-1">
+                            <input
+                              type="time"
+                              value={session.openTime}
+                              onChange={(e) => {
+                                const updated = [...hours];
+                                updated[hourIdxInState] = { ...session, openTime: e.target.value };
+                                setHours(updated);
+                              }}
+                              className="bg-transparent border-none focus:ring-0 text-sm font-medium text-gray-900 px-2 py-1 cursor-pointer"
+                            />
+                            <span className="text-gray-400 text-xs px-1">至</span>
+                            <input
+                              type="time"
+                              value={session.closeTime}
+                              onChange={(e) => {
+                                const updated = [...hours];
+                                updated[hourIdxInState] = { ...session, closeTime: e.target.value };
+                                setHours(updated);
+                              }}
+                              className="bg-transparent border-none focus:ring-0 text-sm font-medium text-gray-900 px-2 py-1 cursor-pointer"
+                            />
+                          </div>
+
+                          {isOvernight && (
+                            <span className="flex items-center gap-1 px-2 py-1 bg-purple-50 text-purple-700 rounded text-[10px] font-bold border border-purple-100">
+                              跨午夜 (+1天)
+                            </span>
+                          )}
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const updated = hours.filter((_, i) => i !== hourIdxInState);
                               setHours(updated);
                             }}
-                            className="bg-transparent border-none focus:ring-0 text-sm font-medium text-gray-900 px-2 py-1 cursor-pointer"
-                          />
-                          <span className="text-gray-400 text-xs px-1">至</span>
-                          <input
-                            type="time"
-                            value={hour.closeTime}
-                            onChange={(e) => {
-                              const updated = [...hours];
-                              updated[index] = { ...hour, closeTime: e.target.value };
-                              setHours(updated);
-                            }}
-                            className="bg-transparent border-none focus:ring-0 text-sm font-medium text-gray-900 px-2 py-1 cursor-pointer"
-                          />
-                        </div>
-
-                        {isOvernight && (
-                          <span className="flex items-center gap-1 px-2 py-1 bg-purple-50 text-purple-700 rounded text-[10px] font-bold border border-purple-100 shadow-sm">
-                            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                            className="text-gray-400 hover:text-red-500 transition-colors"
+                          >
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                             </svg>
-                            跨午夜 (+1天)
-                          </span>
-                        )}
+                          </button>
 
-                        {/* Visual Timeline Preview */}
-                        <div className="hidden lg:flex flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden relative ml-4">
-                           {(() => {
-                              const [oH, oM] = hour.openTime.split(':').map(Number);
-                              const [cH, cM] = hour.closeTime.split(':').map(Number);
-                              const startPct = ((oH * 60 + oM) / 1440) * 100;
-                              let durationPct = (((cH * 60 + cM) - (oH * 60 + oM)) / 1440) * 100;
-                              if (durationPct <= 0) durationPct += 100;
-                              
-                              return (
-                                <div 
-                                  className="absolute h-full bg-primary-500/30 border-x border-primary-500/50"
-                                  style={{ left: `${startPct}%`, width: `${durationPct}%` }}
-                                ></div>
-                              );
-                           })()}
+                          {/* Mini Timeline for this session */}
+                          <div className="hidden md:flex flex-1 h-1 bg-gray-100 rounded-full overflow-hidden relative min-w-[100px]">
+                            {(() => {
+                               const [oH, oM] = session.openTime.split(':').map(Number);
+                               const [cH, cM] = session.closeTime.split(':').map(Number);
+                               const startPct = ((oH * 60 + oM) / 1440) * 100;
+                               let durationPct = (((cH * 60 + cM) - (oH * 60 + oM)) / 1440) * 100;
+                               if (durationPct <= 0) durationPct += 100;
+                               return <div className="absolute h-full bg-primary-400" style={{ left: `${startPct}%`, width: `${durationPct}%` }} />;
+                            })()}
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      );
+                    })}
                   </div>
                 </div>
               );
