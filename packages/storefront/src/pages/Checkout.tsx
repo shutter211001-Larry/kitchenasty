@@ -51,6 +51,9 @@ export default function Checkout() {
   // Busy mode
   const [isBusy, setIsBusy] = useState(false);
   const [busyMessage, setBusyMessage] = useState('');
+  const [locationId, setLocationId] = useState<string>('');
+  const [slotsByDay, setSlotsByDay] = useState<any[]>([]);
+  const [selectedDateIndex, setSelectedDateIndex] = useState(0);
 
   // Loyalty points
   const [loyaltyBalance, setLoyaltyBalance] = useState(0);
@@ -87,13 +90,30 @@ export default function Checkout() {
       .then((res) => res.json())
       .then((data) => {
         const loc = data.data?.[0];
-        if (loc?.isBusy) {
-          setIsBusy(true);
-          setBusyMessage(loc.busyMessage || 'This location is currently not accepting orders.');
+        if (loc) {
+          setLocationId(loc.id);
+          if (loc.isBusy) {
+            setIsBusy(true);
+            setBusyMessage(loc.busyMessage || 'This location is currently not accepting orders.');
+          }
         }
       })
       .catch(() => {});
   }, []);
+
+  // Fetch available slots when location or order type changes
+  useEffect(() => {
+    if (locationId && orderSettings?.enableFutureOrdering) {
+      fetch(`${API_BASE}/locations/${locationId}/available-slots?orderType=${orderType}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success) {
+            setSlotsByDay(data.data);
+          }
+        })
+        .catch(() => {});
+    }
+  }, [locationId, orderType, orderSettings?.enableFutureOrdering]);
 
   // Intersection Observer for the checkout button
   useEffect(() => {
@@ -345,34 +365,91 @@ export default function Checkout() {
           {orderSettings?.enableFutureOrdering && (
             <div className="surface-card rounded-xl shadow-sm border p-6">
               <h2 className="text-lg font-semibold text-main mb-4">{t('checkout.scheduling')}</h2>
-              <div className="space-y-3">
-                <label className="flex items-center gap-3">
-                  <input
-                    type="radio"
-                    name="schedule"
-                    checked={!scheduledAt}
-                    onChange={() => setScheduledAt('')}
-                    className="accent-primary-600"
-                  />
-                  <span className="text-sm text-sub">{t('checkout.asap')}</span>
-                </label>
-                <label className="flex items-center gap-3">
-                  <input
-                    type="radio"
-                    name="schedule"
-                    checked={!!scheduledAt}
-                    onChange={() => setScheduledAt(getDefaultScheduleTime())}
-                    className="accent-primary-600"
-                  />
-                  <span className="text-sm text-sub">{t('checkout.scheduled')}</span>
-                </label>
-                {scheduledAt && (
-                  <input
-                    type="datetime-local"
-                    value={scheduledAt}
-                    onChange={(e) => setScheduledAt(e.target.value)}
-                    className="w-full px-3 py-2 bg-surface border border-input rounded-lg focus:ring-2 focus:ring-primary-500 outline-none text-sm text-main"
-                  />
+              <div className="space-y-4">
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setScheduledAt('')}
+                    className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium border-2 transition-all ${
+                      !scheduledAt
+                        ? 'border-primary-600 bg-primary-50 text-primary-700'
+                        : 'border-input text-sub hover:border-gray-300'
+                    }`}
+                  >
+                    {t('checkout.asap')}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (slotsByDay.length > 0 && slotsByDay[0].slots.length > 0) {
+                        setScheduledAt(slotsByDay[0].slots[0]);
+                        setSelectedDateIndex(0);
+                      }
+                    }}
+                    className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium border-2 transition-all ${
+                      !!scheduledAt
+                        ? 'border-primary-600 bg-primary-50 text-primary-700'
+                        : 'border-input text-sub hover:border-gray-300'
+                    }`}
+                  >
+                    {t('checkout.scheduled')}
+                  </button>
+                </div>
+
+                {scheduledAt && slotsByDay.length > 0 && (
+                  <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                    {/* Date Selector */}
+                    <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
+                      {slotsByDay.map((day, idx) => {
+                        const date = new Date(day.date);
+                        const isToday = new Date().toDateString() === date.toDateString();
+                        return (
+                          <button
+                            key={day.date}
+                            type="button"
+                            onClick={() => setSelectedDateIndex(idx)}
+                            className={`shrink-0 px-4 py-2 rounded-full text-xs font-bold transition-all ${
+                              selectedDateIndex === idx
+                                ? 'bg-primary-600 text-white shadow-md shadow-primary-200'
+                                : 'bg-surface border border-input text-sub hover:bg-gray-50'
+                            }`}
+                          >
+                            {isToday ? '今天' : `${date.getMonth() + 1}/${date.getDate()}`}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* Time Slots Grid */}
+                    <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
+                      {slotsByDay[selectedDateIndex]?.slots.map((slot: string) => {
+                        const timeStr = new Date(slot).toLocaleTimeString(i18n.language, {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                          hour12: false,
+                        });
+                        const isSelected = scheduledAt === slot;
+                        return (
+                          <button
+                            key={slot}
+                            type="button"
+                            onClick={() => setScheduledAt(slot)}
+                            className={`py-2 rounded-lg text-xs font-medium border transition-all ${
+                              isSelected
+                                ? 'bg-primary-600 border-primary-600 text-white shadow-sm'
+                                : 'bg-surface border-input text-main hover:border-primary-300'
+                            }`}
+                          >
+                            {timeStr}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+                
+                {scheduledAt && slotsByDay.length === 0 && (
+                  <p className="text-xs text-hint italic">暫無可用預約時段</p>
                 )}
               </div>
             </div>

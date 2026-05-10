@@ -5,6 +5,7 @@ import {
   createLocation,
   updateLocation,
   deleteLocation,
+  getAvailableSlots,
 } from '../controllers/location.controller.js';
 import {
   listDeliveryZones,
@@ -27,6 +28,7 @@ const router = Router();
 // Locations - read is open, write requires staff
 router.get('/', listLocations);
 router.get('/:id', getLocation);
+router.get('/:id/available-slots', getAvailableSlots);
 router.post('/', authenticate, requireStaff, requireRole('SUPER_ADMIN', 'MANAGER'), createLocation);
 router.patch('/:id', authenticate, requireStaff, requireRole('SUPER_ADMIN', 'MANAGER'), updateLocation);
 router.delete('/:id', authenticate, requireStaff, requireRole('SUPER_ADMIN'), deleteLocation);

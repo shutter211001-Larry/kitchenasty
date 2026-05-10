@@ -186,3 +186,82 @@ export async function deleteLocation(req: Request<{ id: string }>, res: Response
   auditLog(req, { action: 'delete', entity: 'Location', entityId: id, details: { name: existing.name } });
   res.json({ success: true, message: 'Location deleted' });
 }
+export async function getAvailableSlots(req: Request, res: Response): Promise<void> {
+  const { id } = req.params;
+  const orderType = (req.query.orderType as string || 'PICKUP').toUpperCase();
+  const daysCount = parseInt(req.query.days as string) || 7;
+
+  const [location, settings] = await Promise.all([
+    prisma.location.findUnique({
+      where: { id },
+      include: { operatingHours: true },
+    }),
+    prisma.siteSettings.findUnique({ where: { id: 'default' } }),
+  ]);
+
+  if (!location) {
+    res.status(404).json({ success: false, error: 'Location not found' });
+    return;
+  }
+
+  const orderSettings = (settings?.orderSettings as any) || {};
+  const preOpeningBuffer = Number(orderSettings.preOpeningBuffer || 30);
+  const postClosingBuffer = Number(orderSettings.postClosingBuffer || 30);
+  const interval = Number(orderSettings.timeSlotInterval || 15);
+  const leadTime = orderType === 'DELIVERY' ? (location.deliveryLeadTime || 45) : (location.pickupLeadTime || 15);
+
+  const now = new Date();
+  const slotsByDay: any[] = [];
+
+  for (let i = 0; i < daysCount; i++) {
+    const targetDate = new Date();
+    targetDate.setDate(now.getDate() + i);
+    const dayOfWeek = targetDate.getDay();
+    
+    const hours = location.operatingHours.find(h => h.dayOfWeek === dayOfWeek);
+    if (!hours || hours.isClosed) continue;
+
+    // Parse open/close times (HH:mm)
+    const [openH, openM] = hours.openTime.split(':').map(Number);
+    const [closeH, closeM] = hours.closeTime.split(':').map(Number);
+
+    const dayStart = new Date(targetDate);
+    dayStart.setHours(openH, openM, 0, 0);
+    dayStart.setMinutes(dayStart.getMinutes() + preOpeningBuffer);
+
+    const dayEnd = new Date(targetDate);
+    dayEnd.setHours(closeH, closeM, 0, 0);
+    dayEnd.setMinutes(dayEnd.getMinutes() - postClosingBuffer);
+
+    const minStartTime = new Date(now);
+    minStartTime.setMinutes(minStartTime.getMinutes() + leadTime);
+
+    const daySlots: string[] = [];
+    const currentSlot = new Date(dayStart);
+
+    // If target date is today, start from at least minStartTime
+    if (i === 0 && currentSlot < minStartTime) {
+      // Align to interval
+      const minutes = minStartTime.getMinutes();
+      const alignedMinutes = Math.ceil(minutes / interval) * interval;
+      currentSlot.setHours(minStartTime.getHours());
+      currentSlot.setMinutes(alignedMinutes, 0, 0);
+    }
+
+    while (currentSlot <= dayEnd) {
+      if (currentSlot >= dayStart) {
+        daySlots.push(currentSlot.toISOString());
+      }
+      currentSlot.setMinutes(currentSlot.getMinutes() + interval);
+    }
+
+    if (daySlots.length > 0) {
+      slotsByDay.push({
+        date: targetDate.toISOString().split('T')[0],
+        slots: daySlots,
+      });
+    }
+  }
+
+  res.json({ success: true, data: slotsByDay });
+}

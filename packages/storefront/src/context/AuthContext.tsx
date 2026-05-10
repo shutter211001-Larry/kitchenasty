@@ -25,7 +25,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const { settings, isInitialized: isThemeInitialized } = useTheme();
+  const { settings } = useTheme();
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(() => localStorage.getItem('token'));
   const [isLoading, setIsLoading] = useState(true);
@@ -39,25 +39,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Handle LIFF initialization and auto-login
   useEffect(() => {
-    // Wait for theme/settings to be loaded from server
-    if (!isThemeInitialized) return;
-
     const liffId = settings.lineSettings?.liffId;
     const isExplicitLogout = localStorage.getItem('explicit_logout') === 'true';
     const hasToken = !!localStorage.getItem('token');
-    const urlParams = new URLSearchParams(window.location.search);
-    const hasLineCode = urlParams.has('code');
 
-    console.log('[Auth] Global check:', { liffId, hasToken, hasLineCode });
-
-    // If we have a token, we are already logged in
-    if (hasToken) {
-      return; 
+    if (!liffId || isExplicitLogout) {
+      setIsLoading(false);
+      return;
     }
 
-    // If no LIFF ID or user explicitly logged out, stop here
-    if (!liffId || (isExplicitLogout && !hasLineCode)) {
-      setIsLoading(false);
+    if (hasToken) {
+      // Already has a session, no need to auto-login via LIFF
       return;
     }
 
@@ -65,20 +57,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         const liff = (window as any).liff;
         if (!liff) {
-          console.error('[Auth] LIFF SDK not found on window');
           setIsLoading(false);
           return;
         }
 
-        console.log('[Auth] Initializing LIFF with ID:', liffId);
         await liff.init({ liffId });
-        
+
         if (liff.isLoggedIn()) {
-          console.log('[Auth] LIFF is logged in, getting profile...');
           const profile = await liff.getProfile();
           const userEmail = liff.getDecodedIDToken()?.email;
 
-          console.log('[Auth] Calling backend line/login...');
           const res = await fetch(`${API_BASE}/line/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -89,31 +77,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               name: profile.displayName
             }),
           });
-          
+
           const data = await res.json();
           if (data.success) {
-            console.log('[Auth] Backend login success!');
             localStorage.setItem('token', data.data.token);
-            localStorage.removeItem('explicit_logout');
             setToken(data.data.token);
             setUser(data.data.customer || data.data.user || data.data);
-          } else {
-            console.error('[Auth] Backend login failed:', data.error);
           }
-        } else {
-          console.log('[Auth] LIFF not logged in');
-          // If we're on a path that needs login or if we want to force it
-          // we could call liff.login() here, but we wait for user for now
         }
       } catch (err) {
-        console.warn('[Auth] Global LIFF init/login error:', err);
+        console.warn('Global LIFF init/login skipped:', err);
       } finally {
         setIsLoading(false);
       }
     };
 
     initLiff();
-  }, [isThemeInitialized, settings.lineSettings?.liffId, token]);
+  }, [settings.lineSettings?.liffId, token]);
 
   useEffect(() => {
     if (!token) {

@@ -17,6 +17,9 @@ export default function SettingsOrder() {
   const [deliveryLeadTime, setDeliveryLeadTime] = useState(30);
   const [pickupLeadTime, setPickupLeadTime] = useState(15);
   const [enableFutureOrdering, setEnableFutureOrdering] = useState(false);
+  const [preOpeningBuffer, setPreOpeningBuffer] = useState(30);
+  const [postClosingBuffer, setPostClosingBuffer] = useState(30);
+  const [timeSlotInterval, setTimeSlotInterval] = useState(15);
   const [enableTipping, setEnableTipping] = useState(false);
   const [tipOptionsStr, setTipOptionsStr] = useState('10,15,20,25');
   const [taxRate, setTaxRate] = useState(0);
@@ -47,6 +50,9 @@ export default function SettingsOrder() {
           if (d.deliveryLeadTime !== undefined) setDeliveryLeadTime(d.deliveryLeadTime);
           if (d.pickupLeadTime !== undefined) setPickupLeadTime(d.pickupLeadTime);
           if (d.enableFutureOrdering !== undefined) setEnableFutureOrdering(d.enableFutureOrdering);
+          if (d.preOpeningBuffer !== undefined) setPreOpeningBuffer(d.preOpeningBuffer);
+          if (d.postClosingBuffer !== undefined) setPostClosingBuffer(d.postClosingBuffer);
+          if (d.timeSlotInterval !== undefined) setTimeSlotInterval(d.timeSlotInterval);
           if (d.enableTipping !== undefined) setEnableTipping(d.enableTipping);
           if (d.enableCounterDisplay !== undefined) setEnableCounterDisplay(d.enableCounterDisplay);
           if (d.tipOptions) setTipOptionsStr(d.tipOptions.join(','));
@@ -79,6 +85,9 @@ export default function SettingsOrder() {
           deliveryLeadTime, 
           pickupLeadTime, 
           enableFutureOrdering, 
+          preOpeningBuffer,
+          postClosingBuffer,
+          timeSlotInterval,
           enableTipping, 
           enableCounterDisplay,
           tipOptions, 
@@ -174,6 +183,49 @@ export default function SettingsOrder() {
             <input type="checkbox" checked={enableFutureOrdering} onChange={(e) => setEnableFutureOrdering(e.target.checked)} className="w-4 h-4 text-primary-600 rounded" />
             <span className="text-sm font-medium text-gray-700">允許預約未來訂單 (Scheduled orders)</span>
           </label>
+
+          {enableFutureOrdering && (
+            <div className="ml-7 p-4 bg-blue-50/50 rounded-lg border border-blue-100 grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-xs font-bold text-blue-800 mb-1">開店後緩衝 (分鐘)</label>
+                <input 
+                  type="number" 
+                  value={preOpeningBuffer} 
+                  onChange={(e) => setPreOpeningBuffer(parseInt(e.target.value) || 0)}
+                  className="w-full px-3 py-2 border border-blue-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500"
+                  placeholder="30"
+                />
+                <p className="text-[10px] text-blue-600 mt-1">例如：11:00開門，設30則11:30才準取餐</p>
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-blue-800 mb-1">打烊前緩衝 (分鐘)</label>
+                <input 
+                  type="number" 
+                  value={postClosingBuffer} 
+                  onChange={(e) => setPostClosingBuffer(parseInt(e.target.value) || 0)}
+                  className="w-full px-3 py-2 border border-blue-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500"
+                  placeholder="30"
+                />
+                <p className="text-[10px] text-blue-600 mt-1">例如：21:00打烊，設30則20:30後不準預約</p>
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-blue-800 mb-1">預約時段間隔 (分鐘)</label>
+                <select 
+                  value={timeSlotInterval} 
+                  onChange={(e) => setTimeSlotInterval(parseInt(e.target.value))}
+                  className="w-full px-3 py-2 border border-blue-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500"
+                >
+                  <option value={5}>5 分鐘</option>
+                  <option value={10}>10 分鐘</option>
+                  <option value={15}>15 分鐘</option>
+                  <option value={20}>20 分鐘</option>
+                  <option value={30}>30 分鐘</option>
+                  <option value={60}>60 分鐘</option>
+                </select>
+                <p className="text-[10px] text-blue-600 mt-1">客人選時間的跳動間隔</p>
+              </div>
+            </div>
+          )}
 
           <label className="flex items-center gap-3">
             <input type="checkbox" checked={enableTipping} onChange={(e) => setEnableTipping(e.target.checked)} className="w-4 h-4 text-primary-600 rounded" />

@@ -97,6 +97,9 @@ function toPublicSettings(settings: Awaited<ReturnType<typeof getOrCreateSetting
       pickupEnabled: isTrue(order.pickupEnabled, true),
       allowGuestCheckout: isTrue(order.allowGuestCheckout, true),
       taxRate: order.taxRate !== undefined ? Number(order.taxRate) : 0,
+      preOpeningBuffer: order.preOpeningBuffer !== undefined ? Number(order.preOpeningBuffer) : 30,
+      postClosingBuffer: order.postClosingBuffer !== undefined ? Number(order.postClosingBuffer) : 30,
+      timeSlotInterval: order.timeSlotInterval !== undefined ? Number(order.timeSlotInterval) : 15,
     } : undefined,
     paymentSettings: {
       cashEnabled: isTrue(payment.cashEnabled, true),
@@ -282,6 +285,9 @@ const orderSettingsSchema = z.object({
   enableTipping: z.boolean().optional(),
   enableCounterDisplay: z.boolean().optional(),
   tipOptions: z.array(z.number()).optional(),
+  preOpeningBuffer: z.number().min(0).optional(),
+  postClosingBuffer: z.number().min(0).optional(),
+  timeSlotInterval: z.number().min(5).max(120).optional(),
   taxRate: z.number().min(0).max(100).optional(),
 });
 

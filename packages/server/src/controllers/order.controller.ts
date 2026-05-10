@@ -121,18 +121,52 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
     return;
   }
 
-  // Validate scheduledAt is within operating hours
+  // Validate scheduledAt is within operating hours and respects buffers
   if (scheduledAt && location.operatingHours.length > 0) {
+    const settings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
+    const orderSettings = (settings?.orderSettings as any) || {};
+    const preOpeningBuffer = Number(orderSettings.preOpeningBuffer || 30);
+    const postClosingBuffer = Number(orderSettings.postClosingBuffer || 30);
+    const leadTime = orderType === 'DELIVERY' ? (location.deliveryLeadTime || 45) : (location.pickupLeadTime || 15);
+
     const scheduled = new Date(scheduledAt);
+    const now = new Date();
+    
+    // Check if scheduled time is in the past or before lead time
+    const minTime = new Date(now);
+    minTime.setMinutes(minTime.getMinutes() + leadTime);
+    if (scheduled < minTime) {
+      res.status(400).json({ success: false, error: `Scheduled time must be at least ${leadTime} minutes from now` });
+      return;
+    }
+
     const dayOfWeek = scheduled.getDay();
-    const timeStr = `${String(scheduled.getHours()).padStart(2, '0')}:${String(scheduled.getMinutes()).padStart(2, '0')}`;
     const dayHours = location.operatingHours.find((h) => h.dayOfWeek === dayOfWeek);
+    
     if (!dayHours || dayHours.isClosed) {
       res.status(400).json({ success: false, error: 'Location is closed on the scheduled day' });
       return;
     }
-    if (timeStr < dayHours.openTime || timeStr >= dayHours.closeTime) {
-      res.status(400).json({ success: false, error: `Scheduled time must be within operating hours (${dayHours.openTime} - ${dayHours.closeTime})` });
+
+    // Calculate valid window with buffers
+    const [openH, openM] = dayHours.openTime.split(':').map(Number);
+    const [closeH, closeM] = dayHours.closeTime.split(':').map(Number);
+
+    const validStart = new Date(scheduled);
+    validStart.setHours(openH, openM, 0, 0);
+    validStart.setMinutes(validStart.getMinutes() + preOpeningBuffer);
+
+    const validEnd = new Date(scheduled);
+    validEnd.setHours(closeH, closeM, 0, 0);
+    validEnd.setMinutes(validEnd.getMinutes() - postClosingBuffer);
+
+    if (scheduled < validStart || scheduled > validEnd) {
+      const startStr = validStart.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+      const endStr = validEnd.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+      res.status(400).json({ 
+        success: false, 
+        error: `Scheduled time must be between ${startStr} and ${endStr} due to business hours and preparation buffers.` 
+      });
       return;
     }
   }
