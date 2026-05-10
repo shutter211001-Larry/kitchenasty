@@ -7,12 +7,47 @@ import { API_BASE } from '../lib/api.js';
 
 export default function Account() {
   const { t } = useTranslation();
-  const { user, token, isLoading, logout } = useAuth();
+  const { user, token, isLoading, logout, updateUser } = useAuth();
   const { settings } = useTheme();
   const [showPasswordSetup, setShowPasswordSetup] = useState(false);
   const [newPassword, setNewPassword] = useState('');
   const [isSettingPassword, setIsSettingPassword] = useState(false);
   const [loyaltyPoints, setLoyaltyPoints] = useState<number | null>(null);
+  
+  const [isEditing, setIsEditing] = useState(false);
+  const [editForm, setEditForm] = useState({ name: '', phone: '' });
+  const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      setEditForm({ name: user.name || '', phone: user.phone || '' });
+    }
+  }, [user]);
+
+  const handleUpdateProfile = async () => {
+    setIsSaving(true);
+    try {
+      const res = await fetch(`${API_BASE}/auth/me`, {
+        method: 'PATCH',
+        headers: { 
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}` 
+        },
+        body: JSON.stringify(editForm),
+      });
+      const data = await res.json();
+      if (data.success) {
+        updateUser(data.data);
+        setIsEditing(false);
+      } else {
+        alert(data.error || '更新失敗');
+      }
+    } catch (err) {
+      alert('更新失敗，請檢查網路連線');
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   useEffect(() => {
     if (!token) return;
@@ -24,7 +59,7 @@ export default function Account() {
         if (data.success) setLoyaltyPoints(data.data.points);
       })
       .catch(() => {});
-  }, [token]);
+  }, [token, user]);
 
   const handleUnbind = async () => {
     try {
@@ -92,22 +127,71 @@ export default function Account() {
       <div className="surface-card rounded-xl shadow-sm border overflow-hidden">
         {/* Profile */}
         <div className="p-6 border-b">
-          <h2 className="text-lg font-semibold text-main mb-4">{t('account.personalInfo')}</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm text-hint mb-1">{t('auth.name')}</label>
-              <p className="text-main font-medium">{user.name}</p>
-            </div>
-            <div>
-              <label className="block text-sm text-hint mb-1">{t('account.emailLabel')}</label>
-              <p className="text-main">{user.email}</p>
-            </div>
-            {user.phone && (
-              <div>
-                <label className="block text-sm text-hint mb-1">{t('account.phoneLabel')}</label>
-                <p className="text-main">{user.phone}</p>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-main">{t('account.personalInfo')}</h2>
+            {!isEditing ? (
+              <button
+                onClick={() => setIsEditing(true)}
+                className="text-sm font-medium text-primary-600 hover:text-primary-700 flex items-center gap-1"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                </svg>
+                編輯
+              </button>
+            ) : (
+              <div className="flex items-center gap-3">
+                <button
+                  disabled={isSaving}
+                  onClick={handleUpdateProfile}
+                  className="text-sm font-bold text-green-600 hover:text-green-700 disabled:opacity-50"
+                >
+                  {isSaving ? '儲存中...' : '儲存'}
+                </button>
+                <button
+                  onClick={() => {
+                    setIsEditing(false);
+                    setEditForm({ name: user.name || '', phone: user.phone || '' });
+                  }}
+                  className="text-sm font-medium text-hint hover:text-sub"
+                >
+                  取消
+                </button>
               </div>
             )}
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm text-hint mb-1">{t('auth.name')}</label>
+              {isEditing ? (
+                <input
+                  type="text"
+                  value={editForm.name}
+                  onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                  className="w-full px-3 py-2 text-sm border border-input rounded-lg outline-none focus:ring-2 focus:ring-primary-500"
+                />
+              ) : (
+                <p className="text-main font-medium">{user.name}</p>
+              )}
+            </div>
+            <div>
+              <label className="block text-sm text-hint mb-1">{t('account.phoneLabel')}</label>
+              {isEditing ? (
+                <input
+                  type="text"
+                  value={editForm.phone}
+                  onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
+                  className="w-full px-3 py-2 text-sm border border-input rounded-lg outline-none focus:ring-2 focus:ring-primary-500"
+                />
+              ) : (
+                <p className="text-main font-medium">{user.phone || '尚未設定'}</p>
+              )}
+            </div>
+            <div className="sm:col-span-2">
+              <label className="block text-sm text-hint mb-1">{t('account.emailLabel')}</label>
+              <p className="text-main bg-gray-50 px-3 py-2 rounded-lg border border-gray-100 italic">{user.email} (不可修改)</p>
+            </div>
           </div>
         </div>
 
@@ -140,116 +224,124 @@ export default function Account() {
           </div>
         </div>
 
-        {/* LINE Integration */}
+        {/* Third-party Accounts */}
         <div className="p-6 border-b">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-8 h-8 text-[#06C755]">
-              <svg fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2c5.514 0 10 3.592 10 8.007 0 3.532-2.855 6.478-6.728 7.513-.337.07-.797.222-.912.511-.103.263-.068.675-.033 1.112.035.437.166 1.764.19 1.954.024.19.112.743-.243.812-.355.07-.944-.456-1.32-.821-.376-.365-1.74-2.023-2.373-2.857-2.73-.012-5.461-1.853-5.461-5.187C5 5.592 9.486 2 12 2zm6.603 10.965h-1.636a.23.23 0 00-.231.231v.006c0 .128.103.232.231.232h1.636a.232.232 0 00.231-.232v-.006a.23.23 0 00-.231-.231zm-2.842 0h-1.636a.23.23 0 00-.23.231v.006c0 .128.103.232.23.232h1.636a.232.232 0 00.232-.232v-.006a.232.232 0 00-.232-.231zm-2.841 0h-1.636a.232.232 0 00-.232.231v.006c0 .128.104.232.232.232h1.636a.232.232 0 00.231-.232v-.006a.23.23 0 00-.231-.231z"/>
-              </svg>
-            </div>
-            <h2 className="text-lg font-semibold text-main">{t('account.lineBinding')}</h2>
-          </div>
-          <div className="bg-surface rounded-lg border border-input p-4">
-            {user.lineUserId ? (
-              <div className="flex flex-col gap-4">
-                {!showPasswordSetup ? (
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div>
-                      <p className="text-sm font-medium text-main flex items-center gap-2">
-                        <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                        {t('account.lineBound')}
-                      </p>
-                      <p className="text-xs text-sub mt-1">
-                        {user.lineDisplayName || t('account.lineId')}: {user.lineUserId}
-                      </p>
-                    </div>
-                    <button
-                      onClick={() => {
-                        if (!(user as any).hasPassword) {
-                          setShowPasswordSetup(true);
-                        } else {
-                          if (confirm(t('account.unbindLineConfirm') || '確定要解除 LINE 連結嗎？')) {
-                            handleUnbind();
-                          }
-                        }
-                      }}
-                      className="px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg border border-red-200 transition-colors"
-                    >
-                      {t('account.unbindLine')}
-                    </button>
-                  </div>
-                ) : (
-                  <div className="animate-in fade-in slide-in-from-top-2 duration-300">
-                    <div className="p-4 bg-primary-50 rounded-lg border border-primary-100 mb-4">
-                      <h3 className="text-sm font-bold text-primary-900 mb-1">優雅轉移：設定登入密碼</h3>
-                      <p className="text-xs text-primary-700 leading-relaxed">
-                        為了保障您的權益，在移除 LINE 登入前，請先為您的 Email ({user.email}) 設定一個密碼。
-                        這能確保您未來仍能隨時登入。或者，如果您不需要保留資料，可以改為執行「刪除帳號」。
-                      </p>
-                    </div>
-                    <div className="flex flex-col sm:flex-row gap-2">
-                      <input
-                        type="password"
-                        placeholder="請輸入新密碼 (至少 6 位)"
-                        value={newPassword}
-                        onChange={(e) => setNewPassword(e.target.value)}
-                        className="flex-1 px-4 py-2 text-sm border border-input rounded-lg outline-none focus:ring-2 focus:ring-primary-500"
-                      />
-                      <button
-                        disabled={isSettingPassword}
-                        onClick={handleSetPasswordAndUnbind}
-                        className="px-6 py-2 bg-primary-600 text-white text-sm font-bold rounded-lg hover:bg-primary-700 disabled:opacity-50 transition-colors"
-                      >
-                        {isSettingPassword ? '設定中...' : '設定並解除連結'}
-                      </button>
-                      <button
-                        onClick={() => setShowPasswordSetup(false)}
-                        className="px-4 py-2 text-sm text-sub hover:text-main"
-                      >
-                        取消
-                      </button>
-                    </div>
-                  </div>
-                )}
+          <h2 className="text-lg font-semibold text-main mb-6">{t('account.socialLinking') || '第三方帳號連結'}</h2>
+          
+          <div className="space-y-6">
+            {/* LINE Row */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl border border-input bg-surface/50">
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 flex items-center justify-center rounded-full bg-[#06C755]/10 text-[#06C755]">
+                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2c5.514 0 10 3.592 10 8.007 0 3.532-2.855 6.478-6.728 7.513-.337.07-.797.222-.912.511-.103.263-.068.675-.033 1.112.035.437.166 1.764.19 1.954.024.19.112.743-.243.812-.355.07-.944-.456-1.32-.821-.376-.365-1.74-2.023-2.373-2.857-2.73-.012-5.461-1.853-5.461-5.187C5 5.592 9.486 2 12 2z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="font-bold text-main">LINE</h3>
+                  <p className="text-xs text-sub mt-0.5">
+                    {user.lineUserId 
+                      ? `已連結: ${user.lineDisplayName || '已授權用戶'}` 
+                      : '連結後可接收訂單即時通知與快速登入'}
+                  </p>
+                </div>
               </div>
-            ) : (
-              <div>
-                <p className="text-sm text-sub mb-4">{t('account.lineBindingDesc')}</p>
-                
-                <div className="space-y-4">
-                  {/* LIFF Automated Binding (Primary if LIFF ID is set) */}
-                  {settings.lineSettings?.liffId ? (
-                    <div className="mb-4">
-                      <button
-                        onClick={async () => {
-                          try {
-                            const liff = (window as any).liff;
-                            if (!liff) {
-                              alert('LINE SDK 尚未載入，請稍候');
-                              return;
-                            }
-                            await liff.init({ liffId: settings.lineSettings!.liffId });
-                            if (!liff.isLoggedIn()) {
-                              liff.login();
-                              return;
-                            }
-                            const profile = await liff.getProfile();
-                            const lineUserId = profile.userId;
-                            const lineDisplayName = profile.displayName;
+              
+              {user.lineUserId ? (
+                <button
+                  onClick={() => {
+                    if (!(user as any).hasPassword) {
+                      setShowPasswordSetup(true);
+                      window.scrollTo({ top: 400, behavior: 'smooth' });
+                    } else {
+                      if (confirm('確定要解除 LINE 連結嗎？')) handleUnbind();
+                    }
+                  }}
+                  className="px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg border border-red-200 transition-colors"
+                >
+                  解除連結
+                </button>
+              ) : (
+                <button
+                  onClick={async () => {
+                    try {
+                      const liff = (window as any).liff;
+                      if (!liff) {
+                        alert('LINE SDK 尚未載入，請稍候');
+                        return;
+                      }
+                      await liff.init({ liffId: settings.lineSettings!.liffId });
+                      if (!liff.isLoggedIn()) {
+                        liff.login();
+                        return;
+                      }
+                      const profile = await liff.getProfile();
+                      const res = await fetch(`${API_BASE}/line/bind`, {
+                        method: 'POST',
+                        headers: { 
+                          'Content-Type': 'application/json',
+                          Authorization: `Bearer ${token}` 
+                        },
+                        body: JSON.stringify({ lineUserId: profile.userId, lineDisplayName: profile.displayName }),
+                      });
+                      const data = await res.json();
+                      if (data.success) {
+                        alert('LINE 連結成功！');
+                        window.location.reload();
+                      } else {
+                        alert(data.error);
+                      }
+                    } catch (err) {
+                      alert('操作失敗');
+                    }
+                  }}
+                  className="px-4 py-2 text-sm font-bold bg-[#06C755] text-white rounded-lg hover:bg-[#05b34c] transition-colors"
+                >
+                  連結至 LINE 帳號
+                </button>
+              )}
+            </div>
 
-                            const res = await fetch(`${API_BASE}/line/bind`, {
-                              method: 'POST',
-                              headers: { 
-                                'Content-Type': 'application/json',
-                                Authorization: `Bearer ${token}` 
-                              },
-                              body: JSON.stringify({ lineUserId, lineDisplayName }),
-                            });
-                            const data = await res.json();
-                            if (data.success) {
-                              alert('LINE 帳號連結成功！');
-                              window.location.reload();
+            {/* Google Row */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl border border-input bg-surface/50">
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 flex items-center justify-center rounded-full bg-white border shadow-sm">
+                  <svg className="w-5 h-5" viewBox="0 0 24 24">
+                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="font-bold text-main">Google</h3>
+                  <p className="text-xs text-sub mt-0.5">
+                    {(user as any).googleId 
+                      ? `已連結: ${(user as any).googleEmail || 'Google 帳號'}` 
+                      : '連結 Google 帳號以啟用快速登入'}
+                  </p>
+                </div>
+              </div>
+              
+              {(user as any).googleId ? (
+                <button
+                  onClick={async () => {
+                    if (!(user as any).hasPassword) {
+                      setShowPasswordSetup(true);
+                      window.scrollTo({ top: 400, behavior: 'smooth' });
+                    } else {
+                      if (!confirm('確定要解除 Google 連結嗎？')) return;
+                      try {
+                        const res = await fetch(`${API_BASE}/auth/google/unbind`, {
+                          method: 'POST',
+                          headers: { Authorization: `Bearer ${token}` },
+                        });
+                        const data = await res.json();
+                        if (data.success) {
+                          window.location.reload();
+                        } else {
+                          alert(data.error);
+                        }
                             } else {
                               alert(data.error || '連結失敗');
                             }

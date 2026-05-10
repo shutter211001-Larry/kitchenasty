@@ -8,6 +8,8 @@ import {
   getMe,
   deleteMe,
   setPassword,
+  updateMe,
+  unbindGoogle,
 } from '../controllers/auth.controller.js';
 import { handleSocialCallback } from '../controllers/social-auth.controller.js';
 import { savePushToken } from '../controllers/push-token.controller.js';
@@ -50,5 +52,7 @@ router.post('/push-token', authenticate, savePushToken);
 router.get('/me', authenticate, getMe);
 router.delete('/me', authenticate, deleteMe);
 router.post('/set-password', authenticate, setPassword);
+router.patch('/me', authenticate, updateMe);
+router.post('/google/unbind', authenticate, unbindGoogle);
 
 export default router;

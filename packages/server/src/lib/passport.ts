@@ -17,13 +17,36 @@ export function initPassport() {
           clientID: GOOGLE_CLIENT_ID,
           clientSecret: GOOGLE_CLIENT_SECRET,
           callbackURL: `${BASE_URL}/api/auth/google/callback`,
+          passReqToCallback: true,
         },
-        async (_accessToken, _refreshToken, profile, done) => {
+        async (req, _accessToken, _refreshToken, profile, done) => {
           try {
             const email = profile.emails?.[0]?.value;
             if (!email) return done(new Error('No email in Google profile'));
 
-            let customer = await prisma.customer.findUnique({ where: { email } });
+            const loggedInUser = (req as any).user;
+
+            if (loggedInUser && loggedInUser.type === 'customer') {
+              // LINKING: User is already logged in
+              const customer = await prisma.customer.update({
+                where: { id: loggedInUser.id },
+                data: {
+                  googleId: profile.id,
+                  googleEmail: email,
+                },
+              });
+              return done(null, { id: customer.id, email: customer.email, type: 'customer' as const });
+            }
+
+            // LOGIN/REGISTER: Try to find by googleId first, then by email
+            let customer = await prisma.customer.findFirst({
+              where: {
+                OR: [
+                  { googleId: profile.id },
+                  { email: email }
+                ]
+              }
+            });
             
             if (!customer) {
               customer = await prisma.customer.create({
@@ -32,6 +55,7 @@ export function initPassport() {
                   name: profile.displayName || email,
                   password: null,
                   googleId: profile.id,
+                  googleEmail: email,
                   isGuest: false,
                 },
               });
@@ -41,6 +65,7 @@ export function initPassport() {
                 where: { id: customer.id },
                 data: {
                   googleId: customer.googleId || profile.id,
+                  googleEmail: customer.googleEmail || email,
                   isGuest: false,
                   name: customer.name || profile.displayName || email,
                 },

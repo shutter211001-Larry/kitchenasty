@@ -55,6 +55,7 @@ model Customer {
   lineUserId     String? @unique
   lineDisplayName String?
   googleId       String? @unique
+  googleEmail    String?
   facebookId     String? @unique
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt

@@ -65,6 +65,8 @@ export async function staffLogin(req: Request, res: Response): Promise<void> {
         role: user.role,
         lineUserId: user.lineUserId,
         lineDisplayName: user.lineDisplayName,
+        googleId: user.googleId,
+        googleEmail: user.googleEmail,
         hasPassword: !!user.password,
       },
     },
@@ -201,6 +203,8 @@ export async function customerLogin(req: Request, res: Response): Promise<void> 
         phone: customer.phone,
         lineUserId: customer.lineUserId,
         lineDisplayName: customer.lineDisplayName,
+        googleId: customer.googleId,
+        googleEmail: customer.googleEmail,
         hasPassword: !!customer.password,
       },
     },
@@ -226,7 +230,7 @@ export async function getMe(req: Request, res: Response): Promise<void> {
   } else {
     const customer = await prisma.customer.findUnique({
       where: { id: req.user.id },
-      select: { id: true, email: true, name: true, phone: true, lineUserId: true, lineDisplayName: true, password: true },
+      select: { id: true, email: true, name: true, phone: true, lineUserId: true, lineDisplayName: true, googleId: true, googleEmail: true, password: true },
     });
     const customerData = { ...customer, hasPassword: !!customer?.password };
     if (customerData) delete (customerData as any).password;
@@ -278,4 +282,55 @@ export async function setPassword(req: Request, res: Response): Promise<void> {
   });
 
   res.json({ success: true, message: 'Password set successfully' });
+}
+
+export async function updateMe(req: Request, res: Response): Promise<void> {
+  if (!req.user || req.user.type !== 'customer') {
+    res.status(401).json({ success: false, error: 'Not authenticated' });
+    return;
+  }
+
+  const schema = z.object({
+    name: z.string().min(1).optional(),
+    phone: z.string().optional(),
+  });
+
+  const parsed = schema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ success: false, error: parsed.error.errors });
+    return;
+  }
+
+  try {
+    const updated = await prisma.customer.update({
+      where: { id: req.user.id },
+      data: parsed.data,
+      select: { id: true, email: true, name: true, phone: true, lineUserId: true, lineDisplayName: true, googleId: true, googleEmail: true },
+    });
+
+    res.json({ success: true, data: updated });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Failed to update profile' });
+  }
+}
+
+export async function unbindGoogle(req: Request, res: Response): Promise<void> {
+  if (!req.user || req.user.type !== 'customer') {
+    res.status(401).json({ success: false, error: 'Not authenticated' });
+    return;
+  }
+
+  try {
+    await prisma.customer.update({
+      where: { id: req.user.id },
+      data: { 
+        googleId: null,
+        googleEmail: null 
+      }
+    });
+
+    res.json({ success: true, message: 'Google account unlinked successfully' });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Failed to unlink Google account' });
+  }
 }
