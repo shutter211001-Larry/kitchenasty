@@ -114,17 +114,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [token, logout]);
 
   async function login(email: string, password: string) {
-    const res = await fetch(`${API_BASE}/auth/customer/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Login failed');
-    localStorage.setItem('token', data.data.token);
-    localStorage.removeItem('explicit_logout');
-    setToken(data.data.token);
-    setUser(data.data.customer || data.data.user || data.data);
+    console.log('[Auth] Attempting login for:', email);
+    try {
+      const res = await fetch(`${API_BASE}/auth/customer/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        console.error('[Auth] Login API failed:', data.error);
+        throw new Error(data.error || 'Login failed');
+      }
+      
+      console.log('[Auth] Login successful, storing token...');
+      localStorage.setItem('token', data.data.token);
+      localStorage.removeItem('explicit_logout');
+      
+      // Clear LIFF state to prevent cross-contamination if they were using LINE before
+      localStorage.removeItem('liff:token'); 
+      
+      setToken(data.data.token);
+      setUser(data.data.customer || data.data.user || data.data);
+      console.log('[Auth] State updated');
+    } catch (err) {
+      console.error('[Auth] Login error:', err);
+      throw err;
+    }
   }
 
   function loginWithToken(newToken: string) {

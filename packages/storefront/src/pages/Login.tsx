@@ -16,17 +16,30 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
-
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError('');
+    setSuccess(false);
     setLoading(true);
     try {
+      console.log('[Login] Submitting credentials...');
       await login(email, password);
-      navigate(redirectPath);
+      console.log('[Login] Success! Redirecting to:', redirectPath);
+      setSuccess(true);
+      
+      // Clear sensitive fields immediately
+      setEmail('');
+      setPassword('');
+
+      // Force redirect after a short delay
+      setTimeout(() => {
+        window.location.replace(redirectPath);
+      }, 800);
     } catch (err: any) {
+      console.error('[Login] Submission failed:', err);
       setError(err.message || 'Login failed');
     } finally {
       setLoading(false);
@@ -44,6 +57,15 @@ export default function Login() {
         <form onSubmit={handleSubmit} className="surface-card p-8 rounded-xl shadow-sm border">
           {error && (
             <div className="bg-red-50 text-red-700 p-3 rounded-lg text-sm mb-4">{error}</div>
+          )}
+
+          {success && (
+            <div className="bg-green-50 text-green-700 p-3 rounded-lg text-sm mb-4 font-medium flex items-center gap-2">
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+              登入成功！正在為您跳轉...
+            </div>
           )}
 
           <div className="mb-4">
@@ -106,13 +128,17 @@ export default function Login() {
                 type="button"
                 onClick={async () => {
                   setLoading(true);
-                  try {
+                    console.log('[Login] Starting LINE Login...');
                     const liff = (window as any).liff;
                     if (!liff) {
                       setError('LINE SDK not loaded');
                       setLoading(false);
                       return;
                     }
+
+                    // Clear old LIFF data to be safe
+                    localStorage.removeItem('liff:token');
+
                     await liff.init({ liffId: settings.lineSettings!.liffId });
                     if (!liff.isLoggedIn()) {
                       liff.login({ redirectUri: window.location.origin + '/login' });
@@ -121,6 +147,7 @@ export default function Login() {
                     const profile = await liff.getProfile();
                     const userEmail = liff.getDecodedIDToken()?.email;
 
+                    console.log('[Login] LINE Profile obtained, authenticating with backend...');
                     const res = await fetch(`${API_BASE}/line/login`, {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json' },
@@ -133,8 +160,12 @@ export default function Login() {
                     });
                     const data = await res.json();
                     if (data.success) {
+                      console.log('[Login] LINE Login successful!');
+                      setSuccess(true);
                       localStorage.setItem('token', data.data.token);
-                      window.location.href = redirectPath;
+                      setTimeout(() => {
+                        window.location.replace(redirectPath);
+                      }, 800);
                     } else {
                       setError(data.error || 'LINE Login failed');
                       setLoading(false);

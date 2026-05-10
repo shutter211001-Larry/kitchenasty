@@ -199,6 +199,20 @@ export async function lineLogin(req: Request, res: Response) {
     // 3. AUTO-REGISTRATION: If still no customer, create one immediately
     if (!customer) {
       console.log(`[LINE Login] AUTO-REGISTERING new customer for LINE ID ${lineUserId}`);
+      
+      // Safety check: Does this email already exist in our DB? 
+      // (Even if it wasn't linked to LINE before, we can't create a duplicate email)
+      if (email && email.trim() !== "") {
+        const emailExists = await prisma.customer.findUnique({ where: { email } });
+        if (emailExists) {
+          console.warn(`[LINE Login] Email ${email} already exists. Redirecting to link/login instead.`);
+          return res.status(400).json({ 
+            success: false, 
+            error: '此 Email 已被註冊，請先使用帳號密碼登入後，再於會員中心綁定 LINE。' 
+          });
+        }
+      }
+
       const fallbackEmail = `${lineUserId}@line.pizzastudio.com`;
       
       customer = await prisma.customer.create({
