@@ -1,3 +1,4 @@
-SELECT column_name 
+SELECT column_name, data_type 
 FROM information_schema.columns 
-WHERE table_name = 'customers' AND column_name = 'googleEmail';
+WHERE table_name = 'customers'
+ORDER BY column_name;
