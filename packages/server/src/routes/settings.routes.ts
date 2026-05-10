@@ -81,7 +81,7 @@ router.post('/ip-blacklist', authenticate, requireRole('SUPER_ADMIN'), async (re
   res.json({ success: true });
 });
 router.delete('/ip-blacklist/:ip', authenticate, requireRole('SUPER_ADMIN'), async (req, res) => {
-  await prisma.iPBlacklist.delete({ where: { ip: req.params.ip } });
+  await prisma.iPBlacklist.delete({ where: { ip: req.params.ip as string } });
   res.json({ success: true });
 });
 
