@@ -157,8 +157,13 @@
     "googleLogin": "Google로 로그인",
     "nameOptional": "이름 (선택 사항)",
     "emailOptional": "이메일 (선택 사항)",
-    "phoneOptional": "전화번호 (선택 사항)",
-    "guestCheckout": "게스트 결제",
+    "phone": "전화번호",
+    "phoneRequired": "전화번호 (예약 필수)",
+    "phoneOptional": "전화번호 (선택)",
+    "phonePlaceholder": "전화번호를 입력하세요",
+    "phonePlaceholderScheduled": "전화번호를 입력하세요 (연락용)",
+    "phoneRequiredForScheduled": "예약 주문에는 전화번호가 필요합니다",
+    "guestCheckout": "비회원 주문",
     "guestEmail": "주문 알림용 이메일"
   },
   "orderConfirmation": {

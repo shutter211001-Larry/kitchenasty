@@ -152,7 +152,12 @@
     "googleLogin": "Masuk dengan Google",
     "nameOptional": "Nama (opsional)",
     "emailOptional": "Email (opsional)",
-    "phoneOptional": "Telepon (opsional)",
+    "phone": "Nomor Telepon",
+    "phoneRequired": "Nomor Telepon (Wajib untuk Pesanan Terjadwal)",
+    "phoneOptional": "Nomor Telepon (opsional)",
+    "phonePlaceholder": "Masukkan nomor telepon",
+    "phonePlaceholderScheduled": "Masukkan nomor telepon (Diperlukan untuk kontak)",
+    "phoneRequiredForScheduled": "Nomor telepon wajib diisi untuk pesanan terjadwal",
     "guestCheckout": "Checkout Tamu",
     "guestEmail": "Email untuk pembaruan pesanan"
   },

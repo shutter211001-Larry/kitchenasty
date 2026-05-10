@@ -150,7 +150,12 @@
     "googleLogin": "Se connecter avec Google",
     "nameOptional": "Nom (optionnel)",
     "emailOptional": "E-mail (optionnel)",
+    "phone": "Numéro de téléphone",
+    "phoneRequired": "Téléphone (obligatoire pour les commandes planifiées)",
     "phoneOptional": "Téléphone (optionnel)",
+    "phonePlaceholder": "Entrez le numéro de téléphone",
+    "phonePlaceholderScheduled": "Entrez le numéro (nécessaire pour le contact)",
+    "phoneRequiredForScheduled": "Le numéro de téléphone est obligatoire pour les commandes planifiées",
     "guestCheckout": "Paiement invité",
     "guestEmail": "E-mail pour le suivi de commande"
   },

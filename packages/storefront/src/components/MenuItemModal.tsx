@@ -187,7 +187,7 @@ export default function MenuItemModal({ itemId, onClose }: Props) {
           <div className="p-6">
             <div className="bg-red-50 text-red-700 p-4 rounded-lg">{error}</div>
             <button onClick={onClose} className="mt-4 text-sm text-gray-500 hover:text-gray-700">
-              Close
+              {t('common.close')}
             </button>
           </div>
         )}
@@ -208,7 +208,7 @@ export default function MenuItemModal({ itemId, onClose }: Props) {
               <button
                 onClick={onClose}
                 className="absolute top-3 right-3 bg-white/80 hover:bg-white rounded-full p-1.5 transition-colors"
-                aria-label="Close"
+                aria-label={t('common.close')}
               >
                 <svg className="w-5 h-5 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -281,7 +281,7 @@ export default function MenuItemModal({ itemId, onClose }: Props) {
                           onChange={(e) => handleSelect(opt.id, e.target.value, opt.displayType, opt.maxSelect)}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
                         >
-                          {!opt.isRequired && <option value="">None</option>}
+                          {!opt.isRequired && <option value="">{t('common.none')}</option>}
                           {opt.values.map((val) => (
                             <option key={val.id} value={val.id}>
                               {getTranslated(val.name, val.nameTranslations, i18n.language)}
