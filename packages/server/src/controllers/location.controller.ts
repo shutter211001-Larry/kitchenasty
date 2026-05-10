@@ -187,7 +187,7 @@ export async function deleteLocation(req: Request<{ id: string }>, res: Response
   res.json({ success: true, message: 'Location deleted' });
 }
 export async function getAvailableSlots(req: Request, res: Response): Promise<void> {
-  const { id } = req.params;
+  const id = req.params.id as string;
   const orderType = (req.query.orderType as string || 'PICKUP').toUpperCase();
   const daysCount = parseInt(req.query.days as string) || 7;
 
@@ -218,7 +218,7 @@ export async function getAvailableSlots(req: Request, res: Response): Promise<vo
     targetDate.setDate(now.getDate() + i);
     const dayOfWeek = targetDate.getDay();
     
-    const hours = location.operatingHours.find((h: any) => h.dayOfWeek === dayOfWeek);
+    const hours = (location as any).operatingHours.find((h: any) => h.dayOfWeek === dayOfWeek);
     if (!hours || hours.isClosed) continue;
 
     // Parse open/close times (HH:mm)

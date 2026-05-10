@@ -335,7 +335,7 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
     const calculated = calculateDistance(userLat, userLon, location.lat, location.lng);
     if (!isNaN(calculated)) {
       distance = calculated;
-      isRemote = distance > 20; // 20 meter threshold
+      isRemote = calculated > 20; // 20 meter threshold
     }
   }
 
