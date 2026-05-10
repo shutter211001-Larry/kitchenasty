@@ -213,6 +213,8 @@ export async function getAvailableSlots(req: Request, res: Response): Promise<vo
   const now = new Date();
   const slotsByDay: any[] = [];
 
+  const { generateDaySlots } = await import('../lib/business-hours.js');
+
   for (let i = 0; i < daysCount; i++) {
     const targetDate = new Date();
     targetDate.setDate(now.getDate() + i);
@@ -221,39 +223,15 @@ export async function getAvailableSlots(req: Request, res: Response): Promise<vo
     const hours = (location as any).operatingHours.find((h: any) => h.dayOfWeek === dayOfWeek);
     if (!hours || hours.isClosed) continue;
 
-    // Parse open/close times (HH:mm)
-    const [openH, openM] = hours.openTime.split(':').map(Number);
-    const [closeH, closeM] = hours.closeTime.split(':').map(Number);
+    const minStartTime = i === 0 ? new Date(now.getTime() + leadTime * 60000) : undefined;
 
-    const dayStart = new Date(targetDate);
-    dayStart.setHours(openH, openM, 0, 0);
-    dayStart.setMinutes(dayStart.getMinutes() + preOpeningBuffer);
-
-    const dayEnd = new Date(targetDate);
-    dayEnd.setHours(closeH, closeM, 0, 0);
-    dayEnd.setMinutes(dayEnd.getMinutes() - postClosingBuffer);
-
-    const minStartTime = new Date(now);
-    minStartTime.setMinutes(minStartTime.getMinutes() + leadTime);
-
-    const daySlots: string[] = [];
-    const currentSlot = new Date(dayStart);
-
-    // If target date is today, start from at least minStartTime
-    if (i === 0 && currentSlot < minStartTime) {
-      // Align to interval
-      const minutes = minStartTime.getMinutes();
-      const alignedMinutes = Math.ceil(minutes / interval) * interval;
-      currentSlot.setHours(minStartTime.getHours());
-      currentSlot.setMinutes(alignedMinutes, 0, 0);
-    }
-
-    while (currentSlot <= dayEnd) {
-      if (currentSlot >= dayStart) {
-        daySlots.push(currentSlot.toISOString());
-      }
-      currentSlot.setMinutes(currentSlot.getMinutes() + interval);
-    }
+    const daySlots = generateDaySlots(
+      targetDate,
+      hours,
+      interval,
+      { preOpeningBuffer, postClosingBuffer },
+      minStartTime
+    );
 
     if (daySlots.length > 0) {
       slotsByDay.push({

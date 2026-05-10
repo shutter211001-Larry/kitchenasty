@@ -148,25 +148,15 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
       return;
     }
 
-    // Calculate valid window with buffers
-    const [openH, openM] = dayHours.openTime.split(':').map(Number);
-    const [closeH, closeM] = dayHours.closeTime.split(':').map(Number);
+    const { isWithinHours } = await import('../lib/business-hours.js');
+    const check = isWithinHours(
+      scheduled,
+      location.operatingHours,
+      { preOpeningBuffer, postClosingBuffer }
+    );
 
-    const validStart = new Date(scheduled);
-    validStart.setHours(openH, openM, 0, 0);
-    validStart.setMinutes(validStart.getMinutes() + preOpeningBuffer);
-
-    const validEnd = new Date(scheduled);
-    validEnd.setHours(closeH, closeM, 0, 0);
-    validEnd.setMinutes(validEnd.getMinutes() - postClosingBuffer);
-
-    if (scheduled < validStart || scheduled > validEnd) {
-      const startStr = validStart.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
-      const endStr = validEnd.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
-      res.status(400).json({ 
-        success: false, 
-        error: `Scheduled time must be between ${startStr} and ${endStr} due to business hours and preparation buffers.` 
-      });
+    if (!check.isOpen) {
+      res.status(400).json({ success: false, error: check.error });
       return;
     }
   }
