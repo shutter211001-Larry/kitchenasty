@@ -525,6 +525,16 @@ model CookieCategory {
   @@map("cookie_categories")
 }
 
+model RegistrationBonusRecord {
+  id        String   @id @default(cuid())
+  provider  String   // 'email', 'google', 'line'
+  identifier String   // email or socialId
+  claimedAt DateTime @default(now())
+
+  @@unique([provider, identifier])
+  @@map("registration_bonus_records")
+}
+
 model CookieConsent {
   id               String         @id @default(cuid())
   customerId       String?
