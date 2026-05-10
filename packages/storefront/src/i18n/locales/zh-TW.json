@@ -184,6 +184,7 @@
     "scheduling": "選擇取餐時間",
     "asap": "儘快送達/取餐",
     "scheduled": "取餐時間",
+    "closed": "今日已打烊",
     "selectDateTime": "選擇日期與時間",
     "orderNotes": "訂單備註 (選填)",
     "couponCode": "優惠碼",

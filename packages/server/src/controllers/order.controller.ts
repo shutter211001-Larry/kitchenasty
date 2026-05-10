@@ -134,30 +134,40 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
     
     // Check if scheduled time is in the past or before lead time
     const minTime = new Date(now);
-    minTime.setMinutes(minTime.getMinutes() + leadTime);
-    if (scheduled < minTime) {
-      res.status(400).json({ success: false, error: `Scheduled time must be at least ${leadTime} minutes from now` });
-      return;
-    }
-
-    const dayOfWeek = scheduled.getDay();
-    const dayHours = location.operatingHours.find((h) => h.dayOfWeek === dayOfWeek);
-    
-    if (!dayHours || dayHours.isClosed) {
-      res.status(400).json({ success: false, error: 'Location is closed on the scheduled day' });
-      return;
-    }
-
     const { isWithinHours } = await import('../lib/business-hours.js');
-    const check = isWithinHours(
-      scheduled,
-      location.operatingHours,
-      { preOpeningBuffer, postClosingBuffer }
-    );
 
-    if (!check.isOpen) {
-      res.status(400).json({ success: false, error: check.error });
-      return;
+    if (scheduledAt) {
+      const scheduled = new Date(scheduledAt);
+      const now = new Date();
+      
+      // Check if scheduled time is in the past or before lead time
+      const minTime = new Date(now);
+      minTime.setMinutes(minTime.getMinutes() + leadTime);
+      if (scheduled < minTime) {
+        res.status(400).json({ success: false, error: `Scheduled time must be at least ${leadTime} minutes from now` });
+        return;
+      }
+
+      const check = isWithinHours(
+        scheduled,
+        location.operatingHours,
+        { preOpeningBuffer, postClosingBuffer }
+      );
+
+      if (!check.isOpen) {
+        res.status(400).json({ success: false, error: check.error });
+        return;
+      }
+    } else {
+      // Check ASAP order against current hours
+      const check = isWithinHours(new Date(), location.operatingHours);
+      if (!check.isOpen) {
+        res.status(400).json({ 
+          success: false, 
+          error: 'We are currently closed for immediate orders. Please select a future pickup time.' 
+        });
+        return;
+      }
     }
   }
 
