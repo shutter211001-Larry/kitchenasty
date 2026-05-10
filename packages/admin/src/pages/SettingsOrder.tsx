@@ -230,9 +230,9 @@ export default function SettingsOrder() {
             ))}
           </div>
         </div>
-        </div>
+      </div>
 
-        <div className="flex justify-end pt-4">
+      <div className="flex justify-end pt-4">
           <button
             onClick={handleSave}
             disabled={saving}
@@ -241,7 +241,6 @@ export default function SettingsOrder() {
             {saving ? '儲存中...' : '儲存所有變更'}
           </button>
         </div>
-      </div>
     </div>
   );
 }
