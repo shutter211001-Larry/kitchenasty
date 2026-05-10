@@ -96,6 +96,7 @@ function toPublicSettings(settings: Awaited<ReturnType<typeof getOrCreateSetting
       deliveryEnabled: isTrue(order.deliveryEnabled, true),
       pickupEnabled: isTrue(order.pickupEnabled, true),
       allowGuestCheckout: isTrue(order.allowGuestCheckout, true),
+      enableFutureOrdering: isTrue(order.enableFutureOrdering, false),
       taxRate: order.taxRate !== undefined ? Number(order.taxRate) : 0,
       preOpeningBuffer: order.preOpeningBuffer !== undefined ? Number(order.preOpeningBuffer) : 30,
       postClosingBuffer: order.postClosingBuffer !== undefined ? Number(order.postClosingBuffer) : 30,

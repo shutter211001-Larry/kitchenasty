@@ -701,8 +701,13 @@ export default function Account() {
               ) : (
                 <button
                   onClick={handleLineAuth}
-                  className="px-8 py-3.5 text-sm font-black bg-[#06C755] text-white rounded-xl hover:bg-[#05b34c] transition-all shadow-lg shadow-[#06C755]/20 active:scale-95"
+                  className="px-8 py-3 bg-[#06C755] text-white rounded-xl text-base font-black hover:bg-[#05b34c] transition-all active:scale-[0.98] shadow-lg shadow-[#06C755]/20 flex items-center gap-3 group"
                 >
+                  <div className="bg-white p-1.5 rounded-full shadow-sm flex items-center justify-center">
+                    <svg className="w-5 h-5 text-[#06C755]" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M24 10.304c0-5.369-5.383-9.738-12-9.738-6.616 0-12 4.369-12 9.738 0 4.814 4.269 8.846 10.036 9.608.391.084.922.258 1.057.592.121.303.079.778.039 1.085l-.171 1.027c-.052.303-.25 1.184.108 1.291.357.107.946-.459 1.324-.827 3.276-3.196 6.014-5.836 6.014-5.836 4.191-1.01 5.587-4.102 5.587-7.164zm-17.485 3.391h-1.61c-.347 0-.63-.283-.63-.63v-5.46c0-.347.283-.63.63-.63h1.61c.347 0 .63.283.63.63v5.46c0 .347-.283.63-.63.63zm3.748 0h-1.61c-.347 0-.63-.283-.63-.63v-5.46c0-.347.283-.63.63-.63h1.61c.347 0 .63.283.63.63v5.46c0 .347-.283.63-.63.63zm3.748-1.26h-1.132v-1.144h1.132c.347 0 .63-.283.63-.63v-.539c0-.347-.283-.63-.63-.63h-1.132v-1.144h1.132c.347 0 .63-.283.63-.63v-.539c0-.347-.283-.63-.63-.63h-2.12c-.347 0-.63.283-.63.63v5.46c0 .347.283.63.63.63h2.12c.347 0 .63-.283.63-.63v-.539c0-.348-.283-.631-.63-.631zm3.748 1.26h-1.61c-.347 0-.63-.283-.63-.63v-5.46c0-.347.283-.63.63-.63h1.61c.347 0 .63.283.63.63v5.46c0 .347-.283.63-.63.63z" />
+                    </svg>
+                  </div>
                   {t('account.bind')} LINE
                 </button>
               )}
