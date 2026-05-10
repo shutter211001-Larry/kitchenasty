@@ -175,32 +175,30 @@ export async function lineLogin(req: Request, res: Response) {
 
     if (customer) {
       console.log(`[LINE Login] Found existing customer by lineUserId: ${customer.id}`);
-    } else if (email && email.trim() !== "") {
+    } else {
       // 2. If not found by ID, try to find by email
-      console.log(`[LINE Login] User ID not found, searching by email: ${email}`);
-      customer = await prisma.customer.findUnique({ where: { email } });
-      
-      if (customer) {
-        // SECURITY CHECK: Is this email already bound to a different LINE ID?
-        if (customer.lineUserId && customer.lineUserId !== lineUserId) {
-          console.warn(`[LINE Login] Email ${email} is already bound to another LINE ID: ${customer.lineUserId}`);
-          // Don't merge automatically if already bound to someone else
-          // We'll create a new account with a fallback email instead
-          customer = null;
-        } else {
-          console.log(`[LINE Login] Linking existing email account ${email} to LINE ID ${lineUserId}`);
-          customer = await prisma.customer.update({
-            where: { id: customer.id },
-            data: { lineUserId, lineDisplayName: customer.lineDisplayName || lineDisplayName }
-          });
+      if (email && email.trim() !== "") {
+        console.log(`[LINE Login] User ID not found, searching by email: ${email}`);
+        customer = await prisma.customer.findUnique({ where: { email } });
+        
+        if (customer) {
+          if (customer.lineUserId && customer.lineUserId !== lineUserId) {
+            console.warn(`[LINE Login] Email ${email} is already bound to another LINE ID`);
+            customer = null; // Don't link, create a new one instead
+          } else {
+            console.log(`[LINE Login] Linking existing email account ${email} to LINE ID ${lineUserId}`);
+            customer = await prisma.customer.update({
+              where: { id: customer.id },
+              data: { lineUserId, lineDisplayName: customer.lineDisplayName || lineDisplayName }
+            });
+          }
         }
       }
     }
 
-    // 3. If still not found, create a new customer
+    // 3. AUTO-REGISTRATION: If still no customer, create one immediately
     if (!customer) {
-      console.log(`[LINE Login] Creating new customer account for LINE ID ${lineUserId}`);
-      // Ensure we have a unique fallback email to avoid collision
+      console.log(`[LINE Login] AUTO-REGISTERING new customer for LINE ID ${lineUserId}`);
       const fallbackEmail = `${lineUserId}@line.pizzastudio.com`;
       
       customer = await prisma.customer.create({
@@ -214,18 +212,18 @@ export async function lineLogin(req: Request, res: Response) {
         }
       });
       
-      // Grant one-time registration bonus
+      // Grant registration bonus
       await grantRegistrationBonus(customer.id, 'line', lineUserId);
     }
 
-    // Generate token
+    // 4. ALWAYS GENERATE TOKEN (Fixes "TOKEN not found" error)
     const token = generateToken({
       id: customer.id,
       email: customer.email,
       type: 'customer'
     });
 
-    console.log(`[LINE Login] Login successful for ${customer.id}`);
+    console.log(`[LINE Login] Success! Returning token for user ${customer.id}`);
     res.json({ 
       success: true, 
       data: { 
@@ -234,24 +232,13 @@ export async function lineLogin(req: Request, res: Response) {
           id: customer.id, 
           email: customer.email, 
           name: customer.name, 
-          phone: customer.phone, 
-          lineUserId: customer.lineUserId, 
-          lineDisplayName: customer.lineDisplayName 
+          lineUserId: customer.lineUserId 
         } 
       } 
     });
   } catch (err: any) {
     console.error('[LINE Login Error]:', err);
-    
-    // Handle Prisma unique constraint errors (P2002)
-    if (err.code === 'P2002') {
-      return res.status(400).json({ 
-        success: false, 
-        error: '此電子郵件已被註冊，請先使用密碼登入後再進行 LINE 綁定。' 
-      });
-    }
-    
-    res.status(500).json({ success: false, error: '伺服器內部錯誤，請稍後再試。' });
+    res.status(500).json({ success: false, error: '登入失敗，請稍後再試。' });
   }
 }
 
