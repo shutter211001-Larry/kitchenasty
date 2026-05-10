@@ -367,6 +367,20 @@ export default function CounterDisplay() {
                           {order.orderType === 'DELIVERY' ? '開始外送' : '完成取餐'}
                         </button>
                       )}
+                      <button
+                        onClick={async () => {
+                          if (window.confirm('確定要取消此訂單嗎？')) {
+                            handleStatusUpdate(order.id, 'CANCELLED');
+                          }
+                        }}
+                        disabled={updating === order.id}
+                        className="px-3 bg-red-50 text-red-600 text-xs font-bold py-2.5 rounded-lg hover:bg-red-100 disabled:opacity-50 transition-all"
+                        title="取消訂單"
+                      >
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
                     </div>
                   </div>
                 ))}

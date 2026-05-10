@@ -258,11 +258,13 @@ export default function Checkout() {
         body.address = address;
       }
 
-      // Guest info
+      // Contact info
       if (!user) {
         body.guestName = guestName;
         body.guestEmail = guestEmail;
-        body.guestPhone = guestPhone || undefined;
+      }
+      if (guestPhone) {
+        body.guestPhone = guestPhone;
       }
 
       // Loyalty points
