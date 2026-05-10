@@ -218,11 +218,14 @@ export async function getAvailableSlots(req: Request, res: Response): Promise<vo
   for (let i = 0; i < daysCount; i++) {
     const targetDate = new Date(now.getTime() + i * 24 * 60 * 60 * 1000);
     
-    // Correctly get day of week in Taiwan timezone (0=Sunday, 1=Monday...)
-    const taiwanDayStr = new Intl.DateTimeFormat('en-US', { weekday: 'numeric', timeZone: 'Asia/Taipei' }).format(targetDate);
-    const dayOfWeek = (Number(taiwanDayStr)) % 7; // Sunday is 0 in JS, Intl can sometimes return 7
+    // Reliable way to get 0-6 dayOfWeek in Taiwan timezone
+    const dayOfWeek = new Date(targetDate.toLocaleString('en-US', { timeZone: 'Asia/Taipei' })).getDay();
     
     const sessions = (location as any).operatingHours.filter((h: any) => h.dayOfWeek === dayOfWeek && !h.isClosed);
+    
+    console.log(`[Slots Debug] Day ${i} (targetDate: ${targetDate.toISOString()}): dayOfWeek=${dayOfWeek}, found ${sessions.length} sessions`);
+    sessions.forEach((s: any) => console.log(`  - Session: ${s.openTime} to ${s.closeTime}`));
+
     if (sessions.length === 0) continue;
 
     const minStartTime = i === 0 ? new Date(now.getTime() + leadTime * 60000) : undefined;
@@ -236,6 +239,7 @@ export async function getAvailableSlots(req: Request, res: Response): Promise<vo
     );
 
     if (daySlots.length > 0) {
+      console.log(`  - Generated ${daySlots.length} slots. First slot: ${daySlots[0]}`);
       // Group by Taiwan local date (YYYY-MM-DD)
       const dateKey = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Taipei' }).format(targetDate);
 
