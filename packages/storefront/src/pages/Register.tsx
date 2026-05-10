@@ -61,7 +61,7 @@ export default function Register() {
     if (settings.lineSettings?.liffId) {
       const liff = (window as any).liff;
       if (liff) {
-        liff.login({ redirectUri: window.location.href });
+        liff.login({ redirectUri: window.location.origin });
       }
     }
   };
