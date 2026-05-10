@@ -18,9 +18,9 @@ export default function Login() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Auto-login if LIFF is already authorized
+  // Auto-login if LIFF is already authorized and user hasn't explicitly logged out
   useEffect(() => {
-    if (settings.lineSettings?.liffId) {
+    if (settings.lineSettings?.liffId && localStorage.getItem('explicit_logout') !== 'true') {
       const initLiff = async () => {
         try {
           const liff = (window as any).liff;
