@@ -7,7 +7,6 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import swaggerUi from 'swagger-ui-express';
 import path from 'path';
-import fs from 'fs';
 import authRoutes from './routes/auth.routes.js';
 import locationRoutes from './routes/location.routes.js';
 import menuRoutes from './routes/menu.routes.js';
@@ -146,43 +145,12 @@ export function createApp() {
   app.use('/api/line', lineRoutes);
 
 
-  // Serve Storefront static files in production
-  // Try multiple possible locations for the storefront dist
-  const possiblePaths = [
-    path.resolve(__dirname, '../../storefront/dist'),
-    path.resolve(process.cwd(), '../storefront/dist'),
-    path.resolve(process.cwd(), 'packages/storefront/dist'),
-    path.resolve(process.cwd(), 'dist')
-  ];
-
-  let storefrontDist = possiblePaths[0];
-  for (const p of possiblePaths) {
-    if (fs.existsSync(p) && fs.existsSync(path.join(p, 'index.html'))) {
-      storefrontDist = p;
-      break;
-    }
-  }
-
-  console.log(`[DEBUG] Serving storefront from: ${storefrontDist} (Exists: ${fs.existsSync(storefrontDist)})`);
-
-  app.use(express.static(storefrontDist));
-
-  // Serve Admin static files
-  const adminDist = path.resolve(__dirname, '../../admin/dist');
-  app.use('/admin', express.static(adminDist));
-
-  // 404 / SPA Fallback
-  app.use((req, res) => {
-    if (req.url.startsWith('/api')) {
-      res.status(404).json({ success: false, error: 'Not Found' });
-      return;
-    }
-    const indexPath = path.join(storefrontDist, 'index.html');
-    if (fs.existsSync(indexPath)) {
-      res.sendFile(indexPath);
-    } else {
-      res.status(404).send(`Storefront index.html not found at ${indexPath}. Current directory: ${process.cwd()}. Dirname: ${__dirname}`);
-    }
+  // 404 handler
+  app.use((_req, res) => {
+    res.status(404).json({
+      success: false,
+      error: 'Not Found',
+    });
   });
 
   // Error handler
