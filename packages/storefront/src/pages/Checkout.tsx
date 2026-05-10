@@ -47,6 +47,9 @@ export default function Checkout() {
   // Dynamic delivery fee from zone check
   const [deliveryFee, setDeliveryFee] = useState(4.99);
   const [zoneError, setZoneError] = useState('');
+  const [isClosedNow, setIsClosedNow] = useState(false);
+
+
 
   // Busy mode
   const [isBusy, setIsBusy] = useState(false);
@@ -54,6 +57,26 @@ export default function Checkout() {
   const [locationId, setLocationId] = useState<string>('');
   const [slotsByDay, setSlotsByDay] = useState<any[]>([]);
   const [selectedDateIndex, setSelectedDateIndex] = useState(0);
+
+  // Determine if currently closed
+  useEffect(() => {
+    if (slotsByDay.length > 0) {
+      const today = new Date().toISOString().split('T')[0];
+      const hasSlotsToday = slotsByDay.find(d => d.date === today);
+      
+      // If no slots today OR if we have slots but they all start much later, mark as closed
+      if (!hasSlotsToday) {
+        setIsClosedNow(true);
+        // Auto-select first available slot if nothing is selected
+        if (!scheduledAt) {
+          setScheduledAt(slotsByDay[0].slots[0]);
+          setSelectedDateIndex(0);
+        }
+      } else {
+        setIsClosedNow(false);
+      }
+    }
+  }, [slotsByDay, scheduledAt]);
 
   // Loyalty points
   const [loyaltyBalance, setLoyaltyBalance] = useState(0);
@@ -369,14 +392,17 @@ export default function Checkout() {
                 <div className="flex gap-2">
                   <button
                     type="button"
+                    disabled={isClosedNow}
                     onClick={() => setScheduledAt('')}
                     className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium border-2 transition-all ${
-                      !scheduledAt
+                      !scheduledAt && !isClosedNow
                         ? 'border-primary-600 bg-primary-50 text-primary-700'
-                        : 'border-input text-sub hover:border-gray-300'
+                        : isClosedNow
+                          ? 'border-gray-100 bg-gray-50 text-gray-400 cursor-not-allowed opacity-60'
+                          : 'border-input text-sub hover:border-gray-300'
                     }`}
                   >
-                    {t('checkout.asap')}
+                    {isClosedNow ? t('checkout.closed') || '已打烊' : t('checkout.asap')}
                   </button>
                   <button
                     type="button"
