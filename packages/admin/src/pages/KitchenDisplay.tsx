@@ -69,7 +69,7 @@ export default function KitchenDisplay() {
   const fetchOrders = useCallback(() => {
     // Fetch active orders (non-completed, non-cancelled)
     const statuses = KITCHEN_STATUSES.join(',');
-    api.get<{ data: KitchenOrder[] }>(`/orders?limit=50&includeItems=true&status=${statuses}`)
+    api.get<{ data: KitchenOrder[] }>(`/orders?limit=100&includeItems=true&status=${statuses}`)
       .then((res) => {
         setOrders(res.data);
         setLastRefresh(new Date());
@@ -181,10 +181,14 @@ export default function KitchenDisplay() {
   };
 
   // Separate scheduled vs immediate orders
+  // Scheduled orders that are due within 60 minutes will be shown in the immediate columns
+  const LEAD_TIME_MS = 60 * 60 * 1000; // 60 minutes
+  const now = new Date();
+
   const scheduledOrders = orders
-    .filter((o) => o.scheduledAt && new Date(o.scheduledAt) > new Date())
+    .filter((o) => o.scheduledAt && new Date(o.scheduledAt).getTime() > now.getTime() + LEAD_TIME_MS)
     .sort((a, b) => new Date(a.scheduledAt!).getTime() - new Date(b.scheduledAt!).getTime());
-  const immediateOrders = orders.filter((o) => !o.scheduledAt || new Date(o.scheduledAt) <= new Date());
+  const immediateOrders = orders.filter((o) => !o.scheduledAt || new Date(o.scheduledAt).getTime() <= now.getTime() + LEAD_TIME_MS);
 
   const ordersByStatus = KITCHEN_STATUSES.map((status) => ({
     status,
