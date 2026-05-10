@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import { z } from 'zod';
 import prisma from '../lib/db.js';
 import { generateToken } from '../middleware/auth.js';
+import { grantRegistrationBonus } from '../lib/registrationBonus.js';
 
 // ============================================================
 // STAFF AUTH
@@ -148,6 +149,9 @@ export async function customerRegister(req: Request, res: Response): Promise<voi
     where: { guestEmail: email, customerId: null },
     data: { customerId: customer.id },
   });
+
+  // Grant one-time registration bonus (anti-wash protected)
+  await grantRegistrationBonus(customer.id, 'email', email);
 
   const token = generateToken({
     id: customer.id,

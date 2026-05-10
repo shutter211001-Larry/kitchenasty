@@ -1,6 +1,7 @@
 import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import { PrismaClient } from '@prisma/client';
+import { grantRegistrationBonus } from './registrationBonus.js';
 
 const prisma = new PrismaClient();
 
@@ -74,6 +75,8 @@ export const initPassport = () => {
                   isGuest: false,
                 },
               });
+              // Grant one-time registration bonus (anti-wash protected)
+              await grantRegistrationBonus(customer.id, 'google', profile.id);
             } else {
               // Update existing customer's googleId if not set
               customer = await prisma.customer.update({
