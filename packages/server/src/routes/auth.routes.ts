@@ -6,6 +6,7 @@ import {
   customerRegister,
   customerLogin,
   getMe,
+  deleteMe,
 } from '../controllers/auth.controller.js';
 import { handleSocialCallback } from '../controllers/social-auth.controller.js';
 import { savePushToken } from '../controllers/push-token.controller.js';
@@ -46,5 +47,6 @@ router.post('/push-token', authenticate, savePushToken);
 
 // Current user info
 router.get('/me', authenticate, getMe);
+router.delete('/me', authenticate, deleteMe);
 
 export default router;

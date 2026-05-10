@@ -59,7 +59,11 @@
     "legal": "法律條款",
     "privacyPolicy": "隱私權政策",
     "impressum": "法律聲明 (Impressum)",
-    "cookieSettings": "Cookie 設定"
+    "cookieSettings": "Cookie 設定",
+    "deleteAccount": "刪除帳號",
+    "deleteAccountWarning": "注意：此動作無法回復。刪除帳號將會移除您所有的消費紀錄、個人資訊，並且視同放棄所有累積的紅利點數與會員權益。",
+    "deleteAccountConfirm": "我了解後果，確定要刪除帳號",
+    "deleteAccountFinalCheck": "最後確認：您確定要永久刪除帳號嗎？此動作真的無法復原。"
   },
   "auth": {
     "loginTitle": "會員登入",

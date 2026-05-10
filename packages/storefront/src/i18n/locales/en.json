@@ -56,7 +56,11 @@
     "legal": "Legal",
     "privacyPolicy": "Privacy Policy",
     "impressum": "Impressum",
-    "cookieSettings": "Cookie Settings"
+    "cookieSettings": "Cookie Settings",
+    "deleteAccount": "Delete Account",
+    "deleteAccountWarning": "Warning: This action is irreversible. Deleting your account will remove all your order history, personal information, and forfeit all accumulated loyalty points and member benefits.",
+    "deleteAccountConfirm": "I understand the consequences, delete my account",
+    "deleteAccountFinalCheck": "Final confirmation: Are you sure you want to permanently delete your account? This action really cannot be undone."
   },
   "auth": {
     "loginTitle": "Sign In",

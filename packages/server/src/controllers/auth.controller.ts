@@ -229,3 +229,21 @@ export async function getMe(req: Request, res: Response): Promise<void> {
     res.json({ success: true, data: { type: 'customer', customer } });
   }
 }
+export async function deleteMe(req: Request, res: Response): Promise<void> {
+  if (!req.user) {
+    res.status(401).json({ success: false, error: 'Not authenticated' });
+    return;
+  }
+
+  try {
+    if (req.user.type === 'customer') {
+      await prisma.customer.delete({ where: { id: req.user.id } });
+      res.json({ success: true, message: 'Account deleted successfully' });
+    } else {
+      res.status(403).json({ success: false, error: 'Staff accounts cannot be deleted here' });
+    }
+  } catch (err) {
+    console.error('[DELETE ACCOUNT ERROR]', err);
+    res.status(500).json({ success: false, error: 'Failed to delete account' });
+  }
+}
