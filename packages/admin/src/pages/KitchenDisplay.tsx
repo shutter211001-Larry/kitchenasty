@@ -254,7 +254,7 @@ export default function KitchenDisplay() {
             <div className="mx-4 mt-4 space-y-2">
               <div className="flex items-center justify-between mb-1 px-1">
                 <h3 className="text-sm font-bold text-indigo-800">
-                  預約訂單 (Scheduled Orders: {scheduledOrders.length})
+                  {t('kitchen.scheduledOrders')} (Scheduled Orders: {scheduledOrders.length})
                 </h3>
               </div>
               {Object.entries(scheduledGroups).map(([date, groupOrders]) => (
@@ -286,27 +286,27 @@ export default function KitchenDisplay() {
                             <span className="font-mono font-bold text-gray-900">#{order.orderNumber}</span>
                             <span className={`ml-2 px-1.5 py-0.5 rounded font-medium ${order.orderType === 'DELIVERY' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'
                               }`}>
-                              {order.orderType === 'DELIVERY' ? '外送' : '自取'}
+                              {order.orderType === 'DELIVERY' ? t('kitchen.delivery') : t('kitchen.pickup')}
                             </span>
                             <span className="ml-2 text-indigo-600 font-medium">
                               {new Date(order.scheduledAt!).toLocaleString([], { hour: '2-digit', minute: '2-digit' })}
                             </span>
                             <span className="ml-2 text-gray-800 font-bold">
-                              {order.customer?.name || order.guestName || '顧客'}
+                              {order.customer?.name || order.guestName || t('common.guest')}
                             </span>
                             <span className="ml-2 text-blue-600 font-bold">
                               ({order.customer?.phone || order.guestPhone})
                             </span>
-                            <span className="ml-2 text-gray-400">{order.items.length} 個品項</span>
+                            <span className="ml-2 text-gray-400">{order.items.length} {t('kitchen.itemsCount', { count: order.items.length })}</span>
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                if (window.confirm('確定要取消此訂單嗎？')) {
+                                if (window.confirm(t('kitchen.cancelConfirm'))) {
                                   handleStatusUpdate(order.id, 'CANCELLED');
                                 }
                               }}
                               className="ml-2 p-1 text-red-500 hover:bg-red-50 rounded transition-colors"
-                              title="取消訂單"
+                              title={t('kitchen.cancelConfirm')}
                             >
                               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -337,7 +337,7 @@ export default function KitchenDisplay() {
                 {/* Order cards */}
                 <div className="flex-1 overflow-y-auto space-y-3 py-3">
                   {statusOrders.length === 0 && (
-                    <p className="text-center text-gray-400 text-sm py-8">目前無訂單</p>
+                    <p className="text-center text-gray-400 text-sm py-8">{t('kitchen.noOrders')}</p>
                   )}
                   {statusOrders.map((order) => (
                     <div

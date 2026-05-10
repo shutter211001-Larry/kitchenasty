@@ -10,8 +10,10 @@
     "submit": "Submit",
     "search": "Search",
     "noResults": "No results found",
-    "viewAll": "View All",
+    "viewAll": "View all",
     "required": "Required",
+    "close": "Close",
+    "none": "None",
     "guest": "Guest"
   },
   "nav": {
@@ -203,14 +205,20 @@
     "phonePlaceholderScheduled": "Enter phone number (Required for contact)",
     "phoneRequiredForScheduled": "Phone number is required for scheduled orders",
     "guestCheckout": "Guest Checkout",
-    "guestEmail": "Email for order updates"
+    "guestEmail": "Email for order updates",
+    "loyaltyTitle": "Loyalty Points",
+    "loyaltyPointsAvailable": "You have {{count}} points available",
+    "loyaltyPointsToRedeem": "points to redeem",
+    "loyaltyRedeemHelp": "(100 points = $1.00)",
+    "cashOnDeliverySub": "Pay at location"
   },
   "orderConfirmation": {
     "title": "Order Placed!",
     "thankYou": "Thank you for your order.",
     "orderNumber": "Order Number",
     "trackOrder": "Track Order",
-    "orderMore": "Order More"
+    "orderMore": "Order More",
+    "pickupNumberLabel": "Your Pickup Number"
   },
   "orders": {
     "title": "Order History",

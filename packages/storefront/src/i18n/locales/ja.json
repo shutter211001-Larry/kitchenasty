@@ -159,7 +159,12 @@
     "googleLogin": "Googleでログイン",
     "nameOptional": "お名前 (任意)",
     "emailOptional": "メールアドレス (任意)",
+    "phone": "電話番号",
+    "phoneRequired": "電話番号 (予約には必須)",
     "phoneOptional": "電話番号 (任意)",
+    "phonePlaceholder": "電話番号を入力",
+    "phonePlaceholderScheduled": "電話番号を入力 (連絡用)",
+    "phoneRequiredForScheduled": "予約注文には電話番号が必要です",
     "guestCheckout": "ゲスト購入",
     "guestEmail": "注文状況の通知用メール"
   },

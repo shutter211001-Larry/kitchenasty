@@ -534,10 +534,10 @@ export default function Checkout() {
           {/* Loyalty Points Redemption */}
           {user && settings.loyaltyProgramEnabled && loyaltyBalance > 0 && (
             <div className="surface-card rounded-xl shadow-sm border p-6">
-              <h2 className="text-lg font-semibold text-main mb-4">Loyalty Points</h2>
+              <h2 className="text-lg font-semibold text-main mb-4">{t('checkout.loyaltyTitle')}</h2>
               <p className="text-sm text-sub mb-3">
-                You have <span className="font-bold text-primary-600">{loyaltyBalance}</span> points available
-                (100 points = $1.00)
+                {t('checkout.loyaltyPointsAvailable', { count: loyaltyBalance })}
+                {t('checkout.loyaltyRedeemHelp')}
               </p>
               <div className="flex items-center gap-3">
                 <input
@@ -550,7 +550,7 @@ export default function Checkout() {
                   className="w-32 px-3 py-2 bg-surface border border-input rounded-lg focus:ring-2 focus:ring-primary-500 outline-none text-sm text-main"
                   placeholder="0"
                 />
-                <span className="text-sm text-sub">points to redeem</span>
+                <span className="text-sm text-sub">{t('checkout.loyaltyPointsToRedeem')}</span>
                 {loyaltyRedeem > 0 && (
                   <span className="text-sm font-medium text-green-600">
                     -${loyaltyDiscount.toFixed(2)}
@@ -596,7 +596,7 @@ export default function Checkout() {
                     />
                     <div className="flex flex-col">
                       <span className="text-sm font-bold">{t('checkout.cashOnDelivery')}</span>
-                      <span className="text-[10px] opacity-70">下單後現場支付</span>
+                      <span className="text-[10px] opacity-70">{t('checkout.cashOnDeliverySub')}</span>
                     </div>
                   </label>
                 )}
@@ -708,7 +708,7 @@ export default function Checkout() {
                           <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M12 2c5.514 0 10 3.592 10 8.007 0 3.532-2.855 6.478-6.728 7.513-.337.07-.797.222-.912.511-.103.263-.068.675-.033 1.112.035.437.166 1.764.19 1.954.024.19.112.743-.243.812-.355.07-.944-.456-1.32-.821-.376-.365-1.74-2.023-2.373-2.857-2.73-.012-5.461-1.853-5.461-5.187C5 5.592 9.486 2 12 2z" />
                           </svg>
-                          LINE 登入
+                          {t('auth.lineSignIn')}
                         </button>
                       )}
 

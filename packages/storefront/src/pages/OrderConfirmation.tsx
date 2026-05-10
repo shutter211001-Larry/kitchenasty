@@ -22,7 +22,7 @@ export default function OrderConfirmation() {
 
       {order?.pickupNumber && (
         <div className="mb-8">
-          <p className="text-sm text-hint mb-1">您的取餐號碼 / Pickup No.</p>
+          <p className="text-sm text-hint mb-1">{t('orderConfirmation.pickupNumberLabel')}</p>
           <div className="text-6xl font-black text-primary-600 tracking-tighter">
             {order.pickupNumber}
           </div>
@@ -40,11 +40,15 @@ export default function OrderConfirmation() {
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
               <span className="text-hint">{t('checkout.orderType')}</span>
-              <p className="font-medium text-main">{order.orderType}</p>
+              <p className="font-medium text-main">
+                {order.orderType === 'DELIVERY' ? t('checkout.delivery') : t('checkout.pickup')}
+              </p>
             </div>
             <div>
               <span className="text-hint">{t('orders.status')}</span>
-              <p className="font-medium text-main">{order.status}</p>
+              <p className="font-medium text-main">
+                {t(`orderStatus.${order.status.toLowerCase()}`)}
+              </p>
             </div>
             <div>
               <span className="text-hint">{t('checkout.subtotal')}</span>

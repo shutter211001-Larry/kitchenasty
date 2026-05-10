@@ -103,7 +103,13 @@
     "ready": "待取餐",
     "completed": "已完成",
     "justNow": "剛剛",
-    "ago": "前"
+    "ago": "前",
+    "scheduledOrders": "預約訂單",
+    "delivery": "外送",
+    "pickup": "自取",
+    "itemsCount": "{{count}} 個品項",
+    "cancelConfirm": "確定要取消此訂單嗎？",
+    "noOrders": "目前無訂單"
   },
   "locations": {
     "title": "分店管理",

@@ -152,7 +152,12 @@
     "googleLogin": "Đăng nhập với Google",
     "nameOptional": "Tên (tùy chọn)",
     "emailOptional": "Email (tùy chọn)",
-    "phoneOptional": "Điện thoại (tùy chọn)",
+    "phone": "Số điện thoại",
+    "phoneRequired": "Số điện thoại (Bắt buộc khi đặt trước)",
+    "phoneOptional": "Số điện thoại (tùy chọn)",
+    "phonePlaceholder": "Nhập số điện thoại",
+    "phonePlaceholderScheduled": "Nhập số điện thoại (Cần thiết để liên lạc)",
+    "phoneRequiredForScheduled": "Cần có số điện thoại cho các đơn hàng đặt trước",
     "guestCheckout": "Thanh toán khách",
     "guestEmail": "Email để cập nhật đơn hàng"
   },

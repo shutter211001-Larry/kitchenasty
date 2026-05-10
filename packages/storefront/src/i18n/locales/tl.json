@@ -152,7 +152,12 @@
     "googleLogin": "Mag-sign in gamit ang Google",
     "nameOptional": "Pangalan (opsyonal)",
     "emailOptional": "Email (opsyonal)",
-    "phoneOptional": "Telepono (opsyonal)",
+    "phone": "Numero ng Telepono",
+    "phoneRequired": "Numero ng Telepono (Kailangan para sa Scheduled Orders)",
+    "phoneOptional": "Numero ng Telepono (opsyonal)",
+    "phonePlaceholder": "Ilagay ang numero ng telepono",
+    "phonePlaceholderScheduled": "Ilagay ang numero (Kailangan para sa pagkontak)",
+    "phoneRequiredForScheduled": "Kailangan ang numero ng telefono para sa scheduled orders",
     "guestCheckout": "Guest Checkout",
     "guestEmail": "Email para sa mga update sa order"
   },
