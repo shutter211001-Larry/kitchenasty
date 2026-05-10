@@ -229,6 +229,41 @@ export default function Account() {
           <h2 className="text-lg font-semibold text-main mb-6">{t('account.socialLinking') || '第三方帳號連結'}</h2>
           
           <div className="space-y-6">
+            {/* Password Setup UI (Elegant Transition) */}
+            {showPasswordSetup && (
+              <div className="animate-in fade-in slide-in-from-top-2 duration-300">
+                <div className="p-4 bg-primary-50 rounded-lg border border-primary-100 mb-4">
+                  <h3 className="text-sm font-bold text-primary-900 mb-1">優雅轉移：設定登入密碼</h3>
+                  <p className="text-xs text-primary-700 leading-relaxed">
+                    為了保障您的權益，在解除連結前，請先為您的 Email ({user.email}) 設定一個密碼。
+                    這能確保您未來仍能隨時登入。
+                  </p>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <input
+                    type="password"
+                    placeholder="請輸入新密碼 (至少 6 位)"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    className="flex-1 px-4 py-2 text-sm border border-input rounded-lg outline-none focus:ring-2 focus:ring-primary-500"
+                  />
+                  <button
+                    disabled={isSettingPassword}
+                    onClick={handleSetPasswordAndUnbind}
+                    className="px-6 py-2 bg-primary-600 text-white text-sm font-bold rounded-lg hover:bg-primary-700 disabled:opacity-50 transition-colors"
+                  >
+                    {isSettingPassword ? '設定中...' : '設定並解除連結'}
+                  </button>
+                  <button
+                    onClick={() => setShowPasswordSetup(false)}
+                    className="px-4 py-2 text-sm text-sub hover:text-main"
+                  >
+                    取消
+                  </button>
+                </div>
+              </div>
+            )}
+
             {/* LINE Row */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl border border-input bg-surface/50">
               <div className="flex items-center gap-4">
@@ -342,99 +377,29 @@ export default function Account() {
                         } else {
                           alert(data.error);
                         }
-                            } else {
-                              alert(data.error || '連結失敗');
-                            }
-                          } catch (err: any) {
-                            console.error('LIFF Error:', err);
-                            alert('LINE 連結失敗: ' + (err.message || '未知錯誤'));
-                          }
-                        }}
-                        className="flex items-center justify-center gap-3 w-full py-4 bg-[#06C755] text-white rounded-xl font-bold hover:bg-[#05b34c] transition-all shadow-lg shadow-green-100"
-                      >
-                        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M12 2c5.514 0 10 3.592 10 8.007 0 3.532-2.855 6.478-6.728 7.513-.337.07-.797.222-.912.511-.103.263-.068.675-.033 1.112.035.437.166 1.764.19 1.954.024.19.112.743-.243.812-.355.07-.944-.456-1.32-.821-.376-.365-1.74-2.023-2.373-2.857-2.73-.012-5.461-1.853-5.461-5.187C5 5.592 9.486 2 12 2z" />
-                        </svg>
-                        一鍵連結 LINE 帳號
-                      </button>
-                      <p className="text-[10px] text-center text-hint mt-2">
-                        使用 LINE 官方快速連結技術，安全且無需輸入 ID
-                      </p>
-                    </div>
-                  ) : settings.lineSettings?.officialAccountUrl && (
-                    /* Manual Binding Link if no LIFF ID */
-                    <div className="mb-4">
-                      <a
-                        href={settings.lineSettings.officialAccountUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center justify-center gap-3 w-full py-3 bg-[#06C755] text-white rounded-xl font-bold hover:bg-[#05b34c] transition-all shadow-lg shadow-green-100"
-                      >
-                        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M12 2c5.514 0 10 3.592 10 8.007 0 3.532-2.855 6.478-6.728 7.513-.337.07-.797.222-.912.511-.103.263-.068.675-.033 1.112.035.437.166 1.764.19 1.954.024.19.112.743-.243.812-.355.07-.944-.456-1.32-.821-.376-.365-1.74-2.023-2.373-2.857-2.73-.012-5.461-1.853-5.461-5.187C5 5.592 9.486 2 12 2z" />
-                        </svg>
-                        一鍵關注官方帳號
-                      </a>
-                    </div>
-                  )}
-
-                  {!settings.lineSettings?.liffId && (
-                    <>
-                      <div className="text-xs bg-gray-50 text-sub p-4 rounded-xl border border-gray-100">
-                        <p className="font-bold text-main mb-2">綁定三步驟：</p>
-                        <ol className="list-decimal list-inside space-y-2">
-                          <li>點擊上方按鈕關注我們的官方帳號</li>
-                          <li>在 LINE 對話框輸入 「<span className="text-primary-600 font-bold">id</span>」 並送出</li>
-                          <li>將得到的 ID 貼回下方完成連結</li>
-                        </ol>
-                      </div>
-
-                      <div className="flex gap-2">
-                        <input
-                          id="lineIdInput"
-                          type="text"
-                          placeholder="貼上您的 LINE ID (U...)"
-                          className="flex-1 px-4 py-2 text-sm border border-input rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
-                        />
-                        <button
-                          onClick={async () => {
-                            const input = document.getElementById('lineIdInput') as HTMLInputElement;
-                            const lineUserId = input.value.trim();
-                            if (!lineUserId) return alert('請輸入 ID');
-                            try {
-                              const res = await fetch(`${API_BASE}/line/bind`, {
-                                method: 'POST',
-                                headers: { 
-                                  'Content-Type': 'application/json',
-                                  Authorization: `Bearer ${token}` 
-                              },
-                              body: JSON.stringify({ lineUserId }),
-                            });
-                            const data = await res.json();
-                            if (data.success) {
-                              window.location.reload();
-                            } else {
-                              alert(data.error);
-                            }
-                          } catch (err) {
-                            alert('綁定失敗');
-                          }
-                        }}
-                        className="px-6 py-2 text-sm font-bold text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors"
-                      >
-                        確認連結
-                      </button>
-                    </div>
-                    </>
-                  )}
-                </div>
-              </div>
-            )}
+                      } catch (err) {
+                        alert('操作失敗');
+                      }
+                    }
+                  }}
+                  className="px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg border border-red-200 transition-colors"
+                >
+                  解除連結
+                </button>
+              ) : (
+                <a
+                  href={`${API_BASE}/auth/google?redirectUri=${encodeURIComponent(window.location.origin + '/account')}`}
+                  className="px-4 py-2 text-sm font-bold bg-white text-main rounded-lg border border-input hover:bg-gray-50 transition-colors flex items-center gap-2 shadow-sm"
+                >
+                  連結至 Google 帳號
+                </a>
+              )}
+            </div>
           </div>
         </div>
 
         {/* Danger Zone - Collapsible for safety */}
-        <div className="mt-12 pt-12 border-t">
+        <div className="mt-12 pt-12 border-t px-6">
           <details className="group">
             <summary className="flex items-center justify-between cursor-pointer list-none text-hint hover:text-sub transition-colors">
               <span className="text-sm font-medium">進階帳號管理選項</span>
@@ -449,35 +414,6 @@ export default function Account() {
                   <h3 className="text-lg font-bold text-red-700 mb-4">{t('account.dangerZone') || '危險區域'}</h3>
                   
                   <div className="space-y-6">
-                    {/* LINE Unbind */}
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                      <div>
-                        <h4 className="text-sm font-bold text-main">{t('account.unbindLine')}</h4>
-                        <p className="text-xs text-sub mt-1">解除與 LINE 帳號的連結，但保留本站會員資料。</p>
-                      </div>
-                      <button
-                        disabled={!user.lineUserId}
-                        onClick={() => {
-                          if (!(user as any).hasPassword) {
-                            setShowPasswordSetup(true);
-                            // Scroll to the password setup area
-                            window.scrollTo({ top: 400, behavior: 'smooth' });
-                          } else {
-                            if (confirm(t('account.unbindLineConfirm') || '確定要解除 LINE 連結嗎？')) {
-                              handleUnbind();
-                            }
-                          }
-                        }}
-                        className={`px-4 py-2 text-sm font-medium rounded-lg border transition-colors ${
-                          user.lineUserId 
-                            ? 'text-red-600 border-red-200 hover:bg-red-50' 
-                            : 'text-gray-400 border-gray-100 cursor-not-allowed'
-                        }`}
-                      >
-                        {t('account.unbindLine')}
-                      </button>
-                    </div>
-
                     <div className="h-px bg-red-100"></div>
 
                     {/* Delete Account */}
@@ -528,7 +464,7 @@ export default function Account() {
         </div>
 
         {/* Logout */}
-        <div className="mt-8 flex justify-center">
+        <div className="mt-8 mb-8 flex justify-center">
           <button
             onClick={logout}
             className="text-sub hover:text-red-600 font-medium text-sm flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-red-50 transition-colors"
