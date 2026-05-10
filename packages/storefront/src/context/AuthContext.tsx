@@ -48,7 +48,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (!res.ok) throw new Error('Invalid token');
         return res.json();
       })
-      .then((data) => setUser(data.data))
+      .then((data) => setUser(data.data.customer || data.data.user || data.data))
       .catch(() => logout())
       .finally(() => setIsLoading(false));
   }, [token, logout]);
@@ -64,7 +64,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem('token', data.data.token);
     localStorage.removeItem('explicit_logout');
     setToken(data.data.token);
-    setUser(data.data.user);
+    setUser(data.data.customer || data.data.user || data.data);
   }
 
   function loginWithToken(newToken: string) {
@@ -84,7 +84,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem('token', data.data.token);
     localStorage.removeItem('explicit_logout');
     setToken(data.data.token);
-    setUser(data.data.user);
+    setUser(data.data.customer || data.data.user || data.data);
   }
 
   function updateUser(userData: Partial<User>) {
