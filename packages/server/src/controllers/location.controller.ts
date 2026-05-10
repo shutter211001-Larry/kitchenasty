@@ -218,7 +218,7 @@ export async function getAvailableSlots(req: Request, res: Response): Promise<vo
     targetDate.setDate(now.getDate() + i);
     const dayOfWeek = targetDate.getDay();
     
-    const hours = location.operatingHours.find(h => h.dayOfWeek === dayOfWeek);
+    const hours = location.operatingHours.find((h: any) => h.dayOfWeek === dayOfWeek);
     if (!hours || hours.isClosed) continue;
 
     // Parse open/close times (HH:mm)
