@@ -341,100 +341,105 @@ export default function Account() {
           </div>
         </div>
 
-        {/* Danger Zone */}
-        <div className="p-6 bg-red-50/50 border-t border-red-100">
-          <h2 className="text-lg font-semibold text-red-700 mb-4">{t('account.dangerZone') || '危險區域'}</h2>
-          
-          <div className="space-y-6">
-            {/* LINE Unbind (Duplicate logic here for convenience or keep as is) */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div>
-                <h3 className="text-sm font-bold text-main">{t('account.unbindLine')}</h3>
-                <p className="text-xs text-sub mt-1">解除與 LINE 帳號的連結，但保留本站會員資料。</p>
-              </div>
-              <button
-                disabled={!user.lineUserId}
-                onClick={async () => {
-                  if (!(user as any).hasPassword) {
-                    if (!confirm('警告：您目前尚未設定帳號密碼。解除 LINE 連結後，如果您登出將無法再次登入此帳號！\n\n建議您先登出並使用「忘記密碼」功能設定密碼後再回來解除綁定。\n\n您確定仍要繼續解除連結嗎？')) return;
-                  } else {
-                    if (!confirm(t('account.unbindLineConfirm') || '確定要解除 LINE 連結嗎？')) return;
-                  }
-                  try {
-                    const res = await fetch(`${API_BASE}/line/unbind`, {
-                      method: 'POST',
-                      headers: { Authorization: `Bearer ${token}` },
-                    });
-                    const data = await res.json();
-                    if (data.success) {
-                      window.location.reload();
-                    } else {
-                      alert(data.error);
-                    }
-                  } catch (err) {
-                    alert('操作失敗');
-                  }
-                }}
-                className={`px-4 py-2 text-sm font-medium rounded-lg border transition-colors ${
-                  user.lineUserId 
-                    ? 'text-red-600 border-red-200 hover:bg-red-50' 
-                    : 'text-gray-400 border-gray-100 cursor-not-allowed'
-                }`}
-              >
-                {t('account.unbindLine')}
-              </button>
-            </div>
+        {/* Danger Zone - Collapsible for safety */}
+        <div className="mt-12 pt-12 border-t">
+          <details className="group">
+            <summary className="flex items-center justify-between cursor-pointer list-none text-hint hover:text-sub transition-colors">
+              <span className="text-sm font-medium">進階帳號管理選項</span>
+              <svg className="w-5 h-5 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </summary>
+            
+            <div className="mt-6 space-y-6 animate-in fade-in slide-in-from-top-2 duration-300">
+              <div className="surface-card rounded-xl border border-red-100 bg-red-50/30 overflow-hidden">
+                <div className="p-6">
+                  <h3 className="text-lg font-bold text-red-700 mb-4">{t('account.dangerZone') || '危險區域'}</h3>
+                  
+                  <div className="space-y-6">
+                    {/* LINE Unbind */}
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                      <div>
+                        <h4 className="text-sm font-bold text-main">{t('account.unbindLine')}</h4>
+                        <p className="text-xs text-sub mt-1">解除與 LINE 帳號的連結，但保留本站會員資料。</p>
+                      </div>
+                      <button
+                        disabled={!user.lineUserId}
+                        onClick={() => {
+                          if (!(user as any).hasPassword) {
+                            setShowPasswordSetup(true);
+                            // Scroll to the password setup area
+                            window.scrollTo({ top: 400, behavior: 'smooth' });
+                          } else {
+                            if (confirm(t('account.unbindLineConfirm') || '確定要解除 LINE 連結嗎？')) {
+                              handleUnbind();
+                            }
+                          }
+                        }}
+                        className={`px-4 py-2 text-sm font-medium rounded-lg border transition-colors ${
+                          user.lineUserId 
+                            ? 'text-red-600 border-red-200 hover:bg-red-50' 
+                            : 'text-gray-400 border-gray-100 cursor-not-allowed'
+                        }`}
+                      >
+                        {t('account.unbindLine')}
+                      </button>
+                    </div>
 
-            <div className="h-px bg-red-100"></div>
+                    <div className="h-px bg-red-100"></div>
 
-            {/* Delete Account */}
-            <div className="flex flex-col gap-4">
-              <div>
-                <h3 className="text-sm font-bold text-red-700">{t('footer.deleteAccount')}</h3>
-                <div className="mt-2 p-4 bg-white border border-red-200 rounded-lg">
-                  <p className="text-xs text-red-600 leading-relaxed font-medium">
-                    {t('footer.deleteAccountWarning')}
-                  </p>
+                    {/* Delete Account */}
+                    <div className="flex flex-col gap-4">
+                      <div>
+                        <h4 className="text-sm font-bold text-red-700">{t('footer.deleteAccount')}</h4>
+                        <div className="mt-2 p-4 bg-white border border-red-200 rounded-lg">
+                          <p className="text-xs text-red-600 leading-relaxed font-medium">
+                            {t('footer.deleteAccountWarning')}
+                          </p>
+                        </div>
+                      </div>
+                      
+                      <button
+                        onClick={async () => {
+                          const firstCheck = confirm(t('footer.deleteAccountWarning'));
+                          if (!firstCheck) return;
+                          
+                          const finalCheck = confirm(t('footer.deleteAccountFinalCheck'));
+                          if (!finalCheck) return;
+
+                          try {
+                            const res = await fetch(`${API_BASE}/auth/me`, {
+                              method: 'DELETE',
+                              headers: { Authorization: `Bearer ${token}` },
+                            });
+                            const data = await res.json();
+                            if (data.success) {
+                              alert('帳號已成功刪除。再見！');
+                              logout();
+                            } else {
+                              alert(data.error || '刪除失敗');
+                            }
+                          } catch (err) {
+                            alert('刪除失敗，請聯繫客服');
+                          }
+                        }}
+                        className="w-full sm:w-auto px-6 py-3 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition-colors shadow-sm"
+                      >
+                        {t('footer.deleteAccountConfirm')}
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
-              
-              <button
-                onClick={async () => {
-                  const firstCheck = confirm(t('footer.deleteAccountWarning'));
-                  if (!firstCheck) return;
-                  
-                  const finalCheck = confirm(t('footer.deleteAccountFinalCheck'));
-                  if (!finalCheck) return;
-
-                  try {
-                    const res = await fetch(`${API_BASE}/auth/me`, {
-                      method: 'DELETE',
-                      headers: { Authorization: `Bearer ${token}` },
-                    });
-                    const data = await res.json();
-                    if (data.success) {
-                      alert('帳號已成功刪除。再見！');
-                      logout();
-                    } else {
-                      alert(data.error || '刪除失敗');
-                    }
-                  } catch (err) {
-                    alert('刪除失敗，請聯繫客服');
-                  }
-                }}
-                className="w-full sm:w-auto px-6 py-3 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition-colors shadow-sm"
-              >
-                {t('footer.deleteAccountConfirm')}
-              </button>
             </div>
-          </div>
+          </details>
         </div>
 
         {/* Logout */}
-        <div className="p-6 border-t bg-gray-50/50">
+        <div className="mt-8 flex justify-center">
           <button
             onClick={logout}
-            className="text-sub hover:text-main font-medium text-sm flex items-center gap-2"
+            className="text-sub hover:text-red-600 font-medium text-sm flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-red-50 transition-colors"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />

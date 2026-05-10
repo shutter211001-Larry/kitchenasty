@@ -31,6 +31,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
     setToken(null);
     localStorage.removeItem('token');
+    localStorage.setItem('explicit_logout', 'true');
   }, []);
 
   useEffect(() => {
@@ -60,12 +61,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Login failed');
     localStorage.setItem('token', data.data.token);
+    localStorage.removeItem('explicit_logout');
     setToken(data.data.token);
     setUser(data.data.user);
   }
 
   function loginWithToken(newToken: string) {
     localStorage.setItem('token', newToken);
+    localStorage.removeItem('explicit_logout');
     setToken(newToken);
   }
 
@@ -78,6 +81,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Registration failed');
     localStorage.setItem('token', data.data.token);
+    localStorage.removeItem('explicit_logout');
     setToken(data.data.token);
     setUser(data.data.user);
   }
