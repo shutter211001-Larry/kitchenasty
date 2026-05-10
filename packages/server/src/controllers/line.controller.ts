@@ -101,6 +101,16 @@ export async function bindLine(req: Request, res: Response) {
   }
 
   try {
+    // 1. Check if this LINE ID is already used by someone else
+    const existing = await (req.user.type === 'customer' 
+      ? prisma.customer.findUnique({ where: { lineUserId } })
+      : prisma.user.findUnique({ where: { lineUserId } }));
+
+    if (existing && existing.id !== req.user.id) {
+      return res.status(400).json({ success: false, error: '此 LINE 帳號已被其他會員連結，請先解除該帳號的連結。' });
+    }
+
+    // 2. Proceed with binding
     if (req.user.type === 'customer') {
       await prisma.customer.update({
         where: { id: req.user.id },

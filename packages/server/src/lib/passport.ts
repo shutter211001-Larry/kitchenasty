@@ -27,7 +27,19 @@ export function initPassport() {
             const loggedInUser = (req as any).user;
 
             if (loggedInUser && loggedInUser.type === 'customer') {
-              // LINKING: User is already logged in
+            // LINKING: User is already logged in
+            if (loggedInUser) {
+              // 1. Check if this Google account is already linked to ANOTHER customer
+              const existingLink = await prisma.customer.findUnique({
+                where: { googleId: profile.id }
+              });
+
+              if (existingLink && existingLink.id !== loggedInUser.id) {
+                // This Google account is already taken by someone else
+                return done(null, false, { message: '此 Google 帳號已被其他會員連結，請先解除該帳號的連結。' });
+              }
+
+              // 2. Safe to link
               const customer = await prisma.customer.update({
                 where: { id: loggedInUser.id },
                 data: {
@@ -47,7 +59,7 @@ export function initPassport() {
                 ]
               }
             });
-            
+
             if (!customer) {
               customer = await prisma.customer.create({
                 data: {
@@ -77,7 +89,7 @@ export function initPassport() {
               where: { guestEmail: email, customerId: null },
               data: { customerId: customer.id },
             });
-            
+
             done(null, { id: customer.id, email: customer.email, type: 'customer' as const });
           } catch (err) {
             done(err as Error);

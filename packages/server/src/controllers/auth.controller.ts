@@ -24,7 +24,7 @@ export async function staffLogin(req: Request, res: Response): Promise<void> {
   console.log(`[AUTH DEBUG] Attempting login for email: "${email}"`);
 
   const user = await prisma.user.findUnique({ where: { email } });
-  
+
   if (!user) {
     console.log(`[AUTH DEBUG] User not found for email: "${email}"`);
     res.status(401).json({ success: false, error: 'Invalid credentials' });
@@ -321,9 +321,9 @@ export async function unbindGoogle(req: Request, res: Response): Promise<void> {
   try {
     await prisma.customer.update({
       where: { id: req.user.id },
-      data: { 
+      data: {
         googleId: null,
-        googleEmail: null 
+        googleEmail: null
       }
     });
 
