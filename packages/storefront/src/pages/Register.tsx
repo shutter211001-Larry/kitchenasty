@@ -7,6 +7,7 @@ import { API_BASE } from '../lib/api.js';
 export default function Register() {
   const { t } = useTranslation();
   const { register } = useAuth();
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const redirectPath = searchParams.get('redirect') || '/';
   const [name, setName] = useState('');
