@@ -264,7 +264,24 @@ export default function CounterDisplay() {
                             <span className="ml-2 text-gray-800 font-bold">
                               {order.customer?.name || order.guestName || '顧客'}
                             </span>
+                            <span className="ml-2 text-blue-600 font-bold">
+                              ({order.customer?.phone || order.guestPhone})
+                            </span>
                             <span className="ml-2 text-gray-400">{order.items.length} 個品項</span>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (window.confirm('確定要取消此訂單嗎？')) {
+                                  handleStatusUpdate(order.id, 'CANCELLED');
+                                }
+                              }}
+                              className="ml-2 p-1 text-red-500 hover:bg-red-50 rounded transition-colors"
+                              title="取消訂單"
+                            >
+                              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                              </svg>
+                            </button>
                           </div>
                         ))}
                       </div>

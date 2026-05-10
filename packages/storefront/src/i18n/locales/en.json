@@ -196,7 +196,12 @@
     "googleLogin": "Sign in with Google",
     "nameOptional": "Name (optional)",
     "emailOptional": "Email (optional)",
-    "phoneOptional": "Phone (optional)",
+    "phone": "Phone Number",
+    "phoneRequired": "Phone Number (Required for Scheduled)",
+    "phoneOptional": "Phone Number (optional)",
+    "phonePlaceholder": "Enter phone number",
+    "phonePlaceholderScheduled": "Enter phone number (Required for contact)",
+    "phoneRequiredForScheduled": "Phone number is required for scheduled orders",
     "guestCheckout": "Guest Checkout",
     "guestEmail": "Email for order updates"
   },
