@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { Client, WebhookEvent, MessageEvent, TextMessage } from '@line/bot-sdk';
 import prisma from '../lib/db.js';
 import { generateToken } from '../middleware/auth.js';
+import { grantRegistrationBonus } from '../lib/registrationBonus.js';
 
 async function getLineConfig() {
   const channelSecret = process.env.LINE_CHANNEL_SECRET;
@@ -192,6 +193,8 @@ export async function lineLogin(req: Request, res: Response) {
           isGuest: false
         }
       });
+      // Grant one-time registration bonus (anti-wash protected)
+      await grantRegistrationBonus(customer.id, 'line', lineUserId);
     }
 
     // Generate token
