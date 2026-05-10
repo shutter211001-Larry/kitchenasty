@@ -15,7 +15,9 @@ router.post('/staff/register', authController.staffRegister);
 router.post('/customer/register', authController.customerRegister);
 router.post('/customer/login', authController.customerLogin);
 
-const handleSocialCallback = (req: Request, res: Response, user: any) => {
+const handleSocialCallback = (req: Request, res: Response) => {
+  if (!req.user) return res.redirect(`${STOREFRONT_URL}/auth/callback?error=auth_failed`);
+  const user = req.user as any;
   const token = generateToken({
     id: user.id,
     email: user.email,
