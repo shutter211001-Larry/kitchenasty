@@ -161,39 +161,60 @@ export async function unbindLine(req: Request, res: Response) {
 
 export async function lineLogin(req: Request, res: Response) {
   const { lineUserId, lineDisplayName, email, name } = req.body;
+  
   if (!lineUserId) {
+    console.error('[LINE Login] Missing lineUserId in request body');
     return res.status(400).json({ success: false, error: 'lineUserId is required' });
   }
 
   try {
-    // 1. Try to find by lineUserId
+    console.log(`[LINE Login] Attempting login for: ${lineDisplayName} (${lineUserId}), Email: ${email}`);
+
+    // 1. Try to find by lineUserId (Strongest match)
     let customer = await prisma.customer.findUnique({ where: { lineUserId } });
 
-    // 2. If not found by ID, but we have an email, try to find by email (Integration!)
-    if (!customer && email) {
+    if (customer) {
+      console.log(`[LINE Login] Found existing customer by lineUserId: ${customer.id}`);
+    } else if (email && email.trim() !== "") {
+      // 2. If not found by ID, try to find by email
+      console.log(`[LINE Login] User ID not found, searching by email: ${email}`);
       customer = await prisma.customer.findUnique({ where: { email } });
+      
       if (customer) {
-        // Link the LINE account to the existing account
-        customer = await prisma.customer.update({
-          where: { id: customer.id },
-          data: { lineUserId, lineDisplayName: customer.lineDisplayName || lineDisplayName }
-        });
+        // SECURITY CHECK: Is this email already bound to a different LINE ID?
+        if (customer.lineUserId && customer.lineUserId !== lineUserId) {
+          console.warn(`[LINE Login] Email ${email} is already bound to another LINE ID: ${customer.lineUserId}`);
+          // Don't merge automatically if already bound to someone else
+          // We'll create a new account with a fallback email instead
+          customer = null;
+        } else {
+          console.log(`[LINE Login] Linking existing email account ${email} to LINE ID ${lineUserId}`);
+          customer = await prisma.customer.update({
+            where: { id: customer.id },
+            data: { lineUserId, lineDisplayName: customer.lineDisplayName || lineDisplayName }
+          });
+        }
       }
     }
 
     // 3. If still not found, create a new customer
     if (!customer) {
+      console.log(`[LINE Login] Creating new customer account for LINE ID ${lineUserId}`);
+      // Ensure we have a unique fallback email to avoid collision
+      const fallbackEmail = `${lineUserId}@line.pizzastudio.com`;
+      
       customer = await prisma.customer.create({
         data: {
           lineUserId,
           lineDisplayName,
-          email: email || `${lineUserId}@line.pizzastudio.com`, // Fallback if no email permission
+          email: (email && email.trim() !== "") ? email : fallbackEmail,
           name: name || lineDisplayName || 'LINE User',
           password: null,
           isGuest: false
         }
       });
-      // Grant one-time registration bonus (anti-wash protected)
+      
+      // Grant one-time registration bonus
       await grantRegistrationBonus(customer.id, 'line', lineUserId);
     }
 
@@ -204,10 +225,33 @@ export async function lineLogin(req: Request, res: Response) {
       type: 'customer'
     });
 
-    res.json({ success: true, data: { token, customer: { id: customer.id, email: customer.email, name: customer.name, phone: customer.phone, lineUserId: customer.lineUserId, lineDisplayName: customer.lineDisplayName } } });
+    console.log(`[LINE Login] Login successful for ${customer.id}`);
+    res.json({ 
+      success: true, 
+      data: { 
+        token, 
+        customer: { 
+          id: customer.id, 
+          email: customer.email, 
+          name: customer.name, 
+          phone: customer.phone, 
+          lineUserId: customer.lineUserId, 
+          lineDisplayName: customer.lineDisplayName 
+        } 
+      } 
+    });
   } catch (err: any) {
-    console.error('LINE Login Error:', err);
-    res.status(500).json({ success: false, error: err.message || 'Internal server error' });
+    console.error('[LINE Login Error]:', err);
+    
+    // Handle Prisma unique constraint errors (P2002)
+    if (err.code === 'P2002') {
+      return res.status(400).json({ 
+        success: false, 
+        error: '此電子郵件已被註冊，請先使用密碼登入後再進行 LINE 綁定。' 
+      });
+    }
+    
+    res.status(500).json({ success: false, error: '伺服器內部錯誤，請稍後再試。' });
   }
 }
 

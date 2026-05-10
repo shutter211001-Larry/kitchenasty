@@ -623,9 +623,11 @@ export async function updateOrderStatus(req: Request<{ id: string }>, res: Respo
   if (order.customer?.lineUserId) {
     try {
       const { sendLinePush } = await import('./line.controller.js');
-      let lineMessage = '';
+      const settings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
+      const lineSettings = (settings?.lineSettings as any) || {};
+      const lineNotifications = lineSettings.notifications || {};
       
-      const statusMap: Record<string, string> = {
+      const defaultStatusMap: Record<string, string> = {
         'CONFIRMED': '您的訂單已確認，我們將盡快為您準備餐點。',
         'PREPARING': '您的餐點正在製作中！',
         'READY': '🎉 餐點已準備就緒！歡迎前往取貨。',
@@ -634,8 +636,13 @@ export async function updateOrderStatus(req: Request<{ id: string }>, res: Respo
         'CANCELLED': '您的訂單已被取消。如有任何疑問，請聯繫我們。'
       };
 
-      if (statusMap[status]) {
-        lineMessage = `【訂單狀態更新】\n訂單編號：#${order.orderNumber}\n目前狀態：${lineMessage || statusMap[status]}`;
+      // Check if this status has a specific setting in lineSettings
+      const statusConfig = lineNotifications[status];
+      const isEnabled = statusConfig ? statusConfig.enabled !== false : !!defaultStatusMap[status];
+      const customMessage = statusConfig?.message || defaultStatusMap[status];
+
+      if (isEnabled && customMessage) {
+        const lineMessage = `【訂單狀態更新】\n訂單編號：#${order.orderNumber}\n目前狀態：${customMessage}`;
         sendLinePush(order.customer.lineUserId, lineMessage).catch(err => {
           console.error('Error sending LINE notification:', err);
         });
