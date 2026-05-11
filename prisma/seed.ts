@@ -75,17 +75,30 @@ async function main() {
 
   // Operating hours (Mon-Sun, 10am-10pm)
   for (let day = 0; day <= 6; day++) {
-    await prisma.operatingHour.upsert({
-      where: { locationId_dayOfWeek: { locationId: location.id, dayOfWeek: day } },
-      update: {},
-      create: {
-        locationId: location.id,
-        dayOfWeek: day,
-        openTime: '10:00',
-        closeTime: '22:00',
-        isClosed: false,
-      },
+    const existingHour = await prisma.operatingHour.findFirst({
+      where: { locationId: location.id, dayOfWeek: day },
     });
+
+    if (existingHour) {
+      await prisma.operatingHour.update({
+        where: { id: existingHour.id },
+        data: {
+          openTime: '10:00',
+          closeTime: '22:00',
+          isClosed: false,
+        },
+      });
+    } else {
+      await prisma.operatingHour.create({
+        data: {
+          locationId: location.id,
+          dayOfWeek: day,
+          openTime: '10:00',
+          closeTime: '22:00',
+          isClosed: false,
+        },
+      });
+    }
   }
 
   // Delivery zones
