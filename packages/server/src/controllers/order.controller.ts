@@ -831,7 +831,7 @@ export async function updateOrderStatus(req: Request<{ id: string }>, res: Respo
           console.error('[LINE Notify] sendLinePush FAILED:', err);
         });
       } else {
-        console.log(`[LINE Notify] Notification skipped: isEnabled=${isEnabled}, hasMessage=${!!customMessage}`);
+        console.log(`[LINE Notify] Notification skipped: isEnabled=${isEnabled}, hasMessage=${!!template}`);
       }
     } catch (err) {
       console.error('[LINE Notify] CRITICAL ERROR in notification logic:', err);
