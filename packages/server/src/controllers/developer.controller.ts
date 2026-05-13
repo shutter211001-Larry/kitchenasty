@@ -153,3 +153,46 @@ export async function getAuditLogs(req: Request, res: Response): Promise<void> {
     },
   });
 }
+
+// ============================================================
+// DATABASE SYNC
+// ============================================================
+
+import { exec } from 'child_process';
+import { promisify } from 'util';
+import path from 'path';
+
+const execAsync = promisify(exec);
+
+export async function syncDatabase(req: Request, res: Response) {
+  // Only SUPER_ADMIN allowed
+  if (req.user?.role !== 'SUPER_ADMIN') {
+    return res.status(403).json({ success: false, error: 'Permission denied' });
+  }
+
+  try {
+    console.log('[Developer] Starting database sync (prisma db push)...');
+    
+    // In production, we might want prisma migrate deploy, but db push is faster for dev/rapid changes
+    const { stdout, stderr } = await execAsync('npx prisma db push', {
+      cwd: path.resolve(process.cwd(), '../../'), // Root directory where prisma folder is
+    });
+
+    console.log('[Developer] Sync stdout:', stdout);
+    if (stderr) console.error('[Developer] Sync stderr:', stderr);
+
+    res.json({ 
+      success: true, 
+      message: 'Database schema synced successfully',
+      details: stdout
+    });
+  } catch (err: any) {
+    console.error('[Developer] Sync failed:', err);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Database sync failed',
+      details: err.message
+    });
+  }
+}
+

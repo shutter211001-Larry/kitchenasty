@@ -47,6 +47,8 @@ model Customer {
   facebookId          String?              @unique
   googleEmail         String?
   googleId            String?              @unique
+  emailNotificationsEnabled Boolean              @default(true)
+  lineNotificationsEnabled  Boolean              @default(true)
   addresses           Address[]
   cookieConsents      CookieConsent[]
   group               CustomerGroup?       @relation(fields: [groupId], references: [id])

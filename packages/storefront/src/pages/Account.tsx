@@ -26,12 +26,22 @@ export default function Account() {
   const [isSocialVerified, setIsSocialVerified] = useState(false);
 
   const [isEditing, setIsEditing] = useState(false);
-  const [editForm, setEditForm] = useState({ name: '', phone: '' });
+  const [editForm, setEditForm] = useState({ 
+    name: '', 
+    phone: '',
+    emailNotificationsEnabled: true,
+    lineNotificationsEnabled: true
+  });
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     if (user) {
-      setEditForm({ name: user.name || '', phone: user.phone || '' });
+      setEditForm({ 
+        name: user.name || '', 
+        phone: user.phone || '',
+        emailNotificationsEnabled: (user as any).emailNotificationsEnabled !== false,
+        lineNotificationsEnabled: (user as any).lineNotificationsEnabled !== false
+      });
     }
   }, [user]);
 
@@ -507,8 +517,69 @@ export default function Account() {
                 <span className="px-2 py-0.5 text-[10px] font-bold bg-hint/20 text-hint rounded-md uppercase tracking-tighter italic">Read Only</span>
               </div>
             </div>
+        </div>
+      </div>
+
+      {/* Notification Preferences */}
+      <div className="p-8 border-b border-input">
+        <h2 className="text-lg font-bold text-main mb-6 flex items-center gap-2">
+          <svg className="w-5 h-5 text-hint" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+          </svg>
+          通知設定
+        </h2>
+        <div className="space-y-4">
+          <div className="flex items-center justify-between p-4 bg-surface-soft/30 border border-input rounded-2xl">
+            <div>
+              <h3 className="font-bold text-main">電子郵件通知</h3>
+              <p className="text-xs text-sub mt-1">接收訂單確認與狀態更新郵件</p>
+            </div>
+            <button
+              onClick={async () => {
+                const newValue = !editForm.emailNotificationsEnabled;
+                setEditForm(prev => ({ ...prev, emailNotificationsEnabled: newValue }));
+                // Auto-save for these toggles
+                try {
+                  await fetch(`${API_BASE}/auth/me`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                    body: JSON.stringify({ emailNotificationsEnabled: newValue }),
+                  });
+                } catch (e) {}
+              }}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${editForm.emailNotificationsEnabled ? 'bg-primary-600' : 'bg-gray-300'}`}
+            >
+              <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${editForm.emailNotificationsEnabled ? 'translate-x-6' : 'translate-x-1'}`} />
+            </button>
+          </div>
+
+          <div className="flex items-center justify-between p-4 bg-surface-soft/30 border border-input rounded-2xl">
+            <div>
+              <h3 className="font-bold text-main">LINE 通知</h3>
+              <p className="text-xs text-sub mt-1">透過 LINE 接收訂單即時通知</p>
+              {!user.lineUserId && <p className="text-[10px] text-amber-600 mt-1">需先綁定 LINE 帳號</p>}
+            </div>
+            <button
+              disabled={!user.lineUserId}
+              onClick={async () => {
+                if (!user.lineUserId) return;
+                const newValue = !editForm.lineNotificationsEnabled;
+                setEditForm(prev => ({ ...prev, lineNotificationsEnabled: newValue }));
+                try {
+                  await fetch(`${API_BASE}/auth/me`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                    body: JSON.stringify({ lineNotificationsEnabled: newValue }),
+                  });
+                } catch (e) {}
+              }}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${!user.lineUserId ? 'opacity-50 cursor-not-allowed' : ''} ${editForm.lineNotificationsEnabled && user.lineUserId ? 'bg-[#06C755]' : 'bg-gray-300'}`}
+            >
+              <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${editForm.lineNotificationsEnabled && user.lineUserId ? 'translate-x-6' : 'translate-x-1'}`} />
+            </button>
           </div>
         </div>
+      </div>
 
         {/* Loyalty Points */}
         {settings.loyaltyProgramEnabled && loyaltyPoints !== null && (

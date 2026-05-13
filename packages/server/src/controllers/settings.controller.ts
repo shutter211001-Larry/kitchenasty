@@ -39,6 +39,13 @@ const updateSettingsSchema = z.object({
   lineSettings: z.object({
     liffId: z.string().optional(),
     officialAccountUrl: z.string().optional(),
+    notifications: z.record(z.object({
+      enabled: z.boolean().optional(),
+      message: z.string().optional(),
+    })).optional(),
+  }).optional(),
+  orderSettings: z.object({
+    emailNotifications: z.record(z.boolean()).optional(),
   }).optional(),
 });
 
@@ -140,8 +147,24 @@ export async function updateSettings(req: Request, res: Response): Promise<void>
 
   const existingSettings = await getOrCreateSettings();
 
+  // Helper to merge JSON fields
+  const mergeJson = (field: string, newData: any) => {
+    if (!newData) return undefined;
+    const existing = (existingSettings as any)[field] || {};
+    return { ...existing, ...newData };
+  };
+
+  const dataToUpdate: any = { ...parsed.data };
+  
+  if (parsed.data.lineSettings) {
+    dataToUpdate.lineSettings = mergeJson('lineSettings', parsed.data.lineSettings);
+  }
+  if (parsed.data.orderSettings) {
+    dataToUpdate.orderSettings = mergeJson('orderSettings', parsed.data.orderSettings);
+  }
+
   // Auto-translate
-  const translatedData = await autoTranslateSiteSettings(parsed.data, existingSettings);
+  const translatedData = await autoTranslateSiteSettings(dataToUpdate, existingSettings);
 
   const settings = await prisma.siteSettings.update({
     where: { id: 'default' },
@@ -296,6 +319,7 @@ const orderSettingsSchema = z.object({
   timeSlotInterval: z.number().min(5).max(120).optional(),
   taxRate: z.number().min(0).max(100).optional(),
   boardLeadTime: z.number().min(0).max(1440).optional(),
+  emailNotifications: z.record(z.boolean()).optional(),
 });
 
 const reservationSettingsSchema = z.object({

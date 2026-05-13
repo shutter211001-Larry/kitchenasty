@@ -236,7 +236,14 @@ export async function getMe(req: Request, res: Response): Promise<void> {
   } else {
     const customer = await prisma.customer.findUnique({
       where: { id: req.user.id },
-      select: { id: true, email: true, name: true, phone: true, lineUserId: true, lineDisplayName: true, googleId: true, googleEmail: true, password: true },
+      select: { 
+        id: true, email: true, name: true, phone: true, 
+        lineUserId: true, lineDisplayName: true, 
+        googleId: true, googleEmail: true, 
+        password: true,
+        emailNotificationsEnabled: true,
+        lineNotificationsEnabled: true
+      },
     });
     if (!customer) {
       res.status(401).json({ success: false, error: 'Customer not found' });
@@ -312,6 +319,8 @@ export async function updateMe(req: Request, res: Response): Promise<void> {
   const schema = z.object({
     name: z.string().min(1).optional(),
     phone: z.string().optional(),
+    emailNotificationsEnabled: z.boolean().optional(),
+    lineNotificationsEnabled: z.boolean().optional(),
   });
 
   const parsed = schema.safeParse(req.body);
@@ -324,7 +333,13 @@ export async function updateMe(req: Request, res: Response): Promise<void> {
     const updated = await prisma.customer.update({
       where: { id: req.user.id },
       data: parsed.data,
-      select: { id: true, email: true, name: true, phone: true, lineUserId: true, lineDisplayName: true, googleId: true, googleEmail: true },
+      select: { 
+        id: true, email: true, name: true, phone: true, 
+        lineUserId: true, lineDisplayName: true, 
+        googleId: true, googleEmail: true,
+        emailNotificationsEnabled: true,
+        lineNotificationsEnabled: true
+      },
     });
 
     res.json({ success: true });

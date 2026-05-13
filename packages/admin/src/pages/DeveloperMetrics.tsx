@@ -86,20 +86,48 @@ export default function DeveloperMetrics() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-gray-900">API Metrics</h1>
-        <div className="flex gap-1">
-          {TIME_RANGES.map((r) => (
-            <button
-              key={r.hours}
-              onClick={() => setHours(r.hours)}
-              className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
-                hours === r.hours
-                  ? 'bg-primary-600 text-white'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
-            >
-              {r.label}
-            </button>
-          ))}
+        <div className="flex gap-2">
+          <button
+            onClick={async () => {
+              if (!confirm('確定要同步資料庫欄位嗎？這將會執行 prisma db push。')) return;
+              try {
+                const res = await fetch('/api/developer/sync-db', {
+                  method: 'POST',
+                  headers: { Authorization: `Bearer ${token}` },
+                });
+                const data = await res.json();
+                if (data.success) {
+                  alert('資料庫同步成功！');
+                } else {
+                  alert(`同步失敗: ${data.error}`);
+                }
+              } catch (err) {
+                alert('發生錯誤，請查看控制台。');
+              }
+            }}
+            className="px-4 py-1.5 text-sm font-medium bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-2"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            同步資料庫
+          </button>
+          <div className="h-8 w-px bg-gray-200 mx-1" />
+          <div className="flex gap-1">
+            {TIME_RANGES.map((r) => (
+              <button
+                key={r.hours}
+                onClick={() => setHours(r.hours)}
+                className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
+                  hours === r.hours
+                    ? 'bg-primary-600 text-white'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                {r.label}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 

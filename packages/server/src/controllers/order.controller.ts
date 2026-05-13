@@ -10,6 +10,25 @@ import { calculateDistance } from '../lib/geo.js';
 import { sendEmail, orderConfirmationEmail, orderStatusEmail } from '../lib/email.js';
 import { auditLog } from '../lib/audit.js';
 
+// ============================================================
+// HELPERS
+// ============================================================
+
+function formatNotificationMessage(template: string, order: any, customer?: any) {
+  const userName = customer?.name || order.guestName || '顧客';
+  const orderNumber = `#${order.orderNumber}`;
+  const itemsList = order.items?.map((i: any) => `${i.name} x${i.quantity}`).join(', ') || '';
+  const pickupTime = order.pickupTime 
+    ? new Date(order.pickupTime).toLocaleString('zh-TW', { hour: '2-digit', minute: '2-digit' })
+    : '做好馬上取';
+
+  return template
+    .replace(/{使用者}/g, userName)
+    .replace(/{訂單編號}/g, orderNumber)
+    .replace(/{餐點內容}/g, itemsList)
+    .replace(/{取餐時間\/做好馬上取}/g, pickupTime);
+}
+
 const orderItemOptionSchema = z.object({
   menuOptionValueId: z.string().min(1),
   name: z.string().min(1),
@@ -505,20 +524,27 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
     }
   }
 
-  // Send confirmation email if enabled
-  const recipientEmail = order.customer?.email || guestEmail;
+  // Send confirmation email/LINE if enabled
+  const customer = customerId ? await prisma.customer.findUnique({ where: { id: customerId } }) : null;
+  const recipientEmail = customer?.email || guestEmail;
+  
   if (recipientEmail) {
-    let shouldSend = true;
+    let shouldSendEmail = true;
     try {
       const settings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
       const orderSettings = (settings?.orderSettings as any) || {};
       const notifications = orderSettings.emailNotifications || {};
       if (notifications['PLACED'] === false) {
-        shouldSend = false;
+        shouldSendEmail = false;
+      }
+      
+      // Check customer preference
+      if (customer && customer.emailNotificationsEnabled === false) {
+        shouldSendEmail = false;
       }
     } catch (e) {}
 
-    if (shouldSend) {
+    if (shouldSendEmail) {
       const emailContent = orderConfirmationEmail({
         orderNumber: order.orderNumber,
         orderType: order.orderType,
@@ -526,6 +552,27 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
         items: order.items.map((i) => ({ name: i.name, quantity: i.quantity, subtotal: i.subtotal })),
       });
       sendEmail({ to: recipientEmail, ...emailContent }).catch(() => {});
+    }
+  }
+
+  // Send LINE push for new order if customer has bound LINE and preference is enabled
+  if (customer?.lineUserId && customer.lineNotificationsEnabled !== false) {
+    try {
+      const { sendLinePush } = await import('./line.controller.js');
+      const settings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
+      const lineSettings = (settings?.lineSettings as any) || {};
+      const lineNotifications = lineSettings.notifications || {};
+      
+      const isEnabled = lineNotifications['PLACED']?.enabled !== false;
+      const template = lineNotifications['PLACED']?.message || '您的訂單已成功建立！我們將盡快為您處理。';
+
+      if (isEnabled) {
+        const formattedMessage = formatNotificationMessage(template, order, customer);
+        const lineMessage = `【訂單建立成功】\n訂單編號：#${order.orderNumber}\n總計：$${order.total.toFixed(2)}\n${formattedMessage}`;
+        sendLinePush(customer.lineUserId, lineMessage).catch(() => {});
+      }
+    } catch (err) {
+      console.error('[LINE Notify] Error in createOrder notification logic:', err);
     }
   }
 
@@ -718,6 +765,12 @@ export async function updateOrderStatus(req: Request<{ id: string }>, res: Respo
       if (notifications[status] === false) {
         shouldSend = false;
       }
+      
+      // Check customer preference
+      const customer = order.customerId ? await prisma.customer.findUnique({ where: { id: order.customerId } }) : null;
+      if (customer && customer.emailNotificationsEnabled === false) {
+        shouldSend = false;
+      }
     } catch (e) {}
 
     if (shouldSend) {
@@ -730,6 +783,17 @@ export async function updateOrderStatus(req: Request<{ id: string }>, res: Respo
   console.log(`[LINE Notify] Checking notification for Order #${order.orderNumber}. Status: ${status}`);
   if (order.customer?.lineUserId) {
     try {
+      // Check customer preference
+      const customer = await prisma.customer.findUnique({ 
+        where: { id: order.customerId! },
+        select: { lineNotificationsEnabled: true }
+      });
+      
+      if (customer?.lineNotificationsEnabled === false) {
+        console.log('[LINE Notify] Customer disabled LINE notifications. Skipping.');
+        return;
+      }
+
       console.log(`[LINE Notify] Found lineUserId: ${order.customer.lineUserId} for customer: ${order.customer.name}`);
       const { sendLinePush } = await import('./line.controller.js');
       const settings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
@@ -753,12 +817,13 @@ export async function updateOrderStatus(req: Request<{ id: string }>, res: Respo
       // Check if this status has a specific setting in lineSettings
       const statusConfig = lineNotifications[status];
       const isEnabled = statusConfig ? statusConfig.enabled !== false : !!defaultStatusMap[status];
-      const customMessage = statusConfig?.message || defaultStatusMap[status];
+      const template = statusConfig?.message || defaultStatusMap[status];
 
-      console.log(`[LINE Notify] isEnabled: ${isEnabled}, customMessage: ${customMessage}`);
+      console.log(`[LINE Notify] isEnabled: ${isEnabled}, template: ${template}`);
 
-      if (isEnabled && customMessage) {
-        const lineMessage = `【訂單狀態更新】\n訂單編號：#${order.orderNumber}\n目前狀態：${customMessage}`;
+      if (isEnabled && template) {
+        const formattedMessage = formatNotificationMessage(template, updated, order.customer);
+        const lineMessage = `【訂單狀態更新】\n訂單編號：#${order.orderNumber}\n目前狀態：${formattedMessage}`;
         console.log(`[LINE Notify] Sending message to LINE...`);
         sendLinePush(order.customer.lineUserId, lineMessage).then(() => {
           console.log('[LINE Notify] sendLinePush call completed');
