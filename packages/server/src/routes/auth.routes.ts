@@ -27,14 +27,48 @@ const handleSocialCallback = (req: Request, res: Response) => {
   // Extract redirect from state if present
   let redirectPath = '/';
   const stateStr = req.query.state as string;
+  const directRedirect = req.query.redirectUri || req.query.redirect;
+
   if (stateStr) {
     try {
-      const decodedStr = decodeURIComponent(stateStr);
-      if (decodedStr.startsWith('{')) {
-        const stateObj = JSON.parse(decodedStr);
-        if (stateObj.redirect) redirectPath = stateObj.redirect;
+      // Some providers or double-encoding might require multiple decodes, 
+      // but usually Express decodes once. Let's try to parse as JSON first.
+      let stateObj: any = null;
+      if (stateStr.startsWith('{')) {
+        stateObj = JSON.parse(stateStr);
+      } else {
+        // Try decoding in case it's double-encoded
+        const decoded = decodeURIComponent(stateStr);
+        if (decoded.startsWith('{')) {
+          stateObj = JSON.parse(decoded);
+        } else {
+          // Try parsing as query string
+          const params = new URLSearchParams(stateStr);
+          redirectPath = params.get('redirect') || params.get('redirectUri') || redirectPath;
+        }
       }
-    } catch (e) {}
+
+      if (stateObj) {
+        redirectPath = stateObj.redirect || stateObj.redirectUri || redirectPath;
+      }
+    } catch (e) {
+      console.warn('[Auth] Failed to parse OAuth state:', e);
+    }
+  }
+
+  // Fallback to direct query param if state didn't yield anything
+  if (redirectPath === '/' && directRedirect) {
+    redirectPath = directRedirect as string;
+  }
+
+  // Ensure redirectPath is relative to prevent open redirect vulnerabilities
+  if (redirectPath.startsWith('http')) {
+    try {
+      const url = new URL(redirectPath);
+      redirectPath = url.pathname + url.search;
+    } catch (e) {
+      redirectPath = '/';
+    }
   }
 
   res.redirect(`${STOREFRONT_URL}/auth/callback?token=${token}&redirect=${encodeURIComponent(redirectPath)}`);
