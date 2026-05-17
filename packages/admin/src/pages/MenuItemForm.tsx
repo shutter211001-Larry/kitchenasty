@@ -60,6 +60,14 @@ interface DietaryOption {
   name: string;
 }
 
+interface ErpRecipe {
+  id: string;
+  name: string;
+  description: string;
+  yieldAmount: number;
+  yieldUnit: string;
+}
+
 const emptyItem: MenuItemData = {
   name: '',
   nameTranslations: {},
@@ -118,6 +126,9 @@ export default function MenuItemForm() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const [erpRecipes, setErpRecipes] = useState<ErpRecipe[]>([]);
+  const [selectedErpRecipeId, setSelectedErpRecipeId] = useState<string>('');
+
   useEffect(() => {
     Promise.all([
       api.get<{ data: CategoryOption[] }>('/menu/categories'),
@@ -130,7 +141,15 @@ export default function MenuItemForm() {
       setMealtimes(mtRes.data);
       setDietary(dieRes.data);
     }).catch(() => { });
-  }, []);
+
+    if (!isEdit) {
+      api.get<{ data: ErpRecipe[] }>('/menu/erp/product-recipes')
+        .then((res) => {
+          setErpRecipes(res.data || []);
+        })
+        .catch(() => console.error('Failed to load ERP recipes'));
+    }
+  }, [isEdit]);
 
   useEffect(() => {
     if (!isEdit) return;
@@ -293,6 +312,14 @@ export default function MenuItemForm() {
         dietaryPreferenceIds: selectedDietary,
       };
 
+      if (!isEdit && selectedErpRecipeId) {
+        const selectedRecipe = erpRecipes.find(r => r.id === selectedErpRecipeId);
+        if (selectedRecipe) {
+          (body as any).recipeId = selectedRecipe.id;
+          (body as any).recipeName = selectedRecipe.name;
+        }
+      }
+
       if (isEdit) {
         const { slug: _, ...updateBody } = body;
         await api.patch(`/menu/items/${id}`, updateBody);
@@ -328,7 +355,36 @@ export default function MenuItemForm() {
       <form onSubmit={handleSubmit} className="space-y-8">
         {/* 基本資訊 */}
         <section className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">基本資訊 (Basic Information)</h3>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-medium text-gray-900">基本資訊 (Basic Information)</h3>
+            {!isEdit && erpRecipes.length > 0 && (
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-primary-600 font-bold bg-primary-50 px-2 py-1 rounded">從 ERP 產品配方匯入</span>
+                <select
+                  value={selectedErpRecipeId}
+                  onChange={(e) => {
+                    const id = e.target.value;
+                    setSelectedErpRecipeId(id);
+                    if (id) {
+                      const recipe = erpRecipes.find(r => r.id === id);
+                      if (recipe) {
+                        updateField('name', recipe.name);
+                        autoSlug(recipe.name);
+                        updateField('description', recipe.description || '');
+                        updateField('unit', recipe.yieldUnit || '份');
+                      }
+                    }
+                  }}
+                  className="border border-primary-200 text-sm rounded-lg px-2 py-1 focus:ring-primary-500 outline-none"
+                >
+                  <option value="">-- 選擇 ERP 食譜 (建立後自動綁定) --</option>
+                  {erpRecipes.map(r => (
+                    <option key={r.id} value={r.id}>{r.name}</option>
+                  ))}
+                </select>
+              </div>
+            )}
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">名稱 (Name) *</label>
