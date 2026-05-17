@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useApi } from '../hooks/useApi.js';
@@ -74,15 +74,18 @@ export default function Menu() {
   const [itemsLoading, setItemsLoading] = useState(true);
   const [itemsError, setItemsError] = useState<string | null>(null);
 
-  // Set default category if not specified in URL
+  // Set default category if not specified in URL (only on first load)
+  const defaultApplied = useRef(false);
   useEffect(() => {
-    if (categories && !selectedCategory && !searchParams.get('category')) {
-      const defaultCategory = categories.find(c => c.isDefaultOpen);
-      if (defaultCategory) {
-        setSelectedCategory(defaultCategory.id);
-      }
+    if (defaultApplied.current) return;
+    if (!categories || categories.length === 0) return;
+    if (searchParams.get('category')) return; // URL already has a category
+    const defaultCategory = categories.find(c => c.isDefaultOpen);
+    if (defaultCategory) {
+      defaultApplied.current = true;
+      setSelectedCategory(defaultCategory.id);
     }
-  }, [categories, selectedCategory, searchParams]);
+  }, [categories]);
 
   // Debounce search
   useEffect(() => {
