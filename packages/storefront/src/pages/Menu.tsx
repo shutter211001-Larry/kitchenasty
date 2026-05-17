@@ -79,13 +79,32 @@ export default function Menu() {
   useEffect(() => {
     if (defaultApplied.current) return;
     if (!categories || categories.length === 0) return;
-    if (searchParams.get('category')) return; // URL already has a category
-    const defaultCategory = categories.find(c => c.isDefaultOpen);
-    if (defaultCategory) {
+    
+    const catParam = searchParams.get('category');
+    if (!catParam) {
+      const defaultCategory = categories.find(c => c.isDefaultOpen && c.isActive);
+      if (defaultCategory) {
+        defaultApplied.current = true;
+        setSelectedCategory(defaultCategory.id);
+      } else {
+        defaultApplied.current = true;
+        setSelectedCategory('all');
+      }
+    } else {
       defaultApplied.current = true;
-      setSelectedCategory(defaultCategory.id);
     }
-  }, [categories]);
+  }, [categories, searchParams]);
+
+  // Sync searchParams changes back to selectedCategory state (e.g. on navigation resets)
+  useEffect(() => {
+    const cat = searchParams.get('category');
+    if (cat !== selectedCategory) {
+      setSelectedCategory(cat);
+      if (!cat) {
+        defaultApplied.current = false;
+      }
+    }
+  }, [searchParams]);
 
   // Debounce search
   useEffect(() => {
@@ -129,7 +148,7 @@ export default function Menu() {
   const activeCategories = categories?.filter((c) => c.isActive && !c.parentId) || [];
   const activeItems = items.filter((i) => i.isActive && (!i.trackStock || i.stockQty > 0));
 
-  function handleCategoryClick(catId: string | null) {
+  function handleCategoryClick(catId: string) {
     setSelectedCategory(catId);
     setPage(1);
     setMobileCategoriesOpen(false);
@@ -185,8 +204,8 @@ export default function Menu() {
         <aside className={`md:w-56 shrink-0 ${mobileCategoriesOpen ? '' : 'hidden md:block'}`}>
           <nav className="space-y-1">
             <button
-              onClick={() => handleCategoryClick(null)}
-              className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors ${!selectedCategory
+              onClick={() => handleCategoryClick('all')}
+              className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors ${selectedCategory === 'all' || !selectedCategory
                   ? 'bg-primary-50 text-primary-700'
                   : 'text-sub hover:bg-surface'
                 }`}
@@ -339,7 +358,7 @@ export default function Menu() {
 
 function buildItemsUrl(categoryId: string | null, search: string, page: number): string {
   const params = new URLSearchParams();
-  if (categoryId) params.set('categoryId', categoryId);
+  if (categoryId && categoryId !== 'all') params.set('categoryId', categoryId);
   if (search) params.set('search', search);
   if (page > 1) params.set('page', String(page));
   params.set('limit', '12');
