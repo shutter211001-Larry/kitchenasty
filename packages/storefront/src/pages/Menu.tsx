@@ -74,37 +74,25 @@ export default function Menu() {
   const [itemsLoading, setItemsLoading] = useState(true);
   const [itemsError, setItemsError] = useState<string | null>(null);
 
-  // Set default category if not specified in URL (only on first load)
-  const defaultApplied = useRef(false);
+  // Set default category if not specified in URL
   useEffect(() => {
-    if (defaultApplied.current) return;
     if (!categories || categories.length === 0) return;
-    
-    const catParam = searchParams.get('category');
-    if (!catParam) {
-      const defaultCategory = categories.find(c => c.isDefaultOpen && c.isActive);
-      if (defaultCategory) {
-        defaultApplied.current = true;
-        setSelectedCategory(defaultCategory.id);
-      } else {
-        defaultApplied.current = true;
-        setSelectedCategory('all');
-      }
-    } else {
-      defaultApplied.current = true;
+    if (searchParams.get('category')) return; // URL already has a category selection
+
+    const activeCats = categories.filter((c) => c.isActive && !c.parentId);
+    if (activeCats.length > 0) {
+      const defaultCategory = activeCats.find((c) => c.isDefaultOpen) || activeCats[0];
+      setSelectedCategory(defaultCategory.id);
     }
   }, [categories, searchParams]);
 
-  // Sync searchParams changes back to selectedCategory state (e.g. on navigation resets)
+  // Sync URL searchParams back to state (e.g. on navigation resets)
   useEffect(() => {
     const cat = searchParams.get('category');
     if (cat !== selectedCategory) {
       setSelectedCategory(cat);
-      if (!cat) {
-        defaultApplied.current = false;
-      }
     }
-  }, [searchParams]);
+  }, [searchParams, selectedCategory]);
 
   // Debounce search
   useEffect(() => {
@@ -203,15 +191,6 @@ export default function Menu() {
         {/* Category sidebar */}
         <aside className={`md:w-56 shrink-0 ${mobileCategoriesOpen ? '' : 'hidden md:block'}`}>
           <nav className="space-y-1">
-            <button
-              onClick={() => handleCategoryClick('all')}
-              className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors ${selectedCategory === 'all' || !selectedCategory
-                  ? 'bg-primary-50 text-primary-700'
-                  : 'text-sub hover:bg-surface'
-                }`}
-            >
-              {t('menu.allCategories')}
-            </button>
             {categoriesLoading && (
               <div className="px-3 py-2 text-sm text-gray-400">{t('common.loading')}</div>
             )}
@@ -228,6 +207,18 @@ export default function Menu() {
                 <span className="text-hint ml-1 text-xs">({cat._count.menuItems})</span>
               </button>
             ))}
+
+            {!categoriesLoading && activeCategories.length > 0 && (
+              <button
+                onClick={() => handleCategoryClick('all')}
+                className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors ${selectedCategory === 'all'
+                    ? 'bg-primary-50 text-primary-700'
+                    : 'text-sub hover:bg-surface'
+                  }`}
+              >
+                {t('menu.allCategories')}
+              </button>
+            )}
           </nav>
         </aside>
 
