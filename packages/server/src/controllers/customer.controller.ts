@@ -194,14 +194,16 @@ export async function sendPromotionalEmail(req: Request, res: Response): Promise
     select: { email: true, name: true }
   });
 
-  if (customers.length === 0) {
-    res.status(404).json({ success: false, error: 'No customers found to send email' });
+  const customersWithEmail = customers.filter((c): c is { email: string; name: string } => c.email !== null && c.email.trim() !== "");
+
+  if (customersWithEmail.length === 0) {
+    res.status(404).json({ success: false, error: 'No customers found with valid email addresses' });
     return;
   }
 
   // Send emails (in a real app, this should be a background job)
   const results = await Promise.allSettled(
-    customers.map(c => 
+    customersWithEmail.map(c => 
       sendEmail({
         to: c.email,
         subject,
