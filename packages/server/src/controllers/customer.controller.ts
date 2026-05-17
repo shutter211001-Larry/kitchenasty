@@ -38,6 +38,7 @@ export async function listCustomers(req: Request, res: Response): Promise<void> 
         email: true,
         name: true,
         phone: true,
+        isEmployee: true,
         isGuest: true,
         loyaltyPoints: true,
         isWhitelisted: true,
@@ -105,6 +106,7 @@ const updateCustomerSchema = z.object({
   groupId: z.string().nullable().optional(),
   loyaltyPoints: z.number().int().optional(),
   isGuest: z.boolean().optional(),
+  isEmployee: z.boolean().optional(),
   isWhitelisted: z.boolean().optional(),
   isBlacklisted: z.boolean().optional(),
 });

@@ -60,6 +60,11 @@ export default function Checkout() {
 
   // Determine if currently closed
   useEffect(() => {
+    if (user?.isEmployee) {
+      setIsClosedNow(false);
+      return;
+    }
+
     if (slotsByDay.length > 0) {
       const today = new Date().toISOString().split('T')[0];
       const hasSlotsToday = slotsByDay.find(d => d.date === today);
@@ -800,21 +805,75 @@ export default function Checkout() {
               </div>
             </div>
           ) : (
-            /* Logged in user: ensure phone if scheduled */
-            scheduledAt && !user.phone && (
-              <div id="contact-info" className="surface-card rounded-xl shadow-sm border p-6 border-amber-200 bg-amber-50/30">
-                <h2 className="text-lg font-semibold text-main mb-2">{t('checkout.phone')}</h2>
-                <p className="text-sm text-amber-700 mb-4">{t('checkout.phoneRequiredForScheduled')}</p>
-                <input
-                  type="tel"
-                  required
-                  placeholder={t('checkout.phonePlaceholderScheduled')}
-                  value={guestPhone}
-                  onChange={(e) => setGuestPhone(e.target.value)}
-                  className="w-full px-3 py-2 bg-surface border border-amber-200 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none text-sm text-main"
-                />
+            /* Logged in user: premium contact info card */
+            <div id="member-contact-info" className="surface-card rounded-xl shadow-sm border p-6 border-primary-200 bg-primary-50/30 transition-all duration-300">
+              <div className="flex items-center justify-between mb-4 border-b border-input pb-3">
+                <div>
+                  <h2 className="text-lg font-bold text-main flex items-center gap-2">
+                    <svg className="w-5 h-5 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    {t('checkout.contactInfo') || '聯絡資訊'}
+                  </h2>
+                  <p className="text-xs text-sub mt-1">
+                    {user.name} ({user.email})
+                  </p>
+                </div>
+                <div>
+                  {user?.isEmployee ? (
+                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-primary-100 text-primary-800 border border-primary-200 shadow-sm animate-pulse">
+                      員工會員
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800 border border-green-200 shadow-sm">
+                      已登入
+                    </span>
+                  )}
+                </div>
               </div>
-            )
+              
+              <div className="space-y-3">
+                <label htmlFor="member-phone" className="block text-sm font-semibold text-main">
+                  {t('checkout.phone') || '聯絡電話'}
+                </label>
+                <div className="relative rounded-lg shadow-sm">
+                  <input
+                    id="member-phone"
+                    type="tel"
+                    required
+                    placeholder={t('checkout.phonePlaceholder') || '請輸入聯絡電話'}
+                    value={guestPhone}
+                    onChange={(e) => setGuestPhone(e.target.value)}
+                    className="w-full pl-3 pr-10 py-2 bg-surface border border-input rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none text-sm text-main transition-all"
+                  />
+                  {guestPhone && guestPhone === user.phone && (
+                    <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                      <svg className="h-5 w-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                  )}
+                </div>
+                
+                {guestPhone && guestPhone === user.phone ? (
+                  <div className="flex items-center gap-1.5 text-xs font-semibold text-green-600 animate-in fade-in slide-in-from-left-1 duration-200">
+                    <span>✓ 已自動帶入您的會員電話號碼</span>
+                  </div>
+                ) : guestPhone && user.phone ? (
+                  <div className="flex items-center gap-1.5 text-xs font-semibold text-amber-600 animate-in fade-in slide-in-from-left-1 duration-200">
+                    <span>已修改電話號碼 (會員原預設電話: {user.phone})</span>
+                  </div>
+                ) : !guestPhone ? (
+                  <div className="flex items-center gap-1.5 text-xs font-semibold text-red-500 animate-in fade-in slide-in-from-left-1 duration-200">
+                    <span>⚠️ 請填寫您的聯絡電話，以便我們在有需要時聯繫您</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-1.5 text-xs font-semibold text-blue-600 animate-in fade-in slide-in-from-left-1 duration-200">
+                    <span>已輸入聯絡電話 (此號碼將與此筆訂單關聯)</span>
+                  </div>
+                )}
+              </div>
+            </div>
           )}
         </div>
 

@@ -141,7 +141,7 @@ export async function customerRegister(req: Request, res: Response): Promise<voi
 
   const customer = await prisma.customer.create({
     data: { email, password: hashedPassword, name, phone },
-    select: { id: true, email: true, name: true, phone: true },
+    select: { id: true, email: true, name: true, phone: true, isEmployee: true },
   });
 
   // Link previous guest orders to this new account
@@ -207,6 +207,7 @@ export async function customerLogin(req: Request, res: Response): Promise<void> 
         lineDisplayName: customer.lineDisplayName,
         googleId: customer.googleId,
         googleEmail: customer.googleEmail,
+        isEmployee: customer.isEmployee,
         hasPassword: !!customer.password,
       },
     },
@@ -241,6 +242,7 @@ export async function getMe(req: Request, res: Response): Promise<void> {
         lineUserId: true, lineDisplayName: true, 
         googleId: true, googleEmail: true, 
         password: true,
+        isEmployee: true,
         emailNotificationsEnabled: true,
         lineNotificationsEnabled: true
       },
@@ -337,6 +339,7 @@ export async function updateMe(req: Request, res: Response): Promise<void> {
         id: true, email: true, name: true, phone: true, 
         lineUserId: true, lineDisplayName: true, 
         googleId: true, googleEmail: true,
+        isEmployee: true,
         emailNotificationsEnabled: true,
         lineNotificationsEnabled: true
       },

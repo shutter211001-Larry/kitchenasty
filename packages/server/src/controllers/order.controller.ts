@@ -120,6 +120,14 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
 
   // Get customer ID from auth if available
   const customerId = (req as any).user?.type === 'customer' ? (req as any).user.id : null;
+  let isEmployee = false;
+  let customerObj: any = null;
+  if (customerId) {
+    customerObj = await prisma.customer.findUnique({
+      where: { id: customerId }
+    });
+    isEmployee = customerObj?.isEmployee || false;
+  }
 
   // Guest checkout: default name to 'Guest' if not provided
   const finalGuestName = guestName || 'Guest';
@@ -151,8 +159,7 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
     }
 
     if (customerId) {
-      const customer = await prisma.customer.findUnique({ where: { id: customerId } });
-      if (!customer?.phone && !guestPhone) {
+      if (!customerObj?.phone && !guestPhone) {
         res.status(400).json({ success: false, error: 'Phone number is required for scheduled orders. Please provide a contact number.' });
         return;
       }
@@ -190,8 +197,8 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
     return;
   }
 
-  // Validate scheduledAt is within operating hours and respects buffers
-  if (scheduledAt && location.operatingHours.length > 0) {
+  // Validate scheduledAt and ASAP within operating hours and respects buffers
+  if (!isEmployee && location.operatingHours.length > 0) {
     const settings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
     const orderSettings = (settings?.orderSettings as any) || {};
     const preOpeningBuffer = Number(orderSettings.preOpeningBuffer || 30);

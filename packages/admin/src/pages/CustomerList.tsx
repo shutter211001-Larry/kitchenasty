@@ -7,6 +7,7 @@ interface Customer {
   name: string;
   phone: string | null;
   isGuest: boolean;
+  isEmployee?: boolean;
   loyaltyPoints: number;
   isWhitelisted: boolean;
   isBlacklisted: boolean;
@@ -32,7 +33,7 @@ export default function CustomerList() {
   
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
-  const [editForm, setEditForm] = useState({ name: '', phone: '', loyaltyPoints: 0, isWhitelisted: false, isBlacklisted: false });
+  const [editForm, setEditForm] = useState({ name: '', phone: '', loyaltyPoints: 0, isWhitelisted: false, isBlacklisted: false, isEmployee: false });
   const [editLoading, setEditLoading] = useState(false);
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -110,6 +111,7 @@ export default function CustomerList() {
       loyaltyPoints: customer.loyaltyPoints,
       isWhitelisted: customer.isWhitelisted,
       isBlacklisted: customer.isBlacklisted,
+      isEmployee: customer.isEmployee || false,
     });
     setShowEditModal(true);
   }
@@ -223,9 +225,14 @@ export default function CustomerList() {
                     <td className="px-4 py-3 text-gray-600">{customer.email}</td>
                     <td className="px-4 py-3 text-gray-600">{customer.phone || '—'}</td>
                     <td className="px-4 py-3">
-                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${customer.isGuest ? 'bg-gray-100 text-gray-600' : 'bg-primary-100 text-primary-700'}`}>
-                        {customer.isGuest ? '訪客' : '會員'}
-                      </span>
+                      <div className="flex flex-col gap-1 w-max">
+                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium w-max ${customer.isGuest ? 'bg-gray-100 text-gray-600' : 'bg-primary-100 text-primary-700'}`}>
+                          {customer.isGuest ? '訪客' : '會員'}
+                        </span>
+                        {customer.isEmployee && (
+                          <span className="text-[10px] bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded font-bold w-max animate-pulse">員工會員</span>
+                        )}
+                      </div>
                     </td>
                     <td className="px-4 py-3 font-medium text-orange-600">{customer.loyaltyPoints}</td>
                     <td className="px-4 py-3 text-gray-600">{customer._count.orders}</td>
@@ -335,6 +342,15 @@ export default function CustomerList() {
               </div>
 
               <div className="flex flex-col gap-3 pt-2">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={editForm.isEmployee}
+                    onChange={(e) => setEditForm({ ...editForm, isEmployee: e.target.checked })}
+                    className="w-4 h-4 accent-indigo-600"
+                  />
+                  <span className="text-sm font-medium text-indigo-700">設為員工會員 (下單可無視營業時間)</span>
+                </label>
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
                     type="checkbox"
