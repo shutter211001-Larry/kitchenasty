@@ -14,6 +14,7 @@ import {
   deleteMenuItem,
   uploadMenuItemImage,
   deleteMenuItemImage,
+  getErpProductRecipes,
 } from '../controllers/menu-item.controller.js';
 import { upload } from '../middleware/upload.js';
 import {
@@ -51,6 +52,9 @@ router.patch('/items/:id', authenticate, requireStaff, requireRole('SUPER_ADMIN'
 router.delete('/items/:id', authenticate, requireStaff, requireRole('SUPER_ADMIN'), deleteMenuItem);
 router.post('/items/:id/image', authenticate, requireStaff, requireRole('SUPER_ADMIN', 'MANAGER'), upload.single('image'), uploadMenuItemImage);
 router.delete('/items/:id/image', authenticate, requireStaff, requireRole('SUPER_ADMIN', 'MANAGER'), deleteMenuItemImage);
+
+// ERP Integration proxy - accessible to staff
+router.get('/erp/product-recipes', authenticate, requireStaff, getErpProductRecipes);
 
 // Allergens - read is open, write requires Manager+
 router.get('/allergens', listAllergens);

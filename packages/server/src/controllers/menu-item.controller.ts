@@ -44,6 +44,8 @@ const createMenuItemSchema = z.object({
   allergenIds: z.array(z.string()).optional(),
   mealtimeIds: z.array(z.string()).optional(),
   dietaryPreferenceIds: z.array(z.string()).optional(),
+  recipeId: z.string().optional(),
+  recipeName: z.string().optional(),
 });
 
 const updateMenuItemSchema = createMenuItemSchema.partial().omit({ slug: true });
@@ -116,7 +118,7 @@ export async function createMenuItem(req: Request, res: Response): Promise<void>
     return;
   }
 
-  const { options, allergenIds, mealtimeIds, dietaryPreferenceIds, ...data } = parsed.data;
+  const { options, allergenIds, mealtimeIds, dietaryPreferenceIds, recipeId, recipeName, ...data } = parsed.data;
 
   const existing = await prisma.menuItem.findUnique({ where: { slug: data.slug } });
   if (existing) {
@@ -176,6 +178,34 @@ export async function createMenuItem(req: Request, res: Response): Promise<void>
   });
 
   auditLog(req, { action: 'create', entity: 'MenuItem', entityId: item.id, details: { name: item.name } });
+
+  // If a recipeId is provided, automatically link it with PizzaMaster ERP
+  if (recipeId) {
+    try {
+      const url = process.env.PIZZAMASTER_API_URL || 'http://localhost:3000';
+      const response = await fetch(`${url}/api/integration/mappings`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-integration-key': process.env.INTEGRATION_KEY || 'pizzamaster-integration-secret-key'
+        },
+        body: JSON.stringify({
+          menuItemId: item.id,
+          recipeId: recipeId,
+          menuItemName: item.name,
+          menuItemPrice: item.price,
+          recipeName: recipeName || item.name
+        })
+      });
+      if (!response.ok) {
+        console.error(`[ERP Integration] Failed to auto-link menu item to recipe. HTTP ${response.status}`);
+      } else {
+        console.log(`[ERP Integration] Successfully auto-linked menu item ${item.name} to recipe ${recipeName}`);
+      }
+    } catch (err) {
+      console.error(`[ERP Integration] Error auto-linking recipe:`, err);
+    }
+  }
 
   res.status(201).json({ success: true, data: item });
 }
@@ -319,4 +349,26 @@ export async function deleteMenuItemImage(req: Request<{ id: string }>, res: Res
   });
 
   res.json({ success: true, data: item });
+}
+
+export async function getErpProductRecipes(req: Request, res: Response): Promise<void> {
+  try {
+    const url = process.env.PIZZAMASTER_API_URL || 'http://localhost:3000';
+    const response = await fetch(`${url}/api/integration/product-recipes`, {
+      headers: {
+        'x-integration-key': process.env.INTEGRATION_KEY || 'pizzamaster-integration-secret-key'
+      }
+    });
+
+    if (!response.ok) {
+      res.status(response.status).json({ success: false, error: 'Failed to fetch product recipes from ERP' });
+      return;
+    }
+
+    const data = await response.json();
+    res.json(data);
+  } catch (err: any) {
+    console.error(`[ERP Integration] Error fetching product recipes:`, err);
+    res.status(500).json({ success: false, error: err.message });
+  }
 }
