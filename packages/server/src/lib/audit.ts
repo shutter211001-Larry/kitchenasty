@@ -18,7 +18,7 @@ export function auditLog(req: Request, opts: AuditOptions): void {
     prisma.auditLog.create({
       data: {
         userId: req.user.id,
-        userEmail: req.user.email,
+        userEmail: req.user.email || 'no-email',
         action: opts.action,
         entity: opts.entity,
         entityId: opts.entityId,
