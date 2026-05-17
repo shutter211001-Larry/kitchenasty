@@ -9,6 +9,7 @@ interface User {
   phone?: string;
   lineUserId?: string;
   lineDisplayName?: string;
+  isEmployee?: boolean;
 }
 
 interface AuthContextType {

@@ -205,11 +205,6 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
     const postClosingBuffer = Number(orderSettings.postClosingBuffer || 30);
     const leadTime = orderType === 'DELIVERY' ? (location.deliveryLeadTime || 45) : (location.pickupLeadTime || 15);
 
-    const scheduled = new Date(scheduledAt);
-    const now = new Date();
-    
-    // Check if scheduled time is in the past or before lead time
-    const minTime = new Date(now);
     const { isWithinHours } = await import('../lib/business-hours.js');
 
     if (scheduledAt) {
