@@ -6,6 +6,8 @@ interface Customer {
   email: string;
   name: string;
   phone: string | null;
+  lineUserId?: string | null;
+  googleEmail?: string | null;
   isGuest: boolean;
   isEmployee?: boolean;
   loyaltyPoints: number;
@@ -209,6 +211,7 @@ export default function CustomerList() {
                 <tr className="border-b border-gray-200 bg-gray-50">
                   <th className="text-left px-4 py-3 font-medium text-gray-600">姓名</th>
                   <th className="text-left px-4 py-3 font-medium text-gray-600">電子郵件</th>
+                  <th className="text-left px-4 py-3 font-medium text-gray-600">LINE唯一碼</th>
                   <th className="text-left px-4 py-3 font-medium text-gray-600">電話</th>
                   <th className="text-left px-4 py-3 font-medium text-gray-600">類型</th>
                   <th className="text-left px-4 py-3 font-medium text-gray-600">紅利點數</th>
@@ -224,10 +227,16 @@ export default function CustomerList() {
                     <td className="px-4 py-3 font-medium">{customer.name}</td>
                     <td className="px-4 py-3 text-gray-600">
                       {customer.email.endsWith('@line.pizzastudio.com') ? (
-                        <span className="text-green-600 font-bold text-[11px] bg-green-50 border border-green-200 px-2 py-0.5 rounded-full whitespace-nowrap">LINE 會員</span>
+                        <div className="flex flex-col gap-1 items-start">
+                          <span className="text-green-600 font-bold text-[11px] bg-green-50 border border-green-200 px-2 py-0.5 rounded-full whitespace-nowrap">LINE 會員</span>
+                          {customer.googleEmail && <span className="text-sm">{customer.googleEmail}</span>}
+                        </div>
                       ) : (
                         customer.email
                       )}
+                    </td>
+                    <td className="px-4 py-3 text-gray-400 text-xs font-mono max-w-[120px] truncate" title={customer.lineUserId || ''}>
+                      {customer.lineUserId || '—'}
                     </td>
                     <td className="px-4 py-3 text-gray-600">{customer.phone || '—'}</td>
                     <td className="px-4 py-3">

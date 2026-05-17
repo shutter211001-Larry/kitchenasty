@@ -38,6 +38,8 @@ export async function listCustomers(req: Request, res: Response): Promise<void> 
         email: true,
         name: true,
         phone: true,
+        lineUserId: true,
+        googleEmail: true,
         isEmployee: true,
         isGuest: true,
         loyaltyPoints: true,
