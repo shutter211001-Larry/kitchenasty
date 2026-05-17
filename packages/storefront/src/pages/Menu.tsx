@@ -14,6 +14,7 @@ interface Category {
   nameTranslations?: Record<string, string>;
   slug: string;
   isActive: boolean;
+  isDefaultOpen?: boolean;
   parentId: string | null;
   _count: { menuItems: number };
   children: Category[];
@@ -72,6 +73,16 @@ export default function Menu() {
   const [pagination, setPagination] = useState<MenuResponse['pagination'] | null>(null);
   const [itemsLoading, setItemsLoading] = useState(true);
   const [itemsError, setItemsError] = useState<string | null>(null);
+
+  // Set default category if not specified in URL
+  useEffect(() => {
+    if (categories && !selectedCategory && !searchParams.get('category')) {
+      const defaultCategory = categories.find(c => c.isDefaultOpen);
+      if (defaultCategory) {
+        setSelectedCategory(defaultCategory.id);
+      }
+    }
+  }, [categories, selectedCategory, searchParams]);
 
   // Debounce search
   useEffect(() => {

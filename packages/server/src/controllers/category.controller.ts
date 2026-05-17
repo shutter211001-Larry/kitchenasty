@@ -13,6 +13,7 @@ const createCategorySchema = z.object({
   image: z.string().optional(),
   sortOrder: z.number().int().min(0).default(0),
   isActive: z.boolean().default(true),
+  isDefaultOpen: z.boolean().default(false),
   parentId: z.string().optional(),
   locationId: z.string().optional(),
 });
@@ -85,9 +86,19 @@ export async function createCategory(req: Request, res: Response): Promise<void>
 
   const translatedData = await autoTranslateCategory(parsed.data);
 
-  const category = await prisma.category.create({
-    data: translatedData,
-    include: { parent: true },
+  const category = await prisma.$transaction(async (tx) => {
+    // If setting this as default open, unset all others
+    if (translatedData.isDefaultOpen) {
+      await tx.category.updateMany({
+        where: { isDefaultOpen: true },
+        data: { isDefaultOpen: false },
+      });
+    }
+
+    return await tx.category.create({
+      data: translatedData,
+      include: { parent: true },
+    });
   });
 
   auditLog(req, { action: 'create', entity: 'Category', entityId: category.id, details: { name: category.name } });
@@ -123,10 +134,20 @@ export async function updateCategory(req: Request<{ id: string }>, res: Response
 
   const translatedData = await autoTranslateCategory(parsed.data, existing);
 
-  const category = await prisma.category.update({
-    where: { id },
-    data: translatedData,
-    include: { parent: true },
+  const category = await prisma.$transaction(async (tx) => {
+    // If setting this as default open, unset all others
+    if (translatedData.isDefaultOpen) {
+      await tx.category.updateMany({
+        where: { isDefaultOpen: true, id: { not: id } },
+        data: { isDefaultOpen: false },
+      });
+    }
+
+    return await tx.category.update({
+      where: { id },
+      data: translatedData,
+      include: { parent: true },
+    });
   });
 
   auditLog(req, { action: 'update', entity: 'Category', entityId: id, details: parsed.data });

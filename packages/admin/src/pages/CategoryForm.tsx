@@ -10,6 +10,7 @@ interface CategoryData {
   descriptionTranslations: Record<string, string>;
   sortOrder: number;
   isActive: boolean;
+  isDefaultOpen: boolean;
   parentId: string;
 }
 
@@ -37,6 +38,7 @@ const emptyCategory: CategoryData = {
   descriptionTranslations: {},
   sortOrder: 0,
   isActive: true,
+  isDefaultOpen: false,
   parentId: '',
 };
 
@@ -70,6 +72,7 @@ export default function CategoryForm() {
           descriptionTranslations: cat.descriptionTranslations || {},
           sortOrder: cat.sortOrder,
           isActive: cat.isActive,
+          isDefaultOpen: cat.isDefaultOpen || false,
           parentId: cat.parentId || '',
         });
         setLoading(false);
@@ -195,6 +198,15 @@ export default function CategoryForm() {
                   className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
                 />
                 <span className="text-sm text-gray-700">啟用 (Active)</span>
+              </label>
+              <label className="flex items-center gap-2 mt-2">
+                <input
+                  type="checkbox"
+                  checked={form.isDefaultOpen}
+                  onChange={(e) => updateField('isDefaultOpen', e.target.checked)}
+                  className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                />
+                <span className="text-sm text-gray-700">設為預設開啟分類 (優先顯示)</span>
               </label>
             </div>
           </div>
