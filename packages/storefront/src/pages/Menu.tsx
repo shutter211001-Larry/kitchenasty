@@ -260,16 +260,16 @@ export default function Menu() {
                         </svg>
                       </div>
                     )}
-                      <div className="p-4">
-                        <div className="flex items-start justify-between gap-2">
-                          <h3 className="font-semibold text-main">{getTranslated(item.name, item.nameTranslations, i18n.language)}</h3>
-                          <span className="text-primary-600 font-bold whitespace-nowrap">
-                            ${item.price.toFixed(2)}
-                          </span>
-                        </div>
-                        {item.description && (
-                          <p className="text-sm text-sub mt-1 line-clamp-2">{getTranslated(item.description, item.descriptionTranslations, i18n.language)}</p>
-                        )}
+                    <div className="p-4">
+                      <div className="flex items-start justify-between gap-2">
+                        <h3 className="font-semibold text-main">{getTranslated(item.name, item.nameTranslations, i18n.language)}</h3>
+                        <span className="text-primary-600 font-bold whitespace-nowrap">
+                          ${item.price.toFixed(2)}
+                        </span>
+                      </div>
+                      {item.description && (
+                        <p className="text-sm text-sub mt-1 line-clamp-2">{getTranslated(item.description, item.descriptionTranslations, i18n.language)}</p>
+                      )}
                       <div className="flex items-center gap-2 mt-3">
                         <span className="text-xs text-hint bg-surface px-2 py-0.5 rounded-full border border-input">
                           {getTranslated(item.category.name, item.category.nameTranslations, i18n.language)}
