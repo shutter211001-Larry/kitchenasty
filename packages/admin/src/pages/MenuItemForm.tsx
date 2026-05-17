@@ -66,6 +66,7 @@ interface ErpRecipe {
   description: string;
   yieldAmount: number;
   yieldUnit: string;
+  allergens?: string[];
 }
 
 const emptyItem: MenuItemData = {
@@ -372,6 +373,19 @@ export default function MenuItemForm() {
                         autoSlug(recipe.name);
                         updateField('description', recipe.description || '');
                         updateField('unit', recipe.yieldUnit || '份');
+                        
+                        // Auto-fill allergens by matching names
+                        if (recipe.allergens && recipe.allergens.length > 0) {
+                          const matchedIds = recipe.allergens
+                            .map(aName => allergens.find(localA => localA.name === aName)?.id)
+                            .filter(Boolean) as string[];
+                          if (matchedIds.length > 0) {
+                            setSelectedAllergens(prev => {
+                              const newSet = new Set([...prev, ...matchedIds]);
+                              return Array.from(newSet);
+                            });
+                          }
+                        }
                       }
                     }
                   }}
