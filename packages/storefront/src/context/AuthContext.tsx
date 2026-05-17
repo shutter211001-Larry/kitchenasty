@@ -4,7 +4,7 @@ import { useTheme } from './ThemeContext.js';
 
 interface User {
   id: string;
-  email: string;
+  email: string | null;
   name: string;
   phone?: string;
   lineUserId?: string;

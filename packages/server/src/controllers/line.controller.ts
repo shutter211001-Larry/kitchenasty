@@ -213,13 +213,13 @@ export async function lineLogin(req: Request, res: Response) {
         }
       }
 
-      const fallbackEmail = `${lineUserId}@line.pizzastudio.com`;
+      const customerEmail = (email && email.trim() !== "") ? email : null;
       
       customer = await prisma.customer.create({
         data: {
           lineUserId,
           lineDisplayName,
-          email: (email && email.trim() !== "") ? email : fallbackEmail,
+          email: customerEmail,
           name: name || lineDisplayName || 'LINE User',
           password: null,
           isGuest: false
