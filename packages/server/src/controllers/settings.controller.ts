@@ -113,6 +113,7 @@ function toPublicSettings(settings: Awaited<ReturnType<typeof getOrCreateSetting
       postClosingBuffer: order.postClosingBuffer !== undefined ? Number(order.postClosingBuffer) : 30,
       timeSlotInterval: order.timeSlotInterval !== undefined ? Number(order.timeSlotInterval) : 15,
       boardLeadTime: order.boardLeadTime !== undefined ? Number(order.boardLeadTime) : 60,
+      emailNotifications: order.emailNotifications || {},
     } : undefined,
     paymentSettings: {
       cashEnabled: isTrue(payment.cashEnabled, true),
