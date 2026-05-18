@@ -159,66 +159,109 @@ export default function SettingsNotifications() {
             🎨 郵件品牌與外觀設計 (Email Branding & Style)
           </h2>
           <p className="text-xs text-gray-400 mb-6">
-            設定發送給顧客的 HTML 郵件整體視覺配色與標題。在下方點選預覽時，效果將隨您的設定即時動態更新！
+            設定發送給顧客的 HTML 郵件整體視覺配色與標題。在右側畫布與下方點選預覽時，效果將隨您的設定即時動態更新！
           </p>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1.5">信件頂部大標名稱 (Brand Title)</label>
-              <input
-                type="text"
-                value={emailBrandName}
-                onChange={(e) => setEmailBrandName(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all font-medium"
-                placeholder="輸入信件大標，例：夏特點餐系統"
-              />
-            </div>
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+            {/* Form Controls */}
+            <div className="lg:col-span-2 space-y-5">
+              <div>
+                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                  信件頂部大標名稱 (Brand Title)
+                </label>
+                <input
+                  type="text"
+                  value={emailBrandName}
+                  onChange={(e) => setEmailBrandName(e.target.value)}
+                  className="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl text-xs focus:ring-4 focus:ring-primary-100 focus:border-primary-500 transition-all font-bold"
+                  placeholder="例：夏特點餐系統"
+                />
+              </div>
 
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                橫幅與主色調 (Banner & Primary Color)
-              </label>
-              <div className="flex gap-2">
-                <div className="relative flex-1">
-                  <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400 text-sm">#</span>
+              <div>
+                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                  橫幅與主色調 (Banner & Primary Color)
+                </label>
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
+                    <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400 text-xs font-mono">#</span>
+                    <input
+                      type="text"
+                      value={emailHeaderColor.replace('#', '')}
+                      onChange={(e) => setEmailHeaderColor('#' + e.target.value)}
+                      className="w-full pl-7 pr-3 py-2.5 border border-gray-300 rounded-xl text-xs focus:ring-4 focus:ring-primary-100 focus:border-primary-500 font-mono uppercase font-bold"
+                      placeholder="F97316"
+                    />
+                  </div>
                   <input
-                    type="text"
-                    value={emailHeaderColor.replace('#', '')}
-                    onChange={(e) => setEmailHeaderColor('#' + e.target.value)}
-                    className="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 font-mono uppercase"
-                    placeholder="F97316"
+                    type="color"
+                    value={emailHeaderColor}
+                    onChange={(e) => setEmailHeaderColor(e.target.value)}
+                    className="w-12 h-[42px] border border-gray-300 rounded-xl cursor-pointer p-1"
                   />
                 </div>
-                <input
-                  type="color"
-                  value={emailHeaderColor}
-                  onChange={(e) => setEmailHeaderColor(e.target.value)}
-                  className="w-12 h-[38px] border border-gray-300 rounded-xl cursor-pointer p-0.5"
-                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                  郵件外層背景底色 (Page Background)
+                </label>
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
+                    <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400 text-xs font-mono">#</span>
+                    <input
+                      type="text"
+                      value={emailBgColor.replace('#', '')}
+                      onChange={(e) => setEmailBgColor('#' + e.target.value)}
+                      className="w-full pl-7 pr-3 py-2.5 border border-gray-300 rounded-xl text-xs focus:ring-4 focus:ring-primary-100 focus:border-primary-500 font-mono uppercase font-bold"
+                      placeholder="F3F4F6"
+                    />
+                  </div>
+                  <input
+                    type="color"
+                    value={emailBgColor}
+                    onChange={(e) => setEmailBgColor(e.target.value)}
+                    className="w-12 h-[42px] border border-gray-300 rounded-xl cursor-pointer p-1"
+                  />
+                </div>
               </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                郵件外層背景底色 (Page Background)
-              </label>
-              <div className="flex gap-2">
-                <div className="relative flex-1">
-                  <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400 text-sm">#</span>
-                  <input
-                    type="text"
-                    value={emailBgColor.replace('#', '')}
-                    onChange={(e) => setEmailBgColor('#' + e.target.value)}
-                    className="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 font-mono uppercase"
-                    placeholder="F3F4F6"
-                  />
+            {/* Live Branding Preview */}
+            <div className="lg:col-span-3 bg-gray-50 rounded-2xl border border-gray-200 p-4 flex flex-col justify-between shadow-inner">
+              <span className="text-[10px] font-black text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                📧 郵件品牌即時外觀 (Live Branding Canvas)
+              </span>
+              
+              <div 
+                style={{ backgroundColor: emailBgColor }}
+                className="rounded-xl p-4 flex items-center justify-center border border-gray-200 transition-all duration-300 min-h-[180px] overflow-hidden"
+              >
+                <div className="w-full max-w-[280px] bg-white border border-gray-150 rounded-lg overflow-hidden shadow-sm">
+                  <div 
+                    style={{ backgroundColor: emailHeaderColor }}
+                    className="text-white py-2 px-3 text-center font-bold text-[10px] tracking-wide transition-all duration-300 uppercase"
+                  >
+                    {emailBrandName}
+                  </div>
+                  <div className="p-3 bg-white">
+                    <h4 className="font-bold text-[10px] text-gray-900 m-0 mb-0.5">您的訂單狀態已更新</h4>
+                    <p className="text-[9px] text-gray-400 m-0 mb-2">訂單編號 <strong>#KA-2026-001</strong></p>
+                    <div className="bg-gray-50 p-2.5 rounded-lg border border-gray-150">
+                      <div 
+                        style={{ color: emailHeaderColor }}
+                        className="font-bold text-[9px] mb-1 transition-all duration-300 flex items-center gap-1"
+                      >
+                        <span className="w-1.5 h-1.5 rounded-full bg-current"></span>
+                        已確認 / 製作中
+                      </div>
+                      <p className="text-gray-600 text-[9px] m-0 leading-relaxed font-semibold">
+                        您好陳小明，您的訂單已確認，夏威夷披薩等餐點正在為您精緻製作中！
+                      </p>
+                    </div>
+                  </div>
                 </div>
-                <input
-                  type="color"
-                  value={emailBgColor}
-                  onChange={(e) => setEmailBgColor(e.target.value)}
-                  className="w-12 h-[38px] border border-gray-300 rounded-xl cursor-pointer p-0.5"
-                />
               </div>
             </div>
           </div>
