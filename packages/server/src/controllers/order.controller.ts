@@ -904,6 +904,70 @@ export async function updateOrderStatus(req: Request<{ id: string }>, res: Respo
   res.json({ success: true, data: updated });
 }
 
+export async function updateOrderDiscount(req: Request<{ id: string }>, res: Response): Promise<void> {
+  const { id } = req.params;
+  const { adjustedTotal, discount } = req.body;
+
+  const order = await prisma.order.findUnique({
+    where: { id },
+  });
+
+  if (!order) {
+    res.status(404).json({ success: false, error: 'Order not found' });
+    return;
+  }
+
+  // Calculate new total and discount
+  let newDiscount = order.discount;
+  let newTotal = order.total;
+  const originalCostBeforeDiscount = order.subtotal + order.tax + order.deliveryFee + order.tip;
+
+  if (typeof adjustedTotal === 'number' && adjustedTotal >= 0) {
+    newDiscount = Math.max(0, originalCostBeforeDiscount - adjustedTotal);
+    newTotal = adjustedTotal;
+  } else if (typeof discount === 'number' && discount >= 0) {
+    newDiscount = discount;
+    newTotal = Math.max(0, originalCostBeforeDiscount - discount);
+  } else {
+    res.status(400).json({ success: false, error: 'Either adjustedTotal or discount must be a non-negative number' });
+    return;
+  }
+
+  const updated = await prisma.order.update({
+    where: { id },
+    data: {
+      discount: newDiscount,
+      total: newTotal,
+    },
+    include: {
+      items: { include: { options: true } },
+    },
+  });
+
+  auditLog(req, {
+    action: 'update',
+    entity: 'Order',
+    entityId: id,
+    details: {
+      action: 'discount_adjustment',
+      previousTotal: order.total,
+      newTotal: newTotal,
+      previousDiscount: order.discount,
+      newDiscount: newDiscount,
+    }
+  });
+
+  emitOrderStatusUpdate({
+    id: updated.id,
+    orderNumber: updated.orderNumber,
+    status: updated.status,
+    orderType: updated.orderType,
+    customerId: updated.customerId,
+  });
+
+  res.json({ success: true, data: updated });
+}
+
 export async function cancelOrder(req: Request<{ id: string }>, res: Response): Promise<void> {
   const { id } = req.params;
   const user = req.user;

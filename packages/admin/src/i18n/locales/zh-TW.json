@@ -94,7 +94,11 @@
     "onSite": "現場",
     "remote": "遠端",
     "distance": "距離",
-    "viewDetails": "查看詳情"
+    "viewDetails": "查看詳情",
+    "discount": "折讓金額",
+    "subtotal": "小計",
+    "tax": "稅金",
+    "deliveryFee": "外送費"
   },
   "kitchen": {
     "title": "廚房看板",

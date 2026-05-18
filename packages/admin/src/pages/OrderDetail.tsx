@@ -56,6 +56,7 @@ export default function OrderDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [updating, setUpdating] = useState(false);
+  const [adjustedTotalInput, setAdjustedTotalInput] = useState('');
   const { user } = useAuth();
   const canManage = user?.role === 'SUPER_ADMIN' || user?.role === 'MANAGER';
 
@@ -69,7 +70,12 @@ export default function OrderDetailPage() {
         if (!res.ok) throw new Error('Failed to load order');
         return res.json();
       })
-      .then((data) => setOrder(data.data))
+      .then((data) => {
+        setOrder(data.data);
+        if (data.data) {
+          setAdjustedTotalInput(data.data.total.toString());
+        }
+      })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
   }, [id, token]);
@@ -88,6 +94,34 @@ export default function OrderDetailPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
       setOrder((prev) => prev ? { ...prev, status: newStatus } : prev);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setUpdating(false);
+    }
+  }
+
+  async function handleUpdateDiscount() {
+    const val = Number(adjustedTotalInput);
+    if (isNaN(val) || val < 0) {
+      alert('請輸入有效的折讓後價格！');
+      return;
+    }
+    setUpdating(true);
+    try {
+      const res = await fetch(`/api/orders/${id}/discount`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ adjustedTotal: val }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || '調整折讓失敗');
+      setOrder(data.data);
+      setAdjustedTotalInput(data.data.total.toString());
+      alert('折讓價格套用成功！');
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -210,6 +244,43 @@ export default function OrderDetailPage() {
                 <span>{t('orders.total')}</span>
                 <span className="text-primary-600">${order.total.toFixed(2)}</span>
               </div>
+
+              {canManage && (
+                <div className="mt-4 pt-4 border-t border-gray-200">
+                  <div className="flex flex-col gap-2">
+                    <label htmlFor="adjustedPriceInput" className="text-xs font-semibold text-gray-500">
+                      設定折讓後價格
+                    </label>
+                    <div className="flex gap-2">
+                      <div className="relative flex-1">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">$</span>
+                        <input
+                          id="adjustedPriceInput"
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          placeholder="請輸入折讓後的價格"
+                          value={adjustedTotalInput}
+                          onChange={(e) => setAdjustedTotalInput(e.target.value)}
+                          className="w-full pl-7 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        />
+                      </div>
+                      <button
+                        onClick={handleUpdateDiscount}
+                        disabled={updating}
+                        className="px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-lg hover:bg-primary-700 transition-colors disabled:opacity-50 flex items-center gap-1"
+                      >
+                        套用
+                      </button>
+                    </div>
+                    {adjustedTotalInput && !isNaN(Number(adjustedTotalInput)) && (
+                      <span className="text-xs text-gray-400 mt-1">
+                        預計折讓金額為: ${(Math.max(0, (order.subtotal + order.tax + order.deliveryFee) - Number(adjustedTotalInput))).toFixed(2)}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
