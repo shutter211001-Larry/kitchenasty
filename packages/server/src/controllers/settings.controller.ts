@@ -451,6 +451,7 @@ export async function updateMailSettings(req: Request, res: Response): Promise<v
 
   const existing = await getSettingsGroup('mailSettings');
   const mergedData = {
+    ...existing,
     ...parsed.data,
     smtpPass: preserveIfMasked(parsed.data.smtpPass, existing.smtpPass),
   };

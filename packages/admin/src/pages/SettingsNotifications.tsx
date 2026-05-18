@@ -64,19 +64,34 @@ export default function SettingsNotifications() {
   const [lineNotifications, setLineNotifications] = useState<Record<string, NotificationConfig>>({});
   const [activePreviewEvent, setActivePreviewEvent] = useState<string | null>(null);
 
+  const [emailBrandName, setEmailBrandName] = useState('KitchenAsty');
+  const [emailHeaderColor, setEmailHeaderColor] = useState('#f97316');
+  const [emailBgColor, setEmailBgColor] = useState('#f3f4f6');
+
   useEffect(() => {
     fetchSettings();
   }, [token]);
 
   async function fetchSettings() {
     try {
-      const res = await api.get<{ success: boolean; data: any }>('/settings');
+      const [res, mailRes] = await Promise.all([
+        api.get<{ success: boolean; data: any }>('/settings'),
+        fetch('/api/settings/mail', { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json())
+      ]);
+
       if (res.success && res.data) {
         const orderSettings = res.data.orderSettings || {};
         const lineSettings = res.data.lineSettings || {};
         
         setEmailNotifications(orderSettings.emailNotifications || {});
         setLineNotifications(lineSettings.notifications || {});
+      }
+
+      if (mailRes.success && mailRes.data) {
+        const d = mailRes.data;
+        if (d.emailBrandName) setEmailBrandName(d.emailBrandName);
+        if (d.emailHeaderColor) setEmailHeaderColor(d.emailHeaderColor);
+        if (d.emailBgColor) setEmailBgColor(d.emailBgColor);
       }
     } catch (err) {
       setError('無法載入設定');
@@ -90,11 +105,22 @@ export default function SettingsNotifications() {
     setError('');
     setSuccess('');
     try {
-      await api.put('/settings', {
-        orderSettings: { emailNotifications },
-        lineSettings: { notifications: lineNotifications }
-      });
-      setSuccess('通知設定已儲存');
+      await Promise.all([
+        api.put('/settings', {
+          orderSettings: { emailNotifications },
+          lineSettings: { notifications: lineNotifications }
+        }),
+        fetch('/api/settings/mail', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({
+            emailBrandName,
+            emailHeaderColor,
+            emailBgColor
+          })
+        }).then(r => r.json())
+      ]);
+      setSuccess('通知設定與郵件外觀已成功儲存');
       setTimeout(() => setSuccess(''), 3000);
     } catch (err: any) {
       setError(err.message || '儲存失敗');
@@ -106,19 +132,19 @@ export default function SettingsNotifications() {
   if (loading) return <div className="p-6 text-gray-500">載入中...</div>;
 
   return (
-    <div className="max-w-5xl">
+    <div className="max-w-5xl mx-auto px-4 py-2">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <Link to="/settings" className="text-sm text-primary-600 hover:text-primary-700">&larr; 返回設定</Link>
+          <Link to="/settings" className="text-sm text-primary-600 hover:text-primary-700 font-medium">&larr; 返回設定</Link>
           <h1 className="text-2xl font-bold text-gray-900 mt-1">通知發送設定</h1>
-          <p className="text-sm text-gray-500 mt-1">統一管理電子郵件與 LINE 的自動通知觸發時機</p>
+          <p className="text-sm text-gray-500 mt-1">統一管理電子郵件與 LINE 的自動通知觸發時機，以及郵件的品牌裝飾風格</p>
         </div>
         <button
           onClick={handleSave}
           disabled={saving}
-          className="px-6 py-2 bg-primary-600 text-white rounded-lg font-bold hover:bg-primary-700 transition-colors shadow-sm disabled:opacity-50"
+          className="px-6 py-2.5 bg-primary-600 text-white rounded-lg font-bold hover:bg-primary-700 transition-colors shadow-sm disabled:opacity-50"
         >
-          {saving ? '儲存中...' : '儲存變更'}
+          {saving ? '儲存中...' : '儲存所有變更'}
         </button>
       </div>
 
@@ -126,6 +152,78 @@ export default function SettingsNotifications() {
       {success && <div className="mb-4 p-3 bg-green-50 border border-green-200 text-green-700 rounded-lg text-sm">{success}</div>}
 
       <div className="grid grid-cols-1 gap-6">
+        {/* Email Branding Customizer Card */}
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 relative overflow-hidden transition-all hover:shadow-md">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary-500 to-indigo-500"></div>
+          <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2 mb-2">
+            🎨 郵件品牌與外觀設計 (Email Branding & Style)
+          </h2>
+          <p className="text-xs text-gray-400 mb-6">
+            設定發送給顧客的 HTML 郵件整體視覺配色與標題。在下方點選預覽時，效果將隨您的設定即時動態更新！
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1.5">信件頂部大標名稱 (Brand Title)</label>
+              <input
+                type="text"
+                value={emailBrandName}
+                onChange={(e) => setEmailBrandName(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all font-medium"
+                placeholder="輸入信件大標，例：KitchenAsty"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                橫幅與主色調 (Banner & Primary Color)
+              </label>
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400 text-sm">#</span>
+                  <input
+                    type="text"
+                    value={emailHeaderColor.replace('#', '')}
+                    onChange={(e) => setEmailHeaderColor('#' + e.target.value)}
+                    className="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 font-mono uppercase"
+                    placeholder="F97316"
+                  />
+                </div>
+                <input
+                  type="color"
+                  value={emailHeaderColor}
+                  onChange={(e) => setEmailHeaderColor(e.target.value)}
+                  className="w-12 h-[38px] border border-gray-300 rounded-xl cursor-pointer p-0.5"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                郵件外層背景底色 (Page Background)
+              </label>
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400 text-sm">#</span>
+                  <input
+                    type="text"
+                    value={emailBgColor.replace('#', '')}
+                    onChange={(e) => setEmailBgColor('#' + e.target.value)}
+                    className="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 font-mono uppercase"
+                    placeholder="F3F4F6"
+                  />
+                </div>
+                <input
+                  type="color"
+                  value={emailBgColor}
+                  onChange={(e) => setEmailBgColor(e.target.value)}
+                  className="w-12 h-[38px] border border-gray-300 rounded-xl cursor-pointer p-0.5"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Unified Table */}
         <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
           <table className="w-full text-left border-collapse">
@@ -231,7 +329,7 @@ export default function SettingsNotifications() {
                                           KA
                                         </div>
                                         <div className="flex flex-col gap-1 max-w-[80%]">
-                                          <span className="text-[11px] text-gray-700 font-semibold">KitchenAsty</span>
+                                          <span className="text-[11px] text-gray-700 font-semibold">{emailBrandName}</span>
                                           <div className="bg-white rounded-2xl rounded-tl-none py-2.5 px-3.5 shadow-sm text-xs text-gray-800 relative whitespace-pre-wrap leading-relaxed border border-gray-100">
                                             {`【訂單狀態更新】\n訂單編號：#KA-2026-001\n目前狀態：${previewMsg}`}
                                           </div>
@@ -254,18 +352,29 @@ export default function SettingsNotifications() {
                                       <div className="bg-white border-b border-gray-200 p-3 text-[11px] text-gray-500 flex flex-col gap-1">
                                         <div><strong className="text-gray-700 font-medium">郵件主旨:</strong> 訂單 #KA-2026-001 狀態更新 - {chineseStatus}</div>
                                         <div><strong className="text-gray-700 font-medium">收件人:</strong> customer@example.com</div>
-                                        <div><strong className="text-gray-700 font-medium">寄件人:</strong> KitchenAsty &lt;noreply@kitchenasty.com&gt;</div>
+                                        <div><strong className="text-gray-700 font-medium">寄件人:</strong> {emailBrandName} &lt;noreply@kitchenasty.com&gt;</div>
                                       </div>
-                                      <div className="p-4 flex-1 bg-gray-50 flex items-center justify-center">
+                                      <div 
+                                        style={{ backgroundColor: emailBgColor }}
+                                        className="p-4 flex-1 flex items-center justify-center transition-all duration-300"
+                                      >
                                         <div className="w-full max-w-[320px] bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
-                                          <div className="bg-[#f97316] text-white py-2 px-3 text-center font-bold text-[11px]">
-                                            KitchenAsty
+                                          <div 
+                                            style={{ backgroundColor: emailHeaderColor }}
+                                            className="text-white py-2 px-3 text-center font-bold text-[11px] transition-all duration-300"
+                                          >
+                                            {emailBrandName}
                                           </div>
                                           <div className="p-3 bg-white">
                                             <h3 className="font-bold text-[11px] text-gray-900 m-0 mb-0.5">訂單狀態更新</h3>
                                             <p className="text-[10px] text-gray-400 m-0 mb-2">訂單 <strong>#KA-2026-001</strong></p>
                                             <div className="bg-gray-50 p-2.5 rounded-lg border border-gray-150">
-                                              <div className="font-bold text-gray-800 text-[11px] mb-1">{chineseStatus}</div>
+                                              <div 
+                                                style={{ color: emailHeaderColor }}
+                                                className="font-bold text-[11px] mb-1 transition-all duration-300"
+                                              >
+                                                ● {chineseStatus}
+                                              </div>
                                               <div className="text-gray-600 text-[10px] whitespace-pre-wrap leading-relaxed">{previewMsg}</div>
                                             </div>
                                           </div>
@@ -296,7 +405,7 @@ export default function SettingsNotifications() {
             <p className="font-semibold">提示：</p>
             <ul className="list-disc list-inside mt-1 space-y-1">
               <li>電子郵件與 LINE 通知共用相同的訊息內容範本，讓顧客在各渠道獲得完全一致的體驗。</li>
-              <li>電子郵件設定可在 <Link to="/settings/mail" className="underline font-medium">郵件設定</Link> 頁面調整發信伺服器。</li>
+              <li>電子郵件發信伺服器設定可在 <Link to="/settings/mail" className="underline font-medium">郵件伺服器設定 (SMTP)</Link> 頁面進行系統對接。</li>
               <li>LINE 通知需先在 <Link to="/settings/line" className="underline font-medium">LINE 整合</Link> 頁面完成官方帳號對接。</li>
               <li>
                 <strong>訊息範本可用參數：</strong>
