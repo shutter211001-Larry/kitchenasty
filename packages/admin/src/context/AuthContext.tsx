@@ -9,6 +9,7 @@ interface User {
   avatar?: string | null;
   lineUserId?: string | null;
   lineDisplayName?: string | null;
+  locationId?: string | null;
 }
 
 interface AuthContextValue {

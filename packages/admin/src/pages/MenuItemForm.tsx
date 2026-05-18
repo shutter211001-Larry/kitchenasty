@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { api } from '../lib/api.js';
 import { getFullUrl } from '../utils/url.js';
+import { useAuth } from '../context/AuthContext.js';
 
 interface OptionValue {
   name: string;
@@ -36,6 +37,7 @@ interface MenuItemData {
   categoryId: string;
   unit: string;
   unitTranslations: Record<string, string>;
+  locationId: string;
 }
 
 interface CategoryOption {
@@ -56,6 +58,11 @@ interface MealtimeOption {
 }
 
 interface DietaryOption {
+  id: string;
+  name: string;
+}
+
+interface LocationOption {
   id: string;
   name: string;
 }
@@ -83,6 +90,7 @@ const emptyItem: MenuItemData = {
   categoryId: '',
   unit: '份',
   unitTranslations: {},
+  locationId: '',
 };
 
 const LANGUAGES = [
@@ -111,6 +119,7 @@ export default function MenuItemForm() {
   const { id } = useParams();
   const navigate = useNavigate();
   const isEdit = !!id;
+  const { user } = useAuth();
 
   const [form, setForm] = useState<MenuItemData>(emptyItem);
   const [options, setOptions] = useState<MenuOption[]>([]);
@@ -121,6 +130,7 @@ export default function MenuItemForm() {
   const [allergens, setAllergens] = useState<AllergenOption[]>([]);
   const [mealtimes, setMealtimes] = useState<MealtimeOption[]>([]);
   const [dietary, setDietary] = useState<DietaryOption[]>([]);
+  const [locations, setLocations] = useState<LocationOption[]>([]);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(isEdit);
@@ -136,11 +146,13 @@ export default function MenuItemForm() {
       api.get<{ data: AllergenOption[] }>('/menu/allergens'),
       api.get<{ data: MealtimeOption[] }>('/menu/mealtimes'),
       api.get<{ data: DietaryOption[] }>('/menu/dietary'),
-    ]).then(([catRes, allRes, mtRes, dieRes]) => {
+      api.get<{ data: LocationOption[] }>('/locations'),
+    ]).then(([catRes, allRes, mtRes, dieRes, locRes]) => {
       setCategories(catRes.data);
       setAllergens(allRes.data);
       setMealtimes(mtRes.data);
       setDietary(dieRes.data);
+      setLocations(locRes.data || []);
     }).catch(() => { });
 
     if (!isEdit) {
@@ -151,6 +163,12 @@ export default function MenuItemForm() {
         .catch(() => console.error('Failed to load ERP recipes'));
     }
   }, [isEdit]);
+
+  useEffect(() => {
+    if (!isEdit && user?.locationId) {
+      updateField('locationId', user.locationId);
+    }
+  }, [user, isEdit]);
 
   useEffect(() => {
     if (!isEdit) return;
@@ -171,6 +189,7 @@ export default function MenuItemForm() {
           categoryId: item.categoryId,
           unit: item.unit || '份',
           unitTranslations: item.unitTranslations || {},
+          locationId: item.locationId || '',
         });
         if (item.image) setImageUrl(item.image);
         if (item.options?.length) {
@@ -311,6 +330,7 @@ export default function MenuItemForm() {
         allergenIds: selectedAllergens,
         mealtimeIds: selectedMealtimes,
         dietaryPreferenceIds: selectedDietary,
+        locationId: form.locationId || null,
       };
 
       if (!isEdit && selectedErpRecipeId) {
@@ -443,6 +463,25 @@ export default function MenuItemForm() {
                   <option key={c.id} value={c.id}>{c.name}</option>
                 ))}
               </select>
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-750 mb-1">上架範圍 / 關聯分店 (Branch Availability)</label>
+              {user?.role === 'SUPER_ADMIN' ? (
+                <select
+                  value={form.locationId}
+                  onChange={(e) => updateField('locationId', e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 font-medium"
+                >
+                  <option value="">中央總部 (全分店上架 - 預設)</option>
+                  {locations.map((loc) => (
+                    <option key={loc.id} value={loc.id}>{loc.name}</option>
+                  ))}
+                </select>
+              ) : (
+                <div className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm font-medium text-gray-600">
+                  {locations.find((l) => l.id === form.locationId)?.name || '指定所屬分店'} (店長限製)
+                </div>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">價格 (Price) *</label>

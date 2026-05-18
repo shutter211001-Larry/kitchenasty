@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { api } from '../lib/api.js';
+import { useAuth } from '../context/AuthContext.js';
 
 interface CategoryData {
   name: string;
@@ -11,6 +12,7 @@ interface CategoryData {
   sortOrder: number;
   isActive: boolean;
   parentId: string;
+  locationId: string;
 }
 
 const LANGUAGES = [
@@ -29,6 +31,11 @@ interface CategoryOption {
   name: string;
 }
 
+interface LocationOption {
+  id: string;
+  name: string;
+}
+
 const emptyCategory: CategoryData = {
   name: '',
   nameTranslations: {},
@@ -38,15 +45,18 @@ const emptyCategory: CategoryData = {
   sortOrder: 0,
   isActive: true,
   parentId: '',
+  locationId: '',
 };
 
 export default function CategoryForm() {
   const { id } = useParams();
   const navigate = useNavigate();
   const isEdit = !!id;
+  const { user } = useAuth();
 
   const [form, setForm] = useState<CategoryData>(emptyCategory);
   const [categories, setCategories] = useState<CategoryOption[]>([]);
+  const [locations, setLocations] = useState<LocationOption[]>([]);
   const [loading, setLoading] = useState(isEdit);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -55,7 +65,17 @@ export default function CategoryForm() {
     api.get<{ data: CategoryOption[] }>('/menu/categories')
       .then((res) => setCategories(res.data.filter((c) => c.id !== id)))
       .catch(() => {});
+
+    api.get<{ data: LocationOption[] }>('/locations')
+      .then((res) => setLocations(res.data || []))
+      .catch(() => {});
   }, [id]);
+
+  useEffect(() => {
+    if (!isEdit && user?.locationId) {
+      updateField('locationId', user.locationId);
+    }
+  }, [user, isEdit]);
 
   useEffect(() => {
     if (!isEdit) return;
@@ -71,6 +91,7 @@ export default function CategoryForm() {
           sortOrder: cat.sortOrder,
           isActive: cat.isActive,
           parentId: cat.parentId || '',
+          locationId: cat.locationId || '',
         });
         setLoading(false);
       })
@@ -97,6 +118,7 @@ export default function CategoryForm() {
         ...form,
         sortOrder: Number(form.sortOrder),
         parentId: form.parentId || undefined,
+        locationId: form.locationId || null,
       };
 
       if (isEdit) {
@@ -175,6 +197,25 @@ export default function CategoryForm() {
                   <option key={c.id} value={c.id}>{c.name}</option>
                 ))}
               </select>
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-750 mb-1">上架範圍 / 關聯分店 (Branch Availability)</label>
+              {user?.role === 'SUPER_ADMIN' ? (
+                <select
+                  value={form.locationId}
+                  onChange={(e) => updateField('locationId', e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 font-medium"
+                >
+                  <option value="">中央總部 (全分店上架 - 預設)</option>
+                  {locations.map((loc) => (
+                    <option key={loc.id} value={loc.id}>{loc.name}</option>
+                  ))}
+                </select>
+              ) : (
+                <div className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm font-medium text-gray-600">
+                  {locations.find((l) => l.id === form.locationId)?.name || '指定所屬分店'} (店長限製)
+                </div>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">排序 (Sort Order)</label>

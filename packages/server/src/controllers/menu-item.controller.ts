@@ -56,10 +56,18 @@ export async function listMenuItems(req: Request, res: Response): Promise<void> 
   const skip = (page - 1) * limit;
   const categoryId = req.query.categoryId as string | undefined;
   const search = req.query.search as string | undefined;
+  const locationId = req.query.locationId as string | undefined;
 
   const where: Record<string, unknown> = {};
   if (categoryId) where.categoryId = categoryId;
   if (search) where.name = { contains: search, mode: 'insensitive' };
+
+  if (locationId) {
+    where.OR = [
+      { locationId: null },
+      { locationId: locationId }
+    ];
+  }
 
   const [items, total] = await Promise.all([
     prisma.menuItem.findMany({

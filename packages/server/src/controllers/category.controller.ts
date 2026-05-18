@@ -23,7 +23,12 @@ export async function listCategories(req: Request, res: Response): Promise<void>
   const locationId = req.query.locationId as string | undefined;
 
   const where: Record<string, unknown> = {};
-  if (locationId) where.locationId = locationId;
+  if (locationId) {
+    where.OR = [
+      { locationId: null },
+      { locationId: locationId }
+    ];
+  }
 
   const categories = await prisma.category.findMany({
     where,

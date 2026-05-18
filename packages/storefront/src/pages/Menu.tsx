@@ -65,10 +65,14 @@ export default function Menu() {
     || settings.menuSection?.description 
     || t('home.heroDescription').split('.')[0] + '.';
 
-  const { data: categories, isLoading: categoriesLoading } = useApi<Category[]>(`${API_BASE}/menu/categories`);
+  const selectedLocation = searchParams.get('location');
+  const categoriesUrl = selectedLocation
+    ? `${API_BASE}/menu/categories?locationId=${selectedLocation}`
+    : `${API_BASE}/menu/categories`;
+  const { data: categories, isLoading: categoriesLoading } = useApi<Category[]>(categoriesUrl);
 
   // Build items URL with filters
-  const itemsUrl = buildItemsUrl(selectedCategory, debouncedSearch, page);
+  const itemsUrl = buildItemsUrl(selectedCategory, debouncedSearch, page, selectedLocation);
   const [items, setItems] = useState<MenuItem[]>([]);
   const [pagination, setPagination] = useState<MenuResponse['pagination'] | null>(null);
   const [itemsLoading, setItemsLoading] = useState(true);
@@ -367,11 +371,12 @@ export default function Menu() {
   );
 }
 
-function buildItemsUrl(categoryId: string | null, search: string, page: number): string {
+function buildItemsUrl(categoryId: string | null, search: string, page: number, locationId: string | null): string {
   const params = new URLSearchParams();
   if (categoryId && categoryId !== 'all') params.set('categoryId', categoryId);
   if (search) params.set('search', search);
   if (page > 1) params.set('page', String(page));
+  if (locationId) params.set('locationId', locationId);
   params.set('limit', '12');
   return `${API_BASE}/menu/items?${params}`;
 }
