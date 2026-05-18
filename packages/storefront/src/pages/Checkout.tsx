@@ -670,7 +670,7 @@ export default function Checkout() {
                     />
                     <div className="flex flex-col">
                       <span className="text-sm font-bold">{t('checkout.creditCard')}</span>
-                      <span className="text-[10px] opacity-70">使用信用卡安全支付</span>
+                      <span className="text-[10px] opacity-70">{t('checkout.creditCardSub') || '使用信用卡安全支付'}</span>
                     </div>
                   </label>
                 )}
@@ -693,7 +693,7 @@ export default function Checkout() {
                     />
                     <div className="flex flex-col">
                       <span className="text-sm font-bold">PayPal</span>
-                      <span className="text-[10px] opacity-70">使用 PayPal 帳戶支付</span>
+                      <span className="text-[10px] opacity-70">{t('checkout.paypalSub') || '使用 PayPal 帳戶支付'}</span>
                     </div>
                   </label>
                 )}
@@ -825,11 +825,11 @@ export default function Checkout() {
                 <div>
                   {user?.isEmployee ? (
                     <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-primary-100 text-primary-800 border border-primary-200 shadow-sm animate-pulse">
-                      員工會員
+                      {t('checkout.staffMember') || '員工會員'}
                     </span>
                   ) : (
                     <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800 border border-green-200 shadow-sm">
-                      已登入
+                      {t('checkout.loggedIn') || '已登入'}
                     </span>
                   )}
                 </div>
@@ -860,19 +860,19 @@ export default function Checkout() {
                 
                 {guestPhone && guestPhone === user.phone ? (
                   <div className="flex items-center gap-1.5 text-xs font-semibold text-green-600 animate-in fade-in slide-in-from-left-1 duration-200">
-                    <span>✓ 已自動帶入您的會員電話號碼</span>
+                    <span>{t('checkout.phoneAutoFilled') || '✓ 已自動帶入您的會員電話號碼'}</span>
                   </div>
                 ) : guestPhone && user.phone ? (
                   <div className="flex items-center gap-1.5 text-xs font-semibold text-amber-600 animate-in fade-in slide-in-from-left-1 duration-200">
-                    <span>已修改電話號碼 (會員原預設電話: {user.phone})</span>
+                    <span>{t('checkout.phoneModified', { phone: user.phone }) || `已修改電話號碼 (會員原預設電話: ${user.phone})`}</span>
                   </div>
                 ) : !guestPhone ? (
                   <div className="flex items-center gap-1.5 text-xs font-semibold text-red-500 animate-in fade-in slide-in-from-left-1 duration-200">
-                    <span>⚠️ 請填寫您的聯絡電話，以便我們在有需要時聯繫您</span>
+                    <span>{t('checkout.phoneRequiredTip') || '⚠️ 請填寫您的聯絡電話，以便我們在有需要時聯繫您'}</span>
                   </div>
                 ) : (
                   <div className="flex items-center gap-1.5 text-xs font-semibold text-blue-600 animate-in fade-in slide-in-from-left-1 duration-200">
-                    <span>已輸入聯絡電話 (此號碼將與此筆訂單關聯)</span>
+                    <span>{t('checkout.phoneEntered') || '已輸入聯絡電話 (此號碼將與此筆訂單關聯)'}</span>
                   </div>
                 )}
               </div>

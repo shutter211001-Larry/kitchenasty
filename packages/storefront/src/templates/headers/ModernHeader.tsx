@@ -69,7 +69,7 @@ export default function ModernHeader() {
             {settings.showMembership && (
               <div className="border-t border-gray-200/50 pt-3 mt-3">
                 {isLoading ? (
-                  <div className="px-3 py-2 text-sm text-gray-500">載入中...</div>
+                  <div className="px-3 py-2 text-sm text-gray-500">{t('common.loading')}</div>
                 ) : user ? (
                   <>
                     <Link to="/account" onClick={() => setMobileOpen(false)} className="block px-3 py-2 text-sm text-gray-600">{t('nav.myAccount')}</Link>
