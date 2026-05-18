@@ -208,6 +208,38 @@ export async function autoTranslateSiteSettings(data: any, existingData?: any) {
       }
     }
 
+    // Translate LINE Custom Notification Templates
+    if (data.lineSettings && data.lineSettings.notifications) {
+      const notifications = data.lineSettings.notifications;
+      const existingLine = existingData?.lineSettings || {};
+      const existingNotifications = existingLine.notifications || {};
+
+      for (const status of Object.keys(notifications)) {
+        const config = notifications[status];
+        if (config && config.message) {
+          const existingConfig = existingNotifications[status] || {};
+          config.translations = existingConfig.translations || {};
+
+          const hasMessageChanged = config.message !== existingConfig.message;
+          const isMissingTranslations = !config.translations || Object.keys(config.translations).length < 3;
+
+          if (hasMessageChanged || isMissingTranslations) {
+            const targetLangs = ['en', 'ko', 'ja'];
+            try {
+              for (const lang of targetLangs) {
+                const transRes = await translateContent(config.message, [lang], 'Traditional Chinese');
+                if (transRes && transRes[lang]) {
+                  config.translations[lang] = transRes[lang];
+                }
+              }
+            } catch (err) {
+              logger.error(err as any, `Failed to translate LINE notification template for status ${status}:`);
+            }
+          }
+        }
+      }
+    }
+
     return data;
   } catch (error) {
     logger.error(error as any, 'Site settings auto-translation failed:');
