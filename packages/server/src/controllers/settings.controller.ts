@@ -339,6 +339,9 @@ const mailSettingsSchema = z.object({
   senderName: z.string().optional(),
   senderEmail: z.string().email().optional().or(z.literal('')),
   encryption: z.enum(['none', 'tls', 'ssl']).optional(),
+  emailBrandName: z.string().optional(),
+  emailHeaderColor: z.string().optional(),
+  emailBgColor: z.string().optional(),
 });
 
 const paymentSettingsSchema = z.object({
@@ -452,6 +455,15 @@ export async function updateMailSettings(req: Request, res: Response): Promise<v
   };
 
   const data = await updateSettingsGroup('mailSettings', mergedData);
+
+  // Invalidate cache immediately for instant updates
+  try {
+    const { invalidateMailCache } = await import('../lib/email.js');
+    invalidateMailCache();
+  } catch (err) {
+    console.error('Failed to invalidate mail cache:', err);
+  }
+
   res.json({
     success: true,
     data: { ...data, smtpPass: maskSecret(data.smtpPass) },

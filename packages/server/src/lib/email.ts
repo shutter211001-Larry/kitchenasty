@@ -76,6 +76,42 @@ async function getMailConfig(): Promise<{ transporter: Transporter; from: string
 export function invalidateMailCache(): void {
   cachedTransporter = null;
   cacheExpiry = 0;
+  cachedMailBranding = null;
+  brandingCacheExpiry = 0;
+}
+
+let cachedMailBranding: {
+  emailBrandName: string;
+  emailHeaderColor: string;
+  emailBgColor: string;
+} | null = null;
+let brandingCacheExpiry = 0;
+
+export async function getMailBranding(): Promise<{
+  emailBrandName: string;
+  emailHeaderColor: string;
+  emailBgColor: string;
+}> {
+  const now = Date.now();
+  if (cachedMailBranding && now < brandingCacheExpiry) {
+    return cachedMailBranding;
+  }
+
+  let emailBrandName = 'KitchenAsty';
+  let emailHeaderColor = '#f97316';
+  let emailBgColor = '#f3f4f6';
+
+  try {
+    const settings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
+    const mail = (settings?.mailSettings as Record<string, any>) || {};
+    if (mail.emailBrandName) emailBrandName = mail.emailBrandName;
+    if (mail.emailHeaderColor) emailHeaderColor = mail.emailHeaderColor;
+    if (mail.emailBgColor) emailBgColor = mail.emailBgColor;
+  } catch {}
+
+  cachedMailBranding = { emailBrandName, emailHeaderColor, emailBgColor };
+  brandingCacheExpiry = now + 5 * 60 * 1000; // 5 minutes
+  return cachedMailBranding;
 }
 
 interface EmailOptions {
@@ -98,19 +134,37 @@ export async function sendEmail(options: EmailOptions): Promise<void> {
     try {
       const serviceType = process.env.MAIL_SERVICE_TYPE || 'GMAIL_API';
 
+      // Load custom branding details and process HTML template
+      let finalHtml = options.html;
+      try {
+        const branding = await getMailBranding();
+        finalHtml = finalHtml.replace(/KitchenAsty/g, branding.emailBrandName);
+        finalHtml = finalHtml.replace(/#f97316/g, branding.emailHeaderColor);
+        // Wrap with the custom email outer background color
+        finalHtml = `
+          <div style="background-color:${branding.emailBgColor};padding:40px 20px;min-height:100%;font-family:sans-serif">
+            ${finalHtml}
+          </div>
+        `;
+      } catch (e) {
+        console.error('[Mail Branding] Failed to apply custom styling properties:', e);
+      }
+
+      const brandedOptions = { ...options, html: finalHtml };
+
       if (serviceType === 'MAILGUN' && process.env.MAILGUN_API_KEY) {
-        await sendMailgunEmail(options);
+        await sendMailgunEmail(brandedOptions);
       } else if (serviceType === 'GMAIL_API' && process.env.GOOGLE_CLIENT_ID) {
-        await sendGmailApiEmail(options);
+        await sendGmailApiEmail(brandedOptions);
       } else {
         // Fallback to traditional SMTP
         const { transporter, from } = await getMailConfig();
         await transporter.sendMail({
           from,
-          to: options.to,
-          subject: options.subject,
-          html: options.html,
-          text: options.text,
+          to: brandedOptions.to,
+          subject: brandedOptions.subject,
+          html: brandedOptions.html,
+          text: brandedOptions.text,
         });
       }
     } catch (err) {
@@ -235,30 +289,44 @@ export function orderConfirmationEmail(order: {
 export function orderStatusEmail(order: {
   orderNumber: string;
   status: string;
-}): { subject: string; html: string } {
+}, messageText?: string): { subject: string; html: string } {
   const statusMessages: Record<string, string> = {
-    CONFIRMED: 'Your order has been confirmed and will be prepared soon.',
-    PREPARING: 'Your order is now being prepared!',
-    READY: 'Your order is ready!',
-    OUT_FOR_DELIVERY: 'Your order is on its way!',
-    DELIVERED: 'Your order has been delivered. Enjoy!',
-    PICKED_UP: 'Your order has been picked up. Enjoy!',
-    CANCELLED: 'Your order has been cancelled.',
+    CONFIRMED: '您的訂單已確認，我們將盡快為您準備。',
+    PREPARING: '您的餐點正在製作中！',
+    READY: '🎉 您的訂單已準備就緒！歡迎前往取貨。',
+    OUT_FOR_DELIVERY: '🚀 您的訂單已由外送員取走，正在前往您的地址！',
+    DELIVERED: '🍽️ 您的餐點已送達，祝您用餐愉快！',
+    PICKED_UP: '🍽️ 您的餐點已取餐，祝您用餐愉快！',
+    CANCELLED: '您的訂單已被取消。如有任何疑問，請聯繫我們。',
   };
 
+  const statusChineseMap: Record<string, string> = {
+    PENDING: '待處理',
+    CONFIRMED: '已確認',
+    PREPARING: '製作中',
+    READY: '可取餐',
+    OUT_FOR_DELIVERY: '外送中',
+    DELIVERED: '已送達',
+    PICKED_UP: '已取餐',
+    CANCELLED: '已取消',
+  };
+
+  const chineseStatus = statusChineseMap[order.status] || order.status.replace(/_/g, ' ');
+  const displayMessage = messageText || statusMessages[order.status] || '您的訂單狀態已更新。';
+
   return {
-    subject: `Order #${order.orderNumber} - ${order.status.replace(/_/g, ' ')}`,
+    subject: `訂單 #${order.orderNumber} 狀態更新 - ${chineseStatus}`,
     html: `
       <div style="max-width:600px;margin:0 auto;font-family:sans-serif">
         <div style="background:#f97316;color:white;padding:20px;text-align:center;border-radius:8px 8px 0 0">
           <h1 style="margin:0;font-size:24px">KitchenAsty</h1>
         </div>
         <div style="padding:24px;background:white;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 8px 8px">
-          <h2 style="margin:0 0 8px">Order Update</h2>
-          <p style="color:#6b7280;margin:0 0 16px">Order <strong>#${order.orderNumber}</strong></p>
+          <h2 style="margin:0 0 8px">訂單狀態更新</h2>
+          <p style="color:#6b7280;margin:0 0 16px">訂單 <strong>#${order.orderNumber}</strong></p>
           <div style="background:#f3f4f6;padding:16px;border-radius:8px;margin-bottom:16px">
-            <p style="margin:0;font-size:18px;font-weight:bold">${order.status.replace(/_/g, ' ')}</p>
-            <p style="margin:8px 0 0;color:#6b7280">${statusMessages[order.status] || 'Your order status has been updated.'}</p>
+            <p style="margin:0;font-size:18px;font-weight:bold">${chineseStatus}</p>
+            <p style="margin:8px 0 0;color:#374151;white-space:pre-wrap;line-height:1.6">${displayMessage}</p>
           </div>
         </div>
       </div>

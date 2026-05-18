@@ -812,6 +812,7 @@ export async function updateOrderStatus(req: Request<{ id: string }>, res: Respo
   const recipientEmail = order.customer?.email || order.guestEmail;
   if (recipientEmail) {
     let shouldSend = true;
+    let formattedEmailMessage = '';
     try {
       const settings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
       const orderSettings = (settings?.orderSettings as any) || {};
@@ -825,10 +826,29 @@ export async function updateOrderStatus(req: Request<{ id: string }>, res: Respo
       if (customer && customer.emailNotificationsEnabled === false) {
         shouldSend = false;
       }
+
+      if (shouldSend) {
+        const lineSettings = (settings?.lineSettings as any) || {};
+        const lineNotifications = lineSettings.notifications || {};
+        const defaultStatusMap: Record<string, string> = {
+          'PLACED': '您好{使用者}，您的訂單{訂單編號}已成功建立！\n餐點內容：{餐點內容}\n取餐時間：{取餐時間/做好馬上取}',
+          'CONFIRMED': '您好{使用者}，您的訂單{訂單編號}已確認，我們將盡快為您準備。',
+          'PREPARING': '您的餐點正在製作中！',
+          'READY': '🎉 您好{使用者}，您的訂單{訂單編號}已準備就緒！歡迎前往取貨。',
+          'OUT_FOR_DELIVERY': '🚀 您的訂單{訂單編號}已由外送員取走，正在前往您的地址！',
+          'DELIVERED': '🍽️ 您的餐點已送達，祝您用餐愉快！',
+          'CANCELLED': '您的訂單{訂單編號}已被取消。如有任何疑問，請聯繫我們。'
+        };
+        const statusConfig = lineNotifications[status];
+        const template = statusConfig?.message || defaultStatusMap[status];
+        if (template) {
+          formattedEmailMessage = formatNotificationMessage(template, updated, order.customer);
+        }
+      }
     } catch (e) {}
 
     if (shouldSend) {
-      const emailContent = orderStatusEmail({ orderNumber: order.orderNumber, status });
+      const emailContent = orderStatusEmail({ orderNumber: order.orderNumber, status }, formattedEmailMessage || undefined);
       sendEmail({ to: recipientEmail, ...emailContent }).catch(() => {});
     }
   }
