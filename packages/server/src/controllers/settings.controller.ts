@@ -367,6 +367,7 @@ const advancedSettingsSchema = z.object({
   maintenanceMode: z.boolean().optional(),
   maintenanceMessage: z.string().optional(),
   enableRateLimiting: z.boolean().optional(),
+  inventorySyncFrequency: z.string().optional(),
 });
 
 // ============================================================
