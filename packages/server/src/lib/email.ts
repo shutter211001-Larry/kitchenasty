@@ -8,9 +8,9 @@ let cachedFrom: string = '';
 let cacheExpiry = 0;
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
-async function getMailConfig(): Promise<{ transporter: Transporter; from: string }> {
+async function getMailConfig(locationId?: string | null): Promise<{ transporter: Transporter; from: string }> {
   const now = Date.now();
-  if (cachedTransporter && now < cacheExpiry) {
+  if (!locationId && cachedTransporter && now < cacheExpiry) {
     return { transporter: cachedTransporter, from: cachedFrom };
   }
 
@@ -19,13 +19,22 @@ async function getMailConfig(): Promise<{ transporter: Transporter; from: string
   let secure = false;
   let user = process.env.SMTP_USER;
   let pass = process.env.SMTP_PASS;
-  let senderName = 'KitchenAsty';
-  let senderEmail = 'noreply@kitchenasty.com';
+  let senderName = '夏特點餐系統';
+  let senderEmail = 'noreply@shutterorder.com';
   let requireTLS = false;
 
   try {
     const settings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
-    const mail = (settings?.mailSettings as Record<string, any>) || {};
+    let mail = (settings?.mailSettings as Record<string, any>) || {};
+
+    if (locationId) {
+      const advanced = (settings?.advancedSettings as Record<string, any>) || {};
+      const overrides = advanced.locationOverrides || {};
+      if (overrides[locationId]?.mailSettings) {
+        mail = overrides[locationId].mailSettings;
+      }
+    }
+
     if (mail.smtpHost) host = mail.smtpHost;
     if (mail.smtpPort) port = mail.smtpPort;
     if (mail.smtpUser) user = mail.smtpUser;
@@ -66,9 +75,11 @@ async function getMailConfig(): Promise<{ transporter: Transporter; from: string
     } as any);
   }
 
-  cachedTransporter = transporter;
-  cachedFrom = from;
-  cacheExpiry = now + CACHE_TTL;
+  if (!locationId) {
+    cachedTransporter = transporter;
+    cachedFrom = from;
+    cacheExpiry = now + CACHE_TTL;
+  }
 
   return { transporter, from };
 }
@@ -97,7 +108,7 @@ export async function getMailBranding(): Promise<{
     return cachedMailBranding;
   }
 
-  let emailBrandName = 'KitchenAsty';
+  let emailBrandName = '夏特點餐系統';
   let emailHeaderColor = '#f97316';
   let emailBgColor = '#f3f4f6';
 
@@ -119,6 +130,7 @@ interface EmailOptions {
   subject: string;
   html: string;
   text?: string;
+  locationId?: string | null;
 }
 
 /**
@@ -138,7 +150,7 @@ export async function sendEmail(options: EmailOptions): Promise<void> {
       let finalHtml = options.html;
       try {
         const branding = await getMailBranding();
-        finalHtml = finalHtml.replace(/KitchenAsty/g, branding.emailBrandName);
+        finalHtml = finalHtml.replace(/KitchenAsty/g, branding.emailBrandName).replace(/夏特點餐系統/g, branding.emailBrandName);
         finalHtml = finalHtml.replace(/#f97316/g, branding.emailHeaderColor);
         // Wrap with the custom email outer background color
         finalHtml = `
@@ -158,7 +170,7 @@ export async function sendEmail(options: EmailOptions): Promise<void> {
         await sendGmailApiEmail(brandedOptions);
       } else {
         // Fallback to traditional SMTP
-        const { transporter, from } = await getMailConfig();
+        const { transporter, from } = await getMailConfig(options.locationId);
         await transporter.sendMail({
           from,
           to: brandedOptions.to,
@@ -180,7 +192,7 @@ async function sendMailgunEmail(options: EmailOptions) {
 
   const auth = Buffer.from(`api:${apiKey}`).toString('base64');
   const body = new URLSearchParams({
-    from: process.env.EMAIL_FROM || `KitchenAsty <noreply@${domain}>`,
+    from: process.env.EMAIL_FROM || `夏特點餐系統 <noreply@${domain}>`,
     to: options.to,
     subject: options.subject,
     html: options.html,
@@ -220,7 +232,7 @@ async function sendGmailApiEmail(options: EmailOptions) {
   const accessToken = tokenData.access_token;
 
   // Construct MIME Message
-  const from = process.env.EMAIL_FROM || 'KitchenAsty <noreply@kitchenasty.com>';
+  const from = process.env.EMAIL_FROM || '夏特點餐系統 <noreply@shutterorder.com>';
   const message = [
     `From: ${from}`,
     `To: ${options.to}`,
@@ -268,7 +280,7 @@ export function orderConfirmationEmail(order: {
     html: `
       <div style="max-width:600px;margin:0 auto;font-family:sans-serif">
         <div style="background:#f97316;color:white;padding:20px;text-align:center;border-radius:8px 8px 0 0">
-          <h1 style="margin:0;font-size:24px">KitchenAsty</h1>
+          <h1 style="margin:0;font-size:24px">夏特點餐系統</h1>
         </div>
         <div style="padding:24px;background:white;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 8px 8px">
           <h2 style="margin:0 0 8px">Order Confirmed!</h2>
@@ -319,7 +331,7 @@ export function orderStatusEmail(order: {
     html: `
       <div style="max-width:600px;margin:0 auto;font-family:sans-serif">
         <div style="background:#f97316;color:white;padding:20px;text-align:center;border-radius:8px 8px 0 0">
-          <h1 style="margin:0;font-size:24px">KitchenAsty</h1>
+          <h1 style="margin:0;font-size:24px">夏特點餐系統</h1>
         </div>
         <div style="padding:24px;background:white;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 8px 8px">
           <h2 style="margin:0 0 8px">訂單狀態更新</h2>
@@ -346,15 +358,15 @@ export function staffInvitationEmail(invite: {
   };
 
   return {
-    subject: '邀請您加入 KitchenAsty 團隊',
+    subject: '邀請您加入 夏特點餐系統 團隊',
     html: `
       <div style="max-width:600px;margin:0 auto;font-family:sans-serif">
         <div style="background:#f97316;color:white;padding:20px;text-align:center;border-radius:8px 8px 0 0">
-          <h1 style="margin:0;font-size:24px">KitchenAsty</h1>
+          <h1 style="margin:0;font-size:24px">夏特點餐系統</h1>
         </div>
         <div style="padding:24px;background:white;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 8px 8px">
           <h2 style="margin:0 0 8px">您收到了邀請！</h2>
-          <p style="color:#6b7280;margin:0 0 16px">您已被邀請加入 KitchenAsty 團隊，職位為：<strong>${roleLabels[invite.role] || invite.role}</strong>。</p>
+          <p style="color:#6b7280;margin:0 0 16px">您已被邀請加入 夏特點餐系統 團隊，職位為：<strong>${roleLabels[invite.role] || invite.role}</strong>。</p>
           <div style="text-align:center;margin:24px 0">
             <a href="${invite.inviteLink}" style="display:inline-block;background:#f97316;color:white;padding:12px 32px;border-radius:8px;text-decoration:none;font-weight:bold;font-size:16px">接受邀請</a>
           </div>
@@ -376,7 +388,7 @@ export function reservationConfirmationEmail(reservation: {
     html: `
       <div style="max-width:600px;margin:0 auto;font-family:sans-serif">
         <div style="background:#f97316;color:white;padding:20px;text-align:center;border-radius:8px 8px 0 0">
-          <h1 style="margin:0;font-size:24px">KitchenAsty</h1>
+          <h1 style="margin:0;font-size:24px">夏特點餐系統</h1>
         </div>
         <div style="padding:24px;background:white;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 8px 8px">
           <h2 style="margin:0 0 16px">Reservation Confirmed!</h2>

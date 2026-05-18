@@ -57,6 +57,7 @@ import SettingsAdvanced from './pages/SettingsAdvanced.js';
 import SettingsPermissions from './pages/SettingsPermissions.js';
 import SettingsLine from './pages/SettingsLine.js';
 import SettingsNotifications from './pages/SettingsNotifications.js';
+import SettingsFranchise from './pages/SettingsFranchise.js';
 
 import './index.css';
 
@@ -141,6 +142,7 @@ function AppRoutes() {
         <Route path="/settings/permissions" element={<RequireRole roles={['SUPER_ADMIN']}><SettingsPermissions /></RequireRole>} />
         <Route path="/settings/line" element={<RequireRole roles={['SUPER_ADMIN']}><SettingsLine /></RequireRole>} />
         <Route path="/settings/notifications" element={<RequireRole roles={['SUPER_ADMIN', 'MANAGER']}><SettingsNotifications /></RequireRole>} />
+        <Route path="/settings/franchise" element={<RequireRole roles={['SUPER_ADMIN']}><SettingsFranchise /></RequireRole>} />
 
 
         {/* Developer — MANAGER+ for metrics, SUPER_ADMIN for audit */}

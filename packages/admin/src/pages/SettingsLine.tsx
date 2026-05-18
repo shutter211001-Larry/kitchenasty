@@ -20,13 +20,31 @@ export default function SettingsLine() {
   const [liffId, setLiffId] = useState('');
   const [officialAccountUrl, setOfficialAccountUrl] = useState('');
 
+  const [locations, setLocations] = useState<{ id: string; name: string }[]>([]);
+  const [selectedLocationId, setSelectedLocationId] = useState('');
+
   useEffect(() => {
-    fetchStatus();
+    fetchLocations();
   }, [token]);
 
-  async function fetchStatus() {
+  async function fetchLocations() {
     try {
-      const res = await api.get<{ success: boolean; data: any }>('/line/status');
+      const res = await api.get<{ success: boolean; data: any }>('/locations');
+      if (res.success && Array.isArray(res.data)) {
+        setLocations(res.data);
+      }
+    } catch {}
+  }
+
+  useEffect(() => {
+    fetchStatus();
+  }, [token, selectedLocationId]);
+
+  async function fetchStatus() {
+    setLoading(true);
+    try {
+      const url = selectedLocationId ? `/line/status?locationId=${selectedLocationId}` : '/line/status';
+      const res = await api.get<{ success: boolean; data: any }>(url);
       if (res.success && res.data) {
         setStatus(res.data);
         setLiffId(res.data.liffId || '');
@@ -45,7 +63,8 @@ export default function SettingsLine() {
     setSuccess('');
     try {
       // Save LIFF ID and Account URL to database
-      await api.put('/settings', { 
+      const url = selectedLocationId ? `/settings?locationId=${selectedLocationId}` : '/settings';
+      await api.put(url, { 
         lineSettings: { liffId, officialAccountUrl } 
       });
       setSuccess('設定已儲存');
@@ -82,6 +101,29 @@ export default function SettingsLine() {
         >
           {saving ? '儲存中...' : '儲存設定'}
         </button>
+      </div>
+
+      {/* Branch Override Selector */}
+      <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <span className="text-2xl">🏬</span>
+          <div>
+            <h3 className="text-sm font-bold text-gray-900 font-sans">分店獨立 LINE 設定 (Branch LINE Settings)</h3>
+            <p className="text-xs text-gray-500 font-sans">切換分店以進行專屬的 LINE 參數覆寫，未設定之分店將繼承全域 LINE 官方帳號與 LIFF 設定。</p>
+          </div>
+        </div>
+        <select
+          value={selectedLocationId}
+          onChange={(e) => setSelectedLocationId(e.target.value)}
+          className="px-3.5 py-2 border border-gray-300 rounded-xl text-sm font-medium focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all cursor-pointer bg-gray-50 hover:bg-gray-100 font-sans"
+        >
+          <option value="">🌐 全域系統預設設定 (System Default)</option>
+          {locations.map((loc) => (
+            <option key={loc.id} value={loc.id}>
+              📍 {loc.name}
+            </option>
+          ))}
+        </select>
       </div>
 
       {error && <div className="bg-red-50 text-red-700 p-4 rounded-lg mb-6">{error}</div>}

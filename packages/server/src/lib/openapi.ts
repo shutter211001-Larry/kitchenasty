@@ -1,9 +1,9 @@
 export const openApiSpec = {
   openapi: '3.0.3',
   info: {
-    title: 'KitchenAsty API',
+    title: '夏特點餐系統 API',
     version: '1.0.0',
-    description: 'REST API for the KitchenAsty restaurant ordering and management system.',
+    description: '夏特餐飲點餐與連鎖管理系統的 REST API 接口。',
   },
   servers: [
     { url: '/api', description: 'API Server' },

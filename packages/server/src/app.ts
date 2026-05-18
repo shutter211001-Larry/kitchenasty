@@ -117,7 +117,7 @@ export function createApp() {
   // API Documentation
   app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(openApiSpec, {
     customCss: '.swagger-ui .topbar { display: none }',
-    customSiteTitle: 'KitchenAsty API Documentation',
+    customSiteTitle: '夏特點餐系統 API Documentation',
   }));
 
   // OpenAPI spec endpoint

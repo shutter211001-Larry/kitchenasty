@@ -64,7 +64,7 @@ export default function SettingsNotifications() {
   const [lineNotifications, setLineNotifications] = useState<Record<string, NotificationConfig>>({});
   const [activePreviewEvent, setActivePreviewEvent] = useState<string | null>(null);
 
-  const [emailBrandName, setEmailBrandName] = useState('KitchenAsty');
+  const [emailBrandName, setEmailBrandName] = useState('夏特點餐系統');
   const [emailHeaderColor, setEmailHeaderColor] = useState('#f97316');
   const [emailBgColor, setEmailBgColor] = useState('#f3f4f6');
 
@@ -170,7 +170,7 @@ export default function SettingsNotifications() {
                 value={emailBrandName}
                 onChange={(e) => setEmailBrandName(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all font-medium"
-                placeholder="輸入信件大標，例：KitchenAsty"
+                placeholder="輸入信件大標，例：夏特點餐系統"
               />
             </div>
 
@@ -350,9 +350,9 @@ export default function SettingsNotifications() {
                                     </span>
                                     <div className="bg-gray-50 rounded-lg border border-gray-200 shadow-inner flex-1 flex flex-col overflow-hidden min-h-[200px]">
                                       <div className="bg-white border-b border-gray-200 p-3 text-[11px] text-gray-500 flex flex-col gap-1">
-                                        <div><strong className="text-gray-700 font-medium">郵件主旨:</strong> 訂單 #KA-2026-001 狀態更新 - {chineseStatus}</div>
+                                        <div><strong className="text-gray-700 font-medium">郵件主旨:</strong> 訂單 #SHUTTER-2026-001 狀態更新 - {chineseStatus}</div>
                                         <div><strong className="text-gray-700 font-medium">收件人:</strong> customer@example.com</div>
-                                        <div><strong className="text-gray-700 font-medium">寄件人:</strong> {emailBrandName} &lt;noreply@kitchenasty.com&gt;</div>
+                                        <div><strong className="text-gray-700 font-medium">寄件人:</strong> {emailBrandName} &lt;noreply@shutterorder.com&gt;</div>
                                       </div>
                                       <div 
                                         style={{ backgroundColor: emailBgColor }}

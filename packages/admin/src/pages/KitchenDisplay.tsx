@@ -57,29 +57,63 @@ export default function KitchenDisplay() {
   const [boardLeadTime, setBoardLeadTime] = useState(60);
   const [collapsedDates, setCollapsedDates] = useState<Record<string, boolean>>({});
 
+  const [locations, setLocations] = useState<{ id: string; name: string }[]>([]);
+  const [selectedLocationId, setSelectedLocationId] = useState<string>(() => {
+    return localStorage.getItem('kds_location_id') || '';
+  });
+
   useEffect(() => {
-    fetch('/api/settings/order', { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } })
+    fetch('/api/locations?limit=100', { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } })
       .then(r => r.json())
       .then(res => {
-        if (res.success && res.data) {
-          setEnableCounterDisplay(!!res.data.enableCounterDisplay);
-          if (res.data.boardLeadTime !== undefined) setBoardLeadTime(res.data.boardLeadTime);
+        if (res.success && Array.isArray(res.data)) {
+          setLocations(res.data);
         }
       })
-      .catch(() => {});
+      .catch(err => console.error('Failed to fetch locations:', err));
+  }, []);
+
+  useEffect(() => {
+    const localLeadTime = localStorage.getItem('kds_boardLeadTime');
+    const localCounter = localStorage.getItem('kds_enableCounterDisplay');
+    
+    if (localLeadTime !== null) {
+      setBoardLeadTime(parseInt(localLeadTime) || 60);
+    }
+    if (localCounter !== null) {
+      setEnableCounterDisplay(localCounter === 'true');
+    }
+
+    if (localLeadTime === null || localCounter === null) {
+      fetch('/api/settings/order', { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } })
+        .then(r => r.json())
+        .then(res => {
+          if (res.success && res.data) {
+            if (localCounter === null) {
+              setEnableCounterDisplay(!!res.data.enableCounterDisplay);
+              localStorage.setItem('kds_enableCounterDisplay', String(!!res.data.enableCounterDisplay));
+            }
+            if (localLeadTime === null && res.data.boardLeadTime !== undefined) {
+              setBoardLeadTime(res.data.boardLeadTime);
+              localStorage.setItem('kds_boardLeadTime', String(res.data.boardLeadTime));
+            }
+          }
+        })
+        .catch(() => {});
+    }
   }, []);
 
   const fetchOrders = useCallback(() => {
-    // Fetch active orders (non-completed, non-cancelled)
     const statuses = KITCHEN_STATUSES.join(',');
-    api.get<{ data: KitchenOrder[] }>(`/orders?limit=100&includeItems=true&status=${statuses}`)
+    const locParam = selectedLocationId ? `&locationId=${selectedLocationId}` : '';
+    api.get<{ data: KitchenOrder[] }>(`/orders?limit=100&includeItems=true&status=${statuses}${locParam}`)
       .then((res) => {
         setOrders(res.data);
         setLastRefresh(new Date());
       })
       .catch(() => { })
       .finally(() => setLoading(false));
-  }, []);
+  }, [selectedLocationId]);
 
   useEffect(() => {
     fetchOrders();
@@ -87,15 +121,14 @@ export default function KitchenDisplay() {
 
   // Socket.IO connection for real-time updates
   useEffect(() => {
-    // Derive socket URL from VITE_API_URL or window.location.origin
     const apiBase = (import.meta.env.VITE_API_URL || '').replace(/\/api$/, '').replace(/\/$/, '');
     const socketUrl = apiBase || window.location.origin;
     
-    console.log('Attempting socket connection to:', socketUrl);
+    console.log('Attempting socket connection to:', socketUrl, 'with locationId:', selectedLocationId);
     
     const s = io(socketUrl, { 
       path: '/socket.io', 
-      transports: ['polling', 'websocket'], // Use polling first to bypass proxy/load-balancer issues, then upgrade
+      transports: ['polling', 'websocket'],
       reconnectionAttempts: 10,
       timeout: 20000,
     });
@@ -106,7 +139,7 @@ export default function KitchenDisplay() {
       console.log('Socket connected successfully');
       setIsConnected(true);
       setSocketError(null);
-      s.emit('join:kitchen');
+      s.emit('join:kitchen', { locationId: selectedLocationId });
     });
 
     s.on('disconnect', () => {
@@ -126,20 +159,18 @@ export default function KitchenDisplay() {
 
     s.on('order:statusUpdate', (data: { id: string; status: string }) => {
       setOrders((prev) => {
-        // Remove completed/cancelled orders from display
         if (!KITCHEN_STATUSES.includes(data.status)) {
           return prev.filter((o) => o.id !== data.id);
         }
-        // Update status of existing order
         return prev.map((o) => o.id === data.id ? { ...o, status: data.status } : o);
       });
     });
 
     return () => {
-      s.emit('leave:kitchen');
+      s.emit('leave:kitchen', { locationId: selectedLocationId });
       s.disconnect();
     };
-  }, [fetchOrders]);
+  }, [fetchOrders, selectedLocationId]);
 
   const handleStatusUpdate = async (orderId: string, newStatus: string) => {
     setUpdating(orderId);
@@ -222,6 +253,28 @@ export default function KitchenDisplay() {
       <div className="bg-gray-900 text-white px-6 py-3 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <h1 className="text-lg font-bold text-primary-400">{t('kitchen.title')}</h1>
+          
+          {/* Location Selector */}
+          <div className="flex items-center gap-1">
+            <span className="text-xs text-gray-400">📍</span>
+            <select
+              value={selectedLocationId}
+              onChange={(e) => {
+                const val = e.target.value;
+                setSelectedLocationId(val);
+                localStorage.setItem('kds_location_id', val);
+              }}
+              className="bg-gray-800 text-xs text-white border border-gray-700 rounded px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-primary-500 font-semibold"
+            >
+              <option value="">全部門市 (All Locations)</option>
+              {locations.map((loc) => (
+                <option key={loc.id} value={loc.id}>
+                  {loc.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
           <div className="flex items-center gap-2" role="status">
             <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-400' : 'bg-red-400'}`} />
             <span className="text-xs text-gray-400">

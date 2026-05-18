@@ -78,7 +78,7 @@ export default function AcceptInvite() {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center px-4">
         <div className="w-full max-w-sm text-center">
-          <h1 className="text-3xl font-bold text-primary-400 mb-8">KitchenAsty</h1>
+          <h1 className="text-3xl font-bold text-primary-400 mb-8">夏特點餐系統</h1>
           <div className="bg-white rounded-xl shadow-lg p-8">
             <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <span className="text-2xl text-red-600">!</span>
@@ -101,7 +101,7 @@ export default function AcceptInvite() {
     <div className="min-h-screen bg-gray-900 flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-primary-400">KitchenAsty</h1>
+          <h1 className="text-3xl font-bold text-primary-400">夏特點餐系統</h1>
           <p className="text-gray-400 mt-1 text-sm">接受加入邀請</p>
         </div>
 

@@ -352,6 +352,35 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
     };
   });
 
+  // Loyalty points redemption margin controls
+  let maxRedemptionForCart = 0;
+  try {
+    const siteSettings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
+    const advancedSettings = (siteSettings?.advancedSettings as any) || {};
+    const redemptionRules = advancedSettings.loyaltyRedemptionRules || {};
+
+    items.forEach((item) => {
+      const menuItem = menuItemMap.get(item.menuItemId);
+      if (!menuItem) return;
+      let unitPrice = menuItem.price;
+      (item.options || []).forEach((opt) => {
+        const dbValue = optionValueMap.get(opt.menuOptionValueId);
+        unitPrice += dbValue ? dbValue.priceModifier : 0;
+      });
+      const itemSubtotal = unitPrice * item.quantity;
+      const rule = redemptionRules[item.menuItemId] || { isRedeemable: false, maxRedemptionAmount: 0 };
+      if (rule.isRedeemable) {
+        const allowedDiscount = rule.maxRedemptionAmount > 0 
+          ? Math.min(itemSubtotal, item.quantity * rule.maxRedemptionAmount)
+          : itemSubtotal;
+        maxRedemptionForCart += allowedDiscount;
+      }
+    });
+  } catch (err) {
+    console.error('Failed to calculate loyalty point redemption margin controls:', err);
+    maxRedemptionForCart = subtotal;
+  }
+
   // Loyalty points redemption
   let loyaltyDiscount = 0;
   if (loyaltyPointsRedeem && loyaltyPointsRedeem > 0 && customerId) {
@@ -361,7 +390,15 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
       return;
     }
     // 100 points = $1
-    loyaltyDiscount = loyaltyPointsRedeem / 100;
+    const proposedDiscount = loyaltyPointsRedeem / 100;
+    if (proposedDiscount > maxRedemptionForCart) {
+      res.status(400).json({ 
+        success: false, 
+        error: `該購物車內品項最高僅允許使用紅利折抵 NT$ ${maxRedemptionForCart.toFixed(2)} 元 (相當於 ${Math.round(maxRedemptionForCart * 100)} 點)。`
+      });
+      return;
+    }
+    loyaltyDiscount = proposedDiscount;
   }
 
   // Check minimum order. Delivery zones override location/global defaults.
@@ -562,7 +599,11 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
         total: order.total,
         items: order.items.map((i) => ({ name: i.name, quantity: i.quantity, subtotal: i.subtotal })),
       });
-      sendEmail({ to: recipientEmail, ...emailContent }).catch(() => {});
+      sendEmail({
+        to: recipientEmail,
+        ...emailContent,
+        locationId: order.locationId,
+      }).catch(() => {});
     }
   }
 
@@ -592,6 +633,7 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
     orderNumber: order.orderNumber,
     status: order.status,
     orderType: order.orderType,
+    locationId: order.locationId,
   });
 
   // Emit event for automation rules
@@ -616,6 +658,7 @@ export async function listOrders(req: Request, res: Response): Promise<void> {
   const skip = (page - 1) * limit;
   const status = req.query.status as string | undefined;
   const orderType = req.query.orderType as string | undefined;
+  const locationId = req.query.locationId as string | undefined;
 
   const includeItems = req.query.includeItems === 'true';
 
@@ -625,6 +668,7 @@ export async function listOrders(req: Request, res: Response): Promise<void> {
     where.status = statuses.length === 1 ? statuses[0] : { in: statuses };
   }
   if (orderType) where.orderType = orderType;
+  if (locationId) where.locationId = locationId;
 
   const [orders, total] = await Promise.all([
     prisma.order.findMany({
@@ -806,6 +850,7 @@ export async function updateOrderStatus(req: Request<{ id: string }>, res: Respo
     status: updated.status,
     orderType: updated.orderType,
     customerId: updated.customerId,
+    locationId: updated.locationId,
   });
 
   // Send status update email if enabled in settings
@@ -849,7 +894,11 @@ export async function updateOrderStatus(req: Request<{ id: string }>, res: Respo
 
     if (shouldSend) {
       const emailContent = orderStatusEmail({ orderNumber: order.orderNumber, status }, formattedEmailMessage || undefined);
-      sendEmail({ to: recipientEmail, ...emailContent }).catch(() => {});
+      sendEmail({
+        to: recipientEmail,
+        ...emailContent,
+        locationId: updated.locationId,
+      }).catch(() => {});
     }
   }
 
@@ -983,6 +1032,7 @@ export async function updateOrderDiscount(req: Request<{ id: string }>, res: Res
     status: updated.status,
     orderType: updated.orderType,
     customerId: updated.customerId,
+    locationId: updated.locationId,
   });
 
   res.json({ success: true, data: updated });
@@ -1041,6 +1091,7 @@ export async function cancelOrder(req: Request<{ id: string }>, res: Response): 
     status: updated.status,
     orderType: updated.orderType,
     customerId: updated.customerId,
+    locationId: updated.locationId,
   });
 
   res.json({ success: true, data: updated });
@@ -1285,7 +1336,8 @@ export async function checkOrderReminders(req: Request, res: Response): Promise<
         to: email,
         subject: `Update on your order #${order.orderNumber}`,
         text: message,
-        html: `<p>${message}</p>`
+        html: `<p>${message}</p>`,
+        locationId: order.locationId
       });
     })
   );

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { api } from '../lib/api.js';
 
 interface Customer {
@@ -17,7 +17,15 @@ interface LoyaltyTransaction {
   order: { orderNumber: string } | null;
 }
 
+interface MenuItem {
+  id: string;
+  name: string;
+  price: number;
+  isActive: boolean;
+}
+
 export default function CustomerLoyalty() {
+  // Original Customer States
   const [searchEmail, setSearchEmail] = useState('');
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [transactions, setTransactions] = useState<LoyaltyTransaction[]>([]);
@@ -27,12 +35,40 @@ export default function CustomerLoyalty() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
+  // New Redemption Rules States
+  const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
+  const [redemptionRules, setRedemptionRules] = useState<Record<string, { isRedeemable: boolean; maxRedemptionAmount: number }>>({});
+  const [menuSearch, setMenuSearch] = useState('');
+  const [rulesLoading, setRulesLoading] = useState(false);
+  const [rulesSaving, setRulesSaving] = useState(false);
+
+  useEffect(() => {
+    fetchMenuAndRules();
+  }, []);
+
+  const fetchMenuAndRules = async () => {
+    setRulesLoading(true);
+    try {
+      const [menuRes, settingsRes] = await Promise.all([
+        api.get<{ data: MenuItem[] }>('/menu/items'),
+        api.get<{ data: any }>('/settings/advanced')
+      ]);
+      setMenuItems(menuRes.data || []);
+      const advanced = settingsRes.data || {};
+      setRedemptionRules(advanced.loyaltyRedemptionRules || {});
+    } catch (err: any) {
+      console.error('Failed to load menu or advanced settings:', err);
+      setError('無法載入商品或紅利設定資訊');
+    } finally {
+      setRulesLoading(false);
+    }
+  };
+
   const searchCustomer = async () => {
     setError('');
     setSuccess('');
     setLoading(true);
     try {
-      // Search using dashboard customers endpoint or a simple approach
       const res = await api.get<{ data: Customer[] }>(`/dashboard/customers?email=${encodeURIComponent(searchEmail)}`);
       if (res.data.length === 0) {
         setError('找不到該顧客');
@@ -40,7 +76,6 @@ export default function CustomerLoyalty() {
         return;
       }
       setCustomer(res.data[0]);
-      // We don't have a per-customer transaction endpoint from admin side, so we show what we have
       setTransactions([]);
     } catch (err: any) {
       setError(err.message);
@@ -73,85 +108,258 @@ export default function CustomerLoyalty() {
     }
   };
 
-  return (
-    <div className="max-w-3xl">
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">忠誠度點數管理 (Loyalty Points)</h1>
+  const handleToggleRedeemable = (itemId: string) => {
+    const current = redemptionRules[itemId] || { isRedeemable: false, maxRedemptionAmount: 0 };
+    setRedemptionRules({
+      ...redemptionRules,
+      [itemId]: {
+        ...current,
+        isRedeemable: !current.isRedeemable,
+      }
+    });
+  };
 
-      {/* Search */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">尋找顧客 (Find Customer)</h2>
-        <div className="flex gap-2">
-          <input
-            type="email"
-            placeholder="輸入顧客電子郵件..."
-            value={searchEmail}
-            onChange={(e) => setSearchEmail(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && searchCustomer()}
-            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary-500"
-            aria-label="依電子郵件搜尋顧客"
-          />
-          <button
-            onClick={searchCustomer}
-            disabled={loading || !searchEmail}
-            className="px-4 py-2 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700 disabled:opacity-50"
-          >
-            {loading ? '搜尋中...' : '搜尋'}
-          </button>
+  const handleAmountChange = (itemId: string, val: string) => {
+    const num = parseFloat(val);
+    const current = redemptionRules[itemId] || { isRedeemable: false, maxRedemptionAmount: 0 };
+    setRedemptionRules({
+      ...redemptionRules,
+      [itemId]: {
+        ...current,
+        maxRedemptionAmount: isNaN(num) ? 0 : num,
+      }
+    });
+  };
+
+  const handleSaveRules = async () => {
+    setRulesSaving(true);
+    setError('');
+    setSuccess('');
+    try {
+      await api.put('/settings/advanced', {
+        loyaltyRedemptionRules: redemptionRules
+      });
+      setSuccess('商品紅利折抵設定已成功更新！');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (err: any) {
+      setError(err.message || '更新失敗');
+    } finally {
+      setRulesSaving(false);
+    }
+  };
+
+  const filteredMenuItems = menuItems.filter(item =>
+    item.name.toLowerCase().includes(menuSearch.toLowerCase())
+  );
+
+  return (
+    <div className="max-w-5xl mx-auto px-4 py-6">
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">💎 門市會員與商品紅利折抵控制中心</h1>
+          <p className="mt-1 text-sm text-gray-500">在此管理顧客會員點數，並精細控制個別商品點數折抵上限以守護門市利潤毛利。</p>
         </div>
       </div>
 
-      {error && <div className="bg-red-50 text-red-700 p-4 rounded-lg mb-4">{error}</div>}
-      {success && <div className="bg-green-50 text-green-700 p-4 rounded-lg mb-4">{success}</div>}
-
-      {customer && (
-        <>
-          {/* Customer Info */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900">{customer.name}</h3>
-                <p className="text-sm text-gray-500">{customer.email}</p>
-              </div>
-              <div className="text-right">
-                <p className="text-3xl font-bold text-primary-600">{customer.loyaltyPoints}</p>
-                <p className="text-sm text-gray-500">點 (約合 ${(customer.loyaltyPoints / 100).toFixed(2)} 價值)</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Adjust Points */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">調整點數 (Adjust Points)</h2>
-            <div className="space-y-3">
-              <div className="flex gap-3">
-                <input
-                  type="number"
-                  placeholder="點數 (+/-)"
-                  value={adjustPoints}
-                  onChange={(e) => setAdjustPoints(e.target.value)}
-                  className="w-40 px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary-500"
-                  aria-label="調整點數"
-                />
-                <input
-                  type="text"
-                  placeholder="調整原因 (選填)"
-                  value={adjustDesc}
-                  onChange={(e) => setAdjustDesc(e.target.value)}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary-500"
-                  aria-label="調整原因"
-                />
-                <button
-                  onClick={handleAdjust}
-                  className="px-4 py-2 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700"
-                >
-                  調整 (Adjust)
-                </button>
-              </div>
-              <p className="text-xs text-gray-400">使用正數增加點數，負數減少點數。</p>
-            </div>
-          </div>
-        </>
+      {error && (
+        <div className="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded-r-xl mb-6 shadow-sm transition-all duration-300">
+          <p className="font-semibold">錯誤提示</p>
+          <p className="text-sm">{error}</p>
+        </div>
       )}
+      {success && (
+        <div className="bg-green-50 border-l-4 border-green-500 text-green-700 p-4 rounded-r-xl mb-6 shadow-sm transition-all duration-300">
+          <p className="font-semibold">操作成功</p>
+          <p className="text-sm">{success}</p>
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        {/* Left Side: Member Management */}
+        <div className="lg:col-span-5 space-y-6">
+          {/* Find Customer */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+            <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+              <span>👤 尋找顧客 (Find Customer)</span>
+            </h2>
+            <div className="flex gap-2">
+              <input
+                type="email"
+                placeholder="輸入顧客電子郵件..."
+                value={searchEmail}
+                onChange={(e) => setSearchEmail(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && searchCustomer()}
+                className="flex-1 px-3.5 py-2.5 border border-gray-300 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+                aria-label="依電子郵件搜尋顧客"
+              />
+              <button
+                onClick={searchCustomer}
+                disabled={loading || !searchEmail}
+                className="px-5 py-2.5 bg-primary-600 hover:bg-primary-700 text-white rounded-xl text-sm font-semibold transition-all disabled:opacity-50 shadow-sm"
+              >
+                {loading ? '搜尋中...' : '搜尋'}
+              </button>
+            </div>
+          </div>
+
+          {customer && (
+            <div className="space-y-6 animate-fadeIn">
+              {/* Customer Info Card */}
+              <div className="bg-gradient-to-br from-primary-600 to-orange-500 rounded-2xl shadow-md text-white p-6">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <span className="bg-white/20 text-xs px-2.5 py-1 rounded-full font-medium">門市金卡會員</span>
+                    <h3 className="text-xl font-bold mt-3">{customer.name}</h3>
+                    <p className="text-sm text-white/80 mt-1">{customer.email}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm text-white/70">可用紅利點數</p>
+                    <p className="text-4xl font-extrabold mt-1">{customer.loyaltyPoints}</p>
+                    <p className="text-xs text-white/80 mt-1">約合 NT$ {(customer.loyaltyPoints / 100).toFixed(1)} 元價值</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Adjust Points Card */}
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+                <h2 className="text-lg font-bold text-gray-900 mb-4">⚙️ 點數異動與調整 (Adjust Points)</h2>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">增減點數 (正數增加，負數減少)</label>
+                    <input
+                      type="number"
+                      placeholder="例如: 100 或 -50"
+                      value={adjustPoints}
+                      onChange={(e) => setAdjustPoints(e.target.value)}
+                      className="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+                      aria-label="調整點數"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">異動事由 (備註)</label>
+                    <input
+                      type="text"
+                      placeholder="備註說明 (如: 活動手動補點、客訴點數退還)"
+                      value={adjustDesc}
+                      onChange={(e) => setAdjustDesc(e.target.value)}
+                      className="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+                      aria-label="調整原因"
+                    />
+                  </div>
+                  <button
+                    onClick={handleAdjust}
+                    className="w-full py-2.5 bg-primary-600 hover:bg-primary-700 text-white rounded-xl text-sm font-semibold transition-all shadow-sm"
+                  >
+                    確定調整點數
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Right Side: Product Point Margin Controls */}
+        <div className="lg:col-span-7">
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+              <div>
+                <h2 className="text-xl font-bold text-gray-900">🎨 商品紅利折抵細粒度控制面板</h2>
+                <p className="text-xs text-gray-400 mt-1">開啟商品折抵並設定抵用金額上限，保護低毛利商品利潤。</p>
+              </div>
+              <button
+                onClick={handleSaveRules}
+                disabled={rulesSaving || rulesLoading}
+                className="px-5 py-2.5 bg-primary-600 hover:bg-primary-700 disabled:opacity-50 text-white rounded-xl text-sm font-semibold transition-all shadow-sm flex items-center justify-center gap-1.5"
+              >
+                {rulesSaving ? '儲存中...' : '儲存紅利設定'}
+              </button>
+            </div>
+
+            {/* Product Search Bar */}
+            <div className="mb-4 relative">
+              <input
+                type="text"
+                placeholder="🔍 搜尋商品名稱 (例如: 披薩、飲料)..."
+                value={menuSearch}
+                onChange={(e) => setMenuSearch(e.target.value)}
+                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+              />
+              <span className="absolute left-3 top-3.5 text-gray-400 text-sm"></span>
+            </div>
+
+            {rulesLoading ? (
+              <div className="text-center py-12">
+                <p className="text-gray-500">正在加載門市商品與規則資訊...</p>
+              </div>
+            ) : (
+              <div className="border border-gray-100 rounded-xl overflow-hidden divide-y divide-gray-100 max-h-[500px] overflow-y-auto">
+                {filteredMenuItems.length === 0 ? (
+                  <div className="text-center py-12 text-gray-500 text-sm">找不到符合的商品</div>
+                ) : (
+                  filteredMenuItems.map((item) => {
+                    const rule = redemptionRules[item.id] || { isRedeemable: false, maxRedemptionAmount: 0 };
+                    return (
+                      <div key={item.id} className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-gray-50 transition-colors">
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-gray-900 text-sm sm:text-base">{item.name}</h4>
+                          <div className="flex items-center gap-2 mt-1">
+                            <span className="text-xs font-semibold bg-gray-100 text-gray-600 px-2 py-0.5 rounded">門市定價: NT$ {item.price} 元</span>
+                            {!item.isActive && (
+                              <span className="text-xs font-semibold bg-red-100 text-red-600 px-2 py-0.5 rounded">已下架</span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Switch controls */}
+                        <div className="flex items-center gap-4 sm:gap-6">
+                          {/* Toggle Switch */}
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-medium text-gray-500">可折抵</span>
+                            <button
+                              type="button"
+                              onClick={() => handleToggleRedeemable(item.id)}
+                              className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out outline-none ${
+                                rule.isRedeemable ? 'bg-primary-600' : 'bg-gray-200'
+                              }`}
+                              aria-pressed={rule.isRedeemable}
+                            >
+                              <span
+                                className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                                  rule.isRedeemable ? 'translate-x-5' : 'translate-x-0'
+                                }`}
+                              />
+                            </button>
+                          </div>
+
+                          {/* Max Redemption Amount Input */}
+                          <div className="flex items-center gap-2 w-32 sm:w-36">
+                            <span className="text-xs font-medium text-gray-500">上限</span>
+                            <div className="relative rounded-lg shadow-sm w-full">
+                              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-2">
+                                <span className="text-xs text-gray-400">$</span>
+                              </div>
+                              <input
+                                type="number"
+                                min="0"
+                                disabled={!rule.isRedeemable}
+                                value={rule.isRedeemable ? (rule.maxRedemptionAmount || '') : ''}
+                                onChange={(e) => handleAmountChange(item.id, e.target.value)}
+                                placeholder="不限"
+                                className="block w-full rounded-lg border border-gray-300 py-1.5 pl-5 pr-2 text-xs sm:text-sm outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 disabled:bg-gray-50 disabled:text-gray-400 disabled:border-gray-200 transition-all text-right font-medium"
+                                aria-label={`${item.name} 折抵上限`}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

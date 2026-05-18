@@ -56,28 +56,52 @@ export default function CounterDisplay() {
   const [boardLeadTime, setBoardLeadTime] = useState(60);
   const [collapsedDates, setCollapsedDates] = useState<Record<string, boolean>>({});
 
+  const [locations, setLocations] = useState<{ id: string; name: string }[]>([]);
+  const [selectedLocationId, setSelectedLocationId] = useState<string>(() => {
+    return localStorage.getItem('cds_location_id') || '';
+  });
+
+  useEffect(() => {
+    fetch('/api/locations?limit=100', { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } })
+      .then(r => r.json())
+      .then(res => {
+        if (res.success && Array.isArray(res.data)) {
+          setLocations(res.data);
+        }
+      })
+      .catch(err => console.error('Failed to fetch locations:', err));
+  }, []);
+
   const fetchOrders = useCallback(() => {
     const statuses = COUNTER_STATUSES.join(',');
-    api.get<{ data: CounterOrder[] }>(`/orders?limit=100&includeItems=true&status=${statuses}`)
+    const locParam = selectedLocationId ? `&locationId=${selectedLocationId}` : '';
+    api.get<{ data: CounterOrder[] }>(`/orders?limit=100&includeItems=true&status=${statuses}${locParam}`)
       .then((res) => {
         setOrders(res.data);
         setLastRefresh(new Date());
       })
       .catch(() => { })
       .finally(() => setLoading(false));
-  }, []);
+  }, [selectedLocationId]);
 
   useEffect(() => {
     fetchOrders();
-    // Fetch settings for boardLeadTime
-    fetch('/api/settings/order', { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } })
-      .then(r => r.json())
-      .then(res => {
-        if (res.success && res.data && res.data.boardLeadTime !== undefined) {
-          setBoardLeadTime(res.data.boardLeadTime);
-        }
-      })
-      .catch(() => {});
+    
+    // Fetch and cache boardLeadTime locally
+    const localLeadTime = localStorage.getItem('cds_boardLeadTime');
+    if (localLeadTime !== null) {
+      setBoardLeadTime(parseInt(localLeadTime) || 60);
+    } else {
+      fetch('/api/settings/order', { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } })
+        .then(r => r.json())
+        .then(res => {
+          if (res.success && res.data && res.data.boardLeadTime !== undefined) {
+            setBoardLeadTime(res.data.boardLeadTime);
+            localStorage.setItem('cds_boardLeadTime', String(res.data.boardLeadTime));
+          }
+        })
+        .catch(() => {});
+    }
   }, [fetchOrders]);
 
   useEffect(() => {
@@ -96,7 +120,7 @@ export default function CounterDisplay() {
     s.on('connect', () => {
       setIsConnected(true);
       setSocketError(null);
-      s.emit('join:kitchen'); // Reuse kitchen room for updates
+      s.emit('join:kitchen', { locationId: selectedLocationId });
     });
 
     s.on('disconnect', () => setIsConnected(false));
@@ -116,10 +140,10 @@ export default function CounterDisplay() {
     });
 
     return () => {
-      s.emit('leave:kitchen');
+      s.emit('leave:kitchen', { locationId: selectedLocationId });
       s.disconnect();
     };
-  }, [fetchOrders]);
+  }, [fetchOrders, selectedLocationId]);
 
   const handleStatusUpdate = async (orderId: string, newStatus: string) => {
     setUpdating(orderId);
@@ -197,7 +221,29 @@ export default function CounterDisplay() {
       
       <div className="bg-purple-900 text-white px-6 py-3 flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <h1 className="text-lg font-bold text-purple-300">櫃台看板 (Counter Display)</h1>
+          <h1 className="text-lg font-bold text-purple-300 font-sans">櫃台看板 (Counter Display)</h1>
+          
+          {/* Location Selector */}
+          <div className="flex items-center gap-1">
+            <span className="text-xs text-purple-200">📍</span>
+            <select
+              value={selectedLocationId}
+              onChange={(e) => {
+                const val = e.target.value;
+                setSelectedLocationId(val);
+                localStorage.setItem('cds_location_id', val);
+              }}
+              className="bg-purple-800 text-xs text-white border border-purple-700 rounded px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-purple-500 font-semibold font-sans cursor-pointer"
+            >
+              <option value="">全部門市 (All Locations)</option>
+              {locations.map((loc) => (
+                <option key={loc.id} value={loc.id}>
+                  {loc.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
           <div className="flex items-center gap-2">
             <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-400' : 'bg-red-400'}`} />
             <span className="text-xs text-purple-200">

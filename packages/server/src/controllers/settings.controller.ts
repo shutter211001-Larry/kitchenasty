@@ -145,6 +145,38 @@ export async function updateSettings(req: Request, res: Response): Promise<void>
     return;
   }
 
+  const locationId = req.query.locationId as string | undefined;
+  if (locationId) {
+    if (parsed.data.lineSettings) {
+      const advanced = await getSettingsGroup('advancedSettings');
+      const overrides = { ...(advanced.locationOverrides || {}) };
+      const locationOverride = overrides[locationId] || {};
+      const existingLine = locationOverride.lineSettings || {};
+      
+      overrides[locationId] = {
+        ...locationOverride,
+        lineSettings: {
+          ...existingLine,
+          ...parsed.data.lineSettings,
+        },
+      };
+
+      const updatedSettings = await prisma.siteSettings.update({
+        where: { id: 'default' },
+        data: {
+          advancedSettings: {
+            ...advanced,
+            locationOverrides: overrides,
+          },
+        },
+      });
+
+      auditLog(req, { action: 'update', entity: 'SiteSettings', entityId: 'default', details: { locationId, fields: ['lineSettings'] } });
+      res.json({ success: true, data: toPublicSettings(updatedSettings) });
+      return;
+    }
+  }
+
   const existingSettings = await getOrCreateSettings();
 
   // Helper to merge JSON fields
@@ -368,6 +400,10 @@ const advancedSettingsSchema = z.object({
   maintenanceMessage: z.string().optional(),
   enableRateLimiting: z.boolean().optional(),
   inventorySyncFrequency: z.string().optional(),
+  loyaltyRedemptionRules: z.record(z.object({
+    isRedeemable: z.boolean(),
+    maxRedemptionAmount: z.number(),
+  })).optional(),
 });
 
 // ============================================================
@@ -431,7 +467,22 @@ export async function updateReservationSettings(req: Request, res: Response): Pr
 // MAIL SETTINGS
 // ============================================================
 
-export async function getMailSettings(_req: Request, res: Response): Promise<void> {
+export async function getMailSettings(req: Request, res: Response): Promise<void> {
+  const locationId = req.query.locationId as string | undefined;
+  if (locationId) {
+    const advanced = await getSettingsGroup('advancedSettings');
+    const overrides = advanced.locationOverrides || {};
+    const locationData = overrides[locationId]?.mailSettings || {};
+    res.json({
+      success: true,
+      data: {
+        ...locationData,
+        smtpPass: maskSecret(locationData.smtpPass),
+      },
+    });
+    return;
+  }
+
   const data = await getSettingsGroup('mailSettings');
   res.json({
     success: true,
@@ -446,6 +497,42 @@ export async function updateMailSettings(req: Request, res: Response): Promise<v
   const parsed = mailSettingsSchema.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ success: false, error: parsed.error.errors });
+    return;
+  }
+
+  const locationId = req.query.locationId as string | undefined;
+  if (locationId) {
+    const advanced = await getSettingsGroup('advancedSettings');
+    const overrides = { ...(advanced.locationOverrides || {}) };
+    const locationOverride = overrides[locationId] || {};
+    const existing = locationOverride.mailSettings || {};
+    const mergedData = {
+      ...existing,
+      ...parsed.data,
+      smtpPass: preserveIfMasked(parsed.data.smtpPass, existing.smtpPass),
+    };
+
+    overrides[locationId] = {
+      ...locationOverride,
+      mailSettings: mergedData,
+    };
+
+    await updateSettingsGroup('advancedSettings', {
+      ...advanced,
+      locationOverrides: overrides,
+    });
+
+    try {
+      const { invalidateMailCache } = await import('../lib/email.js');
+      invalidateMailCache();
+    } catch (err) {
+      console.error('Failed to invalidate mail cache:', err);
+    }
+
+    res.json({
+      success: true,
+      data: { ...mergedData, smtpPass: maskSecret(mergedData.smtpPass) },
+    });
     return;
   }
 
@@ -479,7 +566,13 @@ export async function sendTestEmail(req: Request, res: Response): Promise<void> 
     return;
   }
 
-  const mail = await getSettingsGroup('mailSettings');
+  const locationId = req.query.locationId as string | undefined;
+  let mail = await getSettingsGroup('mailSettings');
+  if (locationId) {
+    const advanced = await getSettingsGroup('advancedSettings');
+    const overrides = advanced.locationOverrides || {};
+    mail = overrides[locationId]?.mailSettings || mail;
+  }
   
   // Use environment variables for sensitive OAuth2 data if available
   const serviceType = process.env.MAIL_SERVICE_TYPE || 'SMTP';
@@ -494,8 +587,8 @@ export async function sendTestEmail(req: Request, res: Response): Promise<void> 
   const port = mail.smtpPort || parseInt(process.env.SMTP_PORT || '1025');
   const user = (mail.smtpUser || process.env.SMTP_USER || '').trim();
   const pass = (mail.smtpPass || process.env.SMTP_PASS || '').trim();
-  const senderName = (mail.senderName || 'KitchenAsty').trim();
-  const senderEmail = (mail.senderEmail || 'noreply@kitchenasty.com').trim();
+  const senderName = (mail.senderName || '夏特點餐系統').trim();
+  const senderEmail = (mail.senderEmail || 'noreply@shutterorder.com').trim();
   const encryption = (mail.encryption || 'none').trim();
 
   try {
@@ -521,7 +614,7 @@ export async function sendTestEmail(req: Request, res: Response): Promise<void> 
       const accessToken = await getAccessToken();
       const message = [
         `To: ${to}`,
-        `Subject: KitchenAsty — Test Email (Gmail API)`,
+        `Subject: 夏特點餐系統 — 測試信件 (Gmail API)`,
         'Content-Type: text/html; charset=utf-8',
         '',
         '<div style="font-family:sans-serif;padding:20px"><h2>Test Email</h2><p>This was sent via Gmail REST API (HTTP) to bypass SMTP blocking.</p></div>',
@@ -556,7 +649,7 @@ export async function sendTestEmail(req: Request, res: Response): Promise<void> 
         body: JSON.stringify({
           from: senderEmail.includes('resend.dev') ? senderEmail : `${senderName} <onboarding@resend.dev>`,
           to: [to],
-          subject: 'KitchenAsty — Test Email (via API)',
+          subject: '夏特點餐系統 — 測試信件 (via API)',
           html: '<div style="font-family:sans-serif;padding:20px"><h2>Test Email</h2><p>This email was sent via the Resend HTTP API.</p></div>',
         }),
       });
@@ -583,7 +676,7 @@ export async function sendTestEmail(req: Request, res: Response): Promise<void> 
     await transporter.sendMail({
       from: `${senderName} <${senderEmail}>`,
       to,
-      subject: 'KitchenAsty — Test Email',
+      subject: '夏特點餐系統 — 測試信件',
       html: '<div style="font-family:sans-serif;padding:20px"><h2>Test Email</h2><p>If you received this, your mail settings are configured correctly.</p></div>',
     });
 
@@ -676,6 +769,15 @@ export async function updateAdvancedSettings(req: Request, res: Response): Promi
     res.status(400).json({ success: false, error: parsed.error.errors });
     return;
   }
-  const data = await updateSettingsGroup('advancedSettings', parsed.data);
+  const existing = await getSettingsGroup('advancedSettings');
+  const mergedData = {
+    ...existing,
+    ...parsed.data,
+    loyaltyRedemptionRules: {
+      ...(existing.loyaltyRedemptionRules || {}),
+      ...(parsed.data.loyaltyRedemptionRules || {}),
+    },
+  };
+  const data = await updateSettingsGroup('advancedSettings', mergedData);
   res.json({ success: true, data });
 }

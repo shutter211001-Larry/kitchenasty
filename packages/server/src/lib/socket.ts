@@ -49,12 +49,20 @@ export function initSocket(httpServer: HttpServer): Server {
     });
 
     // Join kitchen room for staff viewing kitchen display
-    socket.on('join:kitchen', () => {
-      socket.join('kitchen');
+    socket.on('join:kitchen', (data?: { locationId?: string }) => {
+      if (data?.locationId) {
+        socket.join(`kitchen:${data.locationId}`);
+      } else {
+        socket.join('kitchen');
+      }
     });
 
-    socket.on('leave:kitchen', () => {
-      socket.leave('kitchen');
+    socket.on('leave:kitchen', (data?: { locationId?: string }) => {
+      if (data?.locationId) {
+        socket.leave(`kitchen:${data.locationId}`);
+      } else {
+        socket.leave('kitchen');
+      }
     });
   });
 
@@ -71,11 +79,16 @@ export function emitOrderStatusUpdate(order: {
   status: string;
   orderType: string;
   customerId?: string | null;
+  locationId?: string;
 }): void {
   if (!io) return;
   // Notify the specific order room (customer tracking)
   io.to(`order:${order.id}`).emit('order:statusUpdate', order);
-  // Notify the kitchen display
+  
+  // Notify the kitchen displays
+  if (order.locationId) {
+    io.to(`kitchen:${order.locationId}`).emit('order:statusUpdate', order);
+  }
   io.to('kitchen').emit('order:statusUpdate', order);
 
   // Send push notification to the customer
@@ -126,7 +139,11 @@ export function emitNewOrder(order: {
   orderNumber: string;
   status: string;
   orderType: string;
+  locationId?: string;
 }): void {
   if (!io) return;
+  if (order.locationId) {
+    io.to(`kitchen:${order.locationId}`).emit('order:new', order);
+  }
   io.to('kitchen').emit('order:new', order);
 }

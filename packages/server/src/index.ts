@@ -10,5 +10,5 @@ const httpServer = createServer(app);
 initSocket(httpServer);
 
 httpServer.listen(Number(PORT), '0.0.0.0', () => {
-  serverLogger.info(`KitchenAsty server running on http://0.0.0.0:${PORT}`);
+  serverLogger.info(`夏特點餐系統服務器已啟動：http://0.0.0.0:${PORT}`);
 });

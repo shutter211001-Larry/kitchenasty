@@ -20,31 +20,48 @@ export default function SettingsMail() {
   const [testSending, setTestSending] = useState(false);
   const [testResult, setTestResult] = useState('');
 
+  const [locations, setLocations] = useState<{ id: string; name: string }[]>([]);
+  const [selectedLocationId, setSelectedLocationId] = useState('');
+
   useEffect(() => {
-    fetch('/api/settings/mail', { headers: { Authorization: `Bearer ${token}` } })
+    fetch('/api/locations', { headers: { Authorization: `Bearer ${token}` } })
+      .then((r) => r.json())
+      .then((res) => {
+        if (res.success && Array.isArray(res.data)) {
+          setLocations(res.data);
+        }
+      })
+      .catch(() => {});
+  }, [token]);
+
+  useEffect(() => {
+    setLoading(true);
+    const url = selectedLocationId ? `/api/settings/mail?locationId=${selectedLocationId}` : '/api/settings/mail';
+    fetch(url, { headers: { Authorization: `Bearer ${token}` } })
       .then((r) => r.json())
       .then((res) => {
         if (res.success && res.data) {
           const d = res.data;
-          if (d.smtpHost) setSmtpHost(d.smtpHost);
-          if (d.smtpPort) setSmtpPort(d.smtpPort);
-          if (d.smtpUser) setSmtpUser(d.smtpUser);
-          if (d.smtpPass) setSmtpPass(d.smtpPass);
-          if (d.senderName) setSenderName(d.senderName);
-          if (d.senderEmail) setSenderEmail(d.senderEmail);
-          if (d.encryption) setEncryption(d.encryption);
+          setSmtpHost(d.smtpHost || '');
+          setSmtpPort(d.smtpPort || 587);
+          setSmtpUser(d.smtpUser || '');
+          setSmtpPass(d.smtpPass || '');
+          setSenderName(d.senderName || '');
+          setSenderEmail(d.senderEmail || '');
+          setEncryption(d.encryption || 'none');
         }
       })
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, [token]);
+  }, [token, selectedLocationId]);
 
   async function handleSave() {
     setSaving(true);
     setError('');
     setSuccess('');
     try {
-      const res = await fetch('/api/settings/mail', {
+      const url = selectedLocationId ? `/api/settings/mail?locationId=${selectedLocationId}` : '/api/settings/mail';
+      const res = await fetch(url, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({
@@ -77,7 +94,8 @@ export default function SettingsMail() {
     setTestSending(true);
     setTestResult('');
     try {
-      const res = await fetch('/api/settings/mail/test', {
+      const url = selectedLocationId ? `/api/settings/mail/test?locationId=${selectedLocationId}` : '/api/settings/mail/test';
+      const res = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ to: testEmail }),
@@ -122,6 +140,29 @@ export default function SettingsMail() {
             '儲存設定'
           )}
         </button>
+      </div>
+
+      {/* Branch Override Selector */}
+      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-4 mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <span className="text-2xl">🏬</span>
+          <div>
+            <h3 className="text-sm font-bold text-gray-900">分店獨立郵件設定 (Branch Mail Settings)</h3>
+            <p className="text-xs text-gray-500">切換分店以進行專屬的 SMTP 參數覆寫，未設定之欄位將繼承系統預設 SMTP 寄件設定。</p>
+          </div>
+        </div>
+        <select
+          value={selectedLocationId}
+          onChange={(e) => setSelectedLocationId(e.target.value)}
+          className="px-3.5 py-2 border border-gray-300 rounded-xl text-sm font-medium focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all cursor-pointer bg-gray-50 hover:bg-gray-100"
+        >
+          <option value="">🌐 全域系統預設設定 (System Default)</option>
+          {locations.map((loc) => (
+            <option key={loc.id} value={loc.id}>
+              📍 {loc.name}
+            </option>
+          ))}
+        </select>
       </div>
 
       {error && (
@@ -228,7 +269,7 @@ export default function SettingsMail() {
                 value={senderName}
                 onChange={(e) => setSenderName(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all font-medium"
-                placeholder="例：KitchenAsty 官方總部"
+                placeholder="例：夏特點餐系統 官方總部"
               />
             </div>
             <div>
@@ -238,7 +279,7 @@ export default function SettingsMail() {
                 value={senderEmail}
                 onChange={(e) => setSenderEmail(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all font-medium"
-                placeholder="noreply@kitchenasty.com"
+                placeholder="noreply@shutterorder.com"
               />
             </div>
           </div>

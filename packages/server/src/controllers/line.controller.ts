@@ -21,6 +21,26 @@ async function getLineConfig() {
 export async function getLineStatus(req: Request, res: Response) {
   const hasSecret = !!process.env.LINE_CHANNEL_SECRET;
   const hasToken = !!process.env.LINE_CHANNEL_ACCESS_TOKEN;
+  const locationId = req.query.locationId as string | undefined;
+
+  if (locationId) {
+    const settings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
+    const advancedSettings = (settings?.advancedSettings as any) || {};
+    const overrides = advancedSettings.locationOverrides || {};
+    const locationData = overrides[locationId]?.lineSettings || {};
+    
+    res.json({
+      success: true,
+      data: {
+        isConfigured: hasSecret && hasToken,
+        hasSecret,
+        hasToken,
+        liffId: locationData.liffId || '',
+        officialAccountUrl: locationData.officialAccountUrl || '',
+      }
+    });
+    return;
+  }
   
   const settings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
   const lineSettings = (settings?.lineSettings as any) || {};
