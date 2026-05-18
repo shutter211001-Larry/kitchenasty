@@ -335,6 +335,7 @@ model Order {
   pickupNumber        String?              @db.VarChar(10)
   userLat             Float?
   userLon             Float?
+  language            String?              @default("zh-TW")
   loyaltyTransactions LoyaltyTransaction[]
   items               OrderItem[]
   address             Address?             @relation(fields: [addressId], references: [id])

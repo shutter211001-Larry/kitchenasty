@@ -2,6 +2,20 @@ import { Link, useLocation, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext.js';
 
+function getStatusTranslationKey(status: string): string {
+  switch (status.toUpperCase()) {
+    case 'PENDING': return 'placed';
+    case 'CONFIRMED': return 'confirmed';
+    case 'PREPARING': return 'preparing';
+    case 'READY': return 'ready';
+    case 'OUT_FOR_DELIVERY': return 'outForDelivery';
+    case 'DELIVERED': return 'delivered';
+    case 'PICKED_UP': return 'pickedUp';
+    case 'CANCELLED': return 'cancelled';
+    default: return status.toLowerCase();
+  }
+}
+
 export default function OrderConfirmation() {
   const { t } = useTranslation();
   const { id } = useParams();
@@ -47,7 +61,7 @@ export default function OrderConfirmation() {
             <div>
               <span className="text-hint">{t('orders.status')}</span>
               <p className="font-medium text-main">
-                {t(`orderStatus.${order.status.toLowerCase()}`)}
+                {t(`orderStatus.${getStatusTranslationKey(order.status)}`)}
               </p>
             </div>
             <div>

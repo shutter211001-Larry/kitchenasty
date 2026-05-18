@@ -36,6 +36,20 @@ const STATUS_COLORS: Record<string, string> = {
   HISTORY: 'bg-gray-100 text-gray-800',
 };
 
+function getStatusTranslationKey(status: string): string {
+  switch (status.toUpperCase()) {
+    case 'PENDING': return 'placed';
+    case 'CONFIRMED': return 'confirmed';
+    case 'PREPARING': return 'preparing';
+    case 'READY': return 'ready';
+    case 'OUT_FOR_DELIVERY': return 'outForDelivery';
+    case 'DELIVERED': return 'delivered';
+    case 'PICKED_UP': return 'pickedUp';
+    case 'CANCELLED': return 'cancelled';
+    default: return status.toLowerCase();
+  }
+}
+
 export default function OrderHistory() {
   const { t } = useTranslation();
   const { user, token, logout, isLoading: authLoading } = useAuth();
@@ -237,7 +251,7 @@ export default function OrderHistory() {
                   <div className="flex items-center gap-3">
                     <span className="font-mono text-sm font-medium text-main">#{order.orderNumber}</span>
                     <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_COLORS[order.status] || 'bg-gray-100'}`}>
-                      {order.status.replace(/_/g, ' ')}
+                      {t(`orderStatus.${getStatusTranslationKey(order.status)}`)}
                     </span>
                   </div>
                   <span className="font-bold text-primary-600">${order.total.toFixed(2)}</span>

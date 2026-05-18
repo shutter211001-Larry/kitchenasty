@@ -309,7 +309,10 @@ export default function Checkout() {
         body.loyaltyPointsRedeem = loyaltyRedeem;
       }
 
-      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      const headers: Record<string, string> = { 
+        'Content-Type': 'application/json',
+        'Accept-Language': i18n.language || 'zh-TW',
+      };
       if (token) headers.Authorization = `Bearer ${token}`;
 
       const res = await fetch(`${API_BASE}/orders`, {

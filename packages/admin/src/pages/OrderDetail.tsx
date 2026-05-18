@@ -119,7 +119,7 @@ export default function OrderDetailPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || '調整折讓失敗');
-      setOrder(data.data);
+      setOrder((prev) => prev ? { ...prev, ...data.data } : data.data);
       setAdjustedTotalInput(data.data.total.toString());
       alert('折讓價格套用成功！');
     } catch (err: any) {

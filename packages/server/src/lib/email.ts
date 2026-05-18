@@ -213,6 +213,21 @@ async function sendMailgunEmail(options: EmailOptions) {
   }
 }
 
+function encodeMimeHeader(value: string): string {
+  if (/^[\x00-\x7F]*$/.test(value)) return value;
+  return `=?utf-8?B?${Buffer.from(value).toString('base64')}?=`;
+}
+
+function encodeFromHeader(fromStr: string): string {
+  const match = fromStr.match(/^(.*?)\s*<(.*?)>$/);
+  if (match) {
+    const displayName = match[1];
+    const email = match[2];
+    return `${encodeMimeHeader(displayName)} <${email}>`;
+  }
+  return encodeMimeHeader(fromStr);
+}
+
 async function sendGmailApiEmail(options: EmailOptions) {
   // Get Access Token
   const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
@@ -233,10 +248,14 @@ async function sendGmailApiEmail(options: EmailOptions) {
 
   // Construct MIME Message
   const from = process.env.EMAIL_FROM || '夏特點餐系統 <noreply@shutterorder.com>';
+  const encodedFrom = encodeFromHeader(from);
+  const encodedSubject = encodeMimeHeader(options.subject);
+
   const message = [
-    `From: ${from}`,
+    `From: ${encodedFrom}`,
     `To: ${options.to}`,
-    `Subject: ${options.subject}`,
+    `Subject: ${encodedSubject}`,
+    'MIME-Version: 1.0',
     'Content-Type: text/html; charset=utf-8',
     '',
     options.html,

@@ -486,6 +486,19 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
   }
   const pickupNumber = String(nextPickup).padStart(3, '0');
 
+  // Capture preferred language from headers or request body
+  let userLang = 'zh-TW';
+  const langHeader = req.headers['accept-language'] || req.body.language;
+  if (langHeader && typeof langHeader === 'string') {
+    const primary = langHeader.split(',')[0].trim();
+    if (primary.toLowerCase().startsWith('zh-tw') || primary.toLowerCase() === 'zh') {
+      userLang = 'zh-TW';
+    } else {
+      const code = primary.split('-')[0].toLowerCase();
+      userLang = code;
+    }
+  }
+
   const order = await prisma.order.create({
     data: {
       orderNumber: generateOrderNumber(),
@@ -507,6 +520,7 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
       userLon,
       distance,
       isRemote,
+      language: userLang,
       items: { create: orderItemsData },
     },
     include: {
@@ -894,11 +908,78 @@ export async function updateOrderStatus(req: Request<{ id: string }>, res: Respo
 
     if (shouldSend) {
       const emailContent = orderStatusEmail({ orderNumber: order.orderNumber, status }, formattedEmailMessage || undefined);
-      sendEmail({
-        to: recipientEmail,
-        ...emailContent,
-        locationId: updated.locationId,
-      }).catch(() => {});
+      
+      const sendEmailAsync = async () => {
+        let finalSubject = emailContent.subject;
+        let finalHtml = emailContent.html;
+
+        const orderLang = order.language || 'zh-TW';
+        const isTraditionalChinese = orderLang.startsWith('zh') || orderLang === 'zh-TW';
+
+        if (!isTraditionalChinese) {
+          try {
+            const { translateContent } = await import('../lib/ai.js');
+            
+            // 1. Translate Subject
+            const transSubject = await translateContent(emailContent.subject, [orderLang], 'Traditional Chinese');
+            if (transSubject && transSubject[orderLang]) {
+              finalSubject = transSubject[orderLang];
+            }
+
+            // 2. Translate HTML Components
+            const statusChineseMap: Record<string, string> = {
+              PENDING: '待處理',
+              CONFIRMED: '已確認',
+              PREPARING: '製作中',
+              READY: '可取餐',
+              OUT_FOR_DELIVERY: '外送中',
+              DELIVERED: '已送達',
+              PICKED_UP: '已取餐',
+              CANCELLED: '已取消',
+            };
+            const chineseStatus = statusChineseMap[status] || status.replace(/_/g, ' ');
+
+            const transStatus = await translateContent(chineseStatus, [orderLang], 'Traditional Chinese');
+            const transMsg = await translateContent(formattedEmailMessage || '您的訂單狀態已更新。', [orderLang], 'Traditional Chinese');
+            const transHeader = await translateContent('夏特點餐系統', [orderLang], 'Traditional Chinese');
+            const transTitle = await translateContent('訂單狀態更新', [orderLang], 'Traditional Chinese');
+            const transLabel = await translateContent('訂單', [orderLang], 'Traditional Chinese');
+
+            const translatedStatus = transStatus?.[orderLang] || chineseStatus;
+            const translatedMessage = transMsg?.[orderLang] || (formattedEmailMessage || '您的訂單狀態已更新。');
+            const translatedHeader = transHeader?.[orderLang] || '夏特點餐系統';
+            const translatedTitle = transTitle?.[orderLang] || '訂單狀態更新';
+            const translatedLabel = transLabel?.[orderLang] || '訂單';
+
+            finalHtml = `
+              <div style="max-width:600px;margin:0 auto;font-family:sans-serif">
+                <div style="background:#f97316;color:white;padding:20px;text-align:center;border-radius:8px 8px 0 0">
+                  <h1 style="margin:0;font-size:24px">${translatedHeader}</h1>
+                </div>
+                <div style="padding:24px;background:white;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 8px 8px">
+                  <h2 style="margin:0 0 8px">${translatedTitle}</h2>
+                  <p style="color:#6b7280;margin:0 0 16px">${translatedLabel} <strong>#${order.orderNumber}</strong></p>
+                  <div style="background:#f3f4f6;padding:16px;border-radius:8px;margin-bottom:16px">
+                    <p style="margin:0;font-size:18px;font-weight:bold">${translatedStatus}</p>
+                    <p style="margin:8px 0 0;color:#374151;white-space:pre-wrap;line-height:1.6">${translatedMessage}</p>
+                  </div>
+                </div>
+              </div>
+            `;
+          } catch (err) {
+            console.error('[AI Translation] Email status update translation failed:', err);
+          }
+        }
+
+        sendEmail({
+          to: recipientEmail,
+          subject: finalSubject,
+          html: finalHtml,
+          locationId: updated.locationId,
+        }).catch(() => {});
+      };
+
+      sendEmailAsync().catch(() => {});
     }
   }
 
@@ -1009,7 +1090,18 @@ export async function updateOrderDiscount(req: Request<{ id: string }>, res: Res
       total: newTotal,
     },
     include: {
-      items: { include: { options: true } },
+      customer: { select: { id: true, name: true, email: true, phone: true } },
+      location: { select: { id: true, name: true } },
+      items: {
+        include: {
+          menuItem: { select: { id: true, name: true, nameTranslations: true, slug: true } },
+          options: {
+            include: {
+              menuOptionValue: { select: { id: true, nameTranslations: true } }
+            }
+          },
+        },
+      },
     },
   });
 
