@@ -1,4 +1,4 @@
-import { Suspense, useEffect } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext.js';
@@ -64,10 +64,63 @@ export default function Home() {
     }
   }, [settings.lineSettings?.liffId, user]);
 
+  // Preloading background image logic
+  const [bgLoaded, setBgLoaded] = useState(false);
+  const bgImage = templateId === 'classic'
+    ? (hero?.backgroundImage || '/images/default-hero.png')
+    : (hero?.backgroundImage || null);
+
+  useEffect(() => {
+    if (!bgImage) {
+      setBgLoaded(true);
+      return;
+    }
+
+    let isMounted = true;
+    const img = new Image();
+    img.src = bgImage;
+
+    // Safety timeout to prevent blocking the user if image fails to load or takes too long
+    const timeoutId = setTimeout(() => {
+      if (isMounted) {
+        setBgLoaded(true);
+      }
+    }, 1500);
+
+    img.onload = () => {
+      if (isMounted) {
+        clearTimeout(timeoutId);
+        setBgLoaded(true);
+      }
+    };
+
+    img.onerror = () => {
+      if (isMounted) {
+        clearTimeout(timeoutId);
+        setBgLoaded(true);
+      }
+    };
+
+    return () => {
+      isMounted = false;
+      clearTimeout(timeoutId);
+    };
+  }, [bgImage]);
+
   // Placeholder to maintain brand identity during lazy loading
   const HeroPlaceholder = (
     <ClassicHero hero={hero} t={t} lang={lang} isPlaceholder={true} />
   );
+
+  if (!bgLoaded) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center bg-surface">
+        <div className="flex flex-col items-center gap-4 animate-pulse">
+          <div className="w-12 h-12 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>

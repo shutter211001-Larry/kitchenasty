@@ -110,6 +110,18 @@ export default function Menu() {
 
   // Fetch items
   useEffect(() => {
+    // If we don't have a category selected yet, check if we need to wait for categories to load
+    // or if a default category redirect is about to happen.
+    if (!selectedCategory) {
+      if (categoriesLoading || !categories) {
+        return;
+      }
+      const hasActiveCategories = categories.some((c) => c.isActive && !c.parentId);
+      if (hasActiveCategories) {
+        return;
+      }
+    }
+
     setItemsLoading(true);
     setItemsError(null);
     fetch(itemsUrl)
@@ -127,7 +139,7 @@ export default function Menu() {
       })
       .catch((err) => setItemsError(err.message))
       .finally(() => setItemsLoading(false));
-  }, [itemsUrl]);
+  }, [itemsUrl, selectedCategory, categories, categoriesLoading]);
 
   const activeCategories = categories?.filter((c) => c.isActive && !c.parentId) || [];
   const activeItems = items.filter((i) => i.isActive && (!i.trackStock || i.stockQty > 0));
