@@ -29,6 +29,64 @@ function formatNotificationMessage(template: string, order: any, customer?: any)
     .replace(/{取餐時間\/做好馬上取}/g, pickupTime);
 }
 
+const linePrefixLocales: Record<string, { placed: string; update: string }> = {
+  'zh-TW': {
+    placed: '【訂單建立成功】',
+    update: '【訂單狀態更新】'
+  },
+  'ko': {
+    placed: '【주문 완료】',
+    update: '【주문 상태 업데이트】'
+  },
+  'en': {
+    placed: '【Order Placed Successfully】',
+    update: '【Order Status Update】'
+  },
+  'ja': {
+    placed: '【ご注文完了】',
+    update: '【ご注文状況の更新】'
+  }
+};
+
+const defaultStatusLocales: Record<string, Record<string, string>> = {
+  'zh-TW': {
+    'PLACED': '您好{使用者}，您的訂單{訂單編號}已成功建立！\n餐點內容：{餐點內容}\n取餐時間：{取餐時間/做好馬上取}',
+    'CONFIRMED': '您好{使用者}，您的訂單{訂單編號}已確認，我們將盡快為您準備。',
+    'PREPARING': '您的餐點正在製作中！',
+    'READY': '🎉 您好{使用者}，您的訂單{訂單編號}已準備就緒！歡迎前往取貨。',
+    'OUT_FOR_DELIVERY': '🚀 您的訂單{訂單編號}已由外送員取走，正在前往您的地址！',
+    'DELIVERED': '🍽️ 您的餐點已送達，祝您用餐愉快！',
+    'CANCELLED': '您的訂單{訂單編號}已被取消。如有任何疑問，請聯繫我們。'
+  },
+  'ko': {
+    'PLACED': '안녕하세요 {使用者}님, 주문 {訂單編號}이(가) 완료되었습니다!\n주문 내용: {餐點內容}\n수령 시간: {取餐時間/做好馬上取}',
+    'CONFIRMED': '안녕하세요 {使用者}님, 주문 {訂單編號}이(가) 확인되었습니다. 최대한 빨리 준비하겠습니다.',
+    'PREPARING': '주문하신 음식을 준비하고 있습니다!',
+    'READY': '🎉 안녕하세요 {使用者}님, 주문 {訂單編號}이(가) 준비되었습니다! 매장에 방문하셔서 픽업해 주세요.',
+    'OUT_FOR_DELIVERY': '🚀 주문 {訂單編號} 배달이 시작되었습니다. 곧 도착할 예정입니다!',
+    'DELIVERED': '🍽️ 주문하신 음식이 배달 완료되었습니다. 맛있게 드세요!',
+    'CANCELLED': '주문 {訂單編號}이(가) 취소되었습니다. 문의 사항이 있으시면 연락 주시기 바랍니다.'
+  },
+  'en': {
+    'PLACED': 'Hello {使用者}, your order {訂單編號} has been successfully created!\nItems: {餐點內容}\nPickup time: {取餐時間/做好馬上取}',
+    'CONFIRMED': 'Hello {使用者}, your order {訂單編號} has been confirmed. We will prepare it as soon as possible.',
+    'PREPARING': 'Your food is being prepared!',
+    'READY': '🎉 Hello {使用者}, your order {訂單編號} is ready! Welcome to pick it up.',
+    'OUT_FOR_DELIVERY': '🚀 Your order {訂單編號} is out for delivery! It will arrive at your address soon.',
+    'DELIVERED': '🍽️ Your meal has been delivered. Enjoy your meal!',
+    'CANCELLED': 'Your order {訂單編號} has been cancelled. If you have any questions, please contact us.'
+  },
+  'ja': {
+    'PLACED': 'こんにちは {使用者} 様、ご注文 {訂單編號} が正常に作成されました！\nご注文内容：{餐點內容}\nお受取時間：{取餐時間/做好馬上取}',
+    'CONFIRMED': 'こんにちは {使用者} 様、ご注文 {訂單編號} が確認されました。ご用意を始めております。',
+    'PREPARING': 'お料理を準備しております！',
+    'READY': '🎉 こんにちは {使用者} 様、ご注文 {訂單編號} の準備ができました！お受け取りにお越しください。',
+    'OUT_FOR_DELIVERY': '🚀 ご注文 {訂單編號} の配達が開始されました！まもなくお届け先へ到着します。',
+    'DELIVERED': '🍽️ 商品のお届けが完了しました。どうぞお召し上がりください！',
+    'CANCELLED': 'ご注文 {訂單編號} がキャンセルされました。ご不明な点がございましたら、お問い合わせください。'
+  }
+};
+
 const orderItemOptionSchema = z.object({
   menuOptionValueId: z.string().min(1),
   name: z.string().min(1),
@@ -607,43 +665,20 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
     } catch (e) {}
 
     if (shouldSendEmail) {
+      const orderLang = order.language || 'zh-TW';
       const emailContent = orderConfirmationEmail({
         orderNumber: order.orderNumber,
         orderType: order.orderType,
         total: order.total,
         items: order.items.map((i) => ({ name: i.name, quantity: i.quantity, subtotal: i.subtotal })),
-      });
-      const sendConfirmationEmailAsync = async () => {
-        let finalSubject = emailContent.subject;
-        let finalHtml = emailContent.html;
+      }, orderLang);
 
-        const orderLang = order.language || 'zh-TW';
-        const isTraditionalChinese = orderLang.startsWith('zh') || orderLang === 'zh-TW';
-
-        if (!isTraditionalChinese) {
-          try {
-            const { translateContent } = await import('../lib/ai.js');
-            const transSubject = await translateContent(emailContent.subject, [orderLang], 'Traditional Chinese');
-            if (transSubject && transSubject[orderLang]) {
-              finalSubject = transSubject[orderLang];
-            }
-            const transBody = await translateContent(emailContent.html, [orderLang], 'Traditional Chinese');
-            if (transBody && transBody[orderLang]) {
-              finalHtml = transBody[orderLang];
-            }
-          } catch (err) {
-            console.error('[AI Translation] Confirmation Email translation failed:', err);
-          }
-        }
-
-        sendEmail({
-          to: recipientEmail,
-          subject: finalSubject,
-          html: finalHtml,
-          locationId: order.locationId,
-        }).catch(() => {});
-      };
-      sendConfirmationEmailAsync().catch(() => {});
+      sendEmail({
+        to: recipientEmail,
+        subject: emailContent.subject,
+        html: emailContent.html,
+        locationId: order.locationId,
+      }).catch(() => {});
     }
   }
 
@@ -656,28 +691,50 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
       const lineNotifications = lineSettings.notifications || {};
       
       const isEnabled = lineNotifications['PLACED']?.enabled !== false;
-      const template = lineNotifications['PLACED']?.message || '您好{使用者}，您的訂單{訂單編號}已成功建立！\n餐點內容：{餐點內容}\n取餐時間：{取餐時間/做好馬上取}';
+      const orderLang = order.language || 'zh-TW';
+      const langKey = defaultStatusLocales[orderLang] ? orderLang : 'en';
 
-      if (isEnabled) {
+      const customConfig = lineNotifications['PLACED'];
+      let template = '';
+      let isPreTranslated = false;
+
+      if (customConfig) {
+        if (langKey === 'zh-TW') {
+          template = customConfig.message || '';
+          isPreTranslated = true;
+        } else if (customConfig.translations?.[langKey]) {
+          template = customConfig.translations[langKey];
+          isPreTranslated = true;
+        } else if (customConfig.message) {
+          template = customConfig.message;
+        }
+      }
+
+      if (!template) {
+        template = defaultStatusLocales[langKey]['PLACED'];
+        isPreTranslated = true;
+      }
+
+      if (isEnabled && template) {
         const formattedMessage = formatNotificationMessage(template, order, customer);
+        const prefix = linePrefixLocales[langKey]?.placed || linePrefixLocales['en'].placed;
+        
         const sendLinePlacedPushAsync = async () => {
-          let lineMessage = `【訂單建立成功】\n訂單編號：#${order.orderNumber}\n總計：$${order.total.toFixed(2)}\n${formattedMessage}`;
-          const orderLang = order.language || 'zh-TW';
-          const isTraditionalChinese = orderLang.startsWith('zh') || orderLang === 'zh-TW';
+          let lineMessage = `${prefix}\n訂單編號：#${order.orderNumber}\n總計：$${order.total.toFixed(2)}\n${formattedMessage}`;
 
-          if (!isTraditionalChinese) {
+          if (!isPreTranslated && customConfig?.message) {
             try {
               const { translateContent } = await import('../lib/ai.js');
-              const rawMessageToTranslate = `【訂單建立成功】\n總計：$${order.total.toFixed(2)}\n${formattedMessage}`;
+              const rawMessageToTranslate = `${prefix}\n總計：$${order.total.toFixed(2)}\n${formattedMessage}`;
               const transResult = await translateContent(rawMessageToTranslate, [orderLang], 'Traditional Chinese');
               if (transResult && transResult[orderLang]) {
-                const translatedBody = transResult[orderLang];
-                lineMessage = `【訂單建立成功】\n訂單編號：#${order.orderNumber}\n${translatedBody}`;
+                lineMessage = `${prefix}\n訂單編號：#${order.orderNumber}\n${transResult[orderLang]}`;
               }
             } catch (err) {
-              console.error('[AI Translation] LINE placed order translation failed:', err);
+              console.error('[AI Translation] LINE placed order dynamic translation fallback failed:', err);
             }
           }
+
           sendLinePush(customer.lineUserId!, lineMessage).catch(() => {});
         };
         sendLinePlacedPushAsync().catch(() => {});
@@ -952,79 +1009,19 @@ export async function updateOrderStatus(req: Request<{ id: string }>, res: Respo
     } catch (e) {}
 
     if (shouldSend) {
-      const emailContent = orderStatusEmail({ orderNumber: order.orderNumber, status }, formattedEmailMessage || undefined);
-      
-      const sendEmailAsync = async () => {
-        let finalSubject = emailContent.subject;
-        let finalHtml = emailContent.html;
+      const orderLang = order.language || 'zh-TW';
+      const emailContent = orderStatusEmail(
+        { orderNumber: order.orderNumber, status },
+        formattedEmailMessage || undefined,
+        orderLang
+      );
 
-        const orderLang = order.language || 'zh-TW';
-        const isTraditionalChinese = orderLang.startsWith('zh') || orderLang === 'zh-TW';
-
-        if (!isTraditionalChinese) {
-          try {
-            const { translateContent } = await import('../lib/ai.js');
-            
-            // 1. Translate Subject
-            const transSubject = await translateContent(emailContent.subject, [orderLang], 'Traditional Chinese');
-            if (transSubject && transSubject[orderLang]) {
-              finalSubject = transSubject[orderLang];
-            }
-
-            // 2. Translate HTML Components
-            const statusChineseMap: Record<string, string> = {
-              PENDING: '待處理',
-              CONFIRMED: '已確認',
-              PREPARING: '製作中',
-              READY: '可取餐',
-              OUT_FOR_DELIVERY: '外送中',
-              DELIVERED: '已送達',
-              PICKED_UP: '已取餐',
-              CANCELLED: '已取消',
-            };
-            const chineseStatus = statusChineseMap[status] || status.replace(/_/g, ' ');
-
-            const transStatus = await translateContent(chineseStatus, [orderLang], 'Traditional Chinese');
-            const transMsg = await translateContent(formattedEmailMessage || '您的訂單狀態已更新。', [orderLang], 'Traditional Chinese');
-            const transHeader = await translateContent('夏特點餐系統', [orderLang], 'Traditional Chinese');
-            const transTitle = await translateContent('訂單狀態更新', [orderLang], 'Traditional Chinese');
-            const transLabel = await translateContent('訂單', [orderLang], 'Traditional Chinese');
-
-            const translatedStatus = transStatus?.[orderLang] || chineseStatus;
-            const translatedMessage = transMsg?.[orderLang] || (formattedEmailMessage || '您的訂單狀態已更新。');
-            const translatedHeader = transHeader?.[orderLang] || '夏特點餐系統';
-            const translatedTitle = transTitle?.[orderLang] || '訂單狀態更新';
-            const translatedLabel = transLabel?.[orderLang] || '訂單';
-
-            finalHtml = `
-              <div style="max-width:600px;margin:0 auto;font-family:sans-serif">
-                <div style="background:#f97316;color:white;padding:20px;text-align:center;border-radius:8px 8px 0 0">
-                  <h1 style="margin:0;font-size:24px">${translatedHeader}</h1>
-                </div>
-                <div style="padding:24px;background:white;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 8px 8px">
-                  <h2 style="margin:0 0 8px">${translatedTitle}</h2>
-                  <p style="color:#6b7280;margin:0 0 16px">${translatedLabel} <strong>#${order.orderNumber}</strong></p>
-                  <div style="background:#f3f4f6;padding:16px;border-radius:8px;margin-bottom:16px">
-                    <p style="margin:0;font-size:18px;font-weight:bold">${translatedStatus}</p>
-                    <p style="margin:8px 0 0;color:#374151;white-space:pre-wrap;line-height:1.6">${translatedMessage}</p>
-                  </div>
-                </div>
-              </div>
-            `;
-          } catch (err) {
-            console.error('[AI Translation] Email status update translation failed:', err);
-          }
-        }
-
-        sendEmail({
-          to: recipientEmail,
-          subject: finalSubject,
-          html: finalHtml,
-          locationId: updated.locationId,
-        }).catch(() => {});
-      };
-
-      sendEmailAsync().catch(() => {});
+      sendEmail({
+        to: recipientEmail,
+        subject: emailContent.subject,
+        html: emailContent.html,
+        locationId: updated.locationId,
+      }).catch(() => {});
     }
   }
 
@@ -1053,42 +1050,53 @@ export async function updateOrderStatus(req: Request<{ id: string }>, res: Respo
 
       const lineSettings = (settings?.lineSettings as any) || {};
       const lineNotifications = lineSettings.notifications || {};
-      
-      const defaultStatusMap: Record<string, string> = {
-        'PLACED': '您好{使用者}，您的訂單{訂單編號}已成功建立！\n餐點內容：{餐點內容}\n取餐時間：{取餐時間/做好馬上取}',
-        'CONFIRMED': '您好{使用者}，您的訂單{訂單編號}已確認，我們將盡快為您準備。',
-        'PREPARING': '您的餐點正在製作中！',
-        'READY': '🎉 您好{使用者}，您的訂單{訂單編號}已準備就緒！歡迎前往取貨。',
-        'OUT_FOR_DELIVERY': '🚀 您的訂單{訂單編號}已由外送員取走，正在前往您的地址！',
-        'DELIVERED': '🍽️ 您的餐點已送達，祝您用餐愉快！',
-        'CANCELLED': '您的訂單{訂單編號}已被取消。如有任何疑問，請聯繫我們。'
-      };
 
       // Check if this status has a specific setting in lineSettings
       const statusConfig = lineNotifications[status];
-      const isEnabled = statusConfig ? statusConfig.enabled !== false : !!defaultStatusMap[status];
-      const template = statusConfig?.message || defaultStatusMap[status];
+      const isEnabled = statusConfig ? statusConfig.enabled !== false : !!defaultStatusLocales['zh-TW'][status];
+      
+      const orderLang = order.language || 'zh-TW';
+      const langKey = defaultStatusLocales[orderLang] ? orderLang : 'en';
+
+      let template = '';
+      let isPreTranslated = false;
+
+      if (statusConfig) {
+        if (langKey === 'zh-TW') {
+          template = statusConfig.message || '';
+          isPreTranslated = true;
+        } else if (statusConfig.translations?.[langKey]) {
+          template = statusConfig.translations[langKey];
+          isPreTranslated = true;
+        } else if (statusConfig.message) {
+          template = statusConfig.message;
+        }
+      }
+
+      if (!template) {
+        template = defaultStatusLocales[langKey][status] || '';
+        isPreTranslated = true;
+      }
 
       console.log(`[LINE Notify] isEnabled: ${isEnabled}, template: ${template}`);
 
       if (isEnabled && template) {
         const formattedMessage = formatNotificationMessage(template, updated, order.customer);
-        const sendLinePushAsync = async () => {
-          let lineMessage = `【訂單狀態更新】\n訂單編號：#${order.orderNumber}\n目前狀態：${formattedMessage}`;
-          const orderLang = order.language || 'zh-TW';
-          const isTraditionalChinese = orderLang.startsWith('zh') || orderLang === 'zh-TW';
+        const prefix = linePrefixLocales[langKey]?.update || linePrefixLocales['en'].update;
 
-          if (!isTraditionalChinese) {
+        const sendLinePushAsync = async () => {
+          let lineMessage = `${prefix}\n訂單編號：#${order.orderNumber}\n目前狀態：${formattedMessage}`;
+
+          if (!isPreTranslated && statusConfig?.message) {
             try {
               const { translateContent } = await import('../lib/ai.js');
-              const rawMessageToTranslate = `【訂單狀態更新】\n目前狀態：${formattedMessage}`;
+              const rawMessageToTranslate = `${prefix}\n目前狀態：${formattedMessage}`;
               const transResult = await translateContent(rawMessageToTranslate, [orderLang], 'Traditional Chinese');
               if (transResult && transResult[orderLang]) {
-                const translatedBody = transResult[orderLang];
-                lineMessage = `【訂單狀態更新】\n訂單編號：#${order.orderNumber}\n${translatedBody}`;
+                lineMessage = `${prefix}\n訂單編號：#${order.orderNumber}\n${transResult[orderLang]}`;
               }
             } catch (err) {
-              console.error('[AI Translation] LINE status update translation failed:', err);
+              console.error('[AI Translation] LINE status update dynamic translation fallback failed:', err);
             }
           }
 

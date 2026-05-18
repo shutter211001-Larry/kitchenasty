@@ -283,80 +283,247 @@ async function sendGmailApiEmail(options: EmailOptions) {
   }
 }
 
-// Email Templates
-export function orderConfirmationEmail(order: {
-  orderNumber: string;
-  orderType: string;
-  total: number;
-  items: { name: string; quantity: number; subtotal: number }[];
-}): { subject: string; html: string } {
+// Email Templates Localizations
+const confirmationLocales: Record<string, any> = {
+  'zh-TW': {
+    subject: '點餐成功 - #',
+    header: '夏特點餐系統',
+    title: '點餐成功！',
+    thankYou: '感謝您的訂購。您的訂單編號為 #',
+    type: '類型',
+    item: '品項',
+    price: '價格',
+    total: '總計',
+    footer: '我們將在訂單狀態更新時通知您。',
+    types: {
+      DELIVERY: '外送',
+      PICKUP: '自取'
+    }
+  },
+  'ko': {
+    subject: '주문 확인 - #',
+    header: '샤트 주문 시스템',
+    title: '주문 완료!',
+    thankYou: '주문해 주셔서 감사합니다. 주문 번호는 #',
+    type: '유형',
+    item: '메뉴',
+    price: '가격',
+    total: '합계',
+    footer: '주문 상태가 변경되면 알려드리겠습니다.',
+    types: {
+      DELIVERY: '배달',
+      PICKUP: '포장'
+    }
+  },
+  'en': {
+    subject: 'Order Confirmed - #',
+    header: 'Shutter Order System',
+    title: 'Order Confirmed!',
+    thankYou: 'Thank you for your order. Your order number is #',
+    type: 'Type',
+    item: 'Item',
+    price: 'Price',
+    total: 'Total',
+    footer: "We'll notify you when your order status changes.",
+    types: {
+      DELIVERY: 'Delivery',
+      PICKUP: 'Pickup'
+    }
+  },
+  'ja': {
+    subject: 'ご注文の確認 - #',
+    header: 'シャト注文システム',
+    title: 'ご注文完了！',
+    thankYou: 'ご注文ありがとうございます。ご注文番号は #',
+    type: '受け取り方法',
+    item: '商品',
+    price: '価格',
+    total: '合計',
+    footer: '注文ステータスが変更された際にお知らせいたします。',
+    types: {
+      DELIVERY: '配達',
+      PICKUP: 'お持ち帰り'
+    }
+  }
+};
+
+const statusLocales: Record<string, any> = {
+  'zh-TW': {
+    subject: '訂單 #{{number}} 狀態更新 - {{status}}',
+    header: '夏特點餐系統',
+    title: '訂單狀態更新',
+    label: '訂單',
+    statuses: {
+      PENDING: '待處理',
+      CONFIRMED: '已確認',
+      PREPARING: '製作中',
+      READY: '可取餐',
+      OUT_FOR_DELIVERY: '外送中',
+      DELIVERED: '已送達',
+      PICKED_UP: '已取餐',
+      CANCELLED: '已取消'
+    },
+    messages: {
+      CONFIRMED: '您的訂單已確認，我們將盡快為您準備。',
+      PREPARING: '您的餐點正在製作中！',
+      READY: '🎉 您的訂單已準備就緒！歡迎前往取貨。',
+      OUT_FOR_DELIVERY: '🚀 您的訂單已由外送員取走，正在前往您的地址！',
+      DELIVERED: '🍽️ 您的餐點已送達，祝您用餐愉快！',
+      PICKED_UP: '🍽️ 您的餐點已取餐，祝您用餐愉快！',
+      CANCELLED: '您的訂單已被取消。如有任何疑問，請聯繫我們。'
+    },
+    defaultMessage: '您的訂單狀態已更新。'
+  },
+  'ko': {
+    subject: '주문 #{{number}} 상태 업데이트 - {{status}}',
+    header: '샤트 주문 시스템',
+    title: '주문 상태 업데이트',
+    label: '주문',
+    statuses: {
+      PENDING: '대기 중',
+      CONFIRMED: '확인됨',
+      PREPARING: '준비 중',
+      READY: '픽업 가능',
+      OUT_FOR_DELIVERY: '배달 중',
+      DELIVERED: '배달 완료',
+      PICKED_UP: '픽업 완료',
+      CANCELLED: '주문 취소됨'
+    },
+    messages: {
+      CONFIRMED: '주문이 확인되었으며 최대한 빨리 준비하겠습니다.',
+      PREPARING: '음식을 준비하고 있습니다!',
+      READY: '🎉 주문하신 음식이 준비되었습니다! 수령해 가시기 바랍니다.',
+      OUT_FOR_DELIVERY: '🚀 주문하신 음식을 배달원이 픽업하여 배송 중입니다!',
+      DELIVERED: '🍽️ 음식이 배달되었습니다. 맛있게 드세요!',
+      PICKED_UP: '🍽️ 주문하신 음식을 픽업하셨습니다. 맛있게 드세요!',
+      CANCELLED: '주문이 취소되었습니다. 문의 사항이 있으시면 연락 주시기 바랍니다.'
+    },
+    defaultMessage: '주문 상태가 업데이트되었습니다.'
+  },
+  'en': {
+    subject: 'Order #{{number}} Status Update - {{status}}',
+    header: 'Shutter Order System',
+    title: 'Order Status Update',
+    label: 'Order',
+    statuses: {
+      PENDING: 'Pending',
+      CONFIRMED: 'Confirmed',
+      PREPARING: 'Preparing',
+      READY: 'Ready for Pickup',
+      OUT_FOR_DELIVERY: 'Out for Delivery',
+      DELIVERED: 'Delivered',
+      PICKED_UP: 'Picked Up',
+      CANCELLED: 'Cancelled'
+    },
+    messages: {
+      CONFIRMED: 'Your order has been confirmed and we will prepare it as soon as possible.',
+      PREPARING: 'Your food is being prepared!',
+      READY: '🎉 Your order is ready! Welcome to pick it up.',
+      OUT_FOR_DELIVERY: '🚀 Your order has been picked up by the courier and is on its way to your address!',
+      DELIVERED: '🍽️ Your meal has been delivered. Enjoy your meal!',
+      PICKED_UP: '🍽️ Your order has been picked up. Enjoy your meal!',
+      CANCELLED: 'Your order has been cancelled. If you have any questions, please contact us.'
+    },
+    defaultMessage: 'Your order status has been updated.'
+  },
+  'ja': {
+    subject: 'ご注文 #{{number}} ステータス更新 - {{status}}',
+    header: 'シャト注文システム',
+    title: 'ご注文状況の更新',
+    label: 'ご注文',
+    statuses: {
+      PENDING: '保留中',
+      CONFIRMED: '確認済み',
+      PREPARING: '準備中',
+      READY: '受取可能',
+      OUT_FOR_DELIVERY: '配達中',
+      DELIVERED: '配達済み',
+      PICKED_UP: '受取済み',
+      CANCELLED: 'キャンセル済み'
+    },
+    messages: {
+      CONFIRMED: 'ご注文が確認されました。できるだけ早くご用意いたします。',
+      PREPARING: 'お料理を準備しております！',
+      READY: '🎉 ご注文の準備ができました！お受け取りにお越しください。',
+      OUT_FOR_DELIVERY: '🚀 配達員が商品を受け取り、お届け先へ向かっています！',
+      DELIVERED: '🍽️ お届けが完了しました。どうぞお召し上がりください！',
+      PICKED_UP: '🍽️ 商品をお受け取りいただきました。どうぞお召し上がりください！',
+      CANCELLED: 'ご注文がキャンセルされました。ご不明な点がございましたら、お問い合わせください。'
+    },
+    defaultMessage: 'ご注文状況が更新されました。'
+  }
+};
+
+export function orderConfirmationEmail(
+  order: {
+    orderNumber: string;
+    orderType: string;
+    total: number;
+    items: { name: string; quantity: number; subtotal: number }[];
+  },
+  language: string = 'zh-TW'
+): { subject: string; html: string } {
+  const langKey = confirmationLocales[language] ? language : 'en';
+  const loc = confirmationLocales[langKey];
+  const typeText = loc.types[order.orderType] || order.orderType;
+
   const itemRows = order.items.map((i) =>
     `<tr><td style="padding:8px;border-bottom:1px solid #eee">${i.quantity}x ${i.name}</td><td style="padding:8px;border-bottom:1px solid #eee;text-align:right">$${i.subtotal.toFixed(2)}</td></tr>`
   ).join('');
 
   return {
-    subject: `Order Confirmed - #${order.orderNumber}`,
+    subject: `${loc.subject}${order.orderNumber}`,
     html: `
       <div style="max-width:600px;margin:0 auto;font-family:sans-serif">
         <div style="background:#f97316;color:white;padding:20px;text-align:center;border-radius:8px 8px 0 0">
-          <h1 style="margin:0;font-size:24px">夏特點餐系統</h1>
+          <h1 style="margin:0;font-size:24px">${loc.header}</h1>
         </div>
         <div style="padding:24px;background:white;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 8px 8px">
-          <h2 style="margin:0 0 8px">Order Confirmed!</h2>
-          <p style="color:#6b7280;margin:0 0 16px">Thank you for your order <strong>#${order.orderNumber}</strong>.</p>
-          <p style="margin:0 0 16px">Type: <strong>${order.orderType}</strong></p>
+          <h2 style="margin:0 0 8px">${loc.title}</h2>
+          <p style="color:#6b7280;margin:0 0 16px">${loc.thankYou}<strong>${order.orderNumber}</strong>.</p>
+          <p style="margin:0 0 16px">${loc.type}: <strong>${typeText}</strong></p>
           <table style="width:100%;border-collapse:collapse;margin-bottom:16px">
-            <thead><tr><th style="padding:8px;text-align:left;border-bottom:2px solid #e5e7eb">Item</th><th style="padding:8px;text-align:right;border-bottom:2px solid #e5e7eb">Price</th></tr></thead>
+            <thead><tr><th style="padding:8px;text-align:left;border-bottom:2px solid #e5e7eb">${loc.item}</th><th style="padding:8px;text-align:right;border-bottom:2px solid #e5e7eb">${loc.price}</th></tr></thead>
             <tbody>${itemRows}</tbody>
-            <tfoot><tr><td style="padding:8px;font-weight:bold">Total</td><td style="padding:8px;text-align:right;font-weight:bold;color:#f97316">$${order.total.toFixed(2)}</td></tr></tfoot>
+            <tfoot><tr><td style="padding:8px;font-weight:bold">${loc.total}</td><td style="padding:8px;text-align:right;font-weight:bold;color:#f97316">$${order.total.toFixed(2)}</td></tr></tfoot>
           </table>
-          <p style="color:#6b7280;font-size:14px">We'll notify you when your order status changes.</p>
+          <p style="color:#6b7280;font-size:14px">${loc.footer}</p>
         </div>
       </div>
     `,
   };
 }
 
-export function orderStatusEmail(order: {
-  orderNumber: string;
-  status: string;
-}, messageText?: string): { subject: string; html: string } {
-  const statusMessages: Record<string, string> = {
-    CONFIRMED: '您的訂單已確認，我們將盡快為您準備。',
-    PREPARING: '您的餐點正在製作中！',
-    READY: '🎉 您的訂單已準備就緒！歡迎前往取貨。',
-    OUT_FOR_DELIVERY: '🚀 您的訂單已由外送員取走，正在前往您的地址！',
-    DELIVERED: '🍽️ 您的餐點已送達，祝您用餐愉快！',
-    PICKED_UP: '🍽️ 您的餐點已取餐，祝您用餐愉快！',
-    CANCELLED: '您的訂單已被取消。如有任何疑問，請聯繫我們。',
-  };
+export function orderStatusEmail(
+  order: {
+    orderNumber: string;
+    status: string;
+  },
+  messageText?: string,
+  language: string = 'zh-TW'
+): { subject: string; html: string } {
+  const langKey = statusLocales[language] ? language : 'en';
+  const loc = statusLocales[langKey];
 
-  const statusChineseMap: Record<string, string> = {
-    PENDING: '待處理',
-    CONFIRMED: '已確認',
-    PREPARING: '製作中',
-    READY: '可取餐',
-    OUT_FOR_DELIVERY: '外送中',
-    DELIVERED: '已送達',
-    PICKED_UP: '已取餐',
-    CANCELLED: '已取消',
-  };
+  const translatedStatus = loc.statuses[order.status] || order.status.replace(/_/g, ' ');
+  const displayMessage = messageText || loc.messages[order.status] || loc.defaultMessage;
 
-  const chineseStatus = statusChineseMap[order.status] || order.status.replace(/_/g, ' ');
-  const displayMessage = messageText || statusMessages[order.status] || '您的訂單狀態已更新。';
+  const finalSubject = loc.subject
+    .replace('{{number}}', order.orderNumber)
+    .replace('{{status}}', translatedStatus);
 
   return {
-    subject: `訂單 #${order.orderNumber} 狀態更新 - ${chineseStatus}`,
+    subject: finalSubject,
     html: `
       <div style="max-width:600px;margin:0 auto;font-family:sans-serif">
         <div style="background:#f97316;color:white;padding:20px;text-align:center;border-radius:8px 8px 0 0">
-          <h1 style="margin:0;font-size:24px">夏特點餐系統</h1>
+          <h1 style="margin:0;font-size:24px">${loc.header}</h1>
         </div>
         <div style="padding:24px;background:white;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 8px 8px">
-          <h2 style="margin:0 0 8px">訂單狀態更新</h2>
-          <p style="color:#6b7280;margin:0 0 16px">訂單 <strong>#${order.orderNumber}</strong></p>
+          <h2 style="margin:0 0 8px">${loc.title}</h2>
+          <p style="color:#6b7280;margin:0 0 16px">${loc.label} <strong>#${order.orderNumber}</strong></p>
           <div style="background:#f3f4f6;padding:16px;border-radius:8px;margin-bottom:16px">
-            <p style="margin:0;font-size:18px;font-weight:bold">${chineseStatus}</p>
+            <p style="margin:0;font-size:18px;font-weight:bold">${translatedStatus}</p>
             <p style="margin:8px 0 0;color:#374151;white-space:pre-wrap;line-height:1.6">${displayMessage}</p>
           </div>
         </div>
