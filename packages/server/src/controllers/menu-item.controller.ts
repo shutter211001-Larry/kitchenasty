@@ -6,7 +6,7 @@ import { autoTranslateMenuItem } from '../lib/translation-helper.js';
 
 const menuOptionValueSchema = z.object({
   name: z.string().min(1),
-  nameTranslations: z.record(z.string()).optional(),
+  nameTranslations: z.record(z.string().nullable()).optional(),
   priceModifier: z.number().default(0),
   isDefault: z.boolean().default(false),
   sortOrder: z.number().int().min(0).default(0),
@@ -14,7 +14,7 @@ const menuOptionValueSchema = z.object({
 
 const menuOptionSchema = z.object({
   name: z.string().min(1),
-  nameTranslations: z.record(z.string()).optional(),
+  nameTranslations: z.record(z.string().nullable()).optional(),
   displayType: z.enum(['SELECT', 'RADIO', 'CHECKBOX', 'QUANTITY']).default('SELECT'),
   isRequired: z.boolean().default(false),
   minSelect: z.number().int().min(0).default(0),
@@ -25,10 +25,10 @@ const menuOptionSchema = z.object({
 
 const createMenuItemSchema = z.object({
   name: z.string().min(1),
-  nameTranslations: z.record(z.string()).optional(),
+  nameTranslations: z.record(z.string().nullable()).optional(),
   slug: z.string().min(1).regex(/^[a-z0-9-]+$/, 'Slug must be lowercase alphanumeric with hyphens'),
   description: z.string().nullable().optional(),
-  descriptionTranslations: z.record(z.string()).optional(),
+  descriptionTranslations: z.record(z.string().nullable()).optional(),
   price: z.number().min(0),
   image: z.string().nullable().optional(),
   isActive: z.boolean().default(true),
@@ -36,7 +36,7 @@ const createMenuItemSchema = z.object({
   trackStock: z.boolean().default(false),
   stockQty: z.number().int().min(0).default(0),
   unit: z.string().nullable().optional(),
-  unitTranslations: z.record(z.string()).optional(),
+  unitTranslations: z.record(z.string().nullable()).optional(),
   orderType: z.enum(['DELIVERY', 'PICKUP']).nullable().optional(),
   categoryId: z.string().min(1),
   locationId: z.string().nullable().optional(),
