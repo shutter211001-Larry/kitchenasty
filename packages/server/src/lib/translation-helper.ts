@@ -221,13 +221,13 @@ export async function autoTranslateSiteSettings(data: any, existingData?: any) {
           config.translations = existingConfig.translations || {};
 
           const hasMessageChanged = config.message !== existingConfig.message;
-          const isMissingTranslations = !config.translations || Object.keys(config.translations).length < 3;
+          const isMissingTranslations = !config.translations || Object.keys(config.translations).length < SUPPORTED_LANGUAGES.length;
 
           if (hasMessageChanged || isMissingTranslations) {
-            const targetLangs = ['en', 'ko', 'ja'];
+            const targetLangs = SUPPORTED_LANGUAGES;
             try {
+              const transRes = await translateContent(config.message, targetLangs, 'Traditional Chinese');
               for (const lang of targetLangs) {
-                const transRes = await translateContent(config.message, [lang], 'Traditional Chinese');
                 if (transRes && transRes[lang]) {
                   config.translations[lang] = transRes[lang];
                 }
