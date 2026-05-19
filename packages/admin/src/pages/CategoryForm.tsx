@@ -24,6 +24,11 @@ const LANGUAGES = [
   { code: 'tl', label: '菲律賓文 (Filipino)' },
   { code: 'vi', label: '越南文 (Vietnamese)' },
   { code: 'id', label: '印尼文 (Indonesian)' },
+  { code: 'es', label: '西班牙文 (Spanish)' },
+  { code: 'fr', label: '法文 (French)' },
+  { code: 'de', label: '德文 (German)' },
+  { code: 'it', label: '義大利文 (Italian)' },
+  { code: 'pt', label: '葡萄牙文 (Portuguese)' },
 ];
 
 interface CategoryOption {
