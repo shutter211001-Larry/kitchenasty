@@ -6,7 +6,7 @@ import { generateToken } from '../../middleware/auth.js';
 vi.mock('../../lib/db.js', () => {
   const mockPrisma = {
     location: { findMany: vi.fn(), findUnique: vi.fn(), findFirst: vi.fn(), create: vi.fn(), update: vi.fn(), delete: vi.fn(), count: vi.fn() },
-    order: { findMany: vi.fn(), findUnique: vi.fn(), create: vi.fn(), update: vi.fn(), count: vi.fn() },
+    order: { findMany: vi.fn(), findUnique: vi.fn(), findFirst: vi.fn(), create: vi.fn(), update: vi.fn(), count: vi.fn() },
     orderItem: { count: vi.fn() },
     menuItem: { findMany: vi.fn(), findUnique: vi.fn(), update: vi.fn() },
     deliveryZone: { findMany: vi.fn(), findFirst: vi.fn(), create: vi.fn(), update: vi.fn(), delete: vi.fn() },
@@ -17,9 +17,13 @@ vi.mock('../../lib/db.js', () => {
     loyaltyTransaction: { create: vi.fn() },
     automationRule: { findMany: vi.fn() },
     category: { findMany: vi.fn(), findUnique: vi.fn(), create: vi.fn(), update: vi.fn(), delete: vi.fn(), count: vi.fn() },
+    siteSettings: { findUnique: vi.fn() },
+    menuOptionValue: { findMany: vi.fn() },
   };
   return { default: mockPrisma, prisma: mockPrisma };
 });
+
+
 
 import prisma from '../../lib/db.js';
 const mockedPrisma = vi.mocked(prisma);
@@ -30,7 +34,7 @@ const adminToken = generateToken({ id: '1', email: 'admin@test.com', type: 'staf
 const staffToken = generateToken({ id: '3', email: 'staff@test.com', type: 'staff', role: 'STAFF' });
 const customerToken = generateToken({ id: 'cust-1', email: 'customer@test.com', type: 'customer' });
 
-const sampleLocation = { id: 'loc-1', name: 'Downtown Kitchen', isActive: true, isBusy: false, busyMessage: null, operatingHours: [] };
+const sampleLocation = { id: 'loc-1', name: 'Downtown Kitchen', isActive: true, isBusy: false, busyMessage: null, operatingHours: [], deliveryEnabled: true, pickupEnabled: true };
 const sampleMenuItem = {
   id: 'item-1',
   name: 'Margherita Pizza',
@@ -73,7 +77,12 @@ const sampleOrder = {
 describe('Order API - Integration Tests', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    (mockedPrisma.siteSettings as any).findUnique.mockResolvedValue({
+      orderSettings: { enabled: true, deliveryEnabled: true, pickupEnabled: true, taxRate: 8 }
+    });
+    (mockedPrisma.menuOptionValue as any).findMany.mockResolvedValue([]);
   });
+
 
   // ============================================================
   // CREATE
@@ -235,24 +244,17 @@ describe('Order API - Integration Tests', () => {
   // GET
   // ============================================================
   describe('GET /api/orders/:id', () => {
-    it('requires authentication', async () => {
-      const res = await request(app).get('/api/orders/order-1');
-      expect(res.status).toBe(401);
-    });
-
-    it('returns order detail', async () => {
+    it('allows guest to view order detail', async () => {
       mockedPrisma.order.findUnique.mockResolvedValue({
         ...sampleOrder,
         items: [{ id: 'oi-1', name: 'Pizza', quantity: 2, unitPrice: 14.99, subtotal: 29.98, options: [] }],
       } as any);
 
-      const res = await request(app)
-        .get('/api/orders/order-1')
-        .set('Authorization', `Bearer ${adminToken}`);
-
+      const res = await request(app).get('/api/orders/order-1');
       expect(res.status).toBe(200);
       expect(res.body.data.orderNumber).toBe('KA-ABC-123');
     });
+
 
     it('returns 404 for unknown order', async () => {
       mockedPrisma.order.findUnique.mockResolvedValue(null);
