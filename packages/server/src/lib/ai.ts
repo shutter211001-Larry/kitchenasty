@@ -121,6 +121,9 @@ export async function translateContent(
     
     Text to translate: "${text}"
     
+    CRITICAL RULE: Do NOT translate, modify, or translate the words inside any text enclosed in curly braces {}.
+    For example, placeholder variables like {使用者}, {訂單編號}, {餐點內容}, and {取餐時間/做好馬上取} must be preserved EXACTLY as-is in the translated text.
+    
     Return ONLY a valid JSON object where keys are language codes and values are the translations.
     Language codes to use: ${targetLanguages.join(', ')}.
     
@@ -170,6 +173,9 @@ export async function translateFields(
       
       Fields:
       ${fields.map(f => `${f.key}: "${f.value}"`).join('\n')}
+      
+      CRITICAL RULE: Do NOT translate, modify, or translate the words inside any text enclosed in curly braces {}.
+      For example, placeholder variables like {使用者}, {訂單編號}, {餐點內容}, and {取餐時間/做好馬上取} must be preserved EXACTLY as-is in the translated text.
       
       Return ONLY a valid JSON object where keys are the field keys, and values are objects mapping language codes to translations.
       
