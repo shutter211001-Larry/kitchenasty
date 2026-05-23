@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { api } from '../lib/api.js';
 import { getFullUrl } from '../utils/url.js';
 import { useAuth } from '../context/AuthContext.js';
+import ImageCropperModal from '../components/ImageCropperModal.js';
 
 interface OptionValue {
   name: string;
@@ -141,6 +142,8 @@ export default function MenuItemForm() {
   const [loading, setLoading] = useState(isEdit);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [cropSrc, setCropSrc] = useState<string | null>(null);
+  const [originalFile, setOriginalFile] = useState<File | null>(null);
 
   const [erpRecipes, setErpRecipes] = useState<ErpRecipe[]>([]);
   const [selectedErpRecipeId, setSelectedErpRecipeId] = useState<string>('');
@@ -289,20 +292,37 @@ export default function MenuItemForm() {
     });
   };
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !id) return;
+    setOriginalFile(file);
+    const reader = new FileReader();
+    reader.onload = () => {
+      setCropSrc(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+    // Clear input so the same file can be selected again
+    e.target.value = '';
+  };
+
+  const handleCropComplete = async (croppedBlob: Blob) => {
+    if (!id || !originalFile) return;
+    setCropSrc(null);
     setUploading(true);
     setError(null);
     try {
+      const croppedFile = new File([croppedBlob], originalFile.name.replace(/\.[^/.]+$/, "") + "_cropped.jpg", {
+        type: 'image/jpeg'
+      });
       const formData = new FormData();
-      formData.append('image', file);
+      formData.append('image', croppedFile);
       const res = await api.upload<{ data: { image: string } }>(`/menu/items/${id}/image`, formData);
       setImageUrl(res.data.image);
     } catch (err: any) {
       setError(err.message);
     } finally {
       setUploading(false);
+      setOriginalFile(null);
     }
   };
 
@@ -902,6 +922,16 @@ export default function MenuItemForm() {
           </button>
         </div>
       </form>
+      {cropSrc && (
+        <ImageCropperModal
+          src={cropSrc}
+          onCrop={handleCropComplete}
+          onClose={() => {
+            setCropSrc(null);
+            setOriginalFile(null);
+          }}
+        />
+      )}
     </div>
   );
 }
