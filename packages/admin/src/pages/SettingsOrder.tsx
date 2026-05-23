@@ -265,46 +265,6 @@ export default function SettingsOrder() {
             </p>
           </div>
         </div>
-
-        {/* Email Notification Settings */}
-        <div className="pt-6 border-t border-gray-100">
-          <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-            <svg className="w-5 h-5 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-            </svg>
-            郵件通知設定
-          </h2>
-          <p className="text-sm text-gray-500 mb-4">選擇哪些狀態更新時要寄送郵件給顧客，以節省發信額度。</p>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {[
-              { key: 'PLACED', label: '新訂單成立 (確認信)', desc: '顧客剛下單時' },
-              { key: 'CONFIRMED', label: '訂單已確認', desc: '餐廳接單後' },
-              { key: 'PREPARING', label: '製作中', desc: '開始烹飪' },
-              { key: 'READY', label: '已就緒 / 可取餐', desc: '最建議開啟' },
-              { key: 'OUT_FOR_DELIVERY', label: '外送中', desc: '司機出發' },
-              { key: 'DELIVERED', label: '已送達', desc: '完成外送' },
-              { key: 'PICKED_UP', label: '已取餐', desc: '完成自取' },
-              { key: 'CANCELLED', label: '訂單取消', desc: '重要的異常通知' },
-            ].map((item) => (
-              <label key={item.key} className="flex items-start gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
-                <input
-                  type="checkbox"
-                  checked={emailNotifications[item.key] !== false}
-                  onChange={(e) => setEmailNotifications({
-                    ...emailNotifications,
-                    [item.key]: e.target.checked
-                  })}
-                  className="w-4 h-4 mt-1 text-primary-600 rounded"
-                />
-                <div>
-                  <p className="text-sm font-bold text-gray-900">{item.label}</p>
-                  <p className="text-xs text-gray-400">{item.desc}</p>
-                </div>
-              </label>
-            ))}
-          </div>
-        </div>
       </div>
 
       <div className="flex justify-end pt-4">
