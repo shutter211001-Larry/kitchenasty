@@ -41,11 +41,14 @@ vi.mock('../../lib/registrationBonus.js', () => ({
     grantRegistrationBonus: vi.fn().mockResolvedValue(undefined),
 }));
 
-// Mock @line/bot-sdk Client — must use class syntax for `new Client()` to work
-const mockReplyMessage = vi.fn().mockResolvedValue({});
-const mockGetProfile = vi.fn().mockResolvedValue({ displayName: 'Test User' });
-const mockPushMessage = vi.fn().mockResolvedValue({});
+// Use vi.hoisted() so these mock fns are available inside vi.mock factory (which is also hoisted)
+const { mockReplyMessage, mockGetProfile, mockPushMessage } = vi.hoisted(() => ({
+  mockReplyMessage: vi.fn().mockResolvedValue({}),
+  mockGetProfile: vi.fn().mockResolvedValue({ displayName: 'Test User' }),
+  mockPushMessage: vi.fn().mockResolvedValue({}),
+}));
 
+// Mock @line/bot-sdk — use class syntax so `new Client()` works as a constructor
 vi.mock('@line/bot-sdk', () => {
   const MockClient = class {
     replyMessage = mockReplyMessage;
