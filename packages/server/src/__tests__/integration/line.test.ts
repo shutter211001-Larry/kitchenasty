@@ -41,20 +41,19 @@ vi.mock('../../lib/registrationBonus.js', () => ({
     grantRegistrationBonus: vi.fn().mockResolvedValue(undefined),
 }));
 
-// Mock @line/bot-sdk Client
+// Mock @line/bot-sdk Client — must use class syntax for `new Client()` to work
 const mockReplyMessage = vi.fn().mockResolvedValue({});
 const mockGetProfile = vi.fn().mockResolvedValue({ displayName: 'Test User' });
 const mockPushMessage = vi.fn().mockResolvedValue({});
 
 vi.mock('@line/bot-sdk', () => {
+  const MockClient = class {
+    replyMessage = mockReplyMessage;
+    getProfile = mockGetProfile;
+    pushMessage = mockPushMessage;
+  };
   return {
-    Client: vi.fn().mockImplementation(() => {
-      return {
-        replyMessage: mockReplyMessage,
-        getProfile: mockGetProfile,
-        pushMessage: mockPushMessage,
-      };
-    }),
+    Client: MockClient,
   };
 });
 
