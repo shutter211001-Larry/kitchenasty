@@ -170,3 +170,47 @@ export async function deleteCategory(req: Request<{ id: string }>, res: Response
   auditLog(req, { action: 'delete', entity: 'Category', entityId: id, details: { name: existing.name } });
   res.json({ success: true, message: 'Category deleted' });
 }
+
+export async function uploadCategoryImage(req: Request<{ id: string }>, res: Response): Promise<void> {
+  const { id } = req.params;
+
+  const existing = await prisma.category.findUnique({ where: { id } });
+  if (!existing) {
+    res.status(404).json({ success: false, error: 'Category not found' });
+    return;
+  }
+
+  if (!req.file) {
+    res.status(400).json({ success: false, error: 'No image file provided' });
+    return;
+  }
+
+  const imagePath = `/uploads/${req.file.filename}`;
+
+  const category = await prisma.category.update({
+    where: { id },
+    data: { image: imagePath },
+    include: { parent: true },
+  });
+
+  res.json({ success: true, data: category });
+}
+
+export async function deleteCategoryImage(req: Request<{ id: string }>, res: Response): Promise<void> {
+  const { id } = req.params;
+
+  const existing = await prisma.category.findUnique({ where: { id } });
+  if (!existing) {
+    res.status(404).json({ success: false, error: 'Category not found' });
+    return;
+  }
+
+  const category = await prisma.category.update({
+    where: { id },
+    data: { image: null },
+    include: { parent: true },
+  });
+
+  res.json({ success: true, data: category });
+}
+

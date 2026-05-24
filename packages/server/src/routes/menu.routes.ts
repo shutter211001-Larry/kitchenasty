@@ -5,6 +5,8 @@ import {
   createCategory,
   updateCategory,
   deleteCategory,
+  uploadCategoryImage,
+  deleteCategoryImage,
 } from '../controllers/category.controller.js';
 import {
   listMenuItems,
@@ -43,6 +45,8 @@ router.get('/categories/:id', getCategory);
 router.post('/categories', authenticate, requireStaff, requireRole('SUPER_ADMIN', 'MANAGER'), createCategory);
 router.patch('/categories/:id', authenticate, requireStaff, requireRole('SUPER_ADMIN', 'MANAGER'), updateCategory);
 router.delete('/categories/:id', authenticate, requireStaff, requireRole('SUPER_ADMIN'), deleteCategory);
+router.post('/categories/:id/image', authenticate, requireStaff, requireRole('SUPER_ADMIN', 'MANAGER'), upload.single('image'), uploadCategoryImage);
+router.delete('/categories/:id/image', authenticate, requireStaff, requireRole('SUPER_ADMIN', 'MANAGER'), deleteCategoryImage);
 
 // Menu items - read is open, write requires Manager+
 router.get('/items', listMenuItems);

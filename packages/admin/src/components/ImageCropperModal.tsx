@@ -6,7 +6,7 @@ interface ImageCropperModalProps {
   onClose: () => void;
 }
 
-type AspectRatioPreset = '4:3' | '16:9' | '1:1' | 'free';
+type AspectRatioPreset = '4:3' | '16:9' | '1:1' | '20:13' | 'free';
 
 export default function ImageCropperModal({ src, onCrop, onClose }: ImageCropperModalProps) {
   const [aspectRatio, setAspectRatio] = useState<AspectRatioPreset>('4:3');
@@ -31,7 +31,7 @@ export default function ImageCropperModal({ src, onCrop, onClose }: ImageCropper
       return;
     }
 
-    const R = preset === '1:1' ? 1 : preset === '4:3' ? 4 / 3 : 16 / 9;
+    const R = preset === '1:1' ? 1 : preset === '4:3' ? 4 / 3 : preset === '20:13' ? 20 / 13 : 16 / 9;
     const imgRatio = naturalWidth / naturalHeight;
     const k = R / imgRatio;
 
@@ -136,7 +136,7 @@ export default function ImageCropperModal({ src, onCrop, onClose }: ImageCropper
       }
     } else {
       // Locked aspect ratio: maintain geometry using the predefined coefficients
-      const R = aspectRatio === '1:1' ? 1 : aspectRatio === '4:3' ? 4 / 3 : 16 / 9;
+      const R = aspectRatio === '1:1' ? 1 : aspectRatio === '4:3' ? 4 / 3 : aspectRatio === '20:13' ? 20 / 13 : 16 / 9;
       const k = R / (imgDimensions.width / imgDimensions.height);
 
       if (handle === 'se') {
@@ -366,11 +366,12 @@ export default function ImageCropperModal({ src, onCrop, onClose }: ImageCropper
                 選擇裁切比例 (Aspect Ratio)
               </label>
               <div className="grid grid-cols-2 gap-2">
-                {(['4:3', '16:9', '1:1', 'free'] as AspectRatioPreset[]).map((preset) => {
+                {(['4:3', '16:9', '1:1', '20:13', 'free'] as AspectRatioPreset[]).map((preset) => {
                   let label = '';
                   if (preset === '4:3') label = '4:3 平衡比例';
                   else if (preset === '16:9') label = '16:9 寬螢幕';
                   else if (preset === '1:1') label = '1:1 正方形';
+                  else if (preset === '20:13') label = '20:13 LINE 比例';
                   else label = '自由比例';
 
                   return (
@@ -399,7 +400,10 @@ export default function ImageCropperModal({ src, onCrop, onClose }: ImageCropper
               </div>
               <div className="space-y-1 text-primary-700 leading-relaxed">
                 <p>
-                  <strong>📱 手機 App 畫面</strong>：採用雙排網格，圖片視覺顯示比例約為 <strong>4:3 (或 3:2)</strong>。
+                  <strong>💬 LINE 點餐卡片</strong>：採用輪播 Flex 橫幅，最完美的比例為 <strong>20:13</strong> (約 800×520 px)。
+                </p>
+                <p>
+                  <strong>📱 手機 App 畫面</strong>：採用雙排網格，圖片視覺顯示比例約為 <strong>4:3</strong>。
                 </p>
                 <p>
                   <strong>💻 電腦瀏覽器</strong>：多以寬卡片呈現，顯示比例約為 <strong>16:9</strong>。
@@ -409,7 +413,7 @@ export default function ImageCropperModal({ src, onCrop, onClose }: ImageCropper
                   ⭐️ 推薦指南：
                 </p>
                 <p>
-                  若您的顧客多由手機點餐，建議優先裁切為 <strong>4:3</strong> 比例，並將美食<strong>主體置於中央九宮格內</strong>，能確保各裝置上皆有最完美的顯圖效果，免於上下細節遭系統遮蔽！
+                  若為<strong>分類圖片</strong>，強烈建議使用 <strong>20:13</strong> 比例以保證在 LINE 官方帳號中有最完美的滿版效果！若為一般商品，則推薦 <strong>4:3</strong> 比例。
                 </p>
               </div>
             </div>

@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { api } from '../lib/api.js';
 import { useAuth } from '../context/AuthContext.js';
+import ImageCropperModal from '../components/ImageCropperModal.js';
+import { getFullUrl } from '../utils/url.js';
 
 interface CategoryData {
   name: string;
@@ -68,6 +70,11 @@ export default function CategoryForm() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [cropSrc, setCropSrc] = useState<string | null>(null);
+  const [originalFile, setOriginalFile] = useState<File | null>(null);
+
   useEffect(() => {
     api.get<{ data: CategoryOption[] }>('/menu/categories')
       .then((res) => setCategories(res.data.filter((c) => c.id !== id)))
@@ -101,6 +108,7 @@ export default function CategoryForm() {
           parentId: cat.parentId || '',
           locationId: cat.locationId || '',
         });
+        if (cat.image) setImageUrl(cat.image);
         setLoading(false);
       })
       .catch((err) => { setError(err.message); setLoading(false); });
@@ -113,6 +121,55 @@ export default function CategoryForm() {
   const autoSlug = (name: string) => {
     if (!isEdit) {
       updateField('slug', name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''));
+    }
+  };
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !id) return;
+    setOriginalFile(file);
+    const reader = new FileReader();
+    reader.onload = () => {
+      setCropSrc(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
+
+  const handleCropComplete = async (croppedBlob: Blob) => {
+    if (!id || !originalFile) return;
+    setCropSrc(null);
+    setUploading(true);
+    setError(null);
+    try {
+      const croppedFile = new File([croppedBlob], originalFile.name.replace(/\.[^/.]+$/, "") + "_cropped.jpg", {
+        type: 'image/jpeg'
+      });
+      const formData = new FormData();
+      formData.append('image', croppedFile);
+      const res = await api.upload<{ data: { image: string } }>(`/menu/categories/${id}/image`, formData);
+      setImageUrl(res.data.image);
+      updateField('image', res.data.image);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setUploading(false);
+      setOriginalFile(null);
+    }
+  };
+
+  const handleImageRemove = async () => {
+    if (!id) return;
+    setUploading(true);
+    setError(null);
+    try {
+      await api.delete(`/menu/categories/${id}/image`);
+      setImageUrl(null);
+      updateField('image', '');
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -185,49 +242,110 @@ export default function CategoryForm() {
               />
             </div>
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">描述 (Description)</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                描述 (Description)
+                <span className="ml-2 text-xs text-orange-500 font-normal">· 會顯示在 LINE 點餐卡片</span>
+              </label>
               <textarea
                 value={form.description}
                 onChange={(e) => updateField('description', e.target.value)}
                 rows={2}
+                placeholder="探索新鮮美味的主題餐點..."
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
               />
+              <p className="text-xs text-gray-400 mt-1 leading-normal">
+                <span className="text-orange-500 font-medium">💡 LINE 推薦規格：此描述會顯示在 LINE 點餐的微型卡片 (Micro Bubble) 中，建議控制在 15-20 字以內，排版最為精緻。</span>
+              </p>
             </div>
-            {/* Image URL — shown in LINE chatbot carousel */}
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                🖼️ 分類圖片網址 (Image URL)
-                <span className="ml-2 text-xs text-orange-500 font-normal">· 顯示於 LINE 點餐選單卡片</span>
-              </label>
-              <div className="flex gap-3 items-start">
-                <div className="flex-1">
-                  <input
-                    type="url"
-                    value={form.image}
-                    onChange={(e) => updateField('image', e.target.value)}
-                    placeholder="https://example.com/pizza.jpg"
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                  />
-                  <p className="text-xs text-gray-400 mt-1">建議尺寸：800×520 px（4:3 橫幅），JPG 或 PNG</p>
-                </div>
-                {form.image && (
-                  <div className="relative shrink-0">
-                    <img
-                      src={form.image}
-                      alt="分類預覽"
-                      className="w-24 h-16 object-cover rounded-lg border border-gray-200"
-                      onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => updateField('image', '')}
-                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600"
-                    >
-                      ✕
-                    </button>
+            {/* Image Section */}
+            <div className="md:col-span-2 border-t border-gray-100 pt-6 mt-4">
+              {isEdit ? (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    🖼️ 分類圖片 (Category Image)
+                    <span className="ml-2 text-xs text-primary-600 font-normal">· 顯示於 LINE 輪播選單與 LIFF 介面</span>
+                  </label>
+                  <div className="flex items-start gap-6 bg-slate-50/50 p-4 rounded-xl border border-gray-100">
+                    {imageUrl ? (
+                      <div className="relative shrink-0">
+                        <img
+                          src={getFullUrl(imageUrl)!}
+                          alt={form.name}
+                          className="w-32 h-24 object-cover rounded-lg border border-gray-200 shadow-sm"
+                        />
+                        <button
+                          type="button"
+                          onClick={handleImageRemove}
+                          disabled={uploading}
+                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600 disabled:opacity-50 shadow-md transition-all active:scale-90"
+                          aria-label="移除圖片"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="w-32 h-24 bg-white rounded-lg border-2 border-dashed border-gray-300 flex flex-col items-center justify-center shrink-0">
+                        <span className="text-[10px] text-gray-400">尚未上傳</span>
+                      </div>
+                    )}
+                    <div className="space-y-2">
+                      <label className="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-xs font-semibold cursor-pointer disabled:opacity-50 transition-colors shadow-sm">
+                        {uploading ? '上傳中...' : '上傳與裁切圖片'}
+                        <input
+                          type="file"
+                          accept="image/jpeg,image/png,image/webp,image/gif"
+                          onChange={handleImageUpload}
+                          disabled={uploading}
+                          className="hidden"
+                        />
+                      </label>
+                      <p className="text-[11px] text-gray-400 leading-relaxed">
+                        支援格式：JPEG, PNG, WebP。檔案上限 5MB。<br />
+                        <span className="text-orange-500 font-medium">💡 LINE 推薦規格：建議裁切為 20:13 比例（800×520 px）。</span>
+                      </p>
+                    </div>
                   </div>
-                )}
-              </div>
+                </div>
+              ) : (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    🖼️ 分類圖片網址 (Image URL)
+                    <span className="ml-2 text-xs text-orange-500 font-normal">· 顯示於 LINE 點餐選單卡片</span>
+                  </label>
+                  <div className="flex gap-3 items-start">
+                    <div className="flex-1">
+                      <input
+                        type="url"
+                        value={form.image}
+                        onChange={(e) => updateField('image', e.target.value)}
+                        placeholder="https://example.com/pizza.jpg"
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                      />
+                      <p className="text-xs text-gray-400 mt-1 leading-normal">
+                        建議尺寸：800×520 px（20:13 橫幅）。<br />
+                        <span className="text-primary-600">💡 提示：建立分類後，點擊編輯該分類即可解鎖「本地拖曳上傳與 20:13 LINE 完美裁切」功能！</span>
+                      </p>
+                    </div>
+                    {form.image && (
+                      <div className="relative shrink-0">
+                        <img
+                          src={form.image}
+                          alt="分類預覽"
+                          className="w-24 h-16 object-cover rounded-lg border border-gray-200 shadow-sm"
+                          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => updateField('image', '')}
+                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">父分類 (Parent Category)</label>
@@ -332,6 +450,16 @@ export default function CategoryForm() {
           </button>
         </div>
       </form>
+      {cropSrc && (
+        <ImageCropperModal
+          src={cropSrc}
+          onCrop={handleCropComplete}
+          onClose={() => {
+            setCropSrc(null);
+            setOriginalFile(null);
+          }}
+        />
+      )}
     </div>
   );
 }
