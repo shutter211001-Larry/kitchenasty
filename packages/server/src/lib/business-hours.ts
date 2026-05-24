@@ -20,25 +20,22 @@ export function isWithinHours(
     hour: 'numeric', minute: 'numeric', weekday: 'short',
     hour12: false
   }).formatToParts(date);
-  
+
   const m: any = {};
   taiwanParts.forEach(p => m[p.type] = p.value);
   
   const daysMap: any = { 'Sun': 0, 'Mon': 1, 'Tue': 2, 'Wed': 3, 'Thu': 4, 'Fri': 5, 'Sat': 6 };
   const dayOfWeek = daysMap[m.weekday];
+  const prevDayOfWeek = (dayOfWeek + 6) % 7;
   const currentMinutes = Number(m.hour) * 60 + Number(m.minute);
-
-  const sessions = hours.filter((h) => h.dayOfWeek === dayOfWeek && !h.isClosed);
-
-  if (sessions.length === 0) {
-    return { isOpen: false, error: 'Location is closed on this day.' };
-  }
 
   const { preOpeningBuffer = 0, postClosingBuffer = 0 } = settings;
   let isOpen = false;
   let timeRangesStr = '';
 
-  for (const session of sessions) {
+  for (const session of hours) {
+    if (session.isClosed) continue;
+
     const [openH, openM] = session.openTime.split(':').map(Number);
     const [closeH, closeM] = session.closeTime.split(':').map(Number);
 
@@ -46,24 +43,33 @@ export function isWithinHours(
     const closeMinutes = closeH * 60 + closeM - postClosingBuffer;
     const isOvernight = (closeH * 60 + closeM) <= (openH * 60 + openM);
 
-    if (isOvernight) {
-      if (currentMinutes >= openMinutes || currentMinutes <= closeMinutes) {
-        isOpen = true;
-        break;
+    if (session.dayOfWeek === dayOfWeek) {
+      if (isOvernight) {
+        if (currentMinutes >= openMinutes) {
+          isOpen = true;
+          break;
+        }
+      } else {
+        if (currentMinutes >= openMinutes && currentMinutes <= closeMinutes) {
+          isOpen = true;
+          break;
+        }
       }
-    } else {
-      if (currentMinutes >= openMinutes && currentMinutes <= closeMinutes) {
-        isOpen = true;
-        break;
+      timeRangesStr += `${timeRangesStr ? ', ' : ''}${session.openTime}-${session.closeTime}`;
+    } else if (session.dayOfWeek === prevDayOfWeek) {
+      if (isOvernight) {
+        if (currentMinutes <= closeMinutes) {
+          isOpen = true;
+          break;
+        }
       }
     }
-    timeRangesStr += `${timeRangesStr ? ', ' : ''}${session.openTime}-${session.closeTime}`;
   }
 
   if (!isOpen) {
     return { 
       isOpen: false, 
-      error: `Scheduled time must be within business hours (${timeRangesStr}) considering preparation buffers.` 
+      error: `Scheduled time must be within business hours (${timeRangesStr || 'Closed'}) considering preparation buffers.` 
     };
   }
 

@@ -248,7 +248,7 @@ export async function getAvailableSlots(req: Request, res: Response): Promise<vo
 
   let allRawSlots: string[] = [];
 
-  for (let i = 0; i < daysCount; i++) {
+  for (let i = -1; i < daysCount; i++) {
     const targetDate = new Date(now.getTime() + i * 24 * 60 * 60 * 1000);
     const { dayOfWeek } = getTaiwanDate(targetDate);
     
@@ -256,7 +256,7 @@ export async function getAvailableSlots(req: Request, res: Response): Promise<vo
     
     if (sessions.length === 0) continue;
 
-    const minStartTime = i === 0 ? new Date(now.getTime() + leadTime * 60000) : undefined;
+    const minStartTime = i <= 0 ? new Date(now.getTime() + leadTime * 60000) : undefined;
 
     const daySlots = generateDaySlots(
       targetDate,

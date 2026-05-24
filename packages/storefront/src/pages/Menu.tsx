@@ -200,54 +200,48 @@ export default function Menu() {
         </div>
       </div>
 
-      {/* Mobile category toggle */}
-      <button
-        className="md:hidden flex items-center gap-2 mb-4 text-sm font-medium text-primary-600 hover:text-primary-700"
-        onClick={() => setMobileCategoriesOpen(!mobileCategoriesOpen)}
-      >
-        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h7" />
-        </svg>
-        {mobileCategoriesOpen ? t('menu.categories') : t('menu.categories')}
-      </button>
+      {/* Category Horizontal Navigation (uncollapsed, left-to-right, scrollable) */}
+      <div className="mb-8 border-b border-input/30 pb-4">
+        <nav className="flex gap-2 overflow-x-auto whitespace-nowrap scrollbar-hide py-1 scroll-smooth snap-x touch-pan-x">
+          {categoriesLoading && (
+            <div className="px-3 py-2 text-sm text-gray-400">{t('common.loading')}</div>
+          )}
 
-      <div className="flex flex-col md:flex-row gap-8">
-        {/* Category sidebar */}
-        <aside className={`md:w-56 shrink-0 ${mobileCategoriesOpen ? '' : 'hidden md:block'}`}>
-          <nav className="space-y-1">
-            {categoriesLoading && (
-              <div className="px-3 py-2 text-sm text-gray-400">{t('common.loading')}</div>
-            )}
-            {activeCategories.map((cat) => (
-              <button
-                key={cat.id}
-                onClick={() => handleCategoryClick(cat.id)}
-                className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors ${selectedCategory === cat.id
-                    ? 'bg-primary-50 text-primary-700'
-                    : 'text-sub hover:bg-surface'
-                  }`}
-              >
-                {getTranslated(cat.name, cat.nameTranslations, i18n.language)}
-                <span className="text-hint ml-1 text-xs">({cat._count.menuItems})</span>
-              </button>
-            ))}
+          {!categoriesLoading && activeCategories.length > 0 && (
+            <button
+              onClick={() => handleCategoryClick('all')}
+              className={`px-5 py-2 rounded-full text-sm font-bold transition-all duration-200 snap-start shrink-0 ${
+                selectedCategory === 'all'
+                  ? 'bg-primary-600 text-white shadow-sm'
+                  : 'bg-surface text-sub border border-input hover:bg-surface-soft'
+              }`}
+            >
+              {t('menu.allCategories')}
+            </button>
+          )}
 
-            {!categoriesLoading && activeCategories.length > 0 && (
-              <button
-                onClick={() => handleCategoryClick('all')}
-                className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors ${selectedCategory === 'all'
-                    ? 'bg-primary-50 text-primary-700'
-                    : 'text-sub hover:bg-surface'
-                  }`}
-              >
-                {t('menu.allCategories')}
-              </button>
-            )}
-          </nav>
-        </aside>
+          {activeCategories.map((cat) => (
+            <button
+              key={cat.id}
+              onClick={() => handleCategoryClick(cat.id)}
+              className={`px-5 py-2 rounded-full text-sm font-bold transition-all duration-200 snap-start shrink-0 ${
+                selectedCategory === cat.id
+                  ? 'bg-primary-600 text-white shadow-sm'
+                  : 'bg-surface text-sub border border-input hover:bg-surface-soft'
+              }`}
+            >
+              {getTranslated(cat.name, cat.nameTranslations, i18n.language)}
+              <span className={`ml-1.5 text-xs font-normal ${selectedCategory === cat.id ? 'text-primary-100' : 'text-hint'}`}>
+                ({cat._count.menuItems})
+              </span>
+            </button>
+          ))}
+        </nav>
+      </div>
 
+      <div>
         {/* Menu items grid */}
-        <div className="flex-1">
+        <div className="w-full">
           {itemsLoading && (
             <div className="flex justify-center py-12">
               <div className="w-8 h-8 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin" />

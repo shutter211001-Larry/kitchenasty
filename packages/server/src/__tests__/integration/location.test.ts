@@ -26,6 +26,9 @@ vi.mock('../../lib/db.js', () => {
     },
     user: { findUnique: vi.fn() },
     customer: { findUnique: vi.fn() },
+    siteSettings: {
+      findUnique: vi.fn().mockResolvedValue({ id: 'default', orderSettings: { preOpeningBuffer: 30, postClosingBuffer: 30, timeSlotInterval: 15 } }),
+    },
   };
   return { default: mockPrisma, prisma: mockPrisma };
 });
@@ -333,6 +336,46 @@ describe('Location API - Integration Tests', () => {
         .set('Authorization', `Bearer ${adminToken}`);
 
       expect(res.status).toBe(404);
+    });
+  });
+
+  // ============================================================
+  // AVAILABLE SLOTS
+  // ============================================================
+  describe('GET /api/locations/:id/available-slots', () => {
+    it('returns empty slots list if no operating hours are configured', async () => {
+      mockedPrisma.location.findUnique.mockResolvedValue({ 
+        ...sampleLocation, 
+        operatingHours: [] 
+      } as any);
+
+      const res = await request(app).get('/api/locations/loc-1/available-slots');
+
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+      expect(res.body.data).toEqual([]);
+    });
+
+    it('returns generated slots when operating hours are configured', async () => {
+      mockedPrisma.location.findUnique.mockResolvedValue({
+        ...sampleLocation,
+        operatingHours: [
+          {
+            id: 'h1',
+            locationId: 'loc-1',
+            dayOfWeek: new Date().getDay(),
+            openTime: '11:00',
+            closeTime: '13:00',
+            isClosed: false,
+          }
+        ]
+      } as any);
+
+      const res = await request(app).get('/api/locations/loc-1/available-slots');
+
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+      expect(Array.isArray(res.body.data)).toBe(true);
     });
   });
 });
