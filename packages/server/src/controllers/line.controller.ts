@@ -251,7 +251,9 @@ async function handleEvent(client: Client, event: WebhookEvent) {
             size: 'micro',
             hero: {
               type: 'image',
-              url: cat.image || 'https://img.freepik.com/free-photo/delicious-pizza-indoors_23-2150873874.jpg',
+              url: cat.image
+                ? (cat.image.startsWith('http') ? cat.image : `${(process.env.SERVER_URL || 'http://localhost:3000').replace(/\/$/, '')}${cat.image}`)
+                : 'https://img.freepik.com/free-photo/delicious-pizza-indoors_23-2150873874.jpg',
               size: 'full',
               aspectRatio: '20:13',
               aspectMode: 'cover'
