@@ -9,6 +9,7 @@ import { isPointInPolygon } from '../lib/geo.js';
 import { calculateDistance } from '../lib/geo.js';
 import { sendEmail, orderConfirmationEmail, orderStatusEmail } from '../lib/email.js';
 import { auditLog } from '../lib/audit.js';
+import { validateAndCalculateDiscount, findAndApplyBestAutomaticDiscount } from '../lib/discount-engine.js';
 
 // ============================================================
 // HELPERS
@@ -362,7 +363,7 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
   const { 
     orderType, items, comment, scheduledAt, address, 
     guestName, guestEmail, guestPhone, loyaltyPointsRedeem,
-    userLat, userLon, locationId, honeypot
+    userLat, userLon, locationId, honeypot, couponCode
   } = parsed.data;
 
   // HONEYPOT check: Bots often fill all fields. If this hidden field is filled, reject it silently or with a generic error.
@@ -728,8 +729,70 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
   let currentTaxRate = orderSettings.taxRate !== undefined ? Number(orderSettings.taxRate) : 0;
   if (isNaN(currentTaxRate)) currentTaxRate = 0;
 
+  // Calculate discount using Unified Discount Engine
+  let couponDiscount = 0;
+  let freeDelivery = false;
+  let appliedCouponId: string | null = null;
+
+  const engineCartItems = items.map((item) => {
+    const dbItem = menuItemMap.get(item.menuItemId)!;
+    let unitPrice = dbItem.price;
+    (item.options || []).forEach((opt) => {
+      const dbValue = optionValueMap.get(opt.menuOptionValueId);
+      unitPrice += dbValue ? dbValue.priceModifier : 0;
+    });
+    return {
+      menuItemId: item.menuItemId,
+      categoryId: dbItem.categoryId,
+      price: unitPrice,
+      quantity: item.quantity,
+    };
+  });
+
+  // A. First scan and apply the best automatic promotion
+  const autoPromo = await findAndApplyBestAutomaticDiscount(
+    { subtotal, orderType, locationId: location.id },
+    engineCartItems
+  );
+  if (autoPromo.campaign) {
+    couponDiscount = autoPromo.discountAmount;
+    freeDelivery = autoPromo.freeDelivery;
+    appliedCouponId = autoPromo.campaign.id;
+  }
+
+  // B. Second, if couponCode is provided, validate and apply
+  if (couponCode) {
+    const coupon = await prisma.coupon.findUnique({ where: { code: couponCode.toUpperCase() } });
+    if (!coupon) {
+      res.status(400).json({ success: false, error: '無效的優惠碼' });
+      return;
+    }
+    
+    const validation = validateAndCalculateDiscount(
+      coupon,
+      { subtotal, orderType, locationId: location.id },
+      engineCartItems
+    );
+    if (!validation.isValid) {
+      res.status(400).json({ success: false, error: validation.reason || '此優惠碼目前無法套用' });
+      return;
+    }
+
+    if (validation.freeDelivery) {
+      freeDelivery = true;
+    }
+    if (validation.discountAmount > 0) {
+      couponDiscount += validation.discountAmount;
+    }
+    appliedCouponId = coupon.id;
+  }
+
+  if (freeDelivery) {
+    deliveryFee = 0;
+  }
+
   const tax = subtotal * (currentTaxRate / 100);
-  const total = subtotal + tax + deliveryFee - loyaltyDiscount;
+  const total = subtotal + tax + deliveryFee - loyaltyDiscount - couponDiscount;
 
   if (isNaN(total)) {
     res.status(400).json({ success: false, error: 'Calculation error: invalid amounts' });
@@ -786,7 +849,8 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
       subtotal,
       tax,
       deliveryFee,
-      discount: loyaltyDiscount,
+      discount: loyaltyDiscount + couponDiscount,
+      couponId: appliedCouponId,
       total,
       comment,
       scheduledAt: scheduledAt ? new Date(scheduledAt) : null,
@@ -805,6 +869,14 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
       customer: { select: { id: true, name: true, email: true } },
     },
   });
+
+  // Increment usage count for the coupon if applied
+  if (appliedCouponId) {
+    await prisma.coupon.update({
+      where: { id: appliedCouponId },
+      data: { usageCount: { increment: 1 } },
+    });
+  }
 
   // Decrement stock for tracked items
   for (const item of items) {
