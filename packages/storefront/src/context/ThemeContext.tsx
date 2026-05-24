@@ -59,6 +59,8 @@ export interface SiteSettings {
     pickupLeadTime?: number;
     enableFutureOrdering?: boolean;
     taxRate?: number;
+    loyaltyEarnRate?: number;
+    loyaltyRedeemRate?: number;
   };
   paymentSettings?: {
     cashEnabled?: boolean;
