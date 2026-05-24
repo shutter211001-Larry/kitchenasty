@@ -19,9 +19,16 @@ vi.mock('../../lib/db.js', () => {
     category: { findMany: vi.fn(), findUnique: vi.fn(), create: vi.fn(), update: vi.fn(), delete: vi.fn(), count: vi.fn() },
     siteSettings: { findUnique: vi.fn() },
     menuOptionValue: { findMany: vi.fn() },
+    coupon: { findMany: vi.fn(), findUnique: vi.fn(), update: vi.fn() },
   };
   return { default: mockPrisma, prisma: mockPrisma };
 });
+
+vi.mock('../../middleware/security.js', () => ({
+  checkIPBlacklist: (req: any, res: any, next: any) => next(),
+  checkCustomerBlacklist: (req: any, res: any, next: any) => next(),
+  orderRateLimiter: (req: any, res: any, next: any) => next(),
+}));
 
 
 
@@ -81,6 +88,7 @@ describe('Order API - Integration Tests', () => {
       orderSettings: { enabled: true, deliveryEnabled: true, pickupEnabled: true, taxRate: 8 }
     });
     (mockedPrisma.menuOptionValue as any).findMany.mockResolvedValue([]);
+    (mockedPrisma.coupon as any).findMany.mockResolvedValue([]);
   });
 
 
@@ -207,6 +215,75 @@ describe('Order API - Integration Tests', () => {
       });
 
       expect(res.status).toBe(201);
+    });
+
+    it('creates a pickup order and applies a valid manual coupon code', async () => {
+      mockedPrisma.menuItem.findMany.mockResolvedValue([sampleMenuItem] as any);
+      mockedPrisma.location.findFirst.mockResolvedValue(sampleLocation as any);
+      
+      const mockCoupon = {
+        id: 'coupon-abc',
+        code: 'SAVE5',
+        name: 'Save 5 Bucks',
+        isAutomatic: false,
+        conditions: null,
+        locationId: null,
+        type: 'FIXED',
+        value: 5.0,
+        minOrder: 0,
+        maxDiscount: null,
+        usageLimit: null,
+        usageCount: 0,
+        perCustomer: 1,
+        startsAt: null,
+        expiresAt: null,
+        isActive: true,
+      };
+      mockedPrisma.coupon.findUnique.mockResolvedValue(mockCoupon as any);
+      mockedPrisma.coupon.update.mockResolvedValue({} as any);
+      mockedPrisma.order.create.mockResolvedValue({ ...sampleOrder, discount: 5.0, total: 24.98 } as any);
+      mockedPrisma.automationRule.findMany.mockResolvedValue([]);
+
+      const res = await request(app).post('/api/orders').send({
+        ...validOrderBody,
+        couponCode: 'SAVE5',
+      });
+
+      expect(res.status).toBe(201);
+      expect(res.body.data.discount).toBe(5.0);
+    });
+
+    it('creates a pickup order and automatically applies a valid automatic promotion', async () => {
+      mockedPrisma.menuItem.findMany.mockResolvedValue([sampleMenuItem] as any);
+      mockedPrisma.location.findFirst.mockResolvedValue(sampleLocation as any);
+      
+      const mockAutomaticPromo = {
+        id: 'promo-auto',
+        code: null,
+        name: 'Auto 10% Off',
+        isAutomatic: true,
+        conditions: null,
+        locationId: null,
+        type: 'PERCENTAGE',
+        value: 10.0,
+        minOrder: 0,
+        maxDiscount: null,
+        usageLimit: null,
+        usageCount: 0,
+        perCustomer: 1,
+        startsAt: null,
+        expiresAt: null,
+        isActive: true,
+      };
+      mockedPrisma.coupon.findMany.mockResolvedValue([mockAutomaticPromo] as any);
+      mockedPrisma.coupon.update.mockResolvedValue({} as any);
+      mockedPrisma.order.create.mockResolvedValue({ ...sampleOrder, discount: 2.99, total: 26.99 } as any);
+      mockedPrisma.automationRule.findMany.mockResolvedValue([]);
+
+      const res = await request(app).post('/api/orders').send(validOrderBody);
+
+      expect(res.status).toBe(201);
+      expect(res.body.data.discount).toBe(2.99);
     });
   });
 

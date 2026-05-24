@@ -2,9 +2,14 @@ import { Request, Response } from 'express';
 import { z } from 'zod';
 import prisma from '../lib/db.js';
 import { auditLog } from '../lib/audit.js';
+import { validateAndCalculateDiscount } from '../lib/discount-engine.js';
 
 const createCouponSchema = z.object({
-  code: z.string().min(1).max(50),
+  code: z.string().min(1).max(50).nullable().optional(),
+  name: z.string().min(1).optional(),
+  isAutomatic: z.boolean().optional(),
+  conditions: z.any().nullable().optional(),
+  locationId: z.string().nullable().optional(),
   type: z.enum(['PERCENTAGE', 'FIXED', 'FREE_DELIVERY']),
   value: z.number().min(0),
   minOrder: z.number().min(0).optional(),
@@ -25,19 +30,21 @@ export async function createCoupon(req: Request, res: Response): Promise<void> {
     return;
   }
 
-  const { startsAt, expiresAt, ...rest } = parsed.data;
+  const { startsAt, expiresAt, code, ...rest } = parsed.data;
 
-  // Check code uniqueness
-  const existing = await prisma.coupon.findUnique({ where: { code: rest.code.toUpperCase() } });
-  if (existing) {
-    res.status(409).json({ success: false, error: 'Coupon code already exists' });
-    return;
+  // Check code uniqueness only if code is provided
+  if (code) {
+    const existing = await prisma.coupon.findUnique({ where: { code: code.toUpperCase() } });
+    if (existing) {
+      res.status(409).json({ success: false, error: 'Coupon code already exists' });
+      return;
+    }
   }
 
   const coupon = await prisma.coupon.create({
     data: {
       ...rest,
-      code: rest.code.toUpperCase(),
+      code: code ? code.toUpperCase() : null,
       startsAt: startsAt ? new Date(startsAt) : null,
       expiresAt: expiresAt ? new Date(expiresAt) : null,
     },
@@ -93,7 +100,21 @@ export async function updateCoupon(req: Request<{ id: string }>, res: Response):
 
   const { startsAt, expiresAt, code, ...rest } = parsed.data;
   const data: Record<string, unknown> = { ...rest };
-  if (code !== undefined) data.code = code.toUpperCase();
+  if (code !== undefined) {
+    if (code !== null) {
+      const upperCode = code.toUpperCase();
+      if (existing.code !== upperCode) {
+        const dup = await prisma.coupon.findUnique({ where: { code: upperCode } });
+        if (dup) {
+          res.status(409).json({ success: false, error: 'Coupon code already exists' });
+          return;
+        }
+      }
+      data.code = upperCode;
+    } else {
+      data.code = null;
+    }
+  }
   if (startsAt !== undefined) data.startsAt = startsAt ? new Date(startsAt) : null;
   if (expiresAt !== undefined) data.expiresAt = expiresAt ? new Date(expiresAt) : null;
 
@@ -120,7 +141,7 @@ export async function deleteCoupon(req: Request<{ id: string }>, res: Response):
 }
 
 export async function validateCoupon(req: Request, res: Response): Promise<void> {
-  const { code, subtotal } = req.body;
+  const { code, subtotal, items = [], orderType = 'PICKUP', locationId = '' } = req.body;
 
   if (!code) {
     res.status(400).json({ success: false, error: 'Coupon code is required' });
@@ -133,43 +154,20 @@ export async function validateCoupon(req: Request, res: Response): Promise<void>
     return;
   }
 
-  if (!coupon.isActive) {
-    res.status(400).json({ success: false, error: 'Coupon is not active' });
-    return;
-  }
+  const result = validateAndCalculateDiscount(
+    coupon,
+    {
+      subtotal: subtotal || 0,
+      orderType,
+      locationId,
+    },
+    items
+  );
 
-  const now = new Date();
-  if (coupon.startsAt && now < coupon.startsAt) {
-    res.status(400).json({ success: false, error: 'Coupon is not yet valid' });
+  if (!result.isValid) {
+    res.status(400).json({ success: false, error: result.reason || 'Coupon validation failed' });
     return;
   }
-  if (coupon.expiresAt && now > coupon.expiresAt) {
-    res.status(400).json({ success: false, error: 'Coupon has expired' });
-    return;
-  }
-
-  if (coupon.usageLimit !== null && coupon.usageCount >= coupon.usageLimit) {
-    res.status(400).json({ success: false, error: 'Coupon usage limit reached' });
-    return;
-  }
-
-  const orderSubtotal = subtotal || 0;
-  if (orderSubtotal < coupon.minOrder) {
-    res.status(400).json({ success: false, error: `Minimum order amount is $${coupon.minOrder.toFixed(2)}` });
-    return;
-  }
-
-  // Calculate discount
-  let discount = 0;
-  if (coupon.type === 'PERCENTAGE') {
-    discount = orderSubtotal * (coupon.value / 100);
-    if (coupon.maxDiscount !== null) {
-      discount = Math.min(discount, coupon.maxDiscount);
-    }
-  } else if (coupon.type === 'FIXED') {
-    discount = coupon.value;
-  }
-  // FREE_DELIVERY discount is applied at checkout level
 
   res.json({
     success: true,
@@ -177,8 +175,8 @@ export async function validateCoupon(req: Request, res: Response): Promise<void>
       code: coupon.code,
       type: coupon.type,
       value: coupon.value,
-      discount: Math.round(discount * 100) / 100,
-      freeDelivery: coupon.type === 'FREE_DELIVERY',
+      discount: result.discountAmount,
+      freeDelivery: result.freeDelivery,
     },
   });
 }
