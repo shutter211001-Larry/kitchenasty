@@ -84,15 +84,93 @@ async function handleEvent(client: Client, event: WebhookEvent) {
   const userId = event.source.userId;
   if (!userId) return;
 
+  // Retrieve LIFF ID & settings for URL fallback
+  const settings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
+  const lineSettings = (settings?.lineSettings as any) || {};
+  const liffId = lineSettings.liffId || '';
+  const storefrontUrl = process.env.STOREFRONT_URL || 'http://localhost:5174';
+  const liffUrl = liffId ? `https://liff.line.me/${liffId}` : storefrontUrl;
+
   if (event.type === 'follow') {
     try {
       const profile = await client.getProfile(userId);
       console.log(`User followed: ${profile.displayName} (${userId})`);
       
-      // Auto-reply with a greeting and binding instruction
       await client.replyMessage(event.replyToken, {
-        type: 'text',
-        text: `您好 ${profile.displayName}！感謝您關注我們的官方帳號。\n\n若要接收訂單通知，請前往網站個人頁面連結您的帳號。`,
+        type: 'flex',
+        altText: `歡迎關注夏特點餐系統！`,
+        contents: {
+          type: 'bubble',
+          header: {
+            type: 'box',
+            layout: 'vertical',
+            backgroundColor: '#f97316',
+            contents: [
+              {
+                type: 'text',
+                text: '夏特點餐系統 🏪',
+                color: '#ffffff',
+                weight: 'bold',
+                size: 'lg',
+                align: 'center'
+              }
+            ]
+          },
+          body: {
+            type: 'box',
+            layout: 'vertical',
+            spacing: 'md',
+            contents: [
+              {
+                type: 'text',
+                text: `您好 ${profile.displayName}！`,
+                weight: 'bold',
+                size: 'md'
+              },
+              {
+                type: 'text',
+                text: '感謝您關注我們的官方帳號！在這裡您可以享有極致便利的線上點餐、紅利集點與即時訂單追蹤服務。',
+                size: 'sm',
+                color: '#444444',
+                wrap: true
+              },
+              {
+                type: 'text',
+                text: '🎁 現在綁定 LINE 帳號，立即可領取會員專屬紅利點數！',
+                size: 'xs',
+                color: '#ea580c',
+                weight: 'bold',
+                wrap: true
+              }
+            ]
+          },
+          footer: {
+            type: 'box',
+            layout: 'vertical',
+            spacing: 'sm',
+            contents: [
+              {
+                type: 'button',
+                style: 'primary',
+                color: '#f97316',
+                action: {
+                  type: 'uri',
+                  label: '🚀 開始線上點餐',
+                  uri: liffUrl
+                }
+              },
+              {
+                type: 'button',
+                style: 'secondary',
+                action: {
+                  type: 'uri',
+                  label: '👤 綁定會員領點數',
+                  uri: liffId ? `${liffUrl}?redirect=/account` : `${storefrontUrl}/account`
+                }
+              }
+            ]
+          }
+        }
       });
     } catch (err) {
       console.error('Error handling follow:', err);
@@ -100,13 +178,411 @@ async function handleEvent(client: Client, event: WebhookEvent) {
   }
 
   if (event.type === 'message' && event.message.type === 'text') {
-    const text = event.message.text.trim();
+    const text = event.message.text.trim().toLowerCase();
     
-    if (text.toLowerCase() === 'id') {
+    if (text === 'id') {
       await client.replyMessage(event.replyToken, {
         type: 'text',
         text: `您的 LINE User ID 為:\n${userId}`,
       });
+      return;
+    }
+
+    if (text === '點餐' || text === 'menu' || text === '菜單' || text === '我要點餐') {
+      try {
+        const categories = await prisma.category.findMany({
+          where: { isActive: true },
+          orderBy: { sortOrder: 'asc' },
+          take: 10
+        });
+
+        if (categories.length === 0) {
+          await client.replyMessage(event.replyToken, {
+            type: 'flex',
+            altText: '歡迎使用線上點餐！',
+            contents: {
+              type: 'bubble',
+              body: {
+                type: 'box',
+                layout: 'vertical',
+                contents: [
+                  {
+                    type: 'text',
+                    text: '歡迎使用夏特點餐系統！',
+                    weight: 'bold',
+                    size: 'md'
+                  },
+                  {
+                    type: 'text',
+                    text: '點擊下方按鈕即可開啟線上點餐網頁喔！',
+                    size: 'sm',
+                    margin: 'md',
+                    wrap: true
+                  }
+                ]
+              },
+              footer: {
+                type: 'box',
+                layout: 'vertical',
+                contents: [
+                  {
+                    type: 'button',
+                    style: 'primary',
+                    color: '#f97316',
+                    action: {
+                      type: 'uri',
+                      label: '🚀 開始點餐',
+                      uri: liffUrl
+                    }
+                  }
+                ]
+              }
+            }
+          });
+          return;
+        }
+
+        const bubbles = categories.map(cat => {
+          const categoryUrl = liffId 
+            ? `${liffUrl}?redirect=/menu/categories/${cat.id}` 
+            : `${storefrontUrl}/menu/categories/${cat.id}`;
+          return {
+            type: 'bubble',
+            size: 'micro',
+            hero: {
+              type: 'image',
+              url: cat.image || 'https://img.freepik.com/free-photo/delicious-pizza-indoors_23-2150873874.jpg',
+              size: 'full',
+              aspectRatio: '20:13',
+              aspectMode: 'cover'
+            },
+            body: {
+              type: 'box',
+              layout: 'vertical',
+              contents: [
+                {
+                  type: 'text',
+                  text: cat.name,
+                  weight: 'bold',
+                  size: 'md',
+                  wrap: true
+                },
+                {
+                  type: 'text',
+                  text: cat.description || '探索新鮮美味的主題餐點',
+                  size: 'xs',
+                  color: '#666666',
+                  wrap: true,
+                  margin: 'sm'
+                }
+              ]
+            },
+            footer: {
+              type: 'box',
+              layout: 'vertical',
+              contents: [
+                {
+                  type: 'button',
+                  style: 'primary',
+                  height: 'sm',
+                  color: '#f97316',
+                  action: {
+                    type: 'uri',
+                    label: '🚀 立即點餐',
+                    uri: categoryUrl
+                  }
+                }
+              ]
+            }
+          };
+        });
+
+        await client.replyMessage(event.replyToken, {
+          type: 'flex',
+          altText: '美味選單分類展示中',
+          contents: {
+            type: 'carousel',
+            contents: bubbles
+          }
+        });
+      } catch (err) {
+        console.error('Error handling category menu:', err);
+      }
+      return;
+    }
+
+    if (text === '查詢' || text === '訂單' || text === 'order') {
+      try {
+        const customer = await prisma.customer.findUnique({
+          where: { lineUserId: userId }
+        });
+
+        if (!customer) {
+          await client.replyMessage(event.replyToken, {
+            type: 'flex',
+            altText: '請先綁定會員帳號',
+            contents: {
+              type: 'bubble',
+              body: {
+                type: 'box',
+                layout: 'vertical',
+                spacing: 'md',
+                contents: [
+                  {
+                    type: 'text',
+                    text: '👤 尚未綁定會員帳號',
+                    weight: 'bold',
+                    size: 'md',
+                    color: '#ea580c'
+                  },
+                  {
+                    type: 'text',
+                    text: '若要查詢您的歷史訂單或當前外送進度，請先點擊下方連結快速綁定您的 LINE 帳號！',
+                    size: 'sm',
+                    color: '#444444',
+                    wrap: true
+                  }
+                ]
+              },
+              footer: {
+                type: 'box',
+                layout: 'vertical',
+                contents: [
+                  {
+                    type: 'button',
+                    style: 'primary',
+                    color: '#f97316',
+                    action: {
+                      type: 'uri',
+                      label: '🔗 立即綁定領紅利',
+                      uri: liffId ? `${liffUrl}?redirect=/account` : `${storefrontUrl}/account`
+                    }
+                  }
+                ]
+              }
+            }
+          });
+          return;
+        }
+
+        const activeOrder = await prisma.order.findFirst({
+          where: {
+            customerId: customer.id,
+            NOT: { status: { in: ['DELIVERED', 'CANCELLED', 'PICKED_UP'] } }
+          },
+          orderBy: { createdAt: 'desc' },
+          include: { items: true, location: true }
+        });
+
+        if (!activeOrder) {
+          await client.replyMessage(event.replyToken, {
+            type: 'flex',
+            altText: '目前沒有活躍訂單',
+            contents: {
+              type: 'bubble',
+              body: {
+                type: 'box',
+                layout: 'vertical',
+                spacing: 'md',
+                contents: [
+                  {
+                    type: 'text',
+                    text: '🔍 查無進行中的訂單',
+                    weight: 'bold',
+                    size: 'md'
+                  },
+                  {
+                    type: 'text',
+                    text: '您目前沒有正在製作或外送中的訂單。快去逛逛我們的美味選單吧！',
+                    size: 'sm',
+                    color: '#666666',
+                    wrap: true
+                  }
+                ]
+              },
+              footer: {
+                type: 'box',
+                layout: 'vertical',
+                contents: [
+                  {
+                    type: 'button',
+                    style: 'primary',
+                    color: '#f97316',
+                    action: {
+                      type: 'uri',
+                      label: '🚀 開始點餐',
+                      uri: liffUrl
+                    }
+                  }
+                ]
+              }
+            }
+          });
+          return;
+        }
+
+        const statusMap: Record<string, { text: string; icon: string }> = {
+          PENDING: { text: '待處理', icon: '📝' },
+          CONFIRMED: { text: '已確認', icon: '✅' },
+          PREPARING: { text: '製作中', icon: '👨‍🍳' },
+          READY: { text: '可取餐', icon: '🎉' },
+          OUT_FOR_DELIVERY: { text: '外送中', icon: '🛵' },
+          DELIVERED: { text: '已送達', icon: '🍽️' },
+          PICKED_UP: { text: '已取餐', icon: '🍽️' },
+          CANCELLED: { text: '已取消', icon: '❌' },
+        };
+
+        const statusInfo = statusMap[activeOrder.status] || { text: activeOrder.status, icon: '🔄' };
+        
+        const itemLines = activeOrder.items.slice(0, 3).map(item => ({
+          type: 'text',
+          text: `• ${item.quantity}x ${item.name}`,
+          size: 'xs',
+          color: '#555555'
+        }));
+
+        if (activeOrder.items.length > 3) {
+          itemLines.push({
+            type: 'text',
+            text: `• 以及其他 ${activeOrder.items.length - 3} 項餐點...`,
+            size: 'xs',
+            color: '#888888'
+          });
+        }
+
+        const orderTrackingUrl = liffId 
+          ? `${liffUrl}?redirect=/orders/${activeOrder.id}` 
+          : `${storefrontUrl}/orders/${activeOrder.id}`;
+
+        await client.replyMessage(event.replyToken, {
+          type: 'flex',
+          altText: `您的訂單 #${activeOrder.orderNumber} 狀態追蹤`,
+          contents: {
+            type: 'bubble',
+            header: {
+              type: 'box',
+              layout: 'vertical',
+              backgroundColor: '#f97316',
+              contents: [
+                {
+                  type: 'text',
+                  text: '訂單狀態追蹤 📦',
+                  color: '#ffffff',
+                  weight: 'bold',
+                  size: 'md'
+                }
+              ]
+            },
+            body: {
+              type: 'box',
+              layout: 'vertical',
+              spacing: 'md',
+              contents: [
+                {
+                  type: 'box',
+                  layout: 'horizontal',
+                  contents: [
+                    {
+                      type: 'text',
+                      text: '訂單編號',
+                      size: 'sm',
+                      color: '#888888'
+                    },
+                    {
+                      type: 'text',
+                      text: `#${activeOrder.orderNumber}`,
+                      size: 'sm',
+                      align: 'end',
+                      weight: 'bold'
+                    }
+                  ]
+                },
+                {
+                  type: 'box',
+                  layout: 'horizontal',
+                  contents: [
+                    {
+                      type: 'text',
+                      text: '當前狀態',
+                      size: 'sm',
+                      color: '#888888'
+                    },
+                    {
+                      type: 'text',
+                      text: `${statusInfo.icon} ${statusInfo.text}`,
+                      size: 'sm',
+                      align: 'end',
+                      weight: 'bold',
+                      color: '#ea580c'
+                    }
+                  ]
+                },
+                {
+                  type: 'separator',
+                  margin: 'md'
+                },
+                {
+                  type: 'box',
+                  layout: 'vertical',
+                  spacing: 'xs',
+                  contents: [
+                    {
+                      type: 'text',
+                      text: '餐點明細：',
+                      size: 'xs',
+                      color: '#aaaaaa',
+                      weight: 'bold'
+                    },
+                    ...itemLines
+                  ]
+                },
+                {
+                  type: 'separator',
+                  margin: 'md'
+                },
+                {
+                  type: 'box',
+                  layout: 'horizontal',
+                  contents: [
+                    {
+                      type: 'text',
+                      text: '結帳總額',
+                      size: 'sm',
+                      weight: 'bold'
+                    },
+                    {
+                      type: 'text',
+                      text: `$${activeOrder.total.toFixed(2)}`,
+                      size: 'sm',
+                      align: 'end',
+                      weight: 'bold'
+                    }
+                  ]
+                }
+              ]
+            },
+            footer: {
+              type: 'box',
+              layout: 'vertical',
+              contents: [
+                {
+                  type: 'button',
+                  style: 'primary',
+                  color: '#f97316',
+                  action: {
+                    type: 'uri',
+                    label: '📦 前往網頁即時追蹤',
+                    uri: orderTrackingUrl
+                  }
+                }
+              ]
+            }
+          }
+        });
+      } catch (err) {
+        console.error('Error handling order tracking:', err);
+      }
+      return;
     }
   }
 }
