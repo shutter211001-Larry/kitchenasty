@@ -9,6 +9,7 @@ interface CategoryData {
   slug: string;
   description: string;
   descriptionTranslations: Record<string, string>;
+  image: string;
   sortOrder: number;
   isActive: boolean;
   parentId: string;
@@ -47,6 +48,7 @@ const emptyCategory: CategoryData = {
   slug: '',
   description: '',
   descriptionTranslations: {},
+  image: '',
   sortOrder: 0,
   isActive: true,
   parentId: '',
@@ -93,6 +95,7 @@ export default function CategoryForm() {
           slug: cat.slug,
           description: cat.description || '',
           descriptionTranslations: cat.descriptionTranslations || {},
+          image: cat.image || '',
           sortOrder: cat.sortOrder,
           isActive: cat.isActive,
           parentId: cat.parentId || '',
@@ -189,6 +192,42 @@ export default function CategoryForm() {
                 rows={2}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
               />
+            </div>
+            {/* Image URL — shown in LINE chatbot carousel */}
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                🖼️ 分類圖片網址 (Image URL)
+                <span className="ml-2 text-xs text-orange-500 font-normal">· 顯示於 LINE 點餐選單卡片</span>
+              </label>
+              <div className="flex gap-3 items-start">
+                <div className="flex-1">
+                  <input
+                    type="url"
+                    value={form.image}
+                    onChange={(e) => updateField('image', e.target.value)}
+                    placeholder="https://example.com/pizza.jpg"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                  />
+                  <p className="text-xs text-gray-400 mt-1">建議尺寸：800×520 px（4:3 橫幅），JPG 或 PNG</p>
+                </div>
+                {form.image && (
+                  <div className="relative shrink-0">
+                    <img
+                      src={form.image}
+                      alt="分類預覽"
+                      className="w-24 h-16 object-cover rounded-lg border border-gray-200"
+                      onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => updateField('image', '')}
+                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">父分類 (Parent Category)</label>
