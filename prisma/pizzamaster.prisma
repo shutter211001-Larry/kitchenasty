@@ -1,6 +1,6 @@
 generator client {
   provider      = "prisma-client-js"
-  output        = "../packages/server/src/generated/pizzamaster-client"
+  output        = "../packages/server/node_modules/@pizzamaster/client"
   binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 

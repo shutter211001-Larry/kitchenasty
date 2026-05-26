@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import { PrismaClient } from '../../generated/pizzamaster-client/index.js';
+import { PrismaClient } from '@pizzamaster/client';
 
 const connectionString = process.env.PIZZAMASTER_DATABASE_URL || process.env.DATABASE_URL;
 

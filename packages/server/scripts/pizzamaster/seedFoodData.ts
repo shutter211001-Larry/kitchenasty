@@ -2,7 +2,7 @@ import 'dotenv/config';
 import fs from 'fs';
 import path from 'path';
 import { parse } from 'csv-parse';
-import { PrismaClient } from '../../generated/pizzamaster-client/index.js';
+import { PrismaClient } from '@pizzamaster/client';
 import { fileURLToPath } from 'url';
 
 const connectionString = process.env.PIZZAMASTER_DATABASE_URL || process.env.DATABASE_URL;
