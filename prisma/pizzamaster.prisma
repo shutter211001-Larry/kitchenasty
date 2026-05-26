@@ -1,0 +1,226 @@
+generator client {
+  provider      = "prisma-client-js"
+  output        = "../packages/server/src/generated/pizzamaster-client"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("PIZZAMASTER_DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  STAFF
+}
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  name          String?
+  passwordHash  String
+  role          Role     @default(STAFF)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Ingredient {
+  id           String   @id @default(cuid())
+  name         String
+  category     String?
+  unit         String   // g, ml, pcs, etc.
+  safetyStock  Float?   @default(0)
+  currentStock Float    @default(0)
+  
+  // Nutrition info (per 100g or 100ml)
+  calories      Float?
+  protein       Float?
+  fat           Float?
+  carbohydrates Float?
+  sodium        Float?
+  saturatedFat  Float?
+  transFat      Float?
+  sugar         Float?
+  
+  isAllergen    Boolean  @default(false)
+  allergenType  String?  // e.g., "Gluten", "Dairy"
+  
+  prices          SupplierPrice[]
+  recipeItems     RecipeItem[]
+  inventoryLogs   InventoryLog[]
+  unitConversions UnitConversion[]
+  allergens       Allergen[]
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Allergen {
+  id          String       @id @default(cuid())
+  name        String       @unique
+  ingredients Ingredient[]
+  createdAt   DateTime     @default(now())
+}
+
+model Supplier {
+  id            String   @id @default(cuid())
+  name          String
+  contactPerson String?
+  phone         String?
+  address       String?
+  prices        SupplierPrice[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model SupplierPrice {
+  id           String      @id @default(cuid())
+  ingredient   Ingredient  @relation(fields: [ingredientId], references: [id])
+  ingredientId String
+  supplier     Supplier?   @relation(fields: [supplierId], references: [id])
+  supplierId   String?
+  packageSize  Float      // e.g., 25 (kg)
+  packageUnit  String     // e.g., kg, L
+  price        Float      // e.g., 800
+  unitPrice    Float      // calculated price per base unit (g/ml)
+  isDefault    Boolean    @default(false)
+  
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+}
+
+model Recipe {
+  id          String       @id @default(cuid())
+  name        String
+  description String?
+  yieldAmount Float        @default(1)
+  yieldUnit   String       @default("份")
+  isSubRecipe Boolean      @default(false)
+  isProduct   Boolean      @default(true) // 新增：是否為商品（有此屬性才會出現在綁定食譜、標籤列印中）
+  bakingLossRate Float?    @default(0)    // 新增：烤焙損耗率 (%)
+  
+  items       RecipeItem[]
+  steps       RecipeStep[]
+  usedInItems RecipeItem[] @relation("SubRecipeRelation")
+  
+  labelConfig Json?
+  
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model RecipeItem {
+  id            String      @id @default(cuid())
+  recipe        Recipe?     @relation(fields: [recipeId], references: [id])
+  recipeId      String?
+  
+  step          RecipeStep? @relation("StepItems", fields: [stepId], references: [id])
+  stepId        String?
+  
+  sourceStep    RecipeStep? @relation("SourceStepItems", fields: [sourceStepId], references: [id])
+  sourceStepId  String?
+  
+  ingredient    Ingredient? @relation(fields: [ingredientId], references: [id])
+  ingredientId  String?
+  
+  subRecipe     Recipe?     @relation("SubRecipeRelation", fields: [subRecipeId], references: [id])
+  subRecipeId   String?
+  
+  quantity      Float
+  portionQuantity Float? // 新增：若引用子食譜，可使用份數（如 1 份）
+  unit          String       @default("g") // 新增：主數量單位
+  parameters    ItemParameter[]
+  order         Int          @default(0) // 新增：用於全球排序
+  
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+}
+
+model RecipeStep {
+  id          String   @id @default(cuid())
+  recipe      Recipe   @relation(fields: [recipeId], references: [id])
+  recipeId    String
+  action      String   // 煎、煮、烤、炸、攪拌、混合、倒入、靜置 等
+  description String?
+  order       Int
+  parameters  StepParameter[]
+  items       RecipeItem[] @relation("StepItems")
+  sourceItems RecipeItem[] @relation("SourceStepItems")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model StepParameter {
+  id          String   @id @default(uuid())
+  step        RecipeStep @relation(fields: [stepId], references: [id], onDelete: Cascade)
+  stepId      String
+  value       Float
+  unit        String
+}
+
+model ItemParameter {
+  id          String     @id @default(uuid())
+  item        RecipeItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  itemId      String
+  value       Float
+  unit        String
+}
+
+model InventoryLog {
+  id           String     @id @default(cuid())
+  ingredient   Ingredient @relation(fields: [ingredientId], references: [id])
+  ingredientId String
+  type         String     // IN, OUT, ADJUST
+  amount       Float
+  reason       String?
+  createdAt    DateTime   @default(now())
+}
+
+model ActionGroup {
+  id                String      @id @default(cuid())
+  name              String      @unique
+  icon              String?
+  actions           Action[]
+  defaultUnitGroups UnitGroup[] @relation("ActionGroupDefaultUnits")
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+}
+
+model Action {
+  id                String      @id @default(cuid())
+  name              String
+  groupId           String
+  group             ActionGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  defaultUnitGroups UnitGroup[] @relation("ActionDefaultUnits")
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+}
+
+model UnitGroup {
+  id                     String        @id @default(cuid())
+  name                   String        @unique
+  units                  Unit[]
+  defaultForActionGroups ActionGroup[] @relation("ActionGroupDefaultUnits")
+  defaultForActions      Action[]      @relation("ActionDefaultUnits")
+  createdAt              DateTime      @default(now())
+  updatedAt              DateTime      @updatedAt
+}
+
+model Unit {
+  id        String    @id @default(cuid())
+  name      String
+  groupId   String
+  group     UnitGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model UnitConversion {
+  id           String     @id @default(cuid())
+  ingredient   Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Cascade)
+  ingredientId String
+  fromUnit     String     // 來源單位，例如 "杯", "大匙"
+  toUnit       String     // 目標單位，例如 "ml", "g"（應對應食材的 unit 欄位）
+  multiplier   Float      // 換算倍率，例如 1 杯 = 240 ml → multiplier = 240
+  createdAt    DateTime   @default(now())
+}
