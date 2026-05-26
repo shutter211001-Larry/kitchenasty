@@ -5,7 +5,7 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 COPY packages/docs/package.json packages/docs/
 
-RUN npm ci -w packages/docs
+RUN npm install -w packages/docs
 
 COPY packages/docs/ packages/docs/
 RUN npm run build -w packages/docs
