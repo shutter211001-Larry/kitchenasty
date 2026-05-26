@@ -1,14 +1,14 @@
 import 'dotenv/config';
-import { PrismaClient } from '@pizzamaster/client';
+import { PrismaClient } from '@shutter-erp/client';
 
-const connectionString = process.env.PIZZAMASTER_DATABASE_URL || process.env.DATABASE_URL;
+const connectionString = process.env.SHUTTER_ERP_DATABASE_URL || process.env.DATABASE_URL;
 
 const globalForPrisma = globalThis as unknown as {
-  pizzamasterPrisma: PrismaClient | undefined;
+  shutterErpPrisma: PrismaClient | undefined;
 };
 
 export const prisma =
-  globalForPrisma.pizzamasterPrisma ??
+  globalForPrisma.shutterErpPrisma ??
   new PrismaClient({
     datasources: {
       db: {
@@ -19,7 +19,7 @@ export const prisma =
   });
 
 if (process.env.NODE_ENV !== 'production') {
-  globalForPrisma.pizzamasterPrisma = prisma;
+  globalForPrisma.shutterErpPrisma = prisma;
 }
 
 export default prisma;

@@ -26,7 +26,7 @@ import customerRoutes from './routes/customer.routes.js';
 import developerRoutes from './routes/developer.routes.js';
 import lineRoutes from './routes/line.routes.js';
 import integrationRoutes from './routes/integration.routes.js';
-import pizzamasterRouter from './pizzamaster/index.js';
+import shutterErpRouter from './shutter-erp/index.js';
 import { openApiSpec } from './lib/openapi.js';
 import { initPassport } from './lib/passport.js';
 import passport from 'passport';
@@ -146,7 +146,7 @@ export function createApp() {
   app.use('/api/developer', developerRoutes);
   app.use('/api/line', lineRoutes);
   app.use('/api/integration', integrationRoutes);
-  app.use('/pizzamaster', pizzamasterRouter);
+  app.use('/shutter-erp', shutterErpRouter);
 
   // 404 handler
   app.use((_req, res) => {

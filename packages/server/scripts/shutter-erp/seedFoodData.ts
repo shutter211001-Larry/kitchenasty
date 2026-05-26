@@ -2,10 +2,10 @@ import 'dotenv/config';
 import fs from 'fs';
 import path from 'path';
 import { parse } from 'csv-parse';
-import { PrismaClient } from '@pizzamaster/client';
+import { PrismaClient } from '@shutter-erp/client';
 import { fileURLToPath } from 'url';
 
-const connectionString = process.env.PIZZAMASTER_DATABASE_URL || process.env.DATABASE_URL;
+const connectionString = process.env.SHUTTER_ERP_DATABASE_URL || process.env.DATABASE_URL;
 const prisma = new PrismaClient({
   datasources: {
     db: {

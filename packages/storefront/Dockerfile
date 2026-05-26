@@ -7,6 +7,7 @@ COPY packages/shared/package.json packages/shared/
 COPY packages/server/package.json packages/server/
 COPY packages/admin/package.json packages/admin/
 COPY packages/storefront/package.json packages/storefront/
+COPY packages/shutter-erp-frontend/package.json packages/shutter-erp-frontend/
 COPY tsconfig.json ./
 
 RUN npm ci

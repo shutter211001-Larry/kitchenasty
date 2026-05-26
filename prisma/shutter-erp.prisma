@@ -1,12 +1,12 @@
 generator client {
   provider      = "prisma-client-js"
-  output        = "../packages/server/node_modules/@pizzamaster/client"
+  output        = "../packages/server/node_modules/@shutter-erp/client"
   binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("PIZZAMASTER_DATABASE_URL")
+  url      = env("SHUTTER_ERP_DATABASE_URL")
 }
 
 enum Role {

@@ -11,8 +11,8 @@ axios.interceptors.request.use((config) => {
     if (backendUrl) {
       config.url = config.url.replace('http://localhost:3000', backendUrl);
     } else if (import.meta.env.PROD) {
-      // In same-domain production, replace http://localhost:3000 with relative pizzamaster prefix path!
-      config.url = config.url.replace('http://localhost:3000', '/pizzamaster');
+      // In same-domain production, replace http://localhost:3000 with relative shutter-erp prefix path!
+      config.url = config.url.replace('http://localhost:3000', '/shutter-erp');
     }
   }
   return config;

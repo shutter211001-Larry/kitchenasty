@@ -15,18 +15,15 @@ RUN npm ci
 COPY packages/shared/ packages/shared/
 RUN npm run build -w packages/shared
 
-COPY packages/admin/ packages/admin/
-
-ARG VITE_BASE_PATH=/
+COPY packages/shutter-erp-frontend/ packages/shutter-erp-frontend/
 ARG VITE_API_URL
-ENV VITE_BASE_PATH=${VITE_BASE_PATH}
 ENV VITE_API_URL=${VITE_API_URL}
 
-RUN npm run build -w packages/admin
+RUN npm run build -w packages/shutter-erp-frontend
 
 FROM nginx:alpine
 
-COPY --from=builder /app/packages/admin/dist/ /usr/share/nginx/html/
-COPY packages/admin/nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=builder /app/packages/shutter-erp-frontend/dist/ /usr/share/nginx/html/
+COPY packages/shutter-erp-frontend/nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
