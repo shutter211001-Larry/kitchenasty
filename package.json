@@ -30,6 +30,10 @@
   "dependencies": {
     "@prisma/client": "^5.22.0"
   },
+  "overrides": {
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0"
+  },
   "optionalDependencies": {
     "@rollup/rollup-linux-x64-musl": "4.57.1",
     "@rollup/rollup-linux-x64-gnu": "4.57.1",
