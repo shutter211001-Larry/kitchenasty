@@ -225,7 +225,13 @@
     "paypalSub": "Pagar con cuenta de PayPal",
     "asap": "Lo antes posible",
     "guestCheckout": "Pago como invitado",
-    "scheduled": "Programado"
+    "scheduled": "Programado",
+    "frozenDelivery": "Envío Congelado",
+    "frozenDeliveryAddress": "Dirección de envío congelado",
+    "addressAutoFilled": "✓ Dirección de miembro aplicada automáticamente",
+    "addressModified": "Dirección de envío modificada (Original: {{address}})",
+    "addressRequiredTip": "⚠️ Por favor, ingrese su dirección para el envío congelado",
+    "addressEntered": "Dirección de envío ingresada (se asociará con este pedido)"
   },
   "orderConfirmation": {
     "title": "¡Pedido Realizado!",

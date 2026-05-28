@@ -224,7 +224,13 @@
     "creditCardSub": "クレジットカードで安全に決済",
     "paypalSub": "PayPal アカウントで決済",
     "asap": "最短お届け",
-    "scheduled": "予約注文"
+    "scheduled": "予約注文",
+    "frozenDelivery": "冷凍宅配",
+    "frozenDeliveryAddress": "冷凍宅配お届け先住所",
+    "addressAutoFilled": "✓ 会員住所が自動的に適用されました",
+    "addressModified": "お届け先住所が変更されました (元の住所: {{address}})",
+    "addressRequiredTip": "⚠️ 冷凍宅配の発送先住所を入力してください",
+    "addressEntered": "お届け先住所が入力されました (この注文に関連付けられます)"
   },
   "orderConfirmation": {
     "title": "注文が完了しました！",

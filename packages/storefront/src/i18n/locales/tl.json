@@ -225,7 +225,13 @@
     "paypalSub": "Magbayad gamit ang PayPal account",
     "asap": "Sa lalong madaling panahon",
     "guestCheckout": "Guest Checkout",
-    "scheduled": "Naka-schedule"
+    "scheduled": "Naka-schedule",
+    "frozenDelivery": "Frozen na Delivery",
+    "frozenDeliveryAddress": "Address para sa Frozen Delivery",
+    "addressAutoFilled": "✓ Awtomatikong inilapat ang address ng miyembro",
+    "addressModified": "Binago ang address ng pagpapadala (Orihinal: {{address}})",
+    "addressRequiredTip": "⚠️ Mangyaring ilagay ang iyong address para sa frozen delivery",
+    "addressEntered": "Nailagay na ang address ng pagpapadala (iuugnay sa order na ito)"
   },
   "orderConfirmation": {
     "title": "Nai-place na ang Order!",

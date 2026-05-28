@@ -225,7 +225,13 @@
     "paypalSub": "Paga con il tuo account PayPal",
     "asap": "Il prima possibile",
     "guestCheckout": "Pagamento ospite",
-    "scheduled": "Programmato"
+    "scheduled": "Programmato",
+    "frozenDelivery": "Spedizione Surgelati",
+    "frozenDeliveryAddress": "Indirizzo di spedizione surgelati",
+    "addressAutoFilled": "✓ Indirizzo membro applicato automaticamente",
+    "addressModified": "Indirizzo di spedizione modificato (Originale: {{address}})",
+    "addressRequiredTip": "⚠️ Inserisci l'indirizzo di spedizione per i surgelati",
+    "addressEntered": "Indirizzo di spedizione inserito (sarà collegato a questo ordine)"
   },
   "orderConfirmation": {
     "title": "Ordine Effettuato!",

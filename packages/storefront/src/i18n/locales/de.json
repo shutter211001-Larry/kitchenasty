@@ -225,7 +225,13 @@
     "paypalSub": "Mit PayPal-Konto bezahlen",
     "asap": "Schnellstmöglich",
     "guestCheckout": "Gast-Checkout",
-    "scheduled": "Geplant"
+    "scheduled": "Geplant",
+    "frozenDelivery": "Gefrorene Lieferung",
+    "frozenDeliveryAddress": "Lieferadresse für gefrorene Ware",
+    "addressAutoFilled": "✓ Mitgliedsadresse automatisch angewendet",
+    "addressModified": "Lieferadresse geändert (Original: {{address}})",
+    "addressRequiredTip": "⚠️ Bitte Lieferadresse für Gefriergut-Versand angeben",
+    "addressEntered": "Lieferadresse eingegeben (wird mit dieser Bestellung verknüpft)"
   },
   "orderConfirmation": {
     "title": "Bestellung Aufgegeben!",

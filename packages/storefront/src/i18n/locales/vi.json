@@ -225,7 +225,13 @@
     "paypalSub": "Thanh toán bằng tài khoản PayPal",
     "asap": "Càng sớm càng tốt",
     "guestCheckout": "Thanh toán khách",
-    "scheduled": "Hẹn giờ"
+    "scheduled": "Hẹn giờ",
+    "frozenDelivery": "Giao hàng đông lạnh",
+    "frozenDeliveryAddress": "Địa chỉ giao hàng đông lạnh",
+    "addressAutoFilled": "✓ Tự động áp dụng địa chỉ thành viên",
+    "addressModified": "Đã thay đổi địa chỉ giao hàng (Gốc: {{address}})",
+    "addressRequiredTip": "⚠️ Vui lòng nhập địa chỉ để giao hàng đông lạnh",
+    "addressEntered": "Đã nhập địa chỉ giao hàng (Sẽ được liên kết với đơn hàng này)"
   },
   "orderConfirmation": {
     "title": "Đặt hàng thành công!",

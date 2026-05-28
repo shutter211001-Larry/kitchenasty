@@ -225,7 +225,13 @@
     "paypalSub": "Pague com a sua conta PayPal",
     "asap": "O mais rápido possível",
     "guestCheckout": "Pagamento visitante",
-    "scheduled": "Agendado"
+    "scheduled": "Agendado",
+    "frozenDelivery": "Entrega Congelada",
+    "frozenDeliveryAddress": "Endereço de entrega congelada",
+    "addressAutoFilled": "✓ Endereço de membro aplicado automaticamente",
+    "addressModified": "Endereço de entrega modificado (Original: {{address}})",
+    "addressRequiredTip": "⚠️ Por favor, insira o endereço de entrega para envio congelado",
+    "addressEntered": "Endereço de entrega inserido (será associado a este pedido)"
   },
   "orderConfirmation": {
     "title": "Pedido Realizado!",

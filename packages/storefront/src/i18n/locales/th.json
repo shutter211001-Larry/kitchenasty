@@ -225,7 +225,13 @@
     "paypalSub": "ชำระเงินด้วยบัญชี PayPal",
     "asap": "เร็วที่สุด",
     "guestCheckout": "ชำระเงินในฐานะแขก",
-    "scheduled": "เลือกเวลา"
+    "scheduled": "เลือกเวลา",
+    "frozenDelivery": "จัดส่งแบบแช่แข็ง",
+    "frozenDeliveryAddress": "ที่อยู่สำหรับจัดส่งแบบแช่แข็ง",
+    "addressAutoFilled": "✓ ใส่ที่อยู่สมาชิกโดยอัตโนมัติ",
+    "addressModified": "แก้ไขที่อยู่จัดส่ง (ที่อยู่เดิม: {{address}})",
+    "addressRequiredTip": "⚠️ กรุณากรอกที่อยู่จัดส่งสำหรับการจัดส่งแบบแช่แข็ง",
+    "addressEntered": "กรอกที่อยู่จัดส่งแล้ว (จะเชื่อมโยงกับคำสั่งซื้อนี้)"
   },
   "orderConfirmation": {
     "title": "สั่งอาหารสำเร็จ!",

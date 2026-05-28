@@ -225,7 +225,13 @@
     "paypalSub": "Bayar dengan akun PayPal",
     "asap": "Sesegera Mungkin",
     "guestCheckout": "Checkout Tamu",
-    "scheduled": "Terjadwal"
+    "scheduled": "Terjadwal",
+    "frozenDelivery": "Pengiriman Beku",
+    "frozenDeliveryAddress": "Alamat Pengiriman Beku",
+    "addressAutoFilled": "✓ Alamat anggota otomatis diterapkan",
+    "addressModified": "Alamat pengiriman diubah (Asli: {{address}})",
+    "addressRequiredTip": "⚠️ Harap isi alamat pengiriman untuk pengiriman beku",
+    "addressEntered": "Alamat pengiriman dimasukkan (akan dikaitkan dengan pesanan ini)"
   },
   "orderConfirmation": {
     "title": "Pesanan Berhasil!",

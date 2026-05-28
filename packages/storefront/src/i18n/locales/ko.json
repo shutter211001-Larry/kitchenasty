@@ -224,7 +224,13 @@
     "creditCardSub": "신용카드로 안전하게 결제",
     "paypalSub": "PayPal 계정으로 결제",
     "asap": "최대한 빨리",
-    "scheduled": "예약 주문"
+    "scheduled": "예약 주문",
+    "frozenDelivery": "냉동 택배",
+    "frozenDeliveryAddress": "냉동 택배 배송지 주소",
+    "addressAutoFilled": "✓ 회원 주소가 자동으로 적용되었습니다",
+    "addressModified": "배송지 주소가 수정되었습니다 (기본 주소: {{address}})",
+    "addressRequiredTip": "⚠️ 냉동 택배 배송을 위해 배송지 주소를 입력해 주세요",
+    "addressEntered": "배송지 주소가 입력되었습니다 (이 주문에 연결됩니다)"
   },
   "orderConfirmation": {
     "title": "주문 완료!",
