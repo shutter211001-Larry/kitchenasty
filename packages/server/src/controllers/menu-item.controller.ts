@@ -118,7 +118,36 @@ export async function getMenuItem(req: Request<{ id: string }>, res: Response): 
     return;
   }
 
-  res.json({ success: true, data: item });
+  // Fetch recipe mapping from ERP if available
+  let recipeId = null;
+  let recipeName = null;
+  try {
+    const url = process.env.SHUTTER_ERP_API_URL || 'http://localhost:3000';
+    const response = await fetch(`${url}/api/integration/mappings`, {
+      headers: {
+        'x-integration-key': process.env.INTEGRATION_KEY || 'pizzamaster-integration-secret-key'
+      }
+    });
+    if (response.ok) {
+      const resData = await response.json();
+      const mapping = (resData.data || []).find((m: any) => m.menuItemId === id);
+      if (mapping) {
+        recipeId = mapping.recipeId;
+        recipeName = mapping.recipeName;
+      }
+    }
+  } catch (err) {
+    console.error(`[ERP Integration] Error fetching mapping for menu item ${id}:`, err);
+  }
+
+  res.json({
+    success: true,
+    data: {
+      ...item,
+      recipeId,
+      recipeName,
+    },
+  });
 }
 
 export async function createMenuItem(req: Request, res: Response): Promise<void> {
@@ -288,6 +317,50 @@ export async function updateMenuItem(req: Request<{ id: string }>, res: Response
   });
 
   auditLog(req, { action: 'update', entity: 'MenuItem', entityId: id, details: data });
+
+  // Update or delete R&D recipe binding in Shutter ERP if recipeId is specified
+  if (recipeId !== undefined) {
+    try {
+      const url = process.env.SHUTTER_ERP_API_URL || 'http://localhost:3000';
+      if (recipeId) {
+        // Save/update mapping
+        const response = await fetch(`${url}/api/integration/mappings`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-integration-key': process.env.INTEGRATION_KEY || 'pizzamaster-integration-secret-key'
+          },
+          body: JSON.stringify({
+            menuItemId: id,
+            recipeId: recipeId,
+            menuItemName: item.name,
+            menuItemPrice: item.price,
+            recipeName: recipeName || item.name
+          })
+        });
+        if (!response.ok) {
+          console.error(`[ERP Integration] Failed to update link of menu item ${id} to recipe. HTTP ${response.status}`);
+        } else {
+          console.log(`[ERP Integration] Successfully updated link of menu item ${item.name} to recipe ${recipeName}`);
+        }
+      } else {
+        // Delete/unbind mapping
+        const response = await fetch(`${url}/api/integration/mappings/${id}`, {
+          method: 'DELETE',
+          headers: {
+            'x-integration-key': process.env.INTEGRATION_KEY || 'pizzamaster-integration-secret-key'
+          }
+        });
+        if (!response.ok) {
+          console.error(`[ERP Integration] Failed to delete link of menu item ${id}. HTTP ${response.status}`);
+        } else {
+          console.log(`[ERP Integration] Successfully deleted link of menu item ${item.name}`);
+        }
+      }
+    } catch (err) {
+      console.error(`[ERP Integration] Error updating recipe link:`, err);
+    }
+  }
 
   res.json({ success: true, data: item });
 }
