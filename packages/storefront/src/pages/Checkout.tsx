@@ -27,6 +27,7 @@ export default function Checkout() {
   const paymentSettings = settings.paymentSettings;
 
   const [orderType, setOrderType] = useState<OrderType>('pickup');
+  const [lastCommonOrderType, setLastCommonOrderType] = useState<'delivery' | 'pickup'>('pickup');
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | null>(null);
   const [showPaymentError, setShowPaymentError] = useState(false);
   const [address, setAddress] = useState({ line1: '', line2: '', city: '', state: '', zip: '' });
@@ -99,8 +100,7 @@ export default function Checkout() {
   const availableTypes = [
     orderSettings?.deliveryEnabled && { id: 'delivery', label: t('checkout.delivery') },
     orderSettings?.pickupEnabled && { id: 'pickup', label: t('checkout.pickup') },
-    showFrozenDeliveryOption && { id: 'frozen_delivery', label: t('checkout.frozenDelivery') || '冷凍宅配' },
-  ].filter(Boolean) as { id: OrderType; label: string }[];
+  ].filter(Boolean) as { id: 'delivery' | 'pickup'; label: string }[];
 
   const frozenDeliveryFee = orderSettings?.frozenDeliveryFee ?? 0;
   const currentDeliveryFee = orderType === 'delivery' 
@@ -115,8 +115,10 @@ export default function Checkout() {
     if (orderSettings) {
       if (orderSettings.deliveryEnabled && !orderSettings.pickupEnabled) {
         setOrderType('delivery');
+        setLastCommonOrderType('delivery');
       } else {
         setOrderType('pickup');
+        setLastCommonOrderType('pickup');
       }
     }
   }, [orderSettings]);
@@ -423,7 +425,13 @@ export default function Checkout() {
                   <button
                     key={type.id}
                     type="button"
-                    onClick={() => setOrderType(type.id)}
+                    onClick={() => {
+                      setOrderType(type.id);
+                      setLastCommonOrderType(type.id);
+                      if (orderType === 'frozen_delivery') {
+                        setScheduledAt('');
+                      }
+                    }}
                     className={`flex-1 py-3 rounded-lg font-medium text-sm border-2 transition-colors ${
                       orderType === type.id
                         ? 'border-primary-600 bg-primary-50 text-primary-700'
@@ -515,21 +523,24 @@ export default function Checkout() {
             </div>
           )}
 
-          {/* Schedule */}
-          {orderSettings?.enableFutureOrdering && (
+          {/* Schedule / Order Method */}
+          {(orderSettings?.enableFutureOrdering || showFrozenDeliveryOption) && (
             <div className="surface-card rounded-xl shadow-sm border p-6">
               <h2 className="text-lg font-semibold text-main mb-4">
-                {orderType === 'delivery' ? t('checkout.deliveryTime') || '選擇送達時間' : t('checkout.scheduling')}
+                {lastCommonOrderType === 'delivery' ? t('checkout.deliveryTime') : t('checkout.scheduling')}
               </h2>
               <div className="space-y-4">
-                <div className="flex gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                   <button
                     type="button"
                     disabled={isClosedNow}
-                    onClick={() => setScheduledAt('')}
-                    className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium border-2 transition-all ${
-                      !scheduledAt && !isClosedNow
-                        ? 'border-primary-600 bg-primary-50 text-primary-700'
+                    onClick={() => {
+                      setOrderType(lastCommonOrderType);
+                      setScheduledAt('');
+                    }}
+                    className={`py-2 px-3 rounded-lg text-sm font-medium border-2 transition-all ${
+                      orderType !== 'frozen_delivery' && !scheduledAt && !isClosedNow
+                        ? 'border-primary-600 bg-primary-50 text-primary-700 font-semibold'
                         : isClosedNow
                           ? 'border-gray-100 bg-gray-50 text-gray-400 cursor-not-allowed opacity-60'
                           : 'border-input text-sub hover:border-gray-300'
@@ -537,23 +548,40 @@ export default function Checkout() {
                   >
                     {isClosedNow 
                       ? t('checkout.closed') || '今日已打烊' 
-                      : orderType === 'delivery' ? t('checkout.asap_delivery') : t('checkout.asap_pickup')}
+                      : lastCommonOrderType === 'delivery' ? t('checkout.asap_delivery') : t('checkout.asap_pickup')}
                   </button>
                   <button
                     type="button"
                     onClick={() => {
-                      if (slotsByDay.length > 0 && slotsByDay[0].slots.length > 0) {
+                      setOrderType(lastCommonOrderType);
+                      if (!scheduledAt && slotsByDay.length > 0 && slotsByDay[0].slots.length > 0) {
                         setScheduledAt(slotsByDay[0].slots[0]);
                       }
                     }}
-                    className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium border-2 transition-all ${
-                      !!scheduledAt
-                        ? 'border-primary-600 bg-primary-50 text-primary-700'
+                    className={`py-2 px-3 rounded-lg text-sm font-medium border-2 transition-all ${
+                      orderType !== 'frozen_delivery' && !!scheduledAt
+                        ? 'border-primary-600 bg-primary-50 text-primary-700 font-semibold'
                         : 'border-input text-sub hover:border-gray-300'
                     }`}
                   >
-                    {orderType === 'delivery' ? t('checkout.scheduled_delivery') : t('checkout.scheduled_pickup')}
+                    {lastCommonOrderType === 'delivery' ? t('checkout.scheduled_delivery') : t('checkout.scheduled_pickup')}
                   </button>
+                  {showFrozenDeliveryOption && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setOrderType('frozen_delivery');
+                        setScheduledAt('');
+                      }}
+                      className={`py-2 px-3 rounded-lg text-sm font-medium border-2 transition-all ${
+                        orderType === 'frozen_delivery'
+                          ? 'border-primary-600 bg-primary-50 text-primary-700 font-semibold'
+                          : 'border-input text-sub hover:border-gray-300'
+                      }`}
+                    >
+                      {t('checkout.frozenDelivery') || '冷凍宅配'}
+                    </button>
+                  )}
                 </div>
 
                 {scheduledAt && slotsByDay.length > 0 && (
