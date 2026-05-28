@@ -21,7 +21,14 @@ export default function Login({ onLogin }: Props) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       });
-      const data = await res.json();
+      
+      let data: any;
+      try {
+        data = await res.json();
+      } catch (parseErr) {
+        throw new Error('伺服器連線失敗或正在維護中，請稍後再試。 (Server connection failed)');
+      }
+
       if (!res.ok) throw new Error(data.error || 'Login failed');
       onLogin(data.data.token);
     } catch (err: any) {

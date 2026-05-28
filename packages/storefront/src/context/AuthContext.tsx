@@ -135,7 +135,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       });
-      const data = await res.json();
+      
+      let data: any;
+      try {
+        data = await res.json();
+      } catch (parseErr) {
+        throw new Error('伺服器連線失敗或正在維護中，請稍後再試。 (Server connection failed)');
+      }
+
       if (!res.ok) {
         console.error('[Auth] Login API failed:', data.error);
         throw new Error(data.error || 'Login failed');
@@ -169,7 +176,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(input),
     });
-    const data = await res.json();
+    
+    let data: any;
+    try {
+      data = await res.json();
+    } catch (parseErr) {
+      throw new Error('伺服器連線失敗或正在維護中，請稍後再試。 (Server connection failed)');
+    }
+
     if (!res.ok) throw new Error(data.error || 'Registration failed');
     localStorage.setItem('token', data.data.token);
     localStorage.removeItem('explicit_logout');

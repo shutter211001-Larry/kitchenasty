@@ -4,6 +4,20 @@ import prisma from '../lib/db.js';
 import { auditLog } from '../lib/audit.js';
 import { autoTranslateMenuItem } from '../lib/translation-helper.js';
 
+function getErpUrl(baseUrl: string): string {
+  const trimmed = baseUrl.trim();
+  let url = trimmed;
+  if (url && !url.startsWith('http://') && !url.startsWith('https://')) {
+    url = `https://${url}`;
+  }
+  if (!url.includes('/shutter-erp')) {
+    const base = url.endsWith('/') ? url.slice(0, -1) : url;
+    return `${base}/shutter-erp`;
+  }
+  return url;
+}
+
+
 const menuOptionValueSchema = z.object({
   name: z.string().min(1),
   nameTranslations: z.record(z.string().nullable()).optional(),
@@ -123,7 +137,7 @@ export async function getMenuItem(req: Request<{ id: string }>, res: Response): 
   let recipeName = null;
   try {
     const url = process.env.SHUTTER_ERP_API_URL || 'http://localhost:3000';
-    const response = await fetch(`${url}/api/integration/mappings`, {
+    const response = await fetch(`${getErpUrl(url)}/api/integration/mappings`, {
       headers: {
         'x-integration-key': process.env.INTEGRATION_KEY || 'pizzamaster-integration-secret-key'
       }
@@ -222,7 +236,7 @@ export async function createMenuItem(req: Request, res: Response): Promise<void>
   if (recipeId) {
     try {
       const url = process.env.SHUTTER_ERP_API_URL || 'http://localhost:3000';
-      const response = await fetch(`${url}/api/integration/mappings`, {
+      const response = await fetch(`${getErpUrl(url)}/api/integration/mappings`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -324,7 +338,7 @@ export async function updateMenuItem(req: Request<{ id: string }>, res: Response
       const url = process.env.SHUTTER_ERP_API_URL || 'http://localhost:3000';
       if (recipeId) {
         // Save/update mapping
-        const response = await fetch(`${url}/api/integration/mappings`, {
+        const response = await fetch(`${getErpUrl(url)}/api/integration/mappings`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -345,7 +359,7 @@ export async function updateMenuItem(req: Request<{ id: string }>, res: Response
         }
       } else {
         // Delete/unbind mapping
-        const response = await fetch(`${url}/api/integration/mappings/${id}`, {
+        const response = await fetch(`${getErpUrl(url)}/api/integration/mappings/${id}`, {
           method: 'DELETE',
           headers: {
             'x-integration-key': process.env.INTEGRATION_KEY || 'pizzamaster-integration-secret-key'
@@ -438,7 +452,7 @@ export async function deleteMenuItemImage(req: Request<{ id: string }>, res: Res
 export async function getErpProductRecipes(req: Request, res: Response): Promise<void> {
   try {
     const url = process.env.SHUTTER_ERP_API_URL || 'http://localhost:3000';
-    const response = await fetch(`${url}/api/integration/product-recipes`, {
+    const response = await fetch(`${getErpUrl(url)}/api/integration/product-recipes`, {
       headers: {
         'x-integration-key': process.env.INTEGRATION_KEY || 'pizzamaster-integration-secret-key'
       }

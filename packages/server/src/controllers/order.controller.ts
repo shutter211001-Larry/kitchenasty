@@ -1283,8 +1283,9 @@ async function notifyPizzaMasterOfDeduction(order: any) {
     if (url && !url.startsWith('http://') && !url.startsWith('https://')) {
       url = `https://${url}`;
     }
+    const erpUrl = url.includes('/shutter-erp') ? url : (url.endsWith('/') ? `${url}shutter-erp` : `${url}/shutter-erp`);
     console.log(`[ERP Integration] Notifying PizzaMaster for stock deduction. Order: #${order.orderNumber}`);
-    const response = await fetch(`${url}/api/integration/deduct-inventory`, {
+    const response = await fetch(`${erpUrl}/api/integration/deduct-inventory`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
