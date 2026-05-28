@@ -9,7 +9,7 @@ import { getFullUrl } from '../utils/url.js';
 import { getTranslated } from '../utils/translation.js';
 import { useRecentOrders } from '../hooks/useRecentOrders.js';
 
-type OrderType = 'delivery' | 'pickup';
+type OrderType = 'delivery' | 'pickup' | 'frozen_delivery';
 type PaymentMethod = 'cash' | 'stripe' | 'paypal';
 
 // Default tax rate fallback if settings not loaded
@@ -92,7 +92,22 @@ export default function Checkout() {
   let currentTaxRate = orderSettings?.taxRate ?? DEFAULT_TAX_RATE;
   if (isNaN(currentTaxRate)) currentTaxRate = 0;
   const tax = subtotal * (currentTaxRate / 100);
-  const currentDeliveryFee = orderType === 'delivery' ? deliveryFee : 0;
+  const isOnlyFrozenItems = items.length > 0 && items.every(item => item.isFrozenDelivery === true);
+  const frozenDeliveryEnabled = orderSettings?.frozenDeliveryEnabled ?? false;
+  const showFrozenDeliveryOption = isOnlyFrozenItems && frozenDeliveryEnabled;
+
+  const availableTypes = [
+    orderSettings?.deliveryEnabled && { id: 'delivery', label: t('checkout.delivery') },
+    orderSettings?.pickupEnabled && { id: 'pickup', label: t('checkout.pickup') },
+    showFrozenDeliveryOption && { id: 'frozen_delivery', label: t('checkout.frozenDelivery') || '冷凍宅配' },
+  ].filter(Boolean) as { id: OrderType; label: string }[];
+
+  const frozenDeliveryFee = orderSettings?.frozenDeliveryFee ?? 0;
+  const currentDeliveryFee = orderType === 'delivery' 
+    ? deliveryFee 
+    : orderType === 'frozen_delivery'
+      ? frozenDeliveryFee
+      : 0;
   const total = subtotal + tax + currentDeliveryFee - loyaltyDiscount;
 
   // Set defaults based on settings
@@ -148,6 +163,9 @@ export default function Checkout() {
   useEffect(() => {
     if (user?.phone) {
       setGuestPhone(user.phone);
+    }
+    if (user?.address && !address.line1) {
+      setAddress(prev => ({ ...prev, line1: user.address || '' }));
     }
   }, [user]);
 
@@ -294,7 +312,7 @@ export default function Checkout() {
         console.warn('Geolocation capture skipped or failed:', err);
       }
 
-      if (orderType === 'delivery') {
+      if (orderType === 'delivery' || orderType === 'frozen_delivery') {
         body.address = address;
       }
 
@@ -325,6 +343,30 @@ export default function Checkout() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to place order');
+
+      // Sync address and phone to user profile if updated
+      if (token && user) {
+        const isPhoneUpdated = guestPhone && guestPhone !== user.phone;
+        const isAddressUpdated = address.line1 && address.line1 !== user.address;
+        
+        if (isPhoneUpdated || isAddressUpdated) {
+          try {
+            await fetch(`${API_BASE}/auth/me`, {
+              method: 'PATCH',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`
+              },
+              body: JSON.stringify({
+                ...(isPhoneUpdated ? { phone: guestPhone } : {}),
+                ...(isAddressUpdated ? { address: address.line1 } : {})
+              })
+            });
+          } catch (profileErr) {
+            console.error('Failed to sync profile updates:', profileErr);
+          }
+        }
+      }
 
       clear();
       addOrder({
@@ -373,41 +415,35 @@ export default function Checkout() {
           )}
 
           {/* Order type */}
-          {orderSettings?.deliveryEnabled && orderSettings?.pickupEnabled && (
+          {availableTypes.length > 1 && (
             <div className="surface-card rounded-xl shadow-sm border p-6">
               <h2 className="text-lg font-semibold text-main mb-4">{t('checkout.orderType')}</h2>
               <div className="flex gap-3">
-                <button
-                  type="button"
-                  onClick={() => setOrderType('delivery')}
-                  className={`flex-1 py-3 rounded-lg font-medium text-sm border-2 transition-colors ${
-                    orderType === 'delivery'
-                      ? 'border-primary-600 bg-primary-50 text-primary-700'
-                      : 'border-input text-sub hover:border-gray-300'
-                  }`}
-                >
-                  {t('checkout.delivery')}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setOrderType('pickup')}
-                  className={`flex-1 py-3 rounded-lg font-medium text-sm border-2 transition-colors ${
-                    orderType === 'pickup'
-                      ? 'border-primary-600 bg-primary-50 text-primary-700'
-                      : 'border-input text-sub hover:border-gray-300'
-                  }`}
-                >
-                  {t('checkout.pickup')}
-                </button>
+                {availableTypes.map((type) => (
+                  <button
+                    key={type.id}
+                    type="button"
+                    onClick={() => setOrderType(type.id)}
+                    className={`flex-1 py-3 rounded-lg font-medium text-sm border-2 transition-colors ${
+                      orderType === type.id
+                        ? 'border-primary-600 bg-primary-50 text-primary-700'
+                        : 'border-input text-sub hover:border-gray-300'
+                    }`}
+                  >
+                    {type.label}
+                  </button>
+                ))}
               </div>
             </div>
           )}
 
           {/* Delivery address */}
-          {orderType === 'delivery' && (
+          {(orderType === 'delivery' || orderType === 'frozen_delivery') && (
             <div className="surface-card rounded-xl shadow-sm border p-6">
-              <h2 className="text-lg font-semibold text-main mb-4">{t('checkout.deliveryAddress')}</h2>
-              {zoneError && (
+              <h2 className="text-lg font-semibold text-main mb-4">
+                {orderType === 'frozen_delivery' ? t('checkout.frozenDeliveryAddress') || '冷凍宅配收件地址' : t('checkout.deliveryAddress')}
+              </h2>
+              {zoneError && orderType === 'delivery' && (
                 <div className="bg-red-50 text-red-700 p-3 rounded-lg text-sm mb-3">{zoneError}</div>
               )}
               <div className="space-y-3">
@@ -452,6 +488,29 @@ export default function Checkout() {
                     className="px-3 py-2 bg-surface border border-input rounded-lg focus:ring-2 focus:ring-primary-500 outline-none text-sm text-main"
                   />
                 </div>
+                
+                {/* Global Address Auto-fill dynamic status card */}
+                {user && (
+                  <div className="pt-2 border-t border-input mt-3">
+                    {address.line1 && address.line1 === user.address ? (
+                      <div className="flex items-center gap-1.5 text-xs font-semibold text-green-600 animate-in fade-in slide-in-from-left-1 duration-200">
+                        <span>{t('checkout.addressAutoFilled')}</span>
+                      </div>
+                    ) : address.line1 && user.address ? (
+                      <div className="flex items-center gap-1.5 text-xs font-semibold text-amber-600 animate-in fade-in slide-in-from-left-1 duration-200">
+                        <span>{t('checkout.addressModified', { address: user.address })}</span>
+                      </div>
+                    ) : !address.line1 ? (
+                      <div className="flex items-center gap-1.5 text-xs font-semibold text-red-500 animate-in fade-in slide-in-from-left-1 duration-200">
+                        <span>{t('checkout.addressRequiredTip')}</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-1.5 text-xs font-semibold text-blue-600 animate-in fade-in slide-in-from-left-1 duration-200">
+                        <span>{t('checkout.addressEntered')}</span>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           )}

@@ -232,7 +232,13 @@
     "loyaltyPointsToRedeem": "points to redeem",
     "loyaltyRedeemHelp": "(100 points = $1.00)",
     "loyaltyTitle": "Loyalty Points",
-    "scheduled": "Scheduled"
+    "scheduled": "Scheduled",
+    "frozenDelivery": "Frozen Delivery",
+    "frozenDeliveryAddress": "Frozen Delivery Shipping Address",
+    "addressAutoFilled": "✓ Membership address automatically applied",
+    "addressModified": "Shipping address modified (Original: {{address}})",
+    "addressRequiredTip": "⚠️ Please fill in your shipping address for delivery/frozen shipping",
+    "addressEntered": "Shipping address entered (Will be linked to this order)"
   },
   "orderConfirmation": {
     "title": "Order Placed!",

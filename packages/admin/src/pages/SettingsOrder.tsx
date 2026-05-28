@@ -11,11 +11,15 @@ export default function SettingsOrder() {
   const [enabled, setEnabled] = useState(true);
   const [deliveryEnabled, setDeliveryEnabled] = useState(true);
   const [pickupEnabled, setPickupEnabled] = useState(true);
+  const [frozenDeliveryEnabled, setFrozenDeliveryEnabled] = useState(false);
   const [allowGuestCheckout, setAllowGuestCheckout] = useState(true);
   const [minOrderDelivery, setMinOrderDelivery] = useState(0);
   const [minOrderPickup, setMinOrderPickup] = useState(0);
+  const [minOrderFrozen, setMinOrderFrozen] = useState(0);
   const [deliveryLeadTime, setDeliveryLeadTime] = useState(30);
   const [pickupLeadTime, setPickupLeadTime] = useState(15);
+  const [frozenLeadTime, setFrozenLeadTime] = useState(0);
+  const [frozenDeliveryFee, setFrozenDeliveryFee] = useState(0);
   const [enableFutureOrdering, setEnableFutureOrdering] = useState(false);
   const [preOpeningBuffer, setPreOpeningBuffer] = useState(30);
   const [postClosingBuffer, setPostClosingBuffer] = useState(30);
@@ -47,11 +51,15 @@ export default function SettingsOrder() {
           if (d.enabled !== undefined) setEnabled(d.enabled);
           if (d.deliveryEnabled !== undefined) setDeliveryEnabled(d.deliveryEnabled);
           if (d.pickupEnabled !== undefined) setPickupEnabled(d.pickupEnabled);
+          if (d.frozenDeliveryEnabled !== undefined) setFrozenDeliveryEnabled(d.frozenDeliveryEnabled);
           if (d.allowGuestCheckout !== undefined) setAllowGuestCheckout(d.allowGuestCheckout);
           if (d.minOrderDelivery !== undefined) setMinOrderDelivery(d.minOrderDelivery);
           if (d.minOrderPickup !== undefined) setMinOrderPickup(d.minOrderPickup);
+          if (d.minOrderFrozen !== undefined) setMinOrderFrozen(d.minOrderFrozen);
           if (d.deliveryLeadTime !== undefined) setDeliveryLeadTime(d.deliveryLeadTime);
           if (d.pickupLeadTime !== undefined) setPickupLeadTime(d.pickupLeadTime);
+          if (d.frozenLeadTime !== undefined) setFrozenLeadTime(d.frozenLeadTime);
+          if (d.frozenDeliveryFee !== undefined) setFrozenDeliveryFee(d.frozenDeliveryFee);
           if (d.enableFutureOrdering !== undefined) setEnableFutureOrdering(d.enableFutureOrdering);
           if (d.preOpeningBuffer !== undefined) setPreOpeningBuffer(d.preOpeningBuffer);
           if (d.postClosingBuffer !== undefined) setPostClosingBuffer(d.postClosingBuffer);
@@ -85,11 +93,15 @@ export default function SettingsOrder() {
           enabled, 
           deliveryEnabled, 
           pickupEnabled, 
+          frozenDeliveryEnabled,
           allowGuestCheckout,
           minOrderDelivery, 
           minOrderPickup, 
+          minOrderFrozen,
           deliveryLeadTime, 
           pickupLeadTime, 
+          frozenLeadTime,
+          frozenDeliveryFee, 
           enableFutureOrdering, 
           preOpeningBuffer,
           postClosingBuffer,
@@ -143,7 +155,7 @@ export default function SettingsOrder() {
             <span className="text-sm font-medium text-gray-700">開啟全站線上點餐功能</span>
           </label>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 bg-gray-50 rounded-lg">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-4 bg-gray-50 rounded-lg">
             <div className="space-y-4">
               <label className="flex items-center gap-3">
                 <input type="checkbox" checked={deliveryEnabled} onChange={(e) => setDeliveryEnabled(e.target.checked)} className="w-4 h-4 text-primary-600 rounded" />
@@ -169,6 +181,21 @@ export default function SettingsOrder() {
                 <label className="block text-xs text-gray-500 mt-3 mb-1">預設自取準備時間 (分鐘)</label>
                 <input type="number" min={0} value={pickupLeadTime} onChange={(e) => setPickupLeadTime(parseInt(e.target.value) || 0)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500" />
                 <p className="text-[10px] text-gray-500 mt-2">門市有設定時，會優先使用門市準備時間。</p>
+              </div>
+            </div>
+
+            <div className="space-y-4 border-l border-gray-200 pl-6">
+              <label className="flex items-center gap-3">
+                <input type="checkbox" checked={frozenDeliveryEnabled} onChange={(e) => setFrozenDeliveryEnabled(e.target.checked)} className="w-4 h-4 text-primary-600 rounded" />
+                <span className="text-sm font-bold text-gray-900">全站允許「冷凍宅配」服務</span>
+              </label>
+              <div className={!frozenDeliveryEnabled ? 'opacity-50 pointer-events-none' : ''}>
+                <label className="block text-xs text-gray-500 mb-1">預設冷凍宅配最低消費金額 ($)</label>
+                <input type="number" min={0} step={0.01} value={minOrderFrozen} onChange={(e) => setMinOrderFrozen(parseFloat(e.target.value) || 0)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500" />
+                <label className="block text-xs text-gray-500 mt-3 mb-1">預設冷凍宅配準備時間 (分鐘)</label>
+                <input type="number" min={0} value={frozenLeadTime} onChange={(e) => setFrozenLeadTime(parseInt(e.target.value) || 0)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500" />
+                <label className="block text-xs text-gray-500 mt-3 mb-1">冷凍宅配基本運費 ($)</label>
+                <input type="number" min={0} step={0.01} value={frozenDeliveryFee} onChange={(e) => setFrozenDeliveryFee(parseFloat(e.target.value) || 0)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500" />
               </div>
             </div>
           </div>

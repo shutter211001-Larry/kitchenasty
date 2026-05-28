@@ -21,6 +21,7 @@ export interface CartItem {
   comment?: string;
   redeemedWithPoints?: boolean;
   rewardPointsPrice?: number;
+  isFrozenDelivery?: boolean;
 }
 
 interface CartContextType {

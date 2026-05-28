@@ -46,7 +46,7 @@ interface MenuItemDetail {
   price: number;
   image: string | null;
   isActive: boolean;
-  category: { id: string; name: string; nameTranslations?: Record<string, string> };
+  category: { id: string; name: string; nameTranslations?: Record<string, string>; isFrozenDelivery?: boolean };
   options: MenuOption[];
   allergens: Allergen[];
   dietaryPreferences: DietaryPreference[];
@@ -157,6 +157,7 @@ export default function MenuItemModal({ itemId, onClose }: Props) {
       options: cartOptions,
       redeemedWithPoints: buyWithPoints,
       rewardPointsPrice: buyWithPoints ? item.rewardPointsPrice : undefined,
+      isFrozenDelivery: item.category.isFrozenDelivery,
     });
     onClose();
   }

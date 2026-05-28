@@ -14,6 +14,7 @@ interface CategoryData {
   image: string;
   sortOrder: number;
   isActive: boolean;
+  isFrozenDelivery: boolean;
   parentId: string;
   locationId: string;
 }
@@ -53,6 +54,7 @@ const emptyCategory: CategoryData = {
   image: '',
   sortOrder: 0,
   isActive: true,
+  isFrozenDelivery: false,
   parentId: '',
   locationId: '',
 };
@@ -105,6 +107,7 @@ export default function CategoryForm() {
           image: cat.image || '',
           sortOrder: cat.sortOrder,
           isActive: cat.isActive,
+          isFrozenDelivery: cat.isFrozenDelivery || false,
           parentId: cat.parentId || '',
           locationId: cat.locationId || '',
         });
@@ -398,6 +401,17 @@ export default function CategoryForm() {
                   className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
                 />
                 <span className="text-sm text-gray-700">啟用 (Active)</span>
+              </label>
+            </div>
+            <div>
+              <label className="flex items-center gap-2 mt-6">
+                <input
+                  type="checkbox"
+                  checked={form.isFrozenDelivery}
+                  onChange={(e) => updateField('isFrozenDelivery', e.target.checked)}
+                  className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                />
+                <span className="text-sm text-gray-705 font-bold text-blue-600">❄️ 冷凍宅配商品 (Frozen Delivery)</span>
               </label>
             </div>
           </div>

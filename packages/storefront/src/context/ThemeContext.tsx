@@ -52,11 +52,15 @@ export interface SiteSettings {
     enabled?: boolean;
     deliveryEnabled?: boolean;
     pickupEnabled?: boolean;
+    frozenDeliveryEnabled?: boolean;
     allowGuestCheckout?: boolean;
     minOrderDelivery?: number;
     minOrderPickup?: number;
+    minOrderFrozen?: number;
     deliveryLeadTime?: number;
     pickupLeadTime?: number;
+    frozenLeadTime?: number;
+    frozenDeliveryFee?: number;
     enableFutureOrdering?: boolean;
     taxRate?: number;
     loyaltyEarnRate?: number;

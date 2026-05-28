@@ -13,6 +13,7 @@ const createCategorySchema = z.object({
   image: z.string().nullable().optional(),
   sortOrder: z.number().int().min(0).default(0),
   isActive: z.boolean().default(true),
+  isFrozenDelivery: z.boolean().default(false).optional(),
   parentId: z.string().nullable().optional(),
   locationId: z.string().nullable().optional(),
 });

@@ -323,7 +323,7 @@ const orderItemSchema = z.object({
 });
 
 const createOrderSchema = z.object({
-  orderType: z.enum(['DELIVERY', 'PICKUP']),
+  orderType: z.enum(['DELIVERY', 'PICKUP', 'FROZEN_DELIVERY']),
   items: z.array(orderItemSchema).min(1),
   comment: z.string().optional(),
   scheduledAt: z.string().optional(),
@@ -374,7 +374,7 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
     return;
   }
 
-  if (orderType === 'DELIVERY' && !address) {
+  if ((orderType === 'DELIVERY' || orderType === 'FROZEN_DELIVERY') && !address) {
     res.status(400).json({ success: false, error: 'Delivery address is required' });
     return;
   }
@@ -389,6 +389,11 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
 
   if (orderType === 'DELIVERY' && orderSettings.deliveryEnabled === false) {
     res.status(400).json({ success: false, error: 'Delivery is currently disabled' });
+    return;
+  }
+
+  if (orderType === 'FROZEN_DELIVERY' && orderSettings.frozenDeliveryEnabled === false) {
+    res.status(400).json({ success: false, error: 'Frozen delivery is currently disabled' });
     return;
   }
 
@@ -482,7 +487,11 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
     const orderSettings = (settings?.orderSettings as any) || {};
     const preOpeningBuffer = Number(orderSettings.preOpeningBuffer || 30);
     const postClosingBuffer = Number(orderSettings.postClosingBuffer || 30);
-    const leadTime = orderType === 'DELIVERY' ? (location.deliveryLeadTime || 45) : (location.pickupLeadTime || 15);
+    const leadTime = orderType === 'DELIVERY' 
+      ? (location.deliveryLeadTime || 45) 
+      : orderType === 'FROZEN_DELIVERY'
+        ? Number(orderSettings.frozenLeadTime || 0)
+        : (location.pickupLeadTime || 15);
 
     const { isWithinHours } = await import('../lib/business-hours.js');
 
@@ -558,6 +567,8 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
       });
       deliveryFee = defaultZone ? defaultZone.charge : 4.99;
     }
+  } else if (orderType === 'FROZEN_DELIVERY') {
+    deliveryFee = orderSettings.frozenDeliveryFee !== undefined ? Number(orderSettings.frozenDeliveryFee) : 0;
   }
 
   // Fetch menu items to validate and get prices
@@ -759,6 +770,15 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
       });
       return;
     }
+  } else if (orderType === 'FROZEN_DELIVERY') {
+    const minOrder = orderSettings.minOrderFrozen !== undefined ? Number(orderSettings.minOrderFrozen) : 0;
+    if (subtotal < minOrder) {
+      res.status(400).json({
+        success: false,
+        error: `Minimum frozen delivery order amount is ${minOrder.toFixed(2)}`,
+      });
+      return;
+    }
   } else {
     const minOrder = location.minOrderPickup ?? Number(orderSettings.minOrderPickup || 0);
     if (subtotal < minOrder) {
@@ -935,22 +955,32 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
 
   // Earn loyalty points using dynamic loyaltyEarnRate
   if (customerId) {
-    // subtotal only contains cash items since point-redeemed items are 0 cash subtotal
     const pointsEarned = Math.floor(subtotal * earnRate);
+    const currentCustomer = await prisma.customer.findUnique({ where: { id: customerId }, select: { phone: true, address: true } });
+    
+    const updateData: any = {};
     if (pointsEarned > 0) {
-      // Also update phone if missing
-      const updateData: any = { loyaltyPoints: { increment: pointsEarned } };
-      if (guestPhone) {
-        const currentCustomer = await prisma.customer.findUnique({ where: { id: customerId }, select: { phone: true } });
-        if (!currentCustomer?.phone) {
-          updateData.phone = guestPhone;
-        }
-      }
-      
+      updateData.loyaltyPoints = { increment: pointsEarned };
+    }
+    
+    // Always sync/update phone if provided and changed
+    if (guestPhone && guestPhone !== currentCustomer?.phone) {
+      updateData.phone = guestPhone;
+    }
+    
+    // Always sync/update address if provided (line1) and changed
+    const incomingAddress = address?.line1;
+    if (incomingAddress && incomingAddress !== currentCustomer?.address) {
+      updateData.address = incomingAddress;
+    }
+
+    if (Object.keys(updateData).length > 0) {
       await prisma.customer.update({
         where: { id: customerId },
         data: updateData,
       });
+    }
+    if (pointsEarned > 0) {
       await prisma.loyaltyTransaction.create({
         data: {
           customerId,

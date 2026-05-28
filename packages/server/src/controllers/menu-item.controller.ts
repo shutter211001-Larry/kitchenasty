@@ -78,7 +78,7 @@ export async function listMenuItems(req: Request, res: Response): Promise<void> 
       take: limit,
       orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
       include: {
-        category: { select: { id: true, name: true, nameTranslations: true } },
+        category: { select: { id: true, name: true, nameTranslations: true, isFrozenDelivery: true } },
         allergens: { include: { allergen: true } },
         dietaryPreferences: { include: { dietaryPreference: true } },
         _count: { select: { options: true } },
@@ -100,7 +100,7 @@ export async function getMenuItem(req: Request<{ id: string }>, res: Response): 
   const item = await prisma.menuItem.findUnique({
     where: { id },
     include: {
-      category: { select: { id: true, name: true, nameTranslations: true } },
+      category: { select: { id: true, name: true, nameTranslations: true, isFrozenDelivery: true } },
       options: {
         orderBy: { sortOrder: 'asc' },
         include: {
@@ -208,7 +208,7 @@ export async function createMenuItem(req: Request, res: Response): Promise<void>
       } : undefined,
     },
     include: {
-      category: { select: { id: true, name: true, nameTranslations: true } },
+      category: { select: { id: true, name: true, nameTranslations: true, isFrozenDelivery: true } },
       options: { include: { values: true } },
       allergens: { include: { allergen: true } },
       mealtimes: { include: { mealtime: true } },
@@ -308,7 +308,7 @@ export async function updateMenuItem(req: Request<{ id: string }>, res: Response
       } : undefined,
     },
     include: {
-      category: { select: { id: true, name: true, nameTranslations: true } },
+      category: { select: { id: true, name: true, nameTranslations: true, isFrozenDelivery: true } },
       options: { include: { values: true } },
       allergens: { include: { allergen: true } },
       mealtimes: { include: { mealtime: true } },

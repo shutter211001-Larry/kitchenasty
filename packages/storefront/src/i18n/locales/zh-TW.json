@@ -224,7 +224,13 @@
     "phoneRequiredTip": "⚠️ 請填寫您的聯絡電話，以便我們在有需要時聯繫您",
     "phoneEntered": "已輸入聯絡電話 (此號碼將與此筆訂單關聯)",
     "creditCardSub": "使用信用卡安全支付",
-    "paypalSub": "使用 PayPal 帳戶支付"
+    "paypalSub": "使用 PayPal 帳戶支付",
+    "frozenDelivery": "冷凍宅配",
+    "frozenDeliveryAddress": "冷凍宅配收件地址",
+    "addressAutoFilled": "✓ 已自動帶入您的會員地址",
+    "addressModified": "已修改配送地址 (會員原預設地址: {{address}})",
+    "addressRequiredTip": "⚠️ 請填寫您的收件地址，以利外送/冷凍宅配寄送",
+    "addressEntered": "已輸入收件地址 (此地址將與此筆訂單關聯)"
   },
   "orderConfirmation": {
     "title": "點餐成功！",
