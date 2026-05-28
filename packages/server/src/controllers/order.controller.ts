@@ -815,7 +815,7 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
 
   // A. First scan and apply the best automatic promotion
   const autoPromo = await findAndApplyBestAutomaticDiscount(
-    { subtotal, orderType, locationId: location.id },
+    { subtotal, orderType: orderType as any, locationId: location.id },
     engineCartItems
   );
   if (autoPromo.campaign) {
@@ -834,7 +834,7 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
     
     const validation = validateAndCalculateDiscount(
       coupon,
-      { subtotal, orderType, locationId: location.id },
+      { subtotal, orderType: orderType as any, locationId: location.id },
       engineCartItems
     );
     if (!validation.isValid) {
