@@ -167,13 +167,11 @@ export default function MenuItemForm() {
       setLocations(locRes.data || []);
     }).catch(() => { });
 
-    if (!isEdit) {
-      api.get<{ data: ErpRecipe[] }>('/menu/erp/product-recipes')
-        .then((res) => {
-          setErpRecipes(res.data || []);
-        })
-        .catch(() => console.error('Failed to load ERP recipes'));
-    }
+    api.get<{ data: ErpRecipe[] }>('/menu/erp/product-recipes')
+      .then((res) => {
+        setErpRecipes(res.data || []);
+      })
+      .catch(() => console.error('Failed to load ERP recipes'));
   }, [isEdit]);
 
   useEffect(() => {
@@ -206,6 +204,9 @@ export default function MenuItemForm() {
           rewardPointsPrice: item.rewardPointsPrice || 0,
         });
         if (item.image) setImageUrl(item.image);
+        if (item.recipeId) {
+          setSelectedErpRecipeId(item.recipeId);
+        }
         if (item.options?.length) {
           setOptions(item.options.map((o: any) => ({
             name: o.name,
@@ -366,12 +367,15 @@ export default function MenuItemForm() {
         locationId: form.locationId || null,
       };
 
-      if (!isEdit && selectedErpRecipeId) {
+      if (selectedErpRecipeId) {
         const selectedRecipe = erpRecipes.find(r => r.id === selectedErpRecipeId);
         if (selectedRecipe) {
           (body as any).recipeId = selectedRecipe.id;
           (body as any).recipeName = selectedRecipe.name;
         }
+      } else {
+        (body as any).recipeId = null;
+        (body as any).recipeName = null;
       }
 
       if (isEdit) {
@@ -411,9 +415,11 @@ export default function MenuItemForm() {
         <section className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-medium text-gray-900">基本資訊 (Basic Information)</h3>
-            {!isEdit && erpRecipes.length > 0 && (
+            {erpRecipes.length > 0 && (
               <div className="flex items-center gap-2">
-                <span className="text-xs text-primary-600 font-bold bg-primary-50 px-2 py-1 rounded">從 ERP 產品配方匯入</span>
+                <span className="text-xs text-primary-600 font-bold bg-primary-50 px-2 py-1 rounded">
+                  {isEdit ? '關聯 ERP 食譜' : '從 ERP 產品配方匯入'}
+                </span>
                 <select
                   value={selectedErpRecipeId}
                   onChange={(e) => {
@@ -422,21 +428,23 @@ export default function MenuItemForm() {
                     if (id) {
                       const recipe = erpRecipes.find(r => r.id === id);
                       if (recipe) {
-                        updateField('name', recipe.name);
-                        autoSlug(recipe.name);
-                        updateField('description', recipe.description || '');
-                        updateField('unit', recipe.yieldUnit || '份');
-                        
-                        // Auto-fill allergens by matching names
-                        if (recipe.allergens && recipe.allergens.length > 0) {
-                          const matchedIds = recipe.allergens
-                            .map(aName => allergens.find(localA => localA.name === aName)?.id)
-                            .filter(Boolean) as string[];
-                          if (matchedIds.length > 0) {
-                            setSelectedAllergens(prev => {
-                              const newSet = new Set([...prev, ...matchedIds]);
-                              return Array.from(newSet);
-                            });
+                        if (!isEdit) {
+                          updateField('name', recipe.name);
+                          autoSlug(recipe.name);
+                          updateField('description', recipe.description || '');
+                          updateField('unit', recipe.yieldUnit || '份');
+                          
+                          // Auto-fill allergens by matching names
+                          if (recipe.allergens && recipe.allergens.length > 0) {
+                            const matchedIds = recipe.allergens
+                              .map(aName => allergens.find(localA => localA.name === aName)?.id)
+                              .filter(Boolean) as string[];
+                            if (matchedIds.length > 0) {
+                              setSelectedAllergens(prev => {
+                                const newSet = new Set([...prev, ...matchedIds]);
+                                return Array.from(newSet);
+                              });
+                            }
                           }
                         }
                       }
@@ -444,7 +452,7 @@ export default function MenuItemForm() {
                   }}
                   className="border border-primary-200 text-sm rounded-lg px-2 py-1 focus:ring-primary-500 outline-none"
                 >
-                  <option value="">-- 選擇 ERP 食譜 (建立後自動綁定) --</option>
+                  <option value="">-- {isEdit ? '選擇 ERP 食譜 (自動更新綁定)' : '選擇 ERP 食譜 (建立後自動綁定)'} --</option>
                   {erpRecipes.map(r => (
                     <option key={r.id} value={r.id}>{r.name}</option>
                   ))}
