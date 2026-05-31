@@ -1819,11 +1819,16 @@ export const Labels = () => {
             {/* 2. Main content adaptive body */}
             {labelSize !== '70x50' ? (
               // Grid structure for big labels: Left (Reheating), Right (Ingredients/Nutrition/Info)
-              // If showReheating is unchecked or has no active sub-items, it collapses to 1 full-width column to let items fill space horizontally!
-              <div className={cn(
-                "flex-1 grid gap-[3mm] py-[2mm] min-h-0 text-black",
-                hasActiveReheating ? "grid-cols-[1.1fr_1fr]" : "grid-cols-1"
-              )}>
+              // If showReheating is unchecked or has no active sub-items, we render a simple single-column block layout so there is absolutely no risk of browser grid rendering quirks!
+              <div 
+                style={hasActiveReheating ? { gridTemplateColumns: '1.1fr 1fr' } : undefined}
+                className={cn(
+                  "flex-1 min-h-0 text-black",
+                  hasActiveReheating 
+                    ? "grid gap-[3mm] py-[2mm] grid-cols-[1.1fr_1fr]" 
+                    : "py-[2mm] flex flex-col justify-between"
+                )}
+              >
                 
                 {/* Left Column: Reheating steps */}
                 {hasActiveReheating && (
@@ -1953,11 +1958,16 @@ export const Labels = () => {
 
             {/* 3. Bottom Row: Nutrition facts table & corporate details & QR code */}
             {labelSize !== '70x50' ? (
-              // Dynamic Grid: If showNutrition is unchecked, this collapses to grid-cols-1, letting corporate details and QR code expand to full width!
-              <div className={cn(
-                "w-full border-t-[0.8mm] border-black pt-[2mm] grid gap-[3mm] shrink-0 items-end text-black",
-                showNutrition ? "grid-cols-[1.1fr_1fr]" : "grid-cols-1"
-              )}>
+              // Dynamic Grid: If showNutrition is unchecked, this collapses to a block element, letting corporate details and QR code expand to full width seamlessly!
+              <div 
+                style={showNutrition ? { gridTemplateColumns: '1.1fr 1fr' } : undefined}
+                className={cn(
+                  "w-full border-t-[0.8mm] border-black pt-[2mm] shrink-0 text-black",
+                  showNutrition 
+                    ? "grid gap-[3mm] items-end grid-cols-[1.1fr_1fr]" 
+                    : "block"
+                )}
+              >
                 
                 {/* Bottom Left: Corporate Details + Barcode Area */}
                 {/* If showNutrition is FALSE, we layout corporate details and QR code side-by-side using "flex justify-between" to fill up the bottom space perfectly! */}
