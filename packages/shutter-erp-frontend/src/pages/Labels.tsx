@@ -71,6 +71,9 @@ export const Labels = () => {
   const [showExpiry, setShowExpiry] = useState(true);
   const [showResponsible, setShowResponsible] = useState(true);
   const [showReheating, setShowReheating] = useState(true);
+  const [showAirFryer, setShowAirFryer] = useState(true);
+  const [showOven, setShowOven] = useState(true);
+  const [showPan, setShowPan] = useState(true);
   const [showNutrition, setShowNutrition] = useState(true);
   const [showAllergens, setShowAllergens] = useState(true);
   const [showBarcode, setShowBarcode] = useState(true);
@@ -181,6 +184,9 @@ export const Labels = () => {
         if (settings.showExpiry !== undefined) setShowExpiry(settings.showExpiry);
         if (settings.showResponsible !== undefined) setShowResponsible(settings.showResponsible);
         if (settings.showReheating !== undefined) setShowReheating(settings.showReheating);
+        if (settings.showAirFryer !== undefined) setShowAirFryer(settings.showAirFryer);
+        if (settings.showOven !== undefined) setShowOven(settings.showOven);
+        if (settings.showPan !== undefined) setShowPan(settings.showPan);
         if (settings.showNutrition !== undefined) setShowNutrition(settings.showNutrition);
         if (settings.showAllergens !== undefined) setShowAllergens(settings.showAllergens);
         if (settings.showBarcode !== undefined) setShowBarcode(settings.showBarcode);
@@ -257,6 +263,9 @@ export const Labels = () => {
     if (config.showExpiry !== undefined) setShowExpiry(config.showExpiry);
     if (config.showResponsible !== undefined) setShowResponsible(config.showResponsible);
     if (config.showReheating !== undefined) setShowReheating(config.showReheating);
+    if (config.showAirFryer !== undefined) setShowAirFryer(config.showAirFryer);
+    if (config.showOven !== undefined) setShowOven(config.showOven);
+    if (config.showPan !== undefined) setShowPan(config.showPan);
     if (config.showNutrition !== undefined) setShowNutrition(config.showNutrition);
     if (config.showAllergens !== undefined) setShowAllergens(config.showAllergens);
     if (config.showBarcode !== undefined) setShowBarcode(config.showBarcode);
@@ -325,6 +334,9 @@ export const Labels = () => {
         showExpiry,
         showResponsible,
         showReheating,
+        showAirFryer,
+        showOven,
+        showPan,
         showNutrition,
         showAllergens,
         showBarcode,
@@ -521,6 +533,9 @@ export const Labels = () => {
     setPortionsPerPkg('2.4');
     setBarcodeText('https://smartkitchen-erp.com/recipe');
     setShowReheating(true);
+    setShowAirFryer(true);
+    setShowOven(true);
+    setShowPan(true);
     setShowNutrition(true);
     setShowAllergens(true);
     setShowBranding(true);
@@ -556,6 +571,9 @@ export const Labels = () => {
       showExpiry,
       showResponsible,
       showReheating,
+      showAirFryer,
+      showOven,
+      showPan,
       showNutrition,
       showAllergens,
       showBarcode,
@@ -667,7 +685,12 @@ export const Labels = () => {
     // Dynamic Font Scaling Factor based on active content sections
     if (labelSize !== '70x50') {
       let score = 0;
-      if (showReheating) score += 2;
+      if (showReheating) {
+        if (showAirFryer) score += 0.6;
+        if (showOven) score += 0.6;
+        if (showPan) score += 0.6;
+        if (showAirFryer || showOven || showPan) score += 0.2;
+      }
       if (showNutrition) score += 3.5;
       if (showIngredients) score += 1.2;
       if (showAllergens) score += 0.8;
@@ -1084,6 +1107,30 @@ export const Labels = () => {
                     { state: showPhone, setter: setShowPhone, label: '顯示電話' },
                     { state: showOrigin, setter: setShowOrigin, label: '顯示原產地' },
                     { state: showManufacturer, setter: setShowManufacturer, label: '顯示製造商' },
+                  ].map((sub, idx) => (
+                    <label key={idx} className="flex items-center gap-1.5 cursor-pointer select-none">
+                      <input
+                        type="checkbox"
+                        checked={sub.state}
+                        onChange={(e) => sub.setter(e.target.checked)}
+                        className="w-3.5 h-3.5 accent-primary rounded border-border focus:ring-primary/20 shrink-0 cursor-pointer"
+                      />
+                      <span className="text-[10px] font-bold text-gray-700">{sub.label}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Nested Sub-fields under Reheating Info */}
+            {showReheating && (
+              <div className="px-4 py-3 bg-primary/5 border border-primary/10 rounded-2xl space-y-2 animate-in fade-in slide-in-from-top-1 duration-150">
+                <span className="text-[9px] font-black text-primary uppercase block tracking-wider">🔥 復熱步驟指引子項目顯示設定</span>
+                <div className="grid grid-cols-3 gap-x-3 gap-y-2.5">
+                  {[
+                    { state: showAirFryer, setter: setShowAirFryer, label: airFryerTitle || '氣炸烤箱' },
+                    { state: showOven, setter: setShowOven, label: ovenTitle || '家用烤箱' },
+                    { state: showPan, setter: setShowPan, label: panTitle || '平底鍋' },
                   ].map((sub, idx) => (
                     <label key={idx} className="flex items-center gap-1.5 cursor-pointer select-none">
                       <input
@@ -1772,48 +1819,51 @@ export const Labels = () => {
             {/* 2. Main content adaptive body */}
             {labelSize !== '70x50' ? (
               // Grid structure for big labels: Left (Reheating), Right (Ingredients/Nutrition/Info)
-              // If showReheating is unchecked, it collapses to 1 full-width column to let items fill space horizontally!
-              <div className={cn(
-                "flex-1 grid gap-[3mm] py-[2mm] min-h-0 text-black",
-                showReheating ? "grid-cols-[1.1fr_1fr]" : "grid-cols-1"
-              )}>
-                
-                {/* Left Column: Reheating steps */}
-                {showReheating && (
-                  <div className="border-r-[0.3mm] border-black pr-[2mm] flex flex-col justify-between gap-[2.5mm] min-h-0 overflow-hidden text-black h-full">
-                    <div className="flex justify-center">
-                      <span 
-                        style={{ fontSize: `${reheatingMainTitleSize}pt` }}
-                        className="font-black bg-black text-white px-[2mm] py-[0.5mm] rounded-[0.5mm] text-center leading-none"
-                      >
-                        {reheatingMainTitle}
-                      </span>
-                    </div>
+              // If showReheating is unchecked or has no active sub-items, it collapses to 1 full-width column to let items fill space horizontally!
+              (() => {
+                const hasActiveReheating = showReheating && (showAirFryer || showOven || showPan);
+                return (
+                  <div className={cn(
+                    "flex-1 grid gap-[3mm] py-[2mm] min-h-0 text-black",
+                    hasActiveReheating ? "grid-cols-[1.1fr_1fr]" : "grid-cols-1"
+                  )}>
                     
-                    <div className="flex-1 flex flex-col justify-around py-[1mm]">
-                      {[
-                        { title: airFryerTitle, steps: airFryerSteps },
-                        { title: ovenTitle, steps: ovenSteps },
-                        { title: panTitle, steps: panSteps }
-                      ].map((m, idx) => (
-                        <div key={idx} className="flex flex-col gap-[0.5mm] text-black">
-                          <strong 
-                            style={{ fontSize: `${reheatingSubTitleSize}pt` }}
-                            className="font-extrabold text-black"
+                    {/* Left Column: Reheating steps */}
+                    {hasActiveReheating && (
+                      <div className="border-r-[0.3mm] border-black pr-[2mm] flex flex-col justify-between gap-[2.5mm] min-h-0 overflow-hidden text-black h-full">
+                        <div className="flex justify-center">
+                          <span 
+                            style={{ fontSize: `${reheatingMainTitleSize}pt` }}
+                            className="font-black bg-black text-white px-[2mm] py-[0.5mm] rounded-[0.5mm] text-center leading-none"
                           >
-                            ├─ {m.title}
-                          </strong>
-                          <p 
-                            style={{ fontSize: `${reheatingContentSize}pt` }}
-                            className="text-black font-semibold whitespace-pre-line pl-[3.5mm] leading-[1.3]"
-                          >
-                            {m.steps}
-                          </p>
+                            {reheatingMainTitle}
+                          </span>
                         </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                        
+                        <div className="flex-1 flex flex-col justify-around py-[1mm]">
+                          {[
+                            { title: airFryerTitle, steps: airFryerSteps, show: showAirFryer },
+                            { title: ovenTitle, steps: ovenSteps, show: showOven },
+                            { title: panTitle, steps: panSteps, show: showPan }
+                          ].filter(m => m.show).map((m, idx) => (
+                            <div key={idx} className="flex flex-col gap-[0.5mm] text-black">
+                              <strong 
+                                style={{ fontSize: `${reheatingSubTitleSize}pt` }}
+                                className="font-extrabold text-black"
+                              >
+                                ├─ {m.title}
+                              </strong>
+                              <p 
+                                style={{ fontSize: `${reheatingContentSize}pt` }}
+                                className="text-black font-semibold whitespace-pre-line pl-[3.5mm] leading-[1.3]"
+                              >
+                                {m.steps}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
 
                 {/* Right Column: Ingredients list, Allergen advice, Expiry, Nutrition */}
                 {/* h-full + flex + justify-between guarantees items stretch out evenly to fill empty vertical gaps! */}
@@ -1869,8 +1919,8 @@ export const Labels = () => {
                     </div>
                   )}
                 </div>
-
-              </div>
+              );
+            })()
             ) : (
               // Mini Label (70x50) compact body
               <div className="flex-1 py-[1mm] flex flex-col justify-between text-[5.8pt] leading-[1.2] font-extrabold text-black">
