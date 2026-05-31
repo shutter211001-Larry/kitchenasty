@@ -2027,7 +2027,7 @@ export const Labels = () => {
                           <th className="py-[0.2mm] text-right pr-[0.5mm] text-black font-black w-[36%]">每 100 公克</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y-[0.1mm] divide-black font-mono text-black">
+                      <tbody className="font-mono text-black">
                         {[
                           { name: '熱量', valPer100: Number(calories), unit: '大卡', isZeroLimit: 0 },
                           { name: '蛋白質', valPer100: Number(protein), unit: '公克', isZeroLimit: 0 },
@@ -2057,8 +2057,17 @@ export const Labels = () => {
                             if (val100 <= row.isZeroLimit) display100 = '0';
                           }
 
+                          // 依據法規標準樣式：橫線僅畫於主項目（蛋白質、脂肪、碳水化合物、鈉）上方，子項目（飽和/反式脂肪、糖）內部不畫線
+                          const hasBorderTop = [1, 2, 5, 7].includes(idx);
+
                           return (
-                            <tr key={idx} className="text-black font-black">
+                            <tr 
+                              key={idx} 
+                              className={cn(
+                                "text-black font-black",
+                                hasBorderTop && "border-t-[0.1mm] border-black"
+                              )}
+                            >
                               <td className={cn(
                                 "py-[0.2mm] text-left font-sans pl-[0.5mm] text-black",
                                 row.name.startsWith('  ') ? "pl-[2mm] font-semibold text-black" : "font-black text-black"
