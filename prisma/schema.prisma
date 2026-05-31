@@ -358,6 +358,10 @@ model Order {
   payments            Payment[]
   reviews             Review[]
 
+  @@index([createdAt])
+  @@index([status])
+  @@index([locationId])
+  @@index([customerId])
   @@map("orders")
 }
 
@@ -374,6 +378,8 @@ model OrderItem {
   menuItem   MenuItem          @relation(fields: [menuItemId], references: [id])
   order      Order             @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
+  @@index([orderId])
+  @@index([menuItemId])
   @@map("order_items")
 }
 
