@@ -111,6 +111,8 @@
     "scheduledOrders": "預約訂單",
     "delivery": "外送",
     "pickup": "自取",
+    "pickupTime": "預約取餐",
+    "deliveryTime": "預約外送",
     "itemsCount": "{{count}} 個品項",
     "cancelConfirm": "確定要取消此訂單嗎？",
     "noOrders": "目前無訂單"

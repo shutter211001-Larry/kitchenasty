@@ -370,6 +370,34 @@ export default function CounterDisplay() {
                       <span className="text-[10px] text-gray-400 font-medium">{getTimeSince(order.createdAt)}</span>
                     </div>
 
+                    {/* Scheduled / Pickup Time */}
+                    {order.scheduledAt && (
+                      <div className="mb-3 px-3 py-2 bg-indigo-50 border border-indigo-150 rounded-lg flex items-center justify-between text-indigo-800 font-semibold text-xs shadow-sm">
+                        <span className="flex items-center gap-1.5">
+                          <span className="text-sm">🕒</span>
+                          <span>
+                            {order.orderType === 'DELIVERY' 
+                              ? t('kitchen.deliveryTime') || '預約外送' 
+                              : t('kitchen.pickupTime') || '預約取餐'
+                            }
+                          </span>
+                        </span>
+                        <span className="bg-indigo-600 text-white px-2 py-0.5 rounded font-mono text-xs">
+                          {(() => {
+                            const d = new Date(order.scheduledAt);
+                            const today = new Date();
+                            const isToday = d.getDate() === today.getDate() &&
+                                            d.getMonth() === today.getMonth() &&
+                                            d.getFullYear() === today.getFullYear();
+                            const timeStr = d.toLocaleString([], { hour: '2-digit', minute: '2-digit' });
+                            if (isToday) return timeStr;
+                            const dateStr = d.toLocaleDateString([], { month: '2-digit', day: '2-digit' });
+                            return `${dateStr} ${timeStr}`;
+                          })()}
+                        </span>
+                      </div>
+                    )}
+
                     {/* Customer Data — The key difference */}
                     <div className="mb-4 p-2.5 bg-gray-50 rounded-lg border border-gray-100">
                       <div className="flex items-center gap-2 mb-1">
