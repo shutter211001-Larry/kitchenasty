@@ -637,10 +637,10 @@ export const Labels = () => {
     return <IconComponent className="w-full h-full text-black stroke-[2]" />;
   };
 
-  // Dynamic layout heuristic: Should we intelligently move Expiry/Weight/Storage block to the bottom-left area to optimize spacing?
   const isBottomLeftEmpty = !showBarcode || !showNutrition || !showResponsible;
   const isRightColumnCrowded = (ingredientsText || '').length > 85 || (allergenWarning || '').length > 60;
   const shouldMoveInfoToBottomLeft = isBottomLeftEmpty || isRightColumnCrowded;
+  const hasActiveReheating = showReheating && (showAirFryer || showOven || showPan);
 
   const getLabelDimensions = () => {
     let w = 100;
@@ -1820,50 +1820,47 @@ export const Labels = () => {
             {labelSize !== '70x50' ? (
               // Grid structure for big labels: Left (Reheating), Right (Ingredients/Nutrition/Info)
               // If showReheating is unchecked or has no active sub-items, it collapses to 1 full-width column to let items fill space horizontally!
-              (() => {
-                const hasActiveReheating = showReheating && (showAirFryer || showOven || showPan);
-                return (
-                  <div className={cn(
-                    "flex-1 grid gap-[3mm] py-[2mm] min-h-0 text-black",
-                    hasActiveReheating ? "grid-cols-[1.1fr_1fr]" : "grid-cols-1"
-                  )}>
+              <div className={cn(
+                "flex-1 grid gap-[3mm] py-[2mm] min-h-0 text-black",
+                hasActiveReheating ? "grid-cols-[1.1fr_1fr]" : "grid-cols-1"
+              )}>
+                
+                {/* Left Column: Reheating steps */}
+                {hasActiveReheating && (
+                  <div className="border-r-[0.3mm] border-black pr-[2mm] flex flex-col justify-between gap-[2.5mm] min-h-0 overflow-hidden text-black h-full">
+                    <div className="flex justify-center">
+                      <span 
+                        style={{ fontSize: `${reheatingMainTitleSize}pt` }}
+                        className="font-black bg-black text-white px-[2mm] py-[0.5mm] rounded-[0.5mm] text-center leading-none"
+                      >
+                        {reheatingMainTitle}
+                      </span>
+                    </div>
                     
-                    {/* Left Column: Reheating steps */}
-                    {hasActiveReheating && (
-                      <div className="border-r-[0.3mm] border-black pr-[2mm] flex flex-col justify-between gap-[2.5mm] min-h-0 overflow-hidden text-black h-full">
-                        <div className="flex justify-center">
-                          <span 
-                            style={{ fontSize: `${reheatingMainTitleSize}pt` }}
-                            className="font-black bg-black text-white px-[2mm] py-[0.5mm] rounded-[0.5mm] text-center leading-none"
+                    <div className="flex-1 flex flex-col justify-around py-[1mm]">
+                      {[
+                        { title: airFryerTitle, steps: airFryerSteps, show: showAirFryer },
+                        { title: ovenTitle, steps: ovenSteps, show: showOven },
+                        { title: panTitle, steps: panSteps, show: showPan }
+                      ].filter(m => m.show).map((m, idx) => (
+                        <div key={idx} className="flex flex-col gap-[0.5mm] text-black">
+                          <strong 
+                            style={{ fontSize: `${reheatingSubTitleSize}pt` }}
+                            className="font-extrabold text-black"
                           >
-                            {reheatingMainTitle}
-                          </span>
+                            ├─ {m.title}
+                          </strong>
+                          <p 
+                            style={{ fontSize: `${reheatingContentSize}pt` }}
+                            className="text-black font-semibold whitespace-pre-line pl-[3.5mm] leading-[1.3]"
+                          >
+                            {m.steps}
+                          </p>
                         </div>
-                        
-                        <div className="flex-1 flex flex-col justify-around py-[1mm]">
-                          {[
-                            { title: airFryerTitle, steps: airFryerSteps, show: showAirFryer },
-                            { title: ovenTitle, steps: ovenSteps, show: showOven },
-                            { title: panTitle, steps: panSteps, show: showPan }
-                          ].filter(m => m.show).map((m, idx) => (
-                            <div key={idx} className="flex flex-col gap-[0.5mm] text-black">
-                              <strong 
-                                style={{ fontSize: `${reheatingSubTitleSize}pt` }}
-                                className="font-extrabold text-black"
-                              >
-                                ├─ {m.title}
-                              </strong>
-                              <p 
-                                style={{ fontSize: `${reheatingContentSize}pt` }}
-                                className="text-black font-semibold whitespace-pre-line pl-[3.5mm] leading-[1.3]"
-                              >
-                                {m.steps}
-                              </p>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 {/* Right Column: Ingredients list, Allergen advice, Expiry, Nutrition */}
                 {/* h-full + flex + justify-between guarantees items stretch out evenly to fill empty vertical gaps! */}
@@ -1919,8 +1916,8 @@ export const Labels = () => {
                     </div>
                   )}
                 </div>
-              );
-            })()
+
+              </div>
             ) : (
               // Mini Label (70x50) compact body
               <div className="flex-1 py-[1mm] flex flex-col justify-between text-[5.8pt] leading-[1.2] font-extrabold text-black">
