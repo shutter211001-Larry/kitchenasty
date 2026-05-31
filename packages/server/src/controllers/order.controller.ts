@@ -577,10 +577,21 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
     where: { id: { in: menuItemIds } },
     include: {
       options: { include: { values: true } },
+      category: true,
     },
   });
 
   const menuItemMap = new Map(menuItems.map((m) => [m.id, m]));
+
+  // Calculate total ordered quantity per category for shared stock validation
+  const categoryQtyOrdered = new Map<string, number>();
+  for (const item of items) {
+    const menuItem = menuItemMap.get(item.menuItemId);
+    if (menuItem && menuItem.categoryId) {
+      const current = categoryQtyOrdered.get(menuItem.categoryId) || 0;
+      categoryQtyOrdered.set(menuItem.categoryId, current + item.quantity);
+    }
+  }
 
   // Validate all items exist and are active
   for (const item of items) {
@@ -593,9 +604,21 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
       res.status(400).json({ success: false, error: `Menu item is not available: ${menuItem.name}` });
       return;
     }
+    // 1. Check Product-level Independent Stock
     if (menuItem.trackStock && menuItem.stockQty < item.quantity) {
-      res.status(400).json({ success: false, error: `Insufficient stock for: ${menuItem.name}` });
+      res.status(400).json({ success: false, error: `商品庫存不足: ${menuItem.name}` });
       return;
+    }
+    // 2. Check Category-level Shared Stock
+    if (menuItem.category && (menuItem.category as any).trackSharedStock) {
+      const totalCategoryQty = categoryQtyOrdered.get(menuItem.categoryId) || 0;
+      if ((menuItem.category as any).sharedStockQty < totalCategoryQty) {
+        res.status(400).json({
+          success: false,
+          error: `分類「${menuItem.category.name}」共用庫存不足（如麵團剩餘不足），無法提供此數量`
+        });
+        return;
+      }
     }
   }
 
@@ -942,13 +965,23 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
     });
   }
 
-  // Decrement stock for tracked items
+  // Decrement stock for tracked items and category shared stock
   for (const item of items) {
     const menuItem = menuItemMap.get(item.menuItemId)!;
+    
+    // 1. Decrement product independent stock
     if (menuItem.trackStock) {
       await prisma.menuItem.update({
         where: { id: item.menuItemId },
         data: { stockQty: { decrement: item.quantity } },
+      });
+    }
+
+    // 2. Decrement category shared stock
+    if (menuItem.category && (menuItem.category as any).trackSharedStock) {
+      await (prisma.category as any).update({
+        where: { id: menuItem.categoryId },
+        data: { sharedStockQty: { decrement: item.quantity } },
       });
     }
   }

@@ -12,6 +12,8 @@ interface Category {
   parentId: string | null;
   children: { id: string; name: string }[];
   _count: { menuItems: number };
+  trackSharedStock?: boolean;
+  sharedStockQty?: number;
 }
 
 export default function CategoryList() {
@@ -68,6 +70,7 @@ export default function CategoryList() {
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">名稱 (Name)</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">產品數量</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">共用庫存</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">子分類</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">狀態 (Status)</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">排序</th>
@@ -83,6 +86,15 @@ export default function CategoryList() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {cat._count.menuItems}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold">
+                    {cat.trackSharedStock ? (
+                      <span className="text-indigo-600 bg-indigo-50 border border-indigo-150 px-2.5 py-1 rounded-md text-xs font-bold shadow-sm">
+                        📦 餘 {cat.sharedStockQty}
+                      </span>
+                    ) : (
+                      <span className="text-gray-400 font-normal text-xs">- (獨立庫存)</span>
+                    )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {cat.children.length > 0
@@ -117,6 +129,9 @@ export default function CategoryList() {
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {categories.reduce((sum, c) => sum + (c._count?.menuItems || 0), 0)}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  -
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   -

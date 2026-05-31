@@ -16,6 +16,8 @@ const createCategorySchema = z.object({
   isFrozenDelivery: z.boolean().default(false).optional(),
   parentId: z.string().nullable().optional(),
   locationId: z.string().nullable().optional(),
+  trackSharedStock: z.boolean().default(false).optional(),
+  sharedStockQty: z.number().int().min(0).default(0).optional(),
 });
 
 const updateCategorySchema = createCategorySchema.partial().omit({ slug: true });

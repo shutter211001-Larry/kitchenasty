@@ -17,6 +17,8 @@ interface CategoryData {
   isFrozenDelivery: boolean;
   parentId: string;
   locationId: string;
+  trackSharedStock: boolean;
+  sharedStockQty: number;
 }
 
 const LANGUAGES = [
@@ -57,6 +59,8 @@ const emptyCategory: CategoryData = {
   isFrozenDelivery: false,
   parentId: '',
   locationId: '',
+  trackSharedStock: false,
+  sharedStockQty: 0,
 };
 
 export default function CategoryForm() {
@@ -110,6 +114,8 @@ export default function CategoryForm() {
           isFrozenDelivery: cat.isFrozenDelivery || false,
           parentId: cat.parentId || '',
           locationId: cat.locationId || '',
+          trackSharedStock: cat.trackSharedStock || false,
+          sharedStockQty: cat.sharedStockQty || 0,
         });
         if (cat.image) setImageUrl(cat.image);
         setLoading(false);
@@ -187,6 +193,8 @@ export default function CategoryForm() {
         sortOrder: Number(form.sortOrder),
         parentId: form.parentId || undefined,
         locationId: form.locationId || null,
+        trackSharedStock: form.trackSharedStock,
+        sharedStockQty: Number(form.sharedStockQty),
       };
 
       if (isEdit) {
@@ -411,8 +419,47 @@ export default function CategoryForm() {
                   onChange={(e) => updateField('isFrozenDelivery', e.target.checked)}
                   className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
                 />
-                <span className="text-sm text-gray-705 font-bold text-blue-600">❄️ 冷凍宅配商品 (Frozen Delivery)</span>
+                <span className="text-sm text-gray-755 font-bold text-blue-600">❄️ 冷凍宅配商品 (Frozen Delivery)</span>
               </label>
+            </div>
+
+            {/* Shared Stock Section */}
+            <div className="md:col-span-2 border-t border-gray-100 pt-6 mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="md:col-span-2">
+                <h4 className="text-sm font-semibold text-gray-800 flex items-center gap-1.5">
+                  📦 分類共用庫存設定 (Shared Category Inventory)
+                </h4>
+                <p className="text-xs text-gray-400 mt-0.5">
+                  啟用後，此分類下的所有商品在下單時，會共同扣除此處設定的當日總庫存（如：12 吋披薩共用 20 顆麵團限制）。
+                </p>
+              </div>
+              <div className="flex items-center">
+                <label className="flex items-center gap-2 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={form.trackSharedStock}
+                    onChange={(e) => {
+                      updateField('trackSharedStock', e.target.checked);
+                      if (!e.target.checked) updateField('sharedStockQty', 0);
+                    }}
+                    className="rounded border-gray-300 text-primary-600 focus:ring-primary-500 w-4 h-4"
+                  />
+                  <span className="text-sm font-medium text-gray-700">啟用分類當日共用庫存</span>
+                </label>
+              </div>
+              {form.trackSharedStock && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">當日共用庫存總數 *</label>
+                  <input
+                    type="number"
+                    value={form.sharedStockQty}
+                    onChange={(e) => updateField('sharedStockQty', Math.max(0, parseInt(e.target.value) || 0))}
+                    min={0}
+                    required
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                  />
+                </div>
+              )}
             </div>
           </div>
         </section>
