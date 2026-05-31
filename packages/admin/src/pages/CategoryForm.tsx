@@ -19,6 +19,7 @@ interface CategoryData {
   locationId: string;
   trackSharedStock: boolean;
   sharedStockQty: number;
+  sharedStockThreshold: number;
 }
 
 const LANGUAGES = [
@@ -61,6 +62,7 @@ const emptyCategory: CategoryData = {
   locationId: '',
   trackSharedStock: false,
   sharedStockQty: 0,
+  sharedStockThreshold: 5,
 };
 
 export default function CategoryForm() {
@@ -116,6 +118,7 @@ export default function CategoryForm() {
           locationId: cat.locationId || '',
           trackSharedStock: cat.trackSharedStock || false,
           sharedStockQty: cat.sharedStockQty || 0,
+          sharedStockThreshold: cat.sharedStockThreshold !== undefined ? cat.sharedStockThreshold : 5,
         });
         if (cat.image) setImageUrl(cat.image);
         setLoading(false);
@@ -195,6 +198,7 @@ export default function CategoryForm() {
         locationId: form.locationId || null,
         trackSharedStock: form.trackSharedStock,
         sharedStockQty: Number(form.sharedStockQty),
+        sharedStockThreshold: Number(form.sharedStockThreshold),
       };
 
       if (isEdit) {
@@ -440,7 +444,10 @@ export default function CategoryForm() {
                     checked={form.trackSharedStock}
                     onChange={(e) => {
                       updateField('trackSharedStock', e.target.checked);
-                      if (!e.target.checked) updateField('sharedStockQty', 0);
+                      if (!e.target.checked) {
+                        updateField('sharedStockQty', 0);
+                        updateField('sharedStockThreshold', 5);
+                      }
                     }}
                     className="rounded border-gray-300 text-primary-600 focus:ring-primary-500 w-4 h-4"
                   />
@@ -448,17 +455,30 @@ export default function CategoryForm() {
                 </label>
               </div>
               {form.trackSharedStock && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">當日共用庫存總數 *</label>
-                  <input
-                    type="number"
-                    value={form.sharedStockQty}
-                    onChange={(e) => updateField('sharedStockQty', Math.max(0, parseInt(e.target.value) || 0))}
-                    min={0}
-                    required
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                  />
-                </div>
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">當日共用庫存總數 *</label>
+                    <input
+                      type="number"
+                      value={form.sharedStockQty}
+                      onChange={(e) => updateField('sharedStockQty', Math.max(0, parseInt(e.target.value) || 0))}
+                      min={0}
+                      required
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">庫存預警提示門檻 (預設 5) *</label>
+                    <input
+                      type="number"
+                      value={form.sharedStockThreshold}
+                      onChange={(e) => updateField('sharedStockThreshold', Math.max(0, parseInt(e.target.value) || 0))}
+                      min={0}
+                      required
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                    />
+                  </div>
+                </>
               )}
             </div>
           </div>

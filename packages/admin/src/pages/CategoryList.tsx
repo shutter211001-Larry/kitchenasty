@@ -14,6 +14,7 @@ interface Category {
   _count: { menuItems: number };
   trackSharedStock?: boolean;
   sharedStockQty?: number;
+  sharedStockThreshold?: number;
 }
 
 export default function CategoryList() {
@@ -87,11 +88,21 @@ export default function CategoryList() {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {cat._count.menuItems}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-bold">
                     {cat.trackSharedStock ? (
-                      <span className="text-indigo-600 bg-indigo-50 border border-indigo-150 px-2.5 py-1 rounded-md text-xs font-bold shadow-sm">
-                        📦 餘 {cat.sharedStockQty}
-                      </span>
+                      (cat.sharedStockQty || 0) === 0 ? (
+                        <span className="text-red-700 bg-red-50 border border-red-200 px-2.5 py-1 rounded-md text-xs font-extrabold shadow-sm inline-flex items-center gap-1">
+                          🚫 已售完 (0)
+                        </span>
+                      ) : (cat.sharedStockQty || 0) <= (cat.sharedStockThreshold || 5) ? (
+                        <span className="text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-md text-xs font-bold shadow-sm inline-flex items-center gap-1 animate-pulse">
+                          ⚠️ 補貨預警 ({cat.sharedStockQty})
+                        </span>
+                      ) : (
+                        <span className="text-indigo-600 bg-indigo-50 border border-indigo-150 px-2.5 py-1 rounded-md text-xs font-bold shadow-sm inline-flex items-center gap-1">
+                          📦 餘 {cat.sharedStockQty}
+                        </span>
+                      )
                     ) : (
                       <span className="text-gray-400 font-normal text-xs">- (獨立庫存)</span>
                     )}

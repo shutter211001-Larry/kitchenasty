@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { prisma } from '../lib/prisma.js';
+import mainPrisma from '../../lib/db.js';
 import { calculateRecipeStats } from './recipeController.js';
 import fs from 'fs';
 import path from 'path';
@@ -80,7 +81,9 @@ const fetchKitchenAsty = async (endpoint: string) => {
 // 1. Get Mappings
 export const getMappings = async (req: Request, res: Response) => {
   try {
-    const mappings = readMappings();
+    const mappings = await mainPrisma.erpRecipeMapping.findMany({
+      orderBy: { updatedAt: 'desc' }
+    });
     res.json({ success: true, data: mappings });
   } catch (err: any) {
     res.status(500).json({ success: false, error: err.message });
@@ -96,25 +99,23 @@ export const saveMapping = async (req: Request, res: Response) => {
       return res.status(400).json({ success: false, error: 'menuItemId and recipeId are required' });
     }
     
-    const mappings = readMappings();
-    const existingIndex = mappings.findIndex(m => m.menuItemId === menuItemId);
+    const newMapping = await mainPrisma.erpRecipeMapping.upsert({
+      where: { menuItemId },
+      create: {
+        menuItemId,
+        recipeId,
+        menuItemName: menuItemName || '',
+        menuItemPrice: menuItemPrice || 0,
+        recipeName: recipeName || '',
+      },
+      update: {
+        recipeId,
+        menuItemName: menuItemName || '',
+        menuItemPrice: menuItemPrice || 0,
+        recipeName: recipeName || '',
+      }
+    });
     
-    const newMapping = {
-      menuItemId,
-      recipeId,
-      menuItemName: menuItemName || '',
-      menuItemPrice: menuItemPrice || 0,
-      recipeName: recipeName || '',
-      updatedAt: new Date().toISOString()
-    };
-    
-    if (existingIndex >= 0) {
-      mappings[existingIndex] = newMapping;
-    } else {
-      mappings.push(newMapping);
-    }
-    
-    writeMappings(mappings);
     res.json({ success: true, data: newMapping });
   } catch (err: any) {
     res.status(500).json({ success: false, error: err.message });
@@ -126,10 +127,9 @@ export const deleteMapping = async (req: Request, res: Response) => {
   try {
     const { menuItemId } = req.params;
     
-    const mappings = readMappings();
-    const filtered = mappings.filter(m => m.menuItemId !== menuItemId);
-    
-    writeMappings(filtered);
+    await mainPrisma.erpRecipeMapping.delete({
+      where: { menuItemId: menuItemId as string }
+    });
     res.json({ success: true, message: 'Mapping deleted successfully' });
   } catch (err: any) {
     res.status(500).json({ success: false, error: err.message });
@@ -202,12 +202,12 @@ export const deductInventory = async (req: Request, res: Response) => {
     }
 
     console.log(`[Integration ERP] Processing stock deduction for Order #${orderNumber}...`);
-    const mappings = readMappings();
+    const mappings = await mainPrisma.erpRecipeMapping.findMany();
     const deductions: { ingredientId: string, name: string, amount: number, unit: string }[] = [];
 
     // 2. Loop order items and calculate required quantities
     for (const item of items) {
-      const mapping = mappings.find(m => m.menuItemId === item.menuItemId);
+      const mapping = mappings.find((m: any) => m.menuItemId === item.menuItemId);
       if (!mapping) {
         console.log(`[Integration ERP] No recipe mapping found for Menu Item: ${item.name} (${item.menuItemId})`);
         continue;
@@ -277,7 +277,7 @@ export const deductInventory = async (req: Request, res: Response) => {
 // 6. Intelligent Demand Forecasting from upcoming reservations
 export const getForecast = async (req: Request, res: Response) => {
   try {
-    const mappings = readMappings();
+    const mappings = await mainPrisma.erpRecipeMapping.findMany();
     if (mappings.length === 0) {
       return res.json({
         success: true,
@@ -307,7 +307,7 @@ export const getForecast = async (req: Request, res: Response) => {
     for (const order of orders) {
       if (order.status === 'CANCELLED') continue;
       for (const item of (order.items || [])) {
-        const mapping = mappings.find(m => m.menuItemId === item.menuItemId);
+        const mapping = mappings.find((m: any) => m.menuItemId === item.menuItemId);
         if (mapping) {
           totalMappedItemsCount += item.quantity || 1;
           const existing = popularityMap.get(item.menuItemId);
@@ -336,7 +336,7 @@ export const getForecast = async (req: Request, res: Response) => {
       });
     } else {
       // Fallback: Equal distribution
-      mappings.forEach((m) => {
+      mappings.forEach((m: any) => {
         weights.push({
           menuItemId: m.menuItemId,
           name: m.menuItemName,
@@ -362,7 +362,7 @@ export const getForecast = async (req: Request, res: Response) => {
     }>();
 
     for (const wt of weights) {
-      const mapping = mappings.find(m => m.menuItemId === wt.menuItemId)!;
+      const mapping = mappings.find((m: any) => m.menuItemId === wt.menuItemId)!;
       const estimatedOrders = totalGuests * wt.weight;
       if (estimatedOrders <= 0) continue;
 
