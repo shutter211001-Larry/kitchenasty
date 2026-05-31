@@ -2057,17 +2057,8 @@ export const Labels = () => {
                             if (val100 <= row.isZeroLimit) display100 = '0';
                           }
 
-                          // 依據法規標準樣式：橫線僅畫於主項目（蛋白質、脂肪、碳水化合物、鈉）上方，子項目（飽和/反式脂肪、糖）內部不畫線
-                          const hasBorderTop = [1, 2, 5, 7].includes(idx);
-
                           return (
-                            <tr 
-                              key={idx} 
-                              className={cn(
-                                "text-black font-black",
-                                hasBorderTop && "border-t-[0.1mm] border-black"
-                              )}
-                            >
+                            <tr key={idx} className="text-black font-black">
                               <td className={cn(
                                 "py-[0.2mm] text-left font-sans pl-[0.5mm] text-black",
                                 row.name.startsWith('  ') ? "pl-[2mm] font-semibold text-black" : "font-black text-black"
