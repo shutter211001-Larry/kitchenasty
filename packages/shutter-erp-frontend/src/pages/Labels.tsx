@@ -59,6 +59,30 @@ export const Labels = () => {
   // Group Collapse Accordion States
   const [activeAccordion, setActiveAccordion] = useState<'A' | 'B' | 'C' | 'D' | 'E' | 'F' | null>('A');
 
+  // Group Font Scales (Multiplier from 0.6 to 2.0)
+  const [groupFontScales, setGroupFontScales] = useState<Record<'A' | 'B' | 'C' | 'D' | 'E' | 'F', number>>({
+    A: 1.0,
+    B: 1.0,
+    C: 1.0,
+    D: 1.0,
+    E: 1.0,
+    F: 1.0
+  });
+
+  const updateGroupFontScale = (key: 'A' | 'B' | 'C' | 'D' | 'E' | 'F', value: number) => {
+    setGroupFontScales(prev => ({
+      ...prev,
+      [key]: value
+    }));
+  };
+
+  // Barcode Explanation dynamic text
+  const [barcodeExplanation, setBarcodeExplanation] = useState<string>('掃碼查看\n復熱教學影片');
+
+  // Copy and Paste Layout configuration utilities
+  const [targetRecipeIdToCopyTo, setTargetRecipeIdToCopyTo] = useState<string>('');
+  const [copyingLayoutToRecipe, setCopyingLayoutToRecipe] = useState<boolean>(false);
+
   // Warning Label for Non-Ready-To-Eat
   const [showNotReadyToEat, setShowNotReadyToEat] = useState<boolean>(true);
   const [notReadyToEatText, setNotReadyToEatText] = useState<string>('非供即食，應充分加熱');
@@ -103,19 +127,19 @@ export const Labels = () => {
   const DEFAULT_LAYOUTS: Record<'100x100' | '80x80' | '100x150' | '70x50', LabelLayout> = {
     '100x100': {
       A: { left: 2, top: 48, width: 48, height: 34 },
-      B: { left: 2, top: 2, width: 50, height: 18 },
-      F: { left: 2, top: 20, width: 50, height: 26 },
+      B: { left: 2, top: 2, width: 96, height: 14 },
+      F: { left: 2, top: 16, width: 50, height: 30 },
       C: { left: 52, top: 48, width: 46, height: 34 },
       D: { left: 2, top: 84, width: 96, height: 14 },
-      E: { left: 54, top: 2, width: 44, height: 44 }
+      E: { left: 54, top: 16, width: 44, height: 30 }
     },
     '80x80': {
       A: { left: 2, top: 48, width: 48, height: 34 },
-      B: { left: 2, top: 2, width: 50, height: 18 },
-      F: { left: 2, top: 20, width: 50, height: 26 },
+      B: { left: 2, top: 2, width: 96, height: 14 },
+      F: { left: 2, top: 16, width: 50, height: 30 },
       C: { left: 52, top: 48, width: 46, height: 34 },
       D: { left: 2, top: 84, width: 96, height: 14 },
-      E: { left: 54, top: 2, width: 44, height: 44 }
+      E: { left: 54, top: 16, width: 44, height: 30 }
     },
     '100x150': {
       B: { left: 2, top: 2, width: 96, height: 12 },
@@ -380,6 +404,13 @@ export const Labels = () => {
         if (settings.showNotReadyToEat !== undefined) setShowNotReadyToEat(settings.showNotReadyToEat);
         if (settings.notReadyToEatText !== undefined) setNotReadyToEatText(settings.notReadyToEatText);
         if (settings.nutritionConfigs !== undefined) setNutritionConfigs(settings.nutritionConfigs);
+        if (settings.groupFontScales !== undefined) {
+          setGroupFontScales({
+            A: 1.0, B: 1.0, C: 1.0, D: 1.0, E: 1.0, F: 1.0,
+            ...settings.groupFontScales
+          });
+        }
+        if (settings.barcodeExplanation !== undefined) setBarcodeExplanation(settings.barcodeExplanation);
         if (settings.brandNameZh) setBrandNameZh(settings.brandNameZh);
         if (settings.brandNameEn) setBrandNameEn(settings.brandNameEn);
         if (settings.logoType) setLogoType(settings.logoType);
@@ -429,6 +460,13 @@ export const Labels = () => {
         ...config.groupLayouts
       });
     }
+    if (config.groupFontScales !== undefined) {
+      setGroupFontScales({
+        A: 1.0, B: 1.0, C: 1.0, D: 1.0, E: 1.0, F: 1.0,
+        ...config.groupFontScales
+      });
+    }
+    if (config.barcodeExplanation !== undefined) setBarcodeExplanation(config.barcodeExplanation);
     if (config.productZh !== undefined) setProductZh(config.productZh);
     if (config.productEn !== undefined) setProductEn(config.productEn);
     if (config.ingredientsText !== undefined) setIngredientsText(config.ingredientsText);
@@ -490,6 +528,64 @@ export const Labels = () => {
     if (config.portionScale !== undefined) setPortionScale(config.portionScale);
   };
 
+  // Copy and Paste Layout configuration utilities
+  const handleCopyLayoutToClipboard = () => {
+    localStorage.setItem('shutter_layout_clipboard', JSON.stringify({
+      groupLayouts,
+      groupFontScales
+    }));
+    alert('📋 已複製當前群組位置與文字大小設定！您可以在切換至其他食譜後點選「貼上排版」套用。');
+  };
+
+  const handlePasteLayoutFromClipboard = () => {
+    const data = localStorage.getItem('shutter_layout_clipboard');
+    if (!data) {
+      alert('📋 剪貼簿為空！請先複製來源配方的排版。');
+      return;
+    }
+    try {
+      const parsed = JSON.parse(data);
+      if (parsed.groupLayouts) setGroupLayouts(parsed.groupLayouts);
+      if (parsed.groupFontScales) setGroupFontScales(parsed.groupFontScales);
+      alert('📋 已成功貼上並套用群組位置與文字大小排版！請點擊下方「儲存設定」按鈕將變更儲存至伺服器。');
+    } catch (e) {
+      alert('📋 貼上排版失敗，剪貼簿資料格式不正確。');
+    }
+  };
+
+  const handleCopyLayoutToRecipe = async () => {
+    if (!selectedRecipeId) {
+      alert('請先選擇當前來源食譜配方');
+      return;
+    }
+    if (!targetRecipeIdToCopyTo) {
+      alert('請選擇一個目標食譜配方');
+      return;
+    }
+    try {
+      setCopyingLayoutToRecipe(true);
+      const res = await axios.get(`http://localhost:3000/api/recipes/${targetRecipeIdToCopyTo}`);
+      const targetRecipe = res.data;
+      const oldConfig = targetRecipe.labelConfig || {};
+      
+      const updatedConfig = {
+        ...oldConfig,
+        useCustomLayout,
+        groupLayouts,
+        groupFontScales
+      };
+      
+      await axios.patch(`http://localhost:3000/api/recipes/${targetRecipeIdToCopyTo}/label-config`, { labelConfig: updatedConfig });
+      alert('🎉 排版已成功複製並套用到目標食譜！您可以切換到該食譜查看。');
+      setTargetRecipeIdToCopyTo('');
+    } catch (error) {
+      console.error('Failed to copy layout to recipe', error);
+      alert('複製排版失敗，請檢查網路連線');
+    } finally {
+      setCopyingLayoutToRecipe(false);
+    }
+  };
+
   const handleSaveLabelConfig = async () => {
     if (!selectedRecipeId) {
       alert('請先選擇一個食譜配方');
@@ -504,6 +600,8 @@ export const Labels = () => {
         notReadyToEatText,
         nutritionConfigs,
         groupLayouts,
+        groupFontScales,
+        barcodeExplanation,
         labelGap,
         includeGapInPrint,
         previewContinuous,
@@ -766,6 +864,15 @@ export const Labels = () => {
     setShowPhone(true);
     setShowOrigin(true);
     setShowManufacturer(true);
+    setGroupFontScales({
+      A: 1.0,
+      B: 1.0,
+      C: 1.0,
+      D: 1.0,
+      E: 1.0,
+      F: 1.0
+    });
+    setBarcodeExplanation('掃碼查看\n復熱教學影片');
     localStorage.removeItem('pizzamaster_label_settings');
   };
 
@@ -776,6 +883,8 @@ export const Labels = () => {
       notReadyToEatText,
       nutritionConfigs,
       labelSize,
+      groupFontScales,
+      barcodeExplanation,
       labelGap,
       includeGapInPrint,
       previewContinuous,
@@ -1080,6 +1189,61 @@ export const Labels = () => {
                 >
                   <span>💾 儲存目前標籤設計</span>
                 </button>
+
+                {/* Layout Replication Panel */}
+                <div className="bg-slate-50 border border-slate-200 p-3.5 rounded-2xl space-y-3 mt-3.5 animate-in fade-in duration-200">
+                  <div className="flex items-center gap-1.5 text-gray-700 pb-1.5 border-b border-dashed border-slate-200">
+                    <Sparkles className="w-3.5 h-3.5 text-teal-600 animate-pulse" />
+                    <span className="text-[10px] font-black text-slate-800">排版剪貼簿 & 跨配方一鍵複製</span>
+                  </div>
+
+                  {/* Clipboard Row */}
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={handleCopyLayoutToClipboard}
+                      className="py-1.5 px-2 border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 rounded-xl font-black text-[10px] flex items-center justify-center gap-1 cursor-pointer transition-colors active:scale-95"
+                    >
+                      📋 複製目前排版
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handlePasteLayoutFromClipboard}
+                      className="py-1.5 px-2 border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 rounded-xl font-black text-[10px] flex items-center justify-center gap-1 cursor-pointer transition-colors active:scale-95"
+                    >
+                      📋 貼上排版設定
+                    </button>
+                  </div>
+
+                  {/* Sync to Other Recipe */}
+                  <div className="space-y-1.5 pt-1.5 border-t border-dashed border-slate-200">
+                    <label className="text-[8.5px] font-black text-gray-500 block">同步複製當前排版至其他食譜</label>
+                    <div className="flex gap-1.5">
+                      <select
+                        className="flex-1 px-2.5 py-1.5 bg-white border border-border rounded-xl font-bold text-[11px] outline-none"
+                        value={targetRecipeIdToCopyTo}
+                        onChange={(e) => setTargetRecipeIdToCopyTo(e.target.value)}
+                      >
+                        <option value="">-- 選擇目標食譜 --</option>
+                        {recipes
+                          .filter((r) => r.id !== selectedRecipeId)
+                          .map((r) => (
+                            <option key={r.id} value={r.id}>
+                              {r.name}
+                            </option>
+                          ))}
+                      </select>
+                      <button
+                        type="button"
+                        onClick={handleCopyLayoutToRecipe}
+                        disabled={copyingLayoutToRecipe || !targetRecipeIdToCopyTo}
+                        className="py-1.5 px-3 bg-teal-600 hover:bg-teal-700 disabled:bg-slate-200 disabled:text-slate-400 text-white rounded-xl font-black text-[10px] flex items-center justify-center gap-1 cursor-pointer transition-colors disabled:cursor-not-allowed"
+                      >
+                        {copyingLayoutToRecipe ? '同步中...' : '一鍵同步'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
           </div>
@@ -1345,6 +1509,28 @@ export const Labels = () => {
               
               {activeAccordion === 'A' && (
                 <div className="p-4 border-t border-border space-y-4 animate-in fade-in duration-200">
+                  {/* Font Scale Slider */}
+                  <div className="bg-slate-50 border border-slate-200/60 p-3 rounded-2xl space-y-1.5 shrink-0">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-black text-gray-700 flex items-center gap-1">
+                        <Sliders className="w-3.5 h-3.5 text-orange-600" />
+                        字體縮放比例
+                      </span>
+                      <span className="text-[10px] font-bold text-orange-600 font-mono bg-orange-50 px-1.5 py-0.5 rounded-md">
+                        {Math.round(groupFontScales.A * 100)}%
+                      </span>
+                    </div>
+                    <input
+                      type="range"
+                      min="0.6"
+                      max="2.0"
+                      step="0.05"
+                      value={groupFontScales.A}
+                      onChange={(e) => updateGroupFontScale('A', parseFloat(e.target.value))}
+                      className="w-full h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-orange-600"
+                    />
+                  </div>
+
                   <div className="flex items-center justify-between pb-1.5 border-b border-dashed border-slate-100">
                     <label className="flex items-center gap-2 cursor-pointer font-black text-[10.5px] text-gray-700">
                       <input
@@ -1498,29 +1684,7 @@ export const Labels = () => {
                         </div>
                       </div>
 
-                      {/* Barcode settings inside Reheating Guide */}
-                      <div className="border-t border-slate-100 pt-3 space-y-2">
-                        <label className="flex items-center gap-2 cursor-pointer font-bold text-[10px] text-gray-700">
-                          <input
-                            type="checkbox"
-                            checked={showBarcode}
-                            onChange={(e) => setShowBarcode(e.target.checked)}
-                            className="w-3.5 h-3.5 accent-primary rounded border-border"
-                          />
-                          <span>顯示烹調說明/條碼 QR Code</span>
-                        </label>
-                        {showBarcode && (
-                          <div className="space-y-1 animate-in fade-in duration-150">
-                            <span className="text-[8.5px] font-bold text-gray-500 block">條碼連結 URL 網址</span>
-                            <input
-                              type="text"
-                              className="w-full px-3 py-1.5 bg-slate-50 border border-border rounded-xl font-bold text-xs font-mono"
-                              value={barcodeText}
-                              onChange={(e) => setBarcodeText(e.target.value)}
-                            />
-                          </div>
-                        )}
-                      </div>
+
                     </div>
                   )}
                 </div>
@@ -1546,6 +1710,27 @@ export const Labels = () => {
               
               {activeAccordion === 'B' && (
                 <div className="p-4 border-t border-border space-y-4 animate-in fade-in duration-200">
+                  {/* Font Scale Slider */}
+                  <div className="bg-slate-50 border border-slate-200/60 p-3 rounded-2xl space-y-1.5 shrink-0">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-black text-gray-700 flex items-center gap-1">
+                        <Sliders className="w-3.5 h-3.5 text-teal-600" />
+                        字體縮放比例
+                      </span>
+                      <span className="text-[10px] font-bold text-teal-600 font-mono bg-teal-50 px-1.5 py-0.5 rounded-md">
+                        {Math.round(groupFontScales.B * 100)}%
+                      </span>
+                    </div>
+                    <input
+                      type="range"
+                      min="0.6"
+                      max="2.0"
+                      step="0.05"
+                      value={groupFontScales.B}
+                      onChange={(e) => updateGroupFontScale('B', parseFloat(e.target.value))}
+                      className="w-full h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-teal-600"
+                    />
+                  </div>
                   {/* Brand Branding Info Box */}
                   <div className="bg-slate-50/50 p-3 border border-border rounded-2xl space-y-3">
                     <div className="flex items-center justify-between">
@@ -1746,6 +1931,27 @@ export const Labels = () => {
               
               {activeAccordion === 'F' && (
                 <div className="p-4 border-t border-border space-y-4 animate-in fade-in duration-200">
+                  {/* Font Scale Slider */}
+                  <div className="bg-slate-50 border border-slate-200/60 p-3 rounded-2xl space-y-1.5 shrink-0">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-black text-gray-700 flex items-center gap-1">
+                        <Sliders className="w-3.5 h-3.5 text-amber-600" />
+                        字體縮放比例
+                      </span>
+                      <span className="text-[10px] font-bold text-amber-600 font-mono bg-amber-50 px-1.5 py-0.5 rounded-md">
+                        {Math.round(groupFontScales.F * 100)}%
+                      </span>
+                    </div>
+                    <input
+                      type="range"
+                      min="0.6"
+                      max="2.0"
+                      step="0.05"
+                      value={groupFontScales.F}
+                      onChange={(e) => updateGroupFontScale('F', parseFloat(e.target.value))}
+                      className="w-full h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-amber-600"
+                    />
+                  </div>
                   {/* Ingredients List */}
                   <div className="space-y-1.5">
                     <label className="flex items-center gap-2 cursor-pointer font-black text-[10.5px] text-gray-700">
@@ -1832,6 +2038,27 @@ export const Labels = () => {
               
               {activeAccordion === 'C' && (
                 <div className="p-4 border-t border-border space-y-4 animate-in fade-in duration-200">
+                  {/* Font Scale Slider */}
+                  <div className="bg-slate-50 border border-slate-200/60 p-3 rounded-2xl space-y-1.5 shrink-0">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-black text-gray-700 flex items-center gap-1">
+                        <Sliders className="w-3.5 h-3.5 text-emerald-600" />
+                        字體縮放比例
+                      </span>
+                      <span className="text-[10px] font-bold text-emerald-600 font-mono bg-emerald-50 px-1.5 py-0.5 rounded-md">
+                        {Math.round(groupFontScales.C * 100)}%
+                      </span>
+                    </div>
+                    <input
+                      type="range"
+                      min="0.6"
+                      max="2.0"
+                      step="0.05"
+                      value={groupFontScales.C}
+                      onChange={(e) => updateGroupFontScale('C', parseFloat(e.target.value))}
+                      className="w-full h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-emerald-600"
+                    />
+                  </div>
                   {/* Net Weight & Origin */}
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-1.5">
@@ -1992,6 +2219,27 @@ export const Labels = () => {
               
               {activeAccordion === 'D' && (
                 <div className="p-4 border-t border-border space-y-4 animate-in fade-in duration-200">
+                  {/* Font Scale Slider */}
+                  <div className="bg-slate-50 border border-slate-200/60 p-3 rounded-2xl space-y-1.5 shrink-0">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-black text-gray-700 flex items-center gap-1">
+                        <Sliders className="w-3.5 h-3.5 text-sky-600" />
+                        字體縮放比例
+                      </span>
+                      <span className="text-[10px] font-bold text-sky-600 font-mono bg-sky-50 px-1.5 py-0.5 rounded-md">
+                        {Math.round(groupFontScales.D * 100)}%
+                      </span>
+                    </div>
+                    <input
+                      type="range"
+                      min="0.6"
+                      max="2.0"
+                      step="0.05"
+                      value={groupFontScales.D}
+                      onChange={(e) => updateGroupFontScale('D', parseFloat(e.target.value))}
+                      className="w-full h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-sky-600"
+                    />
+                  </div>
                   <div className="flex items-center justify-between pb-1.5 border-b border-dashed border-slate-100">
                     <label className="flex items-center gap-2 cursor-pointer font-black text-[10.5px] text-gray-700">
                       <input
@@ -2061,6 +2309,42 @@ export const Labels = () => {
                       </div>
                     </div>
                   )}
+
+                  {/* Barcode settings moved to Group D */}
+                  <div className="border-t border-slate-100 pt-3 space-y-2">
+                    <label className="flex items-center gap-2 cursor-pointer font-bold text-[10px] text-gray-700">
+                      <input
+                        type="checkbox"
+                        checked={showBarcode}
+                        onChange={(e) => setShowBarcode(e.target.checked)}
+                        className="w-3.5 h-3.5 accent-primary rounded border-border"
+                      />
+                      <span>顯示烹調說明/條碼 QR Code</span>
+                    </label>
+                    {showBarcode && (
+                      <div className="space-y-3 animate-in fade-in duration-150">
+                        <div className="space-y-1">
+                          <span className="text-[8.5px] font-bold text-gray-500 block">條碼連結 URL 網址</span>
+                          <input
+                            type="text"
+                            className="w-full px-3 py-1.5 bg-slate-50 border border-border rounded-xl font-bold text-xs font-mono"
+                            value={barcodeText}
+                            onChange={(e) => setBarcodeText(e.target.value)}
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <span className="text-[8.5px] font-bold text-gray-500 block">條碼旁說明文字 (支援多行)</span>
+                          <textarea
+                            className="w-full px-3 py-1.5 bg-slate-50 border border-border rounded-xl font-bold text-xs resize-none font-sans"
+                            rows={2}
+                            placeholder={"掃碼查看\n復熱教學影片"}
+                            value={barcodeExplanation}
+                            onChange={(e) => setBarcodeExplanation(e.target.value)}
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
@@ -2084,6 +2368,27 @@ export const Labels = () => {
               
               {activeAccordion === 'E' && (
                 <div className="p-4 border-t border-border space-y-4 animate-in fade-in duration-200">
+                  {/* Font Scale Slider */}
+                  <div className="bg-slate-50 border border-slate-200/60 p-3 rounded-2xl space-y-1.5 shrink-0">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-black text-gray-700 flex items-center gap-1">
+                        <Sliders className="w-3.5 h-3.5 text-purple-600" />
+                        字體縮放比例
+                      </span>
+                      <span className="text-[10px] font-bold text-purple-600 font-mono bg-purple-50 px-1.5 py-0.5 rounded-md">
+                        {Math.round(groupFontScales.E * 100)}%
+                      </span>
+                    </div>
+                    <input
+                      type="range"
+                      min="0.6"
+                      max="2.0"
+                      step="0.05"
+                      value={groupFontScales.E}
+                      onChange={(e) => updateGroupFontScale('E', parseFloat(e.target.value))}
+                      className="w-full h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-purple-600"
+                    />
+                  </div>
                   <div className="flex items-center justify-between pb-1.5 border-b border-dashed border-slate-100">
                     <label className="flex items-center gap-2 cursor-pointer font-black text-[10.5px] text-gray-700">
                       <input
@@ -2359,33 +2664,51 @@ export const Labels = () => {
                           </div>
 
                           {/* Content Container */}
-                          <div className="w-full h-full flex flex-col justify-center pt-3 pb-1 min-h-0 text-black">
-                            {/* Brand Header */}
-                            {showBranding && labelSize !== '70x50' && (
-                              <div className="flex items-center gap-1.5 overflow-hidden shrink-0 border-b border-black pb-1 mb-1">
-                                <div className="w-5 h-5 shrink-0 flex items-center justify-center border border-black rounded p-0.5 bg-white">
-                                  {renderLabelLogo()}
+                          <div className="w-full h-full flex items-center justify-between pt-3 pb-1 min-h-0 text-black px-1">
+                            {labelSize !== '70x50' ? (
+                              <>
+                                {/* Left Side: Brand Logo & Names */}
+                                {showBranding && (
+                                  <div className="flex items-center gap-1.5 overflow-hidden shrink-0">
+                                    <div className="w-5 h-5 shrink-0 flex items-center justify-center border border-black rounded p-0.5 bg-white">
+                                      {renderLabelLogo()}
+                                    </div>
+                                    <div className="flex flex-col text-left min-w-0">
+                                      <span className="font-extrabold tracking-wide leading-none text-black truncate" style={{ fontSize: `${7.5 * groupFontScales.B}pt` }}>{brandNameZh}</span>
+                                      <span className="font-bold tracking-wider text-black uppercase leading-none truncate mt-0.5" style={{ fontSize: `${4.5 * groupFontScales.B}pt` }}>{brandNameEn}</span>
+                                    </div>
+                                  </div>
+                                )}
+
+                                {/* Right Side: Product Name */}
+                                <div className="text-right flex-1 pl-2 overflow-hidden leading-tight flex flex-col justify-center">
+                                  {showProductZh && (
+                                    <h1 className="font-black leading-none tracking-tight text-black break-words" style={{ fontSize: `${10 * groupFontScales.B}pt` }}>
+                                      {productZh}
+                                    </h1>
+                                  )}
+                                  {showProductEn && (
+                                    <span className="font-bold uppercase text-black block leading-none truncate mt-0.5" style={{ fontSize: `${5 * groupFontScales.B}pt` }}>
+                                      {productEn}
+                                    </span>
+                                  )}
                                 </div>
-                                <div className="flex flex-col text-black min-w-0">
-                                  <span className="font-extrabold text-[7.5pt] tracking-wide leading-none truncate text-black">{brandNameZh}</span>
-                                  <span className="font-bold text-[4.5pt] tracking-wider text-black uppercase leading-none truncate mt-0.5">{brandNameEn}</span>
-                                </div>
+                              </>
+                            ) : (
+                              // 70x50 mini label side-by-side layout: Product name on left, Brand name on right
+                              <div className="w-full flex items-center justify-between min-h-0 leading-none">
+                                {showProductZh && (
+                                  <span className="font-black text-black text-left truncate flex-1 pr-1.5" style={{ fontSize: `${9 * groupFontScales.B}pt` }}>
+                                    {productZh}
+                                  </span>
+                                )}
+                                {showBranding && (
+                                  <span className="font-bold text-black text-right shrink-0" style={{ fontSize: `${5.5 * groupFontScales.B}pt` }}>
+                                    {brandNameZh}
+                                  </span>
+                                )}
                               </div>
                             )}
-
-                            {/* Product Name */}
-                            <div className="shrink-0 leading-tight">
-                              {showProductZh && (
-                                <h1 className="font-black text-[10pt] leading-none tracking-tight text-black break-words">
-                                  {productZh}
-                                </h1>
-                              )}
-                              {showProductEn && labelSize !== '70x50' && (
-                                <span className="font-bold text-[5pt] uppercase text-black block leading-none truncate mt-0.5">
-                                  {productEn}
-                                </span>
-                              )}
-                            </div>
                           </div>
 
                           {/* Resize Handle - Hidden in Print */}
@@ -2436,10 +2759,10 @@ export const Labels = () => {
                             {/* Ingredients */}
                             {showIngredients && (
                               <div className="flex-1 flex flex-col justify-start min-h-0 overflow-hidden text-black leading-tight">
-                                <span className="font-black text-[5.8pt] bg-black text-white px-1 py-[0.2mm] rounded-[0.2mm] self-start leading-none shrink-0 mb-0.5">
+                                <span className="font-black bg-black text-white px-1 py-[0.2mm] rounded-[0.2mm] self-start leading-none shrink-0 mb-0.5" style={{ fontSize: `${5.8 * groupFontScales.F}pt` }}>
                                   成分
                                 </span>
-                                <p className="font-semibold text-justify word-break break-all text-black leading-[1.25] text-[5.8pt] overflow-y-auto">
+                                <p className="font-semibold text-justify word-break break-all text-black leading-[1.25] overflow-y-auto" style={{ fontSize: `${5.8 * groupFontScales.F}pt` }}>
                                   {ingredientsText}
                                 </p>
                               </div>
@@ -2448,12 +2771,12 @@ export const Labels = () => {
                             {/* Warnings Non-Ready-To-Eat & Allergens */}
                             <div className="shrink-0 space-y-0.5 mt-1 leading-none">
                               {showNotReadyToEat && (
-                                <div className="text-[5.5pt] font-black text-center text-white bg-black border border-black py-0.5 rounded-[0.2mm]">
+                                <div className="font-black text-center text-white bg-black border border-black py-0.5 rounded-[0.2mm]" style={{ fontSize: `${5.5 * groupFontScales.F}pt` }}>
                                   ⚠️ {notReadyToEatText}
                                 </div>
                               )}
                               {showAllergens && allergenWarning && (
-                                <div className="text-[5pt] font-black text-black bg-white p-0.5 rounded-[0.2mm] border border-black border-dashed leading-tight">
+                                <div className="font-black text-black bg-white p-0.5 rounded-[0.2mm] border border-black border-dashed leading-tight" style={{ fontSize: `${5 * groupFontScales.F}pt` }}>
                                   警告：{allergenWarning}
                                 </div>
                               )}
@@ -2508,16 +2831,16 @@ export const Labels = () => {
                           <div className="w-full h-full flex flex-col justify-end pt-3 pb-1 min-h-0 text-black">
                             {showNutrition ? (
                               <div className="flex flex-col justify-end text-black shrink-0 border border-black p-0.5 bg-white">
-                                <div className="text-[6.2pt] font-black text-center border-b border-black pb-0.5 tracking-wider leading-none">
+                                <div className="font-black text-center border-b border-black pb-0.5 tracking-wider leading-none" style={{ fontSize: `${6.2 * groupFontScales.E}pt` }}>
                                   營 養 標 示
                                 </div>
-                                <div className="text-[4.8pt] font-bold text-left py-0.5 border-b border-black leading-tight">
+                                <div className="font-bold text-left py-0.5 border-b border-black leading-tight" style={{ fontSize: `${4.8 * groupFontScales.E}pt` }}>
                                   每一份量 {portionSize} 公克<br />
                                   本包裝含 {portionsPerPkg} 份
                                 </div>
-                                <table className="w-full text-center border-collapse text-[5pt] font-black mt-0.5">
+                                <table className="w-full text-center border-collapse mt-0.5" style={{ fontSize: `${5 * groupFontScales.E}pt` }}>
                                   <thead>
-                                    <tr className="border-b border-black text-[4.5pt]">
+                                    <tr className="border-b border-black" style={{ fontSize: `${4.5 * groupFontScales.E}pt` }}>
                                       <th className="py-0.5 text-left font-black"></th>
                                       <th className="py-0.5 text-right font-black w-[28%]">每份</th>
                                       <th className="py-0.5 text-right font-black w-[36%]">每100克</th>
@@ -2639,7 +2962,7 @@ export const Labels = () => {
 
                           {/* Content Container */}
                           <div className="w-full h-full flex flex-col justify-around pt-3 pb-1 min-h-0 text-black leading-tight">
-                            <div className="text-[5.8pt] font-extrabold space-y-[0.3mm] text-black">
+                            <div className="font-extrabold space-y-[0.3mm] text-black" style={{ fontSize: `${5.8 * groupFontScales.C}pt` }}>
                               {showNetWeight && (
                                 <div className="flex justify-between">
                                   <span>淨重：</span>
@@ -2725,7 +3048,7 @@ export const Labels = () => {
                               <div className="w-full h-full flex flex-col justify-between overflow-hidden">
                                 <div className="flex justify-center shrink-0 mb-0.5">
                                   <span 
-                                    style={{ fontSize: `${reheatingMainTitleSize - 1}pt` }}
+                                    style={{ fontSize: `${(reheatingMainTitleSize - 1) * groupFontScales.A}pt` }}
                                     className="font-black bg-black text-white px-1.5 py-[0.25mm] rounded-[0.25mm] text-center leading-none"
                                   >
                                     {reheatingMainTitle}
@@ -2738,10 +3061,10 @@ export const Labels = () => {
                                     { title: panTitle, steps: panSteps, show: showPan }
                                   ].filter(m => m.show).map((m, idx) => (
                                     <div key={idx} className="flex flex-col text-black">
-                                      <strong style={{ fontSize: `${reheatingSubTitleSize - 1.2}pt` }} className="font-black">
+                                      <strong style={{ fontSize: `${(reheatingSubTitleSize - 1.2) * groupFontScales.A}pt` }} className="font-black">
                                         ├─ {m.title}
                                       </strong>
-                                      <p style={{ fontSize: `${reheatingContentSize - 1.2}pt` }} className="font-bold whitespace-pre-line pl-2 leading-tight">
+                                      <p style={{ fontSize: `${(reheatingContentSize - 1.2) * groupFontScales.A}pt` }} className="font-bold whitespace-pre-line pl-2 leading-tight">
                                         {m.steps}
                                       </p>
                                     </div>
@@ -2803,7 +3126,7 @@ export const Labels = () => {
                           <div className="w-full h-full flex items-center justify-between pt-3 pb-0.5 min-h-0 text-black leading-tight gap-1.5">
                             {/* Responsible party info */}
                             {showResponsible && (
-                              <div className="text-[5.2pt] text-black font-semibold flex-1 min-w-0">
+                              <div className="text-black font-semibold flex-1 min-w-0" style={{ fontSize: `${5.2 * groupFontScales.D}pt` }}>
                                 {showAddress && (
                                   <div className="flex gap-[0.2mm]">
                                     <span className="font-black shrink-0">地址：</span>
@@ -2817,7 +3140,7 @@ export const Labels = () => {
                                   </div>
                                 )}
                                 {showManufacturer && (
-                                  <div className="flex gap-[0.2mm] text-[5pt] text-slate-600 mt-0.5">
+                                  <div className="flex gap-[0.2mm] text-slate-600 mt-0.5" style={{ fontSize: `${5 * groupFontScales.D}pt` }}>
                                     <span>製造商：</span>
                                     <span className="truncate">{companyName}</span>
                                   </div>
@@ -2837,8 +3160,8 @@ export const Labels = () => {
                                     bgColor="#ffffff"
                                   />
                                 </div>
-                                <span className="text-[4.5pt] font-sans font-black leading-tight text-black whitespace-nowrap">
-                                  掃碼查看<br />復熱教學
+                                <span className="font-sans font-black leading-tight text-black whitespace-pre-line text-left" style={{ fontSize: `${4.5 * groupFontScales.D}pt` }}>
+                                  {barcodeExplanation}
                                 </span>
                               </div>
                             )}
@@ -2872,20 +3195,20 @@ export const Labels = () => {
                                   {renderLabelLogo()}
                                 </div>
                                 <div className="flex flex-col justify-center text-black">
-                                  <span className="font-extrabold text-[12pt] tracking-wide leading-none text-black">{brandNameZh}</span>
-                                  <span className="font-bold text-[5.5pt] tracking-widest text-black uppercase mt-0.5 leading-none">{brandNameEn}</span>
+                                  <span className="font-extrabold tracking-wide leading-none text-black" style={{ fontSize: `${12 * groupFontScales.B}pt` }}>{brandNameZh}</span>
+                                  <span className="font-bold tracking-widest text-black uppercase mt-0.5 leading-none" style={{ fontSize: `${5.5 * groupFontScales.B}pt` }}>{brandNameEn}</span>
                                 </div>
                               </div>
                             )}
                             
                             <div className="text-right flex-1 pl-[3mm] overflow-hidden">
                               {showProductZh && (
-                                <h1 className="font-black text-[13pt] tracking-tight leading-none text-black break-words">
+                                <h1 className="font-black tracking-tight leading-none text-black break-words" style={{ fontSize: `${13 * groupFontScales.B}pt` }}>
                                   {productZh}
                                 </h1>
                               )}
                               {showProductEn && (
-                                <span className="font-extrabold text-[6.2pt] tracking-wide uppercase text-black block mt-1.5 leading-none truncate">
+                                <span className="font-extrabold tracking-wide uppercase text-black block mt-1.5 leading-none truncate" style={{ fontSize: `${6.2 * groupFontScales.B}pt` }}>
                                   {productEn}
                                 </span>
                               )}
@@ -2894,8 +3217,8 @@ export const Labels = () => {
                         ) : (
                           // Mini Header layout (70x50)
                           <div className="w-full border-b-[0.5mm] border-black pb-[0.5mm] flex justify-between items-end shrink-0">
-                            <span className="font-black text-[9pt] leading-none text-black">{productZh}</span>
-                            <span className="font-bold text-[5.5pt] text-black leading-none">{brandNameZh}</span>
+                            <span className="font-black leading-none text-black" style={{ fontSize: `${9 * groupFontScales.B}pt` }}>{productZh}</span>
+                            <span className="font-bold text-black leading-none" style={{ fontSize: `${5.5 * groupFontScales.B}pt` }}>{brandNameZh}</span>
                           </div>
                         )}
 
@@ -2917,7 +3240,7 @@ export const Labels = () => {
                               <div className="border-r-[0.3mm] border-black pr-[2mm] flex flex-col justify-between gap-[2.5mm] min-h-0 overflow-hidden text-black h-full">
                                 <div className="flex justify-center">
                                   <span 
-                                    style={{ fontSize: `${reheatingMainTitleSize}pt` }}
+                                    style={{ fontSize: `${reheatingMainTitleSize * groupFontScales.A}pt` }}
                                     className="font-black bg-black text-white px-[2mm] py-[0.5mm] rounded-[0.5mm] text-center leading-none"
                                   >
                                     {reheatingMainTitle}
@@ -2932,13 +3255,13 @@ export const Labels = () => {
                                   ].filter(m => m.show).map((m, idx) => (
                                     <div key={idx} className="flex flex-col gap-[0.5mm] text-black">
                                       <strong 
-                                        style={{ fontSize: `${reheatingSubTitleSize}pt` }}
+                                        style={{ fontSize: `${reheatingSubTitleSize * groupFontScales.A}pt` }}
                                         className="font-extrabold text-black"
                                       >
                                         ├─ {m.title}
                                       </strong>
                                       <p 
-                                        style={{ fontSize: `${reheatingContentSize}pt` }}
+                                        style={{ fontSize: `${reheatingContentSize * groupFontScales.A}pt` }}
                                         className="text-black font-semibold whitespace-pre-line pl-[3.5mm] leading-[1.3]"
                                       >
                                         {m.steps}
@@ -2954,10 +3277,10 @@ export const Labels = () => {
                               {/* Ingredients */}
                               {showIngredients && (
                                 <div className="flex flex-col gap-[1mm] min-h-0 overflow-hidden text-black flex-1 justify-start">
-                                  <span className="font-black text-[7pt] bg-black text-white px-[1.5mm] py-[0.3mm] rounded-[0.3mm] self-start leading-none shrink-0 mb-1">
+                                  <span className="font-black bg-black text-white px-[1.5mm] py-[0.3mm] rounded-[0.3mm] self-start leading-none shrink-0 mb-1" style={{ fontSize: `${7 * groupFontScales.F}pt` }}>
                                     成分
                                   </span>
-                                  <p className="font-semibold text-justify word-break break-all text-black pl-0.5 leading-[1.3] text-[6.6pt] overflow-y-auto">
+                                  <p className="font-semibold text-justify word-break break-all text-black pl-0.5 leading-[1.3] overflow-y-auto" style={{ fontSize: `${6.6 * groupFontScales.F}pt` }}>
                                     {ingredientsText}
                                   </p>
                                 </div>
@@ -2965,14 +3288,14 @@ export const Labels = () => {
 
                               {/* Non-ready-to-eat warning inside flow */}
                               {showNotReadyToEat && (
-                                <div className="text-[6.2pt] font-black text-center text-white bg-black py-0.5 rounded-[0.3mm] shrink-0 my-0.5">
+                                <div className="font-black text-center text-white bg-black py-0.5 rounded-[0.3mm] shrink-0 my-0.5" style={{ fontSize: `${6.2 * groupFontScales.F}pt` }}>
                                   ⚠️ {notReadyToEatText}
                                 </div>
                               )}
 
                               {/* Expiry / Weight */}
                               {!shouldMoveInfoToBottomLeft && (showNetWeight || showStorage || showExpiry || showOrigin) && (
-                                <div className="text-[6.8pt] leading-[1.35] font-bold space-y-[0.6mm] border-t-[0.2mm] border-dashed border-black pt-2 text-black shrink-0">
+                                <div className="leading-[1.35] font-bold space-y-[0.6mm] border-t-[0.2mm] border-dashed border-black pt-2 text-black shrink-0" style={{ fontSize: `${6.8 * groupFontScales.C}pt` }}>
                                   {showNetWeight && (
                                     <div className="flex justify-between text-black">
                                       <span>淨重：</span>
@@ -3019,20 +3342,20 @@ export const Labels = () => {
                           </div>
                         ) : (
                           // Mini Label (70x50) compact body
-                          <div className="flex-1 py-[1mm] flex flex-col justify-between text-[5.8pt] leading-[1.2] font-extrabold text-black">
+                          <div className="flex-1 py-[1mm] flex flex-col justify-between text-black leading-[1.2] font-extrabold" style={{ fontSize: `${5.8 * groupFontScales.F}pt` }}>
                             {showIngredients && (
-                              <p className="text-justify word-break break-all text-black font-semibold">
+                              <p className="text-justify word-break break-all text-black font-semibold" style={{ fontSize: `${5.8 * groupFontScales.F}pt` }}>
                                 <span className="font-black text-black">成分：</span>{ingredientsText}
                               </p>
                             )}
 
                             {showNotReadyToEat && (
-                              <div className="text-[5.2pt] font-black text-center text-white bg-black py-0.5 rounded-[0.2mm] shrink-0 my-0.5">
+                              <div className="font-black text-center text-white bg-black py-0.5 rounded-[0.2mm] shrink-0 my-0.5" style={{ fontSize: `${5.2 * groupFontScales.F}pt` }}>
                                 ⚠️ {notReadyToEatText}
                               </div>
                             )}
                             
-                            <div className="grid grid-cols-2 gap-[2mm] border-t-[0.1mm] border-black pt-[1mm] mt-[0.5mm]">
+                            <div className="grid grid-cols-2 gap-[2mm] border-t-[0.1mm] border-black pt-[1mm] mt-[0.5mm]" style={{ fontSize: `${5.8 * groupFontScales.C}pt` }}>
                               <div>
                                 {showNetWeight && <p><span className="font-black">淨重：</span>{netWeight}</p>}
                                 {showStorage && <p><span className="font-black">保存：</span>{storageCondition}</p>}
@@ -3049,7 +3372,7 @@ export const Labels = () => {
                             </div>
 
                             {showAllergens && (
-                              <p className="text-[5pt] font-black text-black bg-white border-[0.1mm] border-dashed border-black p-0.5 mt-0.5">
+                              <p className="font-black text-black bg-white border-[0.1mm] border-dashed border-black p-0.5 mt-0.5" style={{ fontSize: `${5 * groupFontScales.F}pt` }}>
                                 過敏原：{allergenWarning.replace('本產品含有', '').replace('，不適合對其過敏體質者食用。', '')}
                               </p>
                             )}
@@ -3074,7 +3397,7 @@ export const Labels = () => {
                               showNutrition ? "space-y-[2mm]" : "flex justify-between items-end gap-[4mm] border-b-[0.1mm] border-dashed border-slate-300 pb-1"
                             )}>
                               {shouldMoveInfoToBottomLeft && (showNetWeight || showStorage || showExpiry || showOrigin) && (
-                                <div className="text-[6.8pt] leading-[1.35] font-bold space-y-[0.6mm] border-b-[0.2mm] border-dashed border-black pb-2 mb-2 text-black shrink-0">
+                                <div className="leading-[1.35] font-bold space-y-[0.6mm] border-b-[0.2mm] border-dashed border-black pb-2 mb-2 text-black shrink-0" style={{ fontSize: `${6.8 * groupFontScales.C}pt` }}>
                                   {showNetWeight && (
                                     <div className="flex justify-between text-black">
                                       <span>淨重：</span>
@@ -3112,9 +3435,9 @@ export const Labels = () => {
 
                               {showResponsible && (
                                 <div className={cn(
-                                  "text-[6.2pt] leading-[1.3] text-black font-semibold",
+                                  "leading-[1.3] text-black font-semibold",
                                   showNutrition ? "" : "flex-1"
-                                )}>
+                                )} style={{ fontSize: `${6.2 * groupFontScales.D}pt` }}>
                                   {showAddress && (
                                     <div className="flex gap-[0.5mm]">
                                       <span className="font-black shrink-0">地址：</span>
@@ -3134,7 +3457,7 @@ export const Labels = () => {
                                     </div>
                                   )}
                                   {showManufacturer && (
-                                    <div className="flex gap-[0.5mm] mt-0.5 text-[5.8pt] text-black">
+                                    <div className="flex gap-[0.5mm] mt-0.5 text-black" style={{ fontSize: `${5.8 * groupFontScales.D}pt` }}>
                                       <span>製造商：</span>
                                       <span className="truncate">{companyName}</span>
                                     </div>
@@ -3159,8 +3482,8 @@ export const Labels = () => {
                                       bgColor="#ffffff"
                                     />
                                   </div>
-                                  <span className="text-[5.2pt] font-sans font-black leading-tight text-black break-all">
-                                    掃碼查看<br />復熱教學影片
+                                  <span className="font-sans font-black leading-tight text-black whitespace-pre-line text-left" style={{ fontSize: `${5.2 * groupFontScales.D}pt` }}>
+                                    {barcodeExplanation}
                                   </span>
                                 </div>
                               )}
@@ -3169,17 +3492,17 @@ export const Labels = () => {
                             {/* Bottom Right: Taiwan Nutrition Facts Table with Custom Decimal Precisions */}
                             {showNutrition && (
                               <div className="flex flex-col justify-end text-black shrink-0 border border-black p-1 bg-white">
-                                <div className="text-[7pt] font-black text-center border-b-[0.25mm] border-black pb-0.5 tracking-[1mm] text-black leading-none">
+                                <div className="font-black text-center border-b-[0.25mm] border-black pb-0.5 tracking-[1mm] text-black leading-none" style={{ fontSize: `${7 * groupFontScales.E}pt` }}>
                                   營 養 標 示
                                 </div>
-                                <div className="text-[5.5pt] font-bold text-left py-1 leading-normal border-b-[0.15mm] border-black text-black">
+                                <div className="font-bold text-left py-1 leading-normal border-b-[0.15mm] border-black text-black" style={{ fontSize: `${5.5 * groupFontScales.E}pt` }}>
                                   每一份量 {portionSize} 公克<br />
                                   本包裝含 {portionsPerPkg} 份
                                 </div>
                                 
-                                <table className="w-full text-center border-collapse text-[5.8pt] font-black mt-0.5 text-black">
+                                <table className="w-full text-center border-collapse mt-0.5 text-black" style={{ fontSize: `${5.8 * groupFontScales.E}pt` }}>
                                   <thead>
-                                    <tr className="border-b-[0.15mm] border-black text-[5pt] text-black">
+                                    <tr className="border-b-[0.15mm] border-black text-black" style={{ fontSize: `${5 * groupFontScales.E}pt` }}>
                                       <th className="py-[0.2mm] text-left pl-[0.5mm] text-black font-black"></th>
                                       <th className="py-[0.2mm] text-right pr-[0.5mm] text-black font-black w-[28%]">每份</th>
                                       <th className="py-[0.2mm] text-right pr-[0.5mm] text-black font-black w-[36%]">每 100 公克</th>
@@ -3256,14 +3579,14 @@ export const Labels = () => {
                           </div>
                         ) : (
                           // Mini Label bottom row (70x50)
-                          <div className="w-full border-t-[0.4mm] border-black pt-[0.5mm] flex justify-between items-center text-[5.2pt] text-black font-black shrink-0">
+                          <div className="w-full border-t-[0.4mm] border-black pt-[0.5mm] flex justify-between items-center text-black font-black shrink-0" style={{ fontSize: `${5.2 * groupFontScales.D}pt` }}>
                             {showResponsible && (
                               <span className="leading-none truncate max-w-[48mm]">
                                 負責商：{companyName} · 電話: {companyPhone}
                               </span>
                             )}
                             {showBarcode && (
-                              <span className="font-mono text-[4.2pt] leading-none shrink-0 font-black border-[0.1mm] border-black px-0.5 rounded-[0.2mm]">
+                              <span className="font-mono leading-none shrink-0 font-black border-[0.1mm] border-black px-0.5 rounded-[0.2mm]" style={{ fontSize: `${4.2 * groupFontScales.D}pt` }}>
                                 QR: Cook Info
                               </span>
                             )}
