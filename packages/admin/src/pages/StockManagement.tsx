@@ -524,61 +524,49 @@ export default function StockManagement() {
 
                             {/* Recipe Link Control */}
                             <td className="px-6 py-3 whitespace-nowrap">
-                              {(() => {
-                                const bound = mappings.find(m => m.menuItemId === item.id);
-                                if (bound) {
-                                  return (
-                                    <div className="flex items-center gap-1.5 group/link">
-                                      <div className="px-2.5 py-1 bg-gradient-to-r from-emerald-50 to-teal-50/50 border border-emerald-200/80 rounded-lg flex items-center gap-1.5 text-xs font-semibold text-emerald-800 shadow-sm max-w-[180px] hover:shadow transition-all duration-200">
-                                        <span className="relative flex h-1.5 w-1.5 shrink-0">
-                                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                                          <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
-                                        </span>
-                                        <span className="truncate" title={bound.recipeName}>{bound.recipeName}</span>
-                                      </div>
-                                      <button 
-                                        onClick={() => handleRemoveBinding(item)}
-                                        disabled={savingId === item.id}
-                                        className="p-1 hover:bg-red-50 hover:text-red-600 border border-transparent hover:border-red-100 rounded-lg text-emerald-600 transition-all cursor-pointer disabled:opacity-40 active:scale-90"
-                                        title="解除食譜綁定"
-                                      >
-                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                                          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                                        </svg>
-                                      </button>
-                                    </div>
-                                  );
-                                }
-
-                                return (
-                                  <div className="flex items-center gap-1.5">
-                                    <select
-                                      disabled={savingId === item.id}
-                                      value={selectedRecipeForMenu[item.id] || ''}
-                                      onChange={(e) => setSelectedRecipeForMenu({
-                                        ...selectedRecipeForMenu,
-                                        [item.id]: e.target.value
-                                      })}
-                                      className="max-w-[160px] text-[11px] p-1.5 border border-gray-200 bg-white rounded-lg outline-none focus:ring-2 focus:ring-primary-100 focus:border-primary-500 text-gray-700 font-medium shadow-sm transition-all"
-                                    >
-                                      <option value="">-- 未連結食譜 --</option>
-                                      {recipes.filter(r => r.isProduct !== false).map(r => (
-                                        <option key={r.id} value={r.id}>{r.name}</option>
-                                      ))}
-                                    </select>
-                                    {selectedRecipeForMenu[item.id] && (
-                                      <button
-                                        onClick={() => handleSaveBinding(item, selectedRecipeForMenu[item.id])}
-                                        disabled={savingId === item.id}
-                                        className="px-2 py-1.5 bg-primary hover:bg-primary-600 text-white rounded-lg text-[11px] font-bold shadow-sm transition-all active:scale-95 flex items-center justify-center cursor-pointer select-none shrink-0"
-                                        title="確認綁定此食譜"
-                                      >
-                                        儲存
-                                      </button>
-                                    )}
-                                  </div>
-                                );
-                              })()}
+                              <div className="flex items-center gap-2">
+                                <select
+                                  disabled={savingId === item.id}
+                                  value={(() => {
+                                    const bound = mappings.find(m => m.menuItemId === item.id);
+                                    return bound ? bound.recipeId : '';
+                                  })()}
+                                  onChange={async (e) => {
+                                    const val = e.target.value;
+                                    if (val === '') {
+                                      await handleRemoveBinding(item);
+                                    } else {
+                                      await handleSaveBinding(item, val);
+                                    }
+                                  }}
+                                  className={`max-w-[170px] text-xs p-1.5 border rounded-lg outline-none focus:ring-2 transition-all font-semibold shadow-sm cursor-pointer ${
+                                    mappings.some(m => m.menuItemId === item.id)
+                                      ? 'border-emerald-200 bg-emerald-50 text-emerald-800 focus:ring-emerald-100 focus:border-emerald-500'
+                                      : 'border-gray-200 bg-white text-gray-700 focus:ring-primary-100 focus:border-primary-500'
+                                  }`}
+                                >
+                                  <option value="" className="bg-white text-gray-500 font-medium">-- 未連結食譜 --</option>
+                                  {recipes.filter(r => r.isProduct !== false).map(r => (
+                                    <option key={r.id} value={r.id} className="bg-white text-gray-800 font-medium">
+                                      {r.name}
+                                    </option>
+                                  ))}
+                                </select>
+                                
+                                {/* Dynamic visual feedback next to select */}
+                                {savingId === item.id && (
+                                  <span className="text-[10px] text-gray-400 animate-pulse font-medium shrink-0">存...</span>
+                                )}
+                                {savedFeedbackId === item.id && (
+                                  <span className="text-xs text-emerald-600 font-black animate-bounce shrink-0">✓</span>
+                                )}
+                                {mappings.some(m => m.menuItemId === item.id) && savingId !== item.id && (
+                                  <span className="relative flex h-1.5 w-1.5 shrink-0" title="已連結中央廚房配方">
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                    <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
+                                  </span>
+                                )}
+                              </div>
                             </td>
 
                             {/* Independent Tracking switch */}
