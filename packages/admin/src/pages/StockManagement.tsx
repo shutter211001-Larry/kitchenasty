@@ -23,6 +23,22 @@ interface MenuItem {
   };
 }
 
+interface Recipe {
+  id: string;
+  name: string;
+  yieldAmount: number;
+  isProduct?: boolean;
+}
+
+interface Mapping {
+  menuItemId: string;
+  recipeId: string;
+  menuItemName: string;
+  menuItemPrice: number;
+  recipeName: string;
+  updatedAt: string;
+}
+
 export default function StockManagement() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [items, setItems] = useState<MenuItem[]>([]);
@@ -38,16 +54,31 @@ export default function StockManagement() {
   const [savingId, setSavingId] = useState<string | null>(null);
   const [savedFeedbackId, setSavedFeedbackId] = useState<string | null>(null);
 
+  // Recipe integration states
+  const [recipes, setRecipes] = useState<Recipe[]>([]);
+  const [mappings, setMappings] = useState<Mapping[]>([]);
+  const [selectedRecipeForMenu, setSelectedRecipeForMenu] = useState<Record<string, string>>({});
+
   // Fetch initial data
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [catRes, itemRes] = await Promise.all([
+      const [catRes, itemRes, recipesRes, mappingsRes] = await Promise.all([
         api.get<{ data: Category[] }>('/menu/categories'),
-        api.get<{ data: MenuItem[] }>('/menu/items?limit=1000')
+        api.get<{ data: MenuItem[] }>('/menu/items?limit=1000'),
+        api.get<Recipe[]>('/../shutter-erp/api/recipes').catch((err) => {
+          console.warn('Failed to load ERP recipes. Server might be offline or shutter-erp route unmounted.', err);
+          return [];
+        }),
+        api.get<{ success: boolean; data: Mapping[] }>('/../shutter-erp/api/integration/mappings').catch((err) => {
+          console.warn('Failed to load ERP recipe mappings.', err);
+          return { success: false, data: [] };
+        })
       ]);
       setCategories(catRes.data || []);
       setItems(itemRes.data || []);
+      setRecipes(recipesRes || []);
+      setMappings(mappingsRes.data || []);
       setError(null);
     } catch (err: any) {
       setError(err.message || '無法載入庫存資料');
@@ -112,6 +143,75 @@ export default function StockManagement() {
       setTimeout(() => setSavedFeedbackId(null), 1500);
     } catch (err: any) {
       alert(`更新分類共用庫存失敗: ${err.message}`);
+    } finally {
+      setSavingId(null);
+    }
+  };
+
+  // Save recipe mapping
+  const handleSaveBinding = async (menuItem: MenuItem, recipeId: string) => {
+    if (!recipeId) {
+      alert('請先選擇一個食譜再進行綁定！');
+      return;
+    }
+
+    const recipe = recipes.find(r => r.id === recipeId);
+    setSavingId(menuItem.id);
+    setSavedFeedbackId(null);
+    try {
+      await api.post('/../shutter-erp/api/integration/mappings', {
+        menuItemId: menuItem.id,
+        recipeId: recipeId,
+        menuItemName: menuItem.name,
+        menuItemPrice: menuItem.price,
+        recipeName: recipe?.name || ''
+      });
+      
+      // Update local mappings state
+      setMappings(prev => {
+        const filtered = prev.filter(m => m.menuItemId !== menuItem.id);
+        return [{
+          menuItemId: menuItem.id,
+          recipeId,
+          menuItemName: menuItem.name,
+          menuItemPrice: menuItem.price,
+          recipeName: recipe?.name || '',
+          updatedAt: new Date().toISOString()
+        }, ...filtered];
+      });
+      
+      setSavedFeedbackId(menuItem.id);
+      setTimeout(() => setSavedFeedbackId(null), 1500);
+    } catch (err: any) {
+      alert(`儲存食譜連結關係失敗: ${err.message}`);
+    } finally {
+      setSavingId(null);
+    }
+  };
+
+  // Remove recipe mapping
+  const handleRemoveBinding = async (menuItem: MenuItem) => {
+    if (!confirm(`確定要解除「${menuItem.name}」的食譜綁定嗎？\n解除後，該商品的線上訂單將不再自動扣減中央廚房庫存。`)) return;
+    
+    setSavingId(menuItem.id);
+    setSavedFeedbackId(null);
+    try {
+      await api.delete(`/../shutter-erp/api/integration/mappings/${menuItem.id}`);
+      
+      // Update local mappings state
+      setMappings(prev => prev.filter(m => m.menuItemId !== menuItem.id));
+      
+      // Clear selected dropdown value for this item
+      setSelectedRecipeForMenu(prev => {
+        const copy = { ...prev };
+        delete copy[menuItem.id];
+        return copy;
+      });
+
+      setSavedFeedbackId(menuItem.id);
+      setTimeout(() => setSavedFeedbackId(null), 1500);
+    } catch (err: any) {
+      alert(`解除綁定失敗: ${err.message}`);
     } finally {
       setSavingId(null);
     }
@@ -378,6 +478,7 @@ export default function StockManagement() {
                     <thead className="bg-gray-50/50">
                       <tr>
                         <th className="px-6 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">商品名稱</th>
+                        <th className="px-6 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">連結研發食譜</th>
                         <th className="px-6 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">獨立庫存追蹤</th>
                         <th className="px-6 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">獨立庫存數量</th>
                         <th className="px-6 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">有效實際庫存 (Effective Stock)</th>
@@ -419,6 +520,65 @@ export default function StockManagement() {
                             <td className="px-6 py-3 whitespace-nowrap">
                               <div className="text-sm font-semibold text-gray-900">{item.name}</div>
                               <div className="text-xs text-gray-400">NT$ {item.price}</div>
+                            </td>
+
+                            {/* Recipe Link Control */}
+                            <td className="px-6 py-3 whitespace-nowrap">
+                              {(() => {
+                                const bound = mappings.find(m => m.menuItemId === item.id);
+                                if (bound) {
+                                  return (
+                                    <div className="flex items-center gap-1.5 group/link">
+                                      <div className="px-2.5 py-1 bg-gradient-to-r from-emerald-50 to-teal-50/50 border border-emerald-200/80 rounded-lg flex items-center gap-1.5 text-xs font-semibold text-emerald-800 shadow-sm max-w-[180px] hover:shadow transition-all duration-200">
+                                        <span className="relative flex h-1.5 w-1.5 shrink-0">
+                                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                          <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
+                                        </span>
+                                        <span className="truncate" title={bound.recipeName}>{bound.recipeName}</span>
+                                      </div>
+                                      <button 
+                                        onClick={() => handleRemoveBinding(item)}
+                                        disabled={savingId === item.id}
+                                        className="p-1 hover:bg-red-50 hover:text-red-600 border border-transparent hover:border-red-100 rounded-lg text-emerald-600 transition-all cursor-pointer disabled:opacity-40 active:scale-90"
+                                        title="解除食譜綁定"
+                                      >
+                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                                          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                      </button>
+                                    </div>
+                                  );
+                                }
+
+                                return (
+                                  <div className="flex items-center gap-1.5">
+                                    <select
+                                      disabled={savingId === item.id}
+                                      value={selectedRecipeForMenu[item.id] || ''}
+                                      onChange={(e) => setSelectedRecipeForMenu({
+                                        ...selectedRecipeForMenu,
+                                        [item.id]: e.target.value
+                                      })}
+                                      className="max-w-[160px] text-[11px] p-1.5 border border-gray-200 bg-white rounded-lg outline-none focus:ring-2 focus:ring-primary-100 focus:border-primary-500 text-gray-700 font-medium shadow-sm transition-all"
+                                    >
+                                      <option value="">-- 未連結食譜 --</option>
+                                      {recipes.filter(r => r.isProduct !== false).map(r => (
+                                        <option key={r.id} value={r.id}>{r.name}</option>
+                                      ))}
+                                    </select>
+                                    {selectedRecipeForMenu[item.id] && (
+                                      <button
+                                        onClick={() => handleSaveBinding(item, selectedRecipeForMenu[item.id])}
+                                        disabled={savingId === item.id}
+                                        className="px-2 py-1.5 bg-primary hover:bg-primary-600 text-white rounded-lg text-[11px] font-bold shadow-sm transition-all active:scale-95 flex items-center justify-center cursor-pointer select-none shrink-0"
+                                        title="確認綁定此食譜"
+                                      >
+                                        儲存
+                                      </button>
+                                    )}
+                                  </div>
+                                );
+                              })()}
                             </td>
 
                             {/* Independent Tracking switch */}
