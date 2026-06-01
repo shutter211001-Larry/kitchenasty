@@ -140,14 +140,19 @@ export const Labels = () => {
   // Update layout defaults when labelSize changes
   useEffect(() => {
     const saved = localStorage.getItem(`group_layouts_${labelSize}`);
+    const defaults = DEFAULT_LAYOUTS[labelSize] || DEFAULT_LAYOUTS['100x100'];
     if (saved) {
       try {
-        setGroupLayouts(JSON.parse(saved));
+        const parsed = JSON.parse(saved);
+        setGroupLayouts({
+          ...defaults,
+          ...parsed
+        });
       } catch (e) {
-        setGroupLayouts(DEFAULT_LAYOUTS[labelSize] || DEFAULT_LAYOUTS['100x100']);
+        setGroupLayouts(defaults);
       }
     } else {
-      setGroupLayouts(DEFAULT_LAYOUTS[labelSize] || DEFAULT_LAYOUTS['100x100']);
+      setGroupLayouts(defaults);
     }
   }, [labelSize]);
 
@@ -417,7 +422,13 @@ export const Labels = () => {
     if (config.showNotReadyToEat !== undefined) setShowNotReadyToEat(config.showNotReadyToEat);
     if (config.notReadyToEatText !== undefined) setNotReadyToEatText(config.notReadyToEatText);
     if (config.nutritionConfigs !== undefined) setNutritionConfigs(config.nutritionConfigs);
-    if (config.groupLayouts !== undefined) setGroupLayouts(config.groupLayouts);
+    if (config.groupLayouts !== undefined) {
+      const defaults = DEFAULT_LAYOUTS[labelSize] || DEFAULT_LAYOUTS['100x100'];
+      setGroupLayouts({
+        ...defaults,
+        ...config.groupLayouts
+      });
+    }
     if (config.productZh !== undefined) setProductZh(config.productZh);
     if (config.productEn !== undefined) setProductEn(config.productEn);
     if (config.ingredientsText !== undefined) setIngredientsText(config.ingredientsText);
