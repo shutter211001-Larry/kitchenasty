@@ -1,7 +1,8 @@
 import 'dotenv/config';
 import { PrismaClient } from '@shutter-erp/client';
 
-const connectionString = process.env.SHUTTER_ERP_DATABASE_URL || process.env.DATABASE_URL || 'postgresql://localhost:5432/dummy';
+const rawConnectionString = process.env.SHUTTER_ERP_DATABASE_URL || process.env.DATABASE_URL || 'postgresql://localhost:5432/dummy';
+const connectionString = `${rawConnectionString}?connection_limit=20&pool_timeout=10&statement_cache_size=0`;
 
 const globalForPrisma = globalThis as unknown as {
   shutterErpPrisma: PrismaClient | undefined;
