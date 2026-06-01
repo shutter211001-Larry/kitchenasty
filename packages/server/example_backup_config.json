@@ -1,0 +1,7 @@
+{
+  "urls": [
+    "postgresql://<USERNAME>:<PASSWORD>@<HOST>:<PORT>/<DATABASE_NAME>",
+    "mysql://<USERNAME>:<PASSWORD>@<HOST>:<PORT>/<DATABASE_NAME>",
+    "sqlite:///C:/path/to/your/local/database.db"
+  ]
+}
