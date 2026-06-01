@@ -3646,9 +3646,10 @@ export const Labels = () => {
         }
 
         @media print {
-          /* Force absolute sharp rectangular borders on all elements in print mode */
+          /* Force background color printing for all elements (e.g., solid black headers and tags) */
           * {
-            border-radius: 0px !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
           }
           /* Hide sidebar and all other website layout wrappers */
           body {
