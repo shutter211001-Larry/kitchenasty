@@ -3650,6 +3650,12 @@ export const Labels = () => {
           * {
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
+            scrollbar-width: none !important; /* Hide scrollbars in Firefox */
+            -ms-overflow-style: none !important; /* Hide scrollbars in IE/Edge */
+          }
+          /* Hide all WebKit scrollbars and scroll buttons globally when printing */
+          ::-webkit-scrollbar {
+            display: none !important;
           }
           /* Hide sidebar and all other website layout wrappers */
           body {

@@ -278,8 +278,12 @@ def main():
         db_type = info["type"]
         db_name = info["name"]
         
-        # Create target filename
-        safe_name = f"{db_type}_{db_name}".replace(":", "_").replace("/", "_").replace("\\", "_")
+        # Extract host prefix to prevent collision for databases with identical names (e.g. "railway")
+        db_host = info.get("host", "localhost")
+        host_prefix = db_host.split(".")[0] if "." in db_host else db_host
+        
+        # Create target filename incorporating both host prefix and db name
+        safe_name = f"{db_type}_{host_prefix}_{db_name}".replace(":", "_").replace("/", "_").replace("\\", "_")
         filename = f"backup_{safe_name}_{timestamp}.sql.gz"
         if db_type == "sqlite":
             filename = f"backup_{safe_name}_{timestamp}.db.gz"
