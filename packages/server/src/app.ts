@@ -44,6 +44,31 @@ export function createApp() {
   // On Railway/Cloud providers, we trust the first proxy
   app.set('trust proxy', 1);
 
+  // --- Database Keep-Alive Heartbeat ---
+  let lastActivityTime = Date.now();
+  
+  app.use((_req, _res, next) => {
+    lastActivityTime = Date.now();
+    next();
+  });
+
+  if (process.env.NODE_ENV !== 'test') {
+    setInterval(async () => {
+      const idleTime = Date.now() - lastActivityTime;
+      // If idle for more than 4 minutes, ping the database
+      if (idleTime > 4 * 60 * 1000) {
+        try {
+          await prisma.$queryRaw`SELECT 1`;
+          lastActivityTime = Date.now();
+          logger.debug('Database keep-alive ping successful');
+        } catch (error) {
+          logger.error({ err: error }, 'Database keep-alive ping failed');
+        }
+      }
+    }, 60 * 1000); // Check every minute
+  }
+  // -------------------------------------
+
   // Middleware
   app.use(requestId);
   app.use(helmet({
