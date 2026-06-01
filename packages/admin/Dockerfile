@@ -30,3 +30,5 @@ COPY --from=builder /app/packages/admin/dist/ /usr/share/nginx/html/
 COPY packages/admin/nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
+
+CMD ["/bin/sh", "-c", "echo \"resolver $(awk '/^nameserver/ {print $2; exit}' /etc/resolv.conf) valid=10s;\" > /etc/nginx/conf.d/resolver.conf && nginx -g 'daemon off;'"]
