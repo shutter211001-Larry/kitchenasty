@@ -57,7 +57,7 @@ export const Labels = () => {
   const [labelSize, setLabelSize] = useState<LabelSize>('100x100');
 
   // Group Collapse Accordion States
-  const [activeAccordion, setActiveAccordion] = useState<'A' | 'B' | 'C' | 'D' | 'E' | null>('A');
+  const [activeAccordion, setActiveAccordion] = useState<'A' | 'B' | 'C' | 'D' | 'E' | 'F' | null>('A');
 
   // Warning Label for Non-Ready-To-Eat
   const [showNotReadyToEat, setShowNotReadyToEat] = useState<boolean>(true);
@@ -97,32 +97,37 @@ export const Labels = () => {
     C: GroupLayout;
     D: GroupLayout;
     E: GroupLayout;
+    F: GroupLayout;
   }
 
   const DEFAULT_LAYOUTS: Record<'100x100' | '80x80' | '100x150' | '70x50', LabelLayout> = {
     '100x100': {
       A: { left: 2, top: 48, width: 48, height: 34 },
-      B: { left: 2, top: 2, width: 50, height: 44 },
+      B: { left: 2, top: 2, width: 50, height: 18 },
+      F: { left: 2, top: 20, width: 50, height: 26 },
       C: { left: 52, top: 48, width: 46, height: 34 },
       D: { left: 2, top: 84, width: 96, height: 14 },
       E: { left: 54, top: 2, width: 44, height: 44 }
     },
     '80x80': {
       A: { left: 2, top: 48, width: 48, height: 34 },
-      B: { left: 2, top: 2, width: 50, height: 44 },
+      B: { left: 2, top: 2, width: 50, height: 18 },
+      F: { left: 2, top: 20, width: 50, height: 26 },
       C: { left: 52, top: 48, width: 46, height: 34 },
       D: { left: 2, top: 84, width: 96, height: 14 },
       E: { left: 54, top: 2, width: 44, height: 44 }
     },
     '100x150': {
-      B: { left: 2, top: 2, width: 96, height: 28 },
+      B: { left: 2, top: 2, width: 96, height: 12 },
+      F: { left: 2, top: 14, width: 96, height: 16 },
       E: { left: 2, top: 32, width: 96, height: 32 },
       C: { left: 2, top: 66, width: 96, height: 20 },
       A: { left: 2, top: 88, width: 96, height: 28 },
       D: { left: 2, top: 118, width: 96, height: 30 }
     },
     '70x50': {
-      B: { left: 2, top: 2, width: 96, height: 48 },
+      B: { left: 2, top: 2, width: 96, height: 18 },
+      F: { left: 2, top: 20, width: 96, height: 30 },
       E: { left: 2, top: 52, width: 96, height: 22 },
       C: { left: 2, top: 76, width: 96, height: 12 },
       A: { left: 2, top: 90, width: 96, height: 4 },
@@ -147,8 +152,8 @@ export const Labels = () => {
   }, [labelSize]);
 
   // Drag and Resize Mouse Listeners
-  const [draggingGroup, setDraggingGroup] = useState<'A' | 'B' | 'C' | 'D' | 'E' | null>(null);
-  const [resizingGroup, setResizingGroup] = useState<'A' | 'B' | 'C' | 'D' | 'E' | null>(null);
+  const [draggingGroup, setDraggingGroup] = useState<'A' | 'B' | 'C' | 'D' | 'E' | 'F' | null>(null);
+  const [resizingGroup, setResizingGroup] = useState<'A' | 'B' | 'C' | 'D' | 'E' | 'F' | null>(null);
   const [dragStartPos, setDragStartPos] = useState({ x: 0, y: 0 });
   const [dragStartLayout, setDragStartLayout] = useState({ left: 0, top: 0, width: 0, height: 0 });
 
@@ -1511,7 +1516,7 @@ export const Labels = () => {
               )}
             </div>
 
-            {/* GROUP B: 成分與品牌識別 */}
+            {/* GROUP B: 品牌與品名 */}
             <div className={cn("border rounded-2xl overflow-hidden bg-white shadow-sm transition-all", activeAccordion === 'B' ? "border-primary/40 ring-1 ring-primary/10" : "border-border")}>
               <button
                 type="button"
@@ -1521,8 +1526,8 @@ export const Labels = () => {
                 <div className="flex items-center gap-2">
                   <span className="w-5 h-5 bg-teal-500 text-white rounded-lg flex items-center justify-center font-bold text-xs">B</span>
                   <div className="text-left">
-                    <span className="text-[11px] font-black text-gray-800 block">成分與品牌識別</span>
-                    <span className="text-[9px] text-muted-foreground font-semibold">成分、品牌Logo、非供即食警告、過敏原</span>
+                    <span className="text-[11px] font-black text-gray-800 block">品牌與品名</span>
+                    <span className="text-[9px] text-muted-foreground font-semibold">品牌Logo、中英文品名設定</span>
                   </div>
                 </div>
                 {activeAccordion === 'B' ? <ChevronUp className="w-4 h-4 text-gray-500" /> : <ChevronDown className="w-4 h-4 text-gray-500" />}
@@ -1707,7 +1712,29 @@ export const Labels = () => {
                       />
                     </div>
                   </div>
+                </div>
+              )}
+            </div>
 
+            {/* GROUP F: 成分與警告 */}
+            <div className={cn("border rounded-2xl overflow-hidden bg-white shadow-sm transition-all", activeAccordion === 'F' ? "border-primary/40 ring-1 ring-primary/10" : "border-border")}>
+              <button
+                type="button"
+                onClick={() => setActiveAccordion(activeAccordion === 'F' ? null : 'F')}
+                className="w-full px-4 py-3 flex items-center justify-between bg-slate-50 hover:bg-slate-100/80 transition-colors cursor-pointer"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="w-5 h-5 bg-amber-500 text-white rounded-lg flex items-center justify-center font-bold text-xs">F</span>
+                  <div className="text-left">
+                    <span className="text-[11px] font-black text-gray-800 block">成分與警告</span>
+                    <span className="text-[9px] text-muted-foreground font-semibold">內容物成分、非供即食警告、過敏原設定</span>
+                  </div>
+                </div>
+                {activeAccordion === 'F' ? <ChevronUp className="w-4 h-4 text-gray-500" /> : <ChevronDown className="w-4 h-4 text-gray-500" />}
+              </button>
+              
+              {activeAccordion === 'F' && (
+                <div className="p-4 border-t border-border space-y-4 animate-in fade-in duration-200">
                   {/* Ingredients List */}
                   <div className="space-y-1.5">
                     <label className="flex items-center gap-2 cursor-pointer font-black text-[10.5px] text-gray-700">
@@ -2292,7 +2319,7 @@ export const Labels = () => {
                       // ABSOLUTE POSITION DRAG-AND-RESIZE LAYOUT
                       <div className="w-full h-full relative z-10">
                         
-                        {/* GROUP B: Brand & Ingredients & Warnings */}
+                        {/* GROUP B: Brand & Product Name */}
                         <div 
                           className={cn(
                             "absolute flex flex-col justify-start overflow-hidden border border-transparent hover:border-slate-300 transition-colors bg-white/95 rounded p-1 group/item",
@@ -2316,12 +2343,12 @@ export const Labels = () => {
                             }}
                             className="absolute top-0 left-0 right-0 h-4 bg-slate-100 hover:bg-slate-200 border-b border-slate-200 cursor-move flex items-center justify-between px-1.5 opacity-0 group-hover/item:opacity-100 transition-opacity z-20 print:hidden text-[7.5px] font-black text-slate-600 select-none"
                           >
-                            <span>✛ 品牌與成分 (B)</span>
+                            <span>✛ 品牌與品名 (B)</span>
                             <span className="font-mono opacity-80">{groupLayouts.B.width}% x {groupLayouts.B.height}%</span>
                           </div>
 
                           {/* Content Container */}
-                          <div className="w-full h-full flex flex-col justify-between pt-3 pb-1 min-h-0 text-black">
+                          <div className="w-full h-full flex flex-col justify-center pt-3 pb-1 min-h-0 text-black">
                             {/* Brand Header */}
                             {showBranding && labelSize !== '70x50' && (
                               <div className="flex items-center gap-1.5 overflow-hidden shrink-0 border-b border-black pb-1 mb-1">
@@ -2336,7 +2363,7 @@ export const Labels = () => {
                             )}
 
                             {/* Product Name */}
-                            <div className="shrink-0 mb-1 leading-tight">
+                            <div className="shrink-0 leading-tight">
                               {showProductZh && (
                                 <h1 className="font-black text-[10pt] leading-none tracking-tight text-black break-words">
                                   {productZh}
@@ -2348,7 +2375,53 @@ export const Labels = () => {
                                 </span>
                               )}
                             </div>
+                          </div>
 
+                          {/* Resize Handle - Hidden in Print */}
+                          <div 
+                            onMouseDown={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setResizingGroup('B');
+                              setDragStartPos({ x: e.clientX, y: e.clientY });
+                              setDragStartLayout({ ...groupLayouts.B });
+                            }}
+                            className="absolute bottom-0 right-0 w-3 h-3 cursor-se-resize flex items-center justify-center bg-slate-200 border-t border-l border-slate-300 opacity-0 group-hover/item:opacity-100 transition-opacity z-20 print:hidden text-[7px] font-black text-slate-600 rounded-tl"
+                          >
+                            ↘
+                          </div>
+                        </div>
+
+                        {/* GROUP F: Ingredients & Warnings & Allergens */}
+                        <div 
+                          className={cn(
+                            "absolute flex flex-col justify-start overflow-hidden border border-transparent hover:border-slate-300 transition-colors bg-white/95 rounded p-1 group/item",
+                            draggingGroup === 'F' && "border-indigo-500 bg-indigo-50/10 z-20 shadow-md",
+                            resizingGroup === 'F' && "border-purple-500 bg-purple-50/10 z-20 shadow-md"
+                          )}
+                          style={{
+                            left: `${groupLayouts.F.left}%`,
+                            top: `${groupLayouts.F.top}%`,
+                            width: `${groupLayouts.F.width}%`,
+                            height: `${groupLayouts.F.height}%`
+                          }}
+                        >
+                          {/* Drag Bar - Hidden in Print */}
+                          <div 
+                            onMouseDown={(e) => {
+                              e.preventDefault();
+                              setDraggingGroup('F');
+                              setDragStartPos({ x: e.clientX, y: e.clientY });
+                              setDragStartLayout({ ...groupLayouts.F });
+                            }}
+                            className="absolute top-0 left-0 right-0 h-4 bg-slate-100 hover:bg-slate-200 border-b border-slate-200 cursor-move flex items-center justify-between px-1.5 opacity-0 group-hover/item:opacity-100 transition-opacity z-20 print:hidden text-[7.5px] font-black text-slate-600 select-none"
+                          >
+                            <span>✛ 成分與警告 (F)</span>
+                            <span className="font-mono opacity-80">{groupLayouts.F.width}% x {groupLayouts.F.height}%</span>
+                          </div>
+
+                          {/* Content Container */}
+                          <div className="w-full h-full flex flex-col justify-between pt-3 pb-1 min-h-0 text-black">
                             {/* Ingredients */}
                             {showIngredients && (
                               <div className="flex-1 flex flex-col justify-start min-h-0 overflow-hidden text-black leading-tight">
@@ -2381,9 +2454,9 @@ export const Labels = () => {
                             onMouseDown={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
-                              setResizingGroup('B');
+                              setResizingGroup('F');
                               setDragStartPos({ x: e.clientX, y: e.clientY });
-                              setDragStartLayout({ ...groupLayouts.B });
+                              setDragStartLayout({ ...groupLayouts.F });
                             }}
                             className="absolute bottom-0 right-0 w-3 h-3 cursor-se-resize flex items-center justify-center bg-slate-200 border-t border-l border-slate-300 opacity-0 group-hover/item:opacity-100 transition-opacity z-20 print:hidden text-[7px] font-black text-slate-600 rounded-tl"
                           >
