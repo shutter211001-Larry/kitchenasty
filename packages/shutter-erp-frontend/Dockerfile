@@ -27,3 +27,5 @@ COPY --from=builder /app/packages/shutter-erp-frontend/dist/ /usr/share/nginx/ht
 COPY packages/shutter-erp-frontend/nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
+
+CMD ["/bin/sh", "-c", "echo \"resolver $(awk '/^nameserver/ {print $2; exit}' /etc/resolv.conf) valid=10s;\" > /etc/nginx/conf.d/resolver.conf && nginx -g 'daemon off;'"]
