@@ -24,8 +24,12 @@ from datetime import datetime
 from urllib.parse import urlparse, unquote
 
 # ==================== CONFIGURATION ====================
+# Resolve paths relative to this script
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+SERVER_DIR = os.path.dirname(SCRIPT_DIR) # packages/server
+
 # Default directory where backups will be saved.
-DEFAULT_BACKUP_DIR = os.path.join(os.getcwd(), "database_backups")
+DEFAULT_BACKUP_DIR = os.path.join(SERVER_DIR, "database_backups")
 
 # Default database URLs list (used if no config JSON or environment variable is provided).
 DEFAULT_DB_URLS = [
@@ -79,17 +83,41 @@ def parse_db_url(url):
         print(f" ❌ Error parsing URL '{url}': {e}")
         return None
 
-def check_utility_available(utility):
+def get_utility_path(utility):
     """
-    Checks if a shell utility is available on the system.
+    Finds the path to a shell utility. Checks PATH first,
+    then standard installation directories on Windows if not found.
     """
-    return shutil.which(utility) is not None
+    path = shutil.which(utility)
+    if path:
+        return path
+        
+    if sys.platform == "win32":
+        if utility == "pg_dump":
+            # Check standard PostgreSQL versions 10 to 25
+            for version in range(25, 9, -1):
+                p = f"C:\\Program Files\\PostgreSQL\\{version}\\bin\\pg_dump.exe"
+                if os.path.exists(p):
+                    return p
+        elif utility == "mysqldump":
+            # Check standard MySQL/MariaDB/XAMPP paths
+            mysql_paths = [
+                "C:\\Program Files\\MySQL\\MySQL Server 8.4\\bin\\mysqldump.exe",
+                "C:\\Program Files\\MySQL\\MySQL Server 8.0\\bin\\mysqldump.exe",
+                "C:\\Program Files\\MariaDB 11.0\\bin\\mysqldump.exe",
+                "C:\\xampp\\mysql\\bin\\mysqldump.exe"
+            ]
+            for p in mysql_paths:
+                if os.path.exists(p):
+                    return p
+    return None
 
 def backup_postgres(info, backup_path):
     """
     Performs PostgreSQL backup using pg_dump.
     """
-    if not check_utility_available("pg_dump"):
+    pg_dump_path = get_utility_path("pg_dump")
+    if not pg_dump_path:
         raise RuntimeError("System utility 'pg_dump' is not installed or not in PATH.")
     
     # Prepare environment variables to supply password securely without prompting
@@ -98,7 +126,7 @@ def backup_postgres(info, backup_path):
         env["PGPASSWORD"] = info["password"]
     
     cmd = [
-        "pg_dump",
+        pg_dump_path,
         "-h", info["host"],
         "-U", info["username"],
         "-d", info["name"]
@@ -123,10 +151,11 @@ def backup_mysql(info, backup_path):
     """
     Performs MySQL backup using mysqldump.
     """
-    if not check_utility_available("mysqldump"):
+    mysqldump_path = get_utility_path("mysqldump")
+    if not mysqldump_path:
         raise RuntimeError("System utility 'mysqldump' is not installed or not in PATH.")
     
-    cmd = ["mysqldump", "-h", info["host"], "-u", info["username"]]
+    cmd = [mysqldump_path, "-h", info["host"], "-u", info["username"]]
     
     if info["password"]:
         cmd.append(f"-p{info['password']}")  # Note: mysqldump password flag has no space
@@ -184,7 +213,15 @@ def main():
     
     # 1. Load URLs from config.json, environment variables, or default list
     config_file = "backup_config.json"
-    urls = load_urls_from_config(config_file)
+    
+    # Try current directory first, then resolve relative to script's server directory
+    config_path = config_file
+    if not os.path.exists(config_path):
+        alt_path = os.path.join(SERVER_DIR, config_file)
+        if os.path.exists(alt_path):
+            config_path = alt_path
+            
+    urls = load_urls_from_config(config_path)
     
     if not urls:
         env_urls = os.environ.get("DATABASE_URLS")
@@ -206,11 +243,12 @@ def main():
                 "sqlite:///C:/Github/kitchenasty/packages/server/data/local.db"
             ]
         }
-        with open(config_file, "w", encoding="utf-8") as f:
+        config_path_to_write = os.path.join(SERVER_DIR, config_file)
+        with open(config_path_to_write, "w", encoding="utf-8") as f:
             json.dump(sample_config, f, indent=2)
             
         print(f" ℹ️ No connection URLs found.")
-        print(f" 📝 Created a template config file at: [backup_config.json](file:///{os.path.abspath(config_file)})")
+        print(f" 📝 Created a template config file at: [backup_config.json](file:///{os.path.abspath(config_path_to_write)})")
         print(" 💡 Please edit this file with your database URLs, and run the script again.")
         print("=" * 70)
         return
