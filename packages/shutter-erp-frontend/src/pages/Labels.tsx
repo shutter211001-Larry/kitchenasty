@@ -5,14 +5,16 @@ import {
   Settings2, 
   Layers, 
   Database, 
-  CheckSquare, 
   RotateCcw,
   Sparkles,
   Flame,
   Award,
   Save,
   ChefHat,
-  Utensils
+  Utensils,
+  ChevronDown,
+  ChevronUp,
+  Sliders
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { QRCodeSVG } from 'qrcode.react';
@@ -53,6 +55,174 @@ export const Labels = () => {
   // Layout Size Options
   type LabelSize = '100x100' | '80x80' | '100x150' | '70x50';
   const [labelSize, setLabelSize] = useState<LabelSize>('100x100');
+
+  // Group Collapse Accordion States
+  const [activeAccordion, setActiveAccordion] = useState<'A' | 'B' | 'C' | 'D' | 'E' | null>('A');
+
+  // Warning Label for Non-Ready-To-Eat
+  const [showNotReadyToEat, setShowNotReadyToEat] = useState<boolean>(true);
+  const [notReadyToEatText, setNotReadyToEatText] = useState<string>('非供即食，應充分加熱');
+
+  // Nutrition Precision and Max Length Configs
+  const [nutritionConfigs, setNutritionConfigs] = useState<Record<string, { decimals: number; maxLength: number }>>({
+    calories: { decimals: -1, maxLength: 8 },
+    protein: { decimals: 1, maxLength: 8 },
+    fat: { decimals: 1, maxLength: 8 },
+    saturatedFat: { decimals: 1, maxLength: 8 },
+    transFat: { decimals: 1, maxLength: 8 },
+    carbs: { decimals: 1, maxLength: 8 },
+    sugar: { decimals: 1, maxLength: 8 },
+    sodium: { decimals: -1, maxLength: 8 }
+  });
+
+  const updateNutritionConfig = (key: string, updates: Partial<{ decimals: number; maxLength: number }>) => {
+    setNutritionConfigs(prev => ({
+      ...prev,
+      [key]: { ...prev[key], ...updates }
+    }));
+  };
+
+  // Drag-and-Resize Custom Positioning Layout Mode
+  const [useCustomLayout, setUseCustomLayout] = useState<boolean>(false);
+
+  interface GroupLayout {
+    left: number;
+    top: number;
+    width: number;
+    height: number;
+  }
+  interface LabelLayout {
+    A: GroupLayout;
+    B: GroupLayout;
+    C: GroupLayout;
+    D: GroupLayout;
+    E: GroupLayout;
+  }
+
+  const DEFAULT_LAYOUTS: Record<'100x100' | '80x80' | '100x150' | '70x50', LabelLayout> = {
+    '100x100': {
+      A: { left: 2, top: 48, width: 48, height: 34 },
+      B: { left: 2, top: 2, width: 50, height: 44 },
+      C: { left: 52, top: 48, width: 46, height: 34 },
+      D: { left: 2, top: 84, width: 96, height: 14 },
+      E: { left: 54, top: 2, width: 44, height: 44 }
+    },
+    '80x80': {
+      A: { left: 2, top: 48, width: 48, height: 34 },
+      B: { left: 2, top: 2, width: 50, height: 44 },
+      C: { left: 52, top: 48, width: 46, height: 34 },
+      D: { left: 2, top: 84, width: 96, height: 14 },
+      E: { left: 54, top: 2, width: 44, height: 44 }
+    },
+    '100x150': {
+      B: { left: 2, top: 2, width: 96, height: 28 },
+      E: { left: 2, top: 32, width: 96, height: 32 },
+      C: { left: 2, top: 66, width: 96, height: 20 },
+      A: { left: 2, top: 88, width: 96, height: 28 },
+      D: { left: 2, top: 118, width: 96, height: 30 }
+    },
+    '70x50': {
+      B: { left: 2, top: 2, width: 96, height: 48 },
+      E: { left: 2, top: 52, width: 96, height: 22 },
+      C: { left: 2, top: 76, width: 96, height: 12 },
+      A: { left: 2, top: 90, width: 96, height: 4 },
+      D: { left: 2, top: 96, width: 96, height: 2 }
+    }
+  };
+
+  const [groupLayouts, setGroupLayouts] = useState<LabelLayout>(DEFAULT_LAYOUTS['100x100']);
+
+  // Update layout defaults when labelSize changes
+  useEffect(() => {
+    const saved = localStorage.getItem(`group_layouts_${labelSize}`);
+    if (saved) {
+      try {
+        setGroupLayouts(JSON.parse(saved));
+      } catch (e) {
+        setGroupLayouts(DEFAULT_LAYOUTS[labelSize] || DEFAULT_LAYOUTS['100x100']);
+      }
+    } else {
+      setGroupLayouts(DEFAULT_LAYOUTS[labelSize] || DEFAULT_LAYOUTS['100x100']);
+    }
+  }, [labelSize]);
+
+  // Drag and Resize Mouse Listeners
+  const [draggingGroup, setDraggingGroup] = useState<'A' | 'B' | 'C' | 'D' | 'E' | null>(null);
+  const [resizingGroup, setResizingGroup] = useState<'A' | 'B' | 'C' | 'D' | 'E' | null>(null);
+  const [dragStartPos, setDragStartPos] = useState({ x: 0, y: 0 });
+  const [dragStartLayout, setDragStartLayout] = useState({ left: 0, top: 0, width: 0, height: 0 });
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!draggingGroup && !resizingGroup) return;
+      const labelEl = document.getElementById('printable-label');
+      if (!labelEl) return;
+      const rect = labelEl.getBoundingClientRect();
+      const deltaX = e.clientX - dragStartPos.x;
+      const deltaY = e.clientY - dragStartPos.y;
+      const deltaXPercent = (deltaX / rect.width) * 100;
+      const deltaYPercent = (deltaY / rect.height) * 100;
+
+      setGroupLayouts((prev) => {
+        const currentLayouts = { ...prev };
+        const group = draggingGroup || resizingGroup;
+        if (!group) return prev;
+        const start = dragStartLayout;
+        
+        if (draggingGroup) {
+          let newLeft = Math.round((start.left + deltaXPercent) / 2) * 2;
+          let newTop = Math.round((start.top + deltaYPercent) / 2) * 2;
+          
+          if (newLeft < 0) newLeft = 0;
+          if (newTop < 0) newTop = 0;
+          if (newLeft + start.width > 100) newLeft = 100 - start.width;
+          if (newTop + start.height > 100) newTop = 100 - start.height;
+          
+          currentLayouts[group] = {
+            ...currentLayouts[group],
+            left: newLeft,
+            top: newTop
+          };
+        } else if (resizingGroup) {
+          let newWidth = Math.round((start.width + deltaXPercent) / 2) * 2;
+          let newHeight = Math.round((start.height + deltaYPercent) / 2) * 2;
+          
+          if (newWidth < 10) newWidth = 10;
+          if (newHeight < 6) newHeight = 6;
+          if (start.left + newWidth > 100) newWidth = 100 - start.left;
+          if (start.top + newHeight > 100) newHeight = 100 - start.top;
+          
+          currentLayouts[group] = {
+            ...currentLayouts[group],
+            width: newWidth,
+            height: newHeight
+          };
+        }
+        return currentLayouts;
+      });
+    };
+
+    const handleMouseUp = () => {
+      if (draggingGroup || resizingGroup) {
+        setGroupLayouts((current) => {
+          localStorage.setItem(`group_layouts_${labelSize}`, JSON.stringify(current));
+          return current;
+        });
+        setDraggingGroup(null);
+        setResizingGroup(null);
+      }
+    };
+
+    if (draggingGroup || resizingGroup) {
+      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mouseup', handleMouseUp);
+    }
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [draggingGroup, resizingGroup, dragStartPos, dragStartLayout, labelSize]);
 
   // Continuous Spacing Options (Label Gap in mm)
   const [labelGap, setLabelGap] = useState<number>(3); 
@@ -196,6 +366,10 @@ export const Labels = () => {
         if (settings.showOrigin !== undefined) setShowOrigin(settings.showOrigin);
         if (settings.showManufacturer !== undefined) setShowManufacturer(settings.showManufacturer);
         
+        if (settings.useCustomLayout !== undefined) setUseCustomLayout(settings.useCustomLayout);
+        if (settings.showNotReadyToEat !== undefined) setShowNotReadyToEat(settings.showNotReadyToEat);
+        if (settings.notReadyToEatText !== undefined) setNotReadyToEatText(settings.notReadyToEatText);
+        if (settings.nutritionConfigs !== undefined) setNutritionConfigs(settings.nutritionConfigs);
         if (settings.brandNameZh) setBrandNameZh(settings.brandNameZh);
         if (settings.brandNameEn) setBrandNameEn(settings.brandNameEn);
         if (settings.logoType) setLogoType(settings.logoType);
@@ -234,6 +408,11 @@ export const Labels = () => {
     if (config.gapAlignment !== undefined) setGapAlignment(config.gapAlignment);
 
     // Core details
+    if (config.useCustomLayout !== undefined) setUseCustomLayout(config.useCustomLayout);
+    if (config.showNotReadyToEat !== undefined) setShowNotReadyToEat(config.showNotReadyToEat);
+    if (config.notReadyToEatText !== undefined) setNotReadyToEatText(config.notReadyToEatText);
+    if (config.nutritionConfigs !== undefined) setNutritionConfigs(config.nutritionConfigs);
+    if (config.groupLayouts !== undefined) setGroupLayouts(config.groupLayouts);
     if (config.productZh !== undefined) setProductZh(config.productZh);
     if (config.productEn !== undefined) setProductEn(config.productEn);
     if (config.ingredientsText !== undefined) setIngredientsText(config.ingredientsText);
@@ -304,6 +483,11 @@ export const Labels = () => {
     try {
       setSavingLabelConfig(true);
       const labelConfig = {
+        useCustomLayout,
+        showNotReadyToEat,
+        notReadyToEatText,
+        nutritionConfigs,
+        groupLayouts,
         labelGap,
         includeGapInPrint,
         previewContinuous,
@@ -497,6 +681,21 @@ export const Labels = () => {
   // Reset form to default Pizza Studio Pepperoni
   const handleReset = () => {
     setSelectedRecipeId('');
+    setUseCustomLayout(false);
+    setShowNotReadyToEat(true);
+    setNotReadyToEatText('非供即食，應充分加熱');
+    setNutritionConfigs({
+      calories: { decimals: -1, maxLength: 8 },
+      protein: { decimals: 1, maxLength: 8 },
+      fat: { decimals: 1, maxLength: 8 },
+      saturatedFat: { decimals: 1, maxLength: 8 },
+      transFat: { decimals: 1, maxLength: 8 },
+      carbs: { decimals: 1, maxLength: 8 },
+      sugar: { decimals: 1, maxLength: 8 },
+      sodium: { decimals: -1, maxLength: 8 }
+    });
+    setGroupLayouts(DEFAULT_LAYOUTS[labelSize] || DEFAULT_LAYOUTS['100x100']);
+    setActiveAccordion('A');
     setLoadedRecipe(null);
     setPortionScale(1.0);
     setLabelGap(3);
@@ -556,6 +755,10 @@ export const Labels = () => {
 
   const handleSaveSettings = () => {
     const settings = {
+      useCustomLayout,
+      showNotReadyToEat,
+      notReadyToEatText,
+      nutritionConfigs,
       labelSize,
       labelGap,
       includeGapInPrint,
@@ -685,6 +888,7 @@ export const Labels = () => {
     // Dynamic Font Scaling Factor based on active content sections
     if (labelSize !== '70x50') {
       let score = 0;
+      if (showNotReadyToEat) score += 0.5;
       if (showReheating) {
         if (showAirFryer) score += 0.6;
         if (showOven) score += 0.6;
@@ -706,6 +910,7 @@ export const Labels = () => {
     } else {
       // 70x50 has hard constraints
       let score = 0;
+      if (showNotReadyToEat) score += 0.4;
       if (showIngredients) score += 1;
       if (showAllergens) score += 0.8;
       
@@ -1064,610 +1269,886 @@ export const Labels = () => {
             </div>
           </div>
 
-          {/* Section: Feature Switch Checkboxes */}
-          <div className="space-y-3">
-            <div className="flex items-center gap-1.5 text-gray-700">
-              <CheckSquare className="w-4 h-4" />
-              <h4 className="text-xs font-black uppercase tracking-wider">欄位與板塊顯示設定</h4>
-            </div>
-            <div className="grid grid-cols-2 gap-x-4 gap-y-2 bg-muted/30 border border-border p-4 rounded-2xl">
-              {[
-                { state: showBranding, setter: setShowBranding, label: '品牌 Logo 識別' },
-                { state: showProductZh, setter: setShowProductZh, label: '品名 (中文)' },
-                { state: showProductEn, setter: setShowProductEn, label: '英文名稱副標' },
-                { state: showIngredients, setter: setShowIngredients, label: '內容物成分清單' },
-                { state: showNetWeight, setter: setShowNetWeight, label: '淨重標示' },
-                { state: showStorage, setter: setShowStorage, label: '冷凍保存條件' },
-                { state: showExpiry, setter: setShowExpiry, label: '有效與保存期限' },
-                { state: showResponsible, setter: setShowResponsible, label: '負責廠商資訊' },
-                { state: showReheating, setter: setShowReheating, label: '加熱/烹調指南' },
-                { state: showNutrition, setter: setShowNutrition, label: '標準八大營養標示' },
-                { state: showAllergens, setter: setShowAllergens, label: '過敏原防呆聲明' },
-                { state: showBarcode, setter: setShowBarcode, label: '烹調說明條碼' },
-              ].map((item, idx) => (
-                <label key={idx} className="flex items-center gap-2 cursor-pointer py-0.5">
-                  <input
-                    type="checkbox"
-                    checked={item.state}
-                    onChange={(e) => item.setter(e.target.checked)}
-                    className="w-3.5 h-3.5 accent-primary rounded border-border focus:ring-primary/20"
-                  />
-                  <span className="text-[11px] font-bold text-gray-700">{item.label}</span>
-                </label>
-              ))}
-            </div>
-            
-            {/* Nested Sub-fields under Responsible Party Info */}
-            {showResponsible && (
-              <div className="px-4 py-3 bg-primary/5 border border-primary/10 rounded-2xl space-y-2 animate-in fade-in slide-in-from-top-1 duration-150">
-                <span className="text-[9px] font-black text-primary uppercase block tracking-wider">🏢 廠商資訊顯示細項設定</span>
-                <div className="grid grid-cols-2 gap-x-3 gap-y-2.5">
-                  {[
-                    { state: showAddress, setter: setShowAddress, label: '顯示地址' },
-                    { state: showPhone, setter: setShowPhone, label: '顯示電話' },
-                    { state: showOrigin, setter: setShowOrigin, label: '顯示原產地' },
-                    { state: showManufacturer, setter: setShowManufacturer, label: '顯示製造商' },
-                  ].map((sub, idx) => (
-                    <label key={idx} className="flex items-center gap-1.5 cursor-pointer select-none">
-                      <input
-                        type="checkbox"
-                        checked={sub.state}
-                        onChange={(e) => sub.setter(e.target.checked)}
-                        className="w-3.5 h-3.5 accent-primary rounded border-border focus:ring-primary/20 shrink-0 cursor-pointer"
-                      />
-                      <span className="text-[10px] font-bold text-gray-700">{sub.label}</span>
-                    </label>
-                  ))}
+          {/* Section: Custom Drag-and-Drop Layout Mode Selector */}
+          <div className="bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-100/80 rounded-2xl p-4 space-y-3 shadow-sm text-black">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Sliders className="w-5 h-5 text-indigo-600" />
+                <div>
+                  <h4 className="text-xs font-black text-indigo-900 uppercase tracking-wide">群組拖拉與縮放排版</h4>
+                  <p className="text-[9.5px] text-indigo-700/80 font-medium">支援自由拖曳位置、縮放欄位大小並對齊網格</p>
                 </div>
               </div>
-            )}
-
-            {/* Nested Sub-fields under Reheating Info */}
-            {showReheating && (
-              <div className="px-4 py-3 bg-primary/5 border border-primary/10 rounded-2xl space-y-2 animate-in fade-in slide-in-from-top-1 duration-150">
-                <span className="text-[9px] font-black text-primary uppercase block tracking-wider">🔥 復熱步驟指引子項目顯示設定</span>
-                <div className="grid grid-cols-3 gap-x-3 gap-y-2.5">
-                  {[
-                    { state: showAirFryer, setter: setShowAirFryer, label: airFryerTitle || '氣炸烤箱' },
-                    { state: showOven, setter: setShowOven, label: ovenTitle || '家用烤箱' },
-                    { state: showPan, setter: setShowPan, label: panTitle || '平底鍋' },
-                  ].map((sub, idx) => (
-                    <label key={idx} className="flex items-center gap-1.5 cursor-pointer select-none">
-                      <input
-                        type="checkbox"
-                        checked={sub.state}
-                        onChange={(e) => sub.setter(e.target.checked)}
-                        className="w-3.5 h-3.5 accent-primary rounded border-border focus:ring-primary/20 shrink-0 cursor-pointer"
-                      />
-                      <span className="text-[10px] font-bold text-gray-700">{sub.label}</span>
-                    </label>
-                  ))}
-                </div>
+              <label className="relative inline-flex items-center cursor-pointer select-none">
+                <input 
+                  type="checkbox" 
+                  checked={useCustomLayout} 
+                  onChange={(e) => setUseCustomLayout(e.target.checked)} 
+                  className="sr-only peer" 
+                />
+                <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+              </label>
+            </div>
+            {useCustomLayout && (
+              <div className="text-[9px] text-indigo-800 leading-relaxed font-semibold bg-white/70 rounded-xl p-2.5 border border-indigo-100 flex flex-col gap-1">
+                <span>✨ 拖拉說明：</span>
+                <span>1. 按住標籤預覽區中各群組的「<span className="font-black text-indigo-700">灰色拖曳把手 ✛</span>」可自由移動。</span>
+                <span>2. 拖曳或縮放時會自動對齊 <span className="font-black text-indigo-700">2% 網格</span>，並顯示輔助點與座標。</span>
+                <span>3. 拉動右下角的「<span className="font-black text-indigo-700">縮放把手 ↘</span>」可調整寬高。</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setGroupLayouts(DEFAULT_LAYOUTS[labelSize] || DEFAULT_LAYOUTS['100x100']);
+                  }}
+                  className="mt-2.5 w-full py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg text-[9px] font-black tracking-wider transition-colors border border-indigo-200 cursor-pointer"
+                >
+                  重置目前尺寸版面位置
+                </button>
               </div>
             )}
           </div>
 
-          {/* Section: Custom Field Editor */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-1.5 text-gray-700">
-              <Settings2 className="w-4 h-4" />
-              <h4 className="text-xs font-black uppercase tracking-wider">標籤內容微調輸入</h4>
-            </div>
-
-            {/* Basic Info */}
-            <div className="space-y-3">
-              {showBranding && (
-                <div className="space-y-3.5 bg-primary/5 p-4 rounded-2xl border border-primary/10 animate-in fade-in slide-in-from-top-2 duration-200">
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-primary">品牌名稱 (中文)</label>
+          {/* Collapsible Accordion Groups A to E */}
+          <div className="space-y-3">
+            {/* GROUP A: 覆熱指引 */}
+            <div className={cn("border rounded-2xl overflow-hidden bg-white shadow-sm transition-all", activeAccordion === 'A' ? "border-primary/40 ring-1 ring-primary/10" : "border-border")}>
+              <button
+                type="button"
+                onClick={() => setActiveAccordion(activeAccordion === 'A' ? null : 'A')}
+                className="w-full px-4 py-3 flex items-center justify-between bg-slate-50 hover:bg-slate-100/80 transition-colors cursor-pointer"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="w-5 h-5 bg-orange-500 text-white rounded-lg flex items-center justify-center font-bold text-xs">A</span>
+                  <div className="text-left">
+                    <span className="text-[11px] font-black text-gray-800 block">覆熱指引</span>
+                    <span className="text-[9px] text-muted-foreground font-semibold">氣炸、烤箱、煎鍋等烹調方式與字型微調</span>
+                  </div>
+                </div>
+                {activeAccordion === 'A' ? <ChevronUp className="w-4 h-4 text-gray-500" /> : <ChevronDown className="w-4 h-4 text-gray-500" />}
+              </button>
+              
+              {activeAccordion === 'A' && (
+                <div className="p-4 border-t border-border space-y-4 animate-in fade-in duration-200">
+                  <div className="flex items-center justify-between pb-1.5 border-b border-dashed border-slate-100">
+                    <label className="flex items-center gap-2 cursor-pointer font-black text-[10.5px] text-gray-700">
                       <input
-                        type="text"
-                        className="w-full px-3 py-1.5 bg-white border border-border rounded-xl font-bold text-xs outline-none focus:ring-2 focus:ring-primary/20"
-                        value={brandNameZh}
-                        onChange={(e) => setBrandNameZh(e.target.value)}
+                        type="checkbox"
+                        checked={showReheating}
+                        onChange={(e) => setShowReheating(e.target.checked)}
+                        className="w-3.5 h-3.5 accent-primary rounded border-border"
                       />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-primary">品牌名稱 (英文)</label>
-                      <input
-                        type="text"
-                        className="w-full px-3 py-1.5 bg-white border border-border rounded-xl font-bold text-xs outline-none focus:ring-2 focus:ring-primary/20"
-                        value={brandNameEn}
-                        onChange={(e) => setBrandNameEn(e.target.value)}
-                      />
-                    </div>
+                      <span>啟用覆熱指引區</span>
+                    </label>
                   </div>
 
-                  {/* Logo Source Type Selection */}
-                  <div className="space-y-1 pt-1">
-                    <span className="text-[9px] font-black uppercase tracking-wider text-slate-500 block">自訂 Logo 標誌樣式</span>
-                    <div className="grid grid-cols-3 gap-1 bg-white border border-border p-1 rounded-xl">
-                      {[
-                        { id: 'icon', label: '精選圖章' },
-                        { id: 'upload', label: '上傳圖檔' },
-                        { id: 'text', label: '文字印記' }
-                      ].map((t) => (
-                        <button
-                          key={t.id}
-                          type="button"
-                          onClick={() => setLogoType(t.id as any)}
-                          className={cn(
-                            "py-1 text-[9.5px] font-black rounded-lg transition-all cursor-pointer",
-                            logoType === t.id 
-                              ? "bg-primary text-white shadow-sm" 
-                              : "text-slate-500 hover:bg-slate-50 hover:text-slate-700"
-                          )}
-                        >
-                          {t.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+                  {showReheating && (
+                    <div className="space-y-3.5">
+                      <div className="space-y-1">
+                        <label className="text-[9.5px] font-bold text-gray-600">覆熱主標題文字</label>
+                        <input
+                          type="text"
+                          className="w-full px-3 py-1.5 bg-slate-50 border border-border rounded-xl font-bold text-xs outline-none focus:ring-2 focus:ring-primary/10"
+                          value={reheatingMainTitle}
+                          onChange={(e) => setReheatingMainTitle(e.target.value)}
+                        />
+                      </div>
 
-                  {/* Logo Source Type Options Editor */}
-                  {logoType === 'icon' && (
-                    <div className="space-y-1.5 pt-1 animate-in fade-in duration-200">
-                      <span className="text-[9px] font-bold text-slate-400 block mb-1">🔍 選擇一個向量印章圖案</span>
-                      <div className="grid grid-cols-3 gap-1.5">
-                        {[
-                          { name: 'ChefHat', label: '廚師帽', icon: ChefHat },
-                          { name: 'Utensils', label: '餐具', icon: Utensils },
-                          { name: 'Flame', label: '火焰', icon: Flame },
-                          { name: 'Award', label: '榮譽獎章', icon: Award },
-                          { name: 'Sparkles', label: '閃耀星芒', icon: Sparkles },
-                          { name: 'Layers', label: '層疊製程', icon: Layers }
-                        ].map((item) => {
-                          const Icon = item.icon;
-                          return (
-                            <button
-                              key={item.name}
-                              type="button"
-                              onClick={() => setSelectedIconName(item.name)}
-                              className={cn(
-                                "flex items-center gap-1.5 px-2 py-1.5 rounded-lg border text-[9.5px] font-bold transition-all cursor-pointer justify-center",
-                                selectedIconName === item.name
-                                  ? "border-primary bg-primary/5 text-primary shadow-sm"
-                                  : "border-border bg-white text-gray-500 hover:bg-slate-50"
-                              )}
-                            >
-                              <Icon className="w-3.5 h-3.5 shrink-0" />
-                              <span>{item.label}</span>
-                            </button>
-                          );
-                        })}
+                      <div className="grid grid-cols-3 gap-2">
+                        <div className="space-y-1">
+                          <label className="text-[8.5px] font-bold text-gray-600">氣炸小標題</label>
+                          <input
+                            type="text"
+                            className="w-full px-2 py-1.5 bg-slate-50 border border-border rounded-xl font-bold text-xs outline-none focus:ring-2 focus:ring-primary/10"
+                            value={airFryerTitle}
+                            onChange={(e) => setAirFryerTitle(e.target.value)}
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[8.5px] font-bold text-gray-600">烤箱小標題</label>
+                          <input
+                            type="text"
+                            className="w-full px-2 py-1.5 bg-slate-50 border border-border rounded-xl font-bold text-xs outline-none focus:ring-2 focus:ring-primary/10"
+                            value={ovenTitle}
+                            onChange={(e) => setOvenTitle(e.target.value)}
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[8.5px] font-bold text-gray-600">煎鍋小標題</label>
+                          <input
+                            type="text"
+                            className="w-full px-2 py-1.5 bg-slate-50 border border-border rounded-xl font-bold text-xs outline-none focus:ring-2 focus:ring-primary/10"
+                            value={panTitle}
+                            onChange={(e) => setPanTitle(e.target.value)}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-2 pt-1.5">
+                        <span className="text-[9px] font-black uppercase text-slate-500 tracking-wider block">🍳 烹調方式顯示子項</span>
+                        <div className="grid grid-cols-3 gap-2">
+                          {[
+                            { state: showAirFryer, setter: setShowAirFryer, label: airFryerTitle || '氣炸烤箱' },
+                            { state: showOven, setter: setShowOven, label: ovenTitle || '家用烤箱' },
+                            { state: showPan, setter: setShowPan, label: panTitle || '平底鍋' }
+                          ].map((sub, idx) => (
+                            <label key={idx} className="flex items-center gap-1.5 cursor-pointer select-none">
+                              <input
+                                type="checkbox"
+                                checked={sub.state}
+                                onChange={(e) => sub.setter(e.target.checked)}
+                                className="w-3.5 h-3.5 accent-primary rounded border-border focus:ring-primary/20 cursor-pointer"
+                              />
+                              <span className="text-[10px] font-bold text-gray-700 truncate">{sub.label}</span>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+
+                      {showAirFryer && (
+                        <div className="space-y-1 animate-in fade-in duration-150">
+                          <label className="text-[9px] font-bold text-gray-500">{airFryerTitle} 步驟說明</label>
+                          <textarea
+                            rows={2}
+                            className="w-full px-3 py-1.5 bg-slate-50 border border-border rounded-xl font-bold text-xs"
+                            value={airFryerSteps}
+                            onChange={(e) => setAirFryerSteps(e.target.value)}
+                          />
+                        </div>
+                      )}
+
+                      {showOven && (
+                        <div className="space-y-1 animate-in fade-in duration-150">
+                          <label className="text-[9px] font-bold text-gray-500">{ovenTitle} 步驟說明</label>
+                          <textarea
+                            rows={2}
+                            className="w-full px-3 py-1.5 bg-slate-50 border border-border rounded-xl font-bold text-xs"
+                            value={ovenSteps}
+                            onChange={(e) => setOvenSteps(e.target.value)}
+                          />
+                        </div>
+                      )}
+
+                      {showPan && (
+                        <div className="space-y-1 animate-in fade-in duration-150">
+                          <label className="text-[9px] font-bold text-gray-500">{panTitle} 步驟說明</label>
+                          <textarea
+                            rows={2}
+                            className="w-full px-3 py-1.5 bg-slate-50 border border-border rounded-xl font-bold text-xs"
+                            value={panSteps}
+                            onChange={(e) => setPanSteps(e.target.value)}
+                          />
+                        </div>
+                      )}
+
+                      <div className="bg-slate-50 border border-slate-100 p-3 rounded-2xl space-y-2 mt-2">
+                        <span className="text-[9px] font-black text-gray-600 uppercase block mb-1">🔍 復熱字型大小微調 (pt)</span>
+                        <div className="grid grid-cols-3 gap-2">
+                          <div className="space-y-1">
+                            <label className="text-[8px] font-bold text-gray-500 block">主標 ({reheatingMainTitleSize}pt)</label>
+                            <input 
+                              type="range" 
+                              min="5" 
+                              max="12" 
+                              step="0.1" 
+                              value={reheatingMainTitleSize} 
+                              onChange={(e) => setReheatingMainTitleSize(Number(e.target.value))}
+                              className="w-full h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary"
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[8px] font-bold text-gray-500 block">小標 ({reheatingSubTitleSize}pt)</label>
+                            <input 
+                              type="range" 
+                              min="5" 
+                              max="11" 
+                              step="0.1" 
+                              value={reheatingSubTitleSize} 
+                              onChange={(e) => setReheatingSubTitleSize(Number(e.target.value))}
+                              className="w-full h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary"
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[8px] font-bold text-gray-500 block">步驟 ({reheatingContentSize}pt)</label>
+                            <input 
+                              type="range" 
+                              min="4.5" 
+                              max="10" 
+                              step="0.1" 
+                              value={reheatingContentSize} 
+                              onChange={(e) => setReheatingContentSize(Number(e.target.value))}
+                              className="w-full h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Barcode settings inside Reheating Guide */}
+                      <div className="border-t border-slate-100 pt-3 space-y-2">
+                        <label className="flex items-center gap-2 cursor-pointer font-bold text-[10px] text-gray-700">
+                          <input
+                            type="checkbox"
+                            checked={showBarcode}
+                            onChange={(e) => setShowBarcode(e.target.checked)}
+                            className="w-3.5 h-3.5 accent-primary rounded border-border"
+                          />
+                          <span>顯示烹調說明/條碼 QR Code</span>
+                        </label>
+                        {showBarcode && (
+                          <div className="space-y-1 animate-in fade-in duration-150">
+                            <span className="text-[8.5px] font-bold text-gray-500 block">條碼連結 URL 網址</span>
+                            <input
+                              type="text"
+                              className="w-full px-3 py-1.5 bg-slate-50 border border-border rounded-xl font-bold text-xs font-mono"
+                              value={barcodeText}
+                              onChange={(e) => setBarcodeText(e.target.value)}
+                            />
+                          </div>
+                        )}
                       </div>
                     </div>
                   )}
+                </div>
+              )}
+            </div>
 
-                  {logoType === 'upload' && (
-                    <div className="space-y-1.5 pt-1 animate-in fade-in duration-200">
-                      <span className="text-[9px] font-bold text-slate-400 block">📸 上傳商標 Logo 檔案 (PNG/JPG)</span>
-                      <div className="flex items-center gap-3 bg-white p-2.5 border border-border rounded-xl">
-                        <label className="shrink-0 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 border border-slate-200 hover:border-slate-300 rounded-lg text-[9px] font-black text-gray-600 transition-all cursor-pointer relative">
-                          選擇圖片
-                          <input
-                            type="file"
-                            accept="image/*"
-                            className="hidden"
-                            onChange={(e) => {
-                              const file = e.target.files?.[0];
-                              if (file) {
-                                const reader = new FileReader();
-                                reader.onload = (event) => {
-                                  if (event.target?.result) {
-                                    setUploadedLogo(event.target.result as string);
-                                  }
-                                };
-                                reader.readAsDataURL(file);
-                              }
-                            }}
-                          />
-                        </label>
-                        <div className="flex-1 min-w-0">
-                          {uploadedLogo ? (
-                            <div className="flex items-center gap-2">
-                              <div className="w-7 h-7 border border-border rounded overflow-hidden shrink-0 flex items-center justify-center bg-slate-50 shadow-inner">
-                                <img src={uploadedLogo} className="w-full h-full object-contain mix-blend-multiply" />
-                              </div>
+            {/* GROUP B: 成分與品牌識別 */}
+            <div className={cn("border rounded-2xl overflow-hidden bg-white shadow-sm transition-all", activeAccordion === 'B' ? "border-primary/40 ring-1 ring-primary/10" : "border-border")}>
+              <button
+                type="button"
+                onClick={() => setActiveAccordion(activeAccordion === 'B' ? null : 'B')}
+                className="w-full px-4 py-3 flex items-center justify-between bg-slate-50 hover:bg-slate-100/80 transition-colors cursor-pointer"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="w-5 h-5 bg-teal-500 text-white rounded-lg flex items-center justify-center font-bold text-xs">B</span>
+                  <div className="text-left">
+                    <span className="text-[11px] font-black text-gray-800 block">成分與品牌識別</span>
+                    <span className="text-[9px] text-muted-foreground font-semibold">成分、品牌Logo、非供即食警告、過敏原</span>
+                  </div>
+                </div>
+                {activeAccordion === 'B' ? <ChevronUp className="w-4 h-4 text-gray-500" /> : <ChevronDown className="w-4 h-4 text-gray-500" />}
+              </button>
+              
+              {activeAccordion === 'B' && (
+                <div className="p-4 border-t border-border space-y-4 animate-in fade-in duration-200">
+                  {/* Brand Branding Info Box */}
+                  <div className="bg-slate-50/50 p-3 border border-border rounded-2xl space-y-3">
+                    <div className="flex items-center justify-between">
+                      <label className="flex items-center gap-1.5 cursor-pointer font-black text-[10.5px] text-gray-700">
+                        <input
+                          type="checkbox"
+                          checked={showBranding}
+                          onChange={(e) => setShowBranding(e.target.checked)}
+                          className="w-3.5 h-3.5 accent-primary rounded border-border"
+                        />
+                        <span>啟用品牌 Logo 識別</span>
+                      </label>
+                    </div>
+
+                    {showBranding && (
+                      <div className="space-y-3.5 animate-in fade-in duration-150">
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="space-y-1">
+                            <label className="text-[9.5px] font-bold text-gray-600">品牌中文名稱</label>
+                            <input
+                              type="text"
+                              className="w-full px-3 py-1.5 bg-white border border-border rounded-xl font-bold text-xs outline-none focus:ring-2 focus:ring-primary/20"
+                              value={brandNameZh}
+                              onChange={(e) => setBrandNameZh(e.target.value)}
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[9.5px] font-bold text-gray-600">品牌英文名稱</label>
+                            <input
+                              type="text"
+                              className="w-full px-3 py-1.5 bg-white border border-border rounded-xl font-bold text-xs outline-none focus:ring-2 focus:ring-primary/20"
+                              value={brandNameEn}
+                              onChange={(e) => setBrandNameEn(e.target.value)}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Logo Source Type Selection */}
+                        <div className="space-y-1 pt-1">
+                          <span className="text-[9px] font-black uppercase tracking-wider text-slate-500 block">自訂 Logo 標誌樣式</span>
+                          <div className="grid grid-cols-3 gap-1 bg-white border border-border p-1 rounded-xl">
+                            {[
+                              { id: 'icon', label: '精選圖章' },
+                              { id: 'upload', label: '上傳圖檔' },
+                              { id: 'text', label: '文字印記' }
+                            ].map((t) => (
+                              <button
+                                key={t.id}
+                                type="button"
+                                onClick={() => setLogoType(t.id as any)}
+                                className={cn(
+                                  "py-1 text-[9.5px] font-black rounded-lg transition-all cursor-pointer",
+                                  logoType === t.id 
+                                    ? "bg-primary text-white shadow-sm" 
+                                    : "text-slate-500 hover:bg-slate-50 hover:text-slate-700"
+                                )}
+                              >
+                                {t.label}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Logo Source Type Options Editor */}
+                        {logoType === 'icon' && (
+                          <div className="space-y-1.5 pt-1 animate-in fade-in duration-200">
+                            <span className="text-[9px] font-bold text-slate-400 block mb-1">🔍 選擇一個向量印章圖案</span>
+                            <div className="grid grid-cols-3 gap-1.5">
+                              {[
+                                { name: 'ChefHat', label: '廚師帽', icon: ChefHat },
+                                { name: 'Utensils', label: '餐具', icon: Utensils },
+                                { name: 'Flame', label: '火焰', icon: Flame },
+                                { name: 'Award', label: '榮譽獎章', icon: Award },
+                                { name: 'Sparkles', label: '閃耀星芒', icon: Sparkles },
+                                { name: 'Layers', label: '層疊製程', icon: Layers }
+                              ].map((item) => {
+                                const Icon = item.icon;
+                                return (
+                                  <button
+                                    key={item.name}
+                                    type="button"
+                                    onClick={() => setSelectedIconName(item.name)}
+                                    className={cn(
+                                      "flex items-center gap-1.5 px-2 py-1.5 rounded-lg border text-[9.5px] font-bold transition-all cursor-pointer justify-center",
+                                      selectedIconName === item.name
+                                        ? "border-primary bg-primary/5 text-primary shadow-sm"
+                                        : "border-border bg-white text-gray-500 hover:bg-slate-50"
+                                    )}
+                                  >
+                                    <Icon className="w-3.5 h-3.5 shrink-0" />
+                                    <span className="truncate">{item.label}</span>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
+
+                        {logoType === 'upload' && (
+                          <div className="space-y-1.5 pt-1 animate-in fade-in duration-200">
+                            <span className="text-[9px] font-bold text-slate-400 block">📸 上傳商標 Logo 檔案 (PNG/JPG)</span>
+                            <div className="flex items-center gap-3 bg-white p-2.5 border border-border rounded-xl">
+                              <label className="shrink-0 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 border border-slate-200 hover:border-slate-300 rounded-lg text-[9px] font-black text-gray-600 transition-all cursor-pointer relative">
+                                選擇圖片
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  className="hidden"
+                                  onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) {
+                                      const reader = new FileReader();
+                                      reader.onload = (event) => {
+                                        if (event.target?.result) {
+                                          setUploadedLogo(event.target.result as string);
+                                        }
+                                      };
+                                      reader.readAsDataURL(file);
+                                    }
+                                  }}
+                                />
+                              </label>
                               <div className="flex-1 min-w-0">
-                                <p className="text-[9px] text-emerald-600 font-extrabold truncate">已成功載入</p>
-                                <button 
-                                  type="button"
-                                  onClick={() => setUploadedLogo('')}
-                                  className="text-[9px] text-red-500 font-bold hover:underline"
-                                >
-                                  清除重新上傳
-                                </button>
+                                {uploadedLogo ? (
+                                  <div className="flex items-center gap-2">
+                                    <div className="w-7 h-7 border border-border rounded overflow-hidden shrink-0 flex items-center justify-center bg-slate-50 shadow-inner">
+                                      <img src={uploadedLogo} className="w-full h-full object-contain mix-blend-multiply" />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                      <p className="text-[9px] text-emerald-600 font-extrabold truncate">已載入</p>
+                                      <button 
+                                        type="button"
+                                        onClick={() => setUploadedLogo('')}
+                                        className="text-[9px] text-red-500 font-bold hover:underline cursor-pointer"
+                                      >
+                                        清除
+                                      </button>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <span className="text-[9px] text-gray-400 font-semibold block leading-tight font-sans">無 Logo (純文字排版)</span>
+                                )}
                               </div>
                             </div>
+                          </div>
+                        )}
+
+                        {logoType === 'text' && (
+                          <div className="bg-white p-2.5 border border-border rounded-xl text-[9px] text-gray-500 leading-normal font-semibold animate-in fade-in duration-200">
+                            💡 純文字印記風格：前兩個中文字（目前為：「{brandNameZh ? brandNameZh.substring(0, 2) : '美味'}」）會以黑色反白小方塊呈現。
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Basic Info Names */}
+                  <div className="grid grid-cols-2 gap-3 pt-1">
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold text-gray-600">中文品名</label>
+                      <input
+                        type="text"
+                        className="w-full px-3 py-1.5 bg-slate-50 border border-border rounded-xl font-bold text-xs"
+                        value={productZh}
+                        onChange={(e) => setProductZh(e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold text-gray-600">英文名稱</label>
+                      <input
+                        type="text"
+                        className="w-full px-3 py-1.5 bg-slate-50 border border-border rounded-xl font-bold text-xs"
+                        value={productEn}
+                        onChange={(e) => setProductEn(e.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Ingredients List */}
+                  <div className="space-y-1.5">
+                    <label className="flex items-center gap-2 cursor-pointer font-black text-[10.5px] text-gray-700">
+                      <input
+                        type="checkbox"
+                        checked={showIngredients}
+                        onChange={(e) => setShowIngredients(e.target.checked)}
+                        className="w-3.5 h-3.5 accent-primary rounded border-border"
+                      />
+                      <span>顯示內容物成分</span>
+                    </label>
+                    {showIngredients && (
+                      <textarea
+                        rows={3}
+                        className="w-full px-3 py-1.5 bg-slate-50 border border-border rounded-xl font-bold text-xs leading-relaxed"
+                        value={ingredientsText}
+                        onChange={(e) => setIngredientsText(e.target.value)}
+                        placeholder="依多到少輸入，例如：水、小麥麵粉、起司..."
+                      />
+                    )}
+                  </div>
+
+                  {/* Non-ready-to-eat Warning Toggle & Input */}
+                  <div className="bg-amber-50/60 p-3 border border-amber-100 rounded-2xl space-y-2">
+                    <label className="flex items-center gap-2 cursor-pointer font-black text-[10.5px] text-amber-900">
+                      <input
+                        type="checkbox"
+                        checked={showNotReadyToEat}
+                        onChange={(e) => setShowNotReadyToEat(e.target.checked)}
+                        className="w-3.5 h-3.5 accent-amber-600 rounded border-amber-200"
+                      />
+                      <span>啟用「非供即食」警告標籤</span>
+                    </label>
+                    {showNotReadyToEat && (
+                      <input
+                        type="text"
+                        className="w-full px-3 py-1.5 bg-white border border-amber-200/80 rounded-xl font-bold text-xs text-amber-800 focus:ring-2 focus:ring-amber-500/10 outline-none"
+                        value={notReadyToEatText}
+                        onChange={(e) => setNotReadyToEatText(e.target.value)}
+                      />
+                    )}
+                  </div>
+
+                  {/* Allergen Warning */}
+                  <div className="space-y-1.5">
+                    <label className="flex items-center gap-2 cursor-pointer font-black text-[10.5px] text-rose-700">
+                      <input
+                        type="checkbox"
+                        checked={showAllergens}
+                        onChange={(e) => setShowAllergens(e.target.checked)}
+                        className="w-3.5 h-3.5 accent-rose-600 rounded border-rose-200"
+                      />
+                      <span>顯示過敏原防呆聲明</span>
+                    </label>
+                    {showAllergens && (
+                      <textarea
+                        rows={2}
+                        className="w-full px-3 py-1.5 bg-rose-50/40 border border-rose-100 rounded-xl font-bold text-xs text-rose-700"
+                        value={allergenWarning}
+                        onChange={(e) => setAllergenWarning(e.target.value)}
+                      />
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* GROUP C: 商品規格與保存條件 */}
+            <div className={cn("border rounded-2xl overflow-hidden bg-white shadow-sm transition-all", activeAccordion === 'C' ? "border-primary/40 ring-1 ring-primary/10" : "border-border")}>
+              <button
+                type="button"
+                onClick={() => setActiveAccordion(activeAccordion === 'C' ? null : 'C')}
+                className="w-full px-4 py-3 flex items-center justify-between bg-slate-50 hover:bg-slate-100/80 transition-colors cursor-pointer"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="w-5 h-5 bg-emerald-500 text-white rounded-lg flex items-center justify-center font-bold text-xs">C</span>
+                  <div className="text-left">
+                    <span className="text-[11px] font-black text-gray-800 block">商品規格與保存條件</span>
+                    <span className="text-[9px] text-muted-foreground font-semibold">淨重、冷凍保存、有效日期與保存期限、產地</span>
+                  </div>
+                </div>
+                {activeAccordion === 'C' ? <ChevronUp className="w-4 h-4 text-gray-500" /> : <ChevronDown className="w-4 h-4 text-gray-500" />}
+              </button>
+              
+              {activeAccordion === 'C' && (
+                <div className="p-4 border-t border-border space-y-4 animate-in fade-in duration-200">
+                  {/* Net Weight & Origin */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <label className="flex items-center gap-1.5 cursor-pointer font-black text-[10px] text-gray-700">
+                        <input
+                          type="checkbox"
+                          checked={showNetWeight}
+                          onChange={(e) => setShowNetWeight(e.target.checked)}
+                          className="w-3.5 h-3.5 accent-primary rounded border-border"
+                        />
+                        <span>商品淨重</span>
+                      </label>
+                      {showNetWeight && (
+                        <input
+                          type="text"
+                          className="w-full px-3 py-1.5 bg-slate-50 border border-border rounded-xl font-bold text-xs"
+                          value={netWeight}
+                          onChange={(e) => setNetWeight(e.target.value)}
+                        />
+                      )}
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="flex items-center gap-1.5 cursor-pointer font-black text-[10px] text-gray-700">
+                        <input
+                          type="checkbox"
+                          checked={showOrigin}
+                          onChange={(e) => setShowOrigin(e.target.checked)}
+                          className="w-3.5 h-3.5 accent-primary rounded border-border"
+                        />
+                        <span>原產地</span>
+                      </label>
+                      {showOrigin && (
+                        <input
+                          type="text"
+                          className="w-full px-3 py-1.5 bg-slate-50 border border-border rounded-xl font-bold text-xs"
+                          value={originCountry}
+                          onChange={(e) => setOriginCountry(e.target.value)}
+                        />
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Merged Preservation & Expiry Conditions setup card */}
+                  <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 space-y-4">
+                    <span className="text-[10px] font-black text-slate-700 uppercase tracking-wider block border-b border-slate-200 pb-1.5">📅 保存條件與日期標示設定群組</span>
+                    
+                    {/* Storage Condition */}
+                    <div className="space-y-1.5">
+                      <label className="flex items-center gap-1.5 cursor-pointer font-black text-[9.5px] text-gray-600">
+                        <input
+                          type="checkbox"
+                          checked={showStorage}
+                          onChange={(e) => setShowStorage(e.target.checked)}
+                          className="w-3.5 h-3.5 accent-primary rounded border-border"
+                        />
+                        <span>啟用冷凍保存條件</span>
+                      </label>
+                      {showStorage && (
+                        <input
+                          type="text"
+                          className="w-full px-3 py-1.5 bg-white border border-border rounded-xl font-bold text-xs"
+                          value={storageCondition}
+                          onChange={(e) => setStorageCondition(e.target.value)}
+                        />
+                      )}
+                    </div>
+
+                    {/* Expiry Date Toggles and Inputs */}
+                    <div className="space-y-2.5 pt-1">
+                      <label className="flex items-center gap-1.5 cursor-pointer font-black text-[9.5px] text-gray-600">
+                        <input
+                          type="checkbox"
+                          checked={showExpiry}
+                          onChange={(e) => setShowExpiry(e.target.checked)}
+                          className="w-3.5 h-3.5 accent-primary rounded border-border"
+                        />
+                        <span>啟用保存期限與日期</span>
+                      </label>
+
+                      {showExpiry && (
+                        <div className="space-y-3.5 p-3 bg-white border border-slate-100 rounded-xl animate-in fade-in duration-150">
+                          <div className="flex items-center justify-between">
+                            <span className="text-[9.5px] font-bold text-gray-500">有效日期標記法</span>
+                            <div className="flex gap-1.5">
+                              <button
+                                type="button"
+                                onClick={() => setExpiryOption('printed')}
+                                className={cn(
+                                  "px-2 py-0.5 rounded text-[8.5px] font-black tracking-wide cursor-pointer",
+                                  expiryOption === 'printed' ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+                                )}
+                              >
+                                標示於封口
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setExpiryOption('date')}
+                                className={cn(
+                                  "px-2 py-0.5 rounded text-[8.5px] font-black tracking-wide cursor-pointer",
+                                  expiryOption === 'date' ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+                                )}
+                              >
+                                指定列印日
+                              </button>
+                            </div>
+                          </div>
+
+                          {expiryOption === 'date' ? (
+                            <div className="space-y-1 animate-in fade-in duration-150">
+                              <label className="text-[8.5px] font-bold text-gray-500">有效日期 (YYYY/MM/DD)</label>
+                              <input
+                                type="text"
+                                className="w-full px-2.5 py-1 bg-slate-50 border border-border rounded-lg font-mono font-bold text-xs"
+                                value={expiryDate}
+                                onChange={(e) => setExpiryDate(e.target.value)}
+                              />
+                            </div>
                           ) : (
-                            <span className="text-[9px] text-gray-400 font-semibold block leading-tight">未載入任何外部圖檔 (印表機將以原文字呈現)</span>
+                            <p className="text-[8.5px] text-muted-foreground font-semibold leading-relaxed">
+                              ※ 標籤有效日期欄將自動呈現「標示於封口處」供生產包裝時壓印。
+                            </p>
                           )}
+
+                          <div className="space-y-1 pt-1 border-t border-slate-100">
+                            <label className="text-[8.5px] font-bold text-gray-500">保存期限</label>
+                            <input
+                              type="text"
+                              className="w-full px-2.5 py-1 bg-slate-50 border border-border rounded-lg font-bold text-xs"
+                              value={shelfLife}
+                              onChange={(e) => setShelfLife(e.target.value)}
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* GROUP D: 廠商資訊 */}
+            <div className={cn("border rounded-2xl overflow-hidden bg-white shadow-sm transition-all", activeAccordion === 'D' ? "border-primary/40 ring-1 ring-primary/10" : "border-border")}>
+              <button
+                type="button"
+                onClick={() => setActiveAccordion(activeAccordion === 'D' ? null : 'D')}
+                className="w-full px-4 py-3 flex items-center justify-between bg-slate-50 hover:bg-slate-100/80 transition-colors cursor-pointer"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="w-5 h-5 bg-sky-500 text-white rounded-lg flex items-center justify-center font-bold text-xs">D</span>
+                  <div className="text-left">
+                    <span className="text-[11px] font-black text-gray-800 block">廠商資訊</span>
+                    <span className="text-[9px] text-muted-foreground font-semibold">負責商、電話、地址、製造商細項開關</span>
+                  </div>
+                </div>
+                {activeAccordion === 'D' ? <ChevronUp className="w-4 h-4 text-gray-500" /> : <ChevronDown className="w-4 h-4 text-gray-500" />}
+              </button>
+              
+              {activeAccordion === 'D' && (
+                <div className="p-4 border-t border-border space-y-4 animate-in fade-in duration-200">
+                  <div className="flex items-center justify-between pb-1.5 border-b border-dashed border-slate-100">
+                    <label className="flex items-center gap-2 cursor-pointer font-black text-[10.5px] text-gray-700">
+                      <input
+                        type="checkbox"
+                        checked={showResponsible}
+                        onChange={(e) => setShowResponsible(e.target.checked)}
+                        className="w-3.5 h-3.5 accent-primary rounded border-border"
+                      />
+                      <span>啟用廠商資訊板塊</span>
+                    </label>
+                  </div>
+
+                  {showResponsible && (
+                    <div className="space-y-3.5 animate-in fade-in duration-150">
+                      <div className="space-y-1">
+                        <label className="text-[9.5px] font-bold text-gray-600">負責廠商名稱</label>
+                        <input
+                          type="text"
+                          className="w-full px-3 py-1.5 bg-slate-50 border border-border rounded-xl font-bold text-xs"
+                          value={companyName}
+                          onChange={(e) => setCompanyName(e.target.value)}
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="space-y-1">
+                          <label className="text-[9.5px] font-bold text-gray-600">聯絡電話</label>
+                          <input
+                            type="text"
+                            className="w-full px-3 py-1.5 bg-slate-50 border border-border rounded-xl font-bold text-xs"
+                            value={companyPhone}
+                            onChange={(e) => setCompanyPhone(e.target.value)}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="text-[9.5px] font-bold text-gray-600">負責廠商地址</label>
+                        <input
+                          type="text"
+                          className="w-full px-3 py-1.5 bg-slate-50 border border-border rounded-xl font-bold text-xs"
+                          value={companyAddress}
+                          onChange={(e) => setCompanyAddress(e.target.value)}
+                        />
+                      </div>
+
+                      <div className="bg-slate-50/60 p-3 border border-slate-200/50 rounded-2xl space-y-2">
+                        <span className="text-[9px] font-black text-slate-500 uppercase tracking-wider block mb-1">🏢 廠商資訊顯示細項設定</span>
+                        <div className="grid grid-cols-2 gap-x-3 gap-y-2">
+                          {[
+                            { state: showAddress, setter: setShowAddress, label: '顯示地址' },
+                            { state: showPhone, setter: setShowPhone, label: '顯示電話' },
+                            { state: showOrigin, setter: setShowOrigin, label: '顯示產地' },
+                            { state: showManufacturer, setter: setShowManufacturer, label: '顯示製造商' },
+                          ].map((sub, idx) => (
+                            <label key={idx} className="flex items-center gap-1.5 cursor-pointer select-none">
+                              <input
+                                type="checkbox"
+                                checked={sub.state}
+                                onChange={(e) => sub.setter(e.target.checked)}
+                                className="w-3.5 h-3.5 accent-primary rounded border-border focus:ring-primary/20 cursor-pointer"
+                              />
+                              <span className="text-[10.5px] font-bold text-gray-700">{sub.label}</span>
+                            </label>
+                          ))}
                         </div>
                       </div>
                     </div>
                   )}
-
-                  {logoType === 'text' && (
-                    <div className="bg-white/50 p-2.5 border border-border rounded-xl text-[9.5px] text-gray-500 leading-normal font-bold animate-in fade-in duration-200">
-                      💡 系統將自動抓取您上方輸入的 <strong>品牌名稱 (中文)</strong> 前兩個字（目前為：「{brandNameZh ? brandNameZh.substring(0, 2) : '美味'}」）作為標籤上的方形純文字反白印記，呈現極簡俐落的工業設計風格。
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {showProductZh && (
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-gray-600">中文品名</label>
-                  <input
-                    type="text"
-                    className="w-full px-3 py-1.5 bg-muted border border-border rounded-xl font-bold text-xs"
-                    value={productZh}
-                    onChange={(e) => setProductZh(e.target.value)}
-                  />
-                </div>
-              )}
-
-              {showProductEn && (
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-gray-600">英文名稱</label>
-                  <input
-                    type="text"
-                    className="w-full px-3 py-1.5 bg-muted border border-border rounded-xl font-bold text-xs"
-                    value={productEn}
-                    onChange={(e) => setProductEn(e.target.value)}
-                  />
-                </div>
-              )}
-
-              {showIngredients && (
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-gray-600">成分清單 (依含量由多到少排列)</label>
-                  <textarea
-                    rows={3}
-                    className="w-full px-3 py-1.5 bg-muted border border-border rounded-xl font-bold text-xs"
-                    value={ingredientsText}
-                    onChange={(e) => setIngredientsText(e.target.value)}
-                  />
-                </div>
-              )}
-
-              <div className="grid grid-cols-2 gap-3">
-                {showNetWeight && (
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-gray-600">淨重容量</label>
-                    <input
-                      type="text"
-                      className="w-full px-3 py-1.5 bg-muted border border-border rounded-xl font-bold text-xs"
-                      value={netWeight}
-                      onChange={(e) => setNetWeight(e.target.value)}
-                    />
-                  </div>
-                )}
-                {showStorage && (
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-gray-600">保存條件</label>
-                    <input
-                      type="text"
-                      className="w-full px-3 py-1.5 bg-muted border border-border rounded-xl font-bold text-xs"
-                      value={storageCondition}
-                      onChange={(e) => setStorageCondition(e.target.value)}
-                    />
-                  </div>
-                )}
-              </div>
-
-              {showExpiry && (
-                <div className="bg-muted/10 p-3 border border-border rounded-xl space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-bold text-gray-600">日期標示設定</span>
-                    <div className="flex gap-2">
-                      <button
-                        type="button"
-                        onClick={() => setExpiryOption('printed')}
-                        className={cn(
-                          "px-2 py-0.5 rounded text-[9px] font-bold",
-                          expiryOption === 'printed' ? "bg-gray-800 text-white" : "bg-muted text-gray-500 hover:bg-gray-200"
-                        )}
-                      >
-                        標示於包裝
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setExpiryOption('date')}
-                        className={cn(
-                          "px-2 py-0.5 rounded text-[9px] font-bold",
-                          expiryOption === 'date' ? "bg-gray-800 text-white" : "bg-muted text-gray-500 hover:bg-gray-200"
-                        )}
-                      >
-                        列印特定日期
-                      </button>
-                    </div>
-                  </div>
-                  
-                  {expiryOption === 'date' ? (
-                    <div className="space-y-1">
-                      <label className="text-[9px] font-bold text-gray-500">有效日期 (YYYY/MM/DD)</label>
-                      <input
-                        type="text"
-                        className="w-full px-3 py-1 bg-white border border-border rounded-lg font-mono font-bold text-xs"
-                        value={expiryDate}
-                        onChange={(e) => setExpiryDate(e.target.value)}
-                      />
-                    </div>
-                  ) : (
-                    <p className="text-[9px] text-muted-foreground font-semibold">
-                      ※ 標籤將自動印出「有效日期：標示於封口處 (西元年/月/日)」
-                    </p>
-                  )}
-
-                  <div className="space-y-1">
-                    <label className="text-[9px] font-bold text-gray-500">保存期限</label>
-                    <input
-                      type="text"
-                      className="w-full px-3 py-1 bg-white border border-border rounded-lg font-bold text-xs"
-                      value={shelfLife}
-                      onChange={(e) => setShelfLife(e.target.value)}
-                    />
-                  </div>
-                </div>
-              )}
-
-              {showAllergens && (
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-rose-600">過敏原防呆聲明</label>
-                  <textarea
-                    rows={2}
-                    className="w-full px-3 py-1.5 bg-rose-50/40 border border-rose-100 rounded-xl font-bold text-xs text-rose-700"
-                    value={allergenWarning}
-                    onChange={(e) => setAllergenWarning(e.target.value)}
-                  />
                 </div>
               )}
             </div>
 
-            {/* Reheating Steps */}
-            {showReheating && (
-              <div className="border-t border-border/80 pt-4 space-y-3">
-                <div className="flex items-center gap-1 text-gray-800">
-                  <Flame className="w-3.5 h-3.5 text-primary animate-pulse" />
-                  <span className="text-[10px] font-black uppercase tracking-wider">復熱步驟指南 (品牌自製)</span>
-                </div>
-                
-                <div className="space-y-3">
-                  <div className="space-y-1">
-                    <label className="text-[9px] font-bold text-gray-600">復熱主標題文字</label>
-                    <input
-                      type="text"
-                      className="w-full px-3 py-1 bg-white border border-border rounded-xl font-bold text-xs outline-none focus:ring-2 focus:ring-primary/10"
-                      value={reheatingMainTitle}
-                      onChange={(e) => setReheatingMainTitle(e.target.value)}
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-2">
-                    <div className="space-y-1">
-                      <label className="text-[8.5px] font-bold text-gray-600">氣炸小標題</label>
-                      <input
-                        type="text"
-                        className="w-full px-2.5 py-1 bg-white border border-border rounded-xl font-bold text-xs outline-none focus:ring-2 focus:ring-primary/10"
-                        value={airFryerTitle}
-                        onChange={(e) => setAirFryerTitle(e.target.value)}
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-[8.5px] font-bold text-gray-600">烤箱小標題</label>
-                      <input
-                        type="text"
-                        className="w-full px-2.5 py-1 bg-white border border-border rounded-xl font-bold text-xs outline-none focus:ring-2 focus:ring-primary/10"
-                        value={ovenTitle}
-                        onChange={(e) => setOvenTitle(e.target.value)}
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-[8.5px] font-bold text-gray-600">煎鍋小標題</label>
-                      <input
-                        type="text"
-                        className="w-full px-2.5 py-1 bg-white border border-border rounded-xl font-bold text-xs outline-none focus:ring-2 focus:ring-primary/10"
-                        value={panTitle}
-                        onChange={(e) => setPanTitle(e.target.value)}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-[9px] font-bold text-gray-600">{airFryerTitle}步驟指引</label>
-                    <textarea
-                      rows={2}
-                      className="w-full px-3 py-1 bg-muted border border-border rounded-xl font-bold text-xs"
-                      value={airFryerSteps}
-                      onChange={(e) => setAirFryerSteps(e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[9px] font-bold text-gray-600">{ovenTitle}步驟指引</label>
-                    <textarea
-                      rows={2}
-                      className="w-full px-3 py-1 bg-muted border border-border rounded-xl font-bold text-xs"
-                      value={ovenSteps}
-                      onChange={(e) => setOvenSteps(e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[9px] font-bold text-gray-600">{panTitle}步驟指引</label>
-                    <textarea
-                      rows={2}
-                      className="w-full px-3 py-1 bg-muted border border-border rounded-xl font-bold text-xs"
-                      value={panSteps}
-                      onChange={(e) => setPanSteps(e.target.value)}
-                    />
+            {/* GROUP E: 營養標示 */}
+            <div className={cn("border rounded-2xl overflow-hidden bg-white shadow-sm transition-all", activeAccordion === 'E' ? "border-primary/40 ring-1 ring-primary/10" : "border-border")}>
+              <button
+                type="button"
+                onClick={() => setActiveAccordion(activeAccordion === 'E' ? null : 'E')}
+                className="w-full px-4 py-3 flex items-center justify-between bg-slate-50 hover:bg-slate-100/80 transition-colors cursor-pointer"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="w-5 h-5 bg-purple-500 text-white rounded-lg flex items-center justify-center font-bold text-xs">E</span>
+                  <div className="text-left">
+                    <span className="text-[11px] font-black text-gray-800 block">營養標示</span>
+                    <span className="text-[9px] text-muted-foreground font-semibold">標準八大營養素、每一份量與顆數精度、字數限寬</span>
                   </div>
                 </div>
-
-                {/* Font Size Adjusters for Reheating Instructions */}
-                <div className="bg-slate-50 border border-slate-100 p-3 rounded-2xl space-y-2 mt-3">
-                  <span className="text-[9px] font-black text-gray-600 uppercase block mb-1">🔍 復熱字型大小微調 (pt)</span>
-                  <div className="grid grid-cols-3 gap-2">
-                    <div className="space-y-1">
-                      <label className="text-[8px] font-bold text-gray-500 block">主標 ({reheatingMainTitleSize}pt)</label>
-                      <input 
-                        type="range" 
-                        min="5" 
-                        max="12" 
-                        step="0.1" 
-                        value={reheatingMainTitleSize} 
-                        onChange={(e) => setReheatingMainTitleSize(Number(e.target.value))}
-                        className="w-full h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary"
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-[8px] font-bold text-gray-500 block">小標 ({reheatingSubTitleSize}pt)</label>
-                      <input 
-                        type="range" 
-                        min="5" 
-                        max="11" 
-                        step="0.1" 
-                        value={reheatingSubTitleSize} 
-                        onChange={(e) => setReheatingSubTitleSize(Number(e.target.value))}
-                        className="w-full h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary"
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-[8px] font-bold text-gray-500 block">步驟 ({reheatingContentSize}pt)</label>
-                      <input 
-                        type="range" 
-                        min="4.5" 
-                        max="10" 
-                        step="0.1" 
-                        value={reheatingContentSize} 
-                        onChange={(e) => setReheatingContentSize(Number(e.target.value))}
-                        className="w-full h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Nutrition facts input */}
-            {showNutrition && (
-              <div className="border-t border-border/80 pt-4 space-y-3">
-                <div className="flex items-center gap-1 text-gray-800">
-                  <Award className="w-3.5 h-3.5 text-slate-500" />
-                  <span className="text-[10px] font-black uppercase tracking-wider">法定標準八大營養數值</span>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3 bg-slate-50 p-3 border border-slate-100 rounded-xl">
-                  <div className="space-y-1">
-                    <label className="text-[9px] font-bold text-gray-500">每一份量 (g)</label>
-                    <input
-                      type="number"
-                      className="w-full px-2 py-1 bg-white border border-border rounded-lg font-mono text-xs text-right font-bold"
-                      value={portionSize}
-                      onChange={(e) => setPortionSize(e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[9px] font-bold text-gray-500">本包裝含 (份)</label>
-                    <input
-                      type="number"
-                      step="any"
-                      className="w-full px-2 py-1 bg-white border border-border rounded-lg font-mono text-xs text-right font-bold"
-                      value={portionsPerPkg}
-                      onChange={(e) => setPortionsPerPkg(e.target.value)}
-                    />
-                  </div>
-                  
-                  {[
-                    { label: '熱量 (kcal)', val: calories, setter: setCalories },
-                    { label: '蛋白質 (g)', val: protein, setter: setProtein },
-                    { label: '脂肪 (g)', val: fat, setter: setFat },
-                    { label: '飽和脂肪 (g)', val: saturatedFat, setter: setSaturatedFat },
-                    { label: '反式脂肪 (g)', val: transFat, setter: setTransFat },
-                    { label: '碳水化合物 (g)', val: carbs, setter: setCarbs },
-                    { label: '糖 (g)', val: sugar, setter: setSugar },
-                    { label: '鈉 (mg)', val: sodium, setter: setSodium },
-                  ].map((nut, idx) => (
-                    <div key={idx} className="space-y-1">
-                      <label className="text-[9px] font-bold text-gray-500">{nut.label}</label>
+                {activeAccordion === 'E' ? <ChevronUp className="w-4 h-4 text-gray-500" /> : <ChevronDown className="w-4 h-4 text-gray-500" />}
+              </button>
+              
+              {activeAccordion === 'E' && (
+                <div className="p-4 border-t border-border space-y-4 animate-in fade-in duration-200">
+                  <div className="flex items-center justify-between pb-1.5 border-b border-dashed border-slate-100">
+                    <label className="flex items-center gap-2 cursor-pointer font-black text-[10.5px] text-gray-700">
                       <input
-                        type="number"
-                        className="w-full px-2 py-1 bg-white border border-border rounded-lg font-mono text-xs text-right font-bold"
-                        value={nut.val}
-                        onChange={(e) => nut.setter(e.target.value)}
+                        type="checkbox"
+                        checked={showNutrition}
+                        onChange={(e) => setShowNutrition(e.target.checked)}
+                        className="w-3.5 h-3.5 accent-primary rounded border-border"
                       />
+                      <span>啟用標準八大營養標示</span>
+                    </label>
+                  </div>
+
+                  {showNutrition && (
+                    <div className="space-y-4 animate-in fade-in duration-150">
+                      {/* Servings Info */}
+                      <div className="grid grid-cols-2 gap-3 bg-slate-50 p-3 border border-slate-200/50 rounded-2xl">
+                        <div className="space-y-1">
+                          <span className="text-[9px] font-bold text-gray-500">每一份量 (g/公克)</span>
+                          <input
+                            type="number"
+                            className="w-full px-2.5 py-1.5 bg-white border border-border rounded-xl font-mono text-xs text-right font-bold"
+                            value={portionSize}
+                            onChange={(e) => setPortionSize(e.target.value)}
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <span className="text-[9px] font-bold text-gray-500">本包裝含 (份/包)</span>
+                          <input
+                            type="number"
+                            step="any"
+                            className="w-full px-2.5 py-1.5 bg-white border border-border rounded-xl font-mono text-xs text-right font-bold"
+                            value={portionsPerPkg}
+                            onChange={(e) => setPortionsPerPkg(e.target.value)}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Granular decimals and length selectors */}
+                      <div className="space-y-2">
+                        <span className="text-[9.5px] font-black text-slate-500 uppercase tracking-wider block">📊 八大營養小數精度與字數防溢出設定</span>
+                        <div className="space-y-2 max-h-[220px] overflow-y-auto pr-1">
+                          {[
+                            { key: 'calories', label: '熱量 (kcal)', val: calories, setter: setCalories },
+                            { key: 'protein', label: '蛋白質 (g)', val: protein, setter: setProtein },
+                            { key: 'fat', label: '脂肪 (g)', val: fat, setter: setFat },
+                            { key: 'saturatedFat', label: '飽和脂肪 (g)', val: saturatedFat, setter: setSaturatedFat },
+                            { key: 'transFat', label: '反式脂肪 (g)', val: transFat, setter: setTransFat },
+                            { key: 'carbs', label: '碳水化合物 (g)', val: carbs, setter: setCarbs },
+                            { key: 'sugar', label: '糖 (g)', val: sugar, setter: setSugar },
+                            { key: 'sodium', label: '鈉 (mg)', val: sodium, setter: setSodium }
+                          ].map((nut) => {
+                            const cfg = nutritionConfigs[nut.key] || { decimals: 1, maxLength: 8 };
+                            return (
+                              <div key={nut.key} className="p-2 bg-slate-50/50 border border-slate-200/50 rounded-xl space-y-1">
+                                <div className="flex justify-between items-center text-[9px] font-bold text-gray-700">
+                                  <span>{nut.label}</span>
+                                </div>
+                                <div className="grid grid-cols-12 gap-1 items-center">
+                                  <div className="col-span-5">
+                                    <input
+                                      type="number"
+                                      className="w-full px-2 py-1 bg-white border border-border rounded-lg font-mono text-[10.5px] text-right font-bold"
+                                      value={nut.val}
+                                      onChange={(e) => nut.setter(e.target.value)}
+                                    />
+                                  </div>
+                                  <div className="col-span-4">
+                                    <select
+                                      className="w-full px-1 py-1 bg-white border border-border rounded-lg text-[9px] font-bold text-gray-700 outline-none"
+                                      value={cfg.decimals}
+                                      onChange={(e) => updateNutritionConfig(nut.key, { decimals: parseInt(e.target.value) })}
+                                    >
+                                      <option value="-1">四捨五入</option>
+                                      <option value="0">0位小數</option>
+                                      <option value="1">1位小數</option>
+                                      <option value="2">2位小數</option>
+                                      <option value="3">3位小數</option>
+                                    </select>
+                                  </div>
+                                  <div className="col-span-3 flex items-center gap-0.5">
+                                    <span className="text-[7.5px] text-slate-400 font-bold">限寬:</span>
+                                    <input
+                                      type="number"
+                                      min="1"
+                                      max="20"
+                                      className="w-full px-1 py-0.5 bg-white border border-border rounded text-[9px] font-mono text-center font-bold text-gray-700"
+                                      value={cfg.maxLength}
+                                      onChange={(e) => updateNutritionConfig(nut.key, { maxLength: parseInt(e.target.value) || 8 })}
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
                     </div>
-                  ))}
+                  )}
                 </div>
-              </div>
-            )}
-
-            {/* Responsible corporate info */}
-            {showResponsible && (
-              <div className="border-t border-border/80 pt-4 space-y-3">
-                <span className="text-[10px] font-black text-gray-800 uppercase tracking-wider">製造廠商/國內負責廠商</span>
-                <div className="space-y-2">
-                  <div className="space-y-1">
-                    <label className="text-[9px] font-bold text-gray-600">廠商名稱</label>
-                    <input
-                      type="text"
-                      className="w-full px-3 py-1 bg-muted border border-border rounded-xl font-bold text-xs"
-                      value={companyName}
-                      onChange={(e) => setCompanyName(e.target.value)}
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1">
-                      <label className="text-[9px] font-bold text-gray-600">聯絡電話</label>
-                      <input
-                        type="text"
-                        className="w-full px-3 py-1 bg-muted border border-border rounded-xl font-bold text-xs"
-                        value={companyPhone}
-                        onChange={(e) => setCompanyPhone(e.target.value)}
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-[9px] font-bold text-gray-600">原產地</label>
-                      <input
-                        type="text"
-                        className="w-full px-3 py-1 bg-muted border border-border rounded-xl font-bold text-xs"
-                        value={originCountry}
-                        onChange={(e) => setOriginCountry(e.target.value)}
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[9px] font-bold text-gray-600">廠商地址</label>
-                    <input
-                      type="text"
-                      className="w-full px-3 py-1 bg-muted border border-border rounded-xl font-bold text-xs"
-                      value={companyAddress}
-                      onChange={(e) => setCompanyAddress(e.target.value)}
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Barcode settings */}
-            {showBarcode && (
-              <div className="border-t border-border/80 pt-4 space-y-2">
-                <label className="text-[10px] font-black text-gray-800 uppercase tracking-wider">條碼連結內容 (烹調說明/官網)</label>
-                <input
-                  type="text"
-                  className="w-full px-3 py-1 bg-muted border border-border rounded-xl font-bold text-xs font-mono"
-                  value={barcodeText}
-                  onChange={(e) => setBarcodeText(e.target.value)}
-                />
-              </div>
-            )}
-
+              )}
+            </div>
           </div>
-
-        </div>
-
-        {/* Right Side: Adaptive thermal label preview */}
+        </div>        {/* Right Side: Adaptive thermal label preview */}
         <div className="lg:col-span-7 flex flex-col items-center justify-start p-8 bg-[#D1D4D9] rounded-3xl min-h-[75vh] relative overflow-hidden border border-border shadow-inner print:bg-transparent print:border-none print:shadow-none print:p-0">
           <div className="absolute top-4 left-6 text-gray-500 font-bold text-[10px] tracking-widest uppercase flex items-center gap-1.5 print:hidden">
             <Sparkles className="w-3.5 h-3.5 text-primary" />
@@ -1778,382 +2259,936 @@ export const Labels = () => {
                   <div 
                     id="printable-label"
                     style={getLabelStyle()}
-                    className="relative shadow-md print:shadow-none shrink-0 transition-shadow rounded-none"
-                  >
-            {/* 1. Header (Brand Logo, Product Title) */}
-            {labelSize !== '70x50' ? (
-              <div className="w-full border-b-[0.8mm] border-black pb-[1.5mm] flex justify-between items-center shrink-0">
-                {showBranding && (
-                  <div className="flex items-center gap-[2.5mm] overflow-hidden">
-                    <div style={{ width: '12mm', height: '12mm' }} className="shrink-0 flex items-center justify-center border border-black rounded-lg p-1 bg-white">
-                      {renderLabelLogo()}
-                    </div>
-                    <div className="flex flex-col justify-center text-black">
-                      <span className="font-extrabold text-[12pt] tracking-wide leading-none text-black">{brandNameZh}</span>
-                      <span className="font-bold text-[5.5pt] tracking-widest text-black uppercase mt-0.5 leading-none">{brandNameEn}</span>
-                    </div>
-                  </div>
-                )}
-                
-                <div className="text-right flex-1 pl-[3mm] overflow-hidden">
-                  {showProductZh && (
-                    <h1 className="font-black text-[13pt] tracking-tight leading-none text-black break-words">
-                      {productZh}
-                    </h1>
-                  )}
-                  {showProductEn && (
-                    <span className="font-extrabold text-[6.2pt] tracking-wide uppercase text-black block mt-1.5 leading-none truncate">
-                      {productEn}
-                    </span>
-                  )}
-                </div>
-              </div>
-            ) : (
-              // Mini Header layout (70x50)
-              <div className="w-full border-b-[0.5mm] border-black pb-[0.5mm] flex justify-between items-end shrink-0">
-                <span className="font-black text-[9pt] leading-none text-black">{productZh}</span>
-                <span className="font-bold text-[5.5pt] text-black leading-none">{brandNameZh}</span>
-              </div>
-            )}
-
-            {/* 2. Main content adaptive body */}
-            {labelSize !== '70x50' ? (
-              // Grid structure for big labels: Left (Reheating), Right (Ingredients/Nutrition/Info)
-              // If showReheating is unchecked or has no active sub-items, we render a simple single-column block layout so there is absolutely no risk of browser grid rendering quirks!
-              <div 
-                style={hasActiveReheating ? { gridTemplateColumns: '1.1fr 1fr' } : undefined}
-                className={cn(
-                  "flex-1 min-h-0 text-black",
-                  hasActiveReheating 
-                    ? "grid gap-[3mm] py-[2mm] grid-cols-[1.1fr_1fr]" 
-                    : "py-[2mm] flex flex-col justify-between"
-                )}
-              >
-                
-                {/* Left Column: Reheating steps */}
-                {hasActiveReheating && (
-                  <div className="border-r-[0.3mm] border-black pr-[2mm] flex flex-col justify-between gap-[2.5mm] min-h-0 overflow-hidden text-black h-full">
-                    <div className="flex justify-center">
-                      <span 
-                        style={{ fontSize: `${reheatingMainTitleSize}pt` }}
-                        className="font-black bg-black text-white px-[2mm] py-[0.5mm] rounded-[0.5mm] text-center leading-none"
-                      >
-                        {reheatingMainTitle}
-                      </span>
-                    </div>
-                    
-                    <div className="flex-1 flex flex-col justify-around py-[1mm]">
-                      {[
-                        { title: airFryerTitle, steps: airFryerSteps, show: showAirFryer },
-                        { title: ovenTitle, steps: ovenSteps, show: showOven },
-                        { title: panTitle, steps: panSteps, show: showPan }
-                      ].filter(m => m.show).map((m, idx) => (
-                        <div key={idx} className="flex flex-col gap-[0.5mm] text-black">
-                          <strong 
-                            style={{ fontSize: `${reheatingSubTitleSize}pt` }}
-                            className="font-extrabold text-black"
-                          >
-                            ├─ {m.title}
-                          </strong>
-                          <p 
-                            style={{ fontSize: `${reheatingContentSize}pt` }}
-                            className="text-black font-semibold whitespace-pre-line pl-[3.5mm] leading-[1.3]"
-                          >
-                            {m.steps}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Right Column: Ingredients list, Allergen advice, Expiry, Nutrition */}
-                {/* h-full + flex + justify-between guarantees items stretch out evenly to fill empty vertical gaps! */}
-                <div className="flex flex-col justify-between gap-[2.5mm] min-h-0 h-full text-black">
-                  {/* Ingredients */}
-                  {showIngredients && (
-                    <div className="flex flex-col gap-[1mm] min-h-0 overflow-hidden text-black flex-1 justify-start">
-                      <span className="font-black text-[7pt] bg-black text-white px-[1.5mm] py-[0.3mm] rounded-[0.3mm] self-start leading-none shrink-0 mb-1">
-                        成分標示
-                      </span>
-                      <p className="font-semibold text-justify word-break break-all text-black pl-0.5 leading-[1.3] text-[6.6pt] overflow-y-auto">
-                        {ingredientsText}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Expiry / Weight */}
-                  {!shouldMoveInfoToBottomLeft && (showNetWeight || showStorage || showExpiry) && (
-                    <div className="text-[6.8pt] leading-[1.35] font-bold space-y-[0.6mm] border-t-[0.2mm] border-dashed border-black pt-2 text-black shrink-0">
-                      {showNetWeight && (
-                        <div className="flex justify-between text-black">
-                          <span>淨重或容量：</span>
-                          <span className="font-mono">{netWeight}</span>
-                        </div>
-                      )}
-                      {showStorage && (
-                        <div className="flex justify-between text-black">
-                          <span>保存條件：</span>
-                          <span>{storageCondition}</span>
-                        </div>
-                      )}
-                      {showExpiry && (
-                        <>
-                          <div className="flex justify-between text-black">
-                            <span>保存期限：</span>
-                            <span>{shelfLife}</span>
-                          </div>
-                          <div className="flex justify-between font-black text-black">
-                            <span>有效日期：</span>
-                            <span className="font-mono">
-                              {expiryOption === 'printed' ? '標示於封口處' : expiryDate}
-                            </span>
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Allergen alert */}
-                  {showAllergens && allergenWarning && (
-                    <div className="text-[6pt] font-black text-black bg-white p-[1.2mm] rounded-[0.5mm] border-[0.25mm] border-black border-dashed leading-[1.2] shrink-0">
-                      ⚠️ 警告：{allergenWarning}
-                    </div>
-                  )}
-                </div>
-
-              </div>
-            ) : (
-              // Mini Label (70x50) compact body
-              <div className="flex-1 py-[1mm] flex flex-col justify-between text-[5.8pt] leading-[1.2] font-extrabold text-black">
-                {showIngredients && (
-                  <p className="text-justify word-break break-all text-black font-semibold">
-                    <span className="font-black text-black">成份：</span>{ingredientsText}
-                  </p>
-                )}
-                
-                <div className="grid grid-cols-2 gap-[2mm] border-t-[0.1mm] border-black pt-[1mm] mt-[0.5mm]">
-                  <div>
-                    {showNetWeight && <p><span className="font-black">淨重：</span>{netWeight}</p>}
-                    {showStorage && <p><span className="font-black">保存：</span>{storageCondition}</p>}
-                    {showExpiry && <p><span className="font-black">效期：</span>{shelfLife}</p>}
-                  </div>
-                  <div className="text-right">
-                    {showExpiry && (
-                      <p className="font-black text-black">
-                        有效：{expiryOption === 'printed' ? '標示於包裝' : expiryDate}
-                      </p>
+                    className={cn(
+                      "relative shadow-md print:shadow-none shrink-0 transition-shadow rounded-none overflow-hidden select-none",
+                      useCustomLayout && "border-slate-800"
                     )}
-                    {showOrigin && originCountry && <p><span className="font-black">產地：</span>{originCountry}</p>}
-                  </div>
-                </div>
+                  >
+                    {/* Dotted Grid Background Overlay for Drag Alignment - Hidden in Print */}
+                    {useCustomLayout && (
+                      <div 
+                        className="absolute inset-0 pointer-events-none print:hidden z-0" 
+                        style={{
+                          backgroundImage: 'radial-gradient(#6366f1 0.8px, transparent 0.8px)',
+                          backgroundSize: '2% 2%',
+                          opacity: 0.15
+                        }}
+                      />
+                    )}
 
-                {showAllergens && (
-                  <p className="text-[5pt] font-black text-black bg-white border-[0.1mm] border-dashed border-black p-0.5 mt-0.5">
-                    過敏原：{allergenWarning.replace('本產品含有', '').replace('，不適合對其過敏體質者食用。', '')}
-                  </p>
-                )}
-              </div>
-            )}
-
-            {/* 3. Bottom Row: Nutrition facts table & corporate details & QR code */}
-            {labelSize !== '70x50' ? (
-              // Dynamic Grid: If showNutrition is unchecked, this collapses to a block element, letting corporate details and QR code expand to full width seamlessly!
-              <div 
-                style={showNutrition ? { gridTemplateColumns: '1.1fr 1fr' } : undefined}
-                className={cn(
-                  "w-full border-t-[0.8mm] border-black pt-[2mm] shrink-0 text-black",
-                  showNutrition 
-                    ? "grid gap-[3mm] items-end grid-cols-[1.1fr_1fr]" 
-                    : "block"
-                )}
-              >
-                
-                {/* Bottom Left: Corporate Details + Barcode Area */}
-                {/* If showNutrition is FALSE, we layout corporate details and QR code side-by-side using "flex justify-between" to fill up the bottom space perfectly! */}
-                <div className={cn(
-                  "overflow-hidden text-black w-full",
-                  showNutrition ? "space-y-[2mm]" : "flex justify-between items-end gap-[4mm] border-b-[0.1mm] border-dashed border-slate-300 pb-1"
-                )}>
-                  {shouldMoveInfoToBottomLeft && (showNetWeight || showStorage || showExpiry) && (
-                    <div className="text-[6.8pt] leading-[1.35] font-bold space-y-[0.6mm] border-b-[0.2mm] border-dashed border-black pb-2 mb-2 text-black shrink-0">
-                      {showNetWeight && (
-                        <div className="flex justify-between text-black">
-                          <span>淨重或容量：</span>
-                          <span className="font-mono">{netWeight}</span>
-                        </div>
-                      )}
-                      {showStorage && (
-                        <div className="flex justify-between text-black">
-                          <span>保存條件：</span>
-                          <span>{storageCondition}</span>
-                        </div>
-                      )}
-                      {showExpiry && (
-                        <>
-                          <div className="flex justify-between text-black">
-                            <span>保存期限：</span>
-                            <span>{shelfLife}</span>
-                          </div>
-                          <div className="flex justify-between font-black text-black">
-                            <span>有效日期：</span>
-                            <span className="font-mono">
-                              {expiryOption === 'printed' ? '標示於封口處' : expiryDate}
-                            </span>
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  )}
-
-                  {showResponsible && (
-                    <div className={cn(
-                      "text-[6.2pt] leading-[1.3] text-black font-semibold",
-                      showNutrition ? "" : "flex-1"
-                    )}>
-                      {showAddress && (
-                        <div className="flex gap-[0.5mm]">
-                          <span className="font-black text-black shrink-0">地址：</span>
-                          <span>{companyAddress}</span>
-                        </div>
-                      )}
-                      {showPhone && (
-                        <div className="flex gap-[0.5mm]">
-                          <span className="font-black text-black shrink-0">電話：</span>
-                          <span className="font-mono">{companyPhone}</span>
-                        </div>
-                      )}
-                      {showOrigin && (
-                        <div className="flex gap-[0.5mm]">
-                          <span className="font-black text-black shrink-0">原產地：</span>
-                          <span className="font-extrabold text-black">{originCountry}</span>
-                        </div>
-                      )}
-                      {showManufacturer && (
-                        <div className="flex gap-[0.5mm] mt-0.5 text-[5.8pt] text-black">
-                          <span>製造商：</span>
-                          <span className="truncate">{companyName}</span>
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {/* QR Code Barcode area (Real SVG dynamic vector QR code!) */}
-                  {showBarcode && (
-                    <div className={cn(
-                      "flex items-center gap-[2mm] shrink-0",
-                      showNutrition 
-                        ? "border-t-[0.2mm] border-dashed border-black pt-[1.5mm]" 
-                        : "border-l-[0.2mm] border-dashed border-black pl-[4mm] py-0.5"
-                    )}>
-                      <div className="p-0.5 bg-white border border-black shrink-0 flex items-center justify-center">
-                        <QRCodeSVG 
-                          value={barcodeText || "https://pizzastudio.com"} 
-                          size={32}
-                          level="M"
-                          fgColor="#000000"
-                          bgColor="#ffffff"
-                        />
+                    {/* Drag-and-Resize Active Group Coordinates Overlay Tooltip - Hidden in Print */}
+                    {useCustomLayout && (draggingGroup || resizingGroup) && (
+                      <div className="absolute top-2 left-2 bg-indigo-900/90 text-white font-mono font-bold text-[7.5px] px-2 py-1 rounded shadow-md z-30 pointer-events-none animate-pulse print:hidden border border-indigo-700">
+                        {draggingGroup ? `DRAGGING [Group ${draggingGroup}]` : `RESIZING [Group ${resizingGroup}]`} : 
+                        L: {groupLayouts[draggingGroup || resizingGroup || 'A'].left}% 
+                        T: {groupLayouts[draggingGroup || resizingGroup || 'A'].top}% 
+                        W: {groupLayouts[draggingGroup || resizingGroup || 'A'].width}% 
+                        H: {groupLayouts[draggingGroup || resizingGroup || 'A'].height}%
                       </div>
-                      <span className="text-[5.2pt] font-sans font-black leading-tight text-black break-all">
-                        掃碼查看<br />復熱教學影片
-                      </span>
-                    </div>
-                  )}
-                </div>
+                    )}
 
-                {/* Bottom Right: Taiwan Nutrition Facts Table */}
-                {showNutrition && (
-                  <div className="flex flex-col justify-end text-black shrink-0 border border-black p-1 bg-white">
-                    {/* 營 養 標 示 標題，加粗並置中，下方一條粗線 */}
-                    <div className="text-[7pt] font-black text-center border-b-[0.25mm] border-black pb-0.5 tracking-[1mm] text-black leading-none">
-                      營 養 標 示
-                    </div>
-                    {/* 份量資訊獨立分行，下方有一條細線區隔 */}
-                    <div className="text-[5.5pt] font-bold text-left py-1 leading-normal border-b-[0.15mm] border-black text-black">
-                      每一份量 {portionSize} 公克<br />
-                      本包裝含 {portionsPerPkg} 份
-                    </div>
-                    
-                    {/* 表格：最左表頭空白，右邊是「每份」與標準中文「每 100 公克」 */}
-                    <table className="w-full text-center border-collapse text-[5.8pt] font-black mt-0.5 text-black">
-                      <thead>
-                        <tr className="border-b-[0.15mm] border-black text-[5pt] text-black">
-                          <th className="py-[0.2mm] text-left pl-[0.5mm] text-black font-black"></th>
-                          <th className="py-[0.2mm] text-right pr-[0.5mm] text-black font-black w-[28%]">每份</th>
-                          <th className="py-[0.2mm] text-right pr-[0.5mm] text-black font-black w-[36%]">每 100 公克</th>
-                        </tr>
-                      </thead>
-                      <tbody className="font-mono text-black">
-                        {[
-                          { name: '熱量', valPer100: Number(calories), unit: '大卡', isZeroLimit: 0 },
-                          { name: '蛋白質', valPer100: Number(protein), unit: '公克', isZeroLimit: 0 },
-                          { name: '脂肪', valPer100: Number(fat), unit: '公克', isZeroLimit: 0 },
-                          { name: '  飽和脂肪', valPer100: Number(saturatedFat), unit: '公克', isZeroLimit: 0.1 },
-                          { name: '  反式脂肪', valPer100: Number(transFat), unit: '公克', isZeroLimit: 0.3 },
-                          { name: '碳水化合物', valPer100: Number(carbs), unit: '公克', isZeroLimit: 0 },
-                          { name: '  糖', valPer100: Number(sugar), unit: '公克', isZeroLimit: 0.5 },
-                          { name: '鈉', valPer100: Number(sodium), unit: '毫克', isZeroLimit: 5 },
-                        ].map((row, idx) => {
-                          const sizeRatio = Number(portionSize) / 100;
-                          
-                          // 計算每份與每百克數值
-                          const valPerPortion = row.valPer100 * sizeRatio;
-                          const val100 = row.valPer100;
+                    {/* RENDER MODE switcher */}
+                    {useCustomLayout ? (
+                      // ABSOLUTE POSITION DRAG-AND-RESIZE LAYOUT
+                      <div className="w-full h-full relative z-10">
+                        
+                        {/* GROUP B: Brand & Ingredients & Warnings */}
+                        <div 
+                          className={cn(
+                            "absolute flex flex-col justify-start overflow-hidden border border-transparent hover:border-slate-300 transition-colors bg-white/95 rounded p-1 group/item",
+                            draggingGroup === 'B' && "border-indigo-500 bg-indigo-50/10 z-20 shadow-md",
+                            resizingGroup === 'B' && "border-purple-500 bg-purple-50/10 z-20 shadow-md"
+                          )}
+                          style={{
+                            left: `${groupLayouts.B.left}%`,
+                            top: `${groupLayouts.B.top}%`,
+                            width: `${groupLayouts.B.width}%`,
+                            height: `${groupLayouts.B.height}%`
+                          }}
+                        >
+                          {/* Drag Bar - Hidden in Print */}
+                          <div 
+                            onMouseDown={(e) => {
+                              e.preventDefault();
+                              setDraggingGroup('B');
+                              setDragStartPos({ x: e.clientX, y: e.clientY });
+                              setDragStartLayout({ ...groupLayouts.B });
+                            }}
+                            className="absolute top-0 left-0 right-0 h-4 bg-slate-100 hover:bg-slate-200 border-b border-slate-200 cursor-move flex items-center justify-between px-1.5 opacity-0 group-hover/item:opacity-100 transition-opacity z-20 print:hidden text-[7.5px] font-black text-slate-600 select-none"
+                          >
+                            <span>✛ 品牌與成分 (B)</span>
+                            <span className="font-mono opacity-80">{groupLayouts.B.width}% x {groupLayouts.B.height}%</span>
+                          </div>
 
-                          // 格式化輸出數值，預設保留一位小數且過濾掉小數點後的零（例如 12.0 顯示 12）
-                          let displayPortion = valPerPortion.toFixed(1).replace(/\.0$/, '');
-                          let display100 = val100.toFixed(1).replace(/\.0$/, '');
+                          {/* Content Container */}
+                          <div className="w-full h-full flex flex-col justify-between pt-3 pb-1 min-h-0 text-black">
+                            {/* Brand Header */}
+                            {showBranding && labelSize !== '70x50' && (
+                              <div className="flex items-center gap-1.5 overflow-hidden shrink-0 border-b border-black pb-1 mb-1">
+                                <div className="w-5 h-5 shrink-0 flex items-center justify-center border border-black rounded p-0.5 bg-white">
+                                  {renderLabelLogo()}
+                                </div>
+                                <div className="flex flex-col text-black min-w-0">
+                                  <span className="font-extrabold text-[7.5pt] tracking-wide leading-none truncate text-black">{brandNameZh}</span>
+                                  <span className="font-bold text-[4.5pt] tracking-wider text-black uppercase leading-none truncate mt-0.5">{brandNameEn}</span>
+                                </div>
+                              </div>
+                            )}
 
-                          // 套用台灣衛福部「零標示」與「鈉整數」防呆法規
-                          if (row.name.trim() === '鈉') {
-                            displayPortion = valPerPortion < 5 ? '0' : Math.round(valPerPortion).toString();
-                            display100 = val100 < 5 ? '0' : Math.round(val100).toString();
-                          } else if (row.isZeroLimit > 0) {
-                            if (valPerPortion <= row.isZeroLimit) displayPortion = '0';
-                            if (val100 <= row.isZeroLimit) display100 = '0';
-                          }
+                            {/* Product Name */}
+                            <div className="shrink-0 mb-1 leading-tight">
+                              {showProductZh && (
+                                <h1 className="font-black text-[10pt] leading-none tracking-tight text-black break-words">
+                                  {productZh}
+                                </h1>
+                              )}
+                              {showProductEn && labelSize !== '70x50' && (
+                                <span className="font-bold text-[5pt] uppercase text-black block leading-none truncate mt-0.5">
+                                  {productEn}
+                                </span>
+                              )}
+                            </div>
 
-                          return (
-                            <tr key={idx} className="text-black font-black">
-                              <td className={cn(
-                                "py-[0.2mm] text-left font-sans pl-[0.5mm] text-black",
-                                row.name.startsWith('  ') ? "pl-[2mm] font-semibold text-black" : "font-black text-black"
-                              )}>
-                                {row.name.trim()}
-                              </td>
-                              <td className="py-[0.2mm] text-right pr-[0.5mm] text-black font-mono font-bold whitespace-nowrap">
-                                {displayPortion} {row.unit}
-                              </td>
-                              <td className="py-[0.2mm] text-right pr-[0.5mm] text-black font-mono font-bold whitespace-nowrap">
-                                {display100} {row.unit}
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
+                            {/* Ingredients */}
+                            {showIngredients && (
+                              <div className="flex-1 flex flex-col justify-start min-h-0 overflow-hidden text-black leading-tight">
+                                <span className="font-black text-[5.8pt] bg-black text-white px-1 py-[0.2mm] rounded-[0.2mm] self-start leading-none shrink-0 mb-0.5">
+                                  成分
+                                </span>
+                                <p className="font-semibold text-justify word-break break-all text-black leading-[1.25] text-[5.8pt] overflow-y-auto">
+                                  {ingredientsText}
+                                </p>
+                              </div>
+                            )}
+
+                            {/* Warnings Non-Ready-To-Eat & Allergens */}
+                            <div className="shrink-0 space-y-0.5 mt-1 leading-none">
+                              {showNotReadyToEat && (
+                                <div className="text-[5.5pt] font-black text-center text-white bg-black border border-black py-0.5 rounded-[0.2mm]">
+                                  ⚠️ {notReadyToEatText}
+                                </div>
+                              )}
+                              {showAllergens && allergenWarning && (
+                                <div className="text-[5pt] font-black text-black bg-white p-0.5 rounded-[0.2mm] border border-black border-dashed leading-tight">
+                                  警告：{allergenWarning}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Resize Handle - Hidden in Print */}
+                          <div 
+                            onMouseDown={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setResizingGroup('B');
+                              setDragStartPos({ x: e.clientX, y: e.clientY });
+                              setDragStartLayout({ ...groupLayouts.B });
+                            }}
+                            className="absolute bottom-0 right-0 w-3 h-3 cursor-se-resize flex items-center justify-center bg-slate-200 border-t border-l border-slate-300 opacity-0 group-hover/item:opacity-100 transition-opacity z-20 print:hidden text-[7px] font-black text-slate-600 rounded-tl"
+                          >
+                            ↘
+                          </div>
+                        </div>
+
+
+                        {/* GROUP E: Nutrition facts table */}
+                        <div 
+                          className={cn(
+                            "absolute flex flex-col justify-start overflow-hidden border border-transparent hover:border-slate-300 transition-colors bg-white/95 rounded p-1 group/item",
+                            draggingGroup === 'E' && "border-indigo-500 bg-indigo-50/10 z-20 shadow-md",
+                            resizingGroup === 'E' && "border-purple-500 bg-purple-50/10 z-20 shadow-md"
+                          )}
+                          style={{
+                            left: `${groupLayouts.E.left}%`,
+                            top: `${groupLayouts.E.top}%`,
+                            width: `${groupLayouts.E.width}%`,
+                            height: `${groupLayouts.E.height}%`
+                          }}
+                        >
+                          {/* Drag Bar - Hidden in Print */}
+                          <div 
+                            onMouseDown={(e) => {
+                              e.preventDefault();
+                              setDraggingGroup('E');
+                              setDragStartPos({ x: e.clientX, y: e.clientY });
+                              setDragStartLayout({ ...groupLayouts.E });
+                            }}
+                            className="absolute top-0 left-0 right-0 h-4 bg-slate-100 hover:bg-slate-200 border-b border-slate-200 cursor-move flex items-center justify-between px-1.5 opacity-0 group-hover/item:opacity-100 transition-opacity z-20 print:hidden text-[7.5px] font-black text-slate-600 select-none"
+                          >
+                            <span>✛ 營養標示 (E)</span>
+                            <span className="font-mono opacity-80">{groupLayouts.E.width}% x {groupLayouts.E.height}%</span>
+                          </div>
+
+                          {/* Content Container */}
+                          <div className="w-full h-full flex flex-col justify-end pt-3 pb-1 min-h-0 text-black">
+                            {showNutrition ? (
+                              <div className="flex flex-col justify-end text-black shrink-0 border border-black p-0.5 bg-white">
+                                <div className="text-[6.2pt] font-black text-center border-b border-black pb-0.5 tracking-wider leading-none">
+                                  營 養 標 示
+                                </div>
+                                <div className="text-[4.8pt] font-bold text-left py-0.5 border-b border-black leading-tight">
+                                  每一份量 {portionSize} 公克<br />
+                                  本包裝含 {portionsPerPkg} 份
+                                </div>
+                                <table className="w-full text-center border-collapse text-[5pt] font-black mt-0.5">
+                                  <thead>
+                                    <tr className="border-b border-black text-[4.5pt]">
+                                      <th className="py-0.5 text-left font-black"></th>
+                                      <th className="py-0.5 text-right font-black w-[28%]">每份</th>
+                                      <th className="py-0.5 text-right font-black w-[36%]">每100克</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody className="font-mono">
+                                    {[
+                                      { name: '熱量', valPer100: Number(calories), key: 'calories', unit: '大卡', isZeroLimit: 0 },
+                                      { name: '蛋白質', valPer100: Number(protein), key: 'protein', unit: '公克', isZeroLimit: 0 },
+                                      { name: '脂肪', valPer100: Number(fat), key: 'fat', unit: '公克', isZeroLimit: 0 },
+                                      { name: '  飽和脂肪', valPer100: Number(saturatedFat), key: 'saturatedFat', unit: '公克', isZeroLimit: 0.1 },
+                                      { name: '  反式脂肪', valPer100: Number(transFat), key: 'transFat', unit: '公克', isZeroLimit: 0.3 },
+                                      { name: '碳水化合物', valPer100: Number(carbs), key: 'carbs', unit: '公克', isZeroLimit: 0 },
+                                      { name: '  糖', valPer100: Number(sugar), key: 'sugar', unit: '公克', isZeroLimit: 0.5 },
+                                      { name: '鈉', valPer100: Number(sodium), key: 'sodium', unit: '毫克', isZeroLimit: 5 },
+                                    ].map((row, idx) => {
+                                      const sizeRatio = Number(portionSize) / 100;
+                                      const valPerPortion = row.valPer100 * sizeRatio;
+                                      const val100 = row.valPer100;
+
+                                      const cfg = nutritionConfigs[row.key] || { decimals: 1, maxLength: 8 };
+                                      
+                                      let displayPortion = '';
+                                      let display100 = '';
+
+                                      // Handle rounding precision
+                                      if (cfg.decimals === -1) {
+                                        displayPortion = Math.round(valPerPortion).toString();
+                                        display100 = Math.round(val100).toString();
+                                      } else {
+                                        displayPortion = valPerPortion.toFixed(cfg.decimals);
+                                        display100 = val100.toFixed(cfg.decimals);
+                                      }
+
+                                      // FDA Zero and Sodium checks
+                                      if (row.key === 'sodium') {
+                                        displayPortion = valPerPortion < 5 ? '0' : Math.round(valPerPortion).toString();
+                                        display100 = val100 < 5 ? '0' : Math.round(val100).toString();
+                                      } else if (row.isZeroLimit > 0) {
+                                        if (valPerPortion <= row.isZeroLimit) displayPortion = '0';
+                                        if (val100 <= row.isZeroLimit) display100 = '0';
+                                      }
+
+                                      // Apply text limits to prevent visual overflows
+                                      if (displayPortion.length > cfg.maxLength) {
+                                        displayPortion = displayPortion.substring(0, cfg.maxLength);
+                                      }
+                                      if (display100.length > cfg.maxLength) {
+                                        display100 = display100.substring(0, cfg.maxLength);
+                                      }
+
+                                      return (
+                                        <tr key={idx} className="text-black font-black">
+                                          <td className={cn("py-[0.1mm] text-left pl-[0.2mm]", row.name.startsWith('  ') ? "pl-[1.2mm] font-semibold" : "font-black")}>
+                                            {row.name.trim()}
+                                          </td>
+                                          <td className="py-[0.1mm] text-right font-mono font-bold whitespace-nowrap">
+                                            {displayPortion}{row.unit}
+                                          </td>
+                                          <td className="py-[0.1mm] text-right font-mono font-bold whitespace-nowrap">
+                                            {display100}{row.unit}
+                                          </td>
+                                        </tr>
+                                      );
+                                    })}
+                                  </tbody>
+                                </table>
+                              </div>
+                            ) : (
+                              <div className="w-full text-center text-[6pt] text-slate-400 font-bold border border-slate-200 border-dashed py-4 rounded">
+                                營養標示已停用
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Resize Handle - Hidden in Print */}
+                          <div 
+                            onMouseDown={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setResizingGroup('E');
+                              setDragStartPos({ x: e.clientX, y: e.clientY });
+                              setDragStartLayout({ ...groupLayouts.E });
+                            }}
+                            className="absolute bottom-0 right-0 w-3 h-3 cursor-se-resize flex items-center justify-center bg-slate-200 border-t border-l border-slate-300 opacity-0 group-hover/item:opacity-100 transition-opacity z-20 print:hidden text-[7px] font-black text-slate-600 rounded-tl"
+                          >
+                            ↘
+                          </div>
+                        </div>
+
+
+                        {/* GROUP C: Product Specs & Preservation Conditions */}
+                        <div 
+                          className={cn(
+                            "absolute flex flex-col justify-start overflow-hidden border border-transparent hover:border-slate-300 transition-colors bg-white/95 rounded p-1 group/item",
+                            draggingGroup === 'C' && "border-indigo-500 bg-indigo-50/10 z-20 shadow-md",
+                            resizingGroup === 'C' && "border-purple-500 bg-purple-50/10 z-20 shadow-md"
+                          )}
+                          style={{
+                            left: `${groupLayouts.C.left}%`,
+                            top: `${groupLayouts.C.top}%`,
+                            width: `${groupLayouts.C.width}%`,
+                            height: `${groupLayouts.C.height}%`
+                          }}
+                        >
+                          {/* Drag Bar - Hidden in Print */}
+                          <div 
+                            onMouseDown={(e) => {
+                              e.preventDefault();
+                              setDraggingGroup('C');
+                              setDragStartPos({ x: e.clientX, y: e.clientY });
+                              setDragStartLayout({ ...groupLayouts.C });
+                            }}
+                            className="absolute top-0 left-0 right-0 h-4 bg-slate-100 hover:bg-slate-200 border-b border-slate-200 cursor-move flex items-center justify-between px-1.5 opacity-0 group-hover/item:opacity-100 transition-opacity z-20 print:hidden text-[7.5px] font-black text-slate-600 select-none"
+                          >
+                            <span>✛ 規格與保存 (C)</span>
+                            <span className="font-mono opacity-80">{groupLayouts.C.width}% x {groupLayouts.C.height}%</span>
+                          </div>
+
+                          {/* Content Container */}
+                          <div className="w-full h-full flex flex-col justify-around pt-3 pb-1 min-h-0 text-black leading-tight">
+                            <div className="text-[5.8pt] font-extrabold space-y-[0.3mm] text-black">
+                              {showNetWeight && (
+                                <div className="flex justify-between">
+                                  <span>淨重：</span>
+                                  <span className="font-mono">{netWeight}</span>
+                                </div>
+                              )}
+                              {showStorage && (
+                                <div className="flex justify-between">
+                                  <span>保存條件：</span>
+                                  <span>{storageCondition}</span>
+                                </div>
+                              )}
+                              {showExpiry && (
+                                <>
+                                  <div className="flex justify-between">
+                                    <span>保存期限：</span>
+                                    <span>{shelfLife}</span>
+                                  </div>
+                                  <div className="flex justify-between font-black">
+                                    <span>有效日期：</span>
+                                    <span className="font-mono">
+                                      {expiryOption === 'printed' ? '標示於封口處' : expiryDate}
+                                    </span>
+                                  </div>
+                                </>
+                              )}
+                              {showOrigin && originCountry && (
+                                <div className="flex justify-between">
+                                  <span>原產地：</span>
+                                  <span className="font-extrabold">{originCountry}</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Resize Handle - Hidden in Print */}
+                          <div 
+                            onMouseDown={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setResizingGroup('C');
+                              setDragStartPos({ x: e.clientX, y: e.clientY });
+                              setDragStartLayout({ ...groupLayouts.C });
+                            }}
+                            className="absolute bottom-0 right-0 w-3 h-3 cursor-se-resize flex items-center justify-center bg-slate-200 border-t border-l border-slate-300 opacity-0 group-hover/item:opacity-100 transition-opacity z-20 print:hidden text-[7px] font-black text-slate-600 rounded-tl"
+                          >
+                            ↘
+                          </div>
+                        </div>
+
+
+                        {/* GROUP A: Reheating Guide */}
+                        <div 
+                          className={cn(
+                            "absolute flex flex-col justify-start overflow-hidden border border-transparent hover:border-slate-300 transition-colors bg-white/95 rounded p-1 group/item",
+                            draggingGroup === 'A' && "border-indigo-500 bg-indigo-50/10 z-20 shadow-md",
+                            resizingGroup === 'A' && "border-purple-500 bg-purple-50/10 z-20 shadow-md"
+                          )}
+                          style={{
+                            left: `${groupLayouts.A.left}%`,
+                            top: `${groupLayouts.A.top}%`,
+                            width: `${groupLayouts.A.width}%`,
+                            height: `${groupLayouts.A.height}%`
+                          }}
+                        >
+                          {/* Drag Bar - Hidden in Print */}
+                          <div 
+                            onMouseDown={(e) => {
+                              e.preventDefault();
+                              setDraggingGroup('A');
+                              setDragStartPos({ x: e.clientX, y: e.clientY });
+                              setDragStartLayout({ ...groupLayouts.A });
+                            }}
+                            className="absolute top-0 left-0 right-0 h-4 bg-slate-100 hover:bg-slate-200 border-b border-slate-200 cursor-move flex items-center justify-between px-1.5 opacity-0 group-hover/item:opacity-100 transition-opacity z-20 print:hidden text-[7.5px] font-black text-slate-600 select-none"
+                          >
+                            <span>✛ 覆熱指引 (A)</span>
+                            <span className="font-mono opacity-80">{groupLayouts.A.width}% x {groupLayouts.A.height}%</span>
+                          </div>
+
+                          {/* Content Container */}
+                          <div className="w-full h-full flex flex-col justify-between pt-3 pb-1 min-h-0 text-black">
+                            {showReheating ? (
+                              <div className="w-full h-full flex flex-col justify-between overflow-hidden">
+                                <div className="flex justify-center shrink-0 mb-0.5">
+                                  <span 
+                                    style={{ fontSize: `${reheatingMainTitleSize - 1}pt` }}
+                                    className="font-black bg-black text-white px-1.5 py-[0.25mm] rounded-[0.25mm] text-center leading-none"
+                                  >
+                                    {reheatingMainTitle}
+                                  </span>
+                                </div>
+                                <div className="flex-1 flex flex-col justify-around min-h-0 overflow-y-auto leading-tight">
+                                  {[
+                                    { title: airFryerTitle, steps: airFryerSteps, show: showAirFryer },
+                                    { title: ovenTitle, steps: ovenSteps, show: showOven },
+                                    { title: panTitle, steps: panSteps, show: showPan }
+                                  ].filter(m => m.show).map((m, idx) => (
+                                    <div key={idx} className="flex flex-col text-black">
+                                      <strong style={{ fontSize: `${reheatingSubTitleSize - 1.2}pt` }} className="font-black">
+                                        ├─ {m.title}
+                                      </strong>
+                                      <p style={{ fontSize: `${reheatingContentSize - 1.2}pt` }} className="font-bold whitespace-pre-line pl-2 leading-tight">
+                                        {m.steps}
+                                      </p>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="w-full text-center text-[5.5pt] text-slate-400 font-bold border border-slate-200 border-dashed py-2 rounded">
+                                覆熱指引已停用
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Resize Handle - Hidden in Print */}
+                          <div 
+                            onMouseDown={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setResizingGroup('A');
+                              setDragStartPos({ x: e.clientX, y: e.clientY });
+                              setDragStartLayout({ ...groupLayouts.A });
+                            }}
+                            className="absolute bottom-0 right-0 w-3 h-3 cursor-se-resize flex items-center justify-center bg-slate-200 border-t border-l border-slate-300 opacity-0 group-hover/item:opacity-100 transition-opacity z-20 print:hidden text-[7px] font-black text-slate-600 rounded-tl"
+                          >
+                            ↘
+                          </div>
+                        </div>
+
+
+                        {/* GROUP D: Manufacturer Info & Barcode */}
+                        <div 
+                          className={cn(
+                            "absolute flex flex-col justify-start overflow-hidden border border-transparent hover:border-slate-300 transition-colors bg-white/95 rounded p-1 group/item",
+                            draggingGroup === 'D' && "border-indigo-500 bg-indigo-50/10 z-20 shadow-md",
+                            resizingGroup === 'D' && "border-purple-500 bg-purple-50/10 z-20 shadow-md"
+                          )}
+                          style={{
+                            left: `${groupLayouts.D.left}%`,
+                            top: `${groupLayouts.D.top}%`,
+                            width: `${groupLayouts.D.width}%`,
+                            height: `${groupLayouts.D.height}%`
+                          }}
+                        >
+                          {/* Drag Bar - Hidden in Print */}
+                          <div 
+                            onMouseDown={(e) => {
+                              e.preventDefault();
+                              setDraggingGroup('D');
+                              setDragStartPos({ x: e.clientX, y: e.clientY });
+                              setDragStartLayout({ ...groupLayouts.D });
+                            }}
+                            className="absolute top-0 left-0 right-0 h-4 bg-slate-100 hover:bg-slate-200 border-b border-slate-200 cursor-move flex items-center justify-between px-1.5 opacity-0 group-hover/item:opacity-100 transition-opacity z-20 print:hidden text-[7.5px] font-black text-slate-600 select-none"
+                          >
+                            <span>✛ 廠商與條碼 (D)</span>
+                            <span className="font-mono opacity-80">{groupLayouts.D.width}% x {groupLayouts.D.height}%</span>
+                          </div>
+
+                          {/* Content Container */}
+                          <div className="w-full h-full flex items-center justify-between pt-3 pb-0.5 min-h-0 text-black leading-tight gap-1.5">
+                            {/* Responsible party info */}
+                            {showResponsible && (
+                              <div className="text-[5.2pt] text-black font-semibold flex-1 min-w-0">
+                                {showAddress && (
+                                  <div className="flex gap-[0.2mm]">
+                                    <span className="font-black shrink-0">地址：</span>
+                                    <span className="truncate">{companyAddress}</span>
+                                  </div>
+                                )}
+                                {showPhone && (
+                                  <div className="flex gap-[0.2mm]">
+                                    <span className="font-black shrink-0">電話：</span>
+                                    <span className="font-mono">{companyPhone}</span>
+                                  </div>
+                                )}
+                                {showManufacturer && (
+                                  <div className="flex gap-[0.2mm] text-[5pt] text-slate-600 mt-0.5">
+                                    <span>製造商：</span>
+                                    <span className="truncate">{companyName}</span>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+
+                            {/* Barcode area */}
+                            {showBarcode && (
+                              <div className="flex items-center gap-1.5 shrink-0 border-l border-dashed border-black pl-1.5 py-0.5">
+                                <div className="p-0.5 bg-white border border-black shrink-0 flex items-center justify-center">
+                                  <QRCodeSVG 
+                                    value={barcodeText || "https://pizzastudio.com"} 
+                                    size={24}
+                                    level="M"
+                                    fgColor="#000000"
+                                    bgColor="#ffffff"
+                                  />
+                                </div>
+                                <span className="text-[4.5pt] font-sans font-black leading-tight text-black whitespace-nowrap">
+                                  掃碼查看<br />復熱教學
+                                </span>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Resize Handle - Hidden in Print */}
+                          <div 
+                            onMouseDown={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setResizingGroup('D');
+                              setDragStartPos({ x: e.clientX, y: e.clientY });
+                              setDragStartLayout({ ...groupLayouts.D });
+                            }}
+                            className="absolute bottom-0 right-0 w-3 h-3 cursor-se-resize flex items-center justify-center bg-slate-200 border-t border-l border-slate-300 opacity-0 group-hover/item:opacity-100 transition-opacity z-20 print:hidden text-[7px] font-black text-slate-600 rounded-tl"
+                          >
+                            ↘
+                          </div>
+                        </div>
+
+                      </div>
+                    ) : (
+                      // STANDARD FLOW COLUMN/GRID LAYOUT
+                      <div className="w-full h-full flex flex-col justify-between relative z-10 text-black">
+                        {/* 1. Header (Brand Logo, Product Title) */}
+                        {labelSize !== '70x50' ? (
+                          <div className="w-full border-b-[0.8mm] border-black pb-[1.5mm] flex justify-between items-center shrink-0">
+                            {showBranding && (
+                              <div className="flex items-center gap-[2.5mm] overflow-hidden">
+                                <div style={{ width: '12mm', height: '12mm' }} className="shrink-0 flex items-center justify-center border border-black rounded-lg p-1 bg-white">
+                                  {renderLabelLogo()}
+                                </div>
+                                <div className="flex flex-col justify-center text-black">
+                                  <span className="font-extrabold text-[12pt] tracking-wide leading-none text-black">{brandNameZh}</span>
+                                  <span className="font-bold text-[5.5pt] tracking-widest text-black uppercase mt-0.5 leading-none">{brandNameEn}</span>
+                                </div>
+                              </div>
+                            )}
+                            
+                            <div className="text-right flex-1 pl-[3mm] overflow-hidden">
+                              {showProductZh && (
+                                <h1 className="font-black text-[13pt] tracking-tight leading-none text-black break-words">
+                                  {productZh}
+                                </h1>
+                              )}
+                              {showProductEn && (
+                                <span className="font-extrabold text-[6.2pt] tracking-wide uppercase text-black block mt-1.5 leading-none truncate">
+                                  {productEn}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        ) : (
+                          // Mini Header layout (70x50)
+                          <div className="w-full border-b-[0.5mm] border-black pb-[0.5mm] flex justify-between items-end shrink-0">
+                            <span className="font-black text-[9pt] leading-none text-black">{productZh}</span>
+                            <span className="font-bold text-[5.5pt] text-black leading-none">{brandNameZh}</span>
+                          </div>
+                        )}
+
+                        {/* 2. Main content adaptive body */}
+                        {labelSize !== '70x50' ? (
+                          // Grid structure for big labels: Left (Reheating), Right (Ingredients/Nutrition/Info)
+                          <div 
+                            style={hasActiveReheating ? { gridTemplateColumns: '1.1fr 1fr' } : undefined}
+                            className={cn(
+                              "flex-1 min-h-0 text-black",
+                              hasActiveReheating 
+                                ? "grid gap-[3mm] py-[2mm] grid-cols-[1.1fr_1fr]" 
+                                : "py-[2mm] flex flex-col justify-between"
+                            )}
+                          >
+                            
+                            {/* Left Column: Reheating steps */}
+                            {hasActiveReheating && (
+                              <div className="border-r-[0.3mm] border-black pr-[2mm] flex flex-col justify-between gap-[2.5mm] min-h-0 overflow-hidden text-black h-full">
+                                <div className="flex justify-center">
+                                  <span 
+                                    style={{ fontSize: `${reheatingMainTitleSize}pt` }}
+                                    className="font-black bg-black text-white px-[2mm] py-[0.5mm] rounded-[0.5mm] text-center leading-none"
+                                  >
+                                    {reheatingMainTitle}
+                                  </span>
+                                </div>
+                                
+                                <div className="flex-1 flex flex-col justify-around py-[1mm]">
+                                  {[
+                                    { title: airFryerTitle, steps: airFryerSteps, show: showAirFryer },
+                                    { title: ovenTitle, steps: ovenSteps, show: showOven },
+                                    { title: panTitle, steps: panSteps, show: showPan }
+                                  ].filter(m => m.show).map((m, idx) => (
+                                    <div key={idx} className="flex flex-col gap-[0.5mm] text-black">
+                                      <strong 
+                                        style={{ fontSize: `${reheatingSubTitleSize}pt` }}
+                                        className="font-extrabold text-black"
+                                      >
+                                        ├─ {m.title}
+                                      </strong>
+                                      <p 
+                                        style={{ fontSize: `${reheatingContentSize}pt` }}
+                                        className="text-black font-semibold whitespace-pre-line pl-[3.5mm] leading-[1.3]"
+                                      >
+                                        {m.steps}
+                                      </p>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Right Column: Ingredients list, Allergen advice, Expiry, Nutrition */}
+                            <div className="flex flex-col justify-between gap-[2.5mm] min-h-0 h-full text-black">
+                              {/* Ingredients */}
+                              {showIngredients && (
+                                <div className="flex flex-col gap-[1mm] min-h-0 overflow-hidden text-black flex-1 justify-start">
+                                  <span className="font-black text-[7pt] bg-black text-white px-[1.5mm] py-[0.3mm] rounded-[0.3mm] self-start leading-none shrink-0 mb-1">
+                                    成分
+                                  </span>
+                                  <p className="font-semibold text-justify word-break break-all text-black pl-0.5 leading-[1.3] text-[6.6pt] overflow-y-auto">
+                                    {ingredientsText}
+                                  </p>
+                                </div>
+                              )}
+
+                              {/* Non-ready-to-eat warning inside flow */}
+                              {showNotReadyToEat && (
+                                <div className="text-[6.2pt] font-black text-center text-white bg-black py-0.5 rounded-[0.3mm] shrink-0 my-0.5">
+                                  ⚠️ {notReadyToEatText}
+                                </div>
+                              )}
+
+                              {/* Expiry / Weight */}
+                              {!shouldMoveInfoToBottomLeft && (showNetWeight || showStorage || showExpiry || showOrigin) && (
+                                <div className="text-[6.8pt] leading-[1.35] font-bold space-y-[0.6mm] border-t-[0.2mm] border-dashed border-black pt-2 text-black shrink-0">
+                                  {showNetWeight && (
+                                    <div className="flex justify-between text-black">
+                                      <span>淨重：</span>
+                                      <span className="font-mono">{netWeight}</span>
+                                    </div>
+                                  )}
+                                  {showStorage && (
+                                    <div className="flex justify-between text-black">
+                                      <span>保存條件：</span>
+                                      <span>{storageCondition}</span>
+                                    </div>
+                                  )}
+                                  {showExpiry && (
+                                    <>
+                                      <div className="flex justify-between text-black">
+                                        <span>保存期限：</span>
+                                        <span>{shelfLife}</span>
+                                      </div>
+                                      <div className="flex justify-between font-black text-black">
+                                        <span>有效日期：</span>
+                                        <span className="font-mono">
+                                          {expiryOption === 'printed' ? '標示於封口處' : expiryDate}
+                                        </span>
+                                      </div>
+                                    </>
+                                  )}
+                                  {showOrigin && originCountry && (
+                                    <div className="flex justify-between text-black">
+                                      <span>原產地：</span>
+                                      <span className="font-extrabold">{originCountry}</span>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+
+                              {/* Allergen alert */}
+                              {showAllergens && allergenWarning && (
+                                <div className="text-[6pt] font-black text-black bg-white p-[1.2mm] rounded-[0.5mm] border-[0.25mm] border-black border-dashed leading-[1.2] shrink-0">
+                                  ⚠️ 警告：{allergenWarning}
+                                </div>
+                              )}
+                            </div>
+
+                          </div>
+                        ) : (
+                          // Mini Label (70x50) compact body
+                          <div className="flex-1 py-[1mm] flex flex-col justify-between text-[5.8pt] leading-[1.2] font-extrabold text-black">
+                            {showIngredients && (
+                              <p className="text-justify word-break break-all text-black font-semibold">
+                                <span className="font-black text-black">成分：</span>{ingredientsText}
+                              </p>
+                            )}
+
+                            {showNotReadyToEat && (
+                              <div className="text-[5.2pt] font-black text-center text-white bg-black py-0.5 rounded-[0.2mm] shrink-0 my-0.5">
+                                ⚠️ {notReadyToEatText}
+                              </div>
+                            )}
+                            
+                            <div className="grid grid-cols-2 gap-[2mm] border-t-[0.1mm] border-black pt-[1mm] mt-[0.5mm]">
+                              <div>
+                                {showNetWeight && <p><span className="font-black">淨重：</span>{netWeight}</p>}
+                                {showStorage && <p><span className="font-black">保存：</span>{storageCondition}</p>}
+                                {showExpiry && <p><span className="font-black">效期：</span>{shelfLife}</p>}
+                              </div>
+                              <div className="text-right">
+                                {showExpiry && (
+                                  <p className="font-black text-black">
+                                    有效：{expiryOption === 'printed' ? '標示於包裝' : expiryDate}
+                                  </p>
+                                )}
+                                {showOrigin && originCountry && <p><span className="font-black">產地：</span>{originCountry}</p>}
+                              </div>
+                            </div>
+
+                            {showAllergens && (
+                              <p className="text-[5pt] font-black text-black bg-white border-[0.1mm] border-dashed border-black p-0.5 mt-0.5">
+                                過敏原：{allergenWarning.replace('本產品含有', '').replace('，不適合對其過敏體質者食用。', '')}
+                              </p>
+                            )}
+                          </div>
+                        )}
+
+                        {/* 3. Bottom Row: Nutrition facts table & corporate details & QR code */}
+                        {labelSize !== '70x50' ? (
+                          <div 
+                            style={showNutrition ? { gridTemplateColumns: '1.1fr 1fr' } : undefined}
+                            className={cn(
+                              "w-full border-t-[0.8mm] border-black pt-[2mm] shrink-0 text-black",
+                              showNutrition 
+                                ? "grid gap-[3mm] items-end grid-cols-[1.1fr_1fr]" 
+                                : "block"
+                            )}
+                          >
+                            
+                            {/* Bottom Left: Corporate Details + Barcode Area */}
+                            <div className={cn(
+                              "overflow-hidden text-black w-full",
+                              showNutrition ? "space-y-[2mm]" : "flex justify-between items-end gap-[4mm] border-b-[0.1mm] border-dashed border-slate-300 pb-1"
+                            )}>
+                              {shouldMoveInfoToBottomLeft && (showNetWeight || showStorage || showExpiry || showOrigin) && (
+                                <div className="text-[6.8pt] leading-[1.35] font-bold space-y-[0.6mm] border-b-[0.2mm] border-dashed border-black pb-2 mb-2 text-black shrink-0">
+                                  {showNetWeight && (
+                                    <div className="flex justify-between text-black">
+                                      <span>淨重：</span>
+                                      <span className="font-mono">{netWeight}</span>
+                                    </div>
+                                  )}
+                                  {showStorage && (
+                                    <div className="flex justify-between text-black">
+                                      <span>保存條件：</span>
+                                      <span>{storageCondition}</span>
+                                    </div>
+                                  )}
+                                  {showExpiry && (
+                                    <>
+                                      <div className="flex justify-between text-black">
+                                        <span>保存期限：</span>
+                                        <span>{shelfLife}</span>
+                                      </div>
+                                      <div className="flex justify-between font-black text-black">
+                                        <span>有效日期：</span>
+                                        <span className="font-mono">
+                                          {expiryOption === 'printed' ? '標示於封口處' : expiryDate}
+                                        </span>
+                                      </div>
+                                    </>
+                                  )}
+                                  {showOrigin && originCountry && (
+                                    <div className="flex justify-between text-black">
+                                      <span>原產地：</span>
+                                      <span className="font-extrabold">{originCountry}</span>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+
+                              {showResponsible && (
+                                <div className={cn(
+                                  "text-[6.2pt] leading-[1.3] text-black font-semibold",
+                                  showNutrition ? "" : "flex-1"
+                                )}>
+                                  {showAddress && (
+                                    <div className="flex gap-[0.5mm]">
+                                      <span className="font-black shrink-0">地址：</span>
+                                      <span>{companyAddress}</span>
+                                    </div>
+                                  )}
+                                  {showPhone && (
+                                    <div className="flex gap-[0.5mm]">
+                                      <span className="font-black shrink-0">電話：</span>
+                                      <span className="font-mono">{companyPhone}</span>
+                                    </div>
+                                  )}
+                                  {showOrigin && !shouldMoveInfoToBottomLeft && (
+                                    <div className="flex gap-[0.5mm]">
+                                      <span className="font-black shrink-0">原產地：</span>
+                                      <span className="font-extrabold text-black">{originCountry}</span>
+                                    </div>
+                                  )}
+                                  {showManufacturer && (
+                                    <div className="flex gap-[0.5mm] mt-0.5 text-[5.8pt] text-black">
+                                      <span>製造商：</span>
+                                      <span className="truncate">{companyName}</span>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+
+                              {/* QR Code Barcode area */}
+                              {showBarcode && (
+                                <div className={cn(
+                                  "flex items-center gap-[2mm] shrink-0",
+                                  showNutrition 
+                                    ? "border-t-[0.2mm] border-dashed border-black pt-[1.5mm]" 
+                                    : "border-l-[0.2mm] border-dashed border-black pl-[4mm] py-0.5"
+                                )}>
+                                  <div className="p-0.5 bg-white border border-black shrink-0 flex items-center justify-center">
+                                    <QRCodeSVG 
+                                      value={barcodeText || "https://pizzastudio.com"} 
+                                      size={32}
+                                      level="M"
+                                      fgColor="#000000"
+                                      bgColor="#ffffff"
+                                    />
+                                  </div>
+                                  <span className="text-[5.2pt] font-sans font-black leading-tight text-black break-all">
+                                    掃碼查看<br />復熱教學影片
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Bottom Right: Taiwan Nutrition Facts Table with Custom Decimal Precisions */}
+                            {showNutrition && (
+                              <div className="flex flex-col justify-end text-black shrink-0 border border-black p-1 bg-white">
+                                <div className="text-[7pt] font-black text-center border-b-[0.25mm] border-black pb-0.5 tracking-[1mm] text-black leading-none">
+                                  營 養 標 示
+                                </div>
+                                <div className="text-[5.5pt] font-bold text-left py-1 leading-normal border-b-[0.15mm] border-black text-black">
+                                  每一份量 {portionSize} 公克<br />
+                                  本包裝含 {portionsPerPkg} 份
+                                </div>
+                                
+                                <table className="w-full text-center border-collapse text-[5.8pt] font-black mt-0.5 text-black">
+                                  <thead>
+                                    <tr className="border-b-[0.15mm] border-black text-[5pt] text-black">
+                                      <th className="py-[0.2mm] text-left pl-[0.5mm] text-black font-black"></th>
+                                      <th className="py-[0.2mm] text-right pr-[0.5mm] text-black font-black w-[28%]">每份</th>
+                                      <th className="py-[0.2mm] text-right pr-[0.5mm] text-black font-black w-[36%]">每 100 公克</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody className="font-mono text-black">
+                                    {[
+                                      { name: '熱量', valPer100: Number(calories), key: 'calories', unit: '大卡', isZeroLimit: 0 },
+                                      { name: '蛋白質', valPer100: Number(protein), key: 'protein', unit: '公克', isZeroLimit: 0 },
+                                      { name: '脂肪', valPer100: Number(fat), key: 'fat', unit: '公克', isZeroLimit: 0 },
+                                      { name: '  飽和脂肪', valPer100: Number(saturatedFat), key: 'saturatedFat', unit: '公克', isZeroLimit: 0.1 },
+                                      { name: '  反式脂肪', valPer100: Number(transFat), key: 'transFat', unit: '公克', isZeroLimit: 0.3 },
+                                      { name: '碳水化合物', valPer100: Number(carbs), key: 'carbs', unit: '公克', isZeroLimit: 0 },
+                                      { name: '  糖', valPer100: Number(sugar), key: 'sugar', unit: '公克', isZeroLimit: 0.5 },
+                                      { name: '鈉', valPer100: Number(sodium), key: 'sodium', unit: '毫克', isZeroLimit: 5 },
+                                    ].map((row, idx) => {
+                                      const sizeRatio = Number(portionSize) / 100;
+                                      const valPerPortion = row.valPer100 * sizeRatio;
+                                      const val100 = row.valPer100;
+
+                                      const cfg = nutritionConfigs[row.key] || { decimals: 1, maxLength: 8 };
+
+                                      let displayPortion = '';
+                                      let display100 = '';
+
+                                      // Handle rounding precision
+                                      if (cfg.decimals === -1) {
+                                        displayPortion = Math.round(valPerPortion).toString();
+                                        display100 = Math.round(val100).toString();
+                                      } else {
+                                        displayPortion = valPerPortion.toFixed(cfg.decimals);
+                                        display100 = val100.toFixed(cfg.decimals);
+                                      }
+
+                                      // Apply FDA Zero checks & Sodium checks
+                                      if (row.key === 'sodium') {
+                                        displayPortion = valPerPortion < 5 ? '0' : Math.round(valPerPortion).toString();
+                                        display100 = val100 < 5 ? '0' : Math.round(val100).toString();
+                                      } else if (row.isZeroLimit > 0) {
+                                        if (valPerPortion <= row.isZeroLimit) displayPortion = '0';
+                                        if (val100 <= row.isZeroLimit) display100 = '0';
+                                      }
+
+                                      // Limit length to prevent overflows
+                                      if (displayPortion.length > cfg.maxLength) {
+                                        displayPortion = displayPortion.substring(0, cfg.maxLength);
+                                      }
+                                      if (display100.length > cfg.maxLength) {
+                                        display100 = display100.substring(0, cfg.maxLength);
+                                      }
+
+                                      return (
+                                        <tr key={idx} className="text-black font-black">
+                                          <td className={cn(
+                                            "py-[0.2mm] text-left font-sans pl-[0.5mm] text-black",
+                                            row.name.startsWith('  ') ? "pl-[2mm] font-semibold text-black" : "font-black text-black"
+                                          )}>
+                                            {row.name.trim()}
+                                          </td>
+                                          <td className="py-[0.2mm] text-right pr-[0.5mm] text-black font-mono font-bold whitespace-nowrap">
+                                            {displayPortion} {row.unit}
+                                          </td>
+                                          <td className="py-[0.2mm] text-right pr-[0.5mm] text-black font-mono font-bold whitespace-nowrap">
+                                            {display100} {row.unit}
+                                          </td>
+                                        </tr>
+                                      );
+                                    })}
+                                  </tbody>
+                                </table>
+                              </div>
+                            )}
+
+                          </div>
+                        ) : (
+                          // Mini Label bottom row (70x50)
+                          <div className="w-full border-t-[0.4mm] border-black pt-[0.5mm] flex justify-between items-center text-[5.2pt] text-black font-black shrink-0">
+                            {showResponsible && (
+                              <span className="leading-none truncate max-w-[48mm]">
+                                負責商：{companyName} · 電話: {companyPhone}
+                              </span>
+                            )}
+                            {showBarcode && (
+                              <span className="font-mono text-[4.2pt] leading-none shrink-0 font-black border-[0.1mm] border-black px-0.5 rounded-[0.2mm]">
+                                QR: Cook Info
+                              </span>
+                            )}
+                          </div>
+                        )}
+
+                      </div>
+                    )}
                   </div>
-                )}
-
-              </div>
-            ) : (
-              // Mini Label bottom row (70x50)
-              <div className="w-full border-t-[0.4mm] border-black pt-[0.5mm] flex justify-between items-center text-[5.2pt] text-black font-black shrink-0">
-                {showResponsible && (
-                  <span className="leading-none truncate max-w-[48mm]">
-                    負責商：{companyName} · 電話: {companyPhone}
-                  </span>
-                )}
-                {showBarcode && (
-                  <span className="font-mono text-[4.2pt] leading-none shrink-0 font-black border-[0.1mm] border-black px-0.5 rounded-[0.2mm]">
-                    QR: Cook Info
-                  </span>
-                )}
-              </div>
-            )}
-
-          </div>
 
           {/* 3. Ghost Next Label at the bottom */}
           {previewContinuous && (
@@ -2187,6 +3222,13 @@ export const Labels = () => {
 
       {/* Printing Media Style for Thermal Printer */}
       <style>{`
+        /* Grid Dots Overlay Dotted Style */
+        .grid-dots-overlay {
+          background-image: radial-gradient(#6366f1 0.8px, transparent 0.8px);
+          background-size: 2% 2%;
+          opacity: 0.15;
+        }
+
         /* Prevent scrollbars inside label rendering container */
         #printable-label::-webkit-scrollbar {
           display: none !important;
