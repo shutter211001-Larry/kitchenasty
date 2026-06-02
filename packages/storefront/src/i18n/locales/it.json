@@ -231,7 +231,11 @@
     "addressAutoFilled": "✓ Indirizzo membro applicato automaticamente",
     "addressModified": "Indirizzo di spedizione modificato (Originale: {{address}})",
     "addressRequiredTip": "⚠️ Inserisci l'indirizzo di spedizione per i surgelati",
-    "addressEntered": "Indirizzo di spedizione inserito (sarà collegato a questo ordine)"
+    "addressEntered": "Indirizzo di spedizione inserito (sarà collegato a questo ordine)",
+    "selectDateFirst": "Seleziona la data di ritiro/consegna",
+    "timeSelectionConfirmed": "Orario programmato selezionato",
+    "scheduledFor": "Hai programmato per",
+    "noAvailableSlots": "Nessuna fascia oraria disponibile"
   },
   "orderConfirmation": {
     "title": "Ordine Effettuato!",

@@ -231,7 +231,11 @@
     "addressAutoFilled": "✓ Dirección de miembro aplicada automáticamente",
     "addressModified": "Dirección de envío modificada (Original: {{address}})",
     "addressRequiredTip": "⚠️ Por favor, ingrese su dirección para el envío congelado",
-    "addressEntered": "Dirección de envío ingresada (se asociará con este pedido)"
+    "addressEntered": "Dirección de envío ingresada (se asociará con este pedido)",
+    "selectDateFirst": "Seleccionar fecha de recogida/entrega",
+    "timeSelectionConfirmed": "Hora programada seleccionada",
+    "scheduledFor": "Ha programado para",
+    "noAvailableSlots": "No hay franjas horarias disponibles"
   },
   "orderConfirmation": {
     "title": "¡Pedido Realizado!",

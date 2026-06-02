@@ -231,7 +231,11 @@
     "addressAutoFilled": "✓ Tự động áp dụng địa chỉ thành viên",
     "addressModified": "Đã thay đổi địa chỉ giao hàng (Gốc: {{address}})",
     "addressRequiredTip": "⚠️ Vui lòng nhập địa chỉ để giao hàng đông lạnh",
-    "addressEntered": "Đã nhập địa chỉ giao hàng (Sẽ được liên kết với đơn hàng này)"
+    "addressEntered": "Đã nhập địa chỉ giao hàng (Sẽ được liên kết với đơn hàng này)",
+    "selectDateFirst": "Chọn ngày nhận/giao hàng",
+    "timeSelectionConfirmed": "Thời gian hẹn đã được chọn",
+    "scheduledFor": "Bạn đã đặt lịch vào",
+    "noAvailableSlots": "Không có khung giờ trống nào"
   },
   "orderConfirmation": {
     "title": "Đặt hàng thành công!",

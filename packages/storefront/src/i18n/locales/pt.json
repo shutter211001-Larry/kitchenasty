@@ -231,7 +231,11 @@
     "addressAutoFilled": "✓ Endereço de membro aplicado automaticamente",
     "addressModified": "Endereço de entrega modificado (Original: {{address}})",
     "addressRequiredTip": "⚠️ Por favor, insira o endereço de entrega para envio congelado",
-    "addressEntered": "Endereço de entrega inserido (será associado a este pedido)"
+    "addressEntered": "Endereço de entrega inserido (será associado a este pedido)",
+    "selectDateFirst": "Selecionar data de retirada/entrega",
+    "timeSelectionConfirmed": "Horário agendado selecionado",
+    "scheduledFor": "Você agendou para",
+    "noAvailableSlots": "Sem horários disponíveis"
   },
   "orderConfirmation": {
     "title": "Pedido Realizado!",

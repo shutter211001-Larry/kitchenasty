@@ -393,6 +393,7 @@ export default function Checkout() {
         total: data.data.total,
         orderType: data.data.orderType,
         itemCount: data.data.items?.length || 0,
+        scheduledAt: data.data.scheduledAt || undefined,
       });
       navigate(`/orders/${data.data.id}`, { state: { order: data.data } });
     } catch (err: any) {
@@ -725,7 +726,7 @@ export default function Checkout() {
                 )}
                 
                 {scheduledAt && slotsByDay.length === 0 && (
-                  <p className="text-xs text-hint italic">暫無可用預約時段</p>
+                  <p className="text-xs text-hint italic">{t('checkout.noAvailableSlots') || '暫無可用預約時段'}</p>
                 )}
               </div>
             </div>
@@ -1064,7 +1065,7 @@ export default function Checkout() {
           <div className="surface-card rounded-xl shadow-sm border p-6 sticky top-24">
             <h2 className="text-lg font-semibold text-main mb-4">{t('checkout.orderSummary')}</h2>
 
-            <div className="space-y-3 mb-4">
+             <div className="space-y-3 mb-4">
               {items.map((item) => {
                 const optionsTotal = item.options.reduce((s, o) => s + o.priceModifier, 0);
                 return (

@@ -231,7 +231,11 @@
     "addressAutoFilled": "✓ Adresse de membre appliquée automatiquement",
     "addressModified": "Adresse de livraison modifiée (Original: {{address}})",
     "addressRequiredTip": "⚠️ Veuillez saisir votre adresse pour la livraison surgelée",
-    "addressEntered": "Adresse de livraison saisie (sera liée à cette commande)"
+    "addressEntered": "Adresse de livraison saisie (sera liée à cette commande)",
+    "selectDateFirst": "Sélectionner la date de retrait/livraison",
+    "timeSelectionConfirmed": "Heure de rendez-vous sélectionnée",
+    "scheduledFor": "Vous avez planifié pour",
+    "noAvailableSlots": "Aucun créneau horaire disponible"
   },
   "orderConfirmation": {
     "title": "Commande Passée !",

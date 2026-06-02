@@ -230,7 +230,11 @@
     "addressAutoFilled": "✓ 已自動帶入您的會員地址",
     "addressModified": "已修改配送地址 (會員原預設地址: {{address}})",
     "addressRequiredTip": "⚠️ 請填寫您的收件地址，以利外送/冷凍宅配寄送",
-    "addressEntered": "已輸入收件地址 (此地址將與此筆訂單關聯)"
+    "addressEntered": "已輸入收件地址 (此地址將與此筆訂單關聯)",
+    "selectDateFirst": "選擇取餐/外送日期",
+    "timeSelectionConfirmed": "預約時間已選定",
+    "scheduledFor": "您已預約於",
+    "noAvailableSlots": "暫無可用預約時段"
   },
   "orderConfirmation": {
     "title": "點餐成功！",

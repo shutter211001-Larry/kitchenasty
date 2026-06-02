@@ -231,7 +231,11 @@
     "addressAutoFilled": "✓ Mitgliedsadresse automatisch angewendet",
     "addressModified": "Lieferadresse geändert (Original: {{address}})",
     "addressRequiredTip": "⚠️ Bitte Lieferadresse für Gefriergut-Versand angeben",
-    "addressEntered": "Lieferadresse eingegeben (wird mit dieser Bestellung verknüpft)"
+    "addressEntered": "Lieferadresse eingegeben (wird mit dieser Bestellung verknüpft)",
+    "selectDateFirst": "Datum für Abholung/Lieferung wählen",
+    "timeSelectionConfirmed": "Gewünschte Zeit ausgewählt",
+    "scheduledFor": "Sie haben reserviert für",
+    "noAvailableSlots": "Keine verfügbaren Zeitfenster"
   },
   "orderConfirmation": {
     "title": "Bestellung Aufgegeben!",

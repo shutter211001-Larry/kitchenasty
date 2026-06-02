@@ -231,7 +231,11 @@
     "addressAutoFilled": "✓ Awtomatikong inilapat ang address ng miyembro",
     "addressModified": "Binago ang address ng pagpapadala (Orihinal: {{address}})",
     "addressRequiredTip": "⚠️ Mangyaring ilagay ang iyong address para sa frozen delivery",
-    "addressEntered": "Nailagay na ang address ng pagpapadala (iuugnay sa order na ito)"
+    "addressEntered": "Nailagay na ang address ng pagpapadala (iuugnay sa order na ito)",
+    "selectDateFirst": "Pumili ng petsa ng pickup/delivery",
+    "timeSelectionConfirmed": "Napili na ang iskedyul ng oras",
+    "scheduledFor": "Naka-iskedyul ka para sa",
+    "noAvailableSlots": "Walang magagamit na iskedyul ng oras"
   },
   "orderConfirmation": {
     "title": "Nai-place na ang Order!",

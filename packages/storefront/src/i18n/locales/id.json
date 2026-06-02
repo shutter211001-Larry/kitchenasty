@@ -231,7 +231,11 @@
     "addressAutoFilled": "✓ Alamat anggota otomatis diterapkan",
     "addressModified": "Alamat pengiriman diubah (Asli: {{address}})",
     "addressRequiredTip": "⚠️ Harap isi alamat pengiriman untuk pengiriman beku",
-    "addressEntered": "Alamat pengiriman dimasukkan (akan dikaitkan dengan pesanan ini)"
+    "addressEntered": "Alamat pengiriman dimasukkan (akan dikaitkan dengan pesanan ini)",
+    "selectDateFirst": "Pilih tanggal pengambilan/pengiriman",
+    "timeSelectionConfirmed": "Waktu pemesanan telah dipilih",
+    "scheduledFor": "Anda telah menjadwalkan pada",
+    "noAvailableSlots": "Tidak ada slot waktu yang tersedia"
   },
   "orderConfirmation": {
     "title": "Pesanan Berhasil!",
