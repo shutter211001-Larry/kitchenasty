@@ -230,7 +230,11 @@
     "addressAutoFilled": "✓ 회원 주소가 자동으로 적용되었습니다",
     "addressModified": "배송지 주소가 수정되었습니다 (기본 주소: {{address}})",
     "addressRequiredTip": "⚠️ 냉동 택배 배송을 위해 배송지 주소를 입력해 주세요",
-    "addressEntered": "배송지 주소가 입력되었습니다 (이 주문에 연결됩니다)"
+    "addressEntered": "배송지 주소가 입력되었습니다 (이 주문에 연결됩니다)",
+    "selectDateFirst": "수령/배달 날짜 선택",
+    "timeSelectionConfirmed": "예약 시간이 선택되었습니다",
+    "scheduledFor": "예약 시간: ",
+    "noAvailableSlots": "이용 가능한 예약 시간대가 없습니다"
   },
   "orderConfirmation": {
     "title": "주문 완료!",

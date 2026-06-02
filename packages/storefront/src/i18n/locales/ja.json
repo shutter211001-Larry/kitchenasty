@@ -230,7 +230,11 @@
     "addressAutoFilled": "✓ 会員住所が自動的に適用されました",
     "addressModified": "お届け先住所が変更されました (元の住所: {{address}})",
     "addressRequiredTip": "⚠️ 冷凍宅配の発送先住所を入力してください",
-    "addressEntered": "お届け先住所が入力されました (この注文に関連付けられます)"
+    "addressEntered": "お届け先住所が入力されました (この注文に関連付けられます)",
+    "selectDateFirst": "受取/配達日を選択してください",
+    "timeSelectionConfirmed": "予約時間が確定しました",
+    "scheduledFor": "予約日時：",
+    "noAvailableSlots": "利用可能な時間帯はありません"
   },
   "orderConfirmation": {
     "title": "注文が完了しました！",

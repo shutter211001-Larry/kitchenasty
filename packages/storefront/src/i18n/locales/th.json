@@ -231,7 +231,11 @@
     "addressAutoFilled": "✓ ใส่ที่อยู่สมาชิกโดยอัตโนมัติ",
     "addressModified": "แก้ไขที่อยู่จัดส่ง (ที่อยู่เดิม: {{address}})",
     "addressRequiredTip": "⚠️ กรุณากรอกที่อยู่จัดส่งสำหรับการจัดส่งแบบแช่แข็ง",
-    "addressEntered": "กรอกที่อยู่จัดส่งแล้ว (จะเชื่อมโยงกับคำสั่งซื้อนี้)"
+    "addressEntered": "กรอกที่อยู่จัดส่งแล้ว (จะเชื่อมโยงกับคำสั่งซื้อนี้)",
+    "selectDateFirst": "เลือกวันที่รับ/จัดส่ง",
+    "timeSelectionConfirmed": "เลือกเวลาจองแล้ว",
+    "scheduledFor": "คุณจองไว้สำหรับ",
+    "noAvailableSlots": "ไม่มีช่วงเวลาที่สามารถเลือกได้"
   },
   "orderConfirmation": {
     "title": "สั่งอาหารสำเร็จ!",
