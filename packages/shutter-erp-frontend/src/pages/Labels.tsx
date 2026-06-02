@@ -14,7 +14,9 @@ import {
   Utensils,
   ChevronDown,
   ChevronUp,
-  Sliders
+  Sliders,
+  Plus,
+  Trash2
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { QRCodeSVG } from 'qrcode.react';
@@ -104,7 +106,7 @@ export const Labels = () => {
   const [labelSize, setLabelSize] = useState<LabelSize>('100x100');
 
   // Group Collapse Accordion States
-  const [activeAccordion, setActiveAccordion] = useState<'A' | 'B' | 'C' | 'D' | 'E' | 'F' | null>('A');
+  const [activeAccordion, setActiveAccordion] = useState<'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'L' | null>('A');
 
   // Group Font Scales (Multiplier from 0.6 to 2.0)
   const [groupFontScales, setGroupFontScales] = useState<Record<'A' | 'B' | 'C' | 'D' | 'E' | 'F', number>>({
@@ -152,6 +154,152 @@ export const Labels = () => {
       [key]: { ...prev[key], ...updates }
     }));
   };
+
+  // Custom Line Segments
+  interface CustomLine {
+    id: string;
+    type: 'horizontal' | 'vertical';
+    left: number;
+    top: number;
+    length: number;
+    thickness: string;
+    style: 'solid' | 'dashed' | 'dotted' | 'double';
+    color: string;
+  }
+
+  const [customLines, setCustomLines] = useState<CustomLine[]>([]);
+  const [draggingLineId, setDraggingLineId] = useState<string | null>(null);
+  const [resizingLineId, setResizingLineId] = useState<string | null>(null);
+  const [dragLineStartPos, setDragLineStartPos] = useState({ x: 0, y: 0 });
+  const [dragLineStartLayout, setDragLineStartLayout] = useState({ left: 0, top: 0, length: 0 });
+
+  const handleAddLine = () => {
+    const newLine: CustomLine = {
+      id: `line_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      type: 'horizontal',
+      left: 25,
+      top: 50,
+      length: 50,
+      thickness: '1pt',
+      style: 'solid',
+      color: '#000000'
+    };
+    setCustomLines(prev => [...prev, newLine]);
+  };
+
+  const handleDeleteLine = (id: string) => {
+    setCustomLines(prev => prev.filter(l => l.id !== id));
+  };
+
+  const handleUpdateLine = (id: string, updates: Partial<CustomLine>) => {
+    setCustomLines(prev => prev.map(l => l.id === id ? { ...l, ...updates } : l));
+  };
+
+  const handleLineDragStart = (e: React.MouseEvent, id: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const line = customLines.find(l => l.id === id);
+    if (!line) return;
+    setDraggingLineId(id);
+    setDragLineStartPos({ x: e.clientX, y: e.clientY });
+    setDragLineStartLayout({ left: line.left, top: line.top, length: line.length });
+  };
+
+  const handleLineResizeStart = (e: React.MouseEvent, id: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const line = customLines.find(l => l.id === id);
+    if (!line) return;
+    setResizingLineId(id);
+    setDragLineStartPos({ x: e.clientX, y: e.clientY });
+    setDragLineStartLayout({ left: line.left, top: line.top, length: line.length });
+  };
+
+  useEffect(() => {
+    const handleLineMouseMove = (e: MouseEvent) => {
+      if (!draggingLineId && !resizingLineId) return;
+      const labelEl = document.getElementById('printable-label');
+      if (!labelEl) return;
+      const rect = labelEl.getBoundingClientRect();
+      const deltaX = e.clientX - dragLineStartPos.x;
+      const deltaY = e.clientY - dragLineStartPos.y;
+      const deltaXPercent = (deltaX / rect.width) * 100;
+      const deltaYPercent = (deltaY / rect.height) * 100;
+
+      setCustomLines((prevLines) => {
+        const lineId = draggingLineId || resizingLineId;
+        const targetLine = prevLines.find(l => l.id === lineId);
+        if (!targetLine) return prevLines;
+
+        const start = dragLineStartLayout;
+
+        return prevLines.map((line) => {
+          if (line.id !== lineId) return line;
+
+          if (draggingLineId) {
+            let newLeft = Math.round((start.left + deltaXPercent) / 2) * 2;
+            let newTop = Math.round((start.top + deltaYPercent) / 2) * 2;
+
+            if (newLeft < 0) newLeft = 0;
+            if (newTop < 0) newTop = 0;
+
+            if (line.type === 'horizontal') {
+              if (newLeft + line.length > 100) newLeft = 100 - line.length;
+            } else {
+              if (newLeft > 100) newLeft = 100;
+            }
+
+            if (line.type === 'vertical') {
+              if (newTop + line.length > 100) newTop = 100 - line.length;
+            } else {
+              if (newTop > 100) newTop = 100;
+            }
+
+            return {
+              ...line,
+              left: newLeft,
+              top: newTop
+            };
+          } else if (resizingLineId) {
+            let newLength = line.type === 'horizontal'
+              ? Math.round((start.length + deltaXPercent) / 2) * 2
+              : Math.round((start.length + deltaYPercent) / 2) * 2;
+
+            if (newLength < 2) newLength = 2;
+
+            if (line.type === 'horizontal') {
+              if (line.left + newLength > 100) newLength = 100 - line.left;
+            } else {
+              if (line.top + newLength > 100) newLength = 100 - line.top;
+            }
+
+            return {
+              ...line,
+              length: newLength
+            };
+          }
+          return line;
+        });
+      });
+    };
+
+    const handleLineMouseUp = () => {
+      if (draggingLineId || resizingLineId) {
+        setDraggingLineId(null);
+        setResizingLineId(null);
+      }
+    };
+
+    if (draggingLineId || resizingLineId) {
+      window.addEventListener('mousemove', handleLineMouseMove);
+      window.addEventListener('mouseup', handleLineMouseUp);
+    }
+
+    return () => {
+      window.removeEventListener('mousemove', handleLineMouseMove);
+      window.removeEventListener('mouseup', handleLineMouseUp);
+    };
+  }, [draggingLineId, resizingLineId, dragLineStartPos, dragLineStartLayout]);
 
   // Drag-and-Resize Custom Positioning Layout Mode
   const [useCustomLayout, setUseCustomLayout] = useState<boolean>(false);
@@ -489,6 +637,7 @@ export const Labels = () => {
         if (settings.reheatingMainTitleSize) setReheatingMainTitleSize(settings.reheatingMainTitleSize);
         if (settings.reheatingSubTitleSize) setReheatingSubTitleSize(settings.reheatingSubTitleSize);
         if (settings.reheatingContentSize) setReheatingContentSize(settings.reheatingContentSize);
+        if (settings.customLines !== undefined) setCustomLines(settings.customLines);
       } catch (e) {
         console.error('Failed to parse saved settings', e);
       }
@@ -509,6 +658,7 @@ export const Labels = () => {
 
     // Core details
     if (config.useCustomLayout !== undefined) setUseCustomLayout(config.useCustomLayout);
+    if (config.customLines !== undefined) setCustomLines(config.customLines || []);
     if (config.showNotReadyToEat !== undefined) setShowNotReadyToEat(config.showNotReadyToEat);
     if (config.notReadyToEatText !== undefined) setNotReadyToEatText(config.notReadyToEatText);
     if (config.nutritionConfigs !== undefined) setNutritionConfigs(config.nutritionConfigs);
@@ -592,9 +742,10 @@ export const Labels = () => {
   const handleCopyLayoutToClipboard = () => {
     localStorage.setItem('shutter_layout_clipboard', JSON.stringify({
       groupLayouts,
-      groupFontScales
+      groupFontScales,
+      customLines
     }));
-    alert('📋 已複製當前群組位置與文字大小設定！您可以在切換至其他食譜後點選「貼上排版」套用。');
+    alert('📋 已複製當前群組位置、文字大小與自訂線段設定！您可以在切換至其他食譜後點選「貼上排版」套用。');
   };
 
   const handlePasteLayoutFromClipboard = () => {
@@ -607,7 +758,8 @@ export const Labels = () => {
       const parsed = JSON.parse(data);
       if (parsed.groupLayouts) setGroupLayouts(parsed.groupLayouts);
       if (parsed.groupFontScales) setGroupFontScales(parsed.groupFontScales);
-      alert('📋 已成功貼上並套用群組位置與文字大小排版！請點擊下方「儲存設定」按鈕將變更儲存至伺服器。');
+      if (parsed.customLines !== undefined) setCustomLines(parsed.customLines);
+      alert('📋 已成功貼上並套用群組位置、文字大小與自訂線段排版！請點擊下方「儲存設定」按鈕將變更儲存至伺服器。');
     } catch (e) {
       alert('📋 貼上排版失敗，剪貼簿資料格式不正確。');
     }
@@ -632,7 +784,8 @@ export const Labels = () => {
         ...oldConfig,
         useCustomLayout,
         groupLayouts,
-        groupFontScales
+        groupFontScales,
+        customLines
       };
       
       await axios.patch(`http://localhost:3000/api/recipes/${targetRecipeIdToCopyTo}/label-config`, { labelConfig: updatedConfig });
@@ -656,6 +809,7 @@ export const Labels = () => {
       setSavingLabelConfig(true);
       const labelConfig = {
         useCustomLayout,
+        customLines,
         showNotReadyToEat,
         notReadyToEatText,
         nutritionConfigs,
@@ -867,6 +1021,7 @@ export const Labels = () => {
   const handleReset = () => {
     setSelectedRecipeId('');
     setUseCustomLayout(false);
+    setCustomLines([]);
     setShowNotReadyToEat(true);
     setNotReadyToEatText('非供即食，應充分加熱');
     setNutritionConfigs({
@@ -951,6 +1106,7 @@ export const Labels = () => {
   const handleSaveSettings = () => {
     const settings = {
       useCustomLayout,
+      customLines,
       showNotReadyToEat,
       notReadyToEatText,
       nutritionConfigs,
@@ -2604,6 +2760,190 @@ export const Labels = () => {
                 </div>
               )}
             </div>
+
+            {/* GROUP L: 自訂分隔線段 */}
+            <div className={cn("border rounded-2xl overflow-hidden bg-white shadow-sm transition-all", activeAccordion === 'L' ? "border-primary/40 ring-1 ring-primary/10" : "border-border")}>
+              <button
+                type="button"
+                onClick={() => setActiveAccordion(activeAccordion === 'L' ? null : 'L')}
+                className="w-full px-4 py-3 flex items-center justify-between bg-slate-50 hover:bg-slate-100/80 transition-colors cursor-pointer"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="w-5 h-5 bg-indigo-500 text-white rounded-lg flex items-center justify-center font-bold text-xs">L</span>
+                  <div className="text-left">
+                    <span className="text-[11px] font-black text-gray-800 block">自訂分隔線段</span>
+                    <span className="text-[9px] text-muted-foreground font-semibold">新增水平線、垂直線，自由調整位置、長度與樣式</span>
+                  </div>
+                </div>
+                {activeAccordion === 'L' ? <ChevronUp className="w-4 h-4 text-gray-500" /> : <ChevronDown className="w-4 h-4 text-gray-500" />}
+              </button>
+              
+              {activeAccordion === 'L' && (
+                <div className="p-4 border-t border-border space-y-4 animate-in fade-in duration-200">
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={handleAddLine}
+                      className="flex-1 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-black text-xs shadow-sm transition-all active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>新增自訂線段</span>
+                    </button>
+                    {customLines.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (confirm('確定要清空所有自訂線段嗎？')) {
+                            setCustomLines([]);
+                          }
+                        }}
+                        className="px-3 py-2 bg-red-50 hover:bg-red-100 border border-red-200 text-red-700 rounded-xl font-bold text-xs transition-all active:scale-95 flex items-center justify-center gap-1 cursor-pointer"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                        <span>清空</span>
+                      </button>
+                    )}
+                  </div>
+
+                  {customLines.length === 0 ? (
+                    <div className="text-center py-6 border border-dashed border-slate-200 rounded-2xl text-slate-400 font-bold text-xs">
+                      目前無自訂線段。<br />點選上方按鈕新增，或在拖拉排版模式下編輯。
+                    </div>
+                  ) : (
+                    <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
+                      {customLines.map((line, index) => (
+                        <div key={line.id} className="p-3 bg-slate-50 border border-slate-200 rounded-2xl space-y-3 relative group/item">
+                          <div className="flex items-center justify-between">
+                            <span className="text-[10px] font-black text-slate-700 font-sans">
+                              線段 #{index + 1} ({line.type === 'horizontal' ? '水平線' : '垂直線'})
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteLine(line.id)}
+                              className="text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50 transition-colors cursor-pointer"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-2">
+                            {/* Direction toggle */}
+                            <div className="space-y-1">
+                              <span className="text-[8.5px] font-bold text-gray-500 block">方向</span>
+                              <div className="flex rounded-lg border border-slate-200 overflow-hidden bg-white p-0.5">
+                                <button
+                                  type="button"
+                                  onClick={() => handleUpdateLine(line.id, { type: 'horizontal' })}
+                                  className={cn(
+                                    "flex-1 py-1 text-[9px] font-black rounded cursor-pointer",
+                                    line.type === 'horizontal' ? "bg-slate-900 text-white" : "text-slate-600 hover:bg-slate-50"
+                                  )}
+                                >
+                                  水平線
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleUpdateLine(line.id, { type: 'vertical' })}
+                                  className={cn(
+                                    "flex-1 py-1 text-[9px] font-black rounded cursor-pointer",
+                                    line.type === 'vertical' ? "bg-slate-900 text-white" : "text-slate-600 hover:bg-slate-50"
+                                  )}
+                                >
+                                  垂直線
+                                </button>
+                              </div>
+                            </div>
+
+                            {/* Style dropdown */}
+                            <div className="space-y-1">
+                              <span className="text-[8.5px] font-bold text-gray-500 block">線條樣式</span>
+                              <select
+                                className="w-full px-2 py-1 bg-white border border-slate-200 rounded-lg text-[9.5px] font-bold text-slate-700 outline-none"
+                                value={line.style}
+                                onChange={(e) => handleUpdateLine(line.id, { style: e.target.value as any })}
+                              >
+                                <option value="solid">實線 (Solid)</option>
+                                <option value="dashed">虛線 (Dashed)</option>
+                                <option value="dotted">點線 (Dotted)</option>
+                                <option value="double">雙線 (Double)</option>
+                              </select>
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-2">
+                            {/* Thickness */}
+                            <div className="space-y-1">
+                              <span className="text-[8.5px] font-bold text-gray-500 block">粗細</span>
+                              <select
+                                className="w-full px-2 py-1 bg-white border border-slate-200 rounded-lg text-[9.5px] font-bold text-slate-700 outline-none"
+                                value={line.thickness}
+                                onChange={(e) => handleUpdateLine(line.id, { thickness: e.target.value })}
+                              >
+                                <option value="0.5pt">0.5 pt</option>
+                                <option value="1pt">1.0 pt (標準)</option>
+                                <option value="1.5pt">1.5 pt</option>
+                                <option value="2pt">2.0 pt</option>
+                                <option value="3pt">3.0 pt</option>
+                              </select>
+                            </div>
+
+                            {/* Length */}
+                            <div className="space-y-1">
+                              <div className="flex justify-between items-center">
+                                <span className="text-[8.5px] font-bold text-gray-500 block">長度 (%)</span>
+                                <span className="text-[8.5px] font-mono font-bold text-slate-600">{line.length}%</span>
+                              </div>
+                              <input
+                                type="range"
+                                min="2"
+                                max="100"
+                                className="w-full h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+                                value={line.length}
+                                onChange={(e) => handleUpdateLine(line.id, { length: parseInt(e.target.value) || 50 })}
+                              />
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-2">
+                            {/* Position X (Left) */}
+                            <div className="space-y-1">
+                              <div className="flex justify-between items-center">
+                                <span className="text-[8.5px] font-bold text-gray-500 block">位置 X (%)</span>
+                                <span className="text-[8.5px] font-mono font-bold text-slate-600">{line.left}%</span>
+                              </div>
+                              <input
+                                type="range"
+                                min="0"
+                                max="100"
+                                className="w-full h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+                                value={line.left}
+                                onChange={(e) => handleUpdateLine(line.id, { left: parseInt(e.target.value) || 0 })}
+                              />
+                            </div>
+
+                            {/* Position Y (Top) */}
+                            <div className="space-y-1">
+                              <div className="flex justify-between items-center">
+                                <span className="text-[8.5px] font-bold text-gray-500 block">位置 Y (%)</span>
+                                <span className="text-[8.5px] font-mono font-bold text-slate-600">{line.top}%</span>
+                              </div>
+                              <input
+                                type="range"
+                                min="0"
+                                max="100"
+                                className="w-full h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+                                value={line.top}
+                                onChange={(e) => handleUpdateLine(line.id, { top: parseInt(e.target.value) || 0 })}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         </div>        {/* Right Side: Adaptive thermal label preview */}
         <div className="lg:col-span-7 flex flex-col items-center justify-start p-8 bg-[#D1D4D9] rounded-3xl min-h-[75vh] relative overflow-hidden border border-border shadow-inner print:bg-transparent print:border-none print:shadow-none print:p-0">
@@ -2732,6 +3072,62 @@ export const Labels = () => {
                         }}
                       />
                     )}
+
+                    {/* Render Custom Line Segments */}
+                    {customLines.map((line) => (
+                      <div
+                        key={line.id}
+                        className={cn(
+                          "absolute pointer-events-auto",
+                          useCustomLayout ? "hover:bg-indigo-50/20 group/line" : "pointer-events-none"
+                        )}
+                        style={{
+                          left: `${line.left}%`,
+                          top: `${line.top}%`,
+                          width: line.type === 'horizontal' ? `${line.length}%` : `${line.thickness}`,
+                          height: line.type === 'vertical' ? `${line.length}%` : `${line.thickness}`,
+                          borderTop: line.type === 'horizontal' ? `${line.thickness} ${line.style} ${line.color}` : 'none',
+                          borderLeft: line.type === 'vertical' ? `${line.thickness} ${line.style} ${line.color}` : 'none',
+                          zIndex: 15,
+                        }}
+                      >
+                        {/* Drag & Resize controls overlay, hidden in print */}
+                        {useCustomLayout && (
+                          <>
+                            {/* Hover info panel & Delete button */}
+                            <div className="absolute top-[-16px] left-0 bg-slate-900 text-white font-mono text-[7px] px-1.5 py-0.5 rounded shadow opacity-0 group-hover/line:opacity-100 transition-opacity z-30 print:hidden flex items-center gap-1 select-none whitespace-nowrap">
+                              <span>線段 ({line.type === 'horizontal' ? 'H' : 'V'})</span>
+                              <button 
+                                type="button" 
+                                onClick={() => handleDeleteLine(line.id)}
+                                className="text-red-400 hover:text-red-600 font-bold ml-1 cursor-pointer"
+                              >
+                                ✕
+                              </button>
+                            </div>
+                            {/* Drag Trigger Overlay */}
+                            <div
+                              onMouseDown={(e) => handleLineDragStart(e, line.id)}
+                              className="absolute inset-0 cursor-move print:hidden z-10 bg-transparent"
+                              style={{
+                                padding: '4px',
+                                margin: '-4px'
+                              }}
+                            />
+                            {/* Resize Handle (circle anchor) */}
+                            <div
+                              onMouseDown={(e) => handleLineResizeStart(e, line.id)}
+                              className={cn(
+                                "absolute bg-indigo-600 rounded-full w-2.5 h-2.5 border border-white cursor-pointer z-20 print:hidden shadow-sm hover:scale-125 transition-transform",
+                                line.type === 'horizontal' 
+                                  ? "right-0 top-1/2 -translate-y-1/2 translate-x-1/2" 
+                                  : "bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2"
+                              )}
+                            />
+                          </>
+                        )}
+                      </div>
+                    ))}
 
                     {/* Drag-and-Resize Active Group Coordinates Overlay Tooltip - Hidden in Print */}
                     {useCustomLayout && (draggingGroup || resizingGroup) && (
