@@ -8,6 +8,7 @@ import { useTheme } from '../context/ThemeContext.js';
 import { getFullUrl } from '../utils/url.js';
 import { getTranslated } from '../utils/translation.js';
 import { useRecentOrders } from '../hooks/useRecentOrders.js';
+import { formatToLocalDate, formatToLocalTime, formatToFullDateTime, getDateFriendlyLabel } from '../utils/date.js';
 
 type OrderType = 'delivery' | 'pickup' | 'frozen_delivery';
 type PaymentMethod = 'cash' | 'stripe' | 'paypal';
@@ -58,6 +59,20 @@ export default function Checkout() {
   const [busyMessage, setBusyMessage] = useState('');
   const [locationId, setLocationId] = useState<string>('');
   const [slotsByDay, setSlotsByDay] = useState<any[]>([]);
+  const [selectedDate, setSelectedDate] = useState('');
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  // Manage selected date for dropdown
+  useEffect(() => {
+    if (slotsByDay.length > 0) {
+      const exists = slotsByDay.some(d => d.date === selectedDate);
+      if (!exists) {
+        setSelectedDate(slotsByDay[0].date);
+      }
+    } else {
+      setSelectedDate('');
+    }
+  }, [slotsByDay, selectedDate]);
 
   // Determine if currently closed
   useEffect(() => {
@@ -67,7 +82,7 @@ export default function Checkout() {
     }
 
     if (slotsByDay.length > 0) {
-      const today = new Date().toISOString().split('T')[0];
+      const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Taipei' }).format(new Date());
       const hasSlotsToday = slotsByDay.find(d => d.date === today);
       
       // If no slots today OR if we have slots but they all start much later, mark as closed
@@ -81,7 +96,7 @@ export default function Checkout() {
         setIsClosedNow(false);
       }
     }
-  }, [slotsByDay, scheduledAt]);
+  }, [slotsByDay, scheduledAt, user]);
 
   // Loyalty points
   const [loyaltyBalance, setLoyaltyBalance] = useState(0);
@@ -586,52 +601,126 @@ export default function Checkout() {
 
                 {scheduledAt && slotsByDay.length > 0 && (
                   <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
-                    <div className="space-y-6 max-h-[400px] overflow-y-auto pr-2 no-scrollbar custom-scrollbar">
-                      {slotsByDay.map((day) => {
-                        const date = new Date(day.date);
-                        const isToday = new Date().toDateString() === date.toDateString();
-                        const headerText = isToday 
-                          ? `今天 (${date.toLocaleDateString(i18n.language, { weekday: 'short' })})` 
-                          : date.toLocaleDateString(i18n.language, { 
-                              month: 'numeric', 
-                              day: 'numeric',
-                              weekday: 'short' 
-                            });
+                    {/* Elegant Custom Date Dropdown Selector */}
+                    <div className="relative">
+                      <label className="block text-xs font-bold text-hint uppercase tracking-wider mb-1.5">
+                        {t('checkout.selectDateFirst') || '選擇取餐日期'}
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                        className="w-full flex items-center justify-between px-4 py-3 bg-surface border border-input rounded-xl text-sm font-semibold text-main hover:border-primary-400 focus:ring-2 focus:ring-primary-500 outline-none transition-all shadow-sm"
+                      >
+                        <div className="flex items-center gap-2">
+                          <svg className="w-5 h-5 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                          <span>
+                            {selectedDate ? formatToLocalDate(selectedDate, i18n.language) : t('checkout.selectDateTime')}
+                            {selectedDate && getDateFriendlyLabel(selectedDate, i18n.language) && (
+                              <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-primary-100 text-primary-800">
+                                {getDateFriendlyLabel(selectedDate, i18n.language)}
+                              </span>
+                            )}
+                          </span>
+                        </div>
+                        <svg
+                          className={`w-5 h-5 text-hint transition-transform duration-300 ${isDropdownOpen ? 'transform rotate-180' : ''}`}
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </button>
 
-                        return (
-                          <div key={day.date} className="space-y-3">
-                            <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider sticky top-0 bg-surface/90 backdrop-blur-sm py-1 z-10">
-                              {headerText}
-                            </h3>
-                            <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
-                              {day.slots.map((slot: string) => {
-                                const dateObj = new Date(slot);
-                                const timeStr = dateObj.toLocaleTimeString(i18n.language, {
-                                  hour: '2-digit',
-                                  minute: '2-digit',
-                                  hour12: false,
-                                });
-                                const isSelected = scheduledAt === slot;
-                                return (
-                                  <button
-                                    key={slot}
-                                    type="button"
-                                    onClick={() => setScheduledAt(slot)}
-                                    className={`py-2 rounded-lg text-xs font-medium border transition-all ${
-                                      isSelected
-                                        ? 'bg-primary-600 border-primary-600 text-white shadow-sm'
-                                        : 'bg-surface border-input text-main hover:border-primary-300'
-                                    }`}
-                                  >
-                                    {timeStr}
-                                  </button>
-                                );
-                              })}
-                            </div>
+                      {/* Dropdown Options List */}
+                      {isDropdownOpen && (
+                        <>
+                          {/* Overlay to close on outside click */}
+                          <div className="fixed inset-0 z-20" onClick={() => setIsDropdownOpen(false)} />
+                          <div className="absolute left-0 right-0 mt-2 bg-surface border border-input rounded-xl shadow-xl z-30 max-h-[300px] overflow-y-auto no-scrollbar custom-scrollbar py-1 animate-in fade-in slide-in-from-top-1 duration-200">
+                            {slotsByDay.map((day) => {
+                              const isCurrent = day.date === selectedDate;
+                              const label = getDateFriendlyLabel(day.date, i18n.language);
+                              return (
+                                <button
+                                  key={day.date}
+                                  type="button"
+                                  onClick={() => {
+                                    setSelectedDate(day.date);
+                                    setIsDropdownOpen(false);
+                                    if (day.slots.length > 0) {
+                                      setScheduledAt(day.slots[0]);
+                                    }
+                                  }}
+                                  className={`w-full flex items-center justify-between px-4 py-3 text-sm text-left font-medium transition-colors ${
+                                    isCurrent
+                                      ? 'bg-primary-50 text-primary-700 font-bold'
+                                      : 'text-main hover:bg-surface-soft'
+                                  }`}
+                                >
+                                  <span>{formatToLocalDate(day.date, i18n.language)}</span>
+                                  {label && (
+                                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                                      isCurrent ? 'bg-primary-600 text-white' : 'bg-gray-100 text-sub'
+                                    }`}>
+                                      {label}
+                                    </span>
+                                  )}
+                                </button>
+                              );
+                            })}
                           </div>
-                        );
-                      })}
+                        </>
+                      )}
                     </div>
+
+                    {/* Available Time Slots Grid */}
+                    {selectedDate && (
+                      <div className="space-y-2 pt-2 animate-in fade-in duration-300">
+                        <label className="block text-xs font-bold text-hint uppercase tracking-wider">
+                          {lastCommonOrderType === 'delivery' ? t('checkout.scheduled_delivery') : t('checkout.scheduled_pickup')}
+                        </label>
+                        <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
+                          {(slotsByDay.find(d => d.date === selectedDate)?.slots || []).map((slot: string) => {
+                            const timeStr = formatToLocalTime(slot, i18n.language);
+                            const isSelected = scheduledAt === slot;
+                            return (
+                              <button
+                                key={slot}
+                                type="button"
+                                onClick={() => setScheduledAt(slot)}
+                                className={`py-2.5 rounded-lg text-xs font-semibold border transition-all ${
+                                  isSelected
+                                    ? 'bg-primary-600 border-primary-600 text-white shadow-sm ring-2 ring-primary-100 scale-105 font-bold'
+                                    : 'bg-surface border-input text-main hover:border-primary-400 hover:bg-surface/50'
+                                }`}
+                              >
+                                {timeStr}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Warm Selected Time Reassurance Banner */}
+                    {scheduledAt && (
+                      <div className="mt-4 p-4 rounded-xl border border-green-200/50 bg-green-50/40 text-green-800 animate-in zoom-in-95 duration-300 flex items-start gap-3 shadow-sm shadow-green-50/20">
+                        <svg className="w-5 h-5 text-green-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <div className="text-xs">
+                          <p className="font-bold text-green-900 mb-0.5">
+                            {t('checkout.timeSelectionConfirmed') || '預約時間已選定'}
+                          </p>
+                          <p className="opacity-90 font-medium">
+                            {t('checkout.scheduledFor') || '您已預約於'} <span className="font-bold underline underline-offset-2">{formatToFullDateTime(scheduledAt, i18n.language)}</span> {lastCommonOrderType === 'delivery' ? t('checkout.delivery') : t('checkout.pickup')}
+                          </p>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
                 

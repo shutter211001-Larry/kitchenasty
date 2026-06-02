@@ -5,6 +5,7 @@ import { io } from 'socket.io-client';
 import { useAuth } from '../context/AuthContext.js';
 import { useTheme } from '../context/ThemeContext.js';
 import { API_BASE } from '../lib/api.js';
+import { formatToFullDateTime } from '../utils/date.js';
 
 interface OrderItem {
   id: string;
@@ -52,6 +53,50 @@ export default function OrderStatus() {
   const [claiming, setClaiming] = useState(false);
   const [claimSuccess, setClaimSuccess] = useState(false);
   const [cancelling, setCancelling] = useState(false);
+  const [timeLeftStr, setTimeLeftStr] = useState('');
+
+  useEffect(() => {
+    if (!order?.scheduledAt) return;
+
+    function updateCountdown() {
+      const scheduledTime = new Date(order.scheduledAt).getTime();
+      const now = new Date();
+      const diffMs = scheduledTime - now.getTime();
+
+      if (diffMs <= 0) {
+        setTimeLeftStr('');
+        return;
+      }
+
+      const taiwanTodayStr = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Taipei' }).format(now);
+      const taiwanScheduledStr = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Taipei' }).format(new Date(order.scheduledAt));
+      
+      if (taiwanTodayStr === taiwanScheduledStr) {
+        const diffMins = Math.floor(diffMs / 60000);
+        const hours = Math.floor(diffMins / 60);
+        const mins = diffMins % 60;
+        
+        if (hours > 0) {
+          setTimeLeftStr(t('orderStatus.timeLeftHoursMins', { hours, mins }) || `預計在 ${hours} 小時 ${mins} 分鐘後開始製作/送達`);
+        } else {
+          setTimeLeftStr(t('orderStatus.timeLeftMins', { mins }) || `預計在 ${mins} 分鐘後開始製作/送達`);
+        }
+      } else {
+        const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+        const taiwanTomorrowStr = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Taipei' }).format(tomorrow);
+        
+        if (taiwanScheduledStr === taiwanTomorrowStr) {
+          setTimeLeftStr(t('orderStatus.tomorrow') || '明天');
+        } else {
+          setTimeLeftStr(''); // Non-today/tomorrow doesn't show countdown
+        }
+      }
+    }
+
+    updateCountdown();
+    const interval = setInterval(updateCountdown, 60000);
+    return () => clearInterval(interval);
+  }, [order?.scheduledAt, t]);
 
   async function handleCancel() {
     if (!window.confirm(t('common.confirmCancel') || '確定要取消這筆訂單嗎？')) return;
@@ -302,6 +347,54 @@ export default function OrderStatus() {
           )}
         </div>
       </div>
+
+      {/* Elegant Scheduled Order Reassurance Card */}
+      {order.scheduledAt && (
+        <div className="surface-card rounded-xl shadow-sm border p-6 mb-6 border-primary-200 bg-gradient-to-br from-primary-50/40 via-surface to-surface animate-in fade-in slide-in-from-top-2 duration-300 relative overflow-hidden">
+          {/* Subtle decorative glowing background circle */}
+          <div className="absolute -top-12 -right-12 w-32 h-32 bg-primary-100/30 rounded-full blur-2xl pointer-events-none" />
+          
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 relative z-10">
+            <div className="bg-primary-500/10 p-3.5 rounded-2xl border border-primary-200/50 shadow-inner shrink-0 animate-pulse">
+              <svg className="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            
+            <div className="flex-1 space-y-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h3 className="font-bold text-main text-base leading-tight">
+                  {t('orderStatus.scheduledOrderTitle') || '📅 預約預訂單已確認成立'}
+                </h3>
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-primary-100 text-primary-800 border border-primary-200">
+                  {order.orderType === 'DELIVERY' ? t('checkout.delivery') : t('checkout.pickup')}
+                </span>
+              </div>
+              
+              <p className="text-sm font-semibold text-primary-700">
+                {t('orderStatus.scheduledForTime') || '預計取餐/送達時間：'}
+                <span className="text-base font-extrabold underline underline-offset-4 decoration-primary-300 decoration-2">
+                  {formatToFullDateTime(order.scheduledAt, i18n.language)}
+                </span>
+              </p>
+              
+              {timeLeftStr ? (
+                <p className="text-xs font-bold text-green-600 flex items-center gap-1.5 pt-0.5">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                  </span>
+                  {timeLeftStr}
+                </p>
+              ) : (
+                <p className="text-xs text-sub leading-normal pt-0.5">
+                  {t('orderStatus.scheduledTips') || '這是您的預訂訂單。店家將於預約時間前開始為您新鮮製作。請在預訂時間留意您的外送動態或前往分店取餐！'}
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Status Tracker */}
       <div className="surface-card rounded-xl shadow-sm border p-6 mb-6">

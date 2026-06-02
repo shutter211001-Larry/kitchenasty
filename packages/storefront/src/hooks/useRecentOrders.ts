@@ -7,6 +7,7 @@ interface RecentOrder {
   total?: number;
   orderType?: string;
   itemCount?: number;
+  scheduledAt?: string | null;
 }
 
 export function useRecentOrders() {

@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext.js';
 import { useTheme } from '../context/ThemeContext.js';
 import { useRecentOrders } from '../hooks/useRecentOrders.js';
 import { API_BASE } from '../lib/api.js';
+import { formatToFullDateTime } from '../utils/date.js';
 
 interface OrderSummary {
   id: string;
@@ -13,6 +14,7 @@ interface OrderSummary {
   status: string;
   total: number;
   createdAt: string;
+  scheduledAt?: string | null;
   location: { id: string; name: string };
   _count: { items: number };
 }
