@@ -64,7 +64,7 @@ export const getIngredients = async (req: Request, res: Response) => {
     
     if (search) {
       const s = String(search).toLowerCase();
-      ingredients.sort((a, b) => {
+      ingredients.sort((a: any, b: any) => {
         const aName = a.name.toLowerCase();
         const bName = b.name.toLowerCase();
         
@@ -86,7 +86,7 @@ export const getIngredients = async (req: Request, res: Response) => {
       });
       ingredients = ingredients.slice(0, 50);
     } else {
-      ingredients.sort((a, b) => a.name.localeCompare(b.name));
+      ingredients.sort((a: any, b: any) => a.name.localeCompare(b.name));
     }
     
     res.json(ingredients);
@@ -120,7 +120,8 @@ export const createIngredient = async (req: Request, res: Response) => {
       name, category, unit, safetyStock, 
       calories, protein, fat, carbohydrates, sodium,
       saturatedFat, transFat, sugar,
-      isAllergen, allergenType, allergenIds, priceInfo 
+      isAllergen, allergenType, allergenIds, priceInfo,
+      components
     } = req.body;
     
     if (!name || !unit) return res.status(400).json({ error: '名稱與單位為必填' });
@@ -130,6 +131,7 @@ export const createIngredient = async (req: Request, res: Response) => {
         name,
         category: category || null,
         unit,
+        components: components || null,
         safetyStock: safetyStock != null && safetyStock !== '' ? Number(safetyStock) : null,
         currentStock: 0,
         calories: calories != null ? Number(calories) : null,
@@ -197,13 +199,15 @@ export const updateIngredient = async (req: Request, res: Response) => {
       name, category, unit, safetyStock, currentStock, 
       calories, protein, fat, carbohydrates, sodium,
       saturatedFat, transFat, sugar,
-      isAllergen, allergenType, allergenIds, priceInfo 
+      isAllergen, allergenType, allergenIds, priceInfo,
+      components
     } = req.body;
     
     const updateData: any = {
       name,
       category: category === '' ? null : category,
       unit,
+      components: components !== undefined ? (components === '' ? null : components) : undefined,
       safetyStock: safetyStock !== undefined ? (safetyStock === null || safetyStock === '' ? null : Number(safetyStock)) : undefined,
       currentStock: currentStock != null ? Number(currentStock) : undefined,
       calories: calories !== undefined ? (calories === null || calories === '' ? null : Number(calories)) : undefined,

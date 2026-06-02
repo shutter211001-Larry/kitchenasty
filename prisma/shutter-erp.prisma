@@ -29,6 +29,7 @@ model Ingredient {
   name         String
   category     String?
   unit         String   // g, ml, pcs, etc.
+  components   String?  // 食材內容物 (例如: "麵粉, 水, 酵母")
   safetyStock  Float?   @default(0)
   currentStock Float    @default(0)
   

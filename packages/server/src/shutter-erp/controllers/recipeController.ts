@@ -13,7 +13,7 @@ export async function calculateRecipeStats(recipeId: string): Promise<{
   transFat: number,
   sugar: number,
   totalWeight: number,
-  totalIngredients: { id: string, name: string, quantity: number, unit: string }[],
+  totalIngredients: { id: string, name: string, quantity: number, unit: string, components?: string | null }[],
   unmeasurableItems: { name: string, itemUnit: string, baseUnit: string }[]
 }> {
   try {
@@ -73,14 +73,14 @@ export async function calculateRecipeStats(recipeId: string): Promise<{
       transFat: 0,
       sugar: 0,
       totalWeight: 0,
-      totalIngredients: [] as { id: string, name: string, quantity: number, unit: string, allergens?: { id: string, name: string }[] }[],
+      totalIngredients: [] as { id: string, name: string, quantity: number, unit: string, components?: string | null, allergens?: { id: string, name: string }[] }[],
       unmeasurableItems: [] as { name: string, itemUnit: string, baseUnit: string }[]
     };
     
-    const ingredientMap = new Map<string, { id: string, name: string, quantity: number, unit: string, allergens?: { id: string, name: string }[] }>();
+    const ingredientMap = new Map<string, { id: string, name: string, quantity: number, unit: string, components?: string | null, allergens?: { id: string, name: string }[] }>();
 
     // Safely get all items across all steps
-    const allItems = recipe.steps?.flatMap(s => s.items || []) || [];
+    const allItems = recipe.steps?.flatMap((s: any) => s.items || []) || [];
 
     for (const item of allItems) {
       if (item.ingredientId && item.ingredient) {
@@ -125,6 +125,7 @@ export async function calculateRecipeStats(recipeId: string): Promise<{
               name: item.ingredient.name,
               quantity: effectiveQty,
               unit: item.ingredient.unit,
+              components: item.ingredient.components || null,
               allergens: ingredientAllergens
             });
           }
@@ -170,6 +171,7 @@ export async function calculateRecipeStats(recipeId: string): Promise<{
                 name: sub.name,
                 quantity: scaledQty,
                 unit: sub.unit,
+                components: sub.components || null,
                 allergens: sub.allergens || []
               });
             }
@@ -204,7 +206,7 @@ export const getRecipes = async (req: Request, res: Response) => {
     });
     
     // Enrich with calculated stats
-    const enrichedRecipes = await Promise.all(recipes.map(async (r) => {
+    const enrichedRecipes = await Promise.all(recipes.map(async (r: any) => {
       const stats = await calculateRecipeStats(r.id);
       return { ...r, ...stats };
     }));
@@ -269,7 +271,7 @@ export const createRecipe = async (req: Request, res: Response) => {
     const { name, description, yieldAmount, yieldUnit, isSubRecipe, isProduct, bakingLossRate } = req.body;
     const stepsPayload = req.body.steps || [];
 
-    const recipe = await prisma.$transaction(async (tx) => {
+    const recipe = await prisma.$transaction(async (tx: any) => {
       const newRecipe = await tx.recipe.create({
         data: { 
           name, 
@@ -341,10 +343,10 @@ export const updateRecipe = async (req: Request, res: Response) => {
     const id = req.params.id as string;
     const { name, description, yieldAmount, yieldUnit, isSubRecipe, isProduct, steps, bakingLossRate } = req.body;
     
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx: any) => {
       // 1. Delete all existing items, step parameters, and steps
       await tx.recipeItem.deleteMany({ where: { recipeId: id } });
-      const stepIds = (await tx.recipeStep.findMany({ where: { recipeId: id }, select: { id: true } })).map(s => s.id);
+      const stepIds = (await tx.recipeStep.findMany({ where: { recipeId: id }, select: { id: true } })).map((s: any) => s.id);
       if (stepIds.length > 0) {
         await tx.stepParameter.deleteMany({ where: { stepId: { in: stepIds } } });
       }
@@ -411,14 +413,14 @@ export const deleteRecipe = async (req: Request, res: Response) => {
     });
 
     if (usages.length > 0) {
-      const parentRecipeNames = Array.from(new Set(usages.map(u => u.recipe?.name).filter(Boolean)));
+      const parentRecipeNames = Array.from(new Set(usages.map((u: any) => u.recipe?.name).filter(Boolean)));
       return res.status(400).json({
         error: `此食譜正被其他食譜（${parentRecipeNames.join('、')}）引用為子食譜，無法刪除。請先至上述食譜中移除此子食譜。`
       });
     }
 
-    await prisma.$transaction(async (tx) => {
-      const stepIds = (await tx.recipeStep.findMany({ where: { recipeId: id }, select: { id: true } })).map(s => s.id);
+    await prisma.$transaction(async (tx: any) => {
+      const stepIds = (await tx.recipeStep.findMany({ where: { recipeId: id }, select: { id: true } })).map((s: any) => s.id);
       await tx.recipeItem.deleteMany({ where: { recipeId: id } });
       if (stepIds.length > 0) {
         await tx.stepParameter.deleteMany({ where: { stepId: { in: stepIds } } });

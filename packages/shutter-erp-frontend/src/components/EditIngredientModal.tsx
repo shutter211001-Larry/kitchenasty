@@ -41,6 +41,7 @@ interface Ingredient {
   unitConversions?: UnitConversion[];
   allergens?: Allergen[];
   prices?: any[];
+  components?: string | null;
 }
 
 interface Props {
@@ -78,7 +79,8 @@ const EditIngredientModal = ({ ingredient, onClose, onSuccess }: Props) => {
     sugar: null,
     isAllergen: false,
     allergenType: '',
-    unitConversions: []
+    unitConversions: [],
+    components: ''
   });
 
   // Purchase Package Price State
@@ -196,7 +198,8 @@ const EditIngredientModal = ({ ingredient, onClose, onSuccess }: Props) => {
         sugar: null,
         isAllergen: false,
         allergenType: '',
-        unitConversions: []
+        unitConversions: [],
+        components: ''
       });
       setPriceInfo({
         packageSize: '',
@@ -238,7 +241,7 @@ const EditIngredientModal = ({ ingredient, onClose, onSuccess }: Props) => {
         category: formData.category || null,
         unit: formData.unit,
         currentStock: Number(formData.currentStock) || 0,
-        safetyStock: formData.safetyStock !== null && formData.safetyStock !== '' ? Number(formData.safetyStock) : null,
+        safetyStock: formData.safetyStock !== null && (formData.safetyStock as any) !== '' ? Number(formData.safetyStock) : null,
         calories: formData.calories != null ? Number(formData.calories) : null,
         protein: formData.protein != null ? Number(formData.protein) : null,
         fat: formData.fat != null ? Number(formData.fat) : null,
@@ -250,6 +253,7 @@ const EditIngredientModal = ({ ingredient, onClose, onSuccess }: Props) => {
         isAllergen: formData.isAllergen || false,
         allergenType: formData.isAllergen ? formData.allergenType || null : null,
         allergenIds: formData.isAllergen ? allergenIds : [],
+        components: formData.components || null,
         priceInfo: priceInfo.packageSize && priceInfo.price ? {
           packageSize: Number(priceInfo.packageSize),
           packageUnit: priceInfo.packageUnit,
@@ -261,7 +265,7 @@ const EditIngredientModal = ({ ingredient, onClose, onSuccess }: Props) => {
       if (isCreate) {
         await axios.post('http://localhost:3000/api/ingredients', payload);
       } else {
-        await axios.patch(`http://localhost:3000/api/ingredients/${ingredient.id}`, payload);
+        await axios.patch(`http://localhost:3000/api/ingredients/${(ingredient as Ingredient).id}`, payload);
       }
       onSuccess();
       onClose();
@@ -275,7 +279,7 @@ const EditIngredientModal = ({ ingredient, onClose, onSuccess }: Props) => {
   };
 
   const handleDelete = async () => {
-    if (!ingredient?.id) return;
+    if (ingredient === 'new' || !ingredient?.id) return;
     if (!window.confirm(`確定要刪除食材「${ingredient.name}」嗎？\n\n注意：此操作無法復原，且會一併刪除該食材的所有報價合約。`)) return;
     
     try {
@@ -427,6 +431,17 @@ const EditIngredientModal = ({ ingredient, onClose, onSuccess }: Props) => {
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                         required
                         placeholder="例如: 蘭花莫札瑞拉起司"
+                      />
+                    </div>
+                    
+                    <div className="space-y-1.5 col-span-2">
+                      <label className="text-xs font-bold text-gray-700">食材內容物 (以逗號分隔，用於標籤展開)</label>
+                      <input 
+                        type="text" 
+                        className="w-full px-3 py-2 bg-muted border border-border rounded-xl outline-none focus:ring-2 focus:ring-primary/20 transition-all font-bold text-sm"
+                        value={formData.components || ''}
+                        onChange={(e) => setFormData({ ...formData, components: e.target.value })}
+                        placeholder="例如: 小麥麵粉, 水, 鹽, 酵母"
                       />
                     </div>
                     

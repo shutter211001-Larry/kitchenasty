@@ -51,6 +51,53 @@ export const Labels = () => {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [selectedRecipeId, setSelectedRecipeId] = useState('');
   const [loading, setLoading] = useState(false);
+  const [allIngredients, setAllIngredients] = useState<any[]>([]);
+  const [expandedIngredients, setExpandedIngredients] = useState<Record<string, boolean>>({});
+
+  const parseIngredientReferences = (text: string) => {
+    const regex = /\{([^,}]+)(?:,\s*name\s*:\s*(?:"([^"]*)"|'([^']*)'))?\}/g;
+    const references: { raw: string; ingredientName: string; customName?: string }[] = [];
+    let match;
+    regex.lastIndex = 0;
+    while ((match = regex.exec(text || '')) !== null) {
+      references.push({
+        raw: match[0],
+        ingredientName: match[1].trim(),
+        customName: (match[2] || match[3] || '').trim() || undefined
+      });
+    }
+    return references;
+  };
+
+  const getIngredientComponents = (name: string): string | null => {
+    const recipeIng = loadedRecipe?.totalIngredients?.find((i: any) => i.name === name);
+    if (recipeIng && recipeIng.components) {
+      return recipeIng.components;
+    }
+    const masterIng = allIngredients.find((i: any) => i.name === name);
+    if (masterIng && masterIng.components) {
+      return masterIng.components;
+    }
+    return null;
+  };
+
+  const getFormattedIngredientsText = (): string => {
+    let formatted = ingredientsText || '';
+    const references = parseIngredientReferences(ingredientsText);
+    references.forEach((ref) => {
+      const displayName = ref.customName || ref.ingredientName;
+      const isExpanded = !!expandedIngredients[ref.raw];
+      const comps = getIngredientComponents(ref.ingredientName);
+      
+      let replacement = displayName;
+      if (isExpanded && comps) {
+        const formattedComps = comps.split(/[,，、\s]+/).filter(Boolean).join('、');
+        replacement = `${displayName}(${formattedComps})`;
+      }
+      formatted = formatted.replaceAll(ref.raw, replacement);
+    });
+    return formatted;
+  };
 
   // Layout Size Options
   type LabelSize = '100x100' | '80x80' | '100x150' | '70x50';
@@ -365,8 +412,19 @@ export const Labels = () => {
     }
   };
 
+  // Load ingredients list
+  const fetchIngredients = async () => {
+    try {
+      const response = await axios.get('http://localhost:3000/api/ingredients');
+      setAllIngredients(response.data);
+    } catch (error) {
+      console.error('Failed to load ingredients', error);
+    }
+  };
+
   useEffect(() => {
     fetchRecipes();
+    fetchIngredients();
 
     // Load saved label settings if they exist
     const saved = localStorage.getItem('pizzamaster_label_settings');
@@ -394,6 +452,7 @@ export const Labels = () => {
         if (settings.showNutrition !== undefined) setShowNutrition(settings.showNutrition);
         if (settings.showAllergens !== undefined) setShowAllergens(settings.showAllergens);
         if (settings.showBarcode !== undefined) setShowBarcode(settings.showBarcode);
+        if (settings.expandedIngredients !== undefined) setExpandedIngredients(settings.expandedIngredients);
         
         if (settings.showAddress !== undefined) setShowAddress(settings.showAddress);
         if (settings.showPhone !== undefined) setShowPhone(settings.showPhone);
@@ -502,6 +561,7 @@ export const Labels = () => {
     if (config.showNutrition !== undefined) setShowNutrition(config.showNutrition);
     if (config.showAllergens !== undefined) setShowAllergens(config.showAllergens);
     if (config.showBarcode !== undefined) setShowBarcode(config.showBarcode);
+    if (config.expandedIngredients !== undefined) setExpandedIngredients(config.expandedIngredients || {});
 
     // Reheating Details
     if (config.airFryerSteps !== undefined) setAirFryerSteps(config.airFryerSteps);
@@ -655,7 +715,8 @@ export const Labels = () => {
         carbs,
         sugar,
         sodium,
-        portionScale
+        portionScale,
+        expandedIngredients
       };
       
       await axios.patch(`http://localhost:3000/api/recipes/${selectedRecipeId}/label-config`, { labelConfig });
@@ -873,6 +934,7 @@ export const Labels = () => {
       F: 1.0
     });
     setBarcodeExplanation('掃碼查看\n復熱教學影片');
+    setExpandedIngredients({});
     localStorage.removeItem('pizzamaster_label_settings');
   };
 
@@ -925,7 +987,8 @@ export const Labels = () => {
       panTitle,
       reheatingMainTitleSize,
       reheatingSubTitleSize,
-      reheatingContentSize
+      reheatingContentSize,
+      expandedIngredients
     };
     localStorage.setItem('pizzamaster_label_settings', JSON.stringify(settings));
     alert('🎉 標籤列印設定已成功儲存至瀏覽器！下次開啟將自動套用您的客製化版面。');
@@ -965,8 +1028,9 @@ export const Labels = () => {
     return <IconComponent className="w-full h-full text-black stroke-[2]" />;
   };
 
+  const formattedIngredients = getFormattedIngredientsText();
   const isBottomLeftEmpty = !showBarcode || !showNutrition || !showResponsible;
-  const isRightColumnCrowded = (ingredientsText || '').length > 85 || (allergenWarning || '').length > 60;
+  const isRightColumnCrowded = (formattedIngredients || '').length > 85 || (allergenWarning || '').length > 60;
   const shouldMoveInfoToBottomLeft = isBottomLeftEmpty || isRightColumnCrowded;
   const hasActiveReheating = showReheating && (showAirFryer || showOven || showPan);
 
@@ -1041,7 +1105,7 @@ export const Labels = () => {
       
       let scaleFactor = 1.0;
       if (score > 1.5) scaleFactor = 0.85;
-      if (ingredientsText.length > 50) scaleFactor *= 0.88;
+      if (formattedIngredients.length > 50) scaleFactor *= 0.88;
 
       const baseVal = parseFloat(baseFontSize);
       baseFontSize = `${(baseVal * scaleFactor).toFixed(1)}pt`;
@@ -1972,6 +2036,36 @@ export const Labels = () => {
                         placeholder="依多到少輸入，例如：水、小麥麵粉、起司..."
                       />
                     )}
+                    {showIngredients && parseIngredientReferences(ingredientsText).length > 0 && (
+                      <div className="mt-3 space-y-2 bg-slate-50 p-3 border border-border rounded-xl animate-in fade-in duration-150 text-left">
+                        <span className="text-[10px] font-black text-gray-500 block mb-1.5">🔗 食材內容物展開選項</span>
+                        {parseIngredientReferences(ingredientsText).map((ref, idx) => {
+                          const comps = getIngredientComponents(ref.ingredientName);
+                          const isExpanded = !!expandedIngredients[ref.raw];
+                          
+                          return (
+                            <label key={idx} className="flex items-center gap-2 cursor-pointer select-none">
+                              <input
+                                type="checkbox"
+                                checked={isExpanded}
+                                disabled={!comps}
+                                onChange={(e) => {
+                                  setExpandedIngredients(prev => ({
+                                    ...prev,
+                                    [ref.raw]: e.target.checked
+                                  }));
+                                }}
+                                className="w-3.5 h-3.5 accent-primary rounded border-border cursor-pointer disabled:opacity-50"
+                              />
+                              <span className={cn("text-[10.5px] font-bold text-gray-700", !comps && "text-gray-400")}>
+                                展開 {ref.customName ? `${ref.ingredientName} (${ref.customName})` : ref.ingredientName}
+                                {comps ? ` [${comps}]` : " (尚未設定內容物)"}
+                              </span>
+                            </label>
+                          );
+                        })}
+                      </div>
+                    )}
                   </div>
 
                   {/* Non-ready-to-eat Warning Toggle & Input */}
@@ -2763,7 +2857,7 @@ export const Labels = () => {
                                   成分
                                 </span>
                                 <p className="font-semibold text-justify word-break break-all text-black leading-[1.25] overflow-y-auto" style={{ fontSize: `${5.8 * groupFontScales.F}pt` }}>
-                                  {ingredientsText}
+                                  {formattedIngredients}
                                 </p>
                               </div>
                             )}
@@ -3281,7 +3375,7 @@ export const Labels = () => {
                                     成分
                                   </span>
                                   <p className="font-semibold text-justify word-break break-all text-black pl-0.5 leading-[1.3] overflow-y-auto" style={{ fontSize: `${6.6 * groupFontScales.F}pt` }}>
-                                    {ingredientsText}
+                                    {formattedIngredients}
                                   </p>
                                 </div>
                               )}
@@ -3345,7 +3439,7 @@ export const Labels = () => {
                           <div className="flex-1 py-[1mm] flex flex-col justify-between text-black leading-[1.2] font-extrabold" style={{ fontSize: `${5.8 * groupFontScales.F}pt` }}>
                             {showIngredients && (
                               <p className="text-justify word-break break-all text-black font-semibold" style={{ fontSize: `${5.8 * groupFontScales.F}pt` }}>
-                                <span className="font-black text-black">成分：</span>{ingredientsText}
+                                <span className="font-black text-black">成分：</span>{formattedIngredients}
                               </p>
                             )}
 
