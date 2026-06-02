@@ -41,7 +41,8 @@ const writeMappings = (mappings: any[]) => {
 
 // Get KitchenAsty URL and Token
 const getKitchenAstyUrl = () => {
-  let url = (process.env.KITCHENASTY_API_URL || 'http://localhost:3001').trim();
+  const port = process.env.PORT || '3000';
+  let url = (process.env.KITCHENASTY_API_URL || process.env.SHUTTER_ERP_API_URL || `http://127.0.0.1:${port}`).trim();
   if (url && !url.startsWith('http://') && !url.startsWith('https://')) {
     url = `https://${url}`;
   }
