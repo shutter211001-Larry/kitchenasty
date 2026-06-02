@@ -332,7 +332,7 @@ export const Labels = () => {
   // Field values
   const [productZh, setProductZh] = useState('美式臘腸披薩');
   const [productEn, setProductEn] = useState('PEPPERONI PIZZA');
-  const [ingredientsText, setIngredientsText] = useState('麵粉、水、酵母、食鹽、美式臘腸、莫札瑞拉乳酪、番茄醬汁');
+  const [ingredientsText, setIngredientsText] = useState('{麵粉}、{水}、{酵母}、{食鹽}、{美式臘腸}、{莫札瑞拉乳酪}、{番茄醬汁}');
   const [netWeight, setNetWeight] = useState('240公克 ± 5%');
   const [storageCondition, setStorageCondition] = useState('冷凍 -18°C 以下保存');
   const [shelfLife, setShelfLife] = useState('一年');
@@ -788,8 +788,18 @@ export const Labels = () => {
 
     // 2. Build Ingredients list (sorted by quantity from most to least)
     const sortedIngredients = [...(recipe.totalIngredients || [])].sort((a, b) => b.quantity - a.quantity);
-    const ingNames = sortedIngredients.map((i: any) => i.name).join('、');
-    setIngredientsText(ingNames || '麵粉、水、酵母、起司');
+    const ingNames = sortedIngredients.map((i: any) => `{${i.name}}`).join('、');
+    setIngredientsText(ingNames || '{麵粉}、{水}、{酵母}、{起司}');
+
+    // 2.5 Auto-initialize expanded status for ingredients that have components in the database
+    const autoExpanded: Record<string, boolean> = {};
+    sortedIngredients.forEach((ing: any) => {
+      const comps = getIngredientComponents(ing.name);
+      if (comps) {
+        autoExpanded[`{${ing.name}}`] = true;
+      }
+    });
+    setExpandedIngredients(autoExpanded);
 
     // 3. Collect Allergens warnings dynamically
     const allergensSet = new Set<string>();
@@ -880,7 +890,7 @@ export const Labels = () => {
     setGapAlignment('bottom');
     setProductZh('美式臘腸披薩');
     setProductEn('PEPPERONI PIZZA');
-    setIngredientsText('麵粉、水、酵母、食鹽、美式臘腸、莫札瑞拉乳酪、番茄醬汁');
+    setIngredientsText('{麵粉}、{水}、{酵母}、{食鹽}、{美式臘腸}、{莫札瑞拉乳酪}、{番茄醬汁}');
     setNetWeight('240公克 ± 5%');
     setStorageCondition('冷凍 -18°C 以下保存');
     setShelfLife('一年');
@@ -2028,13 +2038,23 @@ export const Labels = () => {
                       <span>顯示內容物成分</span>
                     </label>
                     {showIngredients && (
-                      <textarea
-                        rows={3}
-                        className="w-full px-3 py-1.5 bg-slate-50 border border-border rounded-xl font-bold text-xs leading-relaxed"
-                        value={ingredientsText}
-                        onChange={(e) => setIngredientsText(e.target.value)}
-                        placeholder="依多到少輸入，例如：水、小麥麵粉、起司..."
-                      />
+                      <div className="space-y-1">
+                        <textarea
+                          rows={3}
+                          className="w-full px-3 py-1.5 bg-slate-50 border border-border rounded-xl font-bold text-xs leading-relaxed"
+                          value={ingredientsText}
+                          onChange={(e) => setIngredientsText(e.target.value)}
+                          placeholder="例如：{水}、{小麥麵粉}、{蘭花莫札瑞拉起司, name: '起司'}..."
+                        />
+                        <div className="text-[9.5px] text-gray-500 font-bold leading-normal bg-amber-50/60 border border-amber-100/60 p-2.5 rounded-xl space-y-1">
+                          <div>
+                            💡 <b>動態引用食材庫</b>：在成分中輸入 <code>{"{食材名稱}"}</code>（例如：<code>{"{蘭花莫札瑞拉起司}"}</code>），即可在下方自動解析出勾選框，控制是否在標籤上「展開」顯示其詳細內容物。
+                          </div>
+                          <div>
+                            ✍️ <b>自訂顯示名稱</b>：若要在標籤上以簡稱呈現，可輸入 <code>{"{食材名稱, name: \"自訂名稱\"}"}</code>（例如：<code>{"{蘭花莫札瑞拉起司, name: \"起司\"}"}</code>）。
+                          </div>
+                        </div>
+                      </div>
                     )}
                     {showIngredients && parseIngredientReferences(ingredientsText).length > 0 && (
                       <div className="mt-3 space-y-2 bg-slate-50 p-3 border border-border rounded-xl animate-in fade-in duration-150 text-left">
