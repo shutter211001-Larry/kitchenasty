@@ -199,17 +199,83 @@ export async function syncDatabase(req: Request, res: Response) {
     console.log(`[Developer] Found schema at: ${schemaPath}`);
     const rootDir = path.dirname(path.dirname(schemaPath));
 
-    const { stdout, stderr } = await execAsync(`npx prisma db push --schema="${schemaPath}"`, {
-      cwd: rootDir,
-    });
+    let stdoutMain = '';
+    let stderrMain = '';
+    try {
+      const resMain = await execAsync(`npx prisma db push --schema="${schemaPath}"`, {
+        cwd: rootDir,
+      });
+      stdoutMain = resMain.stdout;
+      stderrMain = resMain.stderr;
+      console.log('[Developer] Main Sync stdout:', stdoutMain);
+      if (stderrMain) console.error('[Developer] Main Sync stderr:', stderrMain);
+    } catch (mainErr: any) {
+      console.error('[Developer] Main Sync failed:', mainErr);
+      throw new Error(`Main schema sync failed: ${mainErr.message}`);
+    }
 
-    console.log('[Developer] Sync stdout:', stdout);
-    if (stderr) console.error('[Developer] Sync stderr:', stderr);
+    // Push shutter-erp schema if exists
+    let shutterStdout = '';
+    let shutterSchemaPath = '';
+    const possibleShutterPaths = [
+      path.resolve(process.cwd(), 'prisma/shutter-erp.prisma'),
+      path.resolve(process.cwd(), '../../prisma/shutter-erp.prisma'),
+      path.resolve(process.cwd(), '../../../prisma/shutter-erp.prisma'),
+    ];
+    for (const p of possibleShutterPaths) {
+      if (fs.existsSync(p)) {
+        shutterSchemaPath = p;
+        break;
+      }
+    }
+
+    if (shutterSchemaPath) {
+      console.log(`[Developer] Found shutter-erp schema at: ${shutterSchemaPath}`);
+      try {
+        const resShutter = await execAsync(`npx prisma db push --schema="${shutterSchemaPath}"`, {
+          cwd: rootDir,
+        });
+        shutterStdout = resShutter.stdout;
+        console.log('[Developer] Shutter Sync stdout:', shutterStdout);
+        if (resShutter.stderr) console.error('[Developer] Shutter Sync stderr:', resShutter.stderr);
+      } catch (shutterErr: any) {
+        console.error('[Developer] Shutter Sync failed:', shutterErr);
+        throw new Error(`Shutter ERP schema sync failed: ${shutterErr.message}`);
+      }
+    }
+
+    // Auto-seed ingredients if the Ingredient table is empty
+    let seedDetails = '';
+    if (shutterSchemaPath) {
+      try {
+        const erpPrisma = (await import('../shutter-erp/lib/prisma.js')).default;
+        const count = await (erpPrisma as any).ingredient.count();
+        console.log(`[Developer] Ingredient count in DB: ${count}`);
+        if (count === 0) {
+          console.log('[Developer] Ingredient table is empty. Seeding food data...');
+          const seedScriptPath = path.resolve(rootDir, 'packages/server/scripts/shutter-erp/seedFoodData.ts');
+          if (fs.existsSync(seedScriptPath)) {
+            const seedRes = await execAsync(`npx tsx "${seedScriptPath}"`, {
+              cwd: rootDir,
+              env: {
+                ...process.env,
+                SHUTTER_ERP_DATABASE_URL: process.env.SHUTTER_ERP_DATABASE_URL || process.env.DATABASE_URL
+              }
+            });
+            console.log('[Developer] Seed output:', seedRes.stdout);
+            seedDetails = `\n\nAuto-seeded 2000+ Ingredients successfully!`;
+          }
+        }
+      } catch (seedErr: any) {
+        console.error('[Developer] Auto-seed failed:', seedErr);
+        seedDetails = `\n\nAuto-seed failed: ${seedErr.message}`;
+      }
+    }
 
     res.json({ 
       success: true, 
-      message: 'Database schema synced successfully',
-      details: stdout
+      message: 'Database schemas synced successfully',
+      details: `Main Schema:\n${stdoutMain}\n\nShutter ERP Schema:\n${shutterStdout}${seedDetails}`
     });
   } catch (err: any) {
     console.error('[Developer] Sync failed:', err);
