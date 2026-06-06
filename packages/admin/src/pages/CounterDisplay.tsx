@@ -619,32 +619,25 @@ export default function CounterDisplay() {
                             {(() => {
                               const cash = parseFloat(cashReceivedInputs[order.id] || '0');
                               const diff = cash - order.total;
-                              if (!cashReceivedInputs[order.id]) {
-                                return (
-                                  <div className="text-right text-[10px] text-gray-400 italic">
-                                    請輸入收受金額
-                                  </div>
-                                );
-                              }
                               if (diff > 0) {
                                 return (
-                                  <div className="flex justify-between items-center text-xs pt-1 border-t border-dashed border-gray-100 text-green-600 font-extrabold flex-wrap gap-1">
+                                  <div className="flex justify-between items-center text-xs pt-1.5 border-t border-dashed border-gray-200 text-green-600 font-extrabold flex-wrap gap-1">
                                     <span>找零 (Change)</span>
                                     <span className="font-mono text-sm">${diff.toFixed(2)}</span>
                                   </div>
                                 );
                               } else if (diff < 0) {
                                 return (
-                                  <div className="flex justify-between items-center text-xs pt-1 border-t border-dashed border-gray-100 text-red-600 font-bold flex-wrap gap-1">
+                                  <div className="flex justify-between items-center text-xs pt-1.5 border-t border-dashed border-gray-200 text-red-600 font-bold flex-wrap gap-1">
                                     <span>尚欠 (Remaining)</span>
                                     <span className="font-mono text-sm">${Math.abs(diff).toFixed(2)}</span>
                                   </div>
                                 );
                               } else {
                                 return (
-                                  <div className="flex justify-between items-center text-xs pt-1 border-t border-dashed border-gray-100 text-green-700 font-extrabold bg-green-50/50 px-1.5 py-0.5 rounded flex-wrap gap-1">
+                                  <div className="flex justify-between items-center text-xs pt-1.5 border-t border-dashed border-gray-200 text-green-700 font-extrabold flex-wrap gap-1">
                                     <span>金額剛好 (Exact)</span>
-                                    <span>免找零</span>
+                                    <span className="font-mono text-sm">$0.00</span>
                                   </div>
                                 );
                               }
@@ -655,32 +648,32 @@ export default function CounterDisplay() {
                           <div className="grid grid-cols-5 gap-1 text-[10px] font-bold">
                             <button
                               onClick={() => handleQuickAmount(order.id, order.total.toFixed(2))}
-                              className="bg-purple-600 text-white rounded py-1 px-1 text-center hover:bg-purple-700 active:scale-95 transition-all shadow-sm truncate"
+                              className="bg-purple-600 text-white rounded py-1 px-1 text-center hover:bg-purple-700 active:scale-95 transition-all shadow-sm truncate touch-manipulation select-none"
                               title="剛好"
                             >
                               剛好
                             </button>
                             <button
                               onClick={() => handleQuickAmount(order.id, '100')}
-                              className="bg-white border border-purple-200 text-purple-700 rounded py-1 hover:bg-purple-50 active:scale-95 transition-all shadow-sm"
+                              className="bg-white border border-purple-200 text-purple-700 rounded py-1 hover:bg-purple-50 active:scale-95 transition-all shadow-sm touch-manipulation select-none"
                             >
                               $100
                             </button>
                             <button
                               onClick={() => handleQuickAmount(order.id, '500')}
-                              className="bg-white border border-purple-200 text-purple-700 rounded py-1 hover:bg-purple-50 active:scale-95 transition-all shadow-sm"
+                              className="bg-white border border-purple-200 text-purple-700 rounded py-1 hover:bg-purple-50 active:scale-95 transition-all shadow-sm touch-manipulation select-none"
                             >
                               $500
                             </button>
                             <button
                               onClick={() => handleQuickAmount(order.id, '1000')}
-                              className="bg-white border border-purple-200 text-purple-700 rounded py-1 hover:bg-purple-50 active:scale-95 transition-all shadow-sm"
+                              className="bg-white border border-purple-200 text-purple-700 rounded py-1 hover:bg-purple-50 active:scale-95 transition-all shadow-sm touch-manipulation select-none"
                             >
                               $1000
                             </button>
                             <button
                               onClick={() => handleClearAmount(order.id)}
-                              className="bg-red-50 text-red-600 border border-red-200 rounded py-1 hover:bg-red-100 active:scale-95 transition-all shadow-sm text-center"
+                              className="bg-red-50 text-red-600 border border-red-200 rounded py-1 hover:bg-red-100 active:scale-95 transition-all shadow-sm text-center touch-manipulation select-none"
                             >
                               清除
                             </button>
@@ -692,7 +685,7 @@ export default function CounterDisplay() {
                               <button
                                 key={key}
                                 onClick={() => handleKeypadPress(order.id, key)}
-                                className={`h-8 font-mono font-bold text-xs rounded transition-all active:scale-95 shadow-sm ${
+                                className={`h-8 font-mono font-bold text-xs rounded transition-all active:scale-95 shadow-sm touch-manipulation select-none ${
                                   key === '⌫'
                                     ? 'bg-red-100 hover:bg-red-200 text-red-700'
                                     : 'bg-white hover:bg-gray-50 text-gray-700 border border-gray-200/60'
@@ -716,7 +709,7 @@ export default function CounterDisplay() {
                                 setTimeout(() => setActionError(null), 5000);
                               }
                             }}
-                            className={`w-full text-xs font-bold py-2 rounded-lg border transition-all active:scale-95 text-center ${
+                            className={`w-full text-xs font-bold py-2 rounded-lg border transition-all active:scale-95 text-center touch-manipulation select-none ${
                               order.paymentStatus === 'PAID'
                                 ? 'bg-rose-50 border-rose-200 text-rose-700 hover:bg-rose-100'
                                 : 'bg-emerald-600 border-transparent text-white hover:bg-emerald-700'
@@ -816,13 +809,6 @@ export default function CounterDisplay() {
                 {(() => {
                   const cash = parseFloat(cashReceivedInputs[order.id] || '0');
                   const diff = cash - order.total;
-                  if (!cashReceivedInputs[order.id]) {
-                    return (
-                      <div className="text-right text-[10px] text-gray-400 italic">
-                        請輸入收受金額
-                      </div>
-                    );
-                  }
                   if (diff > 0) {
                     return (
                       <div className="flex justify-between items-center text-xs pt-2 border-t border-dashed border-gray-200 text-green-600 font-extrabold flex-wrap gap-1">
@@ -839,9 +825,9 @@ export default function CounterDisplay() {
                     );
                   } else {
                     return (
-                      <div className="flex justify-between items-center text-xs pt-2 border-t border-dashed border-gray-200 text-green-700 font-extrabold bg-green-50 px-2 py-0.5 rounded flex-wrap gap-1">
+                      <div className="flex justify-between items-center text-xs pt-2 border-t border-dashed border-gray-200 text-green-700 font-extrabold flex-wrap gap-1">
                         <span>金額剛好 (Exact)</span>
-                        <span>免找零</span>
+                        <span className="font-mono text-base">$0.00</span>
                       </div>
                     );
                   }
@@ -852,31 +838,31 @@ export default function CounterDisplay() {
               <div className="grid grid-cols-5 gap-1.5 text-xs font-bold">
                 <button
                   onClick={() => handleQuickAmount(order.id, order.total.toFixed(2))}
-                  className="bg-purple-600 text-white rounded-lg py-2.5 text-center hover:bg-purple-700 active:scale-95 transition-all shadow-sm truncate"
+                  className="bg-purple-600 text-white rounded-lg py-2.5 text-center hover:bg-purple-700 active:scale-95 transition-all shadow-sm truncate touch-manipulation select-none"
                 >
                   剛好
                 </button>
                 <button
                   onClick={() => handleQuickAmount(order.id, '100')}
-                  className="bg-white border border-purple-200 text-purple-700 rounded-lg py-2.5 hover:bg-purple-50 active:scale-95 transition-all shadow-sm"
+                  className="bg-white border border-purple-200 text-purple-700 rounded-lg py-2.5 hover:bg-purple-50 active:scale-95 transition-all shadow-sm touch-manipulation select-none"
                 >
                   $100
                 </button>
                 <button
                   onClick={() => handleQuickAmount(order.id, '500')}
-                  className="bg-white border border-purple-200 text-purple-700 rounded-lg py-2.5 hover:bg-purple-50 active:scale-95 transition-all shadow-sm"
+                  className="bg-white border border-purple-200 text-purple-700 rounded-lg py-2.5 hover:bg-purple-50 active:scale-95 transition-all shadow-sm touch-manipulation select-none"
                 >
                   $500
                 </button>
                 <button
                   onClick={() => handleQuickAmount(order.id, '1000')}
-                  className="bg-white border border-purple-200 text-purple-700 rounded-lg py-2.5 hover:bg-purple-50 active:scale-95 transition-all shadow-sm"
+                  className="bg-white border border-purple-200 text-purple-700 rounded-lg py-2.5 hover:bg-purple-50 active:scale-95 transition-all shadow-sm touch-manipulation select-none"
                 >
                   $1000
                 </button>
                 <button
                   onClick={() => handleClearAmount(order.id)}
-                  className="bg-red-50 text-red-600 border border-red-200 rounded-lg py-2.5 hover:bg-red-100 active:scale-95 transition-all shadow-sm text-center"
+                  className="bg-red-50 text-red-600 border border-red-200 rounded-lg py-2.5 hover:bg-red-100 active:scale-95 transition-all shadow-sm text-center touch-manipulation select-none"
                 >
                   清除
                 </button>
@@ -888,7 +874,7 @@ export default function CounterDisplay() {
                   <button
                     key={key}
                     onClick={() => handleKeypadPress(order.id, key)}
-                    className={`h-11 font-mono font-bold text-sm rounded-lg transition-all active:scale-95 shadow-sm ${
+                    className={`h-11 font-mono font-bold text-sm rounded-lg transition-all active:scale-95 shadow-sm touch-manipulation select-none ${
                       key === '⌫'
                         ? 'bg-red-100 hover:bg-red-200 text-red-700'
                         : 'bg-white hover:bg-gray-50 text-gray-700 border border-gray-200/60'
@@ -913,7 +899,7 @@ export default function CounterDisplay() {
                     setTimeout(() => setActionError(null), 5000);
                   }
                 }}
-                className={`w-full text-xs font-bold py-3 rounded-lg border transition-all active:scale-95 text-center shadow-md ${
+                className={`w-full text-xs font-bold py-3 rounded-lg border transition-all active:scale-95 text-center shadow-md touch-manipulation select-none ${
                   order.paymentStatus === 'PAID'
                     ? 'bg-rose-50 border-rose-200 text-rose-700 hover:bg-rose-100'
                     : 'bg-emerald-600 border-transparent text-white hover:bg-emerald-700'

@@ -95,6 +95,27 @@ export default function AdminLayout({ children, onLogout }: { children: React.Re
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [enableCounterDisplay, setEnableCounterDisplay] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({});
+
+  const filteredNav = user
+    ? navItems.filter((item) => item.roles.includes(user.role))
+    : [];
+
+
+  // Auto-expand current active item category
+  useEffect(() => {
+    const activeItem = filteredNav.find(item => 
+      item.path !== '/' && location.pathname.startsWith(item.path)
+    );
+    if (activeItem) {
+      setExpandedItems(prev => ({ ...prev, [activeItem.path]: true }));
+    }
+  }, [location.pathname, filteredNav]);
+
+  const toggleExpand = (path: string) => {
+    setExpandedItems(prev => ({ ...prev, [path]: !prev[path] }));
+  };
 
   // Poll pending order count and settings
   useEffect(() => {
@@ -125,9 +146,6 @@ export default function AdminLayout({ children, onLogout }: { children: React.Re
     return () => clearInterval(interval);
   }, [token]);
 
-  const filteredNav = user
-    ? navItems.filter((item) => item.roles.includes(user.role))
-    : [];
 
   // Inject Counter link if enabled
   if (enableCounterDisplay && user && !filteredNav.some(item => item.path === '/counter')) {
@@ -155,44 +173,92 @@ export default function AdminLayout({ children, onLogout }: { children: React.Re
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
+      {/* Sidebar Backdrop Overlay on mobile */}
+      {sidebarOpen && (
+        <div
+          onClick={() => setSidebarOpen(false)}
+          className="fixed inset-0 z-45 bg-black/60 backdrop-blur-sm md:hidden"
+        />
+      )}
+
       {/* Sidebar */}
-      <aside className="w-64 bg-gray-900 text-white flex flex-col" role="navigation" aria-label="Main navigation">
+      <aside
+        className={`fixed inset-y-0 left-0 z-50 w-[80vw] max-w-[320px] md:w-64 bg-gray-900 text-white flex flex-col transform transition-transform duration-300 ease-in-out md:relative md:translate-x-0 ${
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+        role="navigation"
+        aria-label="Main navigation"
+      >
         <div className="px-6 py-4 border-b border-gray-700">
           <h1 className="text-xl font-bold text-primary-400">夏特點餐系統</h1>
           <p className="text-xs text-gray-400 mt-1">{t('common.adminPanel') || '管理後台'}</p>
         </div>
-        <nav className="flex-1 py-4">
+        <nav className="flex-1 py-4 overflow-y-auto select-none">
           {filteredNav.map((item) => {
             const isActive =
               item.path === '/'
                 ? location.pathname === '/'
                 : location.pathname.startsWith(item.path);
+            const hasChildren = !!item.children;
+            const isExpanded = !!expandedItems[item.path];
+
             return (
               <div key={item.path}>
-                <Link
-                  to={item.children ? item.children[0].path : item.path}
-                  className={`flex items-center px-6 py-3 text-sm transition-colors ${isActive
-                    ? 'bg-gray-800 text-primary-400 border-r-2 border-primary-400'
-                    : 'text-gray-300 hover:bg-gray-800 hover:text-white'
-                    }`}
-                >
-                  <span className="mr-3">{item.icon}</span>
-                  {t(item.label)}
-                </Link>
-                {item.children && isActive && (
-                  <div className="bg-gray-950">
-                    {item.children.map((child) => (
-                      <Link
-                        key={child.path}
-                        to={child.path}
-                        className={`block pl-14 pr-6 py-2 text-xs transition-colors ${location.pathname.startsWith(child.path)
-                          ? 'text-primary-400'
-                          : 'text-gray-400 hover:text-white'
-                          }`}
-                      >
-                        {t(child.label)}
-                      </Link>
-                    ))}
+                {hasChildren ? (
+                  <button
+                    onClick={() => toggleExpand(item.path)}
+                    className={`w-full flex items-center justify-between px-6 py-3.5 md:py-3 text-base md:text-sm transition-colors focus:outline-none ${isActive
+                      ? 'bg-gray-800 text-primary-400 border-r-2 border-primary-400'
+                      : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                      }`}
+                  >
+                    <div className="flex items-center">
+                      <span className="mr-3 text-lg md:text-base">{item.icon}</span>
+                      <span className="font-medium">{t(item.label)}</span>
+                    </div>
+                    <svg
+                      className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${
+                        isExpanded ? 'rotate-180' : ''
+                      }`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                ) : (
+                  <Link
+                    to={item.path}
+                    onClick={() => setSidebarOpen(false)}
+                    className={`flex items-center px-6 py-3.5 md:py-3 text-base md:text-sm transition-colors ${isActive
+                      ? 'bg-gray-800 text-primary-400 border-r-2 border-primary-400'
+                      : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                      }`}
+                  >
+                    <span className="mr-3 text-lg md:text-base">{item.icon}</span>
+                    <span className="font-medium">{t(item.label)}</span>
+                  </Link>
+                )}
+
+                {item.children && isExpanded && (
+                  <div className="bg-gray-950/60 border-l border-gray-800">
+                    {item.children.map((child) => {
+                      const isChildActive = location.pathname.startsWith(child.path);
+                      return (
+                        <Link
+                          key={child.path}
+                          to={child.path}
+                          onClick={() => setSidebarOpen(false)}
+                          className={`block pl-14 pr-6 py-3 md:py-2.5 text-sm md:text-xs transition-colors ${isChildActive
+                            ? 'text-primary-400 font-bold bg-gray-900/40'
+                            : 'text-gray-400 hover:text-white'
+                            }`}
+                        >
+                          {t(child.label)}
+                        </Link>
+                      );
+                    })}
                   </div>
                 )}
               </div>
@@ -214,7 +280,16 @@ export default function AdminLayout({ children, onLogout }: { children: React.Re
       {/* Main content */}
       <div className="flex-1 flex flex-col">
         <header className="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between">
-          <div />
+          {/* Hamburger menu button for mobile */}
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="md:hidden p-2 text-gray-500 hover:text-gray-700 focus:outline-none"
+            aria-label="Toggle sidebar"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
           <div className="flex items-center gap-3">
             {/* Notifications bell */}
             <Link
