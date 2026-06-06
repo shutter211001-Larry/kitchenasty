@@ -933,6 +933,7 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
       customerId,
       locationId: location.id,
       orderType,
+      paymentStatus: 'UNPAID',
       subtotal,
       tax,
       deliveryFee,
@@ -1179,6 +1180,7 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
     status: order.status,
     orderType: order.orderType,
     locationId: order.locationId,
+    paymentStatus: order.paymentStatus,
   });
 
   // Emit event for automation rules
@@ -1397,6 +1399,7 @@ export async function updateOrderStatus(req: Request<{ id: string }>, res: Respo
     orderType: updated.orderType,
     customerId: updated.customerId,
     locationId: updated.locationId,
+    paymentStatus: updated.paymentStatus,
   });
 
   // Send status update email if enabled in settings
@@ -2061,6 +2064,49 @@ export async function claimOrder(req: Request<{ id: string }>, res: Response): P
   auditLog(req, { action: 'update', entity: 'Order', entityId: id, details: { action: 'claim', customerId } });
 
   res.json({ success: true, data: updatedOrder });
+}
+
+export async function updateOrderPaymentStatus(req: Request<{ id: string }>, res: Response): Promise<void> {
+  const { id } = req.params;
+  const { paymentStatus } = req.body;
+
+  const validStatuses = ['PAID', 'UNPAID'];
+  if (paymentStatus !== null && paymentStatus !== undefined && !validStatuses.includes(paymentStatus)) {
+    res.status(400).json({ success: false, error: `Invalid paymentStatus. Must be one of: ${validStatuses.join(', ')} or null` });
+    return;
+  }
+
+  const order = await prisma.order.findUnique({
+    where: { id },
+  });
+  if (!order) {
+    res.status(404).json({ success: false, error: 'Order not found' });
+    return;
+  }
+
+  const updated = await prisma.order.update({
+    where: { id },
+    data: { paymentStatus: paymentStatus || null },
+  });
+
+  auditLog(req, { 
+    action: 'update', 
+    entity: 'Order', 
+    entityId: id, 
+    details: { paymentStatus: updated.paymentStatus, previousPaymentStatus: order.paymentStatus } 
+  });
+
+  emitOrderStatusUpdate({
+    id: updated.id,
+    orderNumber: updated.orderNumber,
+    status: updated.status,
+    orderType: updated.orderType,
+    customerId: updated.customerId,
+    locationId: updated.locationId,
+    paymentStatus: updated.paymentStatus,
+  } as any);
+
+  res.status(200).json({ success: true, data: updated });
 }
 
 

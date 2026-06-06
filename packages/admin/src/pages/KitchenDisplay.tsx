@@ -32,6 +32,7 @@ interface KitchenOrder {
   discount: number;
   tip: number;
   total: number;
+  paymentStatus?: string | null;
 }
 
 const KITCHEN_STATUSES = ['PENDING', 'CONFIRMED', 'PREPARING', 'READY'];
@@ -168,12 +169,12 @@ export default function KitchenDisplay() {
       fetchOrders();
     });
 
-    s.on('order:statusUpdate', (data: { id: string; status: string }) => {
+    s.on('order:statusUpdate', (data: { id: string; status: string; paymentStatus?: string | null }) => {
       setOrders((prev) => {
         if (!KITCHEN_STATUSES.includes(data.status)) {
           return prev.filter((o) => o.id !== data.id);
         }
-        return prev.map((o) => o.id === data.id ? { ...o, status: data.status } : o);
+        return prev.map((o) => o.id === data.id ? { ...o, status: data.status, paymentStatus: data.paymentStatus !== undefined ? data.paymentStatus : o.paymentStatus } : o);
       });
     });
 
@@ -407,9 +408,17 @@ export default function KitchenDisplay() {
                     <div
                       key={order.id}
                       onClick={() => toggleExpand(order.id)}
-                      className={`bg-white rounded-lg shadow-sm border p-4 mx-1 cursor-pointer transition-all hover:border-primary-300 ${
-                        updating === order.id ? 'opacity-50' : ''
-                      } ${expandedOrders[order.id] ? 'ring-2 ring-primary-500' : ''}`}
+                      className={`rounded-lg p-4 mx-1 cursor-pointer transition-all hover:border-primary-300 ${
+                        order.paymentStatus === 'PAID'
+                          ? 'bg-emerald-50/10 border-emerald-500 border-2 shadow-sm shadow-emerald-100/50'
+                          : 'bg-white border border-gray-200 shadow-sm'
+                      } ${updating === order.id ? 'opacity-50' : ''} ${
+                        expandedOrders[order.id]
+                          ? order.paymentStatus === 'PAID'
+                            ? 'ring-2 ring-emerald-500'
+                            : 'ring-2 ring-primary-500'
+                          : ''
+                      }`}
                     >
                       {/* Order header */}
                       <div className="flex items-center justify-between mb-2">
@@ -433,6 +442,13 @@ export default function KitchenDisplay() {
                               {order.isRemote ? t('orders.remote') : t('orders.onSite')}
                             </span>
                           )}
+                          <span className={`ml-2 text-[10px] px-1.5 py-0.5 rounded font-bold ${
+                            order.paymentStatus === 'PAID'
+                              ? 'bg-emerald-100 text-emerald-800'
+                              : 'bg-gray-100 text-gray-600'
+                          }`}>
+                            {order.paymentStatus === 'PAID' ? '已結帳 💰' : '未結帳 🔄'}
+                          </span>
                         </div>
                         <div className="flex items-center gap-1.5 text-xs text-gray-400">
                           <span>{getTimeSince(order.createdAt)}</span>

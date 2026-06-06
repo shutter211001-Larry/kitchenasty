@@ -18,6 +18,7 @@ interface Order {
   _count: { items: number };
   isRemote?: boolean;
   distance?: number | null;
+  paymentStatus?: string | null;
 }
 
 interface Pagination {
@@ -49,8 +50,25 @@ export default function OrderList() {
   const [typeFilter, setTypeFilter] = useState('');
   const { user } = useAuth();
   const canManage = user?.role === 'SUPER_ADMIN' || user?.role === 'MANAGER';
-
   const token = localStorage.getItem('token') || '';
+
+  async function togglePaymentStatus(id: string, currentStatus: string | null | undefined) {
+    const nextStatus = currentStatus === 'PAID' ? 'UNPAID' : 'PAID';
+    try {
+      const res = await fetch(`/api/orders/${id}/payment-status`, {
+        method: 'PATCH',
+        headers: { 
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}` 
+        },
+        body: JSON.stringify({ paymentStatus: nextStatus })
+      });
+      if (!res.ok) throw new Error('更新結帳狀態失敗');
+      setOrders(orders.map(o => o.id === id ? { ...o, paymentStatus: nextStatus } : o));
+    } catch (err: any) {
+      setError(err.message);
+    }
+  }
 
   useEffect(() => {
     setLoading(true);
@@ -281,6 +299,7 @@ export default function OrderList() {
                   <th className="text-left px-4 py-3 font-medium text-gray-600">{t('orders.customer')}</th>
                   <th className="text-left px-4 py-3 font-medium text-gray-600">{t('orders.type')}</th>
                   <th className="text-left px-4 py-3 font-medium text-gray-600">{t('common.status')}</th>
+                  <th className="text-left px-4 py-3 font-medium text-gray-600">結帳狀態</th>
                   <th className="text-left px-4 py-3 font-medium text-gray-600">{t('orders.items')}</th>
                   <th className="text-right px-4 py-3 font-medium text-gray-600">{t('orders.total')}</th>
                   <th className="text-left px-4 py-3 font-medium text-gray-600">{t('common.createdAt')}</th>
@@ -327,6 +346,19 @@ export default function OrderList() {
                         {order.status === 'CANCELLED' && '已取消'}
                         {!['PENDING', 'CONFIRMED', 'PREPARING', 'READY', 'OUT_FOR_DELIVERY', 'DELIVERED', 'PICKED_UP', 'CANCELLED'].includes(order.status) && order.status.replace(/_/g, ' ')}
                       </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <button
+                        onClick={() => togglePaymentStatus(order.id, order.paymentStatus)}
+                        className={`text-xs px-2.5 py-1 rounded-full font-bold transition-all active:scale-95 ${
+                          order.paymentStatus === 'PAID'
+                            ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200 border border-emerald-200'
+                            : 'bg-rose-100 text-rose-800 hover:bg-rose-200 border border-rose-200'
+                        }`}
+                        title="點擊切換結帳狀態"
+                      >
+                        {order.paymentStatus === 'PAID' ? '已結帳 💰' : '未結帳 🔄'}
+                      </button>
                     </td>
                     <td className="px-4 py-3 text-gray-600">{order._count.items}</td>
                     <td className="px-4 py-3 text-right font-medium">${order.total.toFixed(2)}</td>
