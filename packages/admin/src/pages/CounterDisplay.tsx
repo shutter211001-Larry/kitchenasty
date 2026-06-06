@@ -539,16 +539,16 @@ export default function CounterDisplay() {
                           
                           {/* Cash Input & Change Display */}
                           <div className="flex flex-col gap-1.5 bg-white p-2.5 rounded-lg border border-purple-100">
-                            <div className="flex justify-between items-center">
-                              <span className="text-xs font-bold text-gray-500">實收金額 (Received)</span>
-                              <div className="flex items-center gap-1">
-                                <span className="text-gray-400 font-mono text-sm font-semibold">$</span>
+                            <div className="flex justify-between items-center gap-2 flex-wrap">
+                              <span className="text-xs font-bold text-gray-500 min-w-max">實收金額</span>
+                              <div className="flex items-center gap-1 bg-gray-50 px-2 py-0.5 rounded border border-gray-200">
+                                <span className="text-gray-400 font-mono text-xs font-semibold">$</span>
                                 <input
                                   type="text"
                                   readOnly
                                   value={cashReceivedInputs[order.id] || ''}
                                   placeholder="0"
-                                  className="w-24 text-right font-mono font-bold text-gray-900 text-base bg-transparent border-none outline-none focus:ring-0 p-0"
+                                  className="w-16 text-right font-mono font-bold text-gray-900 text-sm bg-transparent border-none outline-none focus:ring-0 p-0"
                                 />
                               </div>
                             </div>
@@ -560,27 +560,27 @@ export default function CounterDisplay() {
                               if (!cashReceivedInputs[order.id]) {
                                 return (
                                   <div className="text-right text-[10px] text-gray-400 italic">
-                                    請點擊按鈕輸入收受金額
+                                    請輸入收受金額
                                   </div>
                                 );
                               }
                               if (diff > 0) {
                                 return (
-                                  <div className="flex justify-between items-center text-xs pt-1 border-t border-dashed border-gray-100 text-green-600 font-extrabold">
+                                  <div className="flex justify-between items-center text-xs pt-1 border-t border-dashed border-gray-100 text-green-600 font-extrabold flex-wrap gap-1">
                                     <span>找零 (Change)</span>
                                     <span className="font-mono text-sm">${diff.toFixed(2)}</span>
                                   </div>
                                 );
                               } else if (diff < 0) {
                                 return (
-                                  <div className="flex justify-between items-center text-xs pt-1 border-t border-dashed border-gray-100 text-red-600 font-bold">
+                                  <div className="flex justify-between items-center text-xs pt-1 border-t border-dashed border-gray-100 text-red-600 font-bold flex-wrap gap-1">
                                     <span>尚欠 (Remaining)</span>
                                     <span className="font-mono text-sm">${Math.abs(diff).toFixed(2)}</span>
                                   </div>
                                 );
                               } else {
                                 return (
-                                  <div className="flex justify-between items-center text-xs pt-1 border-t border-dashed border-gray-100 text-green-700 font-extrabold bg-green-50/50 px-1.5 py-0.5 rounded">
+                                  <div className="flex justify-between items-center text-xs pt-1 border-t border-dashed border-gray-100 text-green-700 font-extrabold bg-green-50/50 px-1.5 py-0.5 rounded flex-wrap gap-1">
                                     <span>金額剛好 (Exact)</span>
                                     <span>免找零</span>
                                   </div>
