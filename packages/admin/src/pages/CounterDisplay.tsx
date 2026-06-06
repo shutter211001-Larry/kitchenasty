@@ -26,6 +26,12 @@ interface CounterOrder {
   guestPhone?: string;
   items: OrderItem[];
   isRemote?: boolean;
+  subtotal: number;
+  deliveryFee: number;
+  tax: number;
+  discount: number;
+  tip: number;
+  total: number;
 }
 
 const COUNTER_STATUSES = ['PENDING', 'CONFIRMED', 'PREPARING', 'READY'];
@@ -55,6 +61,35 @@ export default function CounterDisplay() {
   const [lastRefresh, setLastRefresh] = useState(new Date());
   const [boardLeadTime, setBoardLeadTime] = useState(60);
   const [collapsedDates, setCollapsedDates] = useState<Record<string, boolean>>({});
+  const [expandedOrders, setExpandedOrders] = useState<Record<string, boolean>>({});
+  const [cashReceivedInputs, setCashReceivedInputs] = useState<Record<string, string>>({});
+
+  const toggleExpand = (orderId: string) => {
+    setExpandedOrders((prev) => ({ ...prev, [orderId]: !prev[orderId] }));
+  };
+
+  const handleKeypadPress = (orderId: string, value: string) => {
+    setCashReceivedInputs((prev) => {
+      const current = prev[orderId] || '';
+      if (value === '⌫') {
+        return { ...prev, [orderId]: current.slice(0, -1) };
+      }
+      if (value === '.') {
+        if (current.includes('.')) return prev;
+        return { ...prev, [orderId]: current + '.' };
+      }
+      if (current.length >= 7) return prev;
+      return { ...prev, [orderId]: current + value };
+    });
+  };
+
+  const handleQuickAmount = (orderId: string, amount: string) => {
+    setCashReceivedInputs((prev) => ({ ...prev, [orderId]: amount }));
+  };
+
+  const handleClearAmount = (orderId: string) => {
+    setCashReceivedInputs((prev) => ({ ...prev, [orderId]: '' }));
+  };
 
   const [locations, setLocations] = useState<{ id: string; name: string }[]>([]);
   const [selectedLocationId, setSelectedLocationId] = useState<string>(() => {
@@ -313,7 +348,7 @@ export default function CounterDisplay() {
                             <span className="ml-2 text-blue-600 font-bold">
                               ({order.customer?.phone || order.guestPhone})
                             </span>
-                            <span className="ml-2 text-gray-400">{order.items.length} {t('kitchen.itemsCount', { count: order.items.length })}</span>
+                            <span className="ml-2 text-gray-400">{t('kitchen.itemsCount', { count: order.items.length })}</span>
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -353,8 +388,14 @@ export default function CounterDisplay() {
                 {statusOrders.length === 0 && (
                   <p className="text-center text-gray-400 text-sm py-8">{t('kitchen.noOrders')}</p>
                 )}
-                {statusOrders.map((order) => (
-                  <div key={order.id} className={`bg-white rounded-lg shadow-sm border p-4 mx-1 ${updating === order.id ? 'opacity-50' : ''}`}>
+                 {statusOrders.map((order) => (
+                  <div
+                    key={order.id}
+                    onClick={() => toggleExpand(order.id)}
+                    className={`bg-white rounded-lg shadow-sm border p-4 mx-1 cursor-pointer transition-all hover:border-purple-300 ${
+                      updating === order.id ? 'opacity-50' : ''
+                    } ${expandedOrders[order.id] ? 'ring-2 ring-purple-500' : ''}`}
+                  >
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2">
                         <span className="text-2xl font-black text-purple-600 bg-purple-50 px-2 rounded">
@@ -367,7 +408,13 @@ export default function CounterDisplay() {
                           </span>
                         </div>
                       </div>
-                      <span className="text-[10px] text-gray-400 font-medium">{getTimeSince(order.createdAt)}</span>
+                      <div className="flex items-center gap-1.5 text-[10px] text-gray-400 font-medium">
+                        <span>{getTimeSince(order.createdAt)}</span>
+                        <span className="text-gray-200">|</span>
+                        <svg className={`w-3.5 h-3.5 text-gray-400 transition-transform ${expandedOrders[order.id] ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </div>
                     </div>
 
                     {/* Scheduled / Pickup Time */}
@@ -447,19 +494,170 @@ export default function CounterDisplay() {
                       ))}
                     </div>
 
+                    {/* Pricing Breakdown & Checkout Calculator when expanded */}
+                    {expandedOrders[order.id] && (
+                      <div className="border-t border-gray-150 pt-3.5 mt-3.5 mb-4 space-y-4" onClick={(e) => e.stopPropagation()}>
+                        {/* Financial breakdown */}
+                        <div className="text-xs text-gray-600 space-y-1.5 bg-gray-50/50 p-2.5 rounded-lg border border-gray-100">
+                          <div className="flex justify-between">
+                            <span>小計 (Subtotal)</span>
+                            <span>${order.subtotal?.toFixed(2) || '0.00'}</span>
+                          </div>
+                          {order.discount > 0 && (
+                            <div className="flex justify-between text-red-600 font-medium">
+                              <span>折扣 (Discount)</span>
+                              <span>-${order.discount.toFixed(2)}</span>
+                            </div>
+                          )}
+                          {order.tax > 0 && (
+                            <div className="flex justify-between">
+                              <span>稅金 (Tax)</span>
+                              <span>${order.tax.toFixed(2)}</span>
+                            </div>
+                          )}
+                          {order.deliveryFee > 0 && (
+                            <div className="flex justify-between">
+                              <span>外送費 (Delivery)</span>
+                              <span>${order.deliveryFee.toFixed(2)}</span>
+                            </div>
+                          )}
+                          {order.tip > 0 && (
+                            <div className="flex justify-between">
+                              <span>小費 (Tip)</span>
+                              <span>${order.tip.toFixed(2)}</span>
+                            </div>
+                          )}
+                          <div className="flex justify-between font-extrabold text-gray-900 text-sm pt-2 border-t border-dashed border-gray-200">
+                            <span>訂單金額 (Total)</span>
+                            <span className="text-purple-600">${order.total?.toFixed(2) || '0.00'}</span>
+                          </div>
+                        </div>
+
+                        {/* Interactive POS Checkout Calculator */}
+                        <div className="bg-purple-50/50 border border-purple-100 rounded-xl p-3 space-y-3">
+                          <h4 className="text-[11px] font-black text-purple-700 uppercase tracking-wider">簡易結帳計算器</h4>
+                          
+                          {/* Cash Input & Change Display */}
+                          <div className="flex flex-col gap-1.5 bg-white p-2.5 rounded-lg border border-purple-100">
+                            <div className="flex justify-between items-center">
+                              <span className="text-xs font-bold text-gray-500">實收金額 (Received)</span>
+                              <div className="flex items-center gap-1">
+                                <span className="text-gray-400 font-mono text-sm font-semibold">$</span>
+                                <input
+                                  type="text"
+                                  readOnly
+                                  value={cashReceivedInputs[order.id] || ''}
+                                  placeholder="0"
+                                  className="w-24 text-right font-mono font-bold text-gray-900 text-base bg-transparent border-none outline-none focus:ring-0 p-0"
+                                />
+                              </div>
+                            </div>
+                            
+                            {/* Change calculation */}
+                            {(() => {
+                              const cash = parseFloat(cashReceivedInputs[order.id] || '0');
+                              const diff = cash - order.total;
+                              if (!cashReceivedInputs[order.id]) {
+                                return (
+                                  <div className="text-right text-[10px] text-gray-400 italic">
+                                    請點擊按鈕輸入收受金額
+                                  </div>
+                                );
+                              }
+                              if (diff > 0) {
+                                return (
+                                  <div className="flex justify-between items-center text-xs pt-1 border-t border-dashed border-gray-100 text-green-600 font-extrabold">
+                                    <span>找零 (Change)</span>
+                                    <span className="font-mono text-sm">${diff.toFixed(2)}</span>
+                                  </div>
+                                );
+                              } else if (diff < 0) {
+                                return (
+                                  <div className="flex justify-between items-center text-xs pt-1 border-t border-dashed border-gray-100 text-red-600 font-bold">
+                                    <span>尚欠 (Remaining)</span>
+                                    <span className="font-mono text-sm">${Math.abs(diff).toFixed(2)}</span>
+                                  </div>
+                                );
+                              } else {
+                                return (
+                                  <div className="flex justify-between items-center text-xs pt-1 border-t border-dashed border-gray-100 text-green-700 font-extrabold bg-green-50/50 px-1.5 py-0.5 rounded">
+                                    <span>金額剛好 (Exact)</span>
+                                    <span>免找零</span>
+                                  </div>
+                                );
+                              }
+                            })()}
+                          </div>
+
+                          {/* Quick Cash Bills Panel */}
+                          <div className="grid grid-cols-5 gap-1 text-[10px] font-bold">
+                            <button
+                              onClick={() => handleQuickAmount(order.id, order.total.toFixed(2))}
+                              className="bg-purple-600 text-white rounded py-1 px-1 text-center hover:bg-purple-700 active:scale-95 transition-all shadow-sm truncate"
+                              title="剛好"
+                            >
+                              剛好
+                            </button>
+                            <button
+                              onClick={() => handleQuickAmount(order.id, '100')}
+                              className="bg-white border border-purple-200 text-purple-700 rounded py-1 hover:bg-purple-50 active:scale-95 transition-all shadow-sm"
+                            >
+                              $100
+                            </button>
+                            <button
+                              onClick={() => handleQuickAmount(order.id, '500')}
+                              className="bg-white border border-purple-200 text-purple-700 rounded py-1 hover:bg-purple-50 active:scale-95 transition-all shadow-sm"
+                            >
+                              $500
+                            </button>
+                            <button
+                              onClick={() => handleQuickAmount(order.id, '1000')}
+                              className="bg-white border border-purple-200 text-purple-700 rounded py-1 hover:bg-purple-50 active:scale-95 transition-all shadow-sm"
+                            >
+                              $1000
+                            </button>
+                            <button
+                              onClick={() => handleClearAmount(order.id)}
+                              className="bg-red-50 text-red-600 border border-red-200 rounded py-1 hover:bg-red-100 active:scale-95 transition-all shadow-sm text-center"
+                            >
+                              清除
+                            </button>
+                          </div>
+
+                          {/* Virtual Keypad */}
+                          <div className="grid grid-cols-3 gap-1 bg-gray-100/50 p-1.5 rounded-lg border border-purple-100/50">
+                            {['7', '8', '9', '4', '5', '6', '1', '2', '3', '0', '.', '⌫'].map((key) => (
+                              <button
+                                key={key}
+                                onClick={() => handleKeypadPress(order.id, key)}
+                                className={`h-8 font-mono font-bold text-xs rounded transition-all active:scale-95 shadow-sm ${
+                                  key === '⌫'
+                                    ? 'bg-red-100 hover:bg-red-200 text-red-700'
+                                    : 'bg-white hover:bg-gray-50 text-gray-700 border border-gray-200/60'
+                                }`}
+                              >
+                                {key}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
                     <div className="flex gap-2">
                       {config.next && (
-                        <button onClick={() => handleStatusUpdate(order.id, config.next!)} disabled={updating === order.id} className="flex-1 bg-purple-600 text-white text-xs font-bold py-2.5 rounded-lg hover:bg-purple-700 disabled:opacity-50 shadow-sm transition-all active:scale-95">
+                        <button onClick={(e) => { e.stopPropagation(); handleStatusUpdate(order.id, config.next!); }} disabled={updating === order.id} className="flex-1 bg-purple-600 text-white text-xs font-bold py-2.5 rounded-lg hover:bg-purple-700 disabled:opacity-50 shadow-sm transition-all active:scale-95">
                           {NEXT_ACTION[status]}
                         </button>
                       )}
                       {status === 'READY' && (
-                        <button onClick={() => handleComplete(order.id, order.orderType)} disabled={updating === order.id} className="flex-1 bg-green-600 text-white text-xs font-bold py-2.5 rounded-lg hover:bg-green-700 disabled:opacity-50 shadow-sm transition-all active:scale-95">
+                        <button onClick={(e) => { e.stopPropagation(); handleComplete(order.id, order.orderType); }} disabled={updating === order.id} className="flex-1 bg-green-600 text-white text-xs font-bold py-2.5 rounded-lg hover:bg-green-700 disabled:opacity-50 shadow-sm transition-all active:scale-95">
                           {order.orderType === 'DELIVERY' ? '開始外送' : '完成取餐'}
                         </button>
                       )}
                       <button
-                        onClick={async () => {
+                        onClick={async (e) => {
+                          e.stopPropagation();
                           if (window.confirm('確定要取消此訂單嗎？')) {
                             handleStatusUpdate(order.id, 'CANCELLED');
                           }
