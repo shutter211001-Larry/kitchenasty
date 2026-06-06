@@ -31,6 +31,7 @@ interface OrderDetail {
   items: OrderItem[];
   isRemote?: boolean;
   distance?: number | null;
+  paymentStatus?: string | null;
 }
 
 const STATUSES = [
@@ -94,6 +95,27 @@ export default function OrderDetailPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
       setOrder((prev) => prev ? { ...prev, status: newStatus } : prev);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setUpdating(false);
+    }
+  }
+
+  async function updatePaymentStatus(newPaymentStatus: string) {
+    setUpdating(true);
+    try {
+      const res = await fetch(`/api/orders/${id}/payment-status`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ paymentStatus: newPaymentStatus }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      setOrder((prev) => prev ? { ...prev, paymentStatus: newPaymentStatus } : prev);
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -321,6 +343,35 @@ export default function OrderDetailPage() {
                   {!['PENDING', 'CONFIRMED', 'PREPARING', 'READY', 'OUT_FOR_DELIVERY', 'DELIVERED', 'PICKED_UP', 'CANCELLED'].includes(status) && status.replace(/_/g, ' ')}
                 </button>
               ))}
+            </div>
+          </div>
+
+          {/* Payment status update */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4 font-sans">更新結帳狀態</h2>
+            <div className="flex gap-2">
+              <button
+                disabled={updating || order.paymentStatus === 'PAID'}
+                onClick={() => updatePaymentStatus('PAID')}
+                className={`flex-1 text-center py-2 rounded-lg text-sm font-semibold transition-all border ${
+                  order.paymentStatus === 'PAID'
+                    ? 'bg-emerald-100 border-emerald-200 text-emerald-800 font-bold cursor-default'
+                    : 'bg-gray-50 border-gray-250 text-gray-600 hover:bg-gray-100 active:scale-95'
+                }`}
+              >
+                已結帳 💰
+              </button>
+              <button
+                disabled={updating || (!order.paymentStatus || order.paymentStatus === 'UNPAID')}
+                onClick={() => updatePaymentStatus('UNPAID')}
+                className={`flex-1 text-center py-2 rounded-lg text-sm font-semibold transition-all border ${
+                  (!order.paymentStatus || order.paymentStatus === 'UNPAID')
+                    ? 'bg-rose-100 border-rose-200 text-rose-800 font-bold cursor-default'
+                    : 'bg-gray-50 border-gray-250 text-gray-600 hover:bg-gray-100 active:scale-95'
+                }`}
+              >
+                未結帳 🔄
+              </button>
             </div>
           </div>
 

@@ -80,6 +80,7 @@ export function emitOrderStatusUpdate(order: {
   orderType: string;
   customerId?: string | null;
   locationId?: string;
+  paymentStatus?: string | null;
 }): void {
   if (!io) return;
   // Notify the specific order room (customer tracking)
@@ -140,6 +141,7 @@ export function emitNewOrder(order: {
   status: string;
   orderType: string;
   locationId?: string;
+  paymentStatus?: string | null;
 }): void {
   if (!io) return;
   if (order.locationId) {

@@ -328,6 +328,7 @@ model Order {
   addressId           String?
   orderType           OrderType
   status              OrderStatus          @default(PENDING)
+  paymentStatus       String?
   subtotal            Float
   deliveryFee         Float                @default(0)
   tax                 Float                @default(0)

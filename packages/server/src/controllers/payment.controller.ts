@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { getStripe } from '../lib/stripe.js';
 import prisma from '../lib/db.js';
 import { createPayPalOrder, capturePayPalOrder } from '../lib/paypal.js';
+import { emitOrderStatusUpdate } from '../lib/socket.js';
 
 export async function createPaymentIntent(req: Request, res: Response): Promise<void> {
   const { orderId } = req.body;
@@ -87,11 +88,21 @@ export async function handleWebhook(req: Request, res: Response): Promise<void> 
           data: { status: 'COMPLETED' },
         });
 
-        // Update order status to confirmed
-        await prisma.order.update({
+        // Update order status to confirmed and paymentStatus to PAID
+        const updatedOrder = await prisma.order.update({
           where: { id: orderId },
-          data: { status: 'CONFIRMED' },
+          data: { status: 'CONFIRMED', paymentStatus: 'PAID' },
         });
+
+        emitOrderStatusUpdate({
+          id: updatedOrder.id,
+          orderNumber: updatedOrder.orderNumber,
+          status: updatedOrder.status,
+          orderType: updatedOrder.orderType,
+          customerId: updatedOrder.customerId,
+          locationId: updatedOrder.locationId,
+          paymentStatus: updatedOrder.paymentStatus,
+        } as any);
       }
       break;
     }
@@ -196,10 +207,20 @@ export async function capturePayPalPayment(req: Request, res: Response): Promise
         data: { status: 'COMPLETED' },
       });
 
-      await prisma.order.update({
+      const updatedOrder = await prisma.order.update({
         where: { id: orderId },
-        data: { status: 'CONFIRMED' },
+        data: { status: 'CONFIRMED', paymentStatus: 'PAID' },
       });
+
+      emitOrderStatusUpdate({
+        id: updatedOrder.id,
+        orderNumber: updatedOrder.orderNumber,
+        status: updatedOrder.status,
+        orderType: updatedOrder.orderType,
+        customerId: updatedOrder.customerId,
+        locationId: updatedOrder.locationId,
+        paymentStatus: updatedOrder.paymentStatus,
+      } as any);
 
       res.json({ success: true, data: { status: 'COMPLETED' } });
     } else {

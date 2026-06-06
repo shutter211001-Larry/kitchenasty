@@ -32,6 +32,7 @@ interface CounterOrder {
   discount: number;
   tip: number;
   total: number;
+  paymentStatus?: string | null;
 }
 
 const COUNTER_STATUSES = ['PENDING', 'CONFIRMED', 'PREPARING', 'READY'];
@@ -165,12 +166,12 @@ export default function CounterDisplay() {
     });
 
     s.on('order:new', () => fetchOrders());
-    s.on('order:statusUpdate', (data: { id: string; status: string }) => {
+    s.on('order:statusUpdate', (data: { id: string; status: string; paymentStatus?: string | null }) => {
       setOrders((prev) => {
         if (!COUNTER_STATUSES.includes(data.status)) {
           return prev.filter((o) => o.id !== data.id);
         }
-        return prev.map((o) => o.id === data.id ? { ...o, status: data.status } : o);
+        return prev.map((o) => o.id === data.id ? { ...o, status: data.status, paymentStatus: data.paymentStatus !== undefined ? data.paymentStatus : o.paymentStatus } : o);
       });
     });
 
@@ -392,20 +393,37 @@ export default function CounterDisplay() {
                   <div
                     key={order.id}
                     onClick={() => toggleExpand(order.id)}
-                    className={`bg-white rounded-lg shadow-sm border p-4 mx-1 cursor-pointer transition-all hover:border-purple-300 ${
-                      updating === order.id ? 'opacity-50' : ''
-                    } ${expandedOrders[order.id] ? 'ring-2 ring-purple-500' : ''}`}
+                    className={`rounded-lg p-4 mx-1 cursor-pointer transition-all hover:border-purple-300 ${
+                      order.paymentStatus === 'PAID'
+                        ? 'bg-emerald-50/10 border-emerald-500 border-2 shadow-sm shadow-emerald-100/50'
+                        : 'bg-white border border-gray-200 shadow-sm'
+                    } ${updating === order.id ? 'opacity-50' : ''} ${
+                      expandedOrders[order.id]
+                        ? order.paymentStatus === 'PAID'
+                          ? 'ring-2 ring-emerald-500'
+                          : 'ring-2 ring-purple-500'
+                        : ''
+                    }`}
                   >
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2">
                         <span className="text-2xl font-black text-purple-600 bg-purple-50 px-2 rounded">
                           {order.pickupNumber || '---'}
                         </span>
-                        <div className="flex flex-col">
+                        <div className="flex flex-col gap-0.5">
                           <span className="font-mono text-[10px] text-gray-400">#{order.orderNumber}</span>
-                          <span className={`text-[10px] px-1 py-0.5 rounded font-bold ${order.orderType === 'DELIVERY' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'}`}>
-                            {order.orderType === 'DELIVERY' ? t('kitchen.delivery') : t('kitchen.pickup')}
-                          </span>
+                          <div className="flex items-center gap-1">
+                            <span className={`text-[10px] px-1 py-0.5 rounded font-bold ${order.orderType === 'DELIVERY' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'}`}>
+                              {order.orderType === 'DELIVERY' ? t('kitchen.delivery') : t('kitchen.pickup')}
+                            </span>
+                            <span className={`text-[10px] px-1 py-0.5 rounded font-bold ${
+                              order.paymentStatus === 'PAID'
+                                ? 'bg-emerald-100 text-emerald-800'
+                                : 'bg-gray-100 text-gray-600'
+                            }`}>
+                              {order.paymentStatus === 'PAID' ? '已結帳 💰' : '未結帳 🔄'}
+                            </span>
+                          </div>
                         </div>
                       </div>
                       <div className="flex items-center gap-1.5 text-[10px] text-gray-400 font-medium">
@@ -640,6 +658,28 @@ export default function CounterDisplay() {
                               </button>
                             ))}
                           </div>
+
+                          {/* Quick Payment Status Toggle Button */}
+                          <button
+                            onClick={async (e) => {
+                              e.stopPropagation();
+                              const nextStatus = order.paymentStatus === 'PAID' ? 'UNPAID' : 'PAID';
+                              try {
+                                await api.patch(`/orders/${order.id}/payment-status`, { paymentStatus: nextStatus });
+                                setOrders((prev) => prev.map((o) => o.id === order.id ? { ...o, paymentStatus: nextStatus } : o));
+                              } catch (err: any) {
+                                setActionError(err.response?.data?.error || err.message || '更新結帳狀態失敗');
+                                setTimeout(() => setActionError(null), 5000);
+                              }
+                            }}
+                            className={`w-full text-xs font-bold py-2 rounded-lg border transition-all active:scale-95 text-center ${
+                              order.paymentStatus === 'PAID'
+                                ? 'bg-rose-50 border-rose-200 text-rose-700 hover:bg-rose-100'
+                                : 'bg-emerald-600 border-transparent text-white hover:bg-emerald-700'
+                            }`}
+                          >
+                            {order.paymentStatus === 'PAID' ? '🔄 標記為未結帳' : '💰 標記為已結帳'}
+                          </button>
                         </div>
                       </div>
                     )}
