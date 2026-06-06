@@ -217,7 +217,7 @@ export default function OrderDetailPage() {
         {/* Main content */}
         <div className="lg:col-span-2 space-y-6">
           {/* Items */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('orders.items')}</h2>
             <div className="space-y-3">
               {order.items.map((item) => (
@@ -308,7 +308,7 @@ export default function OrderDetailPage() {
 
           {/* Notes */}
           {order.comment && (
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
               <h2 className="text-lg font-semibold text-gray-900 mb-2">{t('checkout.orderNotes') || '訂單備註'}</h2>
               <p className="text-gray-600 text-sm">{order.comment}</p>
             </div>
@@ -318,7 +318,7 @@ export default function OrderDetailPage() {
         {/* Sidebar */}
         <div className="space-y-6">
           {/* Status update */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">更新訂單狀態</h2>
             <div className="space-y-2">
               {STATUSES.map((status) => (
@@ -347,7 +347,7 @@ export default function OrderDetailPage() {
           </div>
 
           {/* Payment status update */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
             <h2 className="text-lg font-semibold text-gray-900 mb-4 font-sans">更新結帳狀態</h2>
             <div className="flex gap-2">
               <button
@@ -377,7 +377,7 @@ export default function OrderDetailPage() {
 
           {/* Delete Action */}
           {canManage && (
-            <div className="bg-red-50 rounded-xl border border-red-100 p-6">
+            <div className="bg-red-50 rounded-xl border border-red-100 p-4 sm:p-6">
               <h2 className="text-lg font-semibold text-red-900 mb-2">危險區域</h2>
               <p className="text-xs text-red-600 mb-4">刪除訂單後將無法復原，請謹慎操作。</p>
               <button
@@ -391,7 +391,7 @@ export default function OrderDetailPage() {
           )}
 
           {/* Order info */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('orders.orderDetail')}</h2>
             <dl className="space-y-3 text-sm">
               <div>
