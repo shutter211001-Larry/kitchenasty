@@ -298,7 +298,13 @@
     "readyForPickup": "Bereit",
     "pickedUp": "Abgeholt",
     "cancelled": "Storniert",
-    "cancelledMessage": "Diese Bestellung wurde storniert."
+    "cancelledMessage": "Diese Bestellung wurde storniert.",
+    "scheduledOrderTitle": "📅 Geplante Bestellung bestätigt",
+    "scheduledForTime": "Geplant für: ",
+    "timeLeftHoursMins": "Voraussichtliche Zubereitung/Lieferung in {{hours}} Stunden und {{mins}} Minuten",
+    "timeLeftMins": "Voraussichtliche Zubereitung/Lieferung in {{mins}} Minuten",
+    "tomorrow": "Morgen",
+    "scheduledTips": "Dies ist Ihre geplante Bestellung. Das Geschäft wird vor der geplanten Zeit mit der frischen Zubereitung beginnen. Bitte behalten Sie Ihren Lieferstatus im Auge oder holen Sie Ihre Bestellung zur geplanten Zeit im Geschäft ab!"
   },
   "reservations": {
     "title": "Tischreservierung",

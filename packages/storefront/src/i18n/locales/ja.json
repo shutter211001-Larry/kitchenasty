@@ -301,7 +301,13 @@
     "readyForPickup": "受け取り可能",
     "pickedUp": "受け取り済み",
     "cancelled": "キャンセル済み",
-    "cancelledMessage": "この注文はキャンセルされました。"
+    "cancelledMessage": "この注文はキャンセルされました。",
+    "scheduledOrderTitle": "📅 予約注文が確定しました",
+    "scheduledForTime": "受け取り/お届け予定時間：",
+    "timeLeftHoursMins": "調理/お届け予定まであと {{hours}} 時間 {{mins}} 分",
+    "timeLeftMins": "調理/お届け予定まであと {{mins}} 分",
+    "tomorrow": "明日",
+    "scheduledTips": "これは予約注文です。予定時間前に店舗で調理を開始します。配送状況をご確認いただくか、予定時間になりましたら店舗までお越しください！"
   },
   "reservations": {
     "title": "テーブル予約",

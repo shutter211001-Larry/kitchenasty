@@ -298,7 +298,13 @@
     "readyForPickup": "Prête",
     "pickedUp": "Récupérée",
     "cancelled": "Annulée",
-    "cancelledMessage": "Cette commande a été annulée."
+    "cancelledMessage": "Cette commande a été annulée.",
+    "scheduledOrderTitle": "📅 Commande programmée confirmée",
+    "scheduledForTime": "Prévue pour : ",
+    "timeLeftHoursMins": "Préparation/livraison estimée dans {{hours}} heures et {{mins}} minutes",
+    "timeLeftMins": "Préparation/livraison estimée dans {{mins}} minutes",
+    "tomorrow": "Demain",
+    "scheduledTips": "Il s'agit de votre commande programmée. Le magasin commencera à la préparer fraîchement avant l'heure prévue. Veuillez garder un œil sur l'état de la livraison ou vous rendre en magasin pour le retrait à l'heure prévue !"
   },
   "reservations": {
     "title": "Réservation de Table",

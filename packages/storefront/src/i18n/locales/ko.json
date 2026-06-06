@@ -301,7 +301,13 @@
     "readyForPickup": "픽업 가능",
     "pickedUp": "픽업 완료",
     "cancelled": "취소됨",
-    "cancelledMessage": "이 주문은 취소되었습니다."
+    "cancelledMessage": "이 주문은 취소되었습니다.",
+    "scheduledOrderTitle": "📅 예약 주문이 확인되었습니다",
+    "scheduledForTime": "예약 시간: ",
+    "timeLeftHoursMins": "조리/배달 예정 시간: {{hours}}시간 {{mins}}분 후",
+    "timeLeftMins": "조리/배달 예정 시간: {{mins}}분 후",
+    "tomorrow": "내일",
+    "scheduledTips": "예약 주문입니다. 매장에서 예약 시간 전에 조리를 시작합니다. 배달 상태를 확인하시거나 예약 시간에 맞춰 매장에서 픽업해 주세요!"
   },
   "reservations": {
     "title": "테이블 예약",

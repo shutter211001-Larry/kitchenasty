@@ -298,7 +298,13 @@
     "readyForPickup": "Listo",
     "pickedUp": "Recogido",
     "cancelled": "Cancelado",
-    "cancelledMessage": "Este pedido ha sido cancelado."
+    "cancelledMessage": "Este pedido ha sido cancelado.",
+    "scheduledOrderTitle": "📅 Pedido programado confirmado",
+    "scheduledForTime": "Programado para: ",
+    "timeLeftHoursMins": "Preparación/entrega estimada en {{hours}} horas y {{mins}} minutos",
+    "timeLeftMins": "Preparación/entrega estimada en {{mins}} minutos",
+    "tomorrow": "Mañana",
+    "scheduledTips": "Este es su pedido programado. La tienda comenzará a prepararlo fresco antes de la hora programada. ¡Esté atento al estado de entrega o acuda a la tienda para recogerlo a la hora programada!"
   },
   "reservations": {
     "title": "Reservas de Mesa",

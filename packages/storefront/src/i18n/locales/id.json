@@ -298,7 +298,13 @@
     "readyForPickup": "Siap Diambil",
     "pickedUp": "Sudah Diambil",
     "cancelled": "Dibatalkan",
-    "cancelledMessage": "Pesanan ini telah dibatalkan."
+    "cancelledMessage": "Pesanan ini telah dibatalkan.",
+    "scheduledOrderTitle": "📅 Pesanan Terjadwal Dikonfirmasi",
+    "scheduledForTime": "Dijadwalkan untuk: ",
+    "timeLeftHoursMins": "Perkiraan penyiapan/pengiriman dalam {{hours}} jam dan {{mins}} menit",
+    "timeLeftMins": "Perkiraan penyiapan/pengiriman dalam {{mins}} menit",
+    "tomorrow": "Besok",
+    "scheduledTips": "Ini adalah pesanan terjadwal Anda. Toko akan mulai menyiapkan pesanan Anda sebelum waktu yang dijadwalkan. Harap perhatikan status pengiriman atau silakan datang ke toko untuk pengambilan pada waktu yang dijadwalkan!"
   },
   "reservations": {
     "title": "Reservasi Meja",
