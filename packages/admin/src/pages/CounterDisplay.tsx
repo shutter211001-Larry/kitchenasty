@@ -387,13 +387,13 @@ export default function CounterDisplay() {
                   onClick={() => setActiveTab(status)}
                   className={`flex-1 min-w-[80px] py-3 text-center border-b-2 font-bold text-xs transition-all ${
                     isActive
-                      ? 'border-purple-650 text-purple-700 bg-purple-50/20'
+                      ? 'border-purple-600 text-purple-700 bg-purple-50/20'
                       : 'border-transparent text-gray-500 hover:text-gray-700'
                   }`}
                 >
                   <div className="flex flex-col items-center gap-0.5">
                     <span>{conf.label.split(' ')[0]}</span>
-                    <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ${isActive ? 'bg-purple-650 text-white' : 'bg-gray-100 text-gray-600'}`}>
+                    <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ${isActive ? 'bg-purple-600 text-white' : 'bg-gray-100 text-gray-600'}`}>
                       {statusOrdersCount}
                     </span>
                   </div>
@@ -589,7 +589,7 @@ export default function CounterDisplay() {
                               e.stopPropagation();
                               setMobileCheckoutOrderId(order.id);
                             }}
-                            className="w-full bg-purple-650 text-white text-xs font-bold py-2.5 rounded-lg hover:bg-purple-700 shadow-sm active:scale-95 transition-all text-center"
+                            className="w-full bg-purple-600 text-white text-xs font-bold py-2.5 rounded-lg hover:bg-purple-700 shadow-sm active:scale-95 transition-all text-center"
                           >
                             💳 收銀結帳 (POS Calculator)
                           </button>
@@ -762,7 +762,7 @@ export default function CounterDisplay() {
         if (!order) return null;
         return (
           <div className="fixed inset-0 z-50 md:hidden flex flex-col justify-end bg-black/60 backdrop-blur-sm" onClick={() => setMobileCheckoutOrderId(null)}>
-            <div className="bg-white rounded-t-2xl p-4 max-h-[85vh] overflow-y-auto space-y-4 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="bg-white rounded-t-2xl px-4 pt-3 pb-8 max-h-[92vh] overflow-y-auto space-y-3.5 shadow-2xl" onClick={(e) => e.stopPropagation()}>
               {/* Drawer Header */}
               <div className="flex justify-between items-center border-b border-gray-100 pb-3">
                 <div className="flex items-center gap-2">
@@ -818,7 +818,7 @@ export default function CounterDisplay() {
                     );
                   } else if (diff < 0) {
                     return (
-                      <div className="flex justify-between items-center text-xs pt-2 border-t border-dashed border-gray-200 text-red-650 font-bold flex-wrap gap-1">
+                      <div className="flex justify-between items-center text-xs pt-2 border-t border-dashed border-gray-200 text-red-600 font-bold flex-wrap gap-1">
                         <span>尚欠 (Remaining)</span>
                         <span className="font-mono text-base">${Math.abs(diff).toFixed(2)}</span>
                       </div>
@@ -833,9 +833,8 @@ export default function CounterDisplay() {
                   }
                 })()}
               </div>
-
-              {/* Quick Cash Bills Panel */}
-              <div className="grid grid-cols-5 gap-1.5 text-xs font-bold">
+                                 {/* Quick Cash Bills Panel */}
+              <div className="grid grid-cols-5 gap-1.5 text-xs font-black">
                 <button
                   onClick={() => handleQuickAmount(order.id, order.total.toFixed(2))}
                   className="bg-purple-600 text-white rounded-lg py-2.5 text-center hover:bg-purple-700 active:scale-95 transition-all shadow-sm truncate touch-manipulation select-none"
@@ -874,10 +873,10 @@ export default function CounterDisplay() {
                   <button
                     key={key}
                     onClick={() => handleKeypadPress(order.id, key)}
-                    className={`h-11 font-mono font-bold text-sm rounded-lg transition-all active:scale-95 shadow-sm touch-manipulation select-none ${
+                    className={`h-12 font-mono font-black text-xl rounded-lg transition-all active:scale-95 shadow-sm touch-manipulation select-none ${
                       key === '⌫'
                         ? 'bg-red-100 hover:bg-red-200 text-red-700'
-                        : 'bg-white hover:bg-gray-50 text-gray-700 border border-gray-200/60'
+                        : 'bg-white hover:bg-gray-50 text-gray-750 border border-gray-200/60'
                     }`}
                   >
                     {key}
@@ -899,7 +898,7 @@ export default function CounterDisplay() {
                     setTimeout(() => setActionError(null), 5000);
                   }
                 }}
-                className={`w-full text-xs font-bold py-3 rounded-lg border transition-all active:scale-95 text-center shadow-md touch-manipulation select-none ${
+                className={`w-full text-sm font-extrabold py-3.5 rounded-lg border transition-all active:scale-95 text-center shadow-md touch-manipulation select-none ${
                   order.paymentStatus === 'PAID'
                     ? 'bg-rose-50 border-rose-200 text-rose-700 hover:bg-rose-100'
                     : 'bg-emerald-600 border-transparent text-white hover:bg-emerald-700'

@@ -401,7 +401,7 @@ export default function OrderList() {
                       {order.customer ? order.customer.name : <span className="text-gray-400 font-normal">{t('common.guest') || '訪客'}</span>}
                     </span>
                     {order.scheduledAt && (
-                      <span className="text-[10px] text-indigo-650 font-semibold flex items-center gap-1">
+                      <span className="text-[10px] text-indigo-600 font-semibold flex items-center gap-1">
                         🕒 {new Date(order.scheduledAt).toLocaleString()}
                       </span>
                     )}
@@ -423,7 +423,7 @@ export default function OrderList() {
                   <span className={`px-2 py-0.5 rounded-full font-bold ${order.orderType === 'DELIVERY' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'}`}>
                     {order.orderType === 'DELIVERY' ? '外送' : '自取'}
                   </span>
-                  <span className="font-extrabold text-primary-650 text-sm">${order.total.toFixed(2)}</span>
+                  <span className="font-extrabold text-primary-600 text-sm">${order.total.toFixed(2)}</span>
                 </div>
 
                 <div className="flex justify-between items-center pt-2.5 border-t border-gray-100 gap-2">
