@@ -298,7 +298,13 @@
     "readyForPickup": "Sẵn sàng để lấy",
     "pickedUp": "Đã lấy hàng",
     "cancelled": "Đã hủy",
-    "cancelledMessage": "Đơn hàng này đã bị hủy."
+    "cancelledMessage": "Đơn hàng này đã bị hủy.",
+    "scheduledOrderTitle": "📅 Đơn hàng đặt trước đã được xác nhận",
+    "scheduledForTime": "Thời gian dự kiến: ",
+    "timeLeftHoursMins": "Chuẩn bị/giao hàng dự kiến trong {{hours}} giờ và {{mins}} phút",
+    "timeLeftMins": "Chuẩn bị/giao hàng dự kiến trong {{mins}} phút",
+    "tomorrow": "Ngày mai",
+    "scheduledTips": "Đây là đơn hàng đặt lịch của bạn. Cửa hàng sẽ bắt đầu chuẩn bị món ăn tươi ngon trước giờ hẹn. Vui lòng theo dõi trạng thái giao hàng hoặc đến cửa hàng để nhận vào giờ đã hẹn!"
   },
   "reservations": {
     "title": "Đặt bàn",

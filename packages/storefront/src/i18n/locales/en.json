@@ -309,7 +309,13 @@
     "readyForPickup": "Ready",
     "pickedUp": "Picked Up",
     "cancelled": "Cancelled",
-    "cancelledMessage": "This order has been cancelled."
+    "cancelledMessage": "This order has been cancelled.",
+    "scheduledOrderTitle": "📅 Scheduled Order Confirmed",
+    "scheduledForTime": "Scheduled for: ",
+    "timeLeftHoursMins": "Estimated preparation/delivery in {{hours}} hours and {{mins}} minutes",
+    "timeLeftMins": "Estimated preparation/delivery in {{mins}} minutes",
+    "tomorrow": "Tomorrow",
+    "scheduledTips": "This is your scheduled order. The store will begin preparing your order fresh before the scheduled time. Please keep an eye on your delivery status or proceed to the store for pickup at the scheduled time!"
   },
   "reservations": {
     "title": "Table Reservations",

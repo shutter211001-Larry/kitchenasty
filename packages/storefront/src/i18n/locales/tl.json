@@ -298,7 +298,13 @@
     "readyForPickup": "Handa nang i-pickup",
     "pickedUp": "Nakuha na",
     "cancelled": "Kanselado",
-    "cancelledMessage": "Ang order na ito ay kanselado na."
+    "cancelledMessage": "Ang order na ito ay kanselado na.",
+    "scheduledOrderTitle": "📅 Nakumpirma na ang Naka-schedule na Order",
+    "scheduledForTime": "Naka-schedule para sa: ",
+    "timeLeftHoursMins": "Tinatayang paghahanda/paghahatid sa loob ng {{hours}} oras at {{mins}} minuto",
+    "timeLeftMins": "Tinatayang paghahanda/paghahatid sa loob ng {{mins}} minuto",
+    "tomorrow": "Bukas",
+    "scheduledTips": "Ito ang iyong naka-schedule na order. Magsisimula ang tindahan na ihanda ito nang sariwa bago ang itinakdang oras. Pakibantayan ang status ng delivery o pumunta sa tindahan para sa pickup sa itinakdang oras!"
   },
   "reservations": {
     "title": "Mga Reservasyon ng Mesa",
