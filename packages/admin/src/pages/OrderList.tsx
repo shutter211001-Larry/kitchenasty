@@ -223,52 +223,57 @@ export default function OrderList() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <h1 className="text-2xl font-bold text-gray-900">{t('orders.title')}</h1>
-        <div className="flex items-center gap-3">
+        <div className="w-full sm:w-auto flex flex-col gap-2">
+          {/* Main Action on mobile: Full width */}
           <Link
             to="/orders/new"
-            className="bg-primary-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary-700 transition-colors flex items-center gap-2"
+            className="bg-primary-600 text-white px-4 py-2.5 rounded-lg text-sm font-bold hover:bg-primary-700 transition-colors flex items-center justify-center gap-2 w-full sm:w-auto"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
             + 新增訂單
           </Link>
-          {canManage && (
+
+          {/* Secondary Actions on mobile: 2x2 Grid */}
+          <div className="grid grid-cols-2 sm:flex sm:flex-row items-center gap-2 w-full sm:w-auto">
+            {canManage && (
+              <button
+                onClick={handleExport}
+                className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-700 transition-colors flex items-center justify-center gap-2 w-full sm:w-auto text-center"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                匯出報表
+              </button>
+            )}
+            {canManage && (
+              <label className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 cursor-pointer w-full sm:w-auto mb-0 text-center">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                </svg>
+                匯入報表
+                <input type="file" className="hidden" accept=".xlsx, .xls, .csv" onChange={handleImport} />
+              </label>
+            )}
+            {canManage && (
+              <button
+                onClick={handleDownloadTemplate}
+                className="text-primary-600 hover:text-primary-705 text-xs font-semibold py-2 px-4 rounded-lg bg-gray-100 hover:bg-gray-200 border border-gray-200 w-full sm:w-auto text-center sm:bg-transparent sm:border-none sm:p-0"
+              >
+                下載範本
+              </button>
+            )}
             <button
-              onClick={handleExport}
-              className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-700 transition-colors flex items-center gap-2"
+              onClick={handleCheckReminders}
+              className="bg-orange-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-orange-600 transition-colors flex items-center justify-center gap-2 w-full sm:w-auto text-center"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              匯出報表 (Excel)
+              🔔 狀態提醒
             </button>
-          )}
-          {canManage && (
-            <label className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors flex items-center gap-2 cursor-pointer">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-              </svg>
-              匯入報表
-              <input type="file" className="hidden" accept=".xlsx, .xls, .csv" onChange={handleImport} />
-            </label>
-          )}
-          {canManage && (
-            <button
-              onClick={handleDownloadTemplate}
-              className="text-primary-600 hover:text-primary-700 text-xs font-medium"
-            >
-              下載範本
-            </button>
-          )}
-          <button
-            onClick={handleCheckReminders}
-            className="bg-orange-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-orange-600 transition-colors flex items-center gap-2"
-          >
-            🔔 狀態提醒
-          </button>
+          </div>
         </div>
       </div>
 
