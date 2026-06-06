@@ -64,6 +64,7 @@ export default function KitchenDisplay() {
   const [boardLeadTime, setBoardLeadTime] = useState(60);
   const [collapsedDates, setCollapsedDates] = useState<Record<string, boolean>>({});
   const [expandedOrders, setExpandedOrders] = useState<Record<string, boolean>>({});
+  const [activeTab, setActiveTab] = useState<string>('PENDING');
 
   const toggleExpand = (orderId: string) => {
     setExpandedOrders((prev) => ({ ...prev, [orderId]: !prev[orderId] }));
@@ -385,10 +386,38 @@ export default function KitchenDisplay() {
                 </div>
               ))}
             </div>
-          )}
-          <div className="grid grid-cols-4 gap-4 p-4 h-[calc(100vh-52px)] overflow-hidden">
-            {ordersByStatus.map(({ status, config, orders: statusOrders }) => (
-              <div key={status} className="flex flex-col min-h-0">
+          {/* Mobile Top Tabs */}
+          <div className="flex md:hidden bg-white border-b border-gray-200 shadow-sm sticky top-0 z-10 overflow-x-auto select-none">
+            {KITCHEN_STATUSES.map((status) => {
+              const conf = STATUS_CONFIG[status];
+              const statusOrdersCount = immediateOrders.filter((o) => o.status === status).length;
+              const isActive = activeTab === status;
+              return (
+                <button
+                  key={status}
+                  onClick={() => setActiveTab(status)}
+                  className={`flex-1 min-w-[80px] py-3 text-center border-b-2 font-bold text-xs transition-all ${
+                    isActive
+                      ? 'border-primary-600 text-primary-700 bg-primary-50/20'
+                      : 'border-transparent text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  <div className="flex flex-col items-center gap-0.5">
+                    <span>{conf.label.split(' ')[0]}</span>
+                    <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ${isActive ? 'bg-primary-600 text-white' : 'bg-gray-100 text-gray-600'}`}>
+                      {statusOrdersCount}
+                    </span>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 h-[calc(100vh-52px)] overflow-hidden">
+            {ordersByStatus.map(({ status, config, orders: statusOrders }) => {
+              const isTabActive = activeTab === status;
+              return (
+                <div key={status} className={`flex flex-col min-h-0 ${isTabActive ? 'flex' : 'hidden md:flex'}`}>
                 {/* Column header */}
                 <div className={`rounded-t-lg px-4 py-2 border-b-2 ${config.bg}`}>
                   <div className="flex items-center justify-between">
@@ -623,7 +652,7 @@ export default function KitchenDisplay() {
                   ))}
                 </div>
               </div>
-            ))}
+            );})}
           </div>
         </>
       )}

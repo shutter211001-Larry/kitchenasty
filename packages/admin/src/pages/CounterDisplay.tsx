@@ -64,6 +64,8 @@ export default function CounterDisplay() {
   const [collapsedDates, setCollapsedDates] = useState<Record<string, boolean>>({});
   const [expandedOrders, setExpandedOrders] = useState<Record<string, boolean>>({});
   const [cashReceivedInputs, setCashReceivedInputs] = useState<Record<string, string>>({});
+  const [activeTab, setActiveTab] = useState<string>('PENDING');
+  const [mobileCheckoutOrderId, setMobileCheckoutOrderId] = useState<string | null>(null);
 
   const toggleExpand = (orderId: string) => {
     setExpandedOrders((prev) => ({ ...prev, [orderId]: !prev[orderId] }));
@@ -373,9 +375,38 @@ export default function CounterDisplay() {
               ))}
             </div>
           )}
-          <div className="grid grid-cols-4 gap-4 p-4 h-[calc(100vh-52px)] overflow-hidden">
-          {ordersByStatus.map(({ status, config, orders: statusOrders }) => (
-            <div key={status} className="flex flex-col min-h-0">
+          {/* Mobile Top Tabs */}
+          <div className="flex md:hidden bg-white border-b border-gray-200 shadow-sm sticky top-0 z-10 overflow-x-auto select-none">
+            {COUNTER_STATUSES.map((status) => {
+              const conf = STATUS_CONFIG[status];
+              const statusOrdersCount = immediateOrders.filter((o) => o.status === status).length;
+              const isActive = activeTab === status;
+              return (
+                <button
+                  key={status}
+                  onClick={() => setActiveTab(status)}
+                  className={`flex-1 min-w-[80px] py-3 text-center border-b-2 font-bold text-xs transition-all ${
+                    isActive
+                      ? 'border-purple-650 text-purple-700 bg-purple-50/20'
+                      : 'border-transparent text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  <div className="flex flex-col items-center gap-0.5">
+                    <span>{conf.label.split(' ')[0]}</span>
+                    <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ${isActive ? 'bg-purple-650 text-white' : 'bg-gray-100 text-gray-600'}`}>
+                      {statusOrdersCount}
+                    </span>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 h-[calc(100vh-52px)] overflow-hidden">
+          {ordersByStatus.map(({ status, config, orders: statusOrders }) => {
+            const isTabActive = activeTab === status;
+            return (
+              <div key={status} className={`flex flex-col min-h-0 ${isTabActive ? 'flex' : 'hidden md:flex'}`}>
               <div className={`rounded-t-lg px-4 py-2 border-b-2 ${config.bg}`}>
                 <div className="flex items-center justify-between">
                   <h2 className={`font-bold text-sm ${config.color}`}>{config.label}</h2>
@@ -551,8 +582,21 @@ export default function CounterDisplay() {
                           </div>
                         </div>
 
+                        {/* Mobile: button to trigger full bottom sheet calculator */}
+                        <div className="block md:hidden mt-3">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setMobileCheckoutOrderId(order.id);
+                            }}
+                            className="w-full bg-purple-650 text-white text-xs font-bold py-2.5 rounded-lg hover:bg-purple-700 shadow-sm active:scale-95 transition-all text-center"
+                          >
+                            💳 收銀結帳 (POS Calculator)
+                          </button>
+                        </div>
+
                         {/* Interactive POS Checkout Calculator */}
-                        <div className="bg-purple-50/50 border border-purple-100 rounded-xl p-3 space-y-3">
+                        <div className="hidden md:block bg-purple-50/50 border border-purple-100 rounded-xl p-3 space-y-3">
                           <h4 className="text-[11px] font-black text-purple-700 uppercase tracking-wider">簡易結帳計算器</h4>
                           
                           {/* Cash Input & Change Display */}
@@ -682,6 +726,7 @@ export default function CounterDisplay() {
                           </button>
                         </div>
                       </div>
+                    </div>
                     )}
 
                     <div className="flex gap-2">
@@ -715,10 +760,172 @@ export default function CounterDisplay() {
                 ))}
               </div>
             </div>
-          ))}
+          );})}
         </div>
       </>
     )}
+      {/* Mobile Bottom Sheet Drawer for POS Calculator */}
+      {mobileCheckoutOrderId && (() => {
+        const order = orders.find((o) => o.id === mobileCheckoutOrderId);
+        if (!order) return null;
+        return (
+          <div className="fixed inset-0 z-50 md:hidden flex flex-col justify-end bg-black/60 backdrop-blur-sm" onClick={() => setMobileCheckoutOrderId(null)}>
+            <div className="bg-white rounded-t-2xl p-4 max-h-[85vh] overflow-y-auto space-y-4 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+              {/* Drawer Header */}
+              <div className="flex justify-between items-center border-b border-gray-100 pb-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-xl font-black text-purple-600 bg-purple-50 px-2 rounded">
+                    {order.pickupNumber || '---'}
+                  </span>
+                  <div>
+                    <h3 className="font-bold text-gray-900 text-sm">訂單收銀結帳</h3>
+                    <p className="font-mono text-[10px] text-gray-400">#{order.orderNumber}</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setMobileCheckoutOrderId(null)}
+                  className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-150 text-gray-600 font-bold hover:bg-gray-200 transition-all"
+                  aria-label="Close checkout"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Order total info */}
+              <div className="flex justify-between items-center bg-purple-50 border border-purple-100/50 p-3 rounded-xl">
+                <span className="text-xs font-extrabold text-purple-750">應收總計 (Total Due)</span>
+                <span className="text-lg font-black text-purple-600">${order.total?.toFixed(2) || '0.00'}</span>
+              </div>
+
+              {/* Cash Input & Change Display */}
+              <div className="flex flex-col gap-1.5 bg-gray-50/50 p-3 rounded-xl border border-gray-150">
+                <div className="flex justify-between items-center gap-2 flex-wrap">
+                  <span className="text-xs font-bold text-gray-600">實收金額</span>
+                  <div className="flex items-center gap-1 bg-white px-3 py-1 rounded border border-gray-200 shadow-sm">
+                    <span className="text-gray-400 font-mono text-sm font-semibold">$</span>
+                    <input
+                      type="text"
+                      readOnly
+                      value={cashReceivedInputs[order.id] || ''}
+                      placeholder="0"
+                      className="w-24 text-right font-mono font-bold text-gray-950 text-base bg-transparent border-none outline-none focus:ring-0 p-0"
+                    />
+                  </div>
+                </div>
+                
+                {/* Change calculation */}
+                {(() => {
+                  const cash = parseFloat(cashReceivedInputs[order.id] || '0');
+                  const diff = cash - order.total;
+                  if (!cashReceivedInputs[order.id]) {
+                    return (
+                      <div className="text-right text-[10px] text-gray-400 italic">
+                        請輸入收受金額
+                      </div>
+                    );
+                  }
+                  if (diff > 0) {
+                    return (
+                      <div className="flex justify-between items-center text-xs pt-2 border-t border-dashed border-gray-200 text-green-600 font-extrabold flex-wrap gap-1">
+                        <span>找零 (Change)</span>
+                        <span className="font-mono text-base">${diff.toFixed(2)}</span>
+                      </div>
+                    );
+                  } else if (diff < 0) {
+                    return (
+                      <div className="flex justify-between items-center text-xs pt-2 border-t border-dashed border-gray-200 text-red-650 font-bold flex-wrap gap-1">
+                        <span>尚欠 (Remaining)</span>
+                        <span className="font-mono text-base">${Math.abs(diff).toFixed(2)}</span>
+                      </div>
+                    );
+                  } else {
+                    return (
+                      <div className="flex justify-between items-center text-xs pt-2 border-t border-dashed border-gray-200 text-green-700 font-extrabold bg-green-50 px-2 py-0.5 rounded flex-wrap gap-1">
+                        <span>金額剛好 (Exact)</span>
+                        <span>免找零</span>
+                      </div>
+                    );
+                  }
+                })()}
+              </div>
+
+              {/* Quick Cash Bills Panel */}
+              <div className="grid grid-cols-5 gap-1.5 text-xs font-bold">
+                <button
+                  onClick={() => handleQuickAmount(order.id, order.total.toFixed(2))}
+                  className="bg-purple-600 text-white rounded-lg py-2.5 text-center hover:bg-purple-700 active:scale-95 transition-all shadow-sm truncate"
+                >
+                  剛好
+                </button>
+                <button
+                  onClick={() => handleQuickAmount(order.id, '100')}
+                  className="bg-white border border-purple-200 text-purple-700 rounded-lg py-2.5 hover:bg-purple-50 active:scale-95 transition-all shadow-sm"
+                >
+                  $100
+                </button>
+                <button
+                  onClick={() => handleQuickAmount(order.id, '500')}
+                  className="bg-white border border-purple-200 text-purple-700 rounded-lg py-2.5 hover:bg-purple-50 active:scale-95 transition-all shadow-sm"
+                >
+                  $500
+                </button>
+                <button
+                  onClick={() => handleQuickAmount(order.id, '1000')}
+                  className="bg-white border border-purple-200 text-purple-700 rounded-lg py-2.5 hover:bg-purple-50 active:scale-95 transition-all shadow-sm"
+                >
+                  $1000
+                </button>
+                <button
+                  onClick={() => handleClearAmount(order.id)}
+                  className="bg-red-50 text-red-600 border border-red-200 rounded-lg py-2.5 hover:bg-red-100 active:scale-95 transition-all shadow-sm text-center"
+                >
+                  清除
+                </button>
+              </div>
+
+              {/* Virtual Keypad */}
+              <div className="grid grid-cols-3 gap-1.5 bg-gray-150/40 p-2 rounded-xl border border-purple-100/50">
+                {['7', '8', '9', '4', '5', '6', '1', '2', '3', '0', '.', '⌫'].map((key) => (
+                  <button
+                    key={key}
+                    onClick={() => handleKeypadPress(order.id, key)}
+                    className={`h-11 font-mono font-bold text-sm rounded-lg transition-all active:scale-95 shadow-sm ${
+                      key === '⌫'
+                        ? 'bg-red-100 hover:bg-red-200 text-red-700'
+                        : 'bg-white hover:bg-gray-50 text-gray-700 border border-gray-200/60'
+                    }`}
+                  >
+                    {key}
+                  </button>
+                ))}
+              </div>
+
+              {/* Quick Payment Status Toggle Button */}
+              <button
+                onClick={async (e) => {
+                  e.stopPropagation();
+                  const nextStatus = order.paymentStatus === 'PAID' ? 'UNPAID' : 'PAID';
+                  try {
+                    await api.patch(`/orders/${order.id}/payment-status`, { paymentStatus: nextStatus });
+                    setOrders((prev) => prev.map((o) => o.id === order.id ? { ...o, paymentStatus: nextStatus } : o));
+                    setMobileCheckoutOrderId(null); // auto close on success
+                  } catch (err: any) {
+                    setActionError(err.response?.data?.error || err.message || '更新結帳狀態失敗');
+                    setTimeout(() => setActionError(null), 5000);
+                  }
+                }}
+                className={`w-full text-xs font-bold py-3 rounded-lg border transition-all active:scale-95 text-center shadow-md ${
+                  order.paymentStatus === 'PAID'
+                    ? 'bg-rose-50 border-rose-200 text-rose-700 hover:bg-rose-100'
+                    : 'bg-emerald-600 border-transparent text-white hover:bg-emerald-700'
+                }`}
+              >
+                {order.paymentStatus === 'PAID' ? '🔄 標記為未結帳' : '💰 標記為已結帳'}
+              </button>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }

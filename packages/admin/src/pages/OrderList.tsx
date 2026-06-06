@@ -291,7 +291,8 @@ export default function OrderList() {
 
       {!loading && orders.length > 0 && (
         <>
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          {/* Desktop view: Table */}
+          <div className="hidden md:block bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-200 bg-gray-50">
@@ -387,6 +388,75 @@ export default function OrderList() {
                 ))}
               </tbody>
             </table>
+          </div>
+
+          {/* Mobile view: Card List */}
+          <div className="md:hidden space-y-4">
+            {orders.map((order) => (
+              <div key={order.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 space-y-3">
+                <div className="flex justify-between items-start">
+                  <div className="flex flex-col gap-1">
+                    <span className="font-mono text-xs text-gray-500 font-semibold">#{order.orderNumber}</span>
+                    <span className="text-sm font-bold text-gray-900">
+                      {order.customer ? order.customer.name : <span className="text-gray-400 font-normal">{t('common.guest') || '訪客'}</span>}
+                    </span>
+                    {order.scheduledAt && (
+                      <span className="text-[10px] text-indigo-650 font-semibold flex items-center gap-1">
+                        🕒 {new Date(order.scheduledAt).toLocaleString()}
+                      </span>
+                    )}
+                  </div>
+                  <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_COLORS[order.status] || 'bg-gray-100 text-gray-700'}`}>
+                    {order.status === 'PENDING' && '待處理'}
+                    {order.status === 'CONFIRMED' && '已確認'}
+                    {order.status === 'PREPARING' && '製作中'}
+                    {order.status === 'READY' && '可取餐'}
+                    {order.status === 'OUT_FOR_DELIVERY' && '外送中'}
+                    {order.status === 'DELIVERED' && '已送達'}
+                    {order.status === 'PICKED_UP' && '已取餐'}
+                    {order.status === 'CANCELLED' && '已取消'}
+                    {!['PENDING', 'CONFIRMED', 'PREPARING', 'READY', 'OUT_FOR_DELIVERY', 'DELIVERED', 'PICKED_UP', 'CANCELLED'].includes(order.status) && order.status.replace(/_/g, ' ')}
+                  </span>
+                </div>
+
+                <div className="flex justify-between items-center text-xs text-gray-500 pt-2.5 border-t border-gray-100">
+                  <span className={`px-2 py-0.5 rounded-full font-bold ${order.orderType === 'DELIVERY' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'}`}>
+                    {order.orderType === 'DELIVERY' ? '外送' : '自取'}
+                  </span>
+                  <span className="font-extrabold text-primary-650 text-sm">${order.total.toFixed(2)}</span>
+                </div>
+
+                <div className="flex justify-between items-center pt-2.5 border-t border-gray-100 gap-2">
+                  <button
+                    onClick={() => togglePaymentStatus(order.id, order.paymentStatus)}
+                    className={`text-[11px] px-2.5 py-1.5 rounded-full font-bold transition-all active:scale-95 border ${
+                      order.paymentStatus === 'PAID'
+                        ? 'bg-emerald-100 text-emerald-800 border-emerald-200'
+                        : 'bg-rose-100 text-rose-800 border-rose-200'
+                    }`}
+                  >
+                    {order.paymentStatus === 'PAID' ? '已結帳 💰' : '未結帳 🔄'}
+                  </button>
+
+                  <div className="flex items-center gap-2">
+                    <Link
+                      to={`/orders/${order.id}`}
+                      className="text-xs bg-gray-50 border border-gray-200 text-gray-600 px-3 py-1.5 rounded-lg font-bold hover:bg-gray-100 transition-all"
+                    >
+                      {t('common.view') || '查看'}
+                    </Link>
+                    {canManage && (
+                      <button
+                        onClick={() => handleDelete(order.id)}
+                        className="text-xs bg-red-50 border border-red-200 text-red-600 px-3 py-1.5 rounded-lg font-bold hover:bg-red-100 transition-all"
+                      >
+                        {t('common.delete') || '刪除'}
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
 
           {/* Pagination */}
