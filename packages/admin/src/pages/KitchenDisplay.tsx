@@ -386,6 +386,7 @@ export default function KitchenDisplay() {
                 </div>
               ))}
             </div>
+          )}
           {/* Mobile Top Tabs */}
           <div className="flex md:hidden bg-white border-b border-gray-200 shadow-sm sticky top-0 z-10 overflow-x-auto select-none">
             {KITCHEN_STATUSES.map((status) => {

@@ -726,7 +726,6 @@ export default function CounterDisplay() {
                           </button>
                         </div>
                       </div>
-                    </div>
                     )}
 
                     <div className="flex gap-2">
