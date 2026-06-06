@@ -46,6 +46,8 @@ export default function OrderList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [page, setPage] = useState(1);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [deleteTimeoutId, setDeleteTimeoutId] = useState<number | null>(null);
   const [statusFilter, setStatusFilter] = useState('');
   const [typeFilter, setTypeFilter] = useState('');
   const { user } = useAuth();
@@ -91,17 +93,42 @@ export default function OrderList() {
       .finally(() => setLoading(false));
   }, [page, statusFilter, typeFilter, token]);
 
-  async function handleDelete(id: string) {
-    if (!window.confirm('確定要刪除這筆訂單嗎？此操作無法復原。')) return;
-    try {
-      const res = await fetch(`/api/orders/${id}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!res.ok) throw new Error('刪除失敗');
-      setOrders(orders.filter(o => o.id !== id));
-    } catch (err: any) {
-      setError(err.message);
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (deleteTimeoutId) window.clearTimeout(deleteTimeoutId);
+    };
+  }, [deleteTimeoutId]);
+
+  async function handleDeleteClick(id: string) {
+    if (deleteConfirmId === id) {
+      if (deleteTimeoutId) {
+        window.clearTimeout(deleteTimeoutId);
+        setDeleteTimeoutId(null);
+      }
+      setDeleteConfirmId(null);
+      try {
+        setLoading(true);
+        const res = await fetch(`/api/orders/${id}`, {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) throw new Error('刪除失敗');
+        setOrders(orders.filter(o => o.id !== id));
+      } catch (err: any) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      setDeleteConfirmId(id);
+      const timeout = window.setTimeout(() => {
+        setDeleteConfirmId(null);
+      }, 3000);
+      if (deleteTimeoutId) {
+        window.clearTimeout(deleteTimeoutId);
+      }
+      setDeleteTimeoutId(timeout);
     }
   }
 
@@ -376,10 +403,14 @@ export default function OrderList() {
                         </Link>
                         {canManage && (
                           <button
-                            onClick={() => handleDelete(order.id)}
-                            className="text-red-600 hover:text-red-700 text-xs font-medium"
+                            onClick={() => handleDeleteClick(order.id)}
+                            className={`text-xs font-bold transition-all ${
+                              deleteConfirmId === order.id
+                                ? 'text-red-650 bg-red-50 px-2 py-0.5 rounded border border-red-200 animate-pulse'
+                                : 'text-red-600 hover:text-red-700'
+                            }`}
                           >
-                            {t('common.delete') || '刪除'}
+                            {deleteConfirmId === order.id ? '確定刪除？' : (t('common.delete') || '刪除')}
                           </button>
                         )}
                       </div>
@@ -447,10 +478,14 @@ export default function OrderList() {
                     </Link>
                     {canManage && (
                       <button
-                        onClick={() => handleDelete(order.id)}
-                        className="text-xs bg-red-50 border border-red-200 text-red-600 px-3 py-1.5 rounded-lg font-bold hover:bg-red-100 transition-all"
+                        onClick={() => handleDeleteClick(order.id)}
+                        className={`text-xs px-3 py-1.5 rounded-lg font-bold transition-all border ${
+                          deleteConfirmId === order.id
+                            ? 'bg-red-600 border-transparent text-white animate-pulse shadow-sm'
+                            : 'bg-red-50 text-red-600 border-red-200 hover:bg-red-100'
+                        }`}
                       >
-                        {t('common.delete') || '刪除'}
+                        {deleteConfirmId === order.id ? '⚠️ 確定刪除？' : (t('common.delete') || '刪除')}
                       </button>
                     )}
                   </div>
