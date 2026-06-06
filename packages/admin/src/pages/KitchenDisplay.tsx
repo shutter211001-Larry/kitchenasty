@@ -26,6 +26,12 @@ interface KitchenOrder {
   guestPhone?: string;
   items: OrderItem[];
   isRemote?: boolean;
+  subtotal: number;
+  deliveryFee: number;
+  tax: number;
+  discount: number;
+  tip: number;
+  total: number;
 }
 
 const KITCHEN_STATUSES = ['PENDING', 'CONFIRMED', 'PREPARING', 'READY'];
@@ -56,6 +62,11 @@ export default function KitchenDisplay() {
   const [lastRefresh, setLastRefresh] = useState(new Date());
   const [boardLeadTime, setBoardLeadTime] = useState(60);
   const [collapsedDates, setCollapsedDates] = useState<Record<string, boolean>>({});
+  const [expandedOrders, setExpandedOrders] = useState<Record<string, boolean>>({});
+
+  const toggleExpand = (orderId: string) => {
+    setExpandedOrders((prev) => ({ ...prev, [orderId]: !prev[orderId] }));
+  };
 
   const [locations, setLocations] = useState<{ id: string; name: string }[]>([]);
   const [selectedLocationId, setSelectedLocationId] = useState<string>(() => {
@@ -350,7 +361,7 @@ export default function KitchenDisplay() {
                             <span className="ml-2 text-blue-600 font-bold">
                               ({order.customer?.phone || order.guestPhone})
                             </span>
-                            <span className="ml-2 text-gray-400">{order.items.length} {t('kitchen.itemsCount', { count: order.items.length })}</span>
+                            <span className="ml-2 text-gray-400">{t('kitchen.itemsCount', { count: order.items.length })}</span>
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -395,8 +406,10 @@ export default function KitchenDisplay() {
                   {statusOrders.map((order) => (
                     <div
                       key={order.id}
-                      className={`bg-white rounded-lg shadow-sm border p-4 mx-1 ${updating === order.id ? 'opacity-50' : ''
-                        }`}
+                      onClick={() => toggleExpand(order.id)}
+                      className={`bg-white rounded-lg shadow-sm border p-4 mx-1 cursor-pointer transition-all hover:border-primary-300 ${
+                        updating === order.id ? 'opacity-50' : ''
+                      } ${expandedOrders[order.id] ? 'ring-2 ring-primary-500' : ''}`}
                     >
                       {/* Order header */}
                       <div className="flex items-center justify-between mb-2">
@@ -421,7 +434,13 @@ export default function KitchenDisplay() {
                             </span>
                           )}
                         </div>
-                        <span className="text-xs text-gray-400">{getTimeSince(order.createdAt)}</span>
+                        <div className="flex items-center gap-1.5 text-xs text-gray-400">
+                          <span>{getTimeSince(order.createdAt)}</span>
+                          <span className="text-gray-300">|</span>
+                          <svg className={`w-3.5 h-3.5 text-gray-400 transition-transform ${expandedOrders[order.id] ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </div>
                       </div>
 
                       {/* Scheduled / Pickup Time */}
@@ -502,11 +521,52 @@ export default function KitchenDisplay() {
                         </div>
                       )}
 
+                      {/* Pricing breakdown when expanded */}
+                      {expandedOrders[order.id] && (
+                        <div className="border-t border-gray-100 pt-3 mt-3 mb-3 text-xs text-gray-600 space-y-1.5 bg-gray-50/50 p-2.5 rounded-lg" onClick={(e) => e.stopPropagation()}>
+                          <div className="flex justify-between">
+                            <span>小計 (Subtotal)</span>
+                            <span>${order.subtotal?.toFixed(2) || '0.00'}</span>
+                          </div>
+                          {order.discount > 0 && (
+                            <div className="flex justify-between text-red-600">
+                              <span>折扣 (Discount)</span>
+                              <span>-${order.discount.toFixed(2)}</span>
+                            </div>
+                          )}
+                          {order.tax > 0 && (
+                            <div className="flex justify-between">
+                              <span>稅金 (Tax)</span>
+                              <span>${order.tax.toFixed(2)}</span>
+                            </div>
+                          )}
+                          {order.deliveryFee > 0 && (
+                            <div className="flex justify-between">
+                              <span>外送費 (Delivery Fee)</span>
+                              <span>${order.deliveryFee.toFixed(2)}</span>
+                            </div>
+                          )}
+                          {order.tip > 0 && (
+                            <div className="flex justify-between">
+                              <span>小費 (Tip)</span>
+                              <span>${order.tip.toFixed(2)}</span>
+                            </div>
+                          )}
+                          <div className="flex justify-between font-bold text-gray-900 text-sm pt-1.5 border-t border-dashed border-gray-200">
+                            <span>訂單金額 (Total)</span>
+                            <span className="text-primary-600">${order.total?.toFixed(2) || '0.00'}</span>
+                          </div>
+                        </div>
+                      )}
+
                       {/* Action buttons */}
                       <div className="flex gap-2">
                         {config.next && (
                           <button
-                            onClick={() => handleStatusUpdate(order.id, config.next!)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleStatusUpdate(order.id, config.next!);
+                            }}
                             disabled={updating === order.id}
                             className="flex-1 bg-primary-600 text-white text-xs font-medium py-2 rounded-lg hover:bg-primary-700 transition-colors disabled:opacity-50"
                             aria-label={`${NEXT_ACTION[status]} order ${order.orderNumber}`}
@@ -516,7 +576,10 @@ export default function KitchenDisplay() {
                         )}
                         {status === 'READY' && (
                           <button
-                            onClick={() => handleComplete(order.id, order.orderType)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleComplete(order.id, order.orderType);
+                            }}
                             disabled={updating === order.id}
                             className="flex-1 bg-green-600 text-white text-xs font-medium py-2 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
                             aria-label={`Mark order ${order.orderNumber} as ${order.orderType === 'DELIVERY' ? 'out for delivery' : 'picked up'}`}
@@ -525,7 +588,8 @@ export default function KitchenDisplay() {
                           </button>
                         )}
                         <button
-                          onClick={async () => {
+                          onClick={async (e) => {
+                            e.stopPropagation();
                             if (window.confirm('確定要取消此訂單嗎？')) {
                               handleStatusUpdate(order.id, 'CANCELLED');
                             }
