@@ -50,6 +50,40 @@ const NEXT_ACTION: Record<string, string> = {
   PREPARING: '製作完成',
 };
 
+const playNotificationSound = () => {
+  try {
+    const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+    if (!AudioCtx) return;
+    const context = new AudioCtx();
+    if (context.state === 'suspended') {
+      context.resume();
+    }
+    
+    const playNote = (frequency: number, startTime: number, duration: number) => {
+      const osc = context.createOscillator();
+      const gainNode = context.createGain();
+      
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(frequency, startTime);
+      
+      gainNode.gain.setValueAtTime(0.3, startTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+      
+      osc.connect(gainNode);
+      gainNode.connect(context.destination);
+      
+      osc.start(startTime);
+      osc.stop(startTime + duration);
+    };
+    
+    const now = context.currentTime;
+    playNote(783.99, now, 0.25);
+    playNote(1046.50, now + 0.12, 0.35);
+  } catch (err) {
+    console.warn('Audio playback failed or was blocked by browser policy:', err);
+  }
+};
+
 export default function KitchenDisplay() {
   const { t } = useTranslation();
   const [orders, setOrders] = useState<KitchenOrder[]>([]);
@@ -65,6 +99,9 @@ export default function KitchenDisplay() {
   const [collapsedDates, setCollapsedDates] = useState<Record<string, boolean>>({});
   const [expandedOrders, setExpandedOrders] = useState<Record<string, boolean>>({});
   const [activeTab, setActiveTab] = useState<string>('PENDING');
+  const [enableSound, setEnableSound] = useState<boolean>(() => {
+    return localStorage.getItem('kds_enableSound') !== 'false';
+  });
 
   const toggleExpand = (orderId: string) => {
     setExpandedOrders((prev) => ({ ...prev, [orderId]: !prev[orderId] }));
@@ -168,6 +205,9 @@ export default function KitchenDisplay() {
 
     s.on('order:new', () => {
       fetchOrders();
+      if (localStorage.getItem('kds_enableSound') !== 'false') {
+        playNotificationSound();
+      }
     });
 
     s.on('order:statusUpdate', (data: { id: string; status: string; paymentStatus?: string | null }) => {
@@ -299,6 +339,18 @@ export default function KitchenDisplay() {
           <span className="text-xs text-gray-400">
             {orders.length} 張進行中訂單 | 更新於 {lastRefresh.toLocaleTimeString()}
           </span>
+          <button
+            onClick={() => {
+              const next = !enableSound;
+              setEnableSound(next);
+              localStorage.setItem('kds_enableSound', String(next));
+              if (next) playNotificationSound();
+            }}
+            className="text-xs bg-gray-800 hover:bg-gray-700 border border-gray-700 px-3 py-1.5 rounded transition-colors flex items-center gap-1.5 font-semibold"
+            aria-label="Toggle sound notifications"
+          >
+            <span>{enableSound ? '🔊 聲音開啟' : '🔇 聲音關閉'}</span>
+          </button>
           <button
             onClick={fetchOrders}
             className="text-xs bg-gray-700 hover:bg-gray-600 px-3 py-1.5 rounded transition-colors"

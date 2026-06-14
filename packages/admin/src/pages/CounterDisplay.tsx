@@ -50,6 +50,40 @@ const NEXT_ACTION: Record<string, string> = {
   PREPARING: '製作完成',
 };
 
+const playNotificationSound = () => {
+  try {
+    const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+    if (!AudioCtx) return;
+    const context = new AudioCtx();
+    if (context.state === 'suspended') {
+      context.resume();
+    }
+    
+    const playNote = (frequency: number, startTime: number, duration: number) => {
+      const osc = context.createOscillator();
+      const gainNode = context.createGain();
+      
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(frequency, startTime);
+      
+      gainNode.gain.setValueAtTime(0.3, startTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+      
+      osc.connect(gainNode);
+      gainNode.connect(context.destination);
+      
+      osc.start(startTime);
+      osc.stop(startTime + duration);
+    };
+    
+    const now = context.currentTime;
+    playNote(783.99, now, 0.25);
+    playNote(1046.50, now + 0.12, 0.35);
+  } catch (err) {
+    console.warn('Audio playback failed or was blocked by browser policy:', err);
+  }
+};
+
 export default function CounterDisplay() {
   const { t } = useTranslation();
   const [orders, setOrders] = useState<CounterOrder[]>([]);
@@ -66,6 +100,9 @@ export default function CounterDisplay() {
   const [cashReceivedInputs, setCashReceivedInputs] = useState<Record<string, string>>({});
   const [activeTab, setActiveTab] = useState<string>('PENDING');
   const [mobileCheckoutOrderId, setMobileCheckoutOrderId] = useState<string | null>(null);
+  const [enableSound, setEnableSound] = useState<boolean>(() => {
+    return localStorage.getItem('cds_enableSound') !== 'false';
+  });
 
   const toggleExpand = (orderId: string) => {
     setExpandedOrders((prev) => ({ ...prev, [orderId]: !prev[orderId] }));
@@ -167,7 +204,12 @@ export default function CounterDisplay() {
       setSocketError(err.message);
     });
 
-    s.on('order:new', () => fetchOrders());
+    s.on('order:new', () => {
+      fetchOrders();
+      if (localStorage.getItem('cds_enableSound') !== 'false') {
+        playNotificationSound();
+      }
+    });
     s.on('order:statusUpdate', (data: { id: string; status: string; paymentStatus?: string | null }) => {
       setOrders((prev) => {
         if (!COUNTER_STATUSES.includes(data.status)) {
@@ -291,6 +333,18 @@ export default function CounterDisplay() {
         </div>
         <div className="flex items-center gap-4 text-xs text-purple-200">
           <span>{orders.length} 張進行中 | 更新於 {lastRefresh.toLocaleTimeString()}</span>
+          <button
+            onClick={() => {
+              const next = !enableSound;
+              setEnableSound(next);
+              localStorage.setItem('cds_enableSound', String(next));
+              if (next) playNotificationSound();
+            }}
+            className="bg-purple-800 hover:bg-purple-700 border border-purple-700/50 px-3 py-1.5 rounded transition-all flex items-center gap-1.5"
+            aria-label="Toggle sound notifications"
+          >
+            <span>{enableSound ? '🔊 聲音開啟' : '🔇 聲音關閉'}</span>
+          </button>
           <button onClick={fetchOrders} className="bg-purple-800 hover:bg-purple-700 px-3 py-1.5 rounded transition-colors">
             重新整理
           </button>
