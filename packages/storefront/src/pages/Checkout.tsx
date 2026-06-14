@@ -909,7 +909,8 @@ export default function Checkout() {
                               if (!liff) return;
                               await liff.init({ liffId: settings.lineSettings!.liffId });
                               if (!liff.isLoggedIn()) {
-                                liff.login({ redirectUri: window.location.origin + '/login?redirect=/checkout' });
+                                localStorage.setItem('line_login_redirect', '/checkout');
+                                liff.login({ redirectUri: window.location.origin + '/login' });
                                 return;
                               }
                               const profile = await liff.getProfile();

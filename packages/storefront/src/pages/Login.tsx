@@ -40,11 +40,11 @@ export default function Login() {
         return;
       }
 
-      // Clear old LIFF data to be safe
-      localStorage.removeItem('liff:token');
-
       await liff.init({ liffId: settings.lineSettings!.liffId });
       if (!liff.isLoggedIn()) {
+        if (redirectPath && redirectPath !== '/') {
+          localStorage.setItem('line_login_redirect', redirectPath);
+        }
         liff.login({ redirectUri: window.location.origin + '/login' });
         return;
       }
@@ -67,8 +67,13 @@ export default function Login() {
         console.log('[Login] LINE Login successful!');
         setSuccess(true);
         localStorage.setItem('token', data.data.token);
+        
+        const savedRedirect = localStorage.getItem('line_login_redirect');
+        const finalRedirect = savedRedirect || redirectPath;
+        localStorage.removeItem('line_login_redirect');
+
         setTimeout(() => {
-          window.location.replace(redirectPath);
+          window.location.replace(finalRedirect);
         }, 800);
       } else {
         setError(data.error || 'LINE Login failed');
@@ -97,8 +102,12 @@ export default function Login() {
       setPassword('');
 
       // Force redirect after a short delay
+      const savedRedirect = localStorage.getItem('line_login_redirect');
+      const finalRedirect = savedRedirect || redirectPath;
+      localStorage.removeItem('line_login_redirect');
+
       setTimeout(() => {
-        window.location.replace(redirectPath);
+        window.location.replace(finalRedirect);
       }, 800);
     } catch (err: any) {
       console.error('[Login] Submission failed:', err);

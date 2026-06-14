@@ -62,7 +62,10 @@ export default function Register() {
     if (settings.lineSettings?.liffId) {
       const liff = (window as any).liff;
       if (liff) {
-        liff.login({ redirectUri: window.location.origin });
+        if (redirectPath && redirectPath !== '/') {
+          localStorage.setItem('line_login_redirect', redirectPath);
+        }
+        liff.login({ redirectUri: window.location.origin + '/login' });
       }
     }
   };
