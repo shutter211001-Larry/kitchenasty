@@ -374,7 +374,9 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
     return;
   }
 
-  if ((orderType === 'DELIVERY' || orderType === 'FROZEN_DELIVERY') && !address) {
+  const isStaff = req.user?.type === 'staff';
+
+  if (!isStaff && (orderType === 'DELIVERY' || orderType === 'FROZEN_DELIVERY') && !address) {
     res.status(400).json({ success: false, error: 'Delivery address is required' });
     return;
   }
@@ -382,22 +384,22 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
   const siteSettings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
   const orderSettings = (siteSettings?.orderSettings as any) || {};
 
-  if (orderSettings.enabled === false) {
+  if (!isStaff && orderSettings.enabled === false) {
     res.status(400).json({ success: false, error: 'Online ordering is currently disabled' });
     return;
   }
 
-  if (orderType === 'DELIVERY' && orderSettings.deliveryEnabled === false) {
+  if (!isStaff && orderType === 'DELIVERY' && orderSettings.deliveryEnabled === false) {
     res.status(400).json({ success: false, error: 'Delivery is currently disabled' });
     return;
   }
 
-  if (orderType === 'FROZEN_DELIVERY' && orderSettings.frozenDeliveryEnabled === false) {
+  if (!isStaff && orderType === 'FROZEN_DELIVERY' && orderSettings.frozenDeliveryEnabled === false) {
     res.status(400).json({ success: false, error: 'Frozen delivery is currently disabled' });
     return;
   }
 
-  if (orderType === 'PICKUP' && orderSettings.pickupEnabled === false) {
+  if (!isStaff && orderType === 'PICKUP' && orderSettings.pickupEnabled === false) {
     res.status(400).json({ success: false, error: 'Pickup is currently disabled' });
     return;
   }
@@ -419,33 +421,36 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
   // Validate scheduledAt
   if (scheduledAt) {
     const scheduled = new Date(scheduledAt);
-    const now = new Date();
-    const minTime = new Date(now.getTime() + 30 * 60 * 1000); // 30 min in future
-    const maxTime = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000); // 7 days out
-
     if (isNaN(scheduled.getTime())) {
       res.status(400).json({ success: false, error: 'Invalid scheduledAt date' });
       return;
     }
-    if (scheduled < minTime) {
-      res.status(400).json({ success: false, error: 'Scheduled time must be at least 30 minutes in the future' });
-      return;
-    }
-    if (scheduled > maxTime) {
-      res.status(400).json({ success: false, error: 'Scheduled time cannot be more than 7 days in the future' });
-      return;
-    }
 
-    // Require phone for scheduled orders
-    if (!guestPhone && !customerId) {
-      res.status(400).json({ success: false, error: 'Phone number is required for scheduled orders' });
-      return;
-    }
+    if (!isStaff) {
+      const now = new Date();
+      const minTime = new Date(now.getTime() + 30 * 60 * 1000); // 30 min in future
+      const maxTime = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000); // 7 days out
 
-    if (customerId) {
-      if (!customerObj?.phone && !guestPhone) {
-        res.status(400).json({ success: false, error: 'Phone number is required for scheduled orders. Please provide a contact number.' });
+      if (scheduled < minTime) {
+        res.status(400).json({ success: false, error: 'Scheduled time must be at least 30 minutes in the future' });
         return;
+      }
+      if (scheduled > maxTime) {
+        res.status(400).json({ success: false, error: 'Scheduled time cannot be more than 7 days in the future' });
+        return;
+      }
+
+      // Require phone for scheduled orders
+      if (!guestPhone && !customerId) {
+        res.status(400).json({ success: false, error: 'Phone number is required for scheduled orders' });
+        return;
+      }
+
+      if (customerId) {
+        if (!customerObj?.phone && !guestPhone) {
+          res.status(400).json({ success: false, error: 'Phone number is required for scheduled orders. Please provide a contact number.' });
+          return;
+        }
       }
     }
   }
@@ -462,18 +467,18 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
     return;
   }
 
-  if (orderType === 'DELIVERY' && !location.deliveryEnabled) {
+  if (!isStaff && orderType === 'DELIVERY' && !location.deliveryEnabled) {
     res.status(400).json({ success: false, error: 'Delivery is not available for this location' });
     return;
   }
 
-  if (orderType === 'PICKUP' && !location.pickupEnabled) {
+  if (!isStaff && orderType === 'PICKUP' && !location.pickupEnabled) {
     res.status(400).json({ success: false, error: 'Pickup is not available for this location' });
     return;
   }
 
   // Check busy mode
-  if (location.isBusy) {
+  if (!isStaff && location.isBusy) {
     res.status(400).json({
       success: false,
       error: location.busyMessage || 'This location is currently not accepting orders. Please try again later.',
@@ -482,7 +487,7 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
   }
 
   // Validate scheduledAt and ASAP within operating hours and respects buffers
-  if (!isEmployee && location.operatingHours.length > 0) {
+  if (!isStaff && !isEmployee && location.operatingHours.length > 0) {
     const settings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
     const orderSettings = (settings?.orderSettings as any) || {};
     const preOpeningBuffer = Number(orderSettings.preOpeningBuffer || 30);
@@ -549,7 +554,7 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
         }
       }
 
-      if (zones.length > 0 && !matchedZone) {
+      if (!isStaff && zones.length > 0 && !matchedZone) {
         res.status(400).json({ success: false, error: 'Delivery address is outside our delivery zones' });
         return;
       }
@@ -758,58 +763,60 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
   }
 
   // Check minimum order. Delivery zones override location/global defaults.
-  if (orderType === 'DELIVERY' && address?.lat != null && address?.lng != null) {
-    const zones = await prisma.deliveryZone.findMany({
-      where: { locationId: location.id, isActive: true },
-    });
-    let matchedZone = null;
-    for (const zone of zones) {
-      if (zone.boundaries && Array.isArray(zone.boundaries)) {
-        if (isPointInPolygon(address.lat, address.lng, zone.boundaries as [number, number][])) {
-          matchedZone = zone;
-          break;
+  if (!isStaff) {
+    if (orderType === 'DELIVERY' && address?.lat != null && address?.lng != null) {
+      const zones = await prisma.deliveryZone.findMany({
+        where: { locationId: location.id, isActive: true },
+      });
+      let matchedZone = null;
+      for (const zone of zones) {
+        if (zone.boundaries && Array.isArray(zone.boundaries)) {
+          if (isPointInPolygon(address.lat, address.lng, zone.boundaries as [number, number][])) {
+            matchedZone = zone;
+            break;
+          }
         }
       }
-    }
 
-    const minOrder = matchedZone?.minOrder ?? location.minOrderDelivery ?? Number(orderSettings.minOrderDelivery || 0);
-    if (subtotal < minOrder) {
-      res.status(400).json({
-        success: false,
-        error: `Minimum delivery order amount is ${minOrder.toFixed(2)}`,
+      const minOrder = matchedZone?.minOrder ?? location.minOrderDelivery ?? Number(orderSettings.minOrderDelivery || 0);
+      if (subtotal < minOrder) {
+        res.status(400).json({
+          success: false,
+          error: `Minimum delivery order amount is ${minOrder.toFixed(2)}`,
+        });
+        return;
+      }
+    } else if (orderType === 'DELIVERY') {
+      const defaultZone = await prisma.deliveryZone.findFirst({
+        where: { locationId: location.id, isActive: true },
+        orderBy: { minOrder: 'asc' },
       });
-      return;
-    }
-  } else if (orderType === 'DELIVERY') {
-    const defaultZone = await prisma.deliveryZone.findFirst({
-      where: { locationId: location.id, isActive: true },
-      orderBy: { minOrder: 'asc' },
-    });
-    const minOrder = defaultZone?.minOrder ?? location.minOrderDelivery ?? Number(orderSettings.minOrderDelivery || 0);
-    if (subtotal < minOrder) {
-      res.status(400).json({
-        success: false,
-        error: `Minimum delivery order amount is ${minOrder.toFixed(2)}`,
-      });
-      return;
-    }
-  } else if (orderType === 'FROZEN_DELIVERY') {
-    const minOrder = orderSettings.minOrderFrozen !== undefined ? Number(orderSettings.minOrderFrozen) : 0;
-    if (subtotal < minOrder) {
-      res.status(400).json({
-        success: false,
-        error: `Minimum frozen delivery order amount is ${minOrder.toFixed(2)}`,
-      });
-      return;
-    }
-  } else {
-    const minOrder = location.minOrderPickup ?? Number(orderSettings.minOrderPickup || 0);
-    if (subtotal < minOrder) {
-      res.status(400).json({
-        success: false,
-        error: `Minimum pickup order amount is ${minOrder.toFixed(2)}`,
-      });
-      return;
+      const minOrder = defaultZone?.minOrder ?? location.minOrderDelivery ?? Number(orderSettings.minOrderDelivery || 0);
+      if (subtotal < minOrder) {
+        res.status(400).json({
+          success: false,
+          error: `Minimum delivery order amount is ${minOrder.toFixed(2)}`,
+        });
+        return;
+      }
+    } else if (orderType === 'FROZEN_DELIVERY') {
+      const minOrder = orderSettings.minOrderFrozen !== undefined ? Number(orderSettings.minOrderFrozen) : 0;
+      if (subtotal < minOrder) {
+        res.status(400).json({
+          success: false,
+          error: `Minimum frozen delivery order amount is ${minOrder.toFixed(2)}`,
+        });
+        return;
+      }
+    } else {
+      const minOrder = location.minOrderPickup ?? Number(orderSettings.minOrderPickup || 0);
+      if (subtotal < minOrder) {
+        res.status(400).json({
+          success: false,
+          error: `Minimum pickup order amount is ${minOrder.toFixed(2)}`,
+        });
+        return;
+      }
     }
   }
 

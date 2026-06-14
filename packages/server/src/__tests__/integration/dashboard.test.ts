@@ -17,6 +17,7 @@ vi.mock('../../lib/db.js', () => {
     customer: { findUnique: vi.fn(), count: vi.fn() },
     user: { findUnique: vi.fn() },
     category: { findMany: vi.fn(), findUnique: vi.fn(), create: vi.fn(), update: vi.fn(), delete: vi.fn(), count: vi.fn() },
+    $queryRaw: vi.fn(),
   };
   return { default: mockPrisma, prisma: mockPrisma };
 });
@@ -29,7 +30,7 @@ vi.mock('../../lib/stripe.js', () => ({
 }));
 
 import prisma from '../../lib/db.js';
-const mockedPrisma = vi.mocked(prisma);
+const mockedPrisma = vi.mocked(prisma) as any;
 
 const app = createApp();
 
@@ -56,16 +57,18 @@ describe('Dashboard API', () => {
 
     it('returns dashboard stats for staff', async () => {
       // Mock all the prisma calls
-      mockedPrisma.order.count
-        .mockResolvedValueOnce(5)   // ordersToday
-        .mockResolvedValueOnce(25)  // ordersThisWeek
-        .mockResolvedValueOnce(100) // ordersThisMonth
-        .mockResolvedValueOnce(500); // totalOrders
-      mockedPrisma.order.aggregate
-        .mockResolvedValueOnce({ _sum: { total: 250.50 } } as any)  // revenueToday
-        .mockResolvedValueOnce({ _sum: { total: 1200 } } as any)    // revenueThisWeek
-        .mockResolvedValueOnce({ _sum: { total: 5000 } } as any)    // revenueThisMonth
-        .mockResolvedValueOnce({ _sum: { total: 25000 } } as any);  // totalRevenue
+      mockedPrisma.$queryRaw.mockResolvedValueOnce([
+        {
+          ordersToday: 5,
+          revenueToday: 250.50,
+          ordersThisWeek: 25,
+          revenueThisWeek: 1200,
+          ordersThisMonth: 100,
+          revenueThisMonth: 5000,
+          totalOrders: 500,
+          totalRevenue: 25000,
+        }
+      ] as any);
       mockedPrisma.menuItem.count.mockResolvedValueOnce(42);
       mockedPrisma.customer.count.mockResolvedValueOnce(150);
       mockedPrisma.reservation.count.mockResolvedValueOnce(3);

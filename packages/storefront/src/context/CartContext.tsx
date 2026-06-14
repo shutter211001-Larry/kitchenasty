@@ -38,14 +38,29 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | null>(null);
 
-let nextId = 1;
-
 export function CartProvider({ children }: { children: React.ReactNode }) {
-  const [items, setItems] = useState<CartItem[]>([]);
+  const [items, setItems] = useState<CartItem[]>(() => {
+    try {
+      const saved = localStorage.getItem('kitchenasty-cart');
+      return saved ? JSON.parse(saved) : [];
+    } catch (e) {
+      console.error('Failed to parse cart items from localStorage:', e);
+      return [];
+    }
+  });
   const [isOpen, setIsOpen] = useState(false);
 
+  useEffect(() => {
+    try {
+      localStorage.setItem('kitchenasty-cart', JSON.stringify(items));
+    } catch (e) {
+      console.error('Failed to save cart items to localStorage:', e);
+    }
+  }, [items]);
+
   const addItem = useCallback((item: Omit<CartItem, 'id'>) => {
-    setItems((prev) => [...prev, { ...item, id: String(nextId++) }]);
+    const randomId = Math.random().toString(36).substring(2, 9);
+    setItems((prev) => [...prev, { ...item, id: randomId }]);
     setIsOpen(true);
   }, []);
 
@@ -63,6 +78,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const clear = useCallback(() => {
     setItems([]);
+    try {
+      localStorage.removeItem('kitchenasty-cart');
+    } catch (e) {
+      console.error('Failed to remove cart items from localStorage:', e);
+    }
   }, []);
 
   const itemCount = items.reduce((sum, i) => sum + i.quantity, 0);

@@ -30,16 +30,15 @@ interface CartState {
   subtotal: () => number;
 }
 
-let nextId = 1;
-
 export const useCartStore = create<CartState>()(
   persist(
     (set, get) => ({
       items: [],
 
       addItem(item) {
+        const randomId = Math.random().toString(36).substring(2, 9);
         set((state) => ({
-          items: [...state.items, { ...item, id: String(nextId++) }],
+          items: [...state.items, { ...item, id: randomId }],
         }));
       },
 

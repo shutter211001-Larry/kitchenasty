@@ -186,7 +186,7 @@ describe('Order API - Integration Tests', () => {
       });
 
       expect(res.status).toBe(400);
-      expect(res.body.error).toContain('stock');
+      expect(res.body.error).toMatch(/stock|庫存/);
     });
 
     it('returns 400 when no active location', async () => {
