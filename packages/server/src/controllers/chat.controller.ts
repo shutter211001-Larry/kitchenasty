@@ -5,7 +5,23 @@ import { emitChatMessage } from '../lib/socket.js';
 
 export async function getMessages(req: Request, res: Response) {
   try {
+    const userId = (req as any).user?.id;
+    if (!userId) return res.status(401).json({ success: false, message: '未授權' });
+
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    
+    let locationId = req.query.locationId as string | undefined;
+    if (locationId === 'global') locationId = undefined;
+
+    // Staff are locked to their own location
+    if (user?.role === 'STAFF' && user.locationId) {
+      locationId = user.locationId;
+    }
+
     const messages = await prisma.chatMessage.findMany({
+      where: {
+        locationId: locationId || null,
+      },
       take: 50,
       orderBy: { createdAt: 'desc' },
       include: {
@@ -25,22 +41,32 @@ export async function getMessages(req: Request, res: Response) {
 
 const sendSchema = z.object({
   content: z.string().min(1, 'Message cannot be empty'),
+  locationId: z.string().optional().nullable(),
 });
 
 export async function sendMessage(req: Request, res: Response) {
   try {
-    // Requires authenticated admin user
     const senderId = (req as any).user?.id;
     if (!senderId) {
       return res.status(401).json({ success: false, message: '未授權' });
     }
 
-    const { content } = sendSchema.parse(req.body);
+    const user = await prisma.user.findUnique({ where: { id: senderId } });
+
+    const { content, locationId: reqLocationId } = sendSchema.parse(req.body);
+
+    let locationId = reqLocationId === 'global' ? null : reqLocationId;
+    
+    // Staff are locked to their own location
+    if (user?.role === 'STAFF' && user.locationId) {
+      locationId = user.locationId;
+    }
 
     const message = await prisma.chatMessage.create({
       data: {
         content,
         senderId,
+        locationId: locationId || null,
       },
       include: {
         sender: {
@@ -50,7 +76,7 @@ export async function sendMessage(req: Request, res: Response) {
     });
 
     // Broadcast the message via Socket.io
-    emitChatMessage(message);
+    emitChatMessage(message, locationId || 'global');
 
     res.json({ success: true, data: message });
   } catch (error) {

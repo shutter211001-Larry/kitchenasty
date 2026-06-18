@@ -136,6 +136,7 @@ model Location {
   tables           Table[]
   staff            User[]
   coupons          Coupon[]
+  chatMessages     ChatMessage[]
 
   @@map("locations")
 }
@@ -724,11 +725,13 @@ model ErpRecipeMapping {
 }
 
 model ChatMessage {
-  id        String   @id @default(cuid())
-  senderId  String
-  content   String
-  createdAt DateTime @default(now())
-  sender    User     @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  id         String    @id @default(cuid())
+  senderId   String
+  locationId String?
+  content    String
+  createdAt  DateTime  @default(now())
+  sender     User      @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  location   Location? @relation(fields: [locationId], references: [id])
 
   @@index([createdAt])
   @@map("chat_messages")

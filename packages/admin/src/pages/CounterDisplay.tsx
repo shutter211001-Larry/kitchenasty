@@ -264,40 +264,37 @@ export default function CounterDisplay() {
       setIsConnected(false);
     });
 
-    socket.on('order:new', (order: CounterOrder) => {
-      setOrders(prev => {
-        if (prev.some(o => o.id === order.id)) return prev;
-        if (localStorage.getItem('cds_enableSound') !== 'false') {
-          playNotificationSound();
-        }
-        setLastRefresh(new Date());
-        return [order, ...prev];
-      });
+    socket.on('order:new', () => {
+      fetchOrders(true);
     });
 
-    socket.on('order:statusUpdate', (order: CounterOrder) => {
-      setOrders(prev => {
-        if (!COUNTER_STATUSES.includes(order.status)) {
-          return prev.filter(o => o.id !== order.id);
-        }
-        const exists = prev.some(o => o.id === order.id);
-        if (!exists) {
-          if (localStorage.getItem('cds_enableSound') !== 'false') {
-            playNotificationSound();
-          }
-          setLastRefresh(new Date());
-          return [order, ...prev];
-        }
-        setLastRefresh(new Date());
-        return prev.map(o => o.id === order.id ? { ...o, ...order } : o);
-      });
+    socket.on('order:statusUpdate', () => {
+      fetchOrders(true);
     });
 
     return () => {
       socket.emit('leave:kitchen', selectedLocationId ? { locationId: selectedLocationId } : undefined);
       socket.disconnect();
     };
-  }, [selectedLocationId]);
+  }, [selectedLocationId, fetchOrders]);
+
+  // AudioContext user gesture unlock
+  useEffect(() => {
+    const unlockAudio = () => {
+      const ctx = getAudioContext();
+      if (ctx?.state === 'suspended') {
+        ctx.resume().catch(() => {});
+      }
+      document.removeEventListener('click', unlockAudio);
+      document.removeEventListener('touchstart', unlockAudio);
+    };
+    document.addEventListener('click', unlockAudio);
+    document.addEventListener('touchstart', unlockAudio);
+    return () => {
+      document.removeEventListener('click', unlockAudio);
+      document.removeEventListener('touchstart', unlockAudio);
+    };
+  }, []);
 
   const handleStatusUpdate = async (orderId: string, newStatus: string) => {
     setUpdating(orderId);

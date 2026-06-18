@@ -66,12 +66,20 @@ export function initSocket(httpServer: HttpServer): Server {
     });
 
     // Join chat room for admins
-    socket.on('join:chat', () => {
-      socket.join('admin:chat');
+    socket.on('join:chat', (data?: { locationId?: string }) => {
+      if (data?.locationId && data.locationId !== 'global') {
+        socket.join(`admin:chat:${data.locationId}`);
+      } else {
+        socket.join('admin:chat:global');
+      }
     });
 
-    socket.on('leave:chat', () => {
-      socket.leave('admin:chat');
+    socket.on('leave:chat', (data?: { locationId?: string }) => {
+      if (data?.locationId && data.locationId !== 'global') {
+        socket.leave(`admin:chat:${data.locationId}`);
+      } else {
+        socket.leave('admin:chat:global');
+      }
     });
   });
 
@@ -159,7 +167,8 @@ export function emitNewOrder(order: {
   io.to('kitchen').emit('order:new', order);
 }
 
-export function emitChatMessage(message: any): void {
+export function emitChatMessage(message: any, locationId: string = 'global'): void {
   if (!io) return;
-  io.to('admin:chat').emit('chat:newMessage', message);
+  const room = locationId === 'global' ? 'admin:chat:global' : `admin:chat:${locationId}`;
+  io.to(room).emit('chat:newMessage', message);
 }
