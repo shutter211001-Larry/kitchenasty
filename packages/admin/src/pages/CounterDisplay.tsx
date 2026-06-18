@@ -50,13 +50,27 @@ const NEXT_ACTION: Record<string, string> = {
   PREPARING: '製作完成',
 };
 
+let sharedAudioCtx: AudioContext | null = null;
+
+const getAudioContext = (): AudioContext | null => {
+  if (typeof window === 'undefined') return null;
+  if (!sharedAudioCtx) {
+    const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+    if (AudioCtx) {
+      sharedAudioCtx = new AudioCtx();
+    }
+  }
+  return sharedAudioCtx;
+};
+
 const playNotificationSound = () => {
   try {
-    const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-    if (!AudioCtx) return;
-    const context = new AudioCtx();
+    const context = getAudioContext();
+    if (!context) return;
     if (context.state === 'suspended') {
-      context.resume();
+      context.resume().catch((err) => {
+        console.warn('Failed to resume AudioContext during play:', err);
+      });
     }
     
     const playNote = (frequency: number, startTime: number, duration: number) => {
@@ -104,6 +118,34 @@ export default function CounterDisplay() {
     return localStorage.getItem('cds_enableSound') !== 'false';
   });
 
+  useEffect(() => {
+    const unlockAudio = () => {
+      const context = getAudioContext();
+      if (context && context.state === 'suspended') {
+        context.resume().then(() => {
+          console.log('AudioContext unlocked successfully');
+          cleanup();
+        }).catch((err) => {
+          console.warn('Failed to unlock AudioContext:', err);
+        });
+      } else if (context && context.state === 'running') {
+        cleanup();
+      }
+    };
+
+    const cleanup = () => {
+      window.removeEventListener('click', unlockAudio);
+      window.removeEventListener('keydown', unlockAudio);
+      window.removeEventListener('touchstart', unlockAudio);
+    };
+
+    window.addEventListener('click', unlockAudio);
+    window.addEventListener('keydown', unlockAudio);
+    window.addEventListener('touchstart', unlockAudio);
+
+    return cleanup;
+  }, []);
+
   const toggleExpand = (orderId: string) => {
     setExpandedOrders((prev) => ({ ...prev, [orderId]: !prev[orderId] }));
   };
@@ -147,15 +189,31 @@ export default function CounterDisplay() {
       .catch(err => console.error('Failed to fetch locations:', err));
   }, []);
 
-  const fetchOrders = useCallback(() => {
+  const fetchOrders = useCallback((playNotification = false) => {
     const statuses = COUNTER_STATUSES.join(',');
     const locParam = selectedLocationId ? `&locationId=${selectedLocationId}` : '';
     api.get<{ data: CounterOrder[] }>(`/orders?limit=100&includeItems=true&status=${statuses}${locParam}`)
       .then((res) => {
-        setOrders(res.data);
+        if (playNotification && localStorage.getItem('cds_enableSound') !== 'false') {
+          setOrders((prev) => {
+            const prevIds = new Set(prev.map(o => o.id));
+            const hasNew = res.data.some(o => !prevIds.has(o.id));
+            if (hasNew) {
+              playNotificationSound();
+            }
+            return res.data;
+          });
+        } else {
+          setOrders(res.data);
+        }
+        setIsConnected(true);
+        setSocketError(null);
         setLastRefresh(new Date());
       })
-      .catch(() => { })
+      .catch((err) => {
+        setIsConnected(false);
+        setSocketError(err.message || '連線錯誤');
+      })
       .finally(() => setLoading(false));
   }, [selectedLocationId]);
 
@@ -179,51 +237,67 @@ export default function CounterDisplay() {
     }
   }, [fetchOrders]);
 
+  // Setup Socket.io for real-time updates
   useEffect(() => {
-    const apiBase = (import.meta.env.VITE_API_URL || '').replace(/\/api$/, '').replace(/\/$/, '');
-    const socketUrl = apiBase || window.location.origin;
+    const SOCKET_URL = import.meta.env.VITE_API_URL || '';
+    const token = localStorage.getItem('token');
     
-    const s = io(socketUrl, { 
-      path: '/socket.io', 
-      transports: ['polling', 'websocket'],
-      reconnectionAttempts: 10,
-      timeout: 20000,
+    const socket = io(SOCKET_URL, {
+      path: '/socket.io',
+      transports: ['websocket', 'polling'],
+      auth: { token }
     });
-    
-    setSocket(s);
 
-    s.on('connect', () => {
+    socket.on('connect', () => {
       setIsConnected(true);
       setSocketError(null);
-      s.emit('join:kitchen', { locationId: selectedLocationId });
+      socket.emit('join:kitchen', selectedLocationId ? { locationId: selectedLocationId } : undefined);
     });
 
-    s.on('disconnect', () => setIsConnected(false));
-    s.on('connect_error', (err) => {
+    socket.on('connect_error', (err) => {
       setIsConnected(false);
-      setSocketError(err.message);
+      setSocketError('連線錯誤');
+      console.error('Socket connect error:', err);
     });
 
-    s.on('order:new', () => {
-      fetchOrders();
-      if (localStorage.getItem('cds_enableSound') !== 'false') {
-        playNotificationSound();
-      }
+    socket.on('disconnect', () => {
+      setIsConnected(false);
     });
-    s.on('order:statusUpdate', (data: { id: string; status: string; paymentStatus?: string | null }) => {
-      setOrders((prev) => {
-        if (!COUNTER_STATUSES.includes(data.status)) {
-          return prev.filter((o) => o.id !== data.id);
+
+    socket.on('order:new', (order: CounterOrder) => {
+      setOrders(prev => {
+        if (prev.some(o => o.id === order.id)) return prev;
+        if (localStorage.getItem('cds_enableSound') !== 'false') {
+          playNotificationSound();
         }
-        return prev.map((o) => o.id === data.id ? { ...o, status: data.status, paymentStatus: data.paymentStatus !== undefined ? data.paymentStatus : o.paymentStatus } : o);
+        setLastRefresh(new Date());
+        return [order, ...prev];
+      });
+    });
+
+    socket.on('order:statusUpdate', (order: CounterOrder) => {
+      setOrders(prev => {
+        if (!COUNTER_STATUSES.includes(order.status)) {
+          return prev.filter(o => o.id !== order.id);
+        }
+        const exists = prev.some(o => o.id === order.id);
+        if (!exists) {
+          if (localStorage.getItem('cds_enableSound') !== 'false') {
+            playNotificationSound();
+          }
+          setLastRefresh(new Date());
+          return [order, ...prev];
+        }
+        setLastRefresh(new Date());
+        return prev.map(o => o.id === order.id ? { ...o, ...order } : o);
       });
     });
 
     return () => {
-      s.emit('leave:kitchen', { locationId: selectedLocationId });
-      s.disconnect();
+      socket.emit('leave:kitchen', selectedLocationId ? { locationId: selectedLocationId } : undefined);
+      socket.disconnect();
     };
-  }, [fetchOrders, selectedLocationId]);
+  }, [selectedLocationId]);
 
   const handleStatusUpdate = async (orderId: string, newStatus: string) => {
     setUpdating(orderId);
@@ -345,7 +419,7 @@ export default function CounterDisplay() {
           >
             <span>{enableSound ? '🔊 聲音開啟' : '🔇 聲音關閉'}</span>
           </button>
-          <button onClick={fetchOrders} className="bg-purple-800 hover:bg-purple-700 px-3 py-1.5 rounded transition-colors">
+          <button onClick={() => fetchOrders()} className="bg-purple-800 hover:bg-purple-700 px-3 py-1.5 rounded transition-colors">
             重新整理
           </button>
         </div>

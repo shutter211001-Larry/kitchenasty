@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext.js';
+import AdminChatWidget from './AdminChatWidget';
 
 type Role = 'SUPER_ADMIN' | 'MANAGER' | 'STAFF';
 
@@ -377,6 +378,9 @@ export default function AdminLayout({ children, onLogout }: { children: React.Re
           </div>
         </header>
         <main className="flex-1 p-6">{children}</main>
+        
+        {/* Chat Widget */}
+        {user && <AdminChatWidget />}
       </div>
     </div>
   );

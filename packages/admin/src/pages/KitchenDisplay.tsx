@@ -50,13 +50,27 @@ const NEXT_ACTION: Record<string, string> = {
   PREPARING: '製作完成',
 };
 
+let sharedAudioCtx: AudioContext | null = null;
+
+const getAudioContext = (): AudioContext | null => {
+  if (typeof window === 'undefined') return null;
+  if (!sharedAudioCtx) {
+    const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+    if (AudioCtx) {
+      sharedAudioCtx = new AudioCtx();
+    }
+  }
+  return sharedAudioCtx;
+};
+
 const playNotificationSound = () => {
   try {
-    const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-    if (!AudioCtx) return;
-    const context = new AudioCtx();
+    const context = getAudioContext();
+    if (!context) return;
     if (context.state === 'suspended') {
-      context.resume();
+      context.resume().catch((err) => {
+        console.warn('Failed to resume AudioContext during play:', err);
+      });
     }
     
     const playNote = (frequency: number, startTime: number, duration: number) => {
@@ -102,6 +116,34 @@ export default function KitchenDisplay() {
   const [enableSound, setEnableSound] = useState<boolean>(() => {
     return localStorage.getItem('kds_enableSound') !== 'false';
   });
+
+  useEffect(() => {
+    const unlockAudio = () => {
+      const context = getAudioContext();
+      if (context && context.state === 'suspended') {
+        context.resume().then(() => {
+          console.log('AudioContext unlocked successfully');
+          cleanup();
+        }).catch((err) => {
+          console.warn('Failed to unlock AudioContext:', err);
+        });
+      } else if (context && context.state === 'running') {
+        cleanup();
+      }
+    };
+
+    const cleanup = () => {
+      window.removeEventListener('click', unlockAudio);
+      window.removeEventListener('keydown', unlockAudio);
+      window.removeEventListener('touchstart', unlockAudio);
+    };
+
+    window.addEventListener('click', unlockAudio);
+    window.addEventListener('keydown', unlockAudio);
+    window.addEventListener('touchstart', unlockAudio);
+
+    return cleanup;
+  }, []);
 
   const toggleExpand = (orderId: string) => {
     setExpandedOrders((prev) => ({ ...prev, [orderId]: !prev[orderId] }));
@@ -153,15 +195,31 @@ export default function KitchenDisplay() {
     }
   }, []);
 
-  const fetchOrders = useCallback(() => {
+  const fetchOrders = useCallback((playNotification = false) => {
     const statuses = KITCHEN_STATUSES.join(',');
     const locParam = selectedLocationId ? `&locationId=${selectedLocationId}` : '';
     api.get<{ data: KitchenOrder[] }>(`/orders?limit=100&includeItems=true&status=${statuses}${locParam}`)
       .then((res) => {
-        setOrders(res.data);
+        if (playNotification && localStorage.getItem('kds_enableSound') !== 'false') {
+          setOrders((prev) => {
+            const prevIds = new Set(prev.map(o => o.id));
+            const hasNew = res.data.some(o => !prevIds.has(o.id));
+            if (hasNew) {
+              playNotificationSound();
+            }
+            return res.data;
+          });
+        } else {
+          setOrders(res.data);
+        }
+        setIsConnected(true);
+        setSocketError(null);
         setLastRefresh(new Date());
       })
-      .catch(() => { })
+      .catch((err) => {
+        setIsConnected(false);
+        setSocketError(err.message || '連線錯誤');
+      })
       .finally(() => setLoading(false));
   }, [selectedLocationId]);
 
@@ -169,61 +227,67 @@ export default function KitchenDisplay() {
     fetchOrders();
   }, [fetchOrders]);
 
-  // Socket.IO connection for real-time updates
+  // Setup Socket.io for real-time updates
   useEffect(() => {
-    const apiBase = (import.meta.env.VITE_API_URL || '').replace(/\/api$/, '').replace(/\/$/, '');
-    const socketUrl = apiBase || window.location.origin;
+    const SOCKET_URL = import.meta.env.VITE_API_URL || '';
+    const token = localStorage.getItem('token');
     
-    console.log('Attempting socket connection to:', socketUrl, 'with locationId:', selectedLocationId);
-    
-    const s = io(socketUrl, { 
-      path: '/socket.io', 
-      transports: ['polling', 'websocket'],
-      reconnectionAttempts: 10,
-      timeout: 20000,
+    const socket = io(SOCKET_URL, {
+      path: '/socket.io',
+      transports: ['websocket', 'polling'],
+      auth: { token }
     });
-    
-    setSocket(s);
 
-    s.on('connect', () => {
-      console.log('Socket connected successfully');
+    socket.on('connect', () => {
       setIsConnected(true);
       setSocketError(null);
-      s.emit('join:kitchen', { locationId: selectedLocationId });
+      socket.emit('join:kitchen', selectedLocationId ? { locationId: selectedLocationId } : undefined);
     });
 
-    s.on('disconnect', () => {
-      console.log('Socket disconnected');
+    socket.on('connect_error', (err) => {
+      setIsConnected(false);
+      setSocketError('連線錯誤');
+      console.error('Socket connect error:', err);
+    });
+
+    socket.on('disconnect', () => {
       setIsConnected(false);
     });
 
-    s.on('connect_error', (err) => {
-      console.error('Socket connection error:', err);
-      setIsConnected(false);
-      setSocketError(err.message);
-    });
-
-    s.on('order:new', () => {
-      fetchOrders();
-      if (localStorage.getItem('kds_enableSound') !== 'false') {
-        playNotificationSound();
-      }
-    });
-
-    s.on('order:statusUpdate', (data: { id: string; status: string; paymentStatus?: string | null }) => {
-      setOrders((prev) => {
-        if (!KITCHEN_STATUSES.includes(data.status)) {
-          return prev.filter((o) => o.id !== data.id);
+    socket.on('order:new', (order: KitchenOrder) => {
+      setOrders(prev => {
+        if (prev.some(o => o.id === order.id)) return prev;
+        if (localStorage.getItem('kds_enableSound') !== 'false') {
+          playNotificationSound();
         }
-        return prev.map((o) => o.id === data.id ? { ...o, status: data.status, paymentStatus: data.paymentStatus !== undefined ? data.paymentStatus : o.paymentStatus } : o);
+        setLastRefresh(new Date());
+        return [order, ...prev];
+      });
+    });
+
+    socket.on('order:statusUpdate', (order: KitchenOrder) => {
+      setOrders(prev => {
+        if (!KITCHEN_STATUSES.includes(order.status)) {
+          return prev.filter(o => o.id !== order.id);
+        }
+        const exists = prev.some(o => o.id === order.id);
+        if (!exists) {
+          if (localStorage.getItem('kds_enableSound') !== 'false') {
+            playNotificationSound();
+          }
+          setLastRefresh(new Date());
+          return [order, ...prev];
+        }
+        setLastRefresh(new Date());
+        return prev.map(o => o.id === order.id ? { ...o, ...order } : o);
       });
     });
 
     return () => {
-      s.emit('leave:kitchen', { locationId: selectedLocationId });
-      s.disconnect();
+      socket.emit('leave:kitchen', selectedLocationId ? { locationId: selectedLocationId } : undefined);
+      socket.disconnect();
     };
-  }, [fetchOrders, selectedLocationId]);
+  }, [selectedLocationId]);
 
   const handleStatusUpdate = async (orderId: string, newStatus: string) => {
     setUpdating(orderId);
@@ -331,7 +395,7 @@ export default function KitchenDisplay() {
           <div className="flex items-center gap-2" role="status">
             <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-400' : 'bg-red-400'}`} />
             <span className="text-xs text-gray-400">
-              {isConnected ? '即時連線' : socketError ? `連線中斷 (${socketError})` : '連線中斷'}
+              {isConnected ? '即時連線中' : socketError ? `連線中斷 (${socketError})` : '連線中斷'}
             </span>
           </div>
         </div>
@@ -352,7 +416,7 @@ export default function KitchenDisplay() {
             <span>{enableSound ? '🔊 聲音開啟' : '🔇 聲音關閉'}</span>
           </button>
           <button
-            onClick={fetchOrders}
+            onClick={() => fetchOrders()}
             className="text-xs bg-gray-700 hover:bg-gray-600 px-3 py-1.5 rounded transition-colors"
             aria-label="Refresh orders"
           >

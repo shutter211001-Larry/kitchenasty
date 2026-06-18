@@ -64,6 +64,15 @@ export function initSocket(httpServer: HttpServer): Server {
         socket.leave('kitchen');
       }
     });
+
+    // Join chat room for admins
+    socket.on('join:chat', () => {
+      socket.join('admin:chat');
+    });
+
+    socket.on('leave:chat', () => {
+      socket.leave('admin:chat');
+    });
   });
 
   return io;
@@ -148,4 +157,9 @@ export function emitNewOrder(order: {
     io.to(`kitchen:${order.locationId}`).emit('order:new', order);
   }
   io.to('kitchen').emit('order:new', order);
+}
+
+export function emitChatMessage(message: any): void {
+  if (!io) return;
+  io.to('admin:chat').emit('chat:newMessage', message);
 }
