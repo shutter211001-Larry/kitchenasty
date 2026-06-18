@@ -16,6 +16,11 @@ interface ChatMessage {
   };
 }
 
+interface Location {
+  id: string;
+  name: string;
+}
+
 export default function AdminChatWidget() {
   const { user, token } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
@@ -25,10 +30,37 @@ export default function AdminChatWidget() {
   const socketRef = useRef<Socket | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Fetch initial history
+  const [locations, setLocations] = useState<Location[]>([]);
+  const [activeLocationId, setActiveLocationId] = useState<string>('global');
+
+  // Set initial location for STAFF
+  useEffect(() => {
+    if (user?.role === 'STAFF' && user.locationId) {
+      setActiveLocationId(user.locationId);
+    }
+  }, [user]);
+
+  // Fetch locations for SUPER_ADMIN / MANAGER
+  useEffect(() => {
+    if (!token || user?.role === 'STAFF') return;
+    fetch('/api/locations?limit=100', {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+      .then(r => r.json())
+      .then(res => {
+        if (res.success && Array.isArray(res.data)) {
+          setLocations(res.data);
+        }
+      })
+      .catch(err => console.error('Failed to fetch locations', err));
+  }, [token, user]);
+
+  // Fetch history when activeLocationId changes
   useEffect(() => {
     if (!token) return;
-    fetch('/api/chat/messages', {
+    const url = activeLocationId === 'global' ? '/api/chat/messages' : `/api/chat/messages?locationId=${activeLocationId}`;
+    
+    fetch(url, {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(res => res.json())
@@ -39,7 +71,7 @@ export default function AdminChatWidget() {
         }
       })
       .catch(err => console.error('Failed to fetch chat messages', err));
-  }, [token]);
+  }, [token, activeLocationId]);
 
   // Setup Socket.io
   useEffect(() => {
@@ -54,7 +86,7 @@ export default function AdminChatWidget() {
     socketRef.current = socket;
 
     socket.on('connect', () => {
-      socket.emit('join:chat');
+      socket.emit('join:chat', { locationId: activeLocationId });
     });
 
     socket.on('chat:newMessage', (msg: ChatMessage) => {
@@ -72,10 +104,10 @@ export default function AdminChatWidget() {
     });
 
     return () => {
-      socket.emit('leave:chat');
+      socket.emit('leave:chat', { locationId: activeLocationId });
       socket.disconnect();
     };
-  }, [token, user]);
+  }, [token, user, activeLocationId]);
 
   useEffect(() => {
     if (isOpen) {
@@ -95,7 +127,7 @@ export default function AdminChatWidget() {
     if (!input.trim() || !token) return;
 
     const currentInput = input.trim();
-    setInput(''); // Clear immediately for better UX
+    setInput('');
 
     try {
       const res = await fetch('/api/chat/messages', {
@@ -104,7 +136,10 @@ export default function AdminChatWidget() {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`
         },
-        body: JSON.stringify({ content: currentInput })
+        body: JSON.stringify({ 
+          content: currentInput,
+          locationId: activeLocationId
+        })
       });
       const data = await res.json();
       if (!data.success) {
@@ -124,7 +159,24 @@ export default function AdminChatWidget() {
         <div className="w-80 h-96 bg-white rounded-2xl shadow-2xl border border-gray-200 flex flex-col overflow-hidden mb-4 transition-all duration-300">
           {/* Header */}
           <div className="bg-primary-600 text-white px-4 py-3 flex justify-between items-center">
-            <h3 className="font-semibold text-sm">內部管理員聊天室</h3>
+            <div className="flex flex-col">
+              <h3 className="font-semibold text-sm">內部管理員聊天室</h3>
+              {(user.role === 'SUPER_ADMIN' || user.role === 'MANAGER') && (
+                <select
+                  value={activeLocationId}
+                  onChange={(e) => setActiveLocationId(e.target.value)}
+                  className="mt-1 text-xs bg-primary-700 text-white border-transparent rounded px-1 py-0.5 focus:ring-0 cursor-pointer max-w-[150px]"
+                >
+                  <option value="global">全域廣播</option>
+                  {locations.map(loc => (
+                    <option key={loc.id} value={loc.id}>{loc.name}</option>
+                  ))}
+                </select>
+              )}
+              {user.role === 'STAFF' && user.locationId && (
+                <span className="text-xs text-primary-200 mt-0.5">專屬分店頻道</span>
+              )}
+            </div>
             <button onClick={() => setIsOpen(false)} className="text-primary-100 hover:text-white">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
             </button>

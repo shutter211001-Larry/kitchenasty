@@ -229,7 +229,7 @@ export async function getMe(req: Request, res: Response): Promise<void> {
   if (req.user.type === 'staff') {
     const user = await prisma.user.findUnique({
       where: { id: req.user.id },
-      select: { id: true, email: true, name: true, role: true, phone: true, avatar: true, lineUserId: true, lineDisplayName: true },
+      select: { id: true, email: true, name: true, role: true, phone: true, avatar: true, lineUserId: true, lineDisplayName: true, locationId: true },
     });
     if (!user) {
       res.status(401).json({ success: false, error: 'User not found' });
