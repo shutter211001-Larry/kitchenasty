@@ -217,7 +217,7 @@ export async function inviteStaff(req: Request, res: Response): Promise<void> {
 
   // Send invitation email
   const adminUrl = process.env.ADMIN_URL || 'http://localhost:5173';
-  const inviteLink = `${adminUrl}/accept-invite?token=${token}`;
+  const inviteLink = `${adminUrl.replace(/\/+$/, '')}/accept-invite?token=${token}`;
   const emailContent = staffInvitationEmail({ email, role: role || 'STAFF', inviteLink });
   await sendEmail({ to: email, ...emailContent });
 
