@@ -92,6 +92,15 @@ export default function TableList() {
     }
   };
 
+  const copyTableUrl = (tableName: string) => {
+    // 優先使用 VITE_STOREFRONT_URL，否則嘗試將開發環境 port 5174 換成 5173
+    const baseUrl = (import.meta.env.VITE_STOREFRONT_URL || window.location.origin.replace('5174', '5173')).replace(/\/$/, '');
+    const url = `${baseUrl}/?table=${encodeURIComponent(tableName)}`;
+    navigator.clipboard.writeText(url)
+      .then(() => alert(`已複製桌號 ${tableName} 的專屬網址：\n${url}`))
+      .catch(() => alert('複製失敗，請手動複製網址：\n' + url));
+  };
+
   if (loading) return <p className="text-gray-500">載入桌位資料中...</p>;
   if (error) return <p className="text-red-600">錯誤: {error}</p>;
 
@@ -234,6 +243,9 @@ export default function TableList() {
                     {table._count.reservations}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm space-x-3">
+                    <button onClick={() => copyTableUrl(table.name)} className="text-green-600 hover:text-green-900 font-medium" aria-label={`複製網址 ${table.name}`}>
+                      複製網址
+                    </button>
                     <button onClick={() => openEditForm(table)} className="text-primary-600 hover:text-primary-900 font-medium" aria-label={`編輯桌位 ${table.name}`}>
                       編輯
                     </button>
