@@ -28,6 +28,7 @@ interface OrderDetail {
   createdAt: string;
   customer: { id: string; name: string; email: string; phone: string | null } | null;
   location: { id: string; name: string };
+  table?: { id: string; name: string } | null;
   items: OrderItem[];
   isRemote?: boolean;
   distance?: number | null;
@@ -396,7 +397,14 @@ export default function OrderDetailPage() {
             <dl className="space-y-3 text-sm">
               <div>
                 <dt className="text-gray-500">{t('orders.type')}</dt>
-                <dd className="font-medium text-gray-900">{order.orderType}</dd>
+                <dd className="font-medium text-gray-900 flex items-center gap-2">
+                  <span>{order.orderType}</span>
+                  {order.table && (
+                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-amber-100 text-amber-800 border border-amber-200">
+                      🍽️ 桌號: {order.table.name}
+                    </span>
+                  )}
+                </dd>
               </div>
               {order.isRemote !== undefined && (
                 <div>

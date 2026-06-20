@@ -16,9 +16,8 @@ type PaymentMethod = 'cash' | 'stripe' | 'paypal';
 // Default tax rate fallback if settings not loaded
 const DEFAULT_TAX_RATE = 0;
 
-export default function Checkout() {
   const { t, i18n } = useTranslation();
-  const { items, subtotal, clear } = useCart();
+  const { items, clear, tableName, setTableName, groupSessionId, groupPin, clientId } = useCart();
   const { user, token } = useAuth();
   const { settings } = useTheme();
   const { addOrder } = useRecentOrders();
@@ -105,10 +104,17 @@ export default function Checkout() {
   const loyaltyRedeemRate = orderSettings?.loyaltyRedeemRate ?? 100;
   const loyaltyDiscount = loyaltyRedeem / loyaltyRedeemRate;
 
+  const myItems = groupSessionId ? items.filter(i => i.clientId === clientId) : items;
+  const subtotal = myItems.reduce((sum, item) => {
+    if (item.redeemedWithPoints) return sum;
+    const optionsTotal = item.options.reduce((s, o) => s + o.priceModifier, 0);
+    return sum + (item.price + optionsTotal) * item.quantity;
+  }, 0);
+
   let currentTaxRate = orderSettings?.taxRate ?? DEFAULT_TAX_RATE;
   if (isNaN(currentTaxRate)) currentTaxRate = 0;
   const tax = subtotal * (currentTaxRate / 100);
-  const isOnlyFrozenItems = items.length > 0 && items.every(item => item.isFrozenDelivery === true);
+  const isOnlyFrozenItems = myItems.length > 0 && myItems.every(item => item.isFrozenDelivery === true);
   const frozenDeliveryEnabled = orderSettings?.frozenDeliveryEnabled ?? false;
   const showFrozenDeliveryOption = isOnlyFrozenItems && frozenDeliveryEnabled;
 
@@ -127,7 +133,10 @@ export default function Checkout() {
 
   // Set defaults based on settings
   useEffect(() => {
-    if (orderSettings) {
+    if (tableName) {
+      setOrderType('pickup');
+      setLastCommonOrderType('pickup');
+    } else if (orderSettings) {
       if (orderSettings.deliveryEnabled && !orderSettings.pickupEnabled) {
         setOrderType('delivery');
         setLastCommonOrderType('delivery');
@@ -136,7 +145,7 @@ export default function Checkout() {
         setLastCommonOrderType('pickup');
       }
     }
-  }, [orderSettings]);
+  }, [orderSettings, tableName]);
 
   // We explicitly DO NOT auto-select payment method to force user choice
   useEffect(() => {
@@ -291,7 +300,7 @@ export default function Checkout() {
     }
 
     try {
-      const orderItems = items.map((item) => ({
+      const orderItems = myItems.map((item) => ({
         menuItemId: item.menuItemId,
         quantity: item.quantity,
         comment: item.comment,
@@ -313,6 +322,13 @@ export default function Checkout() {
         couponCode: couponCode || undefined,
         honeypot: honeypot || undefined,
       };
+
+      if (tableName) {
+        body.tableName = tableName;
+        if (groupSessionId) {
+          body.groupSessionId = groupSessionId;
+        }
+      }
 
       // Capture location (optional, won't block if fails)
       try {
@@ -432,8 +448,35 @@ export default function Checkout() {
             <div className="bg-red-50 text-red-700 p-4 rounded-lg text-sm">{error}</div>
           )}
 
+          {/* Table Banner */}
+          {tableName && (
+            <div className="bg-primary-50 border border-primary-200 text-primary-800 p-6 rounded-xl shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h2 className="font-bold text-lg flex items-center gap-2">
+                  <span>🍽️</span>
+                  <span>{t('checkout.dineInTable') || '內用桌號'} : {tableName}</span>
+                </h2>
+                {groupSessionId && groupPin ? (
+                  <p className="text-sm mt-1 opacity-90 font-medium">
+                    同桌代碼: <span className="text-lg font-black tracking-widest bg-white/50 px-2 py-0.5 rounded">{groupPin}</span>
+                    <span className="block mt-1 text-xs opacity-75">輸入代碼一起點餐</span>
+                  </p>
+                ) : (
+                  <p className="text-sm mt-1 opacity-90 font-medium">{t('checkout.dineInTableDesc') || '您的餐點將會為您準備於此桌位'}</p>
+                )}
+              </div>
+              <button 
+                type="button" 
+                onClick={() => setTableName(null)}
+                className="text-sm font-bold bg-white px-4 py-2 rounded-lg border border-primary-200 text-primary-700 hover:bg-primary-100 transition-colors whitespace-nowrap shadow-sm"
+              >
+                {t('checkout.clearTable') || '改為一般外帶/外送'}
+              </button>
+            </div>
+          )}
+
           {/* Order type */}
-          {availableTypes.length > 1 && (
+          {!tableName && availableTypes.length > 1 && (
             <div className="surface-card rounded-xl shadow-sm border p-6">
               <h2 className="text-lg font-semibold text-main mb-4">{t('checkout.orderType')}</h2>
               <div className="flex gap-3">
@@ -1066,23 +1109,44 @@ export default function Checkout() {
           <div className="surface-card rounded-xl shadow-sm border p-6 sticky top-24">
             <h2 className="text-lg font-semibold text-main mb-4">{t('checkout.orderSummary')}</h2>
 
-             <div className="space-y-3 mb-4">
+            <div className="space-y-3 mb-4">
               {items.map((item) => {
                 const optionsTotal = item.options.reduce((s, o) => s + o.priceModifier, 0);
+                const isMine = item.clientId === clientId || !groupSessionId;
                 return (
-                  <div key={item.id} className="flex justify-between text-sm">
-                    <div>
-                      <span className="text-hint mr-1">{item.quantity}x</span>
-                      <span className="text-sub">
-                        {getTranslated(item.name, item.nameTranslations, i18n.language)}
-                      </span>
+                  <div key={item.id} className={`flex justify-between text-sm ${!isMine ? 'opacity-40 grayscale' : ''}`}>
+                    <div className="flex gap-2">
+                      {groupSessionId && (
+                        <div className="mt-0.5 flex-shrink-0">
+                          <input 
+                            type="checkbox" 
+                            checked={isMine} 
+                            readOnly 
+                            className="accent-primary-600 w-4 h-4 cursor-not-allowed"
+                            title={isMine ? "這是您點的餐點" : `由 ${item.guestName || '同行友人'} 點的餐點`}
+                          />
+                        </div>
+                      )}
+                      <div className="flex flex-col">
+                        <span className="font-medium">
+                          <span className="text-hint mr-1">{item.quantity}x</span>
+                          <span className="text-sub">
+                            {getTranslated(item.nameTranslations, item.name, i18n.language)}
+                          </span>
+                          {!isMine && (
+                            <span className="ml-2 text-[10px] font-bold bg-gray-200 text-gray-600 px-1.5 py-0.5 rounded">
+                              {item.guestName || '同行友人'}
+                            </span>
+                          )}
+                        </span>
                       {item.options.length > 0 && (
                         <p className="text-xs text-hint ml-5">
                           {item.options.map((o) => getTranslated(o.valueName, o.valueNameTranslations, i18n.language)).join(', ')}
                         </p>
                       )}
                     </div>
-                    <span className="text-main font-medium">
+                  </div>
+                  <span className="text-main font-medium">
                       ${((item.price + optionsTotal) * item.quantity).toFixed(2)}
                     </span>
                   </div>

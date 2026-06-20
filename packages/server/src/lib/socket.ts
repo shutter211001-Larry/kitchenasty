@@ -81,6 +81,15 @@ export function initSocket(httpServer: HttpServer): Server {
         socket.leave('admin:chat:global');
       }
     });
+
+    // Join group order room for table sharing
+    socket.on('join:group-order', (sessionId: string) => {
+      socket.join(`group-order:${sessionId}`);
+    });
+
+    socket.on('leave:group-order', (sessionId: string) => {
+      socket.leave(`group-order:${sessionId}`);
+    });
   });
 
   return io;

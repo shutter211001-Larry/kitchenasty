@@ -344,6 +344,8 @@ const createOrderSchema = z.object({
   userLat: z.number().optional(),
   userLon: z.number().optional(),
   locationId: z.string().optional(),
+  tableName: z.string().optional(),
+  groupSessionId: z.string().optional(),
   honeypot: z.string().optional(),
 });
 
@@ -364,7 +366,7 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
   const { 
     orderType, items, comment, scheduledAt, address, 
     guestName, guestEmail, guestPhone, loyaltyPointsRedeem,
-    userLat, userLon, locationId, honeypot, couponCode
+    userLat, userLon, locationId, honeypot, couponCode, tableName, groupSessionId
   } = parsed.data;
 
   // HONEYPOT check: Bots often fill all fields. If this hidden field is filled, reject it silently or with a generic error.
@@ -932,6 +934,19 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
       userLang = code;
     }
   }
+  
+  // Validate table
+  let tableId: string | undefined = undefined;
+  if (tableName && location) {
+    const table = await prisma.table.findFirst({
+      where: { name: tableName, locationId: location.id, isActive: true },
+    });
+    if (!table) {
+      res.status(400).json({ success: false, error: '查無此桌號或桌號已停用' });
+      return;
+    }
+    tableId = table.id;
+  }
 
   const order = await (prisma.order.create as any)({
     data: {
@@ -957,11 +972,14 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
       distance,
       isRemote,
       language: userLang,
+      tableId,
+      groupId: groupSessionId || undefined,
       items: { create: orderItemsData },
     } as any,
     include: {
       items: { include: { options: true, menuItem: { select: { id: true, nameTranslations: true } } } },
       customer: { select: { id: true, name: true, email: true } },
+      table: { select: { id: true, name: true } },
     },
   });
 
@@ -1233,6 +1251,7 @@ export async function listOrders(req: Request, res: Response): Promise<void> {
       include: {
         customer: { select: { id: true, name: true, email: true, phone: true } },
         location: { select: { id: true, name: true } },
+        table: { select: { id: true, name: true } },
         _count: { select: { items: true } },
         ...(includeItems ? { items: { include: { options: true } } } : {}),
       },
@@ -1255,6 +1274,7 @@ export async function getOrder(req: Request<{ id: string }>, res: Response): Pro
     include: {
       customer: { select: { id: true, name: true, email: true, phone: true } },
       location: { select: { id: true, name: true } },
+      table: { select: { id: true, name: true } },
       items: {
         include: {
           menuItem: { select: { id: true, name: true, nameTranslations: true, slug: true } },

@@ -126,6 +126,7 @@ export default defineConfig({
         {
           text: 'Deployment',
           items: [
+            { text: 'Railway (PaaS)', link: '/deployment/railway' },
             { text: 'Docker', link: '/deployment/docker' },
             { text: 'Manual', link: '/deployment/manual' },
             { text: 'CI / CD', link: '/deployment/ci-cd' },

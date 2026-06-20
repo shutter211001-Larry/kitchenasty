@@ -15,6 +15,7 @@ interface Order {
   scheduledAt: string | null;
   customer: { id: string; name: string; email: string } | null;
   location: { id: string; name: string };
+  table?: { id: string; name: string } | null;
   _count: { items: number };
   isRemote?: boolean;
   distance?: number | null;
@@ -345,6 +346,11 @@ export default function OrderList() {
                     <td className="px-4 py-3 font-mono text-xs">
                       <div className="flex flex-col gap-1">
                         <span>{order.orderNumber}</span>
+                        {order.table && (
+                          <span className="inline-flex items-center w-fit px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200">
+                            🍽️ 內用桌號: {order.table.name}
+                          </span>
+                        )}
                         {order.isRemote !== undefined && (
                           <span className={`inline-flex items-center w-fit px-1.5 py-0.5 rounded text-[10px] font-bold ${order.isRemote ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
                             {order.isRemote ? t('orders.remote') : t('orders.onSite')}
@@ -432,7 +438,14 @@ export default function OrderList() {
               <div key={order.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 space-y-3">
                 <div className="flex justify-between items-start">
                   <div className="flex flex-col gap-1">
-                    <span className="font-mono text-xs text-gray-500 font-semibold">#{order.orderNumber}</span>
+                    <span className="font-mono text-xs text-gray-500 font-semibold flex items-center gap-2">
+                      #{order.orderNumber}
+                      {order.table && (
+                        <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200">
+                          🍽️ 桌號: {order.table.name}
+                        </span>
+                      )}
+                    </span>
                     <span className="text-sm font-bold text-gray-900">
                       {order.customer ? order.customer.name : <span className="text-gray-400 font-normal">{t('common.guest') || '訪客'}</span>}
                     </span>

@@ -21,6 +21,7 @@ interface KitchenOrder {
   createdAt: string;
   scheduledAt: string | null;
   customer: { name: string; phone?: string; email?: string } | null;
+  table?: { id: string; name: string } | null;
   guestName?: string;
   guestEmail?: string;
   guestPhone?: string;
@@ -467,6 +468,11 @@ export default function KitchenDisplay() {
                               }`}>
                               {order.orderType === 'DELIVERY' ? t('kitchen.delivery') : t('kitchen.pickup')}
                             </span>
+                            {order.table && (
+                              <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded font-bold bg-amber-100 text-amber-800 border border-amber-200">
+                                🍽️ 桌號: {order.table.name}
+                              </span>
+                            )}
                             <span className="ml-2 text-indigo-600 font-medium">
                               {new Date(order.scheduledAt!).toLocaleString([], { hour: '2-digit', minute: '2-digit' })}
                             </span>
@@ -580,6 +586,11 @@ export default function KitchenDisplay() {
                             }`}>
                             {order.orderType === 'DELIVERY' ? '外送' : '自取'}
                           </span>
+                          {order.table && (
+                            <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200">
+                              🍽️ 桌號: {order.table.name}
+                            </span>
+                          )}
                           {order.isRemote !== undefined && (
                             <span className={`ml-2 text-[10px] px-1.5 py-0.5 rounded font-bold ${order.isRemote ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
                               {order.isRemote ? t('orders.remote') : t('orders.onSite')}
