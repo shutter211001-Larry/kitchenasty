@@ -28,16 +28,19 @@ export default function TableList() {
   const [formCapacity, setFormCapacity] = useState(2);
   const [formActive, setFormActive] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [storefrontUrl, setStorefrontUrl] = useState('');
 
   const fetchTables = () => {
     setLoading(true);
     Promise.all([
       api.get<{ data: LocationInfo }>(`/locations/${locationId}`),
       api.get<{ data: Table[] }>(`/locations/${locationId}/tables`),
+      api.get<{ data: any }>('/settings')
     ])
-      .then(([locRes, tableRes]) => {
+      .then(([locRes, tableRes, settingsRes]) => {
         setLocation(locRes.data);
         setTables(tableRes.data);
+        setStorefrontUrl(settingsRes.data.storefrontUrl || import.meta.env.VITE_STOREFRONT_URL || window.location.origin.replace('5174', '5173'));
         setLoading(false);
       })
       .catch((err) => { setError(err.message); setLoading(false); });
@@ -93,8 +96,7 @@ export default function TableList() {
   };
 
   const copyTableUrl = (tableName: string) => {
-    // 優先使用 VITE_STOREFRONT_URL，否則嘗試將開發環境 port 5174 換成 5173
-    const baseUrl = (import.meta.env.VITE_STOREFRONT_URL || window.location.origin.replace('5174', '5173')).replace(/\/$/, '');
+    const baseUrl = storefrontUrl.replace(/\/$/, '');
     const url = `${baseUrl}/?table=${encodeURIComponent(tableName)}`;
     navigator.clipboard.writeText(url)
       .then(() => alert(`已複製桌號 ${tableName} 的專屬網址：\n${url}`))
