@@ -16,6 +16,7 @@ type PaymentMethod = 'cash' | 'stripe' | 'paypal';
 // Default tax rate fallback if settings not loaded
 const DEFAULT_TAX_RATE = 0;
 
+export default function Checkout() {
   const { t, i18n } = useTranslation();
   const { items, clear, tableName, setTableName, groupSessionId, groupPin, clientId } = useCart();
   const { user, token } = useAuth();
@@ -1131,7 +1132,7 @@ const DEFAULT_TAX_RATE = 0;
                         <span className="font-medium">
                           <span className="text-hint mr-1">{item.quantity}x</span>
                           <span className="text-sub">
-                            {getTranslated(item.nameTranslations, item.name, i18n.language)}
+                            {getTranslated(item.name, item.nameTranslations, i18n.language)}
                           </span>
                           {!isMine && (
                             <span className="ml-2 text-[10px] font-bold bg-gray-200 text-gray-600 px-1.5 py-0.5 rounded">
