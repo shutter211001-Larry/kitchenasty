@@ -5,14 +5,15 @@ import { API_BASE } from '../lib/api.js';
 
 export default function GroupOrderDialog() {
   const { t } = useTranslation();
-  const { tableName, groupSessionId, setGroupSession } = useCart();
+  const { tableName, groupSessionId, groupPin, setGroupSession } = useCart();
   const [isOpen, setIsOpen] = useState(false);
+  const [isJoining, setIsJoining] = useState(false);
   const [pinInput, setPinInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    // Open if there is a tableName but NO groupSessionId
+    // Open bubble by default if there's a table but no session
     if (tableName && !groupSessionId) {
       setIsOpen(true);
     } else {
@@ -78,60 +79,88 @@ export default function GroupOrderDialog() {
     }
   };
 
-  if (!isOpen) return null;
+  if (!tableName) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-sm w-full p-8 space-y-6 transform transition-all">
-        <div className="text-center">
-          <div className="w-16 h-16 bg-primary-100 dark:bg-primary-900/30 text-primary-600 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl shadow-sm">
-            🍽️
+    <div className="fixed bottom-24 left-4 sm:bottom-6 sm:left-6 z-40 animate-in fade-in slide-in-from-bottom-5 duration-300">
+      <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-md shadow-2xl rounded-2xl p-4 border border-gray-100 dark:border-gray-700 w-[240px] transition-all">
+        {/* Header (Always Visible) */}
+        <div 
+          className="flex items-center justify-between cursor-pointer"
+          onClick={() => !groupSessionId && setIsOpen(!isOpen)}
+        >
+          <div className="flex items-center gap-3">
+            <div className="bg-primary-100 text-primary-600 rounded-full w-10 h-10 flex items-center justify-center text-lg shadow-inner">
+              🍽️
+            </div>
+            <div className="font-bold text-gray-900 dark:text-gray-100 flex flex-col">
+              <span className="text-[10px] text-gray-500 dark:text-gray-400 font-medium">內用桌號</span>
+              <span className="text-lg leading-none">{tableName}</span>
+            </div>
           </div>
-          <h2 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">您目前位於桌號 {tableName}</h2>
-          <p className="mt-2 text-gray-500 dark:text-gray-400 text-sm">
-            同桌點餐可以讓同行友人一起加入訂單，大家能看到彼此的餐點，並在結帳時各自挑選自己的餐點結帳。
-          </p>
+          {!groupSessionId && (
+            <button className="text-gray-400 hover:text-gray-600 transition-colors">
+              <svg className={`w-5 h-5 transform transition-transform ${isOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+              </svg>
+            </button>
+          )}
         </div>
-
-        {error && (
-          <div className="p-4 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 text-sm rounded-xl border border-red-100 dark:border-red-800 font-medium text-center">
-            {error}
+        
+        {/* Content (Active Session) */}
+        {groupSessionId && (
+          <div className="mt-3">
+            <div className="bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 px-3 py-2 rounded-xl text-center shadow-inner border border-primary-100/50 dark:border-primary-800/50">
+              <span className="text-[10px] opacity-80 block mb-0.5 font-medium">同桌點餐代碼</span>
+              <span className="text-xl font-black tracking-widest">{groupPin}</span>
+            </div>
           </div>
         )}
 
-        <div className="space-y-5">
-          <button 
-            onClick={handleStartNew}
-            disabled={loading}
-            className="w-full bg-primary-600 text-white py-3.5 rounded-xl font-bold shadow-lg shadow-primary-500/30 hover:bg-primary-700 hover:shadow-primary-500/40 hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:hover:translate-y-0 text-lg"
-          >
-            發起新訂單 (產生代碼)
-          </button>
-
-          <div className="relative flex items-center py-1">
-            <div className="flex-grow border-t border-gray-200 dark:border-gray-700"></div>
-            <span className="flex-shrink-0 mx-4 text-gray-400 font-medium text-sm">或加入同行友人訂單</span>
-            <div className="flex-grow border-t border-gray-200 dark:border-gray-700"></div>
-          </div>
-
-          <div className="flex space-x-3">
-            <input 
-              type="text" 
-              maxLength={4}
-              placeholder="輸入 4 碼"
-              className="flex-1 px-4 py-3 border border-gray-300 rounded-xl dark:bg-gray-700 dark:border-gray-600 dark:text-white text-center text-xl font-black tracking-widest focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-shadow outline-none shadow-inner"
-              value={pinInput}
-              onChange={(e) => setPinInput(e.target.value.replace(/\D/g, ''))}
-            />
+        {/* Content (No Session, Expanded) */}
+        {!groupSessionId && isOpen && (
+          <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700 flex flex-col gap-3 animate-in fade-in zoom-in-95 duration-200">
+            {error && (
+              <div className="p-2 bg-red-50 text-red-700 text-xs rounded-lg font-medium text-center">
+                {error}
+              </div>
+            )}
+            
             <button 
-              onClick={handleJoin}
-              disabled={loading || pinInput.length !== 4}
-              className="px-6 bg-gray-900 text-white dark:bg-gray-600 rounded-xl font-bold shadow-lg hover:bg-gray-800 hover:shadow-xl transition-all disabled:opacity-50 disabled:hover:bg-gray-900"
+              onClick={handleStartNew}
+              disabled={loading}
+              className="w-full bg-primary-600 text-white text-sm font-bold py-2.5 rounded-xl hover:bg-primary-700 transition shadow-md shadow-primary-500/20 disabled:opacity-50"
             >
-              加入
+              產生同桌代碼
             </button>
+            
+            {isJoining ? (
+               <div className="flex gap-2">
+                  <input 
+                    value={pinInput} 
+                    onChange={(e) => setPinInput(e.target.value.replace(/\D/g, ''))} 
+                    className="w-full px-3 py-2 border border-gray-300 rounded-xl dark:bg-gray-700 dark:border-gray-600 dark:text-white text-center font-bold tracking-widest focus:ring-2 focus:ring-primary-500 outline-none text-sm" 
+                    placeholder="輸入4碼" 
+                    maxLength={4}
+                  />
+                  <button 
+                    onClick={handleJoin} 
+                    disabled={loading || pinInput.length !== 4}
+                    className="bg-gray-900 text-white px-4 rounded-xl text-sm font-bold hover:bg-gray-800 disabled:opacity-50 whitespace-nowrap shadow-md"
+                  >
+                    加入
+                  </button>
+               </div>
+            ) : (
+               <button 
+                 onClick={() => setIsJoining(true)} 
+                 className="text-gray-500 text-xs font-medium hover:text-gray-700 transition pb-1"
+               >
+                 或輸入代碼加入訂單
+               </button>
+            )}
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
