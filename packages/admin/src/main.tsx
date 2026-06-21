@@ -20,6 +20,8 @@ import MealtimeList from './pages/MealtimeList.js';
 import TableList from './pages/TableList.js';
 import OrderList from './pages/OrderList.js';
 import OrderCreate from './pages/OrderCreate.js';
+import RecipeList from './pages/RecipeList.js';
+import RecipeForm from './pages/RecipeForm.js';
 import OrderDetailPage from './pages/OrderDetail.js';
 import ReservationList from './pages/ReservationList.js';
 import ReservationDetail from './pages/ReservationDetail.js';
@@ -114,6 +116,11 @@ function AppRoutes() {
         <Route path="/menu/allergens" element={<RequireRole roles={['SUPER_ADMIN', 'MANAGER']}><AllergenList /></RequireRole>} />
         <Route path="/menu/dietary" element={<RequireRole roles={['SUPER_ADMIN', 'MANAGER']}><DietaryPreferenceList /></RequireRole>} />
         <Route path="/menu/mealtimes" element={<RequireRole roles={['SUPER_ADMIN', 'MANAGER']}><MealtimeList /></RequireRole>} />
+        <Route path="/promotions/loyalty" element={<RequireRole roles={['SUPER_ADMIN', 'MANAGER']}><CustomerLoyalty /></RequireRole>} />
+
+        <Route path="/recipes" element={<RequireRole roles={['SUPER_ADMIN', 'MANAGER']}><RecipeList /></RequireRole>} />
+        <Route path="/recipes/new" element={<RequireRole roles={['SUPER_ADMIN', 'MANAGER']}><RecipeForm /></RequireRole>} />
+        <Route path="/recipes/:id" element={<RequireRole roles={['SUPER_ADMIN', 'MANAGER']}><RecipeForm /></RequireRole>} />
         <Route path="/promotions" element={<RequireRole roles={['SUPER_ADMIN', 'MANAGER']}><PromotionsHub /></RequireRole>} />
         <Route path="/promotions/coupons/new" element={<RequireRole roles={['SUPER_ADMIN', 'MANAGER']}><CouponForm /></RequireRole>} />
         <Route path="/promotions/coupons/:id" element={<RequireRole roles={['SUPER_ADMIN', 'MANAGER']}><CouponForm /></RequireRole>} />

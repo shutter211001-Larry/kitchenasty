@@ -51,6 +51,7 @@ model Ingredient {
   inventoryLogs   InventoryLog[]
   unitConversions UnitConversion[]
   allergens       Allergen[]
+  recipeOutputs   RecipeOutput[]
   
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
@@ -103,6 +104,7 @@ model Recipe {
   items       RecipeItem[]
   steps       RecipeStep[]
   usedInItems RecipeItem[] @relation("SubRecipeRelation")
+  outputs     RecipeOutput[]
   
   labelConfig Json?
   
@@ -135,6 +137,25 @@ model RecipeItem {
   
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
+}
+
+enum OutputType {
+  PRIMARY
+  BYPRODUCT
+  WASTE
+}
+
+model RecipeOutput {
+  id              String      @id @default(cuid())
+  recipe          Recipe      @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  recipeId        String
+  type            OutputType
+  ingredient      Ingredient? @relation(fields: [ingredientId], references: [id])
+  ingredientId    String?     
+  name            String      
+  yield           Float       
+  unit            String
+  nutritionFacts  Json?       
 }
 
 model RecipeStep {

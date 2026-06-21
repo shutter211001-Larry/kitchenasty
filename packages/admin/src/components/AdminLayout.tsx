@@ -34,6 +34,7 @@ const navItems: NavItem[] = [
       { path: '/menu/allergens', label: 'nav.allergens' },
       { path: '/menu/dietary', label: 'nav.dietary' },
       { path: '/menu/mealtimes', label: 'nav.mealtimes' },
+      { path: '/recipes', label: 'nav.recipes' },
     ],
   },
   { path: '/promotions', label: 'nav.promotions', icon: '🎁', roles: ['SUPER_ADMIN', 'MANAGER'] },

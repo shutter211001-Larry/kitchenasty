@@ -200,3 +200,22 @@ export async function translateFields(
     return {};
   }
 }
+
+/**
+ * Generic method to prompt Gemini and return a parsed JSON object
+ */
+export async function generateGeminiObject(prompt: string): Promise<any> {
+  const apiKey = getApiKey();
+  if (!apiKey) {
+    throw new Error('GEMINI_API_KEY not configured.');
+  }
+
+  const data = await fetchWithFallback(apiKey, prompt);
+  const resultText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+  
+  if (!resultText) {
+    throw new Error('No valid response from AI model');
+  }
+
+  return parseJSONWithMarkdownFallback(resultText);
+}
