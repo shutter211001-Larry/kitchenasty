@@ -74,7 +74,7 @@ export default function CouponList() {
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-gray-900">優惠券管理 (Coupons)</h1>
         <Link
-          to="/coupons/new"
+          to="/promotions/coupons/new"
           className="bg-primary-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary-700 transition-colors"
         >
           + 新增優惠券
@@ -144,7 +144,7 @@ export default function CouponList() {
                     </td>
                     <td className="px-4 py-3">
                       <Link
-                        to={`/coupons/${coupon.id}`}
+                        to={`/promotions/coupons/${coupon.id}`}
                         className="text-primary-600 hover:text-primary-700 text-xs font-medium"
                         aria-label={`編輯優惠券 ${coupon.code}`}
                       >

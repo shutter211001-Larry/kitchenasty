@@ -108,7 +108,7 @@ export default function CouponForm() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(typeof data.error === 'string' ? data.error : 'Failed to save');
-      navigate('/coupons');
+      navigate('/promotions');
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -127,7 +127,7 @@ export default function CouponForm() {
   return (
     <div className="max-w-2xl">
       <div className="flex items-center gap-4 mb-6">
-        <Link to="/coupons" className="text-gray-400 hover:text-gray-600">
+        <Link to="/promotions" className="text-gray-400 hover:text-gray-600">
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
@@ -335,7 +335,7 @@ export default function CouponForm() {
             {saving ? '儲存中...' : isEdit ? '更新優惠券' : '建立優惠券'}
           </button>
           <Link
-            to="/coupons"
+            to="/promotions"
             className="border border-gray-300 text-gray-700 px-6 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
           >
             取消
