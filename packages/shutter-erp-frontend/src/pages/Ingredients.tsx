@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Search, Package, Plus, Edit2, ShieldAlert } from 'lucide-react';
-import { cn } from '../lib/utils';
+import { cn, formatUnit } from '../lib/utils';
 import EditIngredientModal from '../components/EditIngredientModal';
 import { AllergenManagerModal } from '../components/AllergenManagerModal';
 
@@ -32,13 +32,18 @@ const Ingredients = () => {
   const [isAllergenMgrOpen, setIsAllergenMgrOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState('所有分類');
   const [activeTab, setActiveTab] = useState<'IN_USE' | 'ALL'>('IN_USE');
+  const [globalSettings, setGlobalSettings] = useState<any>(null);
 
   const fetchIngredients = async () => {
     try {
       setLoading(true);
       const categoryParam = activeCategory !== '所有分類' ? `&category=${activeCategory}` : '';
-      const response = await axios.get(`http://localhost:3000/api/ingredients?search=${search}${categoryParam}`);
-      setIngredients(response.data);
+      const [ingredientsRes, settingsRes] = await Promise.all([
+        axios.get(`http://localhost:3000/api/ingredients?search=${search}${categoryParam}`),
+        axios.get('http://localhost:3000/api/settings')
+      ]);
+      setIngredients(ingredientsRes.data);
+      setGlobalSettings(settingsRes.data);
     } catch (error) {
       console.error('Failed to fetch ingredients', error);
     } finally {
@@ -187,21 +192,20 @@ const Ingredients = () => {
                       </span>
                     </td>
                     <td className="px-8 py-5">
-                      <div className="flex flex-col">
-                        <div className="flex items-center gap-2">
-                          <span className={cn(
-                            "text-sm font-bold",
-                            ing.safetyStock === null ? "text-gray-700" : (ing.currentStock <= ing.safetyStock ? "text-destructive" : "text-emerald-600")
-                          )}>
-                            {ing.currentStock} {ing.unit}
-                          </span>
-                          {ing.safetyStock !== null && ing.currentStock <= ing.safetyStock && (
-                            <div className="w-2 h-2 rounded-full bg-destructive animate-pulse" />
-                          )}
-                        </div>
-                        <span className="text-[10px] text-muted-foreground mt-0.5 font-medium">
-                          安全警戒: {ing.safetyStock !== null ? `${ing.safetyStock} ${ing.unit}` : '未啟用'}
+                      <div className="flex flex-col gap-1">
+                        <span className="font-black text-gray-800 text-lg">
+                          {formatUnit(ing.currentStock, ing.unit, globalSettings).value} <span className="text-xs font-bold text-gray-400">{formatUnit(ing.currentStock, ing.unit, globalSettings).unit}</span>
                         </span>
+                        {ing.safetyStock !== null && (
+                          <span className={`text-[10px] font-bold ${ing.currentStock < ing.safetyStock ? 'text-red-500' : 'text-emerald-500'}`}>
+                            安全警戒: {formatUnit(ing.safetyStock, ing.unit, globalSettings).value} {formatUnit(ing.safetyStock, ing.unit, globalSettings).unit}
+                          </span>
+                        )}
+                        {ing.safetyStock === null && (
+                          <span className="text-[10px] font-bold text-gray-500">
+                            安全警戒: 未啟用
+                          </span>
+                        )}
                       </div>
                     </td>
                     <td className="px-8 py-5 text-sm font-mono text-center text-gray-600">{ing.calories?.toFixed(1) || '-'}</td>
