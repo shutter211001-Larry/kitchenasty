@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Search, Package, AlertCircle, Plus, Edit2, ShieldAlert } from 'lucide-react';
+import { Search, Package, Plus, Edit2, ShieldAlert } from 'lucide-react';
 import { cn } from '../lib/utils';
 import EditIngredientModal from '../components/EditIngredientModal';
 import { AllergenManagerModal } from '../components/AllergenManagerModal';
