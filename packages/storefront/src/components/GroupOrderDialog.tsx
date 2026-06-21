@@ -87,7 +87,7 @@ export default function GroupOrderDialog() {
         {/* Header (Always Visible) */}
         <div 
           className="flex items-center justify-between cursor-pointer"
-          onClick={() => !groupSessionId && setIsOpen(!isOpen)}
+          onClick={() => setIsOpen(!isOpen)}
         >
           <div className="flex items-center gap-3">
             <div className="bg-primary-100 text-primary-600 rounded-full w-10 h-10 flex items-center justify-center text-lg shadow-inner">
@@ -98,17 +98,15 @@ export default function GroupOrderDialog() {
               <span className="text-lg leading-none">{tableName}</span>
             </div>
           </div>
-          {!groupSessionId && (
-            <button className="text-gray-400 hover:text-gray-600 transition-colors">
-              <svg className={`w-5 h-5 transform transition-transform ${isOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-              </svg>
-            </button>
-          )}
+          <button className="text-gray-400 hover:text-gray-600 transition-colors p-1">
+            <svg className={`w-5 h-5 transform transition-transform ${isOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
         </div>
         
         {/* Content (Active Session) */}
-        {groupSessionId && (
+        {groupSessionId && isOpen && (
           <div className="mt-3 flex flex-col gap-3">
             <div className="bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 px-3 py-2 rounded-xl text-center shadow-inner border border-primary-100/50 dark:border-primary-800/50">
               <span className="text-[10px] opacity-80 block mb-0.5 font-medium">同桌點餐代碼</span>
