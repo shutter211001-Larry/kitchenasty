@@ -239,4 +239,64 @@ describe('Discount Engine Logic', () => {
       expect(best.freeDelivery).toBe(false);
     });
   });
+
+  describe('Granular Applicable Restrictions (applicableCategoryIds / applicableMenuItemIds)', () => {
+    it('applies percentage discount only to applicable categories', () => {
+      const campaign = createSampleCampaign({
+        type: 'PERCENTAGE',
+        value: 10, // 10% off
+        conditions: JSON.stringify({ applicableCategoryIds: ['cat-drinks'] } as any)
+      });
+      // cart: burger 200 (cat-food), drink 100 (cat-drinks), total = 300
+      // 10% off drinks = 10 discount.
+      const result = validateAndCalculateDiscount(
+        campaign,
+        { ...baseOrderData, subtotal: 300 },
+        [
+          { menuItemId: 'm1', categoryId: 'cat-food', price: 200, quantity: 1 },
+          { menuItemId: 'm2', categoryId: 'cat-drinks', price: 100, quantity: 1 }
+        ]
+      );
+      expect(result.isValid).toBe(true);
+      expect(result.discountAmount).toBe(10);
+    });
+
+    it('returns invalid if cart has no applicable items', () => {
+      const campaign = createSampleCampaign({
+        type: 'FIXED',
+        value: 50,
+        conditions: JSON.stringify({ applicableMenuItemIds: ['m999'] } as any)
+      });
+      const result = validateAndCalculateDiscount(
+        campaign,
+        { ...baseOrderData, subtotal: 300 },
+        [
+          { menuItemId: 'm1', categoryId: 'cat-food', price: 200, quantity: 1 },
+          { menuItemId: 'm2', categoryId: 'cat-drinks', price: 100, quantity: 1 }
+        ]
+      );
+      expect(result.isValid).toBe(false);
+      expect(result.reason).toContain('沒有符合此優惠條件的指定商品');
+    });
+
+    it('caps FIXED discount at applicable subtotal', () => {
+      const campaign = createSampleCampaign({
+        type: 'FIXED',
+        value: 50,
+        conditions: JSON.stringify({ applicableCategoryIds: ['cat-drinks'] } as any)
+      });
+      // drink is only $30. Max discount should be $30.
+      const result = validateAndCalculateDiscount(
+        campaign,
+        { ...baseOrderData, subtotal: 230 },
+        [
+          { menuItemId: 'm1', categoryId: 'cat-food', price: 200, quantity: 1 },
+          { menuItemId: 'm2', categoryId: 'cat-drinks', price: 30, quantity: 1 }
+        ]
+      );
+      expect(result.isValid).toBe(true);
+      expect(result.discountAmount).toBe(30);
+    });
+  });
+
 });

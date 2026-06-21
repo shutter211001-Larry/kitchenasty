@@ -10,6 +10,8 @@ export interface DiscountConditions {
     startTime: string; // 'HH:MM' e.g. '14:00'
     endTime: string;   // 'HH:MM' e.g. '17:00'
   };
+  applicableCategoryIds?: string[];
+  applicableMenuItemIds?: string[];
 }
 
 export interface DiscountValidationResult {
@@ -73,8 +75,8 @@ export function validateAndCalculateDiscount(
   }
 
   // 6. Advanced Custom Conditions parsing
+  let rules: DiscountConditions = {};
   if (campaign.conditions) {
-    let rules: DiscountConditions;
     try {
       rules = typeof campaign.conditions === 'string' 
         ? JSON.parse(campaign.conditions) 
@@ -150,15 +152,40 @@ export function validateAndCalculateDiscount(
     }
   }
 
+  // Calculate Applicable Subtotal for granular rules
+  let applicableSubtotal = orderData.subtotal;
+  let hasApplicableRestrictions = false;
+
+  if (rules.applicableCategoryIds?.length || rules.applicableMenuItemIds?.length) {
+    hasApplicableRestrictions = true;
+    applicableSubtotal = cartItems.reduce((sum, item) => {
+      const matchCategory = rules.applicableCategoryIds?.includes(item.categoryId);
+      const matchItem = rules.applicableMenuItemIds?.includes(item.menuItemId);
+      if (matchCategory || matchItem) {
+        return sum + (item.price * item.quantity);
+      }
+      return sum;
+    }, 0);
+
+    // If there are restrictions and no applicable items are in the cart, the discount is 0.
+    if (applicableSubtotal <= 0) {
+      return { isValid: false, discountAmount: 0, freeDelivery: false, reason: '購物車內沒有符合此優惠條件的指定商品' };
+    }
+  }
+
   // 7. Calculate Discount Amount
   let discountAmount = 0;
   let freeDelivery = false;
 
   if (campaign.type === 'FIXED') {
     discountAmount = campaign.value;
+    // Cap fixed discount at applicable subtotal to avoid negative totals
+    if (hasApplicableRestrictions) {
+      discountAmount = Math.min(discountAmount, applicableSubtotal);
+    }
   } else if (campaign.type === 'PERCENTAGE') {
     // campaign.value is percentage, e.g. 10 means 10% off
-    discountAmount = orderData.subtotal * (campaign.value / 100);
+    discountAmount = applicableSubtotal * (campaign.value / 100);
     if (campaign.maxDiscount !== null && campaign.maxDiscount !== undefined) {
       discountAmount = Math.min(discountAmount, campaign.maxDiscount);
     }

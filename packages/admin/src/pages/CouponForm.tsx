@@ -17,6 +17,11 @@ export default function CouponForm() {
   const [expiresAt, setExpiresAt] = useState('');
   const [isActive, setIsActive] = useState(true);
   const [isAutomatic, setIsAutomatic] = useState(false);
+  const [applicableCategoryIds, setApplicableCategoryIds] = useState<string[]>([]);
+  const [applicableMenuItemIds, setApplicableMenuItemIds] = useState<string[]>([]);
+  const [categories, setCategories] = useState<{ id: string; nameTranslations: any }[]>([]);
+  const [menuItems, setMenuItems] = useState<{ id: string; nameTranslations: any }[]>([]);
+
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -24,6 +29,15 @@ export default function CouponForm() {
   const token = localStorage.getItem('token') || '';
 
   useEffect(() => {
+    // Fetch categories and menu items for advanced conditions
+    Promise.all([
+      fetch('/api/categories', { headers: { Authorization: `Bearer ${token}` } }).then(res => res.json()),
+      fetch('/api/items', { headers: { Authorization: `Bearer ${token}` } }).then(res => res.json())
+    ]).then(([catData, itemData]) => {
+      if (catData.success) setCategories(catData.data);
+      if (itemData.success) setMenuItems(itemData.data);
+    }).catch(err => console.error('Failed to load menu data', err));
+
     if (!id) return;
     setLoading(true);
     fetch(`/api/coupons/${id}`, {
@@ -35,7 +49,7 @@ export default function CouponForm() {
       })
       .then((data) => {
         const c = data.data;
-        setCode(c.code);
+        setCode(c.code || '');
         setType(c.type);
         setValue(c.value);
         setMinOrder(c.minOrder);
@@ -46,6 +60,16 @@ export default function CouponForm() {
         setExpiresAt(c.expiresAt ? c.expiresAt.split('T')[0] : '');
         setIsActive(c.isActive);
         setIsAutomatic(c.isAutomatic || false);
+        
+        if (c.conditions) {
+          try {
+            const parsed = typeof c.conditions === 'string' ? JSON.parse(c.conditions) : c.conditions;
+            setApplicableCategoryIds(parsed.applicableCategoryIds || []);
+            setApplicableMenuItemIds(parsed.applicableMenuItemIds || []);
+          } catch (e) {
+            console.error('Failed to parse conditions');
+          }
+        }
       })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
@@ -55,6 +79,10 @@ export default function CouponForm() {
     e.preventDefault();
     setSaving(true);
     setError('');
+
+    const conditionsObj: any = {};
+    if (applicableCategoryIds.length > 0) conditionsObj.applicableCategoryIds = applicableCategoryIds;
+    if (applicableMenuItemIds.length > 0) conditionsObj.applicableMenuItemIds = applicableMenuItemIds;
 
     const body = {
       code,
@@ -68,6 +96,7 @@ export default function CouponForm() {
       expiresAt: expiresAt || null,
       isActive,
       isAutomatic,
+      conditions: Object.keys(conditionsObj).length > 0 ? JSON.stringify(conditionsObj) : null,
     };
 
     try {
@@ -245,6 +274,53 @@ export default function CouponForm() {
             <label htmlFor="isAutomatic" className="text-sm text-gray-700 font-bold text-indigo-700">
               自動滿額優惠 (結帳時自動套用，不須輸入代碼)
             </label>
+          </div>
+        </div>
+
+        <div className="border-t border-gray-200 pt-6 mt-6">
+          <h3 className="text-sm font-bold text-gray-900 mb-4">進階條件 (Advanced Restrictions)</h3>
+          <p className="text-xs text-gray-500 mb-4">若未選擇，則優惠適用於全單所有商品。</p>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+              <label className="block text-sm font-medium text-gray-700 mb-2">指定適用分類 (Categories)</label>
+              <div className="max-h-48 overflow-y-auto space-y-2 pr-2">
+                {categories.map((cat) => (
+                  <label key={cat.id} className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={applicableCategoryIds.includes(cat.id)}
+                      onChange={(e) => {
+                        if (e.target.checked) setApplicableCategoryIds([...applicableCategoryIds, cat.id]);
+                        else setApplicableCategoryIds(applicableCategoryIds.filter(id => id !== cat.id));
+                      }}
+                      className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                    />
+                    {cat.nameTranslations?.['zh-TW'] || cat.id}
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+              <label className="block text-sm font-medium text-gray-700 mb-2">指定適用單品 (Menu Items)</label>
+              <div className="max-h-48 overflow-y-auto space-y-2 pr-2">
+                {menuItems.map((item) => (
+                  <label key={item.id} className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={applicableMenuItemIds.includes(item.id)}
+                      onChange={(e) => {
+                        if (e.target.checked) setApplicableMenuItemIds([...applicableMenuItemIds, item.id]);
+                        else setApplicableMenuItemIds(applicableMenuItemIds.filter(id => id !== item.id));
+                      }}
+                      className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                    />
+                    {item.nameTranslations?.['zh-TW'] || item.id}
+                  </label>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
 
