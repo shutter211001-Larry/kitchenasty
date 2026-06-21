@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Utensils, Users, Package, AlertTriangle, Settings, Printer, LogOut, Archive, Briefcase, Workflow, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Utensils, Users, Package, Settings, Printer, LogOut, Archive, Briefcase, Workflow, Menu, X } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useAuth } from '../context/AuthContext';
 
 const SidebarItem = ({ icon: Icon, label, path, onClick }: { icon: any, label: string, path: string, onClick?: () => void }) => {
   const location = useLocation();
   const active = location.pathname === path;
-  
+
   return (
-    <Link 
+    <Link
       to={path}
       onClick={onClick}
       className={cn(
@@ -58,7 +58,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 
       {/* Mobile Menu Backdrop Mask */}
       {isMobileMenuOpen && (
-        <div 
+        <div
           onClick={closeMobileMenu}
           className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm md:hidden animate-in fade-in duration-200"
         />
@@ -76,7 +76,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
             </div>
             <h2 className="text-base font-bold tracking-tight text-gray-800">智慧餐飲研發 ERP</h2>
           </div>
-          <button 
+          <button
             onClick={closeMobileMenu}
             className="p-1.5 hover:bg-muted border border-border/60 rounded-lg transition-all"
           >
@@ -110,13 +110,13 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           {user?.role === 'ADMIN' && (
             <>
               <SidebarItem icon={Users} label="帳號管理" path="/users" onClick={closeMobileMenu} />
-              <SidebarItem icon={Settings} label="食譜動作設定" path="/settings" onClick={closeMobileMenu} />
+              <SidebarItem icon={Settings} label="設定" path="/settings" onClick={closeMobileMenu} />
             </>
           )}
         </nav>
 
         <div className="mt-auto space-y-4">
-          <button 
+          <button
             onClick={() => {
               closeMobileMenu();
               logout();
@@ -164,13 +164,13 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           {user?.role === 'ADMIN' && (
             <>
               <SidebarItem icon={Users} label="帳號管理" path="/users" />
-              <SidebarItem icon={Settings} label="食譜動作設定" path="/settings" />
+              <SidebarItem icon={Settings} label="設定" path="/settings" />
             </>
           )}
         </nav>
 
         <div className="mt-auto space-y-4">
-          <button 
+          <button
             onClick={logout}
             className="w-full flex items-center justify-center gap-2 py-3 bg-red-50 border border-red-100 hover:bg-red-500 hover:text-white text-red-600 text-xs font-black rounded-xl transition-all cursor-pointer shadow-sm active:scale-95"
           >

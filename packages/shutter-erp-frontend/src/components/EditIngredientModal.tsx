@@ -53,7 +53,7 @@ interface Props {
 const EditIngredientModal = ({ ingredient, onClose, onSuccess }: Props) => {
   const isCreate = ingredient === 'new';
   
-  const [activeTab, setActiveTab] = useState<'basic' | 'nutrition' | 'conversions'>('basic');
+  const [activeTab, setActiveTab] = useState<'basic' | 'nutrition' | 'conversions' | 'prices'>('basic');
   const [loading, setLoading] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(false);
   const [isAllergenMgrOpen, setIsAllergenMgrOpen] = useState(false);
@@ -129,7 +129,9 @@ const EditIngredientModal = ({ ingredient, onClose, onSuccess }: Props) => {
         setAllergenIds(data.allergens.map((a: Allergen) => a.id));
       }
 
-      // Load package pricing
+      // Load package pricing (ensure prices array is stored in formData)
+      setFormData(prev => ({ ...prev, prices: data.prices || [] }));
+      
       if (data.prices && data.prices.length > 0) {
         const defaultPrice = data.prices.find((p: any) => p.isDefault) || data.prices[0];
         setPriceInfo({
@@ -351,6 +353,62 @@ const EditIngredientModal = ({ ingredient, onClose, onSuccess }: Props) => {
     }
   };
 
+  const handleAddQuote = async () => {
+    if (isCreate || !ingredient.id) return;
+    if (!priceInfo.packageSize || !priceInfo.packageUnit || !priceInfo.price) {
+      alert('請填寫所有報價欄位');
+      return;
+    }
+    
+    try {
+      setLoading(true);
+      await axios.post('http://localhost:3000/api/suppliers/price', {
+        ingredientId: ingredient.id,
+        supplierId: priceInfo.supplierId || null,
+        packageSize: Number(priceInfo.packageSize),
+        packageUnit: priceInfo.packageUnit,
+        price: Number(priceInfo.price)
+      });
+      await fetchIngredientDetails();
+      // Reset form
+      setPriceInfo(prev => ({ ...prev, packageSize: '', price: '' }));
+    } catch (error: any) {
+      console.error('Failed to add quote', error);
+      alert(error.response?.data?.error || '新增報價失敗');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteQuote = async (priceId: string) => {
+    if (!confirm('確認刪除此供應商報價？')) return;
+    try {
+      setLoading(true);
+      await axios.delete(`http://localhost:3000/api/suppliers/prices/${priceId}`);
+      await fetchIngredientDetails();
+    } catch (error: any) {
+      console.error('Failed to delete quote', error);
+      alert(error.response?.data?.error || '刪除報價失敗');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSetDefaultQuote = async (priceId: string) => {
+    try {
+      setLoading(true);
+      await axios.patch(`http://localhost:3000/api/suppliers/prices/${priceId}/default`);
+      await fetchIngredientDetails();
+    } catch (error: any) {
+      console.error('Failed to set default quote', error);
+      alert(error.response?.data?.error || '設定預設報價失敗');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
+
   return (
     <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
       <div 
@@ -397,17 +455,29 @@ const EditIngredientModal = ({ ingredient, onClose, onSuccess }: Props) => {
           >
             營養標示
           </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab('conversions')}
-            className={cn(
-              "flex-1 py-3 text-xs font-bold border-b-2 transition-all",
-              activeTab === 'conversions' ? "border-primary text-primary bg-white" : "border-transparent text-muted-foreground hover:text-gray-800"
+            <button
+              type="button"
+              onClick={() => setActiveTab('conversions')}
+              className={cn(
+                "flex-1 py-3 text-xs font-bold border-b-2 transition-all",
+                activeTab === 'conversions' ? "border-primary text-primary bg-white" : "border-transparent text-muted-foreground hover:text-gray-800"
+              )}
+            >
+              單位換算
+            </button>
+            {!isCreate && (
+              <button
+                type="button"
+                onClick={() => setActiveTab('prices')}
+                className={cn(
+                  "flex-1 py-3 text-xs font-bold border-b-2 transition-all",
+                  activeTab === 'prices' ? "border-primary text-primary bg-white" : "border-transparent text-muted-foreground hover:text-gray-800"
+                )}
+              >
+                供應商報價
+              </button>
             )}
-          >
-            單位換算
-          </button>
-        </div>
+          </div>
 
         {/* Scrollable Form Body */}
         <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-6 flex flex-col">
@@ -476,8 +546,9 @@ const EditIngredientModal = ({ ingredient, onClose, onSuccess }: Props) => {
                     </div>
                   </div>
 
-                  {/* Pricing packaging section */}
-                  <div className="border-t border-border/60 my-2 pt-4 space-y-4 animate-in fade-in duration-200">
+                  {/* Pricing packaging section (Only shown during creation) */}
+                  {isCreate && (
+                    <div className="border-t border-border/60 my-2 pt-4 space-y-4 animate-in fade-in duration-200">
                     <h4 className="text-xs font-black text-gray-400 uppercase tracking-wider">採購包裝與價格 (採購防呆計價)</h4>
                     <div className="grid grid-cols-2 gap-4 bg-muted/20 p-4 border border-border rounded-2xl">
                       <div className="space-y-1.5">
@@ -550,6 +621,7 @@ const EditIngredientModal = ({ ingredient, onClose, onSuccess }: Props) => {
                       )}
                     </div>
                   </div>
+                  )}
 
                   <div className="border-t border-border/60 my-2 pt-4 space-y-4">
                     <h4 className="text-xs font-black text-gray-400 uppercase tracking-wider">庫存與警戒線</h4>
@@ -866,8 +938,160 @@ const EditIngredientModal = ({ ingredient, onClose, onSuccess }: Props) => {
                   )}
                 </div>
               )}
-            </div>
-          )}
+              
+                {/* Tab 4: Supplier Prices */}
+                {activeTab === 'prices' && !isCreate && (
+                  <div className="space-y-4">
+                    <div className="bg-primary/5 border border-primary/10 rounded-xl p-3 flex gap-2.5">
+                      <Scale className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+                      <p className="text-[11px] text-primary/80 leading-normal font-medium">
+                        此處管理這項食材在各家供應商的報價資訊。你可以隨時新增其他供應商的報價，並點擊「設為預設」來作為系統預設的成本計算依據。
+                      </p>
+                    </div>
+
+                    {/* Existing Quotes */}
+                    <div className="bg-white border border-border rounded-2xl overflow-hidden shadow-sm">
+                      <table className="w-full text-left border-collapse">
+                        <thead>
+                          <tr className="bg-muted/30 border-b border-border">
+                            <th className="px-4 py-3 font-bold text-[10px] text-muted-foreground uppercase">預設</th>
+                            <th className="px-4 py-3 font-bold text-[10px] text-muted-foreground uppercase">供應商</th>
+                            <th className="px-4 py-3 font-bold text-[10px] text-muted-foreground uppercase text-right">包裝規格</th>
+                            <th className="px-4 py-3 font-bold text-[10px] text-muted-foreground uppercase text-right">價格(NT$)</th>
+                            <th className="px-4 py-3 font-bold text-[10px] text-muted-foreground uppercase text-right">換算單價</th>
+                            <th className="px-4 py-3 font-bold text-[10px] text-muted-foreground uppercase text-center">操作</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-border">
+                          {formData.prices?.map((p: any) => (
+                            <tr key={p.id} className="hover:bg-muted/10 transition-colors">
+                              <td className="px-4 py-3 text-center">
+                                {p.isDefault ? (
+                                  <span className="text-emerald-500 font-bold text-lg">★</span>
+                                ) : (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleSetDefaultQuote(p.id)}
+                                    className="text-gray-300 hover:text-emerald-500 transition-colors font-bold text-lg"
+                                    title="設為預設報價"
+                                  >
+                                    ☆
+                                  </button>
+                                )}
+                              </td>
+                              <td className="px-4 py-3 text-xs font-bold text-gray-800">
+                                {p.supplier?.name || '未指定'}
+                              </td>
+                              <td className="px-4 py-3 text-xs font-mono font-bold text-gray-600 text-right">
+                                {p.packageSize} <span className="text-[10px] text-gray-400">{p.packageUnit}</span>
+                              </td>
+                              <td className="px-4 py-3 text-xs font-mono font-bold text-gray-800 text-right">
+                                {p.price.toLocaleString()}
+                              </td>
+                              <td className="px-4 py-3 text-[10px] font-mono text-emerald-600 text-right">
+                                {p.unitPrice.toFixed(4)} / {formData.unit}
+                              </td>
+                              <td className="px-4 py-3 text-center">
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteQuote(p.id)}
+                                  className="p-1.5 text-muted-foreground hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
+                                  title="刪除報價"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                          {(!formData.prices || formData.prices.length === 0) && (
+                            <tr>
+                              <td colSpan={6} className="px-4 py-8 text-center text-xs text-muted-foreground font-medium italic">
+                                尚未有任何報價資料
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    {/* Add New Quote Form */}
+                    <div className="bg-muted/30 border border-border rounded-2xl p-4 space-y-3">
+                      <h4 className="text-xs font-bold text-gray-700">新增報價</h4>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="space-y-1 col-span-2">
+                          <label className="text-[10px] font-bold text-gray-500">選擇供應商</label>
+                          <select
+                            className="w-full px-3 py-2 bg-white border border-border rounded-xl outline-none focus:ring-2 focus:ring-primary/20 text-xs font-bold"
+                            value={priceInfo.supplierId}
+                            onChange={(e) => setPriceInfo({ ...priceInfo, supplierId: e.target.value })}
+                          >
+                            <option value="">-- 未指定 --</option>
+                            {suppliers.map(s => (
+                              <option key={s.id} value={s.id}>{s.name}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-bold text-gray-500">包裝大小</label>
+                          <input 
+                            type="number" step="any"
+                            placeholder="如 2.5"
+                            className="w-full px-3 py-2 bg-white border border-border rounded-xl outline-none focus:ring-2 focus:ring-primary/20 font-mono text-xs text-right"
+                            value={priceInfo.packageSize}
+                            onChange={(e) => setPriceInfo({ ...priceInfo, packageSize: e.target.value })}
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-bold text-gray-500">包裝單位</label>
+                          <select
+                            className="w-full px-3 py-2 bg-white border border-border rounded-xl outline-none focus:ring-2 focus:ring-primary/20 text-xs font-bold"
+                            value={priceInfo.packageUnit}
+                            onChange={(e) => setPriceInfo({ ...priceInfo, packageUnit: e.target.value })}
+                          >
+                            {formData.unit === 'g' ? (
+                              <>
+                                <option value="kg">kg (公斤)</option>
+                                <option value="g">g (公克)</option>
+                                <option value="台斤">台斤 (600g)</option>
+                              </>
+                            ) : formData.unit === 'ml' ? (
+                              <>
+                                <option value="L">L (公升)</option>
+                                <option value="ml">ml (毫升)</option>
+                              </>
+                            ) : (
+                              <option value="個">個 (Pcs)</option>
+                            )}
+                          </select>
+                        </div>
+                        <div className="space-y-1 col-span-2">
+                          <label className="text-[10px] font-bold text-gray-500">包裝價格 (NT$)</label>
+                          <div className="flex gap-2">
+                            <input 
+                              type="number" step="any"
+                              placeholder="如 800"
+                              className="flex-1 px-3 py-2 bg-white border border-border rounded-xl outline-none focus:ring-2 focus:ring-primary/20 font-mono text-xs text-right"
+                              value={priceInfo.price}
+                              onChange={(e) => setPriceInfo({ ...priceInfo, price: e.target.value })}
+                            />
+                            <button
+                              type="button"
+                              onClick={handleAddQuote}
+                              disabled={loading || !priceInfo.packageSize || !priceInfo.packageUnit || !priceInfo.price}
+                              className="px-4 py-2 bg-primary text-white text-xs font-bold rounded-xl hover:bg-primary/90 disabled:opacity-50 transition-all flex items-center gap-1 shadow-sm"
+                            >
+                              <Plus className="w-3.5 h-3.5" />
+                              新增
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+              </div>
+            )}
 
           {/* Sticky Form Footer Buttons inside the scroll viewport (or below) */}
           <div className="flex gap-3 pt-6 mt-auto border-t border-border shrink-0">
