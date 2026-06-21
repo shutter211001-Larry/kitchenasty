@@ -31,7 +31,7 @@ export default function Settings() {
       const [actRes, ugRes, settingsRes] = await Promise.all([
         axios.get(`${API}/actions`),
         axios.get(`${API}/units`),
-        axios.get('http://localhost:3000/api/settings')
+        axios.get('http://localhost:3000/shutter-erp/api/settings')
       ]);
       setActionGroups(actRes.data);
       setUnitGroups(ugRes.data);
@@ -44,16 +44,6 @@ export default function Settings() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const fetchUnitGroups = async () => {
-    try {
-      const [actRes, ugRes] = await Promise.all([
-        axios.get(`${API}/units`),
-        activeTab === 'units' ? axios.get(`${API}/units`) : axios.get(`${API}/actions`),
-      ]);
-      setUnitGroups(actRes.data);
-    } catch (e) { console.error(e); }
   };
 
   useEffect(() => {
@@ -113,7 +103,7 @@ export default function Settings() {
 
   const handleSaveGlobalSettings = async () => {
     try {
-      await axios.put('http://localhost:3000/api/settings', globalSettings);
+      await axios.put('http://localhost:3000/shutter-erp/api/settings', globalSettings);
       alert('系統全域設定已儲存！');
     } catch (e) {
       console.error('Failed to save settings:', e);

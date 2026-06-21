@@ -6,11 +6,13 @@ import {
 } from 'lucide-react';
 import StockAdjustmentModal from '../components/StockAdjustmentModal';
 import { useAuth } from '../context/AuthContext';
+import { formatUnit } from '../lib/utils';
 
 const Inventory: React.FC = () => {
   const {} = useAuth();
   const [ingredients, setIngredients] = useState<any[]>([]);
   const [logs, setLogs] = useState<any[]>([]);
+  const [globalSettings, setGlobalSettings] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
@@ -26,12 +28,14 @@ const Inventory: React.FC = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [ingredientsRes, logsRes] = await Promise.all([
+      const [ingredientsRes, logsRes, settingsRes] = await Promise.all([
         axios.get('http://localhost:3000/api/ingredients'),
-        axios.get('http://localhost:3000/api/inventory/logs')
+        axios.get('http://localhost:3000/api/inventory/logs'),
+        axios.get('http://localhost:3000/shutter-erp/api/settings')
       ]);
       setIngredients(ingredientsRes.data);
       setLogs(logsRes.data);
+      setGlobalSettings(settingsRes.data);
     } catch (error) {
       console.error('Failed to fetch inventory data', error);
     } finally {
@@ -250,7 +254,7 @@ const Inventory: React.FC = () => {
                         )}
                       </div>
                       <div className="flex items-center gap-3 text-[10px] text-muted-foreground font-semibold">
-                        <span>安全水位: {item.safetyStock || 0} {item.unit}</span>
+                        <span>安全水位: {formatUnit(item.safetyStock || 0, item.unit, globalSettings).value} {formatUnit(item.safetyStock || 0, item.unit, globalSettings).unit}</span>
                         <span>·</span>
                         {isLowStock ? (
                           <span className="flex items-center gap-0.5 text-red-500 font-bold bg-red-50 px-1.5 py-0.5 rounded border border-red-100 shadow-sm animate-pulse">
@@ -270,7 +274,7 @@ const Inventory: React.FC = () => {
                     <div className="md:text-right">
                       <span className="text-[9px] uppercase font-black text-muted-foreground tracking-wider block">目前庫存</span>
                       <span className={`text-base font-black ${isLowStock ? 'text-red-600' : 'text-gray-800'}`}>
-                        {item.currentStock.toFixed(1)} <span className="text-xs font-bold text-gray-400">{item.unit}</span>
+                        {formatUnit(item.currentStock, item.unit, globalSettings).value} <span className="text-xs font-bold text-gray-400">{formatUnit(item.currentStock, item.unit, globalSettings).unit}</span>
                       </span>
                     </div>
 
@@ -372,7 +376,7 @@ const Inventory: React.FC = () => {
                             : 'text-slate-700'
                       }`}>
                         {log.type === 'IN' ? '+' : log.type === 'OUT' ? '-' : ''}
-                        {log.amount} <span className="text-[10px] font-bold text-gray-400">{log.ingredient?.unit}</span>
+                        {formatUnit(log.amount, log.ingredient?.unit || '', globalSettings).value} <span className="text-[10px] font-bold text-gray-400">{formatUnit(log.amount, log.ingredient?.unit || '', globalSettings).unit}</span>
                       </span>
                     </div>
 
