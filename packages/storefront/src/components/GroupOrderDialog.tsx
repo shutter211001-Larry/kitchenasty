@@ -6,20 +6,11 @@ import { API_BASE } from '../lib/api.js';
 export default function GroupOrderDialog() {
   const { t } = useTranslation();
   const { tableName, groupSessionId, groupPin, setGroupSession } = useCart();
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(true);
   const [isJoining, setIsJoining] = useState(false);
   const [pinInput, setPinInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-
-  useEffect(() => {
-    // Open bubble by default if there's a table but no session
-    if (tableName && !groupSessionId) {
-      setIsOpen(true);
-    } else {
-      setIsOpen(false);
-    }
-  }, [tableName, groupSessionId]);
 
   const getLocationId = async () => {
     const res = await fetch(`${API_BASE}/locations`);

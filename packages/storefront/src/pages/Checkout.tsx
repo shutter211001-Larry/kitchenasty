@@ -18,7 +18,7 @@ const DEFAULT_TAX_RATE = 0;
 
 export default function Checkout() {
   const { t, i18n } = useTranslation();
-  const { items, clear, tableName, setTableName, groupSessionId, groupPin, clientId } = useCart();
+  const { items, clear, tableName, setTableName, groupSessionId, groupPin, clientId, setGroupSession } = useCart();
   const { user, token } = useAuth();
   const { settings } = useTheme();
   const { addOrder } = useRecentOrders();
@@ -466,13 +466,39 @@ export default function Checkout() {
                   <p className="text-sm mt-1 opacity-90 font-medium">{t('checkout.dineInTableDesc') || '您的餐點將會為您準備於此桌位'}</p>
                 )}
               </div>
-              <button 
-                type="button" 
-                onClick={() => setTableName(null)}
-                className="text-sm font-bold bg-white px-4 py-2 rounded-lg border border-primary-200 text-primary-700 hover:bg-primary-100 transition-colors whitespace-nowrap shadow-sm"
-              >
-                {t('checkout.clearTable') || '改為一般外帶/外送'}
-              </button>
+              {!groupSessionId && (
+                <button 
+                  type="button" 
+                  disabled={loading}
+                  onClick={async () => {
+                    try {
+                      setError('');
+                      setLoading(true);
+                      const locRes = await fetch(`${API_BASE}/locations`);
+                      const locData = await locRes.json();
+                      const locId = locData.data?.[0]?.id;
+                      if (!locId) throw new Error('Location not found');
+
+                      const res = await fetch(`${API_BASE}/group-orders/create`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ locationId: locId, tableName })
+                      });
+                      const data = await res.json();
+                      if (!data.success) throw new Error(data.error || '發起訂單失敗');
+
+                      setGroupSession(data.data.id, data.data.pin);
+                    } catch (err: any) {
+                      setError(err.message);
+                    } finally {
+                      setLoading(false);
+                    }
+                  }}
+                  className="text-sm font-bold bg-white px-4 py-2 rounded-lg border border-primary-200 text-primary-700 hover:bg-primary-100 transition-colors whitespace-nowrap shadow-sm disabled:opacity-50"
+                >
+                  產生同桌代碼
+                </button>
+              )}
             </div>
           )}
 
