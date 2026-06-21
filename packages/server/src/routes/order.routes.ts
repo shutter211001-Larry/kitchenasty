@@ -5,7 +5,7 @@ import {
   createOrder, listOrders, listCustomerOrders, getOrder, 
   updateOrderStatus, deleteOrder, exportOrders, importOrders, 
   downloadOrderTemplate, checkOrderReminders, lookupOrder, claimOrder,
-  cancelOrder, updateOrderDiscount, updateOrderPaymentStatus
+  cancelOrder, updateOrderDiscount, updateOrderPaymentStatus, addOrderPayment
 } from '../controllers/order.controller.js';
 import { checkIPBlacklist, checkCustomerBlacklist, orderRateLimiter } from '../middleware/security.js';
 
@@ -35,6 +35,7 @@ router.post('/import', authenticate, requireRole('SUPER_ADMIN', 'MANAGER'), uplo
 router.get('/:id', optionalAuth, getOrder);
 router.patch('/:id/status', authenticate, requirePermission('MANAGE_ORDERS', ['SUPER_ADMIN', 'MANAGER', 'STAFF']), updateOrderStatus);
 router.patch('/:id/payment-status', authenticate, requirePermission('MANAGE_ORDERS', ['SUPER_ADMIN', 'MANAGER', 'STAFF']), updateOrderPaymentStatus);
+router.post('/:id/payments', authenticate, requirePermission('MANAGE_ORDERS', ['SUPER_ADMIN', 'MANAGER', 'STAFF']), addOrderPayment);
 router.patch('/:id/discount', authenticate, requirePermission('MANAGE_ORDERS', ['SUPER_ADMIN', 'MANAGER']), updateOrderDiscount);
 router.post('/reminders', authenticate, requireStaff, checkOrderReminders);
 router.delete('/:id', authenticate, requireRole('SUPER_ADMIN', 'MANAGER'), deleteOrder);

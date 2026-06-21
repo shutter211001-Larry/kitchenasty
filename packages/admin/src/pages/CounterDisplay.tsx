@@ -7,6 +7,8 @@ interface OrderItem {
   id: string;
   name: string;
   quantity: number;
+  unitPrice?: number;
+  subtotal?: number;
   comment: string | null;
   options: { name: string; value: string }[];
 }
@@ -33,6 +35,8 @@ interface CounterOrder {
   tip: number;
   total: number;
   paymentStatus?: string | null;
+  table?: { id: string; name: string } | null;
+  payments?: { id: string; amount: number; method: string; status: string }[];
 }
 
 const COUNTER_STATUSES = ['PENDING', 'CONFIRMED', 'PREPARING', 'READY'];
@@ -117,6 +121,12 @@ export default function CounterDisplay() {
   const [enableSound, setEnableSound] = useState<boolean>(() => {
     return localStorage.getItem('cds_enableSound') !== 'false';
   });
+  const [isGroupCheckoutMode, setIsGroupCheckoutMode] = useState(false);
+  const [selectedOrders, setSelectedOrders] = useState<Set<string>>(new Set());
+  const [groupCashInput, setGroupCashInput] = useState<string>('');
+  const [autoProrateDiscounts, setAutoProrateDiscounts] = useState<boolean>(() => {
+    return localStorage.getItem('cds_autoProrate') !== 'false';
+  });
 
   useEffect(() => {
     const unlockAudio = () => {
@@ -171,6 +181,26 @@ export default function CounterDisplay() {
 
   const handleClearAmount = (orderId: string) => {
     setCashReceivedInputs((prev) => ({ ...prev, [orderId]: '' }));
+  };
+
+  const handleItemClick = (order: CounterOrder, item: OrderItem) => {
+    if (!item.subtotal || !order.subtotal) return;
+    
+    // Calculate the item's share of the final total
+    let amountToAdd = item.subtotal;
+    if (autoProrateDiscounts && order.total > 0 && order.subtotal > 0) {
+      amountToAdd = (item.subtotal / order.subtotal) * order.total;
+    }
+    
+    setCashReceivedInputs((prev) => {
+      const current = parseFloat(prev[order.id] || '0');
+      const newAmount = current + amountToAdd;
+      // Cap at remaining order total
+      const totalPaid = (order.payments || []).reduce((s, p) => s + p.amount, 0);
+      const remaining = Math.max(0, order.total - totalPaid);
+      const finalAmount = Math.min(newAmount, remaining);
+      return { ...prev, [order.id]: finalAmount.toFixed(2) };
+    });
   };
 
   const [locations, setLocations] = useState<{ id: string; name: string }[]>([]);
@@ -315,6 +345,56 @@ export default function CounterDisplay() {
     }
   };
 
+  const handleAddPayment = async (orderId: string, amount: number) => {
+    setUpdating(orderId);
+    try {
+      await api.post(`/orders/${orderId}/payments`, { amount, method: 'CASH' });
+      // The socket will trigger a refresh, but we can also manually fetch or update state
+      fetchOrders();
+      setCashReceivedInputs((prev) => ({ ...prev, [orderId]: '' }));
+    } catch (err: any) {
+      setActionError(err.response?.data?.error || err.message || '付款失敗');
+      setTimeout(() => setActionError(null), 5000);
+    } finally {
+      setUpdating(null);
+    }
+  };
+
+  const handleGroupCheckout = async () => {
+    if (selectedOrders.size === 0) return;
+    try {
+      const amount = parseFloat(groupCashInput);
+      if (isNaN(amount) || amount <= 0) {
+        setActionError('請輸入有效的金額');
+        setTimeout(() => setActionError(null), 3000);
+        return;
+      }
+      
+      const ordersToPay = orders.filter(o => selectedOrders.has(o.id));
+      let remainingCash = amount;
+      
+      // Distribute cash to orders sequentially
+      for (const order of ordersToPay) {
+        if (remainingCash <= 0) break;
+        const paid = (order.payments || []).reduce((s, p) => s + p.amount, 0);
+        const orderRemaining = Math.max(0, order.total - paid);
+        if (orderRemaining <= 0) continue;
+        
+        const amountToPay = Math.min(orderRemaining, remainingCash);
+        await api.post(`/orders/${order.id}/payments`, { amount: amountToPay, method: 'CASH' });
+        remainingCash -= amountToPay;
+      }
+      
+      fetchOrders();
+      setSelectedOrders(new Set());
+      setGroupCashInput('');
+      setIsGroupCheckoutMode(false);
+    } catch (err: any) {
+      setActionError(err.response?.data?.error || err.message || '併單結帳失敗');
+      setTimeout(() => setActionError(null), 5000);
+    }
+  };
+
   const handleComplete = async (orderId: string, orderType: string) => {
     const completedStatus = orderType === 'DELIVERY' ? 'OUT_FOR_DELIVERY' : 'PICKED_UP';
     setUpdating(orderId);
@@ -404,6 +484,18 @@ export default function CounterDisplay() {
         </div>
         <div className="flex items-center gap-4 text-xs text-purple-200">
           <span>{orders.length} 張進行中 | 更新於 {lastRefresh.toLocaleTimeString()}</span>
+          <button
+            onClick={() => {
+              setIsGroupCheckoutMode(!isGroupCheckoutMode);
+              if (isGroupCheckoutMode) {
+                setSelectedOrders(new Set());
+                setGroupCashInput('');
+              }
+            }}
+            className={`px-3 py-1.5 rounded transition-all flex items-center gap-1.5 font-bold border ${isGroupCheckoutMode ? 'bg-indigo-600 text-white border-indigo-500 shadow-md ring-2 ring-indigo-400' : 'bg-purple-800 hover:bg-purple-700 border-purple-700/50'}`}
+          >
+            <span>🔗 {isGroupCheckoutMode ? '退出併單模式' : '併單收銀模式'}</span>
+          </button>
           <button
             onClick={() => {
               const next = !enableSound;
@@ -580,14 +672,36 @@ export default function CounterDisplay() {
                               {order.paymentStatus === 'PAID' ? '已結帳 💰' : '未結帳 🔄'}
                             </span>
                           </div>
+                          {order.table && (
+                            <span className="font-bold text-xs text-indigo-700 bg-indigo-50 px-1 py-0.5 rounded border border-indigo-200 w-max mt-1">
+                              🍽️ 桌號: {order.table.name}
+                            </span>
+                          )}
                         </div>
                       </div>
-                      <div className="flex items-center gap-1.5 text-[10px] text-gray-400 font-medium">
-                        <span>{getTimeSince(order.createdAt)}</span>
-                        <span className="text-gray-200">|</span>
-                        <svg className={`w-3.5 h-3.5 text-gray-400 transition-transform ${expandedOrders[order.id] ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                        </svg>
+                      <div className="flex items-center gap-3">
+                        {isGroupCheckoutMode && order.paymentStatus !== 'PAID' && (
+                          <div onClick={(e) => e.stopPropagation()}>
+                            <input
+                              type="checkbox"
+                              checked={selectedOrders.has(order.id)}
+                              onChange={(e) => {
+                                const newSet = new Set(selectedOrders);
+                                if (e.target.checked) newSet.add(order.id);
+                                else newSet.delete(order.id);
+                                setSelectedOrders(newSet);
+                              }}
+                              className="w-6 h-6 text-purple-600 border-gray-300 rounded focus:ring-purple-500 cursor-pointer"
+                            />
+                          </div>
+                        )}
+                        <div className="flex items-center gap-1.5 text-[10px] text-gray-400 font-medium">
+                          <span>{getTimeSince(order.createdAt)}</span>
+                          <span className="text-gray-200">|</span>
+                          <svg className={`w-3.5 h-3.5 text-gray-400 transition-transform ${expandedOrders[order.id] ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </div>
                       </div>
                     </div>
 
@@ -649,18 +763,35 @@ export default function CounterDisplay() {
 
                     <div className="space-y-1.5 mb-4 max-h-40 overflow-y-auto pr-1">
                       {order.items.map((item) => (
-                        <div key={item.id} className="text-sm">
+                        <div 
+                          key={item.id} 
+                          className={`text-sm rounded-lg p-2 transition-colors ${expandedOrders[order.id] ? 'hover:bg-purple-50 cursor-pointer border border-transparent hover:border-purple-100' : ''}`}
+                          onClick={(e) => {
+                            if (expandedOrders[order.id]) {
+                              e.stopPropagation();
+                              handleItemClick(order, item);
+                            }
+                          }}
+                          title={expandedOrders[order.id] ? "點擊將此餐點加入結帳金額" : undefined}
+                        >
                           <div className="flex items-start gap-2">
                             <span className="font-bold text-gray-400 text-xs mt-0.5">{item.quantity}x</span>
-                            <div className="flex-1 min-w-0">
-                              <p className="font-medium text-gray-800 leading-tight">{item.name}</p>
-                              {item.options.length > 0 && (
-                                <p className="text-[10px] text-gray-500 mt-0.5">
-                                  {item.options.map((o) => `${o.name}: ${o.value}`).join(', ')}
-                                </p>
-                              )}
-                              {item.comment && (
-                                <p className="text-[10px] text-amber-600 italic bg-amber-50 px-1 rounded mt-0.5 inline-block">"{item.comment}"</p>
+                            <div className="flex-1 min-w-0 flex justify-between items-start">
+                              <div>
+                                <p className="font-medium text-gray-800 leading-tight">{item.name}</p>
+                                {item.options.length > 0 && (
+                                  <p className="text-[10px] text-gray-500 mt-0.5">
+                                    {item.options.map((o) => `${o.name}: ${o.value}`).join(', ')}
+                                  </p>
+                                )}
+                                {item.comment && (
+                                  <p className="text-[10px] text-amber-600 italic bg-amber-50 px-1 rounded mt-0.5 inline-block">"{item.comment}"</p>
+                                )}
+                              </div>
+                              {expandedOrders[order.id] && item.subtotal !== undefined && (
+                                <span className="font-mono text-xs text-purple-600 font-bold ml-2 shrink-0">
+                                  ${item.subtotal.toFixed(2)}
+                                </span>
                               )}
                             </div>
                           </div>
@@ -722,7 +853,22 @@ export default function CounterDisplay() {
 
                         {/* Interactive POS Checkout Calculator */}
                         <div className="hidden md:block bg-purple-50/50 border border-purple-100 rounded-xl p-3 space-y-3">
-                          <h4 className="text-[11px] font-black text-purple-700 uppercase tracking-wider">簡易結帳計算器</h4>
+                          <div className="flex justify-between items-center">
+                            <h4 className="text-[11px] font-black text-purple-700 uppercase tracking-wider">簡易結帳計算器</h4>
+                            <label className="flex items-center gap-1.5 text-[10px] font-bold text-purple-600 cursor-pointer bg-white px-2 py-1 rounded-md border border-purple-200 hover:bg-purple-50 transition-colors" title="開啟時，點擊餐點會自動按比例分攤折扣與附加費">
+                              <input 
+                                type="checkbox" 
+                                checked={autoProrateDiscounts} 
+                                onChange={(e) => {
+                                  const val = e.target.checked;
+                                  setAutoProrateDiscounts(val);
+                                  localStorage.setItem('cds_autoProrate', String(val));
+                                }}
+                                className="w-3 h-3 text-purple-600 rounded focus:ring-0 cursor-pointer"
+                              />
+                              智慧比例分攤
+                            </label>
+                          </div>
                           
                           {/* Cash Input & Change Display */}
                           <div className="flex flex-col gap-1.5 bg-white p-2.5 rounded-lg border border-purple-100">
@@ -740,32 +886,39 @@ export default function CounterDisplay() {
                               </div>
                             </div>
                             
-                            {/* Change calculation */}
+                            {/* Change / Partial Payment calculation */}
                             {(() => {
-                              const cash = parseFloat(cashReceivedInputs[order.id] || '0');
-                              const diff = cash - order.total;
-                              if (diff > 0) {
-                                return (
-                                  <div className="flex justify-between items-center text-xs pt-1.5 border-t border-dashed border-gray-200 text-green-600 font-extrabold flex-wrap gap-1">
-                                    <span>找零 (Change)</span>
-                                    <span className="font-mono text-sm">${diff.toFixed(2)}</span>
-                                  </div>
-                                );
-                              } else if (diff < 0) {
-                                return (
-                                  <div className="flex justify-between items-center text-xs pt-1.5 border-t border-dashed border-gray-200 text-red-600 font-bold flex-wrap gap-1">
-                                    <span>尚欠 (Remaining)</span>
-                                    <span className="font-mono text-sm">${Math.abs(diff).toFixed(2)}</span>
-                                  </div>
-                                );
-                              } else {
-                                return (
-                                  <div className="flex justify-between items-center text-xs pt-1.5 border-t border-dashed border-gray-200 text-green-700 font-extrabold flex-wrap gap-1">
-                                    <span>金額剛好 (Exact)</span>
-                                    <span className="font-mono text-sm">$0.00</span>
-                                  </div>
-                                );
-                              }
+                              const cashInput = parseFloat(cashReceivedInputs[order.id] || '0');
+                              const totalPaid = (order.payments || []).reduce((s, p) => s + p.amount, 0);
+                              const remaining = Math.max(0, order.total - totalPaid);
+                              const diff = cashInput - remaining;
+
+                              return (
+                                <div className="space-y-1.5 pt-1.5 border-t border-dashed border-gray-200">
+                                  {totalPaid > 0 && (
+                                    <div className="flex justify-between items-center text-[10px] text-gray-500 font-medium">
+                                      <span>已付 (Paid)</span>
+                                      <span className="font-mono">${totalPaid.toFixed(2)}</span>
+                                    </div>
+                                  )}
+                                  {diff > 0 ? (
+                                    <div className="flex justify-between items-center text-xs text-green-600 font-extrabold flex-wrap gap-1">
+                                      <span>找零 (Change)</span>
+                                      <span className="font-mono text-sm">${diff.toFixed(2)}</span>
+                                    </div>
+                                  ) : diff < 0 ? (
+                                    <div className="flex justify-between items-center text-xs text-red-600 font-bold flex-wrap gap-1">
+                                      <span>尚欠 (Remaining)</span>
+                                      <span className="font-mono text-sm">${Math.abs(diff).toFixed(2)}</span>
+                                    </div>
+                                  ) : (
+                                    <div className="flex justify-between items-center text-xs text-green-700 font-extrabold flex-wrap gap-1">
+                                      <span>金額剛好 (Exact)</span>
+                                      <span className="font-mono text-sm">$0.00</span>
+                                    </div>
+                                  )}
+                                </div>
+                              );
                             })()}
                           </div>
 
@@ -825,22 +978,31 @@ export default function CounterDisplay() {
                           <button
                             onClick={async (e) => {
                               e.stopPropagation();
-                              const nextStatus = order.paymentStatus === 'PAID' ? 'UNPAID' : 'PAID';
-                              try {
-                                await api.patch(`/orders/${order.id}/payment-status`, { paymentStatus: nextStatus });
-                                setOrders((prev) => prev.map((o) => o.id === order.id ? { ...o, paymentStatus: nextStatus } : o));
-                              } catch (err: any) {
-                                setActionError(err.response?.data?.error || err.message || '更新結帳狀態失敗');
-                                setTimeout(() => setActionError(null), 5000);
+                              const cashInput = parseFloat(cashReceivedInputs[order.id] || '0');
+                              if (cashInput > 0) {
+                                await handleAddPayment(order.id, cashInput);
+                              } else {
+                                const nextStatus = order.paymentStatus === 'PAID' ? 'UNPAID' : 'PAID';
+                                try {
+                                  await api.patch(`/orders/${order.id}/payment-status`, { paymentStatus: nextStatus });
+                                  setOrders((prev) => prev.map((o) => o.id === order.id ? { ...o, paymentStatus: nextStatus } : o));
+                                } catch (err: any) {
+                                  setActionError(err.response?.data?.error || err.message || '更新結帳狀態失敗');
+                                  setTimeout(() => setActionError(null), 5000);
+                                }
                               }
                             }}
                             className={`w-full text-xs font-bold py-2 rounded-lg border transition-all active:scale-95 text-center touch-manipulation select-none ${
-                              order.paymentStatus === 'PAID'
-                                ? 'bg-rose-50 border-rose-200 text-rose-700 hover:bg-rose-100'
-                                : 'bg-emerald-600 border-transparent text-white hover:bg-emerald-700'
+                              parseFloat(cashReceivedInputs[order.id] || '0') > 0
+                                ? 'bg-indigo-600 border-indigo-700 text-white hover:bg-indigo-700 shadow-md ring-2 ring-indigo-300'
+                                : order.paymentStatus === 'PAID'
+                                  ? 'bg-rose-50 border-rose-200 text-rose-700 hover:bg-rose-100'
+                                  : 'bg-emerald-600 border-transparent text-white hover:bg-emerald-700'
                             }`}
                           >
-                            {order.paymentStatus === 'PAID' ? '🔄 標記為未結帳' : '💰 標記為已結帳'}
+                            {parseFloat(cashReceivedInputs[order.id] || '0') > 0
+                              ? `💵 確認收現 $${cashReceivedInputs[order.id]}`
+                              : order.paymentStatus === 'PAID' ? '🔄 標記為未結帳' : '💰 標記為已結帳'}
                           </button>
                         </div>
                       </div>
@@ -930,32 +1092,39 @@ export default function CounterDisplay() {
                   </div>
                 </div>
                 
-                {/* Change calculation */}
+                {/* Change / Partial Payment calculation */}
                 {(() => {
-                  const cash = parseFloat(cashReceivedInputs[order.id] || '0');
-                  const diff = cash - order.total;
-                  if (diff > 0) {
-                    return (
-                      <div className="flex justify-between items-center text-xs pt-2 border-t border-dashed border-gray-200 text-green-600 font-extrabold flex-wrap gap-1">
-                        <span>找零 (Change)</span>
-                        <span className="font-mono text-base">${diff.toFixed(2)}</span>
-                      </div>
-                    );
-                  } else if (diff < 0) {
-                    return (
-                      <div className="flex justify-between items-center text-xs pt-2 border-t border-dashed border-gray-200 text-red-600 font-bold flex-wrap gap-1">
-                        <span>尚欠 (Remaining)</span>
-                        <span className="font-mono text-base">${Math.abs(diff).toFixed(2)}</span>
-                      </div>
-                    );
-                  } else {
-                    return (
-                      <div className="flex justify-between items-center text-xs pt-2 border-t border-dashed border-gray-200 text-green-700 font-extrabold flex-wrap gap-1">
-                        <span>金額剛好 (Exact)</span>
-                        <span className="font-mono text-base">$0.00</span>
-                      </div>
-                    );
-                  }
+                  const cashInput = parseFloat(cashReceivedInputs[order.id] || '0');
+                  const totalPaid = (order.payments || []).reduce((s, p) => s + p.amount, 0);
+                  const remaining = Math.max(0, order.total - totalPaid);
+                  const diff = cashInput - remaining;
+
+                  return (
+                    <div className="space-y-1.5 pt-2 border-t border-dashed border-gray-200">
+                      {totalPaid > 0 && (
+                        <div className="flex justify-between items-center text-xs text-gray-500 font-medium">
+                          <span>已付 (Paid)</span>
+                          <span className="font-mono">${totalPaid.toFixed(2)}</span>
+                        </div>
+                      )}
+                      {diff > 0 ? (
+                        <div className="flex justify-between items-center text-xs text-green-600 font-extrabold flex-wrap gap-1">
+                          <span>找零 (Change)</span>
+                          <span className="font-mono text-base">${diff.toFixed(2)}</span>
+                        </div>
+                      ) : diff < 0 ? (
+                        <div className="flex justify-between items-center text-xs text-red-600 font-bold flex-wrap gap-1">
+                          <span>尚欠 (Remaining)</span>
+                          <span className="font-mono text-base">${Math.abs(diff).toFixed(2)}</span>
+                        </div>
+                      ) : (
+                        <div className="flex justify-between items-center text-xs text-green-700 font-extrabold flex-wrap gap-1">
+                          <span>金額剛好 (Exact)</span>
+                          <span className="font-mono text-base">$0.00</span>
+                        </div>
+                      )}
+                    </div>
+                  );
                 })()}
               </div>
                                  {/* Quick Cash Bills Panel */}
@@ -1013,28 +1182,73 @@ export default function CounterDisplay() {
               <button
                 onClick={async (e) => {
                   e.stopPropagation();
-                  const nextStatus = order.paymentStatus === 'PAID' ? 'UNPAID' : 'PAID';
-                  try {
-                    await api.patch(`/orders/${order.id}/payment-status`, { paymentStatus: nextStatus });
-                    setOrders((prev) => prev.map((o) => o.id === order.id ? { ...o, paymentStatus: nextStatus } : o));
+                  const cashInput = parseFloat(cashReceivedInputs[order.id] || '0');
+                  if (cashInput > 0) {
+                    await handleAddPayment(order.id, cashInput);
                     setMobileCheckoutOrderId(null); // auto close on success
-                  } catch (err: any) {
-                    setActionError(err.response?.data?.error || err.message || '更新結帳狀態失敗');
-                    setTimeout(() => setActionError(null), 5000);
+                  } else {
+                    const nextStatus = order.paymentStatus === 'PAID' ? 'UNPAID' : 'PAID';
+                    try {
+                      await api.patch(`/orders/${order.id}/payment-status`, { paymentStatus: nextStatus });
+                      setOrders((prev) => prev.map((o) => o.id === order.id ? { ...o, paymentStatus: nextStatus } : o));
+                      setMobileCheckoutOrderId(null); // auto close on success
+                    } catch (err: any) {
+                      setActionError(err.response?.data?.error || err.message || '更新結帳狀態失敗');
+                      setTimeout(() => setActionError(null), 5000);
+                    }
                   }
                 }}
                 className={`w-full text-sm font-extrabold py-3.5 rounded-lg border transition-all active:scale-95 text-center shadow-md touch-manipulation select-none ${
-                  order.paymentStatus === 'PAID'
-                    ? 'bg-rose-50 border-rose-200 text-rose-700 hover:bg-rose-100'
-                    : 'bg-emerald-600 border-transparent text-white hover:bg-emerald-700'
+                  parseFloat(cashReceivedInputs[order.id] || '0') > 0
+                    ? 'bg-indigo-600 border-indigo-700 text-white hover:bg-indigo-700 shadow-md ring-2 ring-indigo-300'
+                    : order.paymentStatus === 'PAID'
+                      ? 'bg-rose-50 border-rose-200 text-rose-700 hover:bg-rose-100'
+                      : 'bg-emerald-600 border-transparent text-white hover:bg-emerald-700'
                 }`}
               >
-                {order.paymentStatus === 'PAID' ? '🔄 標記為未結帳' : '💰 標記為已結帳'}
+                {parseFloat(cashReceivedInputs[order.id] || '0') > 0
+                  ? `💵 確認收現 $${cashReceivedInputs[order.id]}`
+                  : order.paymentStatus === 'PAID' ? '🔄 標記為未結帳' : '💰 標記為已結帳'}
               </button>
             </div>
           </div>
         );
       })()}
+      {/* Group Checkout Bottom Bar */}
+      {isGroupCheckoutMode && selectedOrders.size > 0 && (
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t-2 border-indigo-500 shadow-[0_-10px_20px_-5px_rgba(0,0,0,0.1)] p-4 z-40 flex flex-col md:flex-row items-center justify-between gap-4 animate-in slide-in-from-bottom-4">
+          <div className="flex flex-col">
+            <span className="text-sm font-bold text-gray-500">併單結帳 (Selected: {selectedOrders.size})</span>
+            {(() => {
+              const selectedOrdersList = orders.filter(o => selectedOrders.has(o.id));
+              const totalAmount = selectedOrdersList.reduce((s, o) => {
+                const paid = (o.payments || []).reduce((ps, p) => ps + p.amount, 0);
+                return s + Math.max(0, o.total - paid);
+              }, 0);
+              return <span className="text-2xl font-black text-indigo-700">總欠款: ${totalAmount.toFixed(2)}</span>;
+            })()}
+          </div>
+          <div className="flex items-center gap-3 w-full md:w-auto">
+            <div className="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded-lg border border-gray-200 w-full md:w-48">
+              <span className="text-gray-400 font-mono text-lg font-bold">$</span>
+              <input
+                type="number"
+                value={groupCashInput}
+                onChange={(e) => setGroupCashInput(e.target.value)}
+                placeholder="輸入實收金額"
+                className="w-full text-right font-mono font-bold text-gray-900 text-lg bg-transparent border-none outline-none focus:ring-0 p-0"
+              />
+            </div>
+            <button
+              onClick={handleGroupCheckout}
+              disabled={!groupCashInput || parseFloat(groupCashInput) <= 0}
+              className="bg-indigo-600 text-white font-bold px-6 py-3 rounded-lg shadow hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+            >
+              💳 合併收現
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
