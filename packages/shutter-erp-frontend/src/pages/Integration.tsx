@@ -7,8 +7,6 @@ import {
   ArrowRight, Sparkles
 } from 'lucide-react';
 import { formatUnit } from '../lib/utils';
-import { useSettings } from '../context/SettingsContext';
-
 interface MenuItem {
   id: string;
   name: string;
@@ -71,7 +69,6 @@ interface ForecastedIngredient {
 }
 
 const Integration = () => {
-  const { globalSettings } = useSettings();
   const [activeTab, setActiveTab] = useState<'overview' | 'binding' | 'forecast' | 'logs'>('overview');
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
