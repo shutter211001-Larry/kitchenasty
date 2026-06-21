@@ -57,7 +57,8 @@ export const getIngredients = async (req: Request, res: Response) => {
       include: { 
         unitConversions: true,
         allergens: true,
-        prices: { include: { supplier: true } }
+        prices: { include: { supplier: true } },
+        _count: { select: { recipeItems: true, recipeOutputs: true } }
       },
       take: take ? Number(take) : (search ? 300 : undefined),
     });
@@ -89,7 +90,13 @@ export const getIngredients = async (req: Request, res: Response) => {
       ingredients.sort((a: any, b: any) => a.name.localeCompare(b.name));
     }
     
-    res.json(ingredients);
+    // Add isInUse flag
+    const processedIngredients = ingredients.map((ing: any) => ({
+      ...ing,
+      isInUse: (ing._count?.recipeItems || 0) > 0 || (ing._count?.recipeOutputs || 0) > 0
+    }));
+    
+    res.json(processedIngredients);
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch ingredients' });
   }
