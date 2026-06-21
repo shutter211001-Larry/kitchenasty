@@ -170,6 +170,9 @@
     "title": "結帳",
     "emptyCart": "您的購物車是空的。",
     "browseMenu": "瀏覽菜單",
+    "dineInTable": "內用桌號",
+    "dineInTableDesc": "您的餐點將會為您準備於此桌位",
+    "clearTable": "改為一般外帶/外送",
     "orderType": "點餐方式",
     "delivery": "外送",
     "pickup": "自取",
@@ -342,5 +345,18 @@
     "title": "查無此頁面",
     "message": "抱歉，我們找不到您要求的頁面。",
     "backHome": "返回首頁"
+  },
+  "groupOrder": {
+    "error4Digits": "請輸入 4 碼代碼",
+    "errorInvalidCode": "代碼無效或同桌點餐已結束",
+    "errorStartFailed": "發起訂單失敗",
+    "groupOrderCode": "同桌點餐代碼",
+    "leaveGroupOrder": "退出同桌",
+    "confirmLeaveGroup": "確定要退出目前的同桌點餐嗎？您的購物車將與同桌分開。",
+    "generateGroupCode": "產生同桌代碼",
+    "enter4DigitCode": "輸入4碼",
+    "join": "加入",
+    "orEnterCodeToJoin": "或輸入代碼加入訂單",
+    "enterCodeToJoinTogether": "輸入代碼一起點餐"
   }
 }

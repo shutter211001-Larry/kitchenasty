@@ -343,5 +343,18 @@
     "title": "Pagina Non Trovata",
     "message": "Ci dispiace, non abbiamo trovato la pagina che stai cercando.",
     "backHome": "Torna alla Home"
+  },
+  "groupOrder": {
+    "error4Digits": "Please enter a 4-digit code",
+    "errorInvalidCode": "Invalid code or group order ended",
+    "errorStartFailed": "Failed to start group order",
+    "groupOrderCode": "Group Order Code",
+    "leaveGroupOrder": "Leave Group Order",
+    "confirmLeaveGroup": "Are you sure you want to leave the current group order? Your cart will be separated.",
+    "generateGroupCode": "Generate Group Code",
+    "enter4DigitCode": "Enter 4-digit code",
+    "join": "Join",
+    "orEnterCodeToJoin": "Or enter code to join",
+    "enterCodeToJoinTogether": "Enter code to order together"
   }
 }
