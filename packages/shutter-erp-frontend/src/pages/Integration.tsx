@@ -6,6 +6,8 @@ import {
   Unlink, TrendingUp, RefreshCw, AlertTriangle, Truck, 
   ArrowRight, Sparkles
 } from 'lucide-react';
+import { formatUnit } from '../lib/utils';
+import { useSettings } from '../context/SettingsContext';
 
 interface MenuItem {
   id: string;
@@ -69,6 +71,7 @@ interface ForecastedIngredient {
 }
 
 const Integration = () => {
+  const { globalSettings } = useSettings();
   const [activeTab, setActiveTab] = useState<'overview' | 'binding' | 'forecast' | 'logs'>('overview');
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -717,7 +720,7 @@ const Integration = () => {
                         {deductionLogs.map(log => (
                           <tr key={log.id} className="border-b border-border/40 text-sm hover:bg-muted/10 transition-colors">
                             <td className="py-3.5 font-bold text-gray-800">{log.ingredient?.name || '未知原料'}</td>
-                            <td className="py-3.5 font-bold text-red-600">-{log.amount} {log.ingredient?.unit}</td>
+                            <td className="py-3.5 font-bold text-red-600">-{formatUnit(log.amount, log.ingredient?.unit || '', globalSettings).value} {formatUnit(log.amount, log.ingredient?.unit || '', globalSettings).unit}</td>
                             <td className="py-3.5 text-xs text-gray-600 font-semibold leading-relaxed max-w-[280px] truncate" title={log.reason}>
                               {log.reason}
                             </td>

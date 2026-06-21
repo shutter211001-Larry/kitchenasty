@@ -12,7 +12,7 @@ export function formatUnit(value: number, unit: string, settings?: { decimalPrec
   let formattedValue = value;
   let formattedUnit = unit;
 
-  if (threshold > 0 && value >= threshold) {
+  if (threshold > 0 && Math.abs(value) >= threshold) {
     if (unit.toLowerCase() === 'g') {
       formattedValue = value / 1000;
       formattedUnit = 'kg';
