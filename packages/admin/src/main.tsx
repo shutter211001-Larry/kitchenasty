@@ -23,7 +23,7 @@ import OrderCreate from './pages/OrderCreate.js';
 import OrderDetailPage from './pages/OrderDetail.js';
 import ReservationList from './pages/ReservationList.js';
 import ReservationDetail from './pages/ReservationDetail.js';
-import CouponList from './pages/CouponList.js';
+import PromotionsHub from './pages/PromotionsHub.js';
 import CouponForm from './pages/CouponForm.js';
 import ReviewList from './pages/ReviewList.js';
 import KitchenDisplay from './pages/KitchenDisplay.js';
@@ -114,13 +114,14 @@ function AppRoutes() {
         <Route path="/menu/allergens" element={<RequireRole roles={['SUPER_ADMIN', 'MANAGER']}><AllergenList /></RequireRole>} />
         <Route path="/menu/dietary" element={<RequireRole roles={['SUPER_ADMIN', 'MANAGER']}><DietaryPreferenceList /></RequireRole>} />
         <Route path="/menu/mealtimes" element={<RequireRole roles={['SUPER_ADMIN', 'MANAGER']}><MealtimeList /></RequireRole>} />
-        <Route path="/coupons" element={<RequireRole roles={['SUPER_ADMIN', 'MANAGER']}><CouponList /></RequireRole>} />
-        <Route path="/coupons/new" element={<RequireRole roles={['SUPER_ADMIN', 'MANAGER']}><CouponForm /></RequireRole>} />
-        <Route path="/coupons/:id" element={<RequireRole roles={['SUPER_ADMIN', 'MANAGER']}><CouponForm /></RequireRole>} />
+        <Route path="/promotions" element={<RequireRole roles={['SUPER_ADMIN', 'MANAGER']}><PromotionsHub /></RequireRole>} />
+        <Route path="/promotions/coupons/new" element={<RequireRole roles={['SUPER_ADMIN', 'MANAGER']}><CouponForm /></RequireRole>} />
+        <Route path="/promotions/coupons/:id" element={<RequireRole roles={['SUPER_ADMIN', 'MANAGER']}><CouponForm /></RequireRole>} />
         <Route path="/automation" element={<RequireRole roles={['SUPER_ADMIN', 'MANAGER']}><AutomationRuleList /></RequireRole>} />
         <Route path="/automation/new" element={<RequireRole roles={['SUPER_ADMIN', 'MANAGER']}><AutomationRuleForm /></RequireRole>} />
         <Route path="/automation/:id" element={<RequireRole roles={['SUPER_ADMIN', 'MANAGER']}><AutomationRuleForm /></RequireRole>} />
-        <Route path="/loyalty" element={<RequireRole roles={['SUPER_ADMIN', 'MANAGER']}><CustomerLoyalty /></RequireRole>} />
+        <Route path="/coupons" element={<Navigate to="/promotions" replace />} />
+        <Route path="/loyalty" element={<Navigate to="/promotions" replace />} />
         <Route path="/design" element={<RequireRole roles={['SUPER_ADMIN', 'MANAGER']}><Navigate to="/design/landing" replace /></RequireRole>} />
         <Route path="/design/landing" element={<RequireRole roles={['SUPER_ADMIN', 'MANAGER']}><DesignLanding /></RequireRole>} />
         <Route path="/design/branding" element={<RequireRole roles={['SUPER_ADMIN', 'MANAGER']}><DesignBranding /></RequireRole>} />

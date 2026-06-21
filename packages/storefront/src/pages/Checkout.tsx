@@ -895,53 +895,67 @@ export default function Checkout() {
             />
           </div>
 
-          {/* Coupon */}
+          {/* Discounts & Rewards */}
           <div className="surface-card rounded-xl shadow-sm border p-6">
-            <h2 className="text-lg font-semibold text-main mb-4">{t('checkout.couponCode')}</h2>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={couponCode}
-                onChange={(e) => setCouponCode(e.target.value)}
-                className="flex-1 px-3 py-2 bg-surface border border-input rounded-lg focus:ring-2 focus:ring-primary-500 outline-none text-sm text-main"
-              />
-              <button
-                type="button"
-                className="px-4 py-2 border border-input rounded-lg text-sm font-medium text-sub hover:bg-surface transition-colors"
-              >
-                {t('checkout.apply')}
-              </button>
+            <h2 className="text-lg font-semibold text-main mb-4">
+              🎁 {t('checkout.discountsAndRewards') || '優惠與紅利'}
+            </h2>
+            
+            <div className="space-y-6">
+              {/* Coupon */}
+              <div>
+                <label className="block text-sm font-medium text-main mb-2">
+                  {t('checkout.couponCode')}
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={couponCode}
+                    onChange={(e) => setCouponCode(e.target.value)}
+                    placeholder={t('checkout.enterCouponCode') || '輸入折扣碼'}
+                    className="flex-1 px-3 py-2 bg-surface border border-input rounded-lg focus:ring-2 focus:ring-primary-500 outline-none text-sm text-main"
+                  />
+                  <button
+                    type="button"
+                    className="px-4 py-2 border border-input rounded-lg text-sm font-medium text-sub hover:bg-surface transition-colors"
+                  >
+                    {t('checkout.apply')}
+                  </button>
+                </div>
+              </div>
+
+              {/* Loyalty Points Redemption */}
+              {user && settings.loyaltyProgramEnabled && loyaltyBalance > 0 && (
+                <div className="pt-6 border-t border-input">
+                  <label className="block text-sm font-medium text-main mb-2">
+                    {t('checkout.loyaltyTitle')}
+                  </label>
+                  <p className="text-sm text-sub mb-3">
+                    {t('checkout.loyaltyPointsAvailable', { count: loyaltyBalance })}。
+                    <span>({loyaltyRedeemRate} 點 = $1.00)</span>
+                  </p>
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="number"
+                      min={0}
+                      max={Math.min(loyaltyBalance, Math.floor(subtotal * loyaltyRedeemRate))}
+                      step={100}
+                      value={loyaltyRedeem}
+                      onChange={(e) => setLoyaltyRedeem(Math.max(0, parseInt(e.target.value) || 0))}
+                      className="w-32 px-3 py-2 bg-surface border border-input rounded-lg focus:ring-2 focus:ring-primary-500 outline-none text-sm text-main"
+                      placeholder="0"
+                    />
+                    <span className="text-sm text-sub">{t('checkout.loyaltyPointsToRedeem')}</span>
+                    {loyaltyRedeem > 0 && (
+                      <span className="text-sm font-medium text-green-600">
+                        -${loyaltyDiscount.toFixed(2)}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
-
-          {/* Loyalty Points Redemption */}
-          {user && settings.loyaltyProgramEnabled && loyaltyBalance > 0 && (
-            <div className="surface-card rounded-xl shadow-sm border p-6">
-              <h2 className="text-lg font-semibold text-main mb-4">{t('checkout.loyaltyTitle')}</h2>
-              <p className="text-sm text-sub mb-3">
-                {t('checkout.loyaltyPointsAvailable', { count: loyaltyBalance })}。
-                <span>({loyaltyRedeemRate} 點 = $1.00)</span>
-              </p>
-              <div className="flex items-center gap-3">
-                <input
-                  type="number"
-                  min={0}
-                  max={Math.min(loyaltyBalance, Math.floor(subtotal * loyaltyRedeemRate))}
-                  step={100}
-                  value={loyaltyRedeem}
-                  onChange={(e) => setLoyaltyRedeem(Math.max(0, parseInt(e.target.value) || 0))}
-                  className="w-32 px-3 py-2 bg-surface border border-input rounded-lg focus:ring-2 focus:ring-primary-500 outline-none text-sm text-main"
-                  placeholder="0"
-                />
-                <span className="text-sm text-sub">{t('checkout.loyaltyPointsToRedeem')}</span>
-                {loyaltyRedeem > 0 && (
-                  <span className="text-sm font-medium text-green-600">
-                    -${loyaltyDiscount.toFixed(2)}
-                  </span>
-                )}
-              </div>
-            </div>
-          )}
 
           {/* Payment method */}
           {paymentSettings?.stripeEnabled || paymentSettings?.paypalEnabled || paymentSettings?.cashEnabled ? (
