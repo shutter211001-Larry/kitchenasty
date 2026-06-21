@@ -192,7 +192,7 @@ export default function AdminLayout({ children, onLogout }: { children: React.Re
       >
         <div className="px-6 py-4 border-b border-gray-700">
           <h1 className="text-xl font-bold text-primary-400">夏特點餐系統</h1>
-          <p className="text-xs text-gray-400 mt-1">{t('common.adminPanel') || '管理後台'}</p>
+          <p className="text-xs text-gray-400 mt-1">{t('common.adminPanel')}</p>
         </div>
         <nav className="flex-1 py-4 overflow-y-auto select-none">
           {filteredNav.map((item) => {

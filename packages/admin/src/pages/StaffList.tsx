@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 interface Staff {
   id: string;
@@ -26,12 +27,13 @@ const ROLE_COLORS: Record<string, string> = {
 };
 
 const ROLE_LABELS: Record<string, string> = {
-  SUPER_ADMIN: '超級管理員',
-  MANAGER: '店經理',
-  STAFF: '店員',
+  SUPER_ADMIN: 'staff.roles.superAdmin',
+  MANAGER: 'staff.roles.manager',
+  STAFF: 'staff.roles.staff',
 };
 
 export default function StaffList() {
+  const { t } = useTranslation();
   const [staff, setStaff] = useState<Staff[]>([]);
   const [pagination, setPagination] = useState<Pagination | null>(null);
   const [loading, setLoading] = useState(true);
@@ -83,12 +85,12 @@ export default function StaffList() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">員工管理 (Staff)</h1>
+        <h1 className="text-2xl font-bold text-gray-900">{t('staff.title')}</h1>
         <Link
           to="/staff/invite"
           className="bg-primary-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary-700 transition-colors"
         >
-          + 邀請員工
+          {t('staff.actions.invite')}
         </Link>
       </div>
 
@@ -96,22 +98,22 @@ export default function StaffList() {
       <div className="flex gap-3 mb-4">
         <input
           type="text"
-          placeholder="搜尋姓名或電子郵件..."
+          placeholder={t('staff.searchPlaceholder')}
           value={search}
           onChange={(e) => { setSearch(e.target.value); setPage(1); }}
           className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none w-64"
-          aria-label="搜尋姓名或電子郵件"
+          aria-label={t('staff.searchPlaceholder')}
         />
         <select
           value={roleFilter}
           onChange={(e) => { setRoleFilter(e.target.value); setPage(1); }}
           className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
-          aria-label="依角色篩選"
+          aria-label={t('staff.roleFilter')}
         >
-          <option value="">所有角色</option>
-          <option value="SUPER_ADMIN">超級管理員 (Super Admin)</option>
-          <option value="MANAGER">店經理 (Manager)</option>
-          <option value="STAFF">店員 (Staff)</option>
+          <option value="">{t('staff.roleFilter')}</option>
+          <option value="SUPER_ADMIN">{t('staff.roles.superAdmin')}</option>
+          <option value="MANAGER">{t('staff.roles.manager')}</option>
+          <option value="STAFF">{t('staff.roles.staff')}</option>
         </select>
       </div>
 
@@ -124,7 +126,7 @@ export default function StaffList() {
       {error && <div className="bg-red-50 text-red-700 p-4 rounded-lg mb-4">{error}</div>}
 
       {!loading && !error && staff.length === 0 && (
-        <p className="text-gray-500 text-center py-12">找不到任何員工。</p>
+        <p className="text-gray-500 text-center py-12">{t('staff.notFound')}</p>
       )}
 
       {!loading && staff.length > 0 && (
@@ -133,12 +135,12 @@ export default function StaffList() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-200 bg-gray-50">
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">姓名</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">電子郵件</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">角色</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">所属分店</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">帳號狀態</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">操作</th>
+                  <th className="text-left px-4 py-3 font-medium text-gray-600">{t('staff.table.name')}</th>
+                  <th className="text-left px-4 py-3 font-medium text-gray-600">{t('staff.table.email')}</th>
+                  <th className="text-left px-4 py-3 font-medium text-gray-600">{t('staff.table.role')}</th>
+                  <th className="text-left px-4 py-3 font-medium text-gray-600">{t('staff.table.location')}</th>
+                  <th className="text-left px-4 py-3 font-medium text-gray-600">{t('staff.table.status')}</th>
+                  <th className="text-left px-4 py-3 font-medium text-gray-600">{t('staff.table.actions')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -148,7 +150,7 @@ export default function StaffList() {
                     <td className="px-4 py-3 text-gray-600">{member.email}</td>
                     <td className="px-4 py-3">
                       <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${ROLE_COLORS[member.role] || 'bg-gray-100 text-gray-700'}`}>
-                        {ROLE_LABELS[member.role] || member.role}
+                        {ROLE_LABELS[member.role] ? t(ROLE_LABELS[member.role]) : member.role}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-gray-600">
@@ -163,7 +165,7 @@ export default function StaffList() {
                           }`}
                         aria-label={`${member.isActive ? '停用' : '啟用'} ${member.name}`}
                       >
-                        {member.isActive ? '啟用中' : '已停用'}
+                        {member.isActive ? t('staff.isActive') : t('staff.isInactive')}
                       </button>
                     </td>
                     <td className="px-4 py-3">
@@ -171,7 +173,7 @@ export default function StaffList() {
                         to={`/staff/${member.id}`}
                         className="text-primary-600 hover:text-primary-700 text-xs font-medium"
                       >
-                        編輯
+                        {t('staff.actions.edit')}
                       </Link>
                     </td>
                   </tr>

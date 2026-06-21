@@ -35,6 +35,7 @@
     "logout": "登出"
   },
   "common": {
+    "adminPanel": "管理後台",
     "save": "儲存",
     "cancel": "取消",
     "delete": "刪除",
@@ -168,5 +169,53 @@
       "createFirst": "建立您的第一條規則",
       "invalidJson": "JSON 格式錯誤"
     }
+  },
+  "staff": {
+    "title": "員工管理 (Staff)",
+    "editTitle": "編輯員工",
+    "inviteTitle": "邀請員工",
+    "inviteSent": "邀請已發送！",
+    "inviteAnother": "邀請另一位",
+    "backToList": "返回員工列表",
+    "email": "電子郵件",
+    "name": "姓名",
+    "nameOptional": "姓名 (選填)",
+    "role": "職位",
+    "phone": "電話",
+    "location": "所屬分店",
+    "active": "啟用狀態",
+    "isActive": "啟用中",
+    "isInactive": "已停用",
+    "roles": {
+      "superAdmin": "超級管理員 (Super Admin)",
+      "manager": "店經理 (Manager)",
+      "staff": "店員 (Staff)"
+    },
+    "actions": {
+      "invite": "+ 邀請員工",
+      "edit": "編輯",
+      "save": "儲存變更",
+      "saving": "儲存中...",
+      "delete": "刪除員工",
+      "deleting": "刪除中...",
+      "sendInvite": "發送邀請",
+      "sending": "發送中..."
+    },
+    "dangerZone": "危險區域",
+    "deleteWarning": "刪除員工後將無法復原。請確定您要執行此操作。",
+    "deleteConfirm": "確定要刪除此員工嗎？此操作無法復原。",
+    "searchPlaceholder": "搜尋姓名或電子郵件...",
+    "roleFilter": "所有角色",
+    "notFound": "找不到任何員工。",
+    "table": {
+      "name": "姓名",
+      "email": "電子郵件",
+      "role": "角色",
+      "location": "所屬分店",
+      "status": "帳號狀態",
+      "actions": "操作"
+    },
+    "none": "無",
+    "back": "← 返回"
   }
 }
