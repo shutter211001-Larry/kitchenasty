@@ -35,7 +35,7 @@
   },
   "home": {
     "heroTitle": "Commandez de Bons Plats en Ligne",
-    "heroDescription": "Parcourez notre menu, passez votre commande en livraison ou à emporter, et savourez des plats frais préparés à la demande chez KitchenAsty.",
+    "heroDescription": "Parcourez notre menu, passez votre commande en livraison ou à emporter, et savourez des plats frais préparés à la demande chez {{storeName}}.",
     "orderMore": "Commander à nouveau",
     "viewMenu": "Voir le Menu",
     "findLocation": "Trouver un Restaurant",
@@ -76,7 +76,7 @@
     "noAccount": "Pas encore de compte ?",
     "registerLink": "Créer un compte",
     "registerTitle": "Créer un Compte",
-    "registerSubtitle": "Rejoignez KitchenAsty pour commander et réserver facilement.",
+    "registerSubtitle": "Rejoignez {{storeName}} pour commander et réserver facilement.",
     "name": "Nom complet",
     "phone": "Téléphone (optionnel)",
     "createAccount": "Créer un Compte",
@@ -134,7 +134,7 @@
   },
   "locations": {
     "title": "Nos Restaurants",
-    "subtitle": "Trouvez un KitchenAsty près de chez vous",
+    "subtitle": "Trouvez un {{storeName}} près de chez vous",
     "noLocations": "Aucun restaurant trouvé.",
     "viewMenu": "Voir le Menu",
     "previous": "Précédent",

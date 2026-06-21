@@ -24,6 +24,9 @@ export default function Home() {
   const FeaturesVariant = featureVariants[templateId];
   const CtaVariant = ctaVariants[templateId];
 
+  // Wrap t function to automatically inject storeName for template variables
+  const tWithStoreName = (key: string) => t(key, { storeName: settings?.storeName || 'Our Store' });
+
   // LIFF auto-login is handled globally in AuthContext — no need to duplicate here
 
   // Preloading background image logic
@@ -71,7 +74,7 @@ export default function Home() {
 
   // Placeholder to maintain brand identity during lazy loading
   const HeroPlaceholder = (
-    <ClassicHero hero={hero} t={t} lang={lang} isPlaceholder={true} />
+    <ClassicHero hero={hero} t={tWithStoreName} lang={lang} isPlaceholder={true} />
   );
 
   if (!bgLoaded) {
@@ -89,28 +92,28 @@ export default function Home() {
       {/* Hero */}
       {HeroVariant ? (
         <Suspense fallback={HeroPlaceholder}>
-          <HeroVariant hero={hero} t={t} lang={lang} />
+          <HeroVariant hero={hero} t={tWithStoreName} lang={lang} />
         </Suspense>
       ) : (
-        <ClassicHero hero={hero} t={t} lang={lang} />
+        <ClassicHero hero={hero} t={tWithStoreName} lang={lang} />
       )}
 
       {/* Features */}
       {FeaturesVariant ? (
         <Suspense fallback={<div className="h-64 animate-pulse bg-surface-soft" />}>
-          <FeaturesVariant features={features} t={t} lang={lang} />
+          <FeaturesVariant features={features} t={tWithStoreName} lang={lang} />
         </Suspense>
       ) : (
-        <ClassicFeatures features={features} t={t} lang={lang} />
+        <ClassicFeatures features={features} t={tWithStoreName} lang={lang} />
       )}
 
       {/* CTA */}
       {CtaVariant ? (
         <Suspense fallback={<div className="h-48 animate-pulse bg-surface-soft" />}>
-          <CtaVariant cta={cta} t={t} lang={lang} />
+          <CtaVariant cta={cta} t={tWithStoreName} lang={lang} />
         </Suspense>
       ) : (
-        <ClassicCta cta={cta} t={t} lang={lang} />
+        <ClassicCta cta={cta} t={tWithStoreName} lang={lang} />
       )}
     </>
   );

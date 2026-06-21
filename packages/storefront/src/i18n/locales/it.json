@@ -35,7 +35,7 @@
   },
   "home": {
     "heroTitle": "Ordina Cibo Delizioso Online",
-    "heroDescription": "Sfoglia il nostro menu, ordina per consegna o ritiro e gusta piatti freschi preparati al momento da KitchenAsty.",
+    "heroDescription": "Sfoglia il nostro menu, ordina per consegna o ritiro e gusta piatti freschi preparati al momento da {{storeName}}.",
     "orderMore": "Ordina ancora",
     "viewMenu": "Vedi il Menu",
     "findLocation": "Trova una Sede",
@@ -76,7 +76,7 @@
     "noAccount": "Non hai un account?",
     "registerLink": "Creane uno",
     "registerTitle": "Crea un Account",
-    "registerSubtitle": "Unisciti a KitchenAsty per ordinare e prenotare facilmente.",
+    "registerSubtitle": "Unisciti a {{storeName}} per ordinare e prenotare facilmente.",
     "name": "Nome completo",
     "phone": "Telefono (opzionale)",
     "createAccount": "Crea un Account",
@@ -134,7 +134,7 @@
   },
   "locations": {
     "title": "Le Nostre Sedi",
-    "subtitle": "Trova un KitchenAsty vicino a te",
+    "subtitle": "Trova un {{storeName}} vicino a te",
     "noLocations": "Nessuna sede trovata.",
     "viewMenu": "Vedi il Menu",
     "previous": "Precedente",

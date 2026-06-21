@@ -65,7 +65,7 @@ export default function Menu() {
     
   const menuDesc = settings.menuSection?.translations?.description?.[i18n.language] 
     || settings.menuSection?.description 
-    || t('home.heroDescription').split('.')[0] + '.';
+    || t('home.heroDescription', { storeName: settings?.storeName || 'Our Store' }).split('.')[0] + '.';
 
   const selectedLocation = searchParams.get('location');
   const categoriesUrl = selectedLocation

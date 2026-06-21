@@ -35,7 +35,7 @@
   },
   "home": {
     "heroTitle": "Peça Comida Deliciosa Online",
-    "heroDescription": "Navegue pelo nosso cardápio, faça seu pedido para entrega ou retirada e aproveite refeições frescas e preparadas na hora pelo KitchenAsty.",
+    "heroDescription": "Navegue pelo nosso cardápio, faça seu pedido para entrega ou retirada e aproveite refeições frescas e preparadas na hora pelo {{storeName}}.",
     "orderMore": "Pedir Novamente",
     "viewMenu": "Ver Cardápio",
     "findLocation": "Encontrar Unidade",
@@ -76,7 +76,7 @@
     "noAccount": "Não tem uma conta?",
     "registerLink": "Crie uma",
     "registerTitle": "Criar Conta",
-    "registerSubtitle": "Junte-se ao KitchenAsty para pedidos e reservas fáceis.",
+    "registerSubtitle": "Junte-se ao {{storeName}} para pedidos e reservas fáceis.",
     "name": "Nome completo",
     "phone": "Telefone (opcional)",
     "createAccount": "Criar Conta",
@@ -134,7 +134,7 @@
   },
   "locations": {
     "title": "Nossas Unidades",
-    "subtitle": "Encontre um KitchenAsty perto de você",
+    "subtitle": "Encontre um {{storeName}} perto de você",
     "noLocations": "Nenhuma unidade encontrada.",
     "viewMenu": "Ver Cardápio",
     "previous": "Anterior",

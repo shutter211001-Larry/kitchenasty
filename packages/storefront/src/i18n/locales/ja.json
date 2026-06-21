@@ -35,7 +35,7 @@
   },
   "home": {
     "heroTitle": "美味しい料理をオンラインで注文",
-    "heroDescription": "メニューを見て、デリバリーやテイクアウトを注文。KitchenAstyの出来立ての料理をお楽しみください。",
+    "heroDescription": "メニューを見て、デリバリーやテイクアウトを注文。{{storeName}}の出来立ての料理をお楽しみください。",
     "orderMore": "もう一度注文する",
     "viewMenu": "メニューを見る",
     "findLocation": "店舗を探す",
@@ -76,7 +76,7 @@
     "noAccount": "アカウントをお持ちでないですか？",
     "registerLink": "新規作成",
     "registerTitle": "アカウント作成",
-    "registerSubtitle": "KitchenAstyに参加して、簡単に注文や予約をしましょう。",
+    "registerSubtitle": "{{storeName}}に参加して、簡単に注文や予約をしましょう。",
     "name": "氏名",
     "phone": "電話番号（任意）",
     "createAccount": "アカウント作成",
@@ -134,7 +134,7 @@
   },
   "locations": {
     "title": "店舗一覧",
-    "subtitle": "お近くのKitchenAstyを探す",
+    "subtitle": "お近くの{{storeName}}を探す",
     "noLocations": "店舗が見つかりません。",
     "viewMenu": "メニューを見る",
     "previous": "前へ",

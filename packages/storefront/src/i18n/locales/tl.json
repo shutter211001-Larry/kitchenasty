@@ -35,7 +35,7 @@
   },
   "home": {
     "heroTitle": "Mag-order ng Masarap na Pagkain Online",
-    "heroDescription": "I-browse ang aming menu, mag-order para sa delivery o pickup, at i-enjoy ang sariwang luto mula sa KitchenAsty.",
+    "heroDescription": "I-browse ang aming menu, mag-order para sa delivery o pickup, at i-enjoy ang sariwang luto mula sa {{storeName}}.",
     "orderMore": "Umorder Pa",
     "viewMenu": "I-view ang Menu",
     "findLocation": "Maghanap ng Lokasyon",
@@ -76,7 +76,7 @@
     "noAccount": "Wala pang account?",
     "registerLink": "Gumawa ng isa",
     "registerTitle": "Gumawa ng Account",
-    "registerSubtitle": "Sumali sa KitchenAsty para sa madaling pag-order at reservasyon.",
+    "registerSubtitle": "Sumali sa {{storeName}} para sa madaling pag-order at reservasyon.",
     "name": "Buong Pangalan",
     "phone": "Telepono (opsyonal)",
     "createAccount": "Gumawa ng Account",
@@ -134,7 +134,7 @@
   },
   "locations": {
     "title": "Aming mga Lokasyon",
-    "subtitle": "Maghanap ng KitchenAsty na malapit sa iyo",
+    "subtitle": "Maghanap ng {{storeName}} na malapit sa iyo",
     "noLocations": "Walang nahanap na lokasyon.",
     "viewMenu": "I-view ang Menu",
     "previous": "Nakaraan",

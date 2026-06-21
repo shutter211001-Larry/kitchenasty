@@ -35,7 +35,7 @@
   },
   "home": {
     "heroTitle": "Pesan Makanan Lezat Online",
-    "heroDescription": "Jelajahi menu kami, pesan untuk pengantaran atau pengambilan, dan nikmati hidangan segar dari KitchenAsty.",
+    "heroDescription": "Jelajahi menu kami, pesan untuk pengantaran atau pengambilan, dan nikmati hidangan segar dari {{storeName}}.",
     "orderMore": "Pesan Lagi",
     "viewMenu": "Lihat Menu",
     "findLocation": "Cari Lokasi",
@@ -76,7 +76,7 @@
     "noAccount": "Belum punya akun?",
     "registerLink": "Buat akun",
     "registerTitle": "Buat Akun",
-    "registerSubtitle": "Bergabung dengan KitchenAsty untuk kemudahan pemesanan dan reservasi.",
+    "registerSubtitle": "Bergabung dengan {{storeName}} untuk kemudahan pemesanan dan reservasi.",
     "name": "Nama Lengkap",
     "phone": "Telepon (opsional)",
     "createAccount": "Buat Akun",
@@ -134,7 +134,7 @@
   },
   "locations": {
     "title": "Lokasi Kami",
-    "subtitle": "Cari KitchenAsty di dekat Anda",
+    "subtitle": "Cari {{storeName}} di dekat Anda",
     "noLocations": "Lokasi tidak ditemukan.",
     "viewMenu": "Lihat Menu",
     "previous": "Sebelumnya",

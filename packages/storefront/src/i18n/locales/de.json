@@ -35,7 +35,7 @@
   },
   "home": {
     "heroTitle": "Leckeres Essen Online Bestellen",
-    "heroDescription": "Stöbern Sie in unserer Speisekarte, bestellen Sie zur Lieferung oder Abholung und genießen Sie frisch zubereitete Gerichte von KitchenAsty.",
+    "heroDescription": "Stöbern Sie in unserer Speisekarte, bestellen Sie zur Lieferung oder Abholung und genießen Sie frisch zubereitete Gerichte von {{storeName}}.",
     "orderMore": "Erneut bestellen",
     "viewMenu": "Speisekarte Ansehen",
     "findLocation": "Standort Finden",
@@ -76,7 +76,7 @@
     "noAccount": "Noch kein Konto?",
     "registerLink": "Jetzt registrieren",
     "registerTitle": "Konto Erstellen",
-    "registerSubtitle": "Werden Sie Mitglied bei KitchenAsty für einfaches Bestellen und Reservieren.",
+    "registerSubtitle": "Werden Sie Mitglied bei {{storeName}} für einfaches Bestellen und Reservieren.",
     "name": "Vollständiger Name",
     "phone": "Telefon (optional)",
     "createAccount": "Konto Erstellen",
@@ -134,7 +134,7 @@
   },
   "locations": {
     "title": "Unsere Standorte",
-    "subtitle": "Finden Sie ein KitchenAsty in Ihrer Nähe",
+    "subtitle": "Finden Sie ein {{storeName}} in Ihrer Nähe",
     "noLocations": "Keine Standorte gefunden.",
     "viewMenu": "Speisekarte Ansehen",
     "previous": "Zurück",
