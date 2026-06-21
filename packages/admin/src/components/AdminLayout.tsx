@@ -21,7 +21,7 @@ const navItems: NavItem[] = [
   { path: '/reviews', label: 'nav.reviews', icon: '\u2B50', roles: ['SUPER_ADMIN', 'MANAGER', 'STAFF'] },
   { path: '/customers', label: 'nav.customers', icon: '\uD83D\uDC65', roles: ['SUPER_ADMIN', 'MANAGER'] },
   { path: '/kitchen', label: 'nav.kitchen', icon: '\uD83C\uDF73', roles: ['SUPER_ADMIN', 'MANAGER', 'STAFF'] },
-  { path: '/locations', label: 'nav.locations', icon: '\u25CE', roles: ['SUPER_ADMIN', 'MANAGER'] },
+  { path: '/locations', label: 'nav.locations', icon: '◎', roles: ['SUPER_ADMIN'] },
   {
     path: '/menu',
     label: 'nav.menu',
@@ -43,7 +43,7 @@ const navItems: NavItem[] = [
     path: '/design',
     label: 'nav.design',
     icon: '\uD83C\uDFA8',
-    roles: ['SUPER_ADMIN', 'MANAGER'],
+    roles: ['SUPER_ADMIN'],
     children: [
       { path: '/design/landing', label: 'nav.landingPage' },
       { path: '/design/branding', label: 'nav.branding' },
@@ -55,19 +55,19 @@ const navItems: NavItem[] = [
     path: '/legal',
     label: 'nav.legal',
     icon: '\u2696',
-    roles: ['SUPER_ADMIN', 'MANAGER'],
+    roles: ['SUPER_ADMIN'],
     children: [
       { path: '/legal/pages', label: 'nav.legalPages' },
       { path: '/legal/cookies', label: 'nav.cookieCategories' },
       { path: '/legal/consent', label: 'nav.consentLog' },
     ],
   },
-  { path: '/settings', label: 'nav.settings', icon: '\u2699', roles: ['SUPER_ADMIN', 'MANAGER'] },
+  { path: '/settings', label: 'nav.settings', icon: '⚙', roles: ['SUPER_ADMIN'] },
   {
     path: '/developer',
     label: 'nav.developer',
     icon: '\uD83D\uDEE0',
-    roles: ['SUPER_ADMIN', 'MANAGER'],
+    roles: ['SUPER_ADMIN'],
     children: [
       { path: '/developer/metrics', label: 'nav.apiMetrics' },
       { path: '/developer/audit-log', label: 'nav.auditLog' },
@@ -170,7 +170,7 @@ export default function AdminLayout({ children, onLogout }: { children: React.Re
     return () => document.removeEventListener('mousedown', handleClick);
   }, []);
 
-  const isManagerPlus = user && (user.role === 'SUPER_ADMIN' || user.role === 'MANAGER');
+  const isSuperAdmin = user && user.role === 'SUPER_ADMIN';
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -313,7 +313,7 @@ export default function AdminLayout({ children, onLogout }: { children: React.Re
             </Link>
 
             {/* Settings gear */}
-            {isManagerPlus && (
+            {isSuperAdmin && (
               <Link
                 to="/settings"
                 className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
@@ -351,7 +351,7 @@ export default function AdminLayout({ children, onLogout }: { children: React.Re
 
                 {dropdownOpen && (
                   <div className="absolute right-0 mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
-                    {isManagerPlus && (
+                    {isSuperAdmin && (
                       <Link
                         to="/settings"
                         onClick={() => setDropdownOpen(false)}
