@@ -170,6 +170,9 @@
     "title": "Checkout",
     "emptyCart": "Your cart is empty.",
     "browseMenu": "Browse Menu",
+    "dineInTable": "Dine-in Table",
+    "dineInTableDesc": "Your order will be prepared for this table",
+    "clearTable": "Change to Takeout / Delivery",
     "orderType": "Order Type",
     "delivery": "Delivery",
     "pickup": "Pickup",
@@ -354,5 +357,18 @@
     "title": "Page Not Found",
     "message": "Sorry, we couldn't find the page you're looking for.",
     "backHome": "Back to Home"
+  },
+  "groupOrder": {
+    "error4Digits": "Please enter a 4-digit code",
+    "errorInvalidCode": "Invalid code or group order ended",
+    "errorStartFailed": "Failed to start group order",
+    "groupOrderCode": "Group Order Code",
+    "leaveGroupOrder": "Leave Group Order",
+    "confirmLeaveGroup": "Are you sure you want to leave the current group order? Your cart will be separated.",
+    "generateGroupCode": "Generate Group Code",
+    "enter4DigitCode": "Enter 4-digit code",
+    "join": "Join",
+    "orEnterCodeToJoin": "Or enter code to join",
+    "enterCodeToJoinTogether": "Enter code to order together"
   }
 }

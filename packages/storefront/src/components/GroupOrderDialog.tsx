@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useLocation } from 'react-router-dom';
 import { useCart } from '../context/CartContext.js';
 import { API_BASE } from '../lib/api.js';
 
@@ -31,10 +32,9 @@ export default function GroupOrderDialog() {
         body: JSON.stringify({ locationId: locId, tableName })
       });
       const data = await res.json();
-      if (!data.success) throw new Error(data.error || '發起訂單失敗');
+      if (!data.success) throw new Error(data.error || t('groupOrder.errorStartFailed'));
 
       setGroupSession(data.data.id, data.data.pin);
-      setIsOpen(false);
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -44,7 +44,7 @@ export default function GroupOrderDialog() {
 
   const handleJoin = async () => {
     if (pinInput.length !== 4) {
-      setError('請輸入 4 碼代碼');
+      setError(t('groupOrder.error4Digits'));
       return;
     }
     try {
@@ -59,10 +59,9 @@ export default function GroupOrderDialog() {
         body: JSON.stringify({ locationId: locId, tableName, pin: pinInput })
       });
       const data = await res.json();
-      if (!data.success) throw new Error(data.error || '代碼無效或同桌點餐已結束');
+      if (!data.success) throw new Error(data.error || t('groupOrder.errorInvalidCode'));
 
       setGroupSession(data.data.id, data.data.pin);
-      setIsOpen(false);
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -70,7 +69,9 @@ export default function GroupOrderDialog() {
     }
   };
 
-  if (!tableName) return null;
+  const location = useLocation();
+
+  if (!tableName || location.pathname === '/checkout') return null;
 
   return (
     <div className="fixed bottom-24 left-4 sm:bottom-6 sm:left-6 z-40 animate-in fade-in slide-in-from-bottom-5 duration-300">
@@ -100,18 +101,18 @@ export default function GroupOrderDialog() {
         {groupSessionId && isOpen && (
           <div className="mt-3 flex flex-col gap-3">
             <div className="bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 px-3 py-2 rounded-xl text-center shadow-inner border border-primary-100/50 dark:border-primary-800/50">
-              <span className="text-[10px] opacity-80 block mb-0.5 font-medium">同桌點餐代碼</span>
+              <span className="text-[10px] opacity-80 block mb-0.5 font-medium">{t('groupOrder.groupOrderCode')}</span>
               <span className="text-xl font-black tracking-widest">{groupPin}</span>
             </div>
             <button 
               onClick={() => {
-                if(window.confirm('確定要退出目前的同桌點餐嗎？您的購物車將與同桌分開。')) {
+                if(window.confirm(t('groupOrder.confirmLeaveGroup'))) {
                   setGroupSession(null, null);
                 }
               }}
               className="w-full bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400 text-xs font-bold py-2 rounded-xl hover:bg-red-100 dark:hover:bg-red-900/50 transition"
             >
-              退出同桌
+              {t('groupOrder.leaveGroupOrder')}
             </button>
           </div>
         )}
@@ -130,7 +131,7 @@ export default function GroupOrderDialog() {
               disabled={loading}
               className="w-full bg-primary-600 text-white text-sm font-bold py-2.5 rounded-xl hover:bg-primary-700 transition shadow-md shadow-primary-500/20 disabled:opacity-50"
             >
-              產生同桌代碼
+              {t('groupOrder.generateGroupCode')}
             </button>
             
             {isJoining ? (
@@ -139,7 +140,7 @@ export default function GroupOrderDialog() {
                     value={pinInput} 
                     onChange={(e) => setPinInput(e.target.value.replace(/\D/g, ''))} 
                     className="w-full px-3 py-2 border border-gray-300 rounded-xl dark:bg-gray-700 dark:border-gray-600 dark:text-white text-center font-bold tracking-widest focus:ring-2 focus:ring-primary-500 outline-none text-sm" 
-                    placeholder="輸入4碼" 
+                    placeholder={t('groupOrder.enter4DigitCode')} 
                     maxLength={4}
                   />
                   <button 
@@ -147,7 +148,7 @@ export default function GroupOrderDialog() {
                     disabled={loading || pinInput.length !== 4}
                     className="bg-gray-900 text-white px-4 rounded-xl text-sm font-bold hover:bg-gray-800 disabled:opacity-50 whitespace-nowrap shadow-md"
                   >
-                    加入
+                    {t('groupOrder.join')}
                   </button>
                </div>
             ) : (
@@ -155,7 +156,7 @@ export default function GroupOrderDialog() {
                  onClick={() => setIsJoining(true)} 
                  className="text-gray-500 text-xs font-medium hover:text-gray-700 transition pb-1"
                >
-                 或輸入代碼加入訂單
+                 {t('groupOrder.orEnterCodeToJoin')}
                </button>
             )}
           </div>

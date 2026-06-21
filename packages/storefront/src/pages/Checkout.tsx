@@ -37,6 +37,8 @@ export default function Checkout() {
   const [couponCode, setCouponCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [isJoining, setIsJoining] = useState(false);
+  const [pinInput, setPinInput] = useState('');
   const [isButtonVisible, setIsButtonVisible] = useState(true);
   const submitButtonRef = useRef<HTMLButtonElement>(null);
   const paymentSectionRef = useRef<HTMLDivElement>(null);
@@ -459,44 +461,124 @@ export default function Checkout() {
                 </h2>
                 {groupSessionId && groupPin ? (
                   <p className="text-sm mt-1 opacity-90 font-medium">
-                    同桌代碼: <span className="text-lg font-black tracking-widest bg-white/50 px-2 py-0.5 rounded">{groupPin}</span>
-                    <span className="block mt-1 text-xs opacity-75">輸入代碼一起點餐</span>
+                    {t('groupOrder.groupOrderCode')}: <span className="text-lg font-black tracking-widest bg-white/50 px-2 py-0.5 rounded">{groupPin}</span>
+                    <span className="block mt-1 text-xs opacity-75">{t('groupOrder.enterCodeToJoinTogether')}</span>
                   </p>
                 ) : (
                   <p className="text-sm mt-1 opacity-90 font-medium">{t('checkout.dineInTableDesc') || '您的餐點將會為您準備於此桌位'}</p>
                 )}
               </div>
-              {!groupSessionId && (
+              {!groupSessionId ? (
+                <div className="flex flex-col gap-2 items-end">
+                  {!isJoining ? (
+                    <>
+                      <button 
+                        type="button" 
+                        disabled={loading}
+                        onClick={async () => {
+                          try {
+                            setError('');
+                            setLoading(true);
+                            const locRes = await fetch(`${API_BASE}/locations`);
+                            const locData = await locRes.json();
+                            const locId = locData.data?.[0]?.id;
+                            if (!locId) throw new Error('Location not found');
+
+                            const res = await fetch(`${API_BASE}/group-orders/create`, {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ locationId: locId, tableName })
+                            });
+                            const data = await res.json();
+                            if (!data.success) throw new Error(data.error || t('groupOrder.errorStartFailed'));
+
+                            setGroupSession(data.data.id, data.data.pin);
+                          } catch (err: any) {
+                            setError(err.message);
+                          } finally {
+                            setLoading(false);
+                          }
+                        }}
+                        className="text-sm font-bold bg-white px-4 py-2 rounded-lg border border-primary-200 text-primary-700 hover:bg-primary-100 transition-colors whitespace-nowrap shadow-sm disabled:opacity-50"
+                      >
+                        {t('groupOrder.generateGroupCode')}
+                      </button>
+                      <button 
+                        type="button" 
+                        onClick={() => setIsJoining(true)} 
+                        className="text-xs font-medium text-primary-600 hover:text-primary-800 transition"
+                      >
+                        {t('groupOrder.orEnterCodeToJoin')}
+                      </button>
+                    </>
+                  ) : (
+                    <div className="flex flex-col gap-2 items-end">
+                      <div className="flex gap-2">
+                        <input 
+                          value={pinInput} 
+                          onChange={(e) => setPinInput(e.target.value.replace(/\D/g, ''))} 
+                          className="w-24 px-3 py-1.5 border border-gray-300 rounded-lg text-center font-bold text-sm outline-none focus:ring-2 focus:ring-primary-500" 
+                          placeholder={t('groupOrder.enter4DigitCode')} 
+                          maxLength={4}
+                        />
+                        <button 
+                          type="button"
+                          onClick={async () => {
+                            if (pinInput.length !== 4) {
+                              setError(t('groupOrder.error4Digits'));
+                              return;
+                            }
+                            try {
+                              setLoading(true);
+                              setError('');
+                              const locRes = await fetch(`${API_BASE}/locations`);
+                              const locData = await locRes.json();
+                              const locId = locData.data?.[0]?.id;
+                              if (!locId) throw new Error('Location not found');
+
+                              const res = await fetch(`${API_BASE}/group-orders/join`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ locationId: locId, tableName, pin: pinInput })
+                              });
+                              const data = await res.json();
+                              if (!data.success) throw new Error(data.error || t('groupOrder.errorInvalidCode'));
+
+                              setGroupSession(data.data.id, data.data.pin);
+                              setIsJoining(false);
+                            } catch (err: any) {
+                              setError(err.message);
+                            } finally {
+                              setLoading(false);
+                            }
+                          }}
+                          disabled={loading || pinInput.length !== 4} 
+                          className="bg-gray-900 text-white px-4 rounded-lg text-sm font-bold hover:bg-gray-800 disabled:opacity-50"
+                        >
+                          {t('groupOrder.join')}
+                        </button>
+                      </div>
+                      <button 
+                        type="button" 
+                        onClick={() => setIsJoining(false)} 
+                        className="text-xs text-gray-500 hover:text-gray-700"
+                      >
+                        {t('common.cancel')}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : (
                 <button 
                   type="button" 
-                  disabled={loading}
-                  onClick={async () => {
-                    try {
-                      setError('');
-                      setLoading(true);
-                      const locRes = await fetch(`${API_BASE}/locations`);
-                      const locData = await locRes.json();
-                      const locId = locData.data?.[0]?.id;
-                      if (!locId) throw new Error('Location not found');
-
-                      const res = await fetch(`${API_BASE}/group-orders/create`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ locationId: locId, tableName })
-                      });
-                      const data = await res.json();
-                      if (!data.success) throw new Error(data.error || '發起訂單失敗');
-
-                      setGroupSession(data.data.id, data.data.pin);
-                    } catch (err: any) {
-                      setError(err.message);
-                    } finally {
-                      setLoading(false);
+                  onClick={() => {
+                    if(window.confirm(t('groupOrder.confirmLeaveGroup'))) {
+                      setGroupSession(null, null);
                     }
                   }}
-                  className="text-sm font-bold bg-white px-4 py-2 rounded-lg border border-primary-200 text-primary-700 hover:bg-primary-100 transition-colors whitespace-nowrap shadow-sm disabled:opacity-50"
+                  className="text-sm font-bold bg-red-50 px-4 py-2 rounded-lg border border-red-200 text-red-600 hover:bg-red-100 transition-colors whitespace-nowrap shadow-sm"
                 >
-                  產生同桌代碼
+                  {t('groupOrder.leaveGroupOrder')}
                 </button>
               )}
             </div>
