@@ -177,6 +177,34 @@ export async function deactivateStaff(req: Request<{ id: string }>, res: Respons
 }
 
 // ============================================================
+// DELETE STAFF
+// ============================================================
+
+export async function deleteStaff(req: Request<{ id: string }>, res: Response): Promise<void> {
+  const targetId = req.params.id;
+
+  // Prevent self-deletion
+  if (req.user!.id === targetId) {
+    res.status(400).json({ success: false, error: 'Cannot delete your own account' });
+    return;
+  }
+
+  const existing = await prisma.user.findUnique({ where: { id: targetId } });
+  if (!existing) {
+    res.status(404).json({ success: false, error: 'Staff member not found' });
+    return;
+  }
+
+  await prisma.user.delete({
+    where: { id: targetId },
+  });
+
+  auditLog(req, { action: 'delete', entity: 'Staff', entityId: targetId });
+
+  res.json({ success: true, data: { message: 'Staff member deleted' } });
+}
+
+// ============================================================
 // INVITE STAFF
 // ============================================================
 

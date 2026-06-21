@@ -1,5 +1,6 @@
 import { useState, useEffect, FormEvent } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext.js';
 
 interface Staff {
   id: string;
@@ -20,6 +21,7 @@ interface Location {
 export default function StaffEdit() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const [staff, setStaff] = useState<Staff | null>(null);
   const [locations, setLocations] = useState<Location[]>([]);
@@ -30,6 +32,7 @@ export default function StaffEdit() {
   const [isActive, setIsActive] = useState(true);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState('');
 
   const token = localStorage.getItem('token') || '';
@@ -78,6 +81,23 @@ export default function StaffEdit() {
       setError(err.message);
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function handleDelete() {
+    if (!window.confirm('Are you sure you want to delete this staff member? This action cannot be undone.')) return;
+    setDeleting(true);
+    try {
+      const res = await fetch(`/api/staff/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to delete');
+      navigate('/staff');
+    } catch (err: any) {
+      setError(err.message);
+      setDeleting(false);
     }
   }
 
@@ -184,6 +204,23 @@ export default function StaffEdit() {
           {saving ? 'Saving...' : 'Save Changes'}
         </button>
       </form>
+
+      {user?.role === 'SUPER_ADMIN' && staff && user.id !== staff.id && (
+        <div className="mt-8 bg-white rounded-xl shadow-sm border border-red-200 p-6">
+          <h3 className="text-lg font-bold text-red-600 mb-2">Danger Zone</h3>
+          <p className="text-sm text-gray-600 mb-4">
+            Once you delete a staff member, there is no going back. Please be certain.
+          </p>
+          <button
+            type="button"
+            onClick={handleDelete}
+            disabled={deleting}
+            className="w-full bg-red-50 text-red-600 py-2.5 rounded-lg font-semibold border border-red-200 hover:bg-red-100 transition-colors disabled:opacity-50"
+          >
+            {deleting ? 'Deleting...' : 'Delete Staff Member'}
+          </button>
+        </div>
+      )}
     </div>
   );
 }
