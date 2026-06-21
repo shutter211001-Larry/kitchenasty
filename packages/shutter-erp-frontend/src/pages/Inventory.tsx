@@ -31,7 +31,7 @@ const Inventory: React.FC = () => {
       const [ingredientsRes, logsRes, settingsRes] = await Promise.all([
         axios.get('http://localhost:3000/api/ingredients'),
         axios.get('http://localhost:3000/api/inventory/logs'),
-        axios.get('http://localhost:3000/shutter-erp/api/settings')
+        axios.get('http://localhost:3000/api/settings')
       ]);
       setIngredients(ingredientsRes.data);
       setLogs(logsRes.data);
