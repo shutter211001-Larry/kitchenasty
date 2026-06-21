@@ -36,9 +36,8 @@ const navItems: NavItem[] = [
       { path: '/menu/mealtimes', label: 'nav.mealtimes' },
     ],
   },
-  { path: '/coupons', label: 'nav.coupons', icon: '\uD83C\uDFF7', roles: ['SUPER_ADMIN', 'MANAGER'] },
+  { path: '/promotions', label: 'nav.promotions', icon: '🎁', roles: ['SUPER_ADMIN', 'MANAGER'] },
   { path: '/automation', label: 'nav.automation', icon: '\u26A1', roles: ['SUPER_ADMIN', 'MANAGER'] },
-  { path: '/loyalty', label: 'nav.loyalty', icon: '\uD83C\uDF81', roles: ['SUPER_ADMIN', 'MANAGER'] },
   {
     path: '/design',
     label: 'nav.design',
