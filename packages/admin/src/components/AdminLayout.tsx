@@ -39,7 +39,6 @@ const navItems: NavItem[] = [
     ],
   },
   { path: '/promotions', label: 'nav.promotions', icon: '🎁', roles: ['SUPER_ADMIN', 'MANAGER'] },
-  { path: '/automation', label: 'nav.automation', icon: '\u26A1', roles: ['SUPER_ADMIN', 'MANAGER'] },
   {
     path: '/design',
     label: 'nav.design',
