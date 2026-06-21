@@ -95,7 +95,7 @@ export default function Register() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-main">{t('auth.registerTitle')}</h1>
-          <p className="mt-2 text-sub">{t('auth.registerSubtitle', { storeName: settings?.storeName || 'Our Store' })}</p>
+          <p className="mt-2 text-sub">{t('auth.registerSubtitle', { storeName: settings?.siteName || 'Our Store' })}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="surface-card p-8 rounded-xl shadow-sm border">

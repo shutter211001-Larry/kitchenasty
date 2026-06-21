@@ -25,7 +25,7 @@ export default function Home() {
   const CtaVariant = ctaVariants[templateId];
 
   // Wrap t function to automatically inject storeName for template variables
-  const tWithStoreName = (key: string) => t(key, { storeName: settings?.storeName || 'Our Store' });
+  const tWithStoreName = (key: string) => t(key, { storeName: settings?.siteName || 'Our Store' });
 
   // LIFF auto-login is handled globally in AuthContext — no need to duplicate here
 
