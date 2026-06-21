@@ -6,9 +6,13 @@ import { cn } from '../lib/utils';
 const API = 'http://localhost:3000/api/dictionaries';
 
 export default function Settings() {
-  const [activeTab, setActiveTab] = useState<'actions' | 'units'>('actions');
+  const [activeTab, setActiveTab] = useState<'actions' | 'units' | 'global'>('actions');
   const [actionGroups, setActionGroups] = useState<any[]>([]);
   const [unitGroups, setUnitGroups] = useState<any[]>([]);
+  const [globalSettings, setGlobalSettings] = useState({
+    decimalPrecision: 1,
+    autoUnitConversionThreshold: 1000
+  });
   const [loading, setLoading] = useState(true);
 
   // Group CRUD state
@@ -24,12 +28,16 @@ export default function Settings() {
   const fetchAll = async () => {
     try {
       setLoading(true);
-      const [actRes, ugRes] = await Promise.all([
+      const [actRes, ugRes, settingsRes] = await Promise.all([
         axios.get(`${API}/actions`),
         axios.get(`${API}/units`),
+        axios.get('http://localhost:3000/api/settings')
       ]);
       setActionGroups(actRes.data);
       setUnitGroups(ugRes.data);
+      if (settingsRes.data) {
+        setGlobalSettings(settingsRes.data);
+      }
       if (actRes.data.length > 0) setActiveGroupId(actRes.data[0].id);
     } catch (e) {
       console.error(e);
@@ -103,6 +111,16 @@ export default function Settings() {
     fetchAll();
   };
 
+  const handleSaveGlobalSettings = async () => {
+    try {
+      await axios.put('http://localhost:3000/api/settings', globalSettings);
+      alert('系統全域設定已儲存！');
+    } catch (e) {
+      console.error('Failed to save settings:', e);
+      alert('儲存失敗，請重試。');
+    }
+  };
+
   const groups = activeTab === 'actions' ? actionGroups : unitGroups;
   const activeGroup = groups.find(g => g.id === activeGroupId);
   const items = activeTab === 'actions' ? (activeGroup?.actions || []) : (activeGroup?.units || []);
@@ -123,11 +141,68 @@ export default function Settings() {
           <button onClick={() => setActiveTab('units')} className={cn('flex-1 sm:flex-none px-4 sm:px-6 py-3 rounded-xl font-bold transition-all text-sm cursor-pointer text-center justify-center flex', activeTab === 'units' ? 'bg-primary text-white shadow-md' : 'text-muted-foreground hover:bg-white')}>
             單位群組管理
           </button>
+          <button onClick={() => setActiveTab('global')} className={cn('flex-1 sm:flex-none px-4 sm:px-6 py-3 rounded-xl font-bold transition-all text-sm cursor-pointer text-center justify-center flex', activeTab === 'global' ? 'bg-primary text-white shadow-md' : 'text-muted-foreground hover:bg-white')}>
+            系統全域設定
+          </button>
         </div>
 
         <div className="flex flex-col md:flex-row flex-1 overflow-hidden">
-          {/* Left: Group List */}
-          <div className="w-full md:w-64 border-b md:border-b-0 md:border-r border-border flex flex-col bg-muted/5 shrink-0 max-h-[260px] md:max-h-none">
+          {activeTab === 'global' ? (
+            <div className="flex-1 p-8 overflow-y-auto space-y-8 bg-muted/5">
+              <div>
+                <h3 className="text-2xl font-black text-gray-800 mb-2">系統偏好設定</h3>
+                <p className="text-sm text-muted-foreground">管理全系統通用的數值顯示與單位進位規則。</p>
+              </div>
+
+              <div className="max-w-2xl space-y-6">
+                <div className="bg-white p-6 rounded-2xl border border-border shadow-sm space-y-6">
+                  {/* Decimal Precision */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-black text-gray-800">數值顯示精確度 (小數點位數)</label>
+                    <p className="text-xs text-muted-foreground">在介面上顯示庫存或食譜用量時，最多保留到小數點後幾位。例如：設定為 1 時，顯示 1.5；設定為 2 時，顯示 1.50。</p>
+                    <input 
+                      type="number" 
+                      min="0" 
+                      max="4" 
+                      className="w-full px-4 py-3 bg-muted/20 border border-border rounded-xl font-bold text-gray-800 outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all"
+                      value={globalSettings.decimalPrecision}
+                      onChange={e => setGlobalSettings({ ...globalSettings, decimalPrecision: parseInt(e.target.value) || 0 })}
+                    />
+                  </div>
+
+                  <hr className="border-border" />
+
+                  {/* Auto Unit Conversion Threshold */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-black text-gray-800">自動單位進位閾值</label>
+                    <p className="text-xs text-muted-foreground">當數量超過此設定值時，系統會在合適的介面中自動嘗試換算為較大的單位 (例如：超過 1000g 時，自動顯示為 1kg)。設為 0 表示不自動進位。</p>
+                    <div className="flex items-center gap-3">
+                      <input 
+                        type="number" 
+                        min="0" 
+                        className="flex-1 px-4 py-3 bg-muted/20 border border-border rounded-xl font-bold text-gray-800 outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all"
+                        value={globalSettings.autoUnitConversionThreshold}
+                        onChange={e => setGlobalSettings({ ...globalSettings, autoUnitConversionThreshold: parseFloat(e.target.value) || 0 })}
+                      />
+                      <span className="text-sm font-bold text-muted-foreground whitespace-nowrap">基本單位 (如 g, ml)</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex justify-end pt-4">
+                  <button 
+                    onClick={handleSaveGlobalSettings}
+                    className="px-8 py-3 bg-gray-800 hover:bg-gray-700 text-white font-bold rounded-xl shadow-sm transition-all"
+                  >
+                    儲存系統設定
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <>
+              {/* Left: Group List */}
+              <div className="w-full md:w-64 border-b md:border-b-0 md:border-r border-border flex flex-col bg-muted/5 shrink-0 max-h-[260px] md:max-h-none">
             <div className="p-4 border-b border-border">
               <form onSubmit={handleCreateGroup} className="flex gap-2">
                 <input type="text" placeholder="新增群組..." className="flex-1 px-3 py-2 text-sm bg-white border border-border rounded-lg outline-none focus:border-primary font-bold" value={newGroupName} onChange={e => setNewGroupName(e.target.value)} />
@@ -275,6 +350,8 @@ export default function Settings() {
               </div>
             )}
           </div>
+            </>
+          )}
         </div>
       </div>
     </div>

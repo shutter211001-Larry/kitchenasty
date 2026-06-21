@@ -246,3 +246,9 @@ model UnitConversion {
   multiplier   Float      // 換算倍率，例如 1 杯 = 240 ml → multiplier = 240
   createdAt    DateTime   @default(now())
 }
+
+model SystemSetting {
+  key       String   @id
+  value     Json
+  updatedAt DateTime @updatedAt
+}

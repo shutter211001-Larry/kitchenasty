@@ -9,6 +9,7 @@ import authRoutes from './routes/authRoutes.js';
 import inventoryRoutes from './routes/inventoryRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import integrationRoutes from './routes/integrationRoutes.js';
+import settingsRoutes from './routes/settingsRoutes.js';
 
 const router = Router();
 
@@ -23,5 +24,6 @@ router.use('/api/auth', authRoutes);
 router.use('/api/inventory', inventoryRoutes);
 router.use('/api/users', userRoutes);
 router.use('/api/integration', integrationRoutes);
+router.use('/api/settings', settingsRoutes);
 
 export default router;
