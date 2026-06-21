@@ -4,6 +4,7 @@ import {
   getStaff,
   updateStaff,
   deactivateStaff,
+  deleteStaff,
   inviteStaff,
   validateInviteToken,
   acceptInvite,
@@ -21,6 +22,6 @@ router.get('/', authenticate, requireStaff, requireRole('SUPER_ADMIN', 'MANAGER'
 router.post('/invite', authenticate, requireStaff, requireRole('SUPER_ADMIN'), inviteStaff);
 router.get('/:id', authenticate, requireStaff, requireRole('SUPER_ADMIN', 'MANAGER'), getStaff);
 router.patch('/:id', authenticate, requireStaff, requireRole('SUPER_ADMIN'), updateStaff);
-router.delete('/:id', authenticate, requireStaff, requireRole('SUPER_ADMIN'), deactivateStaff);
+router.delete('/:id', authenticate, requireStaff, requireRole('SUPER_ADMIN'), deleteStaff);
 
 export default router;
