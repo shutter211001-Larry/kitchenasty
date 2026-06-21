@@ -13,6 +13,9 @@ axios.interceptors.request.use((config) => {
     } else if (import.meta.env.PROD) {
       // In same-domain production, replace http://localhost:3000 with relative shutter-erp prefix path!
       config.url = config.url.replace('http://localhost:3000', '/shutter-erp');
+    } else {
+      // Local development! Map to the local backend's shutter-erp mounted router
+      config.url = config.url.replace('http://localhost:3000', 'http://localhost:3000/shutter-erp');
     }
   }
   return config;
