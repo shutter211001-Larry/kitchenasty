@@ -12,7 +12,7 @@ import {
   PaymentStatus,
   PaymentMethod
 } from '@prisma/client';
-import { emitNewOrder, emitOrderStatusUpdate } from '../lib/socket.js';
+import { emitNewOrder, emitOrderStatusUpdate, getIO } from '../lib/socket.js';
 import { isPointInPolygon } from '../lib/geo.js';
 import { calculateDistance } from '../lib/geo.js';
 import { sendEmail, orderConfirmationEmail, orderStatusEmail } from '../lib/email.js';
