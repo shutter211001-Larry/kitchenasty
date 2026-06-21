@@ -1,6 +1,7 @@
 import { useState, useEffect, FormEvent } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.js';
+import { useTranslation } from 'react-i18next';
 
 interface Staff {
   id: string;
@@ -22,6 +23,7 @@ export default function StaffEdit() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { t } = useTranslation();
 
   const [staff, setStaff] = useState<Staff | null>(null);
   const [locations, setLocations] = useState<Location[]>([]);
@@ -85,7 +87,7 @@ export default function StaffEdit() {
   }
 
   async function handleDelete() {
-    if (!window.confirm('Are you sure you want to delete this staff member? This action cannot be undone.')) return;
+    if (!window.confirm(t('staff.deleteConfirm') || 'Are you sure you want to delete this staff member? This action cannot be undone.')) return;
     setDeleting(true);
     try {
       const res = await fetch(`/api/staff/${id}`, {
@@ -110,16 +112,16 @@ export default function StaffEdit() {
   }
 
   if (!staff) {
-    return <div className="bg-red-50 text-red-700 p-4 rounded-lg">{error || 'Staff not found'}</div>;
+    return <div className="bg-red-50 text-red-700 p-4 rounded-lg">{error || t('staff.notFound') || 'Staff not found'}</div>;
   }
 
   return (
     <div className="max-w-lg mx-auto">
       <div className="flex items-center gap-3 mb-6">
         <Link to="/staff" className="text-gray-400 hover:text-gray-600">
-          ← Back
+          {t('staff.back')}
         </Link>
-        <h1 className="text-2xl font-bold text-gray-900">Edit Staff</h1>
+        <h1 className="text-2xl font-bold text-gray-900">{t('staff.editTitle')}</h1>
       </div>
 
       <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-5">
@@ -128,7 +130,7 @@ export default function StaffEdit() {
         )}
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">{t('staff.email')}</label>
           <input
             type="email"
             value={staff.email}
@@ -138,7 +140,7 @@ export default function StaffEdit() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">{t('staff.name')}</label>
           <input
             type="text"
             value={name}
@@ -149,20 +151,20 @@ export default function StaffEdit() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">{t('staff.role')}</label>
           <select
             value={role}
             onChange={(e) => setRole(e.target.value)}
             className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
           >
-            <option value="STAFF">Staff</option>
-            <option value="MANAGER">Manager</option>
-            <option value="SUPER_ADMIN">Super Admin</option>
+            <option value="STAFF">{t('staff.roles.staff')}</option>
+            <option value="MANAGER">{t('staff.roles.manager')}</option>
+            <option value="SUPER_ADMIN">{t('staff.roles.superAdmin')}</option>
           </select>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">{t('staff.phone')}</label>
           <input
             type="text"
             value={phone}
@@ -172,13 +174,13 @@ export default function StaffEdit() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">{t('staff.location')}</label>
           <select
             value={locationId}
             onChange={(e) => setLocationId(e.target.value)}
             className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
           >
-            <option value="">None</option>
+            <option value="">{t('staff.none')}</option>
             {locations.map((loc) => (
               <option key={loc.id} value={loc.id}>{loc.name}</option>
             ))}
@@ -193,7 +195,7 @@ export default function StaffEdit() {
             onChange={(e) => setIsActive(e.target.checked)}
             className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
           />
-          <label htmlFor="isActive" className="text-sm text-gray-700">Active</label>
+          <label htmlFor="isActive" className="text-sm text-gray-700">{t('staff.active')}</label>
         </div>
 
         <button
@@ -201,15 +203,15 @@ export default function StaffEdit() {
           disabled={saving}
           className="w-full bg-primary-600 text-white py-2.5 rounded-lg font-semibold hover:bg-primary-700 transition-colors disabled:opacity-50"
         >
-          {saving ? 'Saving...' : 'Save Changes'}
+          {saving ? t('staff.actions.saving') : t('staff.actions.save')}
         </button>
       </form>
 
       {user?.role === 'SUPER_ADMIN' && staff && user.id !== staff.id && (
         <div className="mt-8 bg-white rounded-xl shadow-sm border border-red-200 p-6">
-          <h3 className="text-lg font-bold text-red-600 mb-2">Danger Zone</h3>
+          <h3 className="text-lg font-bold text-red-600 mb-2">{t('staff.dangerZone')}</h3>
           <p className="text-sm text-gray-600 mb-4">
-            Once you delete a staff member, there is no going back. Please be certain.
+            {t('staff.deleteWarning')}
           </p>
           <button
             type="button"
@@ -217,7 +219,7 @@ export default function StaffEdit() {
             disabled={deleting}
             className="w-full bg-red-50 text-red-600 py-2.5 rounded-lg font-semibold border border-red-200 hover:bg-red-100 transition-colors disabled:opacity-50"
           >
-            {deleting ? 'Deleting...' : 'Delete Staff Member'}
+            {deleting ? t('staff.actions.deleting') : t('staff.actions.delete')}
           </button>
         </div>
       )}
