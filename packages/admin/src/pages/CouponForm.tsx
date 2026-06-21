@@ -16,6 +16,7 @@ export default function CouponForm() {
   const [startsAt, setStartsAt] = useState('');
   const [expiresAt, setExpiresAt] = useState('');
   const [isActive, setIsActive] = useState(true);
+  const [isAutomatic, setIsAutomatic] = useState(false);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -44,6 +45,7 @@ export default function CouponForm() {
         setStartsAt(c.startsAt ? c.startsAt.split('T')[0] : '');
         setExpiresAt(c.expiresAt ? c.expiresAt.split('T')[0] : '');
         setIsActive(c.isActive);
+        setIsAutomatic(c.isAutomatic || false);
       })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
@@ -65,6 +67,7 @@ export default function CouponForm() {
       startsAt: startsAt || null,
       expiresAt: expiresAt || null,
       isActive,
+      isAutomatic,
     };
 
     try {
@@ -108,11 +111,11 @@ export default function CouponForm() {
       <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">優惠碼 (Code)</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">優惠碼 / 活動代碼 (Code)</label>
             <input
               value={code}
-              onChange={(e) => setCode(e.target.value.toUpperCase())}
-              placeholder="SAVE20"
+              onChange={(e) => setCode(e.target.value.toUpperCase().replace(/\s/g, ''))}
+              placeholder={isAutomatic ? "AUTO_PROMO_01" : "SAVE20"}
               required
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none font-mono"
             />
@@ -220,15 +223,29 @@ export default function CouponForm() {
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            id="isActive"
-            checked={isActive}
-            onChange={(e) => setIsActive(e.target.checked)}
-            className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-          />
-          <label htmlFor="isActive" className="text-sm text-gray-700">啟用 (Active)</label>
+        <div className="flex items-center gap-6">
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="isActive"
+              checked={isActive}
+              onChange={(e) => setIsActive(e.target.checked)}
+              className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+            />
+            <label htmlFor="isActive" className="text-sm text-gray-700">啟用 (Active)</label>
+          </div>
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="isAutomatic"
+              checked={isAutomatic}
+              onChange={(e) => setIsAutomatic(e.target.checked)}
+              className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+            />
+            <label htmlFor="isAutomatic" className="text-sm text-gray-700 font-bold text-indigo-700">
+              自動滿額優惠 (結帳時自動套用，不須輸入代碼)
+            </label>
+          </div>
         </div>
 
         {error && <div className="text-red-600 text-sm">{error}</div>}
