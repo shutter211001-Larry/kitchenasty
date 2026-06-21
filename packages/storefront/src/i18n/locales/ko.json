@@ -35,7 +35,7 @@
   },
   "home": {
     "heroTitle": "맛있는 음식을 온라인으로 주문하세요",
-    "heroDescription": "메뉴를 둘러보고 배달 또는 포장 주문을 하세요. KitchenAsty에서 갓 만든 신선한 요리를 즐기세요.",
+    "heroDescription": "메뉴를 둘러보고 배달 또는 포장 주문을 하세요. {{storeName}}에서 갓 만든 신선한 요리를 즐기세요.",
     "orderMore": "다시 주문하기",
     "viewMenu": "메뉴 보기",
     "findLocation": "매장 찾기",
@@ -76,7 +76,7 @@
     "noAccount": "계정이 없으신가요?",
     "registerLink": "회원가입",
     "registerTitle": "계정 만들기",
-    "registerSubtitle": "KitchenAsty에 가입하여 간편하게 주문하고 예약하세요.",
+    "registerSubtitle": "{{storeName}}에 가입하여 간편하게 주문하고 예약하세요.",
     "name": "성함",
     "phone": "전화번호 (선택)",
     "createAccount": "계정 만들기",
@@ -134,7 +134,7 @@
   },
   "locations": {
     "title": "매장 안내",
-    "subtitle": "가까운 KitchenAsty 매장을 찾아보세요",
+    "subtitle": "가까운 {{storeName}} 매장을 찾아보세요",
     "noLocations": "매장을 찾을 수 없습니다.",
     "viewMenu": "메뉴 보기",
     "previous": "이전",

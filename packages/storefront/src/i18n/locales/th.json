@@ -35,7 +35,7 @@
   },
   "home": {
     "heroTitle": "สั่งอาหารอร่อยออนไลน์",
-    "heroDescription": "เลือกเมนูของเรา สั่งอาหารสำหรับจัดส่งหรือรับที่ร้าน และเพลิดเพลินกับอาหารสดใหม่จาก KitchenAsty",
+    "heroDescription": "เลือกเมนูของเรา สั่งอาหารสำหรับจัดส่งหรือรับที่ร้าน และเพลิดเพลินกับอาหารสดใหม่จาก {{storeName}}",
     "orderMore": "สั่งอาหารเพิ่ม",
     "viewMenu": "ดูเมนู",
     "findLocation": "หาสาขา",
@@ -76,7 +76,7 @@
     "noAccount": "ยังไม่มีบัญชี?",
     "registerLink": "สร้างบัญชี",
     "registerTitle": "สร้างบัญชี",
-    "registerSubtitle": "เข้าร่วม KitchenAsty เพื่อการสั่งอาหารและจองโต๊ะที่ง่ายขึ้น",
+    "registerSubtitle": "เข้าร่วม {{storeName}} เพื่อการสั่งอาหารและจองโต๊ะที่ง่ายขึ้น",
     "name": "ชื่อเต็ม",
     "phone": "เบอร์โทรศัพท์ (ไม่บังคับ)",
     "createAccount": "สร้างบัญชี",
@@ -134,7 +134,7 @@
   },
   "locations": {
     "title": "สาขาของเรา",
-    "subtitle": "ค้นหา KitchenAsty ใกล้คุณ",
+    "subtitle": "ค้นหา {{storeName}} ใกล้คุณ",
     "noLocations": "ไม่พบสาขา",
     "viewMenu": "ดูเมนู",
     "previous": "ก่อนหน้า",

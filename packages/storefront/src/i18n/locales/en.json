@@ -35,7 +35,7 @@
   },
   "home": {
     "heroTitle": "Order Delicious Food Online",
-    "heroDescription": "Browse our menu, place your order for delivery or pickup, and enjoy fresh, made-to-order meals from KitchenAsty.",
+    "heroDescription": "Browse our menu, place your order for delivery or pickup, and enjoy fresh, made-to-order meals from {{storeName}}.",
     "orderMore": "Order More",
     "viewMenu": "View Menu",
     "findLocation": "Find a Location",
@@ -76,7 +76,7 @@
     "noAccount": "Don't have an account?",
     "registerLink": "Create one",
     "registerTitle": "Create Account",
-    "registerSubtitle": "Join KitchenAsty for easy ordering and reservations.",
+    "registerSubtitle": "Join {{storeName}} for easy ordering and reservations.",
     "name": "Full Name",
     "phone": "Phone (optional)",
     "address": "Address (optional)",
@@ -136,7 +136,7 @@
   },
   "locations": {
     "title": "Our Locations",
-    "subtitle": "Find a KitchenAsty near you",
+    "subtitle": "Find a {{storeName}} near you",
     "noLocations": "No locations found.",
     "viewMenu": "View Menu",
     "previous": "Previous",

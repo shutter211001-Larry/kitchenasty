@@ -35,7 +35,7 @@
   },
   "home": {
     "heroTitle": "線上點餐，美味即刻享受",
-    "heroDescription": "瀏覽我們的菜單，選擇外送或自取，享受 KitchenAsty 為您現做的鮮美餐點。",
+    "heroDescription": "瀏覽我們的菜單，選擇外送或自取，享受 {{storeName}} 為您現做的鮮美餐點。",
     "orderMore": "再點一餐",
     "viewMenu": "立即點餐",
     "findLocation": "尋找分店",
@@ -76,7 +76,7 @@
     "noAccount": "還沒有帳戶？",
     "registerLink": "立即註冊",
     "registerTitle": "建立帳戶",
-    "registerSubtitle": "加入 KitchenAsty，享受便捷的點餐與預約服務。",
+    "registerSubtitle": "加入 {{storeName}}，享受便捷的點餐與預約服務。",
     "name": "姓名",
     "phone": "電話 (選填)",
     "address": "住址 (選填)",
@@ -136,7 +136,7 @@
   },
   "locations": {
     "title": "分店資訊",
-    "subtitle": "尋找您附近的 KitchenAsty",
+    "subtitle": "尋找您附近的 {{storeName}}",
     "noLocations": "查無分店資訊。",
     "viewMenu": "查看菜單",
     "previous": "上一頁",

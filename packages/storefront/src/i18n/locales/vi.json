@@ -35,7 +35,7 @@
   },
   "home": {
     "heroTitle": "Đặt món ngon trực tuyến",
-    "heroDescription": "Khám phá thực đơn của chúng tôi, đặt hàng giao tận nơi hoặc tự đến lấy, và thưởng thức các món ăn tươi ngon từ KitchenAsty.",
+    "heroDescription": "Khám phá thực đơn của chúng tôi, đặt hàng giao tận nơi hoặc tự đến lấy, và thưởng thức các món ăn tươi ngon từ {{storeName}}.",
     "orderMore": "Đặt thêm món",
     "viewMenu": "Xem thực đơn",
     "findLocation": "Tìm chi nhánh",
@@ -76,7 +76,7 @@
     "noAccount": "Chưa có tài khoản?",
     "registerLink": "Đăng ký ngay",
     "registerTitle": "Tạo tài khoản",
-    "registerSubtitle": "Tham gia KitchenAsty để đặt hàng và đặt bàn dễ dàng hơn.",
+    "registerSubtitle": "Tham gia {{storeName}} để đặt hàng và đặt bàn dễ dàng hơn.",
     "name": "Họ và tên",
     "phone": "Số điện thoại (tùy chọn)",
     "createAccount": "Tạo tài khoản",
@@ -134,7 +134,7 @@
   },
   "locations": {
     "title": "Chi nhánh của chúng tôi",
-    "subtitle": "Tìm chi nhánh KitchenAsty gần bạn",
+    "subtitle": "Tìm chi nhánh {{storeName}} gần bạn",
     "noLocations": "Không tìm thấy chi nhánh.",
     "viewMenu": "Xem thực đơn",
     "previous": "Trước",
