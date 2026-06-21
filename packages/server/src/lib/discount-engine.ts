@@ -12,6 +12,11 @@ export interface DiscountConditions {
   };
   applicableCategoryIds?: string[];
   applicableMenuItemIds?: string[];
+  // BOGO specific conditions
+  buyQuantity?: number;
+  getQuantity?: number;
+  getDiscountType?: 'FREE' | 'PERCENTAGE' | 'FIXED';
+  getDiscountValue?: number;
 }
 
 export interface DiscountValidationResult {
@@ -177,7 +182,56 @@ export function validateAndCalculateDiscount(
   let discountAmount = 0;
   let freeDelivery = false;
 
-  if (campaign.type === 'FIXED') {
+  if (campaign.type === 'BOGO') {
+    const buyQ = rules.buyQuantity || 1;
+    const getQ = rules.getQuantity || 1;
+    const discountType = rules.getDiscountType || 'FREE';
+    const discountValue = rules.getDiscountValue || 0;
+
+    // Get all applicable items based on restrictions (or all items if no restrictions)
+    let eligibleItems = [];
+    if (rules.applicableCategoryIds?.length || rules.applicableMenuItemIds?.length) {
+      eligibleItems = cartItems.filter(item => 
+        rules.applicableCategoryIds?.includes(item.categoryId) || 
+        rules.applicableMenuItemIds?.includes(item.menuItemId)
+      );
+    } else {
+      eligibleItems = [...cartItems];
+    }
+
+    // Flatten items so each quantity=1 is its own element
+    const flattenedItems: number[] = [];
+    for (const item of eligibleItems) {
+      for (let i = 0; i < item.quantity; i++) {
+        flattenedItems.push(item.price);
+      }
+    }
+
+    // Sort ascending (lowest price first) to apply discount to cheapest items
+    flattenedItems.sort((a, b) => a - b);
+
+    const requiredBatchSize = buyQ + getQ;
+    const numberOfBatches = Math.floor(flattenedItems.length / requiredBatchSize);
+
+    if (numberOfBatches > 0) {
+      // The number of items we can apply the discount to
+      const totalDiscountableItems = numberOfBatches * getQ;
+      
+      // Since sorted ascending, the first `totalDiscountableItems` are the cheapest
+      for (let i = 0; i < totalDiscountableItems; i++) {
+        const itemPrice = flattenedItems[i];
+        if (discountType === 'FREE') {
+          discountAmount += itemPrice;
+        } else if (discountType === 'PERCENTAGE') {
+          discountAmount += itemPrice * (discountValue / 100);
+        } else if (discountType === 'FIXED') {
+          discountAmount += Math.min(itemPrice, discountValue);
+        }
+      }
+    } else {
+      return { isValid: false, discountAmount: 0, freeDelivery: false, reason: `購買數量未達活動門檻 (需購買 ${buyQ} 件)` };
+    }
+  } else if (campaign.type === 'FIXED') {
     discountAmount = campaign.value;
     // Cap fixed discount at applicable subtotal to avoid negative totals
     if (hasApplicableRestrictions) {

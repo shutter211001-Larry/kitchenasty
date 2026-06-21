@@ -27,6 +27,7 @@ const TYPE_LABELS: Record<string, string> = {
   PERCENTAGE: '% 折扣 (Percentage)',
   FIXED: '固定金額 (Fixed Amount)',
   FREE_DELIVERY: '免運費 (Free Delivery)',
+  BOGO: '組合優惠 (BOGO)',
 };
 
 export default function CouponList() {
@@ -122,7 +123,9 @@ export default function CouponList() {
                         ? `${coupon.value}%`
                         : coupon.type === 'FIXED'
                           ? `$${coupon.value.toFixed(2)}`
-                          : '—'}
+                          : coupon.type === 'BOGO'
+                            ? '依條件折抵'
+                            : '—'}
                     </td>
                     <td className="px-4 py-3 text-gray-600">
                       {coupon.minOrder > 0 ? `$${coupon.minOrder.toFixed(2)}` : '—'}

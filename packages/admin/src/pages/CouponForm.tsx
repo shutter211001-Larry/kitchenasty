@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import { api } from '../lib/api';
 
 export default function CouponForm() {
   const { id } = useParams();
@@ -17,10 +18,17 @@ export default function CouponForm() {
   const [expiresAt, setExpiresAt] = useState('');
   const [isActive, setIsActive] = useState(true);
   const [isAutomatic, setIsAutomatic] = useState(false);
+  
+  // BOGO specific states
+  const [buyQuantity, setBuyQuantity] = useState<number>(1);
+  const [getQuantity, setGetQuantity] = useState<number>(1);
+  const [getDiscountType, setGetDiscountType] = useState<'FREE' | 'PERCENTAGE' | 'FIXED'>('FREE');
+  const [getDiscountValue, setGetDiscountValue] = useState<number>(0);
   const [applicableCategoryIds, setApplicableCategoryIds] = useState<string[]>([]);
   const [applicableMenuItemIds, setApplicableMenuItemIds] = useState<string[]>([]);
-  const [categories, setCategories] = useState<{ id: string; nameTranslations: any }[]>([]);
-  const [menuItems, setMenuItems] = useState<{ id: string; nameTranslations: any }[]>([]);
+  const [categories, setCategories] = useState<{ id: string; name?: string }[]>([]);
+  const [menuItems, setMenuItems] = useState<{ id: string; name?: string }[]>([]);
+  const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -31,11 +39,11 @@ export default function CouponForm() {
   useEffect(() => {
     // Fetch categories and menu items for advanced conditions
     Promise.all([
-      fetch('/api/categories', { headers: { Authorization: `Bearer ${token}` } }).then(res => res.json()),
-      fetch('/api/items', { headers: { Authorization: `Bearer ${token}` } }).then(res => res.json())
-    ]).then(([catData, itemData]) => {
-      if (catData.success) setCategories(catData.data);
-      if (itemData.success) setMenuItems(itemData.data);
+      api.get<any>('/menu/categories'),
+      api.get<any>('/menu/items?limit=1000')
+    ]).then(([catRes, itemRes]) => {
+      if (catRes.data) setCategories(catRes.data);
+      if (itemRes.data) setMenuItems(itemRes.data);
     }).catch(err => console.error('Failed to load menu data', err));
 
     if (!id) return;
@@ -66,6 +74,12 @@ export default function CouponForm() {
             const parsed = typeof c.conditions === 'string' ? JSON.parse(c.conditions) : c.conditions;
             setApplicableCategoryIds(parsed.applicableCategoryIds || []);
             setApplicableMenuItemIds(parsed.applicableMenuItemIds || []);
+            if (c.type === 'BOGO') {
+              setBuyQuantity(parsed.buyQuantity || 1);
+              setGetQuantity(parsed.getQuantity || 1);
+              setGetDiscountType(parsed.getDiscountType || 'FREE');
+              setGetDiscountValue(parsed.getDiscountValue || 0);
+            }
           } catch (e) {
             console.error('Failed to parse conditions');
           }
@@ -83,6 +97,13 @@ export default function CouponForm() {
     const conditionsObj: any = {};
     if (applicableCategoryIds.length > 0) conditionsObj.applicableCategoryIds = applicableCategoryIds;
     if (applicableMenuItemIds.length > 0) conditionsObj.applicableMenuItemIds = applicableMenuItemIds;
+
+    if (type === 'BOGO') {
+      conditionsObj.buyQuantity = buyQuantity;
+      conditionsObj.getQuantity = getQuantity;
+      conditionsObj.getDiscountType = getDiscountType;
+      conditionsObj.getDiscountValue = getDiscountValue;
+    }
 
     const body = {
       code,
@@ -159,11 +180,72 @@ export default function CouponForm() {
               <option value="PERCENTAGE">百分比折扣 (Percentage Off)</option>
               <option value="FIXED">固定金額折扣 (Fixed Amount Off)</option>
               <option value="FREE_DELIVERY">免運費 (Free Delivery)</option>
+              <option value="BOGO">組合優惠 (BOGO: 買X件享Y件優惠)</option>
             </select>
           </div>
         </div>
 
-        {type !== 'FREE_DELIVERY' && (
+        {type === 'BOGO' && (
+          <div className="bg-blue-50/50 p-4 rounded-xl border border-blue-100 space-y-4">
+            <h3 className="text-sm font-bold text-blue-900 flex items-center gap-2">
+              組合優惠設定 (BOGO Settings)
+            </h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">需購買數量 (Buy X items)</label>
+                <input
+                  type="number"
+                  min="1"
+                  value={buyQuantity}
+                  onChange={(e) => setBuyQuantity(parseInt(e.target.value) || 1)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">優惠數量 (Get Y items)</label>
+                <input
+                  type="number"
+                  min="1"
+                  value={getQuantity}
+                  onChange={(e) => setGetQuantity(parseInt(e.target.value) || 1)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">優惠方式 (Discount Type)</label>
+                <select
+                  value={getDiscountType}
+                  onChange={(e) => setGetDiscountType(e.target.value as any)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                >
+                  <option value="FREE">免費送 (Free)</option>
+                  <option value="PERCENTAGE">打折 (Percentage Off)</option>
+                  <option value="FIXED">固定金額折抵 (Fixed Amount Off)</option>
+                </select>
+              </div>
+              {getDiscountType !== 'FREE' && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    優惠數值 {getDiscountType === 'PERCENTAGE' ? '(%)' : '($)'}
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    step={getDiscountType === 'PERCENTAGE' ? '1' : '0.01'}
+                    value={getDiscountValue}
+                    onChange={(e) => setGetDiscountValue(parseFloat(e.target.value) || 0)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                  />
+                </div>
+              )}
+            </div>
+            <p className="text-xs text-blue-700">提示：系統會以購物車內符合條件之最低價商品優先給予折扣。</p>
+          </div>
+        )}
+
+        {type !== 'FREE_DELIVERY' && type !== 'BOGO' && (
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -278,10 +360,25 @@ export default function CouponForm() {
         </div>
 
         <div className="border-t border-gray-200 pt-6 mt-6">
-          <h3 className="text-sm font-bold text-gray-900 mb-4">進階條件 (Advanced Restrictions)</h3>
-          <p className="text-xs text-gray-500 mb-4">若未選擇，則優惠適用於全單所有商品。</p>
+          <button 
+            type="button" 
+            onClick={() => setIsAdvancedOpen(!isAdvancedOpen)}
+            className="flex items-center justify-between w-full text-left hover:bg-gray-50 p-2 -mx-2 rounded-lg transition-colors"
+          >
+            <div>
+              <h3 className="text-sm font-bold text-gray-900 mb-1">進階條件 (Advanced Restrictions)</h3>
+              <p className="text-xs text-gray-500">若未選擇，則優惠適用於全單所有商品。</p>
+            </div>
+            <svg 
+              className={`w-5 h-5 text-gray-400 transition-transform ${isAdvancedOpen ? 'rotate-180' : ''}`} 
+              fill="none" viewBox="0 0 24 24" stroke="currentColor"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {isAdvancedOpen && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
               <label className="block text-sm font-medium text-gray-700 mb-2">指定適用分類 (Categories)</label>
               <div className="max-h-48 overflow-y-auto space-y-2 pr-2">
@@ -296,7 +393,7 @@ export default function CouponForm() {
                       }}
                       className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
                     />
-                    {cat.nameTranslations?.['zh-TW'] || cat.id}
+                    {cat.name || cat.id}
                   </label>
                 ))}
               </div>
@@ -316,12 +413,13 @@ export default function CouponForm() {
                       }}
                       className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
                     />
-                    {item.nameTranslations?.['zh-TW'] || item.id}
+                    {item.name || item.id}
                   </label>
                 ))}
               </div>
             </div>
-          </div>
+            </div>
+          )}
         </div>
 
         {error && <div className="text-red-600 text-sm">{error}</div>}
