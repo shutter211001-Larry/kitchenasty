@@ -211,6 +211,99 @@ describe('Discount Engine Logic', () => {
     });
   });
 
+  describe('validateAndCalculateDiscount - BOGO Promotions', () => {
+    it('should correctly calculate buy 1 get 1 free (lowest price item is free)', () => {
+      const bogoCampaign = createSampleCampaign({
+        type: 'BOGO' as const,
+        conditions: JSON.stringify({
+          buyQuantity: 1,
+          getQuantity: 1,
+          getDiscountType: 'FREE'
+        })
+      });
+
+      // 3 items: $100, $80, $50
+      // Batch 1: buy 1, get 1 free -> the cheapest of the first batch (if we take all 3, cheapest is 50).
+      // Since sorting ascending: 50, 80, 100.
+      // Total items = 3. Batch size = 2. We have 1 batch.
+      // So 1 item gets the discount. The cheapest is $50.
+      const cartItems = [
+        { menuItemId: 'item1', categoryId: 'cat1', price: 100, quantity: 1 },
+        { menuItemId: 'item2', categoryId: 'cat1', price: 80, quantity: 1 },
+        { menuItemId: 'item3', categoryId: 'cat1', price: 50, quantity: 1 },
+      ];
+
+      const result = validateAndCalculateDiscount(
+        bogoCampaign,
+        { subtotal: 230, orderType: 'PICKUP', locationId: 'loc1' },
+        cartItems
+      );
+
+      expect(result.isValid).toBe(true);
+      expect(result.discountAmount).toBe(50);
+    });
+
+    it('should correctly calculate buy 1 get second 50% off', () => {
+      const bogoCampaign = createSampleCampaign({
+        type: 'BOGO' as const,
+        conditions: JSON.stringify({
+          buyQuantity: 1,
+          getQuantity: 1,
+          getDiscountType: 'PERCENTAGE',
+          getDiscountValue: 50
+        })
+      });
+
+      // 4 items: $100, $100, $50, $50
+      // 4 items, batch size 2, so 2 batches. 
+      // 2 cheapest items get 50% off -> $50 * 50% + $50 * 50% = 25 + 25 = 50 discount.
+      const cartItems = [
+        { menuItemId: 'item1', categoryId: 'cat1', price: 100, quantity: 2 },
+        { menuItemId: 'item2', categoryId: 'cat1', price: 50, quantity: 2 },
+      ];
+
+      const result = validateAndCalculateDiscount(
+        bogoCampaign,
+        { subtotal: 300, orderType: 'PICKUP', locationId: 'loc1' },
+        cartItems
+      );
+
+      expect(result.isValid).toBe(true);
+      expect(result.discountAmount).toBe(50); // 50 * 50% * 2
+    });
+
+    it('should correctly handle BOGO with specific categories', () => {
+      const bogoCampaign = createSampleCampaign({
+        type: 'BOGO' as const,
+        conditions: JSON.stringify({
+          applicableCategoryIds: ['target-cat'],
+          buyQuantity: 2,
+          getQuantity: 1,
+          getDiscountType: 'FREE'
+        })
+      });
+
+      // Cart: 
+      // 1 item in target-cat (price $100)
+      // 2 items in other-cat (price $50)
+      // Only target-cat items are eligible, so we only have 1 item.
+      // Required batch size is 3 (buy 2 get 1). 1 item is not enough.
+      const cartItems = [
+        { menuItemId: 'item1', categoryId: 'target-cat', price: 100, quantity: 1 },
+        { menuItemId: 'item2', categoryId: 'other-cat', price: 50, quantity: 2 },
+      ];
+
+      const result = validateAndCalculateDiscount(
+        bogoCampaign,
+        { subtotal: 200, orderType: 'PICKUP', locationId: 'loc1' },
+        cartItems
+      );
+
+      expect(result.isValid).toBe(false);
+      expect(result.reason).toContain('未達活動門檻');
+    });
+  });
+
   describe('findAndApplyBestAutomaticDiscount', () => {
     it('scans and applies the best automatic promotion', async () => {
       const promo1 = createSampleCampaign({
@@ -251,7 +344,7 @@ describe('Discount Engine Logic', () => {
       // 10% off drinks = 10 discount.
       const result = validateAndCalculateDiscount(
         campaign,
-        { ...baseOrderData, subtotal: 300 },
+        { subtotal: 300, orderType: 'PICKUP', locationId: 'loc1' },
         [
           { menuItemId: 'm1', categoryId: 'cat-food', price: 200, quantity: 1 },
           { menuItemId: 'm2', categoryId: 'cat-drinks', price: 100, quantity: 1 }
@@ -269,7 +362,7 @@ describe('Discount Engine Logic', () => {
       });
       const result = validateAndCalculateDiscount(
         campaign,
-        { ...baseOrderData, subtotal: 300 },
+        { subtotal: 300, orderType: 'PICKUP', locationId: 'loc1' },
         [
           { menuItemId: 'm1', categoryId: 'cat-food', price: 200, quantity: 1 },
           { menuItemId: 'm2', categoryId: 'cat-drinks', price: 100, quantity: 1 }
@@ -288,7 +381,7 @@ describe('Discount Engine Logic', () => {
       // drink is only $30. Max discount should be $30.
       const result = validateAndCalculateDiscount(
         campaign,
-        { ...baseOrderData, subtotal: 230 },
+        { subtotal: 230, orderType: 'PICKUP', locationId: 'loc1' },
         [
           { menuItemId: 'm1', categoryId: 'cat-food', price: 200, quantity: 1 },
           { menuItemId: 'm2', categoryId: 'cat-drinks', price: 30, quantity: 1 }

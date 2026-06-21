@@ -732,6 +732,7 @@ enum CouponType {
   PERCENTAGE
   FIXED
   FREE_DELIVERY
+  BOGO
 }
 
 enum LoyaltyTransactionType {
