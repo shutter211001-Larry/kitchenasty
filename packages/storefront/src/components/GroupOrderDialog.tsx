@@ -109,11 +109,21 @@ export default function GroupOrderDialog() {
         
         {/* Content (Active Session) */}
         {groupSessionId && (
-          <div className="mt-3">
+          <div className="mt-3 flex flex-col gap-3">
             <div className="bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 px-3 py-2 rounded-xl text-center shadow-inner border border-primary-100/50 dark:border-primary-800/50">
               <span className="text-[10px] opacity-80 block mb-0.5 font-medium">同桌點餐代碼</span>
               <span className="text-xl font-black tracking-widest">{groupPin}</span>
             </div>
+            <button 
+              onClick={() => {
+                if(window.confirm('確定要退出目前的同桌點餐嗎？您的購物車將與同桌分開。')) {
+                  setGroupSession(null, null);
+                }
+              }}
+              className="w-full bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400 text-xs font-bold py-2 rounded-xl hover:bg-red-100 dark:hover:bg-red-900/50 transition"
+            >
+              退出同桌
+            </button>
           </div>
         )}
 
