@@ -214,7 +214,7 @@ describe('Discount Engine Logic', () => {
   describe('validateAndCalculateDiscount - BOGO Promotions', () => {
     it('should correctly calculate buy 1 get 1 free (lowest price item is free)', () => {
       const bogoCampaign = createSampleCampaign({
-        type: 'BOGO' as const,
+        type: 'BOGO' as any,
         conditions: JSON.stringify({
           buyQuantity: 1,
           getQuantity: 1,
@@ -245,7 +245,7 @@ describe('Discount Engine Logic', () => {
 
     it('should correctly calculate buy 1 get second 50% off', () => {
       const bogoCampaign = createSampleCampaign({
-        type: 'BOGO' as const,
+        type: 'BOGO' as any,
         conditions: JSON.stringify({
           buyQuantity: 1,
           getQuantity: 1,
@@ -274,7 +274,7 @@ describe('Discount Engine Logic', () => {
 
     it('should correctly handle BOGO with specific categories', () => {
       const bogoCampaign = createSampleCampaign({
-        type: 'BOGO' as const,
+        type: 'BOGO' as any,
         conditions: JSON.stringify({
           applicableCategoryIds: ['target-cat'],
           buyQuantity: 2,
