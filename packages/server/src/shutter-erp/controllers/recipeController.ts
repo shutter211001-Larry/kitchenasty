@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { prisma } from '../lib/prisma.js';
+import { generateGeminiObject } from '../../lib/ai.js';
 
 // Recursive function to calculate cost and nutrition including Saturated Fat, Trans Fat, and Sugar
 export async function calculateRecipeStats(recipeId: string): Promise<{ 
@@ -202,7 +203,7 @@ export async function calculateRecipeStats(recipeId: string): Promise<{
 export const getRecipes = async (req: Request, res: Response) => {
   try {
     const recipes = await prisma.recipe.findMany({
-      include: { items: true }
+      include: { items: true, outputs: true }
     });
     
     // Enrich with calculated stats
@@ -270,6 +271,7 @@ export const createRecipe = async (req: Request, res: Response) => {
   try {
     const { name, description, yieldAmount, yieldUnit, isSubRecipe, isProduct, bakingLossRate } = req.body;
     const stepsPayload = req.body.steps || [];
+    const outputsPayload = req.body.outputs || [];
 
     const recipe = await prisma.$transaction(async (tx: any) => {
       const newRecipe = await tx.recipe.create({
@@ -284,9 +286,24 @@ export const createRecipe = async (req: Request, res: Response) => {
         }
       });
       await createStepsWithItems(tx, newRecipe.id, stepsPayload);
+      
+      if (outputsPayload.length > 0) {
+        await tx.recipeOutput.createMany({
+          data: outputsPayload.map((o: any) => ({
+            recipeId: newRecipe.id,
+            type: o.type,
+            name: o.name,
+            yield: o.yield ? parseFloat(o.yield) : 0,
+            unit: o.unit || 'g',
+            ingredientId: o.ingredientId || null,
+            nutritionFacts: o.nutritionFacts || null
+          }))
+        });
+      }
+
       return tx.recipe.findUnique({
         where: { id: newRecipe.id },
-        include: { steps: { include: { items: true, parameters: true } } }
+        include: { steps: { include: { items: true, parameters: true } }, outputs: true }
       });
     }, {
       maxWait: 15000,
@@ -306,6 +323,7 @@ export const getRecipeById = async (req: Request, res: Response) => {
     const recipe = await prisma.recipe.findUnique({
       where: { id },
       include: {
+        outputs: true,
         items: {
           include: {
             ingredient: true,
@@ -341,11 +359,13 @@ export const getRecipeById = async (req: Request, res: Response) => {
 export const updateRecipe = async (req: Request, res: Response) => {
   try {
     const id = req.params.id as string;
-    const { name, description, yieldAmount, yieldUnit, isSubRecipe, isProduct, steps, bakingLossRate } = req.body;
+    const { name, description, yieldAmount, yieldUnit, isSubRecipe, isProduct, steps, bakingLossRate, outputs } = req.body;
+    const outputsPayload = outputs || [];
     
     const result = await prisma.$transaction(async (tx: any) => {
-      // 1. Delete all existing items, step parameters, and steps
+      // 1. Delete all existing items, step parameters, steps, and outputs
       await tx.recipeItem.deleteMany({ where: { recipeId: id } });
+      await tx.recipeOutput.deleteMany({ where: { recipeId: id } });
       const stepIds = (await tx.recipeStep.findMany({ where: { recipeId: id }, select: { id: true } })).map((s: any) => s.id);
       if (stepIds.length > 0) {
         await tx.stepParameter.deleteMany({ where: { stepId: { in: stepIds } } });
@@ -369,9 +389,24 @@ export const updateRecipe = async (req: Request, res: Response) => {
       // 3. Recreate steps and items with proper clientId → dbId mapping
       await createStepsWithItems(tx, id, steps || []);
 
+      // 4. Recreate outputs
+      if (outputsPayload.length > 0) {
+        await tx.recipeOutput.createMany({
+          data: outputsPayload.map((o: any) => ({
+            recipeId: id,
+            type: o.type,
+            name: o.name,
+            yield: o.yield ? parseFloat(o.yield) : 0,
+            unit: o.unit || 'g',
+            ingredientId: o.ingredientId || null,
+            nutritionFacts: o.nutritionFacts || null
+          }))
+        });
+      }
+
       return tx.recipe.findUnique({
         where: { id },
-        include: { steps: { include: { items: true, parameters: true } } }
+        include: { steps: { include: { items: true, parameters: true } }, outputs: true }
       });
     }, {
       maxWait: 15000,
@@ -436,5 +471,52 @@ export const deleteRecipe = async (req: Request, res: Response) => {
   } catch (error) {
     console.error('Delete Recipe Error:', error);
     res.status(500).json({ error: '刪除食譜失敗' });
+  }
+};
+
+export const calculateAiNutrition = async (req: Request, res: Response) => {
+  try {
+    const { ingredients, cookingMethod, outputs } = req.body;
+
+    const prompt = `You are an expert food scientist and nutritionist.
+Given the following recipe raw ingredients, cooking method, and final output distributions (Primary Yield, By-products, Waste), calculate the detailed nutritional profile for EACH output (per 100g of that specific output).
+
+Consider:
+1. Moisture loss (evaporation during cooking like boiling/baking).
+2. Fat loss/rendering (e.g. from pork belly).
+3. Absorption rates (how much sugar/sodium from a liquid is actually absorbed by solid items, and how much is left in the liquid by-product/waste).
+
+Ingredients:
+${JSON.stringify(ingredients, null, 2)}
+
+Cooking Method: ${cookingMethod || 'Mixed'}
+
+Outputs:
+${JSON.stringify(outputs, null, 2)}
+
+Respond with a JSON object strictly matching this schema for each output, keyed by the output index:
+{
+  "explanation": "Brief reasoning for absorption/loss rates",
+  "outputs": [
+    {
+      "index": 0,
+      "nutrition": {
+        "calories": number,
+        "protein": number,
+        "fat": number,
+        "carbohydrates": number,
+        "sodium": number,
+        "sugar": number
+      }
+    }
+  ]
+}
+`;
+
+    const aiResult = await generateGeminiObject(prompt);
+    res.json(aiResult);
+  } catch (error) {
+    console.error('AI Nutrition Calculation Error:', error);
+    res.status(500).json({ error: 'AI 計算失敗' });
   }
 };
