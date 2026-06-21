@@ -148,6 +148,7 @@ const CreateRecipeModal = ({ initialData, onClose, onSuccess }: Props) => {
   const [isSubRecipe, setIsSubRecipe] = useState(initialData?.isSubRecipe || false);
   const [isProduct, setIsProduct] = useState(initialData?.isProduct !== false); // default to true
   const [bakingLossRate, setBakingLossRate] = useState(initialData?.bakingLossRate || 0);
+  const [outputs, setOutputs] = useState<any[]>(initialData?.outputs || []);
   const [search, setSearch] = useState('');
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [steps, setSteps] = useState<any[]>([]);
@@ -464,6 +465,31 @@ const CreateRecipeModal = ({ initialData, onClose, onSuccess }: Props) => {
     setOpenGroups(prev => prev.includes(name) ? prev.filter(n => n !== name) : [...prev, name]);
   };
 
+  const handleCalculateAiNutrition = async () => {
+    try {
+      setLoading(true);
+      const allItems = steps.flatMap(s => s.items.map((i: any) => ({
+        ingredientId: i.type === 'ingredient' ? i.data.id : null,
+        subRecipeId: i.type === 'recipe' ? i.data.id : null,
+        quantity: i.quantity,
+        unit: i.unit,
+        ingredientName: i.name,
+      })));
+      
+      const res = await axios.post('http://localhost:3000/api/recipes/ai-nutrition', {
+        recipeItems: allItems,
+        outputs,
+        cookingMethod: steps.map(s => s.action).join(', ')
+      });
+      setOutputs(res.data.outputs);
+      alert('AI 營養標示計算完成！');
+    } catch (err: any) {
+      alert(`AI 計算失敗: ${err.response?.data?.error || err.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (steps.length === 0) return alert('請至少加入一個製作步驟');
@@ -477,6 +503,7 @@ const CreateRecipeModal = ({ initialData, onClose, onSuccess }: Props) => {
         isSubRecipe,
         isProduct,
         bakingLossRate,
+        outputs,
         steps: steps.map(s => ({
           id: s.id,
           action: s.action,
@@ -665,6 +692,122 @@ const CreateRecipeModal = ({ initialData, onClose, onSuccess }: Props) => {
                         </span>
                       </div>
                     </label>
+                  </div>
+                </div>
+
+                {/* Outputs & AI Nutrition Section */}
+                <div className="bg-white border border-border rounded-2xl p-6 shadow-sm space-y-4">
+                  <div className="flex justify-between items-center border-b border-border pb-3">
+                    <div>
+                      <h4 className="font-black text-gray-800 text-sm flex items-center gap-2">
+                        <span>🧪 產出設定 (主產物 / 副產品 / 耗損)</span>
+                      </h4>
+                      <p className="text-[10px] text-muted-foreground mt-1">
+                        定義這份食譜的所有產出。耗損的重量會從成品中扣除，副產品可以轉存為食材供其他食譜使用。
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setOutputs([...outputs, { type: 'PRIMARY', name: '', yield: 0, unit: 'g', ingredientId: null }])}
+                      className="px-3 py-1.5 bg-primary/10 text-primary text-xs font-bold rounded-lg hover:bg-primary/20 transition-colors"
+                    >
+                      + 新增產出流向
+                    </button>
+                  </div>
+
+                  {outputs.map((out, idx) => (
+                    <div key={idx} className="flex gap-2 items-center bg-muted/20 p-2 rounded-lg border border-border">
+                      <select 
+                        value={out.type} 
+                        onChange={e => {
+                          const newOutputs = [...outputs];
+                          newOutputs[idx].type = e.target.value;
+                          setOutputs(newOutputs);
+                        }}
+                        className="p-2 border rounded-lg text-sm bg-white"
+                      >
+                        <option value="PRIMARY">主產品 (Primary)</option>
+                        <option value="BYPRODUCT">副產品 (By-product)</option>
+                        <option value="WASTE">耗損/廢棄 (Waste)</option>
+                      </select>
+                      <input 
+                        type="text" 
+                        placeholder="名稱 (如: 老滷汁)" 
+                        value={out.name}
+                        onChange={e => {
+                          const newOutputs = [...outputs];
+                          newOutputs[idx].name = e.target.value;
+                          setOutputs(newOutputs);
+                        }}
+                        className="flex-1 p-2 border rounded-lg text-sm bg-white"
+                      />
+                      <input 
+                        type="number" 
+                        placeholder="產出量" 
+                        value={out.yield || ''}
+                        onChange={e => {
+                          const newOutputs = [...outputs];
+                          newOutputs[idx].yield = parseFloat(e.target.value) || 0;
+                          setOutputs(newOutputs);
+                        }}
+                        className="w-24 p-2 border rounded-lg text-sm bg-white"
+                      />
+                      <select 
+                        value={out.unit} 
+                        onChange={e => {
+                          const newOutputs = [...outputs];
+                          newOutputs[idx].unit = e.target.value;
+                          setOutputs(newOutputs);
+                        }}
+                        className="w-20 p-2 border rounded-lg text-sm bg-white"
+                      >
+                        <option value="g">g</option>
+                        <option value="ml">ml</option>
+                        <option value="kg">kg</option>
+                        <option value="L">L</option>
+                      </select>
+                      <button 
+                        type="button" 
+                        onClick={() => {
+                          const newOutputs = [...outputs];
+                          newOutputs.splice(idx, 1);
+                          setOutputs(newOutputs);
+                        }}
+                        className="p-2 text-red-500 hover:bg-red-50 rounded"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+
+                  {/* AI Nutrition Button */}
+                  <div className="pt-2">
+                    <button
+                      type="button"
+                      onClick={handleCalculateAiNutrition}
+                      disabled={loading || outputs.length === 0 || steps.length === 0}
+                      className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-indigo-50 border border-indigo-200 text-indigo-700 font-bold rounded-xl hover:bg-indigo-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <span>✨ AI 計算營養標示 (依照步驟推估)</span>
+                    </button>
+                    {outputs.some(o => o.nutritionFacts) && (
+                      <div className="mt-4 space-y-2 text-xs">
+                        <p className="font-bold text-gray-700">AI 計算結果 (每 100g/ml)：</p>
+                        <div className="grid grid-cols-2 gap-2">
+                          {outputs.map((out, idx) => out.nutritionFacts ? (
+                            <div key={idx} className="bg-white p-3 rounded border border-gray-200">
+                              <span className="font-bold">{out.name}</span>
+                              <div className="grid grid-cols-2 mt-1 gap-x-2 text-gray-500">
+                                <div>熱量: {out.nutritionFacts.calories} kcal</div>
+                                <div>蛋白: {out.nutritionFacts.protein} g</div>
+                                <div>脂肪: {out.nutritionFacts.fat} g</div>
+                                <div>碳水: {out.nutritionFacts.carbohydrates} g</div>
+                              </div>
+                            </div>
+                          ) : null)}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
 

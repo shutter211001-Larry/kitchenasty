@@ -21,6 +21,7 @@ interface Ingredient {
   isAllergen: boolean;
   allergenType?: string;
   allergens?: Allergen[];
+  isInUse?: boolean; // 新增：是否被食譜使用
 }
 
 const Ingredients = () => {
@@ -30,6 +31,7 @@ const Ingredients = () => {
   const [selectedIngredient, setSelectedIngredient] = useState<Ingredient | null | 'new'>(null);
   const [isAllergenMgrOpen, setIsAllergenMgrOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState('所有分類');
+  const [activeTab, setActiveTab] = useState<'IN_USE' | 'ALL'>('IN_USE');
 
   const fetchIngredients = async () => {
     try {
@@ -102,6 +104,34 @@ const Ingredients = () => {
           <option value="起司乳酪">起司乳酪</option>
           <option value="其他">其他</option>
         </select>
+        
+        {/* New Filter Tabs */}
+        <div className="flex bg-muted/50 p-1 rounded-xl shrink-0">
+          <button
+            onClick={() => setActiveTab('IN_USE')}
+            className={cn(
+              "px-4 py-2 text-xs font-bold rounded-lg transition-all",
+              activeTab === 'IN_USE' ? "bg-white text-primary shadow-sm" : "text-muted-foreground hover:text-gray-800"
+            )}
+          >
+            需控管 (使用中)
+            <span className="ml-1.5 px-1.5 py-0.5 bg-primary/10 text-primary rounded-md text-[10px]">
+              {ingredients.filter(i => i.isInUse).length}
+            </span>
+          </button>
+          <button
+            onClick={() => setActiveTab('ALL')}
+            className={cn(
+              "px-4 py-2 text-xs font-bold rounded-lg transition-all",
+              activeTab === 'ALL' ? "bg-white text-gray-800 shadow-sm" : "text-muted-foreground hover:text-gray-800"
+            )}
+          >
+            全部/未啟用
+            <span className="ml-1.5 px-1.5 py-0.5 bg-gray-200 text-gray-600 rounded-md text-[10px]">
+              {ingredients.length}
+            </span>
+          </button>
+        </div>
       </div>
 
       {/* Ingredients List */}
@@ -136,14 +166,19 @@ const Ingredients = () => {
                   </td>
                 </tr>
               ) : (
-                ingredients.map((ing) => (
+                ingredients.filter(ing => activeTab === 'ALL' || ing.isInUse).map((ing) => (
                   <tr key={ing.id} className="hover:bg-muted/30 transition-colors group">
                     <td className="px-8 py-5">
                       <div className="flex items-center gap-4">
                         <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
                           <Package className="w-5 h-5" />
                         </div>
-                        <span className="font-bold text-gray-800">{ing.name}</span>
+                        <div className="flex flex-col">
+                          <span className="font-bold text-gray-800 flex items-center gap-2">
+                            {ing.name}
+                            {!ing.isInUse && <span className="text-[10px] font-medium bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded">未被食譜使用</span>}
+                          </span>
+                        </div>
                       </div>
                     </td>
                     <td className="px-8 py-5">
