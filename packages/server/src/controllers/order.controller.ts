@@ -4,6 +4,14 @@ import * as XLSX from 'xlsx';
 import path from 'path';
 import fs from 'fs';
 import prisma from '../lib/db.js';
+import { 
+  OrderStatus, 
+  OrderType, 
+  Prisma, 
+  ReservationStatus,
+  PaymentStatus,
+  PaymentMethod
+} from '@prisma/client';
 import { emitNewOrder, emitOrderStatusUpdate } from '../lib/socket.js';
 import { isPointInPolygon } from '../lib/geo.js';
 import { calculateDistance } from '../lib/geo.js';
@@ -1252,6 +1260,7 @@ export async function listOrders(req: Request, res: Response): Promise<void> {
         customer: { select: { id: true, name: true, email: true, phone: true } },
         location: { select: { id: true, name: true } },
         table: { select: { id: true, name: true } },
+        payments: true,
         _count: { select: { items: true } },
         ...(includeItems ? { items: { include: { options: true } } } : {}),
       },
@@ -1275,6 +1284,7 @@ export async function getOrder(req: Request<{ id: string }>, res: Response): Pro
       customer: { select: { id: true, name: true, email: true, phone: true } },
       location: { select: { id: true, name: true } },
       table: { select: { id: true, name: true } },
+      payments: true,
       items: {
         include: {
           menuItem: { select: { id: true, name: true, nameTranslations: true, slug: true } },
@@ -2134,6 +2144,76 @@ export async function updateOrderPaymentStatus(req: Request<{ id: string }>, res
   } as any);
 
   res.status(200).json({ success: true, data: updated });
+}
+
+export async function addOrderPayment(req: Request<{ id: string }>, res: Response): Promise<void> {
+  const { id } = req.params;
+  const { amount, method } = req.body;
+
+  if (typeof amount !== 'number' || amount <= 0) {
+    res.status(400).json({ success: false, error: 'Invalid amount' });
+    return;
+  }
+
+  const validMethods = ['CASH', 'STRIPE', 'PAYPAL', 'LINE_PAY', 'CREDIT_CARD'];
+  if (!validMethods.includes(method)) {
+    res.status(400).json({ success: false, error: `Invalid method. Must be one of: ${validMethods.join(', ')}` });
+    return;
+  }
+
+  const order = await prisma.order.findUnique({
+    where: { id },
+    include: { payments: true }
+  });
+
+  if (!order) {
+    res.status(404).json({ success: false, error: 'Order not found' });
+    return;
+  }
+
+  // Create payment
+  await prisma.payment.create({
+    data: {
+      orderId: id,
+      amount,
+      method: method as PaymentMethod,
+      status: 'COMPLETED' as PaymentStatus,
+    }
+  });
+
+  // Calculate new total paid
+  const totalPaid = order.payments.reduce((sum, p) => sum + (p.status === 'COMPLETED' ? p.amount : 0), 0) + amount;
+
+  let updatedOrder = order;
+  if (totalPaid >= order.total && order.paymentStatus !== 'PAID') {
+    updatedOrder = await prisma.order.update({
+      where: { id },
+      data: { paymentStatus: 'PAID' },
+      include: { payments: true }
+    });
+
+    emitOrderStatusUpdate({
+      id: updatedOrder.id,
+      orderNumber: updatedOrder.orderNumber,
+      status: updatedOrder.status,
+      orderType: updatedOrder.orderType,
+    });
+  }
+
+  auditLog(req, { 
+    action: 'create', 
+    entity: 'Payment', 
+    entityId: id, 
+    details: { amount, method, newTotalPaid: totalPaid } 
+  });
+
+  // Send generic order refresh so CounterDisplay fetches new payment data
+  const io = getIO();
+  if (io) {
+    io.to(`kitchen:${order.locationId}`).emit('order:statusUpdate', { id });
+  }
+
+  res.json({ success: true, data: updatedOrder });
 }
 
 
