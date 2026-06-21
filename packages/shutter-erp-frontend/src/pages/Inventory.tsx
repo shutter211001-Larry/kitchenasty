@@ -2,19 +2,20 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { 
   Package, Search, ArrowUpRight, ArrowDownRight, Scale, 
-  History, AlertTriangle, CheckCircle, ListFilter, RotateCw 
+  History, AlertTriangle, CheckCircle, RotateCw 
 } from 'lucide-react';
 import StockAdjustmentModal from '../components/StockAdjustmentModal';
 import { useAuth } from '../context/AuthContext';
 
 const Inventory: React.FC = () => {
-  const { user } = useAuth();
+  const {} = useAuth();
   const [ingredients, setIngredients] = useState<any[]>([]);
   const [logs, setLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
   const [onlyLowStock, setOnlyLowStock] = useState(false);
+  const [activeTab, setActiveTab] = useState<'IN_USE' | 'ALL'>('IN_USE');
   
   // Modal states
   const [activeModal, setActiveModal] = useState<{
@@ -63,8 +64,9 @@ const Inventory: React.FC = () => {
       (i.category && i.category.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesCategory = selectedCategory === 'ALL' || i.category === selectedCategory;
     const matchesLowStock = !onlyLowStock || (i.safetyStock !== null && i.safetyStock > 0 && i.currentStock < i.safetyStock);
+    const matchesInUse = activeTab === 'ALL' || i.isInUse;
     
-    return matchesSearch && matchesCategory && matchesLowStock;
+    return matchesSearch && matchesCategory && matchesLowStock && matchesInUse;
   });
 
   return (
@@ -158,7 +160,32 @@ const Inventory: React.FC = () => {
               />
             </div>
             
-            <div className="flex items-center gap-2">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+              <div className="flex bg-muted/50 p-1 rounded-xl shrink-0">
+                <button
+                  onClick={() => setActiveTab('IN_USE')}
+                  className={`px-3 py-2 text-xs font-bold rounded-lg transition-all ${
+                    activeTab === 'IN_USE' ? "bg-white text-primary shadow-sm" : "text-muted-foreground hover:text-gray-800"
+                  }`}
+                >
+                  需控管 (使用中)
+                  <span className="ml-1.5 px-1.5 py-0.5 bg-primary/10 text-primary rounded-md text-[10px]">
+                    {ingredients.filter(i => i.isInUse).length}
+                  </span>
+                </button>
+                <button
+                  onClick={() => setActiveTab('ALL')}
+                  className={`px-3 py-2 text-xs font-bold rounded-lg transition-all ${
+                    activeTab === 'ALL' ? "bg-white text-gray-800 shadow-sm" : "text-muted-foreground hover:text-gray-800"
+                  }`}
+                >
+                  全部
+                  <span className="ml-1.5 px-1.5 py-0.5 bg-gray-200 text-gray-600 rounded-md text-[10px]">
+                    {ingredients.length}
+                  </span>
+                </button>
+              </div>
+
               <button
                 onClick={() => setOnlyLowStock(!onlyLowStock)}
                 className={`flex items-center gap-1.5 px-4 py-3 rounded-2xl text-xs font-black border transition-all cursor-pointer ${
@@ -212,7 +239,10 @@ const Inventory: React.FC = () => {
                     {/* Left: Info */}
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
-                        <h4 className="text-sm font-black text-gray-800">{item.name}</h4>
+                        <h4 className="text-sm font-black text-gray-800 flex items-center gap-2">
+                          {item.name}
+                          {!item.isInUse && <span className="text-[9px] font-medium bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded">未被食譜使用</span>}
+                        </h4>
                         {item.category && (
                           <span className="px-2 py-0.5 bg-muted text-muted-foreground rounded-lg text-[9px] font-black uppercase">
                             {item.category}
