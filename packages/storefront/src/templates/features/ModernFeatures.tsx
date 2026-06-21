@@ -1,8 +1,10 @@
 import { useTheme } from '../../context/ThemeContext.js';
+import { getTranslated } from '../../utils/translation.js';
 
 interface FeaturesProps {
   features: Array<{ icon: string; title: string; description: string }> | null;
   t: (key: string) => string;
+  lang?: string;
 }
 
 const defaultIcons: Record<string, React.ReactNode> = {
@@ -11,10 +13,14 @@ const defaultIcons: Record<string, React.ReactNode> = {
   calendar: <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>,
 };
 
-export default function ModernFeatures({ features, t }: FeaturesProps) {
+export default function ModernFeatures({ features, t, lang = 'zh-TW' }: FeaturesProps) {
   const { settings } = useTheme();
 
-  const items = features?.length ? features : [
+  const items = features?.length ? features.filter(f => {
+              if (!settings.navShowLocations && (f.title.includes('分店') || f.title.includes('定位') || f.title.includes('預約'))) return false;
+              if ((!settings.navShowReservations || !settings.reservationSettings?.enabled) && f.title.includes('預約')) return false;
+              return true;
+            }) : [
     settings.orderSettings?.deliveryEnabled && { icon: 'clock', title: t('home.fastDelivery'), description: t('home.fastDeliveryDesc') },
     settings.navShowLocations && { icon: 'clipboard', title: t('home.easyOrdering'), description: t('home.easyOrderingDesc') },
     settings.navShowReservations && settings.reservationSettings?.enabled && { icon: 'calendar', title: t('home.tableReservations'), description: t('home.tableReservationsDesc') },
@@ -42,12 +48,8 @@ export default function ModernFeatures({ features, t }: FeaturesProps) {
                   <span className="text-lg font-semibold">{feature.icon}</span>
                 )}
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                {feature.title}
-              </h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
-                {feature.description}
-              </p>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">{getTranslated(feature.title, (feature as any).translations?.title, lang)}</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">{getTranslated(feature.description, (feature as any).translations?.description, lang)}</p>
             </div>
           ))}
         </div>

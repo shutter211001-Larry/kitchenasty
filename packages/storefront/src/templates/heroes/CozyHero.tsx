@@ -1,12 +1,14 @@
 import { Link } from 'react-router-dom';
 import { useTheme } from '../../context/ThemeContext.js';
+import { getTranslated } from '../../utils/translation.js';
 
 interface HeroProps {
   hero: { title?: string; subtitle?: string; ctaPrimaryText?: string; ctaPrimaryLink?: string; ctaSecondaryText?: string; ctaSecondaryLink?: string; backgroundImage?: string } | null;
   t: (key: string) => string;
+  lang?: string;
 }
 
-export default function CozyHero({ hero, t }: HeroProps) {
+export default function CozyHero({ hero, t, lang = 'zh-TW' }: HeroProps) {
   const { settings } = useTheme();
 
   return (
@@ -36,11 +38,11 @@ export default function CozyHero({ hero, t }: HeroProps) {
             </div>
 
             <h1 className={`text-3xl sm:text-4xl lg:text-5xl font-bold mb-6 leading-tight ${hero?.backgroundImage ? 'text-white' : 'text-gray-900 dark:text-white'}`}>
-              {hero?.title || t('home.heroTitle')}
+              {getTranslated(hero?.title || '', (hero as any)?.translations?.title, lang) || t('home.heroTitle')}
             </h1>
 
             <p className={`text-lg mb-10 max-w-lg mx-auto leading-relaxed ${hero?.backgroundImage ? 'text-amber-100' : 'text-gray-600 dark:text-gray-300'}`}>
-              {hero?.subtitle || t('home.heroDescription')}
+              {getTranslated(hero?.subtitle || '', (hero as any)?.translations?.subtitle, lang) || t('home.heroDescription')}
             </p>
 
             <div className="flex flex-wrap justify-center gap-4">
@@ -49,19 +51,19 @@ export default function CozyHero({ hero, t }: HeroProps) {
                   to={hero?.ctaPrimaryLink || '/menu'}
                   className="bg-amber-500 hover:bg-amber-600 text-white px-8 py-3.5 rounded-xl font-semibold shadow-lg shadow-amber-500/25 transition-all duration-200 hover:shadow-xl hover:shadow-amber-500/30"
                 >
-                  {hero?.ctaPrimaryText || t('home.viewMenu')}
+                  {getTranslated(hero?.ctaPrimaryText || '', (hero as any)?.translations?.ctaPrimaryText, lang) || t('home.viewMenu')}
                 </Link>
               )}
               {(() => {
                 const link = hero?.ctaSecondaryLink || '/locations';
                 if (link === '/locations' && !settings.navShowLocations) return null;
-                if (link === '/reservations' && !settings.navShowReservations) return null;
+                if (link === '/reservations' && (!settings.navShowReservations || !settings.reservationSettings?.enabled)) return null;
                 return (
                   <Link
                     to={link}
                     className={`px-8 py-3.5 rounded-xl font-semibold transition-colors ${hero?.backgroundImage ? 'border-2 border-white/50 text-white hover:bg-white/10' : 'border-2 border-amber-300 dark:border-amber-600 text-amber-700 dark:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-900/20'}`}
                   >
-                    {hero?.ctaSecondaryText || t('home.findLocation')}
+                    {getTranslated(hero?.ctaSecondaryText || '', (hero as any)?.translations?.ctaSecondaryText, lang) || t('home.findLocation')}
                   </Link>
                 );
               })()}

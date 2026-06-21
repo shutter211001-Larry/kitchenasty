@@ -1,10 +1,12 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext.js';
+import { useAuth } from '../../context/AuthContext.js';
 
 export default function ElegantFooter() {
   const { t } = useTranslation();
   const { settings } = useTheme();
+  const { user, isLoading } = useAuth();
 
   return (
     <footer className="bg-gray-50 text-gray-600">
@@ -35,7 +37,7 @@ export default function ElegantFooter() {
             <ul className="space-y-2">
               {settings.navShowMenu && <li><Link to="/menu" className="hover:text-gray-900 transition-colors">{t('nav.menu')}</Link></li>}
               {settings.navShowLocations && <li><Link to="/locations" className="hover:text-gray-900 transition-colors">{t('nav.locations')}</Link></li>}
-              {settings.navShowReservations && <li><Link to="/reservations" className="hover:text-gray-900 transition-colors">{t('nav.reservations')}</Link></li>}
+              {settings.navShowReservations && settings.reservationSettings?.enabled && <li><Link to="/reservations" className="hover:text-gray-900 transition-colors">{t('nav.reservations')}</Link></li>}
             </ul>
           </div>
 
@@ -43,9 +45,16 @@ export default function ElegantFooter() {
             <div>
               <h3 className="text-gray-800 font-serif text-base mb-4 tracking-wide">{t('footer.account')}</h3>
               <ul className="space-y-2">
-                <li><Link to="/login" className="hover:text-gray-900 transition-colors">{t('nav.login')}</Link></li>
-                <li><Link to="/register" className="hover:text-gray-900 transition-colors">{t('footer.createAccount')}</Link></li>
-                <li><Link to="/account" className="hover:text-gray-900 transition-colors">{t('nav.myAccount')}</Link></li>
+                {isLoading ? (
+                  <li className="text-gray-500 italic">{t('common.loading')}</li>
+                ) : user ? (
+                  <li><Link to="/account" className="hover:text-gray-900 transition-colors">{t('nav.myAccountWithName', { name: user.name })}</Link></li>
+                ) : (
+                  <>
+                    <li><Link to="/login" className="hover:text-gray-900 transition-colors">{t('nav.login')}</Link></li>
+                    <li><Link to="/register" className="hover:text-gray-900 transition-colors">{t('footer.createAccount')}</Link></li>
+                  </>
+                )}
               </ul>
             </div>
           )}

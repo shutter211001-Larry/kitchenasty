@@ -16,10 +16,14 @@ const defaultIcons: Record<string, React.ReactNode> = {
 export default function MinimalFeatures({ features, t, lang = 'zh-TW' }: FeaturesProps) {
   const { settings } = useTheme();
 
-  const items = features?.length ? features : [
+  const items = features?.length ? features.filter(f => {
+              if (!settings.navShowLocations && (f.title.includes('分店') || f.title.includes('定位') || f.title.includes('預約'))) return false;
+              if ((!settings.navShowReservations || !settings.reservationSettings?.enabled) && f.title.includes('預約')) return false;
+              return true;
+            }) : [
     settings.orderSettings?.deliveryEnabled && { icon: 'clock', title: t('home.fastDelivery'), description: t('home.fastDeliveryDesc') },
     settings.navShowLocations && { icon: 'clipboard', title: t('home.easyOrdering'), description: t('home.easyOrderingDesc') },
-    settings.navShowReservations && { icon: 'calendar', title: t('home.tableReservations'), description: t('home.tableReservationsDesc') },
+    settings.navShowReservations && settings.reservationSettings?.enabled && { icon: 'calendar', title: t('home.tableReservations'), description: t('home.tableReservationsDesc') },
   ].filter(Boolean) as Array<{ icon: string; title: string; description: string }>;
 
   return (

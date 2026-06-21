@@ -1,10 +1,12 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext.js';
+import { useAuth } from '../../context/AuthContext.js';
 
 export default function ModernFooter() {
   const { t } = useTranslation();
   const { settings } = useTheme();
+  const { user, isLoading } = useAuth();
 
   return (
     <footer className="relative bg-gray-900/80 backdrop-blur-xl text-gray-400 border-t border-white/10">

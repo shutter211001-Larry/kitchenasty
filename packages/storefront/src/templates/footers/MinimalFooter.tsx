@@ -1,10 +1,12 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext.js';
+import { useAuth } from '../../context/AuthContext.js';
 
 export default function MinimalFooter() {
   const { t } = useTranslation();
   const { settings } = useTheme();
+  const { user, isLoading } = useAuth();
 
   return (
     <footer className="bg-white text-gray-500 border-t border-gray-100">
@@ -26,7 +28,7 @@ export default function MinimalFooter() {
           <nav className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs">
             {settings.navShowMenu && <Link to="/menu" className="hover:text-gray-900 transition-colors">{t('nav.menu')}</Link>}
             {settings.navShowLocations && <Link to="/locations" className="hover:text-gray-900 transition-colors">{t('nav.locations')}</Link>}
-            {settings.navShowReservations && <Link to="/reservations" className="hover:text-gray-900 transition-colors">{t('nav.reservations')}</Link>}
+            {settings.navShowReservations && settings.reservationSettings?.enabled && <Link to="/reservations" className="hover:text-gray-900 transition-colors">{t('nav.reservations')}</Link>}
             {settings.showMembership && (
               <>
                 <span className="text-gray-300">|</span>

@@ -1,12 +1,14 @@
 import { Link } from 'react-router-dom';
 import { useTheme } from '../../context/ThemeContext.js';
+import { getTranslated } from '../../utils/translation.js';
 
 interface HeroProps {
   hero: { title?: string; subtitle?: string; ctaPrimaryText?: string; ctaPrimaryLink?: string; ctaSecondaryText?: string; ctaSecondaryLink?: string; backgroundImage?: string } | null;
   t: (key: string) => string;
+  lang?: string;
 }
 
-export default function RetroHero({ hero, t }: HeroProps) {
+export default function RetroHero({ hero, t, lang = 'zh-TW' }: HeroProps) {
   const { settings } = useTheme();
 
   return (
@@ -35,7 +37,7 @@ export default function RetroHero({ hero, t }: HeroProps) {
           className="text-4xl sm:text-5xl lg:text-6xl font-bold text-amber-900 dark:text-amber-100 mb-6 leading-tight"
           style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}
         >
-          {hero?.title || t('home.heroTitle')}
+          {getTranslated(hero?.title || '', (hero as any)?.translations?.title, lang) || t('home.heroTitle')}
         </h1>
 
         {/* Retro divider */}
@@ -49,7 +51,7 @@ export default function RetroHero({ hero, t }: HeroProps) {
           className="text-lg text-amber-800/70 dark:text-amber-300/70 mb-10 max-w-md mx-auto leading-relaxed italic"
           style={{ fontFamily: 'Georgia, serif' }}
         >
-          {hero?.subtitle || t('home.heroDescription')}
+          {getTranslated(hero?.subtitle || '', (hero as any)?.translations?.subtitle, lang) || t('home.heroDescription')}
         </p>
 
         <div className="flex flex-wrap justify-center gap-4">
@@ -59,20 +61,20 @@ export default function RetroHero({ hero, t }: HeroProps) {
               className="bg-amber-700 hover:bg-amber-800 dark:bg-amber-600 dark:hover:bg-amber-700 text-amber-50 px-8 py-3.5 rounded-sm font-bold uppercase tracking-widest text-sm border-2 border-amber-800 dark:border-amber-500 transition-colors shadow-md"
               style={{ fontFamily: 'Georgia, serif' }}
             >
-              {hero?.ctaPrimaryText || t('home.viewMenu')}
+              {getTranslated(hero?.ctaPrimaryText || '', (hero as any)?.translations?.ctaPrimaryText, lang) || t('home.viewMenu')}
             </Link>
           )}
           {(() => {
             const link = hero?.ctaSecondaryLink || '/locations';
             if (link === '/locations' && !settings.navShowLocations) return null;
-            if (link === '/reservations' && !settings.navShowReservations) return null;
+            if (link === '/reservations' && (!settings.navShowReservations || !settings.reservationSettings?.enabled)) return null;
             return (
               <Link
                 to={link}
                 className="border-2 border-amber-700 dark:border-amber-500 text-amber-800 dark:text-amber-300 px-8 py-3.5 rounded-sm font-bold uppercase tracking-widest text-sm hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors"
                 style={{ fontFamily: 'Georgia, serif' }}
               >
-                {hero?.ctaSecondaryText || t('home.findLocation')}
+                {getTranslated(hero?.ctaSecondaryText || '', (hero as any)?.translations?.ctaSecondaryText, lang) || t('home.findLocation')}
               </Link>
             );
           })()}

@@ -1,10 +1,12 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext.js';
+import { useAuth } from '../../context/AuthContext.js';
 
 export default function RusticFooter() {
   const { t } = useTranslation();
   const { settings } = useTheme();
+  const { user, isLoading } = useAuth();
 
   return (
     <footer className="bg-stone-800 text-stone-400">
@@ -44,10 +46,17 @@ export default function RusticFooter() {
           <div>
             <h3 className="text-stone-200 font-semibold mb-4 border-b border-stone-600 pb-2">{t('footer.account')}</h3>
             <ul className="space-y-2 text-sm">
-              <li><Link to="/login" className="hover:text-amber-400 transition-colors">{t('nav.login')}</Link></li>
-              <li><Link to="/register" className="hover:text-amber-400 transition-colors">{t('footer.createAccount')}</Link></li>
-              <li><Link to="/account" className="hover:text-amber-400 transition-colors">{t('nav.myAccount')}</Link></li>
-            </ul>
+                {isLoading ? (
+                  <li className="text-gray-500 italic">{t('common.loading')}</li>
+                ) : user ? (
+                  <li><Link to="/account" className="hover:text-amber-400 transition-colors">{t('nav.myAccountWithName', { name: user.name })}</Link></li>
+                ) : (
+                  <>
+                    <li><Link to="/login" className="hover:text-amber-400 transition-colors">{t('nav.login')}</Link></li>
+                    <li><Link to="/register" className="hover:text-amber-400 transition-colors">{t('footer.createAccount')}</Link></li>
+                  </>
+                )}
+              </ul>
           </div>
 
           {/* Legal */}

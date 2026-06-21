@@ -4,12 +4,15 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext.js';
 import { useCart } from '../../context/CartContext.js';
 import { useTheme } from '../../context/ThemeContext.js';
+import { useRecentOrders } from '../../hooks/useRecentOrders.js';
+// from '../../context/ThemeContext.js';
 
 export function useHeaderProps() {
   const { t } = useTranslation();
   const { user, logout, isLoading } = useAuth();
   const { itemCount, setIsOpen: openCart } = useCart();
   const { settings } = useTheme();
+  const { recentOrders } = useRecentOrders();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
@@ -49,5 +52,5 @@ export function useHeaderProps() {
     };
   }, [mobileOpen]);
 
-  return { t, user, logout, isLoading, itemCount, openCart, settings, navLinks, isActive, mobileOpen, setMobileOpen, headerRef };
+  return { t, user, logout, isLoading, itemCount, openCart, settings, navLinks, isActive, mobileOpen, setMobileOpen, headerRef, recentOrders };
 }

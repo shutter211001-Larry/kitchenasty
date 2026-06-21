@@ -31,7 +31,7 @@ export default function MinimalHero({ hero, t, lang = 'zh-TW' }: HeroProps) {
             to={hero?.ctaSecondaryLink || '/locations'}
             className="group text-gray-500 dark:text-gray-400 font-medium"
           >
-            <span>{getTranslated(hero?.ctaSecondaryText || '', (hero as any)?.translations?.ctaSecondaryText, lang) || t('home.findLocation')}</span>
+            <span>{getTranslated(hero?.ctaSecondaryText || '', (hero as any)?.translations?.ctaSecondaryText, lang) || t('home.findLocation') || t('home.findLocation')}</span>
             <span className="block h-px w-0 group-hover:w-full bg-gray-500 dark:bg-gray-400 transition-all duration-300 mt-1" />
           </Link>
         </div>

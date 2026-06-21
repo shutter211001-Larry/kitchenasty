@@ -1,4 +1,13 @@
-import { Link } from 'react-router-dom';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const vibrantPath = path.join(__dirname, '..', 'templates', 'heroes', 'VibrantHero.tsx');
+
+const content = `import { Link } from 'react-router-dom';
 import { getTranslated } from '../../utils/translation.js';
 
 interface HeroProps {
@@ -24,13 +33,13 @@ export default function VibrantHero({ hero, t, lang = 'zh-TW' }: HeroProps) {
       <div className="absolute bottom-1/4 right-1/4 w-48 h-48 bg-yellow-300/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
 
       {/* Inline keyframes for gradient animation */}
-      <style>{`
+      <style>{\`
         @keyframes vibrant-gradient {
           0% { background-position: 0% 50%; }
           50% { background-position: 100% 50%; }
           100% { background-position: 0% 50%; }
         }
-      `}</style>
+      \`}</style>
 
       <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28 text-center">
         <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold text-white mb-6 leading-[0.95] drop-shadow-lg">
@@ -66,3 +75,7 @@ export default function VibrantHero({ hero, t, lang = 'zh-TW' }: HeroProps) {
     </section>
   );
 }
+`;
+
+fs.writeFileSync(vibrantPath, content, 'utf8');
+console.log('Fixed VibrantHero');

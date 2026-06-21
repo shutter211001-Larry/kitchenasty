@@ -1,8 +1,10 @@
 import { useTheme } from '../../context/ThemeContext.js';
+import { getTranslated } from '../../utils/translation.js';
 
 interface FeaturesProps {
   features: Array<{ icon: string; title: string; description: string }> | null;
   t: (key: string) => string;
+  lang?: string;
 }
 
 const defaultIcons: Record<string, React.ReactNode> = {
@@ -20,13 +22,17 @@ const gradients = [
   'from-fuchsia-500 to-pink-500',
 ];
 
-export default function VibrantFeatures({ features, t }: FeaturesProps) {
+export default function VibrantFeatures({ features, t, lang = 'zh-TW' }: FeaturesProps) {
   const { settings } = useTheme();
 
-  const items = features?.length ? features : [
+  const items = features?.length ? features.filter(f => {
+              if (!settings.navShowLocations && (f.title.includes('分店') || f.title.includes('定位') || f.title.includes('預約'))) return false;
+              if ((!settings.navShowReservations || !settings.reservationSettings?.enabled) && f.title.includes('預約')) return false;
+              return true;
+            }) : [
     settings.orderSettings?.deliveryEnabled && { icon: 'clock', title: t('home.fastDelivery'), description: t('home.fastDeliveryDesc') },
     settings.navShowLocations && { icon: 'clipboard', title: t('home.easyOrdering'), description: t('home.easyOrderingDesc') },
-    settings.navShowReservations && { icon: 'calendar', title: t('home.tableReservations'), description: t('home.tableReservationsDesc') },
+    settings.navShowReservations && settings.reservationSettings?.enabled && { icon: 'calendar', title: t('home.tableReservations'), description: t('home.tableReservationsDesc') },
   ].filter(Boolean) as Array<{ icon: string; title: string; description: string }>;
 
   return (
@@ -49,12 +55,8 @@ export default function VibrantFeatures({ features, t }: FeaturesProps) {
                     <span className="text-lg font-bold">{feature.icon}</span>
                   )}
                 </div>
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
-                  {feature.title}
-                </h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
-                  {feature.description}
-                </p>
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">{getTranslated(feature.title, (feature as any).translations?.title, lang)}</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">{getTranslated(feature.description, (feature as any).translations?.description, lang)}</p>
               </div>
             </div>
           ))}

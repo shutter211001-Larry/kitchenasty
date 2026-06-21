@@ -1,10 +1,12 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext.js';
+import { useAuth } from '../../context/AuthContext.js';
 
 export default function VibrantFooter() {
   const { t } = useTranslation();
   const { settings } = useTheme();
+  const { user, isLoading } = useAuth();
 
   return (
     <footer className="bg-gradient-to-br from-purple-700 via-pink-600 to-orange-500 text-white/80">
@@ -42,9 +44,16 @@ export default function VibrantFooter() {
             <div>
               <h3 className="text-white font-semibold mb-4">{t('footer.account')}</h3>
               <ul className="space-y-2 text-sm">
-                <li><Link to="/login" className="hover:text-white transition-colors">{t('nav.login')}</Link></li>
-                <li><Link to="/register" className="hover:text-white transition-colors">{t('footer.createAccount')}</Link></li>
-                <li><Link to="/account" className="hover:text-white transition-colors">{t('nav.myAccount')}</Link></li>
+                {isLoading ? (
+                  <li className="text-gray-500 italic">{t('common.loading')}</li>
+                ) : user ? (
+                  <li><Link to="/account" className="hover:text-white transition-colors">{t('nav.myAccountWithName', { name: user.name })}</Link></li>
+                ) : (
+                  <>
+                    <li><Link to="/login" className="hover:text-white transition-colors">{t('nav.login')}</Link></li>
+                    <li><Link to="/register" className="hover:text-white transition-colors">{t('footer.createAccount')}</Link></li>
+                  </>
+                )}
               </ul>
             </div>
           )}

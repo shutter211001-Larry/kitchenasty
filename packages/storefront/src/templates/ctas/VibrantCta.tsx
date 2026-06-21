@@ -1,19 +1,23 @@
 import { Link } from 'react-router-dom';
 import { useTheme } from '../../context/ThemeContext.js';
+import { useAuth } from '../../context/AuthContext.js';
+import { getTranslated } from '../../utils/translation.js';
 
 interface CtaProps {
   cta: { title?: string; description?: string; buttonText?: string; buttonLink?: string } | null;
   t: (key: string) => string;
+  lang?: string;
 }
 
-export default function VibrantCta({ cta, t }: CtaProps) {
+export default function VibrantCta({ cta, t, lang = 'zh-TW' }: CtaProps) {
   const { settings } = useTheme();
-  const title = cta?.title || t('home.readyToOrder');
-  const description = cta?.description || t('home.readyToOrderDesc');
-  const buttonText = cta?.buttonText || t('home.createAccount');
+  const { user } = useAuth();
+  const title = getTranslated(cta?.title || '', (cta as any)?.translations?.title, lang) || t('home.readyToOrder');
+  const description = getTranslated(cta?.description || '', (cta as any)?.translations?.description, lang) || t('home.readyToOrderDesc');
+  const buttonText = getTranslated(cta?.buttonText || '', (cta as any)?.translations?.buttonText, lang) || t('home.createAccount');
   const buttonLink = cta?.buttonLink || '/register';
 
-  if (!settings.showMembership && buttonLink === '/register') {
+  if (user || (!settings.showMembership && (!cta?.buttonLink || cta.buttonLink === '/register'))) {
     return null;
   }
 

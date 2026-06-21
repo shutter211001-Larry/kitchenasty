@@ -1,12 +1,14 @@
 import { Link } from 'react-router-dom';
 import { useTheme } from '../../context/ThemeContext.js';
+import { getTranslated } from '../../utils/translation.js';
 
 interface HeroProps {
   hero: { title?: string; subtitle?: string; ctaPrimaryText?: string; ctaPrimaryLink?: string; ctaSecondaryText?: string; ctaSecondaryLink?: string; backgroundImage?: string } | null;
   t: (key: string) => string;
+  lang?: string;
 }
 
-export default function RusticHero({ hero, t }: HeroProps) {
+export default function RusticHero({ hero, t, lang = 'zh-TW' }: HeroProps) {
   const { settings } = useTheme();
   const bgStyle = hero?.backgroundImage
     ? { backgroundImage: `url(${hero.backgroundImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }
@@ -37,11 +39,11 @@ export default function RusticHero({ hero, t }: HeroProps) {
           className={`text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 leading-tight ${hero?.backgroundImage ? 'text-amber-50' : 'text-stone-800 dark:text-stone-100'}`}
           style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}
         >
-          {hero?.title || t('home.heroTitle')}
+          {getTranslated(hero?.title || '', (hero as any)?.translations?.title, lang) || t('home.heroTitle')}
         </h1>
 
         <p className={`text-lg mb-10 max-w-xl mx-auto leading-relaxed ${hero?.backgroundImage ? 'text-stone-200' : 'text-stone-600 dark:text-stone-400'}`}>
-          {hero?.subtitle || t('home.heroDescription')}
+          {getTranslated(hero?.subtitle || '', (hero as any)?.translations?.subtitle, lang) || t('home.heroDescription')}
         </p>
 
         <div className="flex flex-wrap justify-center gap-4">
@@ -51,20 +53,20 @@ export default function RusticHero({ hero, t }: HeroProps) {
               className="bg-amber-700 hover:bg-amber-800 dark:bg-amber-600 dark:hover:bg-amber-700 text-white px-8 py-3.5 rounded-lg font-semibold transition-colors shadow-md"
               style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}
             >
-              {hero?.ctaPrimaryText || t('home.viewMenu')}
+              {getTranslated(hero?.ctaPrimaryText || '', (hero as any)?.translations?.ctaPrimaryText, lang) || t('home.viewMenu')}
             </Link>
           )}
           {(() => {
             const link = hero?.ctaSecondaryLink || '/locations';
             if (link === '/locations' && !settings.navShowLocations) return null;
-            if (link === '/reservations' && !settings.navShowReservations) return null;
+            if (link === '/reservations' && (!settings.navShowReservations || !settings.reservationSettings?.enabled)) return null;
             return (
               <Link
                 to={link}
                 className={`px-8 py-3.5 rounded-lg font-semibold transition-colors border-2 ${hero?.backgroundImage ? 'border-amber-200/50 text-amber-100 hover:bg-amber-200/10' : 'border-stone-400 dark:border-stone-600 text-stone-700 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-800'}`}
                 style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}
               >
-                {hero?.ctaSecondaryText || t('home.findLocation')}
+                {getTranslated(hero?.ctaSecondaryText || '', (hero as any)?.translations?.ctaSecondaryText, lang) || t('home.findLocation')}
               </Link>
             );
           })()}

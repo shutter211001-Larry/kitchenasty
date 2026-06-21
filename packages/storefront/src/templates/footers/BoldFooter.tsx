@@ -1,10 +1,12 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext.js';
+import { useAuth } from '../../context/AuthContext.js';
 
 export default function BoldFooter() {
   const { t } = useTranslation();
   const { settings } = useTheme();
+  const { user, isLoading } = useAuth();
 
   return (
     <footer className="bg-gray-950 text-gray-400">
@@ -33,7 +35,7 @@ export default function BoldFooter() {
             <ul className="space-y-3 text-base font-semibold">
               {settings.navShowMenu && <li><Link to="/menu" className="hover:text-white transition-colors">{t('nav.menu')}</Link></li>}
               {settings.navShowLocations && <li><Link to="/locations" className="hover:text-white transition-colors">{t('nav.locations')}</Link></li>}
-              {settings.navShowReservations && <li><Link to="/reservations" className="hover:text-white transition-colors">{t('nav.reservations')}</Link></li>}
+              {settings.navShowReservations && settings.reservationSettings?.enabled && <li><Link to="/reservations" className="hover:text-white transition-colors">{t('nav.reservations')}</Link></li>}
             </ul>
           </div>
 

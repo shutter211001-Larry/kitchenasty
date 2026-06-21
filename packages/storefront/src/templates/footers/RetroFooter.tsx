@@ -1,10 +1,12 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext.js';
+import { useAuth } from '../../context/AuthContext.js';
 
 export default function RetroFooter() {
   const { t } = useTranslation();
   const { settings } = useTheme();
+  const { user, isLoading } = useAuth();
 
   return (
     <footer className="bg-amber-950 text-amber-300/70">
@@ -51,10 +53,17 @@ export default function RetroFooter() {
               {t('footer.account')}
             </h3>
             <ul className="space-y-2 text-sm">
-              <li><Link to="/login" className="hover:text-amber-100 transition-colors">{t('nav.login')}</Link></li>
-              <li><Link to="/register" className="hover:text-amber-100 transition-colors">{t('footer.createAccount')}</Link></li>
-              <li><Link to="/account" className="hover:text-amber-100 transition-colors">{t('nav.myAccount')}</Link></li>
-            </ul>
+                {isLoading ? (
+                  <li className="text-gray-500 italic">{t('common.loading')}</li>
+                ) : user ? (
+                  <li><Link to="/account" className="hover:text-amber-100 transition-colors">{t('nav.myAccountWithName', { name: user.name })}</Link></li>
+                ) : (
+                  <>
+                    <li><Link to="/login" className="hover:text-amber-100 transition-colors">{t('nav.login')}</Link></li>
+                    <li><Link to="/register" className="hover:text-amber-100 transition-colors">{t('footer.createAccount')}</Link></li>
+                  </>
+                )}
+              </ul>
           </div>
 
           {/* Legal */}

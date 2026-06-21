@@ -1,12 +1,14 @@
 import { Link } from 'react-router-dom';
 import { useTheme } from '../../context/ThemeContext.js';
+import { getTranslated } from '../../utils/translation.js';
 
 interface HeroProps {
   hero: { title?: string; subtitle?: string; ctaPrimaryText?: string; ctaPrimaryLink?: string; ctaSecondaryText?: string; ctaSecondaryLink?: string; backgroundImage?: string } | null;
   t: (key: string) => string;
+  lang?: string;
 }
 
-export default function ModernHero({ hero, t }: HeroProps) {
+export default function ModernHero({ hero, t, lang = 'zh-TW' }: HeroProps) {
   const { settings } = useTheme();
 
   return (
@@ -25,11 +27,11 @@ export default function ModernHero({ hero, t }: HeroProps) {
           {/* Asymmetric text - takes 7 cols */}
           <div className="lg:col-span-7">
             <div className="inline-block bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 px-4 py-1.5 rounded-full text-sm font-medium mb-6">
-              {hero?.subtitle || t('home.heroDescription')}
+              {getTranslated(hero?.subtitle || '', (hero as any)?.translations?.subtitle, lang) || t('home.heroDescription')}
             </div>
 
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white mb-8 leading-[1.1]">
-              {hero?.title || t('home.heroTitle')}
+              {getTranslated(hero?.title || '', (hero as any)?.translations?.title, lang) || t('home.heroTitle')}
             </h1>
 
             <div className="flex flex-wrap gap-4">
@@ -38,19 +40,19 @@ export default function ModernHero({ hero, t }: HeroProps) {
                   to={hero?.ctaPrimaryLink || '/menu'}
                   className="bg-primary-600 text-white px-8 py-3.5 rounded-2xl font-semibold hover:bg-primary-700 transition-colors shadow-lg shadow-primary-600/25"
                 >
-                  {hero?.ctaPrimaryText || t('home.viewMenu')}
+                  {getTranslated(hero?.ctaPrimaryText || '', (hero as any)?.translations?.ctaPrimaryText, lang) || t('home.viewMenu')}
                 </Link>
               )}
               {(() => {
                 const link = hero?.ctaSecondaryLink || '/locations';
                 if (link === '/locations' && !settings.navShowLocations) return null;
-                if (link === '/reservations' && !settings.navShowReservations) return null;
+                if (link === '/reservations' && (!settings.navShowReservations || !settings.reservationSettings?.enabled)) return null;
                 return (
                   <Link
                     to={link}
                     className="bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 px-8 py-3.5 rounded-2xl font-semibold hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors shadow-md border border-gray-200 dark:border-gray-700"
                   >
-                    {hero?.ctaSecondaryText || t('home.findLocation')}
+                    {getTranslated(hero?.ctaSecondaryText || '', (hero as any)?.translations?.ctaSecondaryText, lang) || t('home.findLocation')}
                   </Link>
                 );
               })()}
