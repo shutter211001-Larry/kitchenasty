@@ -4,6 +4,14 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { createProxyMiddleware } from 'http-proxy-middleware';
 
+process.on('uncaughtException', (err) => {
+  console.error('[Storefront] FATAL UNCAUGHT EXCEPTION:', err);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('[Storefront] FATAL UNHANDLED REJECTION:', reason);
+});
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -28,6 +36,11 @@ const proxyOptions = {
   secure: false,
 };
 
+// Fast healthcheck route for Railway to prevent timeouts
+app.get('/health', (req, res) => {
+  res.status(200).send('OK');
+});
+
 app.use('/api', createProxyMiddleware(proxyOptions));
 app.use('/uploads', createProxyMiddleware(proxyOptions));
 
@@ -43,7 +56,7 @@ app.use(async (req, res) => {
     // Attempt to fetch settings from backend to dynamically render SEO tags
     try {
       const fetchUrl = new URL('/api/settings', API_URL).toString();
-      const response = await fetch(fetchUrl, { timeout: 3000 });
+      const response = await fetch(fetchUrl, { signal: AbortSignal.timeout(3000) });
       
       if (response.ok) {
         const result = await response.json();
