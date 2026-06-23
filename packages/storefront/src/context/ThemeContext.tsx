@@ -38,6 +38,7 @@ export interface SiteSettings {
   id: string;
   siteName: string;
   siteTitle: string;
+  siteDescription?: string;
   favicon: string | null;
   logo: string | null;
   colorPrimary: string;
@@ -221,8 +222,27 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   }, [settings.darkMode]);
 
   useEffect(() => {
-    document.title = settings.siteTitle;
-  }, [settings.siteTitle]);
+    document.title = settings.siteTitle || 'Shutter - Order Online';
+
+    const updateMetaTag = (selector: string, nameAttr: string, content: string) => {
+      let meta = document.querySelector<HTMLMetaElement>(selector);
+      if (!meta) {
+        meta = document.createElement('meta');
+        if (nameAttr.startsWith('property=')) {
+          meta.setAttribute('property', nameAttr.split('=')[1]);
+        } else {
+          meta.setAttribute('name', nameAttr);
+        }
+        document.head.appendChild(meta);
+      }
+      meta.setAttribute('content', content);
+    };
+
+    if (settings.siteDescription) {
+      updateMetaTag('meta[name="description"]', 'description', settings.siteDescription);
+      updateMetaTag('meta[property="og:description"]', 'property=og:description', settings.siteDescription);
+    }
+  }, [settings.siteTitle, settings.siteDescription]);
 
   useEffect(() => {
     if (settings.favicon) {
