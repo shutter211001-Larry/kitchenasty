@@ -1,6 +1,6 @@
 # 🎁 Loyalty Program
 
-KitchenAsty includes a points-based loyalty program where customers earn points on purchases and redeem them for discounts.
+Shutter includes a points-based loyalty program where customers earn points on purchases and redeem them for discounts.
 
 ![Admin Loyalty](/screenshots/admin-loyalty.png)
 

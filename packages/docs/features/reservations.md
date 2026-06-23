@@ -1,6 +1,6 @@
 # 🪑 Reservations
 
-KitchenAsty includes a table reservation system with availability checking and staff management.
+Shutter includes a table reservation system with availability checking and staff management.
 
 ![Admin Reservations](/screenshots/admin-reservations.png)
 

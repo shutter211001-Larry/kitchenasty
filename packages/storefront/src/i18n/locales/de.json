@@ -277,7 +277,7 @@
     "findOrderTitle": "Bestellung nicht gefunden?",
     "findOrderDesc": "Geben Sie die E-Mail-Adresse/Telefonnummer und Bestellnummer ein, die Sie bei der Bestellung verwendet haben, um den Datensatz abzurufen.",
     "lookupEmail": "E-Mail",
-    "lookupNumber": "Bestellnummer (z. B. #KA-XXXX)",
+    "lookupNumber": "Bestellnummer (z. B. #SH-XXXX)",
     "lookupSubmit": "Bestellung finden",
     "lookupSearching": "Suche läuft...",
     "lookupError": "Keine passende Bestellung gefunden. Bitte überprüfen Sie, ob die eingegebenen Informationen korrekt sind.",

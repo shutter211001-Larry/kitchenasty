@@ -1,10 +1,10 @@
 <p align="center">
   <a href="https://github.com/mighty840/kitchenasty">
-    <img src="assets/logo.svg" alt="KitchenAsty Logo" width="420" />
+    <img src="assets/logo.svg" alt="Shutter Logo" width="420" />
   </a>
 </p>
 
-<h1 align="center">KitchenAsty</h1>
+<h1 align="center">Shutter</h1>
 
 <p align="center">
   <em>Self-hosted restaurant ordering, reservations, and management — all in one platform.</em>
@@ -31,11 +31,11 @@
 </p>
 
 <p align="center">
-  <a href="https://www.producthunt.com/products/kitchenasty?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-kitchenasty" target="_blank" rel="noopener noreferrer"><img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1084792&theme=light&t=1772014081416" alt="KitchenAsty - Open-source, self-hosted restaurant ordering and management | Product Hunt" width="250" height="54" /></a>
+  <a href="https://www.producthunt.com/products/kitchenasty?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-kitchenasty" target="_blank" rel="noopener noreferrer"><img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1084792&theme=light&t=1772014081416" alt="Shutter - Open-source, self-hosted restaurant ordering and management | Product Hunt" width="250" height="54" /></a>
 </p>
 
 <p align="center">
-  <a href="https://demo.kitchenasty.com"><strong>Live Demo</strong></a> &middot;
+  <a href="https://demo.shutter.com"><strong>Live Demo</strong></a> &middot;
   <a href="#quick-start">Quick Start</a> &middot;
   <a href="https://mighty840.github.io/kitchenasty/">Docs</a> &middot;
   <a href="https://github.com/mighty840/kitchenasty/issues/new?template=bug_report.md">Report Bug</a> &middot;
@@ -45,13 +45,13 @@
 
 ---
 
-> **Try it now:** [demo.kitchenasty.com](https://demo.kitchenasty.com) (storefront) | [demo.kitchenasty.com/admin](https://demo.kitchenasty.com/admin/) (admin — `admin@kitchenasty.com` / `admin123`)
+> **Try it now:** [demo.shutter.com](https://demo.shutter.com) (storefront) | [demo.shutter.com/admin](https://demo.shutter.com/admin/) (admin — `admin@shutter.com` / `admin123`)
 >
 > The demo resets every 2 hours and is rate-limited. See the [docs](https://mighty840.github.io/kitchenasty/guide/live-demo.html) for details.
 
 ---
 
-KitchenAsty enables restaurants, cafes, and takeaways to accept online orders for delivery and pickup, manage menus, handle table reservations, and run day-to-day operations from a single admin panel. Built as a modern TypeScript monorepo with separate admin and storefront frontends, a REST API with real-time WebSocket updates, and a full test suite with 350+ tests.
+Shutter enables restaurants, cafes, and takeaways to accept online orders for delivery and pickup, manage menus, handle table reservations, and run day-to-day operations from a single admin panel. Built as a modern TypeScript monorepo with separate admin and storefront frontends, a REST API with real-time WebSocket updates, and a full test suite with 350+ tests.
 
 ---
 

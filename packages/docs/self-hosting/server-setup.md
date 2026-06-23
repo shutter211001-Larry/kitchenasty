@@ -1,6 +1,6 @@
 # 🖥️ Server Setup
 
-This page walks you through setting up a fresh Linux server for KitchenAsty. We'll use Ubuntu 24.04 LTS, but any modern Debian-based distribution works similarly.
+This page walks you through setting up a fresh Linux server for Shutter. We'll use Ubuntu 24.04 LTS, but any modern Debian-based distribution works similarly.
 
 ## 1️⃣ Step 1: Create a Server
 
@@ -61,7 +61,7 @@ sudo apt update && sudo apt upgrade -y
 
 ## 5️⃣ Step 5: Install Docker
 
-Docker lets you run KitchenAsty without installing Node.js, PostgreSQL, or any other dependencies directly on the server.
+Docker lets you run Shutter without installing Node.js, PostgreSQL, or any other dependencies directly on the server.
 
 ```bash
 # Install Docker's official GPG key and repository
@@ -171,4 +171,4 @@ Only do this if you have SSH key authentication working. Otherwise, you will loc
 
 ## ➡️ Next Step
 
-Your server is ready. Continue to **[Docker Compose Production](/self-hosting/docker-compose)** to deploy KitchenAsty.
+Your server is ready. Continue to **[Docker Compose Production](/self-hosting/docker-compose)** to deploy Shutter.

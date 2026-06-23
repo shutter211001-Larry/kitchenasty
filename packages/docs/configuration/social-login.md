@@ -1,6 +1,6 @@
 # 🔗 Social Login
 
-KitchenAsty supports customer login via **Google** and **Facebook** using Passport.js OAuth strategies.
+Shutter supports customer login via **Google** and **Facebook** using Passport.js OAuth strategies.
 
 ## 🟢 Google OAuth
 

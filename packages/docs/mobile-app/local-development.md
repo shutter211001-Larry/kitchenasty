@@ -52,7 +52,7 @@ Expo Go is great for quick testing, but some features (push notifications, Strip
 
 ## 4️⃣ Step 4: Connect to Your API Server
 
-The app needs to reach your KitchenAsty API server. During development, you have several options:
+The app needs to reach your Shutter API server. During development, you have several options:
 
 ### 🏠 Option A: Local Server on Same Machine
 

@@ -2,7 +2,7 @@
 
 ## Our Pledge
 
-We as members, contributors, and maintainers pledge to make participation in the KitchenAsty community a welcoming and respectful experience for everyone.
+We as members, contributors, and maintainers pledge to make participation in the Shutter community a welcoming and respectful experience for everyone.
 
 ## Our Standards
 

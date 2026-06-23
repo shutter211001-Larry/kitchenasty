@@ -26,7 +26,7 @@ Paste:
 
 ```bash
 #!/bin/bash
-# KitchenAsty Database Backup Script
+# Shutter Database Backup Script
 set -euo pipefail
 
 BACKUP_DIR="/opt/backups/kitchenasty"
@@ -145,7 +145,7 @@ Add this to the end of your backup script to get notified on failures:
 
 ```bash
 # At the top of the script, add a trap
-trap 'echo "Backup FAILED at $(date)" | mail -s "KitchenAsty Backup Failed" admin@yourdomain.com' ERR
+trap 'echo "Backup FAILED at $(date)" | mail -s "Shutter Backup Failed" admin@yourdomain.com' ERR
 ```
 
 This requires a mail utility (`sudo apt install -y mailutils`) and working SMTP configuration.

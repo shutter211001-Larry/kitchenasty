@@ -1,6 +1,6 @@
 # 🐳 Docker Compose Production
 
-This page explains how to configure and run KitchenAsty in production using Docker Compose.
+This page explains how to configure and run Shutter in production using Docker Compose.
 
 ## 1️⃣ Step 1: Clone the Repository
 
@@ -194,7 +194,7 @@ docker compose -f docker-compose.prod.yml exec server \
 
 After seeding, you can log in with:
 
-- 👨‍💼 **Admin**: `admin@kitchenasty.com` / `admin123`
+- 👨‍💼 **Admin**: `admin@shutter.com` / `admin123`
 - 👤 **Customer**: `customer@example.com` / `customer123`
 
 ::: danger 🚨 Change Default Passwords

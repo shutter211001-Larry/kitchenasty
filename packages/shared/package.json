@@ -1,5 +1,5 @@
 {
-  "name": "@kitchenasty/shared",
+  "name": "@shutter/shared",
   "version": "0.2.0",
   "private": true,
   "main": "./dist/index.js",

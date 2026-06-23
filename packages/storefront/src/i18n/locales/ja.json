@@ -276,7 +276,7 @@
     "findOrderTitle": "注文が見つかりませんか？",
     "findOrderDesc": "メールアドレス/電話番号と注文番号を入力して検索してください。",
     "lookupEmail": "メールアドレス",
-    "lookupNumber": "注文番号 (例: #KA-XXXX)",
+    "lookupNumber": "注文番号 (例: #SH-XXXX)",
     "lookupSubmit": "注文を検索",
     "lookupSearching": "検索中...",
     "lookupError": "一致する注文が見つかりませんでした。情報を確認してください。",

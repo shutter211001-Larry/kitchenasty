@@ -9,7 +9,7 @@
 
 ## Reporting a Vulnerability
 
-If you discover a security vulnerability in KitchenAsty, please report it responsibly. **Do not open a public GitHub issue.**
+If you discover a security vulnerability in Shutter, please report it responsibly. **Do not open a public GitHub issue.**
 
 ### How to Report
 
@@ -30,7 +30,7 @@ Send an email to **sharang@meghsakha.com** with:
 
 The following are in scope:
 
-- The KitchenAsty API server (`packages/server`)
+- The Shutter API server (`packages/server`)
 - Authentication and authorization mechanisms
 - Payment processing (Stripe integration)
 - Database access and data exposure
@@ -47,7 +47,7 @@ The following are in scope:
 
 ## Security Best Practices for Self-Hosters
 
-If you are self-hosting KitchenAsty, please ensure:
+If you are self-hosting Shutter, please ensure:
 
 - All environment variables with secrets (JWT keys, Stripe keys, database URLs) are kept secure
 - HTTPS is enabled via a reverse proxy (Nginx, Caddy, etc.)

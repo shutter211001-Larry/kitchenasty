@@ -277,7 +277,7 @@
     "findOrderTitle": "Tidak menemukan pesanan?",
     "findOrderDesc": "Masukkan email/nomor telepon dan nomor pesanan yang Anda gunakan saat melakukan pemesanan untuk mengambil riwayatnya.",
     "lookupEmail": "Email",
-    "lookupNumber": "Nomor Pesanan (contoh #KA-XXXX)",
+    "lookupNumber": "Nomor Pesanan (contoh #SH-XXXX)",
     "lookupSubmit": "Cari Pesanan",
     "lookupSearching": "Mencari...",
     "lookupError": "Pesanan yang cocok tidak ditemukan, mohon periksa kembali informasi yang dimasukkan.",

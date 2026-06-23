@@ -277,7 +277,7 @@
     "findOrderTitle": "Không tìm thấy đơn hàng?",
     "findOrderDesc": "Nhập email/số điện thoại và số đơn hàng bạn đã sử dụng khi đặt hàng để tìm lại đơn hàng.",
     "lookupEmail": "Email",
-    "lookupNumber": "Số đơn hàng (ví dụ: #KA-XXXX)",
+    "lookupNumber": "Số đơn hàng (ví dụ: #SH-XXXX)",
     "lookupSubmit": "Tìm lại đơn hàng",
     "lookupSearching": "Đang tìm kiếm...",
     "lookupError": "Không tìm thấy đơn hàng phù hợp, vui lòng kiểm tra lại thông tin đã nhập.",

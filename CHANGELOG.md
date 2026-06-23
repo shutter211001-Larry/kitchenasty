@@ -53,7 +53,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.1.0] - 2026-02-23
 
-Initial release of KitchenAsty — a self-hosted, full-stack restaurant ordering
+Initial release of Shutter — a self-hosted, full-stack restaurant ordering
 and management platform.
 
 ### Added

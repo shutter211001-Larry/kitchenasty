@@ -1,6 +1,6 @@
 # 📧 Email & SMS
 
-KitchenAsty can send transactional emails and SMS messages through the [Automation](/features/automation) system.
+Shutter can send transactional emails and SMS messages through the [Automation](/features/automation) system.
 
 ## 📬 SMTP Configuration
 
@@ -9,7 +9,7 @@ SMTP_HOST=smtp.example.com
 SMTP_PORT=587
 SMTP_USER=your-username
 SMTP_PASS=your-password
-EMAIL_FROM=noreply@kitchenasty.com
+EMAIL_FROM=noreply@shutter.com
 ```
 
 ## 🧪 Development Email

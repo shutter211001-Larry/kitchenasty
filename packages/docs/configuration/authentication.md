@@ -1,6 +1,6 @@
 # 🔑 Authentication
 
-KitchenAsty uses **JWT (JSON Web Tokens)** for stateless authentication.
+Shutter uses **JWT (JSON Web Tokens)** for stateless authentication.
 
 ## ⚙️ Configuration
 

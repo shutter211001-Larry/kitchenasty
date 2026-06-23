@@ -277,7 +277,7 @@
     "findOrderTitle": "Non trovi il tuo ordine?",
     "findOrderDesc": "Inserisci l'email/il numero di telefono e il numero d'ordine che hai usato quando hai effettuato l'ordine per recuperare i dettagli.",
     "lookupEmail": "Email",
-    "lookupNumber": "Numero ordine (es. #KA-XXXX)",
+    "lookupNumber": "Numero ordine (es. #SH-XXXX)",
     "lookupSubmit": "Recupera ordine",
     "lookupSearching": "Ricerca in corso...",
     "lookupError": "Nessun ordine corrispondente trovato, si prega di verificare che le informazioni inserite siano corrette.",

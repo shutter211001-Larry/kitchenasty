@@ -68,7 +68,7 @@ const validOrderBody = {
 
 const sampleOrder = {
   id: 'order-1',
-  orderNumber: 'KA-ABC-123',
+  orderNumber: 'SH-ABC-123',
   customerId: null,
   locationId: 'loc-1',
   orderType: 'PICKUP',
@@ -105,7 +105,7 @@ describe('Order API - Integration Tests', () => {
       const res = await request(app).post('/api/orders').send(validOrderBody);
 
       expect(res.status).toBe(201);
-      expect(res.body.data.orderNumber).toBe('KA-ABC-123');
+      expect(res.body.data.orderNumber).toBe('SH-ABC-123');
     });
 
     it('creates an order as authenticated customer', async () => {
@@ -405,7 +405,7 @@ describe('Order API - Integration Tests', () => {
 
       const res = await request(app).get('/api/orders/order-1');
       expect(res.status).toBe(200);
-      expect(res.body.data.orderNumber).toBe('KA-ABC-123');
+      expect(res.body.data.orderNumber).toBe('SH-ABC-123');
     });
 
 
@@ -481,7 +481,7 @@ describe('Order API - Integration Tests', () => {
     it('returns 400 if both email and phone are missing', async () => {
       const res = await request(app)
         .get('/api/orders/lookup')
-        .query({ orderNumber: 'KA-ABC-123' });
+        .query({ orderNumber: 'SH-ABC-123' });
       expect(res.status).toBe(400);
       expect(res.body.error).toContain('Either email or phone is required');
     });
@@ -491,7 +491,7 @@ describe('Order API - Integration Tests', () => {
 
       const res = await request(app)
         .get('/api/orders/lookup')
-        .query({ orderNumber: 'KA-ABC-123', email: 'wrong@test.com' });
+        .query({ orderNumber: 'SH-ABC-123', email: 'wrong@test.com' });
 
       expect(res.status).toBe(404);
       expect(res.body.error).toContain('Order not found');
@@ -502,10 +502,10 @@ describe('Order API - Integration Tests', () => {
 
       const res = await request(app)
         .get('/api/orders/lookup')
-        .query({ orderNumber: 'KA-ABC-123', email: 'guest@test.com' });
+        .query({ orderNumber: 'SH-ABC-123', email: 'guest@test.com' });
 
       expect(res.status).toBe(200);
-      expect(res.body.data.orderNumber).toBe('KA-ABC-123');
+      expect(res.body.data.orderNumber).toBe('SH-ABC-123');
     });
 
     it('returns order if found by phone', async () => {
@@ -513,10 +513,10 @@ describe('Order API - Integration Tests', () => {
 
       const res = await request(app)
         .get('/api/orders/lookup')
-        .query({ orderNumber: 'KA-ABC-123', phone: '0912345678' });
+        .query({ orderNumber: 'SH-ABC-123', phone: '0912345678' });
 
       expect(res.status).toBe(200);
-      expect(res.body.data.orderNumber).toBe('KA-ABC-123');
+      expect(res.body.data.orderNumber).toBe('SH-ABC-123');
     });
   });
 });

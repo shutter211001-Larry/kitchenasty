@@ -1,6 +1,6 @@
 # ⚡ Automation
 
-KitchenAsty's automation system lets you create event-driven rules that trigger actions like sending emails, calling webhooks, or sending SMS messages.
+Shutter's automation system lets you create event-driven rules that trigger actions like sending emails, calling webhooks, or sending SMS messages.
 
 ![Admin Automation](/screenshots/admin-automation.png)
 

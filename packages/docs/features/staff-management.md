@@ -1,6 +1,6 @@
 # 👥 Staff Management
 
-KitchenAsty includes a complete staff management system with role-based access control, email invitations, and admin UI filtering.
+Shutter includes a complete staff management system with role-based access control, email invitations, and admin UI filtering.
 
 ![Admin Staff Management](/screenshots/admin-staff.png)
 

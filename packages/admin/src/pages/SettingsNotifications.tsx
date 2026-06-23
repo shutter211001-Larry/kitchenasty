@@ -30,7 +30,7 @@ const DEFAULT_LINE_MESSAGES: Record<string, string> = {
 
 const dummyOrder = {
   userName: '陳小明',
-  orderNumber: 'KA-2026-001',
+  orderNumber: 'SH-2026-001',
   itemsList: '夏威夷披薩 x1, 可口可樂 x2',
   pickupTime: '05/18 18:30',
 };
@@ -247,7 +247,7 @@ export default function SettingsNotifications() {
                   </div>
                   <div className="p-3 bg-white">
                     <h4 className="font-bold text-[10px] text-gray-900 m-0 mb-0.5">您的訂單狀態已更新</h4>
-                    <p className="text-[9px] text-gray-400 m-0 mb-2">訂單編號 <strong>#KA-2026-001</strong></p>
+                    <p className="text-[9px] text-gray-400 m-0 mb-2">訂單編號 <strong>#SH-2026-001</strong></p>
                     <div className="bg-gray-50 p-2.5 rounded-lg border border-gray-150">
                       <div 
                         style={{ color: emailHeaderColor }}
@@ -369,12 +369,12 @@ export default function SettingsNotifications() {
                                     <div className="flex-1 flex flex-col gap-3 min-h-[200px] justify-start pt-2">
                                       <div className="flex gap-2.5 items-start">
                                         <div className="w-8 h-8 rounded-full bg-primary-600 flex items-center justify-center text-white font-bold text-xs shrink-0 shadow-sm">
-                                          KA
+                                          SH
                                         </div>
                                         <div className="flex flex-col gap-1 max-w-[80%]">
                                           <span className="text-[11px] text-gray-700 font-semibold">{emailBrandName}</span>
                                           <div className="bg-white rounded-2xl rounded-tl-none py-2.5 px-3.5 shadow-sm text-xs text-gray-800 relative whitespace-pre-wrap leading-relaxed border border-gray-100">
-                                            {`【訂單狀態更新】\n訂單編號：#KA-2026-001\n目前狀態：${previewMsg}`}
+                                            {`【訂單狀態更新】\n訂單編號：#SH-2026-001\n目前狀態：${previewMsg}`}
                                           </div>
                                           <div className="flex gap-1.5 items-center justify-end text-[9px] text-gray-500 mt-0.5">
                                             <span>已讀</span>
@@ -410,7 +410,7 @@ export default function SettingsNotifications() {
                                           </div>
                                           <div className="p-3 bg-white">
                                             <h3 className="font-bold text-[11px] text-gray-900 m-0 mb-0.5">訂單狀態更新</h3>
-                                            <p className="text-[10px] text-gray-400 m-0 mb-2">訂單 <strong>#KA-2026-001</strong></p>
+                                            <p className="text-[10px] text-gray-400 m-0 mb-2">訂單 <strong>#SH-2026-001</strong></p>
                                             <div className="bg-gray-50 p-2.5 rounded-lg border border-gray-150">
                                               <div 
                                                 style={{ color: emailHeaderColor }}

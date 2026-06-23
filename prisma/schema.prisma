@@ -532,8 +532,8 @@ model GroupOrderSession {
 
 model SiteSettings {
   id                  String   @id @default("default")
-  siteName            String   @default("KitchenAsty")
-  siteTitle           String   @default("KitchenAsty - Order Online")
+  siteName            String   @default("Shutter")
+  siteTitle           String   @default("Shutter - Order Online")
   favicon             String?
   logo                String?
   colorPrimary        String   @default("#ea580c")

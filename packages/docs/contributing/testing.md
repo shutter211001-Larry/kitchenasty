@@ -1,6 +1,6 @@
 # 🧪 Testing
 
-KitchenAsty has three levels of testing: unit, integration, and end-to-end.
+Shutter has three levels of testing: unit, integration, and end-to-end.
 
 ## 📁 Test Structure
 

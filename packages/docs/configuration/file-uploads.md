@@ -1,6 +1,6 @@
 # 📁 File Uploads
 
-KitchenAsty handles image uploads for menu items using Multer middleware.
+Shutter handles image uploads for menu items using Multer middleware.
 
 ## ⚙️ Configuration
 

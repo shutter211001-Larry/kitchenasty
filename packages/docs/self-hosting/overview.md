@@ -1,12 +1,12 @@
 # 🖥️ Self-Hosting Overview
 
-KitchenAsty is designed to be self-hosted on your own server or cloud instance. This guide walks you through everything you need to go from a blank server to a fully running restaurant ordering platform with HTTPS, backups, and monitoring.
+Shutter is designed to be self-hosted on your own server or cloud instance. This guide walks you through everything you need to go from a blank server to a fully running restaurant ordering platform with HTTPS, backups, and monitoring.
 
 ## 🎯 What You Will Set Up
 
 By the end of this guide, you will have:
 
-- 🚀 A production server running KitchenAsty (API, Admin Dashboard, Storefront)
+- 🚀 A production server running Shutter (API, Admin Dashboard, Storefront)
 - 🗄️ PostgreSQL database with automatic backups
 - 🔒 HTTPS with free SSL certificates from Let's Encrypt
 - 🔀 A reverse proxy routing traffic to each service
@@ -50,7 +50,7 @@ By the end of this guide, you will have:
 
 ## ☁️ Hosting Options
 
-You can host KitchenAsty on any Linux server. Here are some popular choices:
+You can host Shutter on any Linux server. Here are some popular choices:
 
 | Provider | Smallest Plan | Approximate Cost | Notes |
 |----------|--------------|------------------|-------|
@@ -82,7 +82,7 @@ You can purchase a domain from any registrar (Namecheap, Cloudflare Registrar, G
 Follow these pages in order:
 
 1. 🖥️ **[Server Setup](/self-hosting/server-setup)** — Provision a server, install Docker, and configure the firewall
-2. 🐳 **[Docker Compose Production](/self-hosting/docker-compose)** — Configure and launch all KitchenAsty services
+2. 🐳 **[Docker Compose Production](/self-hosting/docker-compose)** — Configure and launch all Shutter services
 3. 🌐 **[Domain & DNS](/self-hosting/domain-dns)** — Point your domain to the server
 4. 🔒 **[Reverse Proxy & SSL](/self-hosting/reverse-proxy-ssl)** — Set up Caddy or Nginx with automatic HTTPS
 5. 💾 **[Backups](/self-hosting/backups)** — Automate database and file backups

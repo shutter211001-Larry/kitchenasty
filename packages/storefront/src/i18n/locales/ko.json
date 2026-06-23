@@ -276,7 +276,7 @@
     "findOrderTitle": "주문을 찾을 수 없나요?",
     "findOrderDesc": "이메일/전화번호와 주문 번호를 입력하여 검색하세요.",
     "lookupEmail": "이메일 주소",
-    "lookupNumber": "주문 번호 (예: #KA-XXXX)",
+    "lookupNumber": "주문 번호 (예: #SH-XXXX)",
     "lookupSubmit": "주문 찾기",
     "lookupSearching": "검색 중...",
     "lookupError": "일치하는 주문을 찾을 수 없습니다. 정보를 확인해 주세요.",

@@ -57,7 +57,7 @@ Authorization: Bearer <token> (optional — guest checkout supported)
   "success": true,
   "data": {
     "id": "cuid",
-    "orderNumber": "KA-20250615-001",
+    "orderNumber": "SH-20250615-001",
     "status": "PENDING",
     "orderType": "DELIVERY",
     "subtotal": 25.98,

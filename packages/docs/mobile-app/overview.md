@@ -1,6 +1,6 @@
 # 📱 Mobile App Overview
 
-KitchenAsty includes a customer-facing mobile app built with [Expo](https://expo.dev) (React Native). This guide walks you through everything needed to build the app and publish it to the Apple App Store and Google Play Store.
+Shutter includes a customer-facing mobile app built with [Expo](https://expo.dev) (React Native). This guide walks you through everything needed to build the app and publish it to the Apple App Store and Google Play Store.
 
 ## 🎯 What the Mobile App Does
 
@@ -31,7 +31,7 @@ The mobile app gives your customers a native experience on their phones:
 
 Before starting, you need:
 
-- 🖥️ Your KitchenAsty server running and accessible via HTTPS (see [Self-Hosting Guide](/self-hosting/overview))
+- 🖥️ Your Shutter server running and accessible via HTTPS (see [Self-Hosting Guide](/self-hosting/overview))
 - 💻 A computer (Mac, Windows, or Linux) for development
 - 🟢 Node.js 22 or later installed
 - 🔧 Basic familiarity with running terminal commands

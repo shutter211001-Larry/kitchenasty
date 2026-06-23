@@ -54,9 +54,9 @@ const sampleTransaction = {
     customerId: 'cust-1',
     type: 'EARN',
     points: 50,
-    description: 'Order #KA-ABC-123',
+    description: 'Order #SH-ABC-123',
     orderId: 'order-1',
-    order: { orderNumber: 'KA-ABC-123' },
+    order: { orderNumber: 'SH-ABC-123' },
     createdAt: new Date(),
 };
 

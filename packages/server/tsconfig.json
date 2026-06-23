@@ -13,7 +13,7 @@
     "types": ["node"],
     "baseUrl": ".",
     "paths": {
-      "@kitchenasty/shared": ["../../shared/src"]
+      "@shutter/shared": ["../../shared/src"]
     }
   },
   "include": ["src/**/*"],

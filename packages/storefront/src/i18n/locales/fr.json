@@ -277,7 +277,7 @@
     "findOrderTitle": "Commande introuvable ?",
     "findOrderDesc": "Saisissez l'adresse e-mail/le numéro de téléphone et le numéro de commande que vous avez fournis lors de la commande pour la retrouver.",
     "lookupEmail": "Adresse e-mail",
-    "lookupNumber": "Numéro de commande (ex: #KA-XXXX)",
+    "lookupNumber": "Numéro de commande (ex: #SH-XXXX)",
     "lookupSubmit": "Récupérer la commande",
     "lookupSearching": "Recherche en cours...",
     "lookupError": "Commande introuvable. Veuillez vérifier les informations saisies.",

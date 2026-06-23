@@ -26,7 +26,7 @@ Before you can publish your app, you need developer accounts with Apple and Goog
    :::
 
 4. 📝 **Enter developer details**:
-   - **Developer name**: Your restaurant name (e.g., "KitchenAsty" or "My Restaurant LLC")
+   - **Developer name**: Your restaurant name (e.g., "Shutter" or "My Restaurant LLC")
    - **Contact email**: A professional email address
    - **Phone number**: Your business or personal phone
    - **Website**: Your restaurant's website (e.g., `https://order.yourdomain.com`)
@@ -116,7 +116,7 @@ You'll have access to:
 
 ## 📦 Expo Account
 
-Expo is the build system used by the KitchenAsty mobile app. You need a free account.
+Expo is the build system used by the Shutter mobile app. You need a free account.
 
 1. 🌐 Visit [expo.dev/signup](https://expo.dev/signup)
 2. 📝 Sign up with GitHub, Google, or email

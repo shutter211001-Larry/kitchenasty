@@ -1,6 +1,6 @@
 # 📈 Scaling
 
-Strategies for scaling KitchenAsty beyond a single server.
+Strategies for scaling Shutter beyond a single server.
 
 ## 🖥️ Multiple API Server Instances
 

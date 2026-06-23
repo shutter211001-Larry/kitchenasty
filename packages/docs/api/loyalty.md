@@ -21,7 +21,7 @@ Returns the customer's current loyalty point balance.
         "id": "cuid",
         "type": "EARN",
         "points": 50,
-        "description": "Order #KA-20250615-001",
+        "description": "Order #SH-20250615-001",
         "createdAt": "2025-06-15T12:00:00Z"
       }
     ]

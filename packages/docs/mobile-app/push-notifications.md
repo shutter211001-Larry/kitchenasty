@@ -1,11 +1,11 @@
 # 🔔 Push Notifications
 
-Push notifications alert customers when their order status changes (e.g., "Your order is being prepared", "Your order is ready for pickup"). KitchenAsty uses [Expo Push Notifications](https://docs.expo.dev/push-notifications/overview/), which handles both iOS (APNs) and Android (FCM) through a unified API.
+Push notifications alert customers when their order status changes (e.g., "Your order is being prepared", "Your order is ready for pickup"). Shutter uses [Expo Push Notifications](https://docs.expo.dev/push-notifications/overview/), which handles both iOS (APNs) and Android (FCM) through a unified API.
 
 ## 🔄 How It Works
 
 ```
-KitchenAsty Server → Expo Push Service → APNs (iOS) / FCM (Android) → Customer's Phone
+Shutter Server → Expo Push Service → APNs (iOS) / FCM (Android) → Customer's Phone
 ```
 
 1. 📱 When a customer opens the app, it registers for push notifications and sends the **Expo Push Token** to your server
@@ -21,7 +21,7 @@ Android push notifications work through Firebase Cloud Messaging (FCM).
 
 1. Go to [console.firebase.google.com](https://console.firebase.google.com)
 2. Click **"Create a project"** (or use an existing one)
-3. Enter your project name (e.g., "KitchenAsty")
+3. Enter your project name (e.g., "Shutter")
 4. Disable Google Analytics (optional, not needed for push)
 5. Click **"Create project"**
 
@@ -89,7 +89,7 @@ If you haven't already when creating the App ID:
 
 1. Go to [developer.apple.com/account/resources/authkeys](https://developer.apple.com/account/resources/authkeys/list)
 2. Click the **"+"** button to create a new key
-3. Enter a name: "KitchenAsty Push Key"
+3. Enter a name: "Shutter Push Key"
 4. Check **"Apple Push Notifications service (APNs)"**
 5. Click **"Continue"** then **"Register"**
 6. 📥 **Download the `.p8` key file** — you can only download it once!
@@ -118,7 +118,7 @@ Alternatively, upload via the Expo website:
 
 ## 🖥️ Server Configuration
 
-The KitchenAsty server already includes push notification support via `expo-server-sdk`. The server automatically:
+The Shutter server already includes push notification support via `expo-server-sdk`. The server automatically:
 
 1. 💾 Stores the customer's Expo Push Token when they log in (via `POST /api/auth/push-token`)
 2. 📤 Sends push notifications when order status changes (in `packages/server/src/lib/socket.ts`)
@@ -144,15 +144,15 @@ No additional server configuration is needed.
 
 ## 📋 Notification Content
 
-KitchenAsty sends these notifications:
+Shutter sends these notifications:
 
 | Order Status | Notification Title | Body |
 |-------------|-------------------|------|
-| ✅ CONFIRMED | Order Confirmed | Your order #KA-XXX has been confirmed |
-| 🍳 PREPARING | Being Prepared | Your order #KA-XXX is being prepared |
-| ✅ READY | Ready! | Your order #KA-XXX is ready for pickup |
-| 🚚 OUT_FOR_DELIVERY | On Its Way | Your order #KA-XXX is out for delivery |
-| 📦 DELIVERED | Delivered | Your order #KA-XXX has been delivered. Enjoy! |
+| ✅ CONFIRMED | Order Confirmed | Your order #SH-XXX has been confirmed |
+| 🍳 PREPARING | Being Prepared | Your order #SH-XXX is being prepared |
+| ✅ READY | Ready! | Your order #SH-XXX is ready for pickup |
+| 🚚 OUT_FOR_DELIVERY | On Its Way | Your order #SH-XXX is out for delivery |
+| 📦 DELIVERED | Delivered | Your order #SH-XXX has been delivered. Enjoy! |
 
 ## 🔧 Troubleshooting
 

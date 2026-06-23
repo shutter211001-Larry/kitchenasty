@@ -1,6 +1,6 @@
 # 🌐 Domain & DNS
 
-This page explains how to point your domain name to your KitchenAsty server.
+This page explains how to point your domain name to your Shutter server.
 
 ## 📋 What You Need
 

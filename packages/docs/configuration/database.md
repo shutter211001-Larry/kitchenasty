@@ -1,6 +1,6 @@
 # 🗄️ Database
 
-KitchenAsty uses **PostgreSQL 16** with **Prisma ORM** for schema management, migrations, and queries.
+Shutter uses **PostgreSQL 16** with **Prisma ORM** for schema management, migrations, and queries.
 
 ## 🔌 Connection
 
@@ -40,7 +40,7 @@ npx -w packages/server prisma db push --schema ../../prisma/schema.prisma
 
 The seed script at `prisma/seed.ts` creates:
 
-- 👤 A Super Admin user (`admin@kitchenasty.com` / `admin123`)
+- 👤 A Super Admin user (`admin@shutter.com` / `admin123`)
 - 📍 A sample location with operating hours
 - 🍽️ Menu categories and items with options
 - 🪑 Tables for reservations

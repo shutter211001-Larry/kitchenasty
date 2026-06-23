@@ -55,7 +55,7 @@ Routes are organized by domain in `packages/server/src/routes/`:
 Types shared between server and frontend packages live in `packages/shared/src/types/`. Import them as:
 
 ```typescript
-import { OrderStatus } from '@kitchenasty/shared';
+import { OrderStatus } from '@shutter/shared';
 ```
 
 ## ✨ Formatting

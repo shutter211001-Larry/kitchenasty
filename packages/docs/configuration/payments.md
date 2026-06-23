@@ -1,6 +1,6 @@
 # 💳 Payments
 
-KitchenAsty supports three payment methods: **Stripe**, **PayPal**, and **Cash**.
+Shutter supports three payment methods: **Stripe**, **PayPal**, and **Cash**.
 
 ## 💰 Stripe
 
@@ -17,7 +17,7 @@ STRIPE_WEBHOOK_SECRET=whsec_...
 
 ### 🔔 Webhooks
 
-Stripe notifies KitchenAsty of payment status changes via webhooks.
+Stripe notifies Shutter of payment status changes via webhooks.
 
 1. In the Stripe Dashboard, go to **Developers → Webhooks**
 2. Add an endpoint: `https://your-domain.com/api/payments/webhook`

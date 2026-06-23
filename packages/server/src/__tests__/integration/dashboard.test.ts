@@ -74,7 +74,7 @@ describe('Dashboard API', () => {
       mockedPrisma.reservation.count.mockResolvedValueOnce(3);
       mockedPrisma.review.count.mockResolvedValueOnce(7);
       mockedPrisma.order.findMany.mockResolvedValueOnce([
-        { id: 'o1', orderNumber: 'KA-001', status: 'PENDING', total: 29.99, orderType: 'DELIVERY', createdAt: new Date(), customer: { name: 'John' } },
+        { id: 'o1', orderNumber: 'SH-001', status: 'PENDING', total: 29.99, orderType: 'DELIVERY', createdAt: new Date(), customer: { name: 'John' } },
       ] as any);
       mockedPrisma.orderItem.groupBy.mockResolvedValueOnce([
         { menuItemId: 'item-1', name: 'Pizza', _sum: { quantity: 42 } },

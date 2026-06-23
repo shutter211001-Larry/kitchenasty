@@ -1,6 +1,6 @@
 # 🏗️ Project Structure
 
-KitchenAsty is organized as an npm workspaces monorepo.
+Shutter is organized as an npm workspaces monorepo.
 
 ## 📂 Directory Tree
 

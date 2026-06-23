@@ -277,7 +277,7 @@
     "findOrderTitle": "Hindi makita ang order?",
     "findOrderDesc": "Ilagay ang email/telepono at numero ng order na iyong ibinigay noong nag-order upang makuha ang record.",
     "lookupEmail": "Email",
-    "lookupNumber": "Numero ng order (hal. #KA-XXXX)",
+    "lookupNumber": "Numero ng order (hal. #SH-XXXX)",
     "lookupSubmit": "Hanapin ang order",
     "lookupSearching": "Naghahanap...",
     "lookupError": "Hindi makita ang katugmang order, pakisuri kung tama ang impormasyon na ipinasok.",

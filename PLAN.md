@@ -1,8 +1,8 @@
-# KitchenAsty - TastyIgniter Clone
+# Shutter - TastyIgniter Clone
 
 ## Overview
 
-KitchenAsty is a self-hosted restaurant online ordering, table reservation, and management system. It enables restaurants, cafes, and takeaways to accept online orders for delivery and pickup, manage menus, handle table reservations, and run their operations from a single admin panel.
+Shutter is a self-hosted restaurant online ordering, table reservation, and management system. It enables restaurants, cafes, and takeaways to accept online orders for delivery and pickup, manage menus, handle table reservations, and run their operations from a single admin panel.
 
 ## Tech Stack
 

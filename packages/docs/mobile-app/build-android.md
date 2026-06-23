@@ -169,7 +169,7 @@ After publishing, monitor your app in Google Play Console:
 
 ## 🔄 Publishing Updates
 
-When you release a new version of KitchenAsty:
+When you release a new version of Shutter:
 
 ```bash
 # Build new version

@@ -1,5 +1,5 @@
 {
-  "name": "@kitchenasty/storefront",
+  "name": "@shutter/storefront",
   "version": "0.2.0",
   "private": true,
   "type": "module",
@@ -10,7 +10,7 @@
     "translate": "tsx scripts/translate.ts"
   },
   "dependencies": {
-    "@kitchenasty/shared": "*",
+    "@shutter/shared": "*",
     "i18next": "^25.8.10",
     "react": "^18.3.0",
     "react-dom": "^18.3.0",

@@ -358,7 +358,7 @@ const createOrderSchema = z.object({
 });
 
 function generateOrderNumber(): string {
-  const prefix = 'KA';
+  const prefix = 'SH';
   const timestamp = Date.now().toString(36).toUpperCase();
   const random = Math.random().toString(36).substring(2, 5).toUpperCase();
   return `${prefix}-${timestamp}-${random}`;
@@ -1845,7 +1845,7 @@ export async function exportOrders(req: Request, res: Response): Promise<void> {
 export async function downloadOrderTemplate(req: Request, res: Response): Promise<void> {
   const templateData = [
     {
-      'Order Number': 'KA-SAMPLE-001',
+      'Order Number': 'SH-SAMPLE-001',
       'Date': new Date().toISOString().split('T')[0],
       'Customer': '王小明',
       'Email': 'customer@example.com',

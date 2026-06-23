@@ -1,5 +1,5 @@
 {
-  "name": "@kitchenasty/admin",
+  "name": "@shutter/admin",
   "version": "0.2.0",
   "private": true,
   "type": "module",
@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@kitchenasty/shared": "*",
+    "@shutter/shared": "*",
     "@reduxjs/toolkit": "^2.12.0",
     "i18next": "^25.8.10",
     "react": "^18.3.0",

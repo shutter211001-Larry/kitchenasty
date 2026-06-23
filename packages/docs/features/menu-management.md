@@ -1,6 +1,6 @@
 # 🍽️ Menu Management
 
-KitchenAsty provides a comprehensive menu system with hierarchical categories, configurable item options, allergen tracking, and mealtime restrictions.
+Shutter provides a comprehensive menu system with hierarchical categories, configurable item options, allergen tracking, and mealtime restrictions.
 
 ![Admin Menu Management](/screenshots/admin-menu.png)
 

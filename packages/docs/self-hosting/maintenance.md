@@ -2,7 +2,7 @@
 
 This page covers day-to-day maintenance tasks: updating to new versions, monitoring server health, and troubleshooting common issues.
 
-## 🔄 Updating KitchenAsty
+## 🔄 Updating Shutter
 
 When a new version is released, follow these steps to update:
 
@@ -204,7 +204,7 @@ If you've lost access to the admin account:
 docker compose -f docker-compose.prod.yml exec postgres \
   psql -U kitchenasty -c "
     UPDATE users SET password = '\$2a\$10\$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy'
-    WHERE email = 'admin@kitchenasty.com';
+    WHERE email = 'admin@shutter.com';
   "
 ```
 

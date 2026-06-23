@@ -287,7 +287,7 @@
     "findOrderTitle": "Can't find your order?",
     "findOrderDesc": "Enter your email/phone and order number to look it up.",
     "lookupEmail": "Email Address",
-    "lookupNumber": "Order Number (e.g. #KA-XXXX)",
+    "lookupNumber": "Order Number (e.g. #SH-XXXX)",
     "lookupSubmit": "Find Order",
     "lookupSearching": "Searching...",
     "lookupError": "No matching order found. Please check your information.",

@@ -30,7 +30,7 @@ That's it — Docker handles everything else.
 
 ## 💻 Hardware
 
-KitchenAsty is lightweight. For a single-location restaurant:
+Shutter is lightweight. For a single-location restaurant:
 
 - 🖥️ **CPU**: 1 core
 - 🧠 **RAM**: 1 GB

@@ -50,7 +50,7 @@ const customerToken = generateToken({ id: 'cust-1', email: 'customer@test.com', 
 
 const sampleOrder = {
   id: 'order-1',
-  orderNumber: 'KA-ABC-123',
+  orderNumber: 'SH-ABC-123',
   total: 32.38,
   status: 'PENDING',
 };

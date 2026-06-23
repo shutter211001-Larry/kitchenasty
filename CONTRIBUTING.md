@@ -1,6 +1,6 @@
-# Contributing to KitchenAsty
+# Contributing to Shutter
 
-Thank you for your interest in contributing to KitchenAsty! This guide will help you get started.
+Thank you for your interest in contributing to Shutter! This guide will help you get started.
 
 ## Table of Contents
 
@@ -163,4 +163,4 @@ Look for issues labeled [`good first issue`](https://github.com/mighty840/kitche
 
 ---
 
-Thank you for helping make KitchenAsty better!
+Thank you for helping make Shutter better!

@@ -1,17 +1,17 @@
 # Live Demo
 
-A live demo of KitchenAsty is available at:
+A live demo of Shutter is available at:
 
 | | URL |
 |---|---|
-| **Storefront** | [demo.kitchenasty.com](https://demo.kitchenasty.com) |
-| **Admin Panel** | [demo.kitchenasty.com/admin](https://demo.kitchenasty.com/admin/) |
+| **Storefront** | [demo.shutter.com](https://demo.shutter.com) |
+| **Admin Panel** | [demo.shutter.com/admin](https://demo.shutter.com/admin/) |
 
 ## Demo Credentials
 
 | Role | Email | Password |
 |------|-------|----------|
-| Admin | `admin@kitchenasty.com` | `admin123` |
+| Admin | `admin@shutter.com` | `admin123` |
 | Customer | `customer@example.com` | `customer123` |
 
 ## Limitations

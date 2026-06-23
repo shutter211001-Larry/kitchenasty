@@ -1,6 +1,6 @@
 # 🔄 CI / CD
 
-KitchenAsty uses **GitHub Actions** for continuous integration. The pipeline is defined in `.github/workflows/ci.yml`.
+Shutter uses **GitHub Actions** for continuous integration. The pipeline is defined in `.github/workflows/ci.yml`.
 
 ## 🗺️ Pipeline Overview
 

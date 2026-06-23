@@ -32,7 +32,7 @@ Create `/etc/systemd/system/kitchenasty-api.service`:
 
 ```ini
 [Unit]
-Description=KitchenAsty API Server
+Description=Shutter API Server
 After=network.target postgresql.service
 
 [Service]

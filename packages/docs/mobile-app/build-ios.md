@@ -168,7 +168,7 @@ Common reasons for rejection:
 - 🔑 **Login issues**: Review team can't log in with the provided demo account
 - 🖥️ **Missing backend**: Server is down or unreachable during review
 - 📝 **Placeholder content**: Using "Lorem ipsum" or stock images
-- ⚠️ **Guideline 4.2**: If the app is too simple (a "web wrapper"), Apple may reject it. KitchenAsty is a full native app, so this shouldn't be an issue.
+- ⚠️ **Guideline 4.2**: If the app is too simple (a "web wrapper"), Apple may reject it. Shutter is a full native app, so this shouldn't be an issue.
 
 If rejected, Apple provides specific feedback. Fix the issues, upload a new build, and resubmit.
 

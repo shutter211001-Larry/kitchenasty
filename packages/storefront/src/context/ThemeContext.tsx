@@ -96,8 +96,8 @@ interface ThemeContextType {
 
 const defaultSettings: SiteSettings = {
   id: 'default',
-  siteName: 'KitchenAsty',
-  siteTitle: 'KitchenAsty - Order Online',
+  siteName: 'Shutter',
+  siteTitle: 'Shutter - Order Online',
   favicon: null,
   logo: null,
   colorPrimary: '#ea580c',

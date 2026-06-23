@@ -3,13 +3,13 @@
 **Effective date:** February 2025\
 **Last updated:** February 2025
 
-This privacy policy explains how the KitchenAsty documentation website (hosted on GitHub Pages) handles visitor data.
+This privacy policy explains how the Shutter documentation website (hosted on GitHub Pages) handles visitor data.
 
 ## 1️⃣ Who We Are
 
-KitchenAsty is an open-source restaurant ordering platform. This privacy policy applies to the **documentation website** at [mighty840.github.io/kitchenasty](https://mighty840.github.io/kitchenasty/), not to individual KitchenAsty installations operated by restaurants.
+Shutter is an open-source restaurant ordering platform. This privacy policy applies to the **documentation website** at [mighty840.github.io/kitchenasty](https://mighty840.github.io/kitchenasty/), not to individual Shutter installations operated by restaurants.
 
-- 📦 **Project**: KitchenAsty (open-source)
+- 📦 **Project**: Shutter (open-source)
 - 🔗 **Repository**: [github.com/mighty840/kitchenasty](https://github.com/mighty840/kitchenasty)
 
 ## 2️⃣ What Data We Collect
@@ -85,7 +85,7 @@ For privacy-related questions about this documentation website, please open an i
 ---
 
 ::: info 🏠 Note for Self-Hosters
-If you operate a KitchenAsty instance for your restaurant, **you** are the data controller for your customers' data. You must create your own privacy policy that covers:
+If you operate a Shutter instance for your restaurant, **you** are the data controller for your customers' data. You must create your own privacy policy that covers:
 - 👤 Customer account data (name, email, phone)
 - 📦 Order and payment data
 - 🔔 Push notification tokens

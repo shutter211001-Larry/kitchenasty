@@ -9,29 +9,29 @@ describe('Email Templates', () => {
   describe('orderConfirmationEmail', () => {
     it('generates correct subject', () => {
       const result = orderConfirmationEmail({
-        orderNumber: 'KA-123',
+        orderNumber: 'SH-123',
         orderType: 'DELIVERY',
         total: 29.99,
         items: [{ name: 'Pizza', quantity: 2, subtotal: 29.98 }],
       }, 'en');
-      expect(result.subject).toBe('Order Confirmed - #KA-123');
+      expect(result.subject).toBe('Order Confirmed - #SH-123');
     });
 
     it('includes order number in html', () => {
       const result = orderConfirmationEmail({
-        orderNumber: 'KA-456',
+        orderNumber: 'SH-456',
         orderType: 'PICKUP',
         total: 15.00,
         items: [{ name: 'Burger', quantity: 1, subtotal: 15.00 }],
       }, 'en');
-      expect(result.html).toContain('KA-456');
+      expect(result.html).toContain('SH-456');
       expect(result.html).toContain('Pickup');
       expect(result.html).toContain('$15.00');
     });
 
     it('includes item details', () => {
       const result = orderConfirmationEmail({
-        orderNumber: 'KA-789',
+        orderNumber: 'SH-789',
         orderType: 'DELIVERY',
         total: 45.00,
         items: [
@@ -46,18 +46,18 @@ describe('Email Templates', () => {
 
   describe('orderStatusEmail', () => {
     it('generates correct subject', () => {
-      const result = orderStatusEmail({ orderNumber: 'KA-123', status: 'PREPARING' }, undefined, 'en');
-      expect(result.subject).toBe('Order #KA-123 Status Update - Preparing');
+      const result = orderStatusEmail({ orderNumber: 'SH-123', status: 'PREPARING' }, undefined, 'en');
+      expect(result.subject).toBe('Order #SH-123 Status Update - Preparing');
     });
 
     it('includes status message', () => {
-      const result = orderStatusEmail({ orderNumber: 'KA-123', status: 'OUT_FOR_DELIVERY' }, undefined, 'en');
+      const result = orderStatusEmail({ orderNumber: 'SH-123', status: 'OUT_FOR_DELIVERY' }, undefined, 'en');
       expect(result.html).toContain('Out for Delivery');
       expect(result.html).toContain('on its way');
     });
 
     it('handles cancelled status', () => {
-      const result = orderStatusEmail({ orderNumber: 'KA-123', status: 'CANCELLED' }, undefined, 'en');
+      const result = orderStatusEmail({ orderNumber: 'SH-123', status: 'CANCELLED' }, undefined, 'en');
       expect(result.html).toContain('cancelled');
     });
   });

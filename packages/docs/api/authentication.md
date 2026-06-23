@@ -74,7 +74,7 @@ POST /api/auth/staff/login
 
 ```json
 {
-  "email": "admin@kitchenasty.com",
+  "email": "admin@shutter.com",
   "password": "admin123"
 }
 ```
@@ -89,7 +89,7 @@ POST /api/auth/staff/login
     "user": {
       "id": "cuid",
       "name": "Admin",
-      "email": "admin@kitchenasty.com",
+      "email": "admin@shutter.com",
       "role": "SUPER_ADMIN"
     }
   }
@@ -110,7 +110,7 @@ Only Super Admins can create new staff accounts.
 ```json
 {
   "name": "New Staff",
-  "email": "staff@kitchenasty.com",
+  "email": "staff@shutter.com",
   "password": "password123",
   "role": "STAFF",
   "locationId": "location-id"

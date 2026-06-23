@@ -7,7 +7,7 @@ export const test = base.extend({
   page: async ({ page }, use) => {
     // Login via API to get a valid token
     const res = await page.request.post('http://127.0.0.1:3000/api/auth/staff/login', {
-      data: { email: 'admin@kitchenasty.com', password: 'admin123' },
+      data: { email: 'admin@shutter.com', password: 'admin123' },
     });
     const body = await res.json();
     const token = body.data?.token;

@@ -29,7 +29,7 @@ These are the essential settings for running the server.
 
 ## 🤖 AI Services (AI 服務設定)
 
-KitchenAsty uses AI for advanced data analysis and automation.
+Shutter uses AI for advanced data analysis and automation.
 
 | Variable | Description | Default | Required |
 |----------|------------|---------|----------|
@@ -106,8 +106,8 @@ If you are using the integrated ERP system.
 |----------|------------|---------|----------|
 | `SHUTTER_ERP_DATABASE_URL`| Separate PostgreSQL connection for ERP | `DATABASE_URL` | No |
 | `SHUTTER_ERP_API_URL` | Shutter ERP instance URL | `http://localhost:3000` | No |
-| `KITCHENASTY_API_URL` | KitchenAsty main API URL | `http://localhost:3000` | No |
-| `INTEGRATION_KEY` | Secret key shared between KitchenAsty and ERP | `pizzamaster...`| No |
+| `KITCHENASTY_API_URL` | Shutter main API URL | `http://localhost:3000` | No |
+| `INTEGRATION_KEY` | Secret key shared between Shutter and ERP | `pizzamaster...`| No |
 
 ---
 

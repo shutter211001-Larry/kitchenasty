@@ -1,8 +1,8 @@
 # 🚀 Introduction
 
-KitchenAsty is a self-hosted, open-source restaurant ordering platform built with a modern TypeScript stack. It gives restaurant owners full control over online ordering, kitchen operations, reservations, and customer engagement — without monthly SaaS fees.
+Shutter is a self-hosted, open-source restaurant ordering platform built with a modern TypeScript stack. It gives restaurant owners full control over online ordering, kitchen operations, reservations, and customer engagement — without monthly SaaS fees.
 
-![KitchenAsty Storefront](/screenshots/storefront-home.png)
+![Shutter Storefront](/screenshots/storefront-home.png)
 
 ## ✨ Key Features
 
@@ -23,7 +23,7 @@ KitchenAsty is a self-hosted, open-source restaurant ordering platform built wit
 
 ## 🏗️ Architecture Overview
 
-KitchenAsty is a monorepo with four packages:
+Shutter is a monorepo with four packages:
 
 ```
 kitchenasty/
@@ -48,10 +48,10 @@ kitchenasty/
 
 ## 🌐 Live Demo
 
-Want to try it before installing? Check out the **[live demo](https://demo.kitchenasty.com)** — no setup required.
+Want to try it before installing? Check out the **[live demo](https://demo.shutter.com)** — no setup required.
 
-- Storefront: [demo.kitchenasty.com](https://demo.kitchenasty.com)
-- Admin: [demo.kitchenasty.com/admin](https://demo.kitchenasty.com/admin/) (login: `admin@kitchenasty.com` / `admin123`)
+- Storefront: [demo.shutter.com](https://demo.shutter.com)
+- Admin: [demo.shutter.com/admin](https://demo.shutter.com/admin/) (login: `admin@shutter.com` / `admin123`)
 
 The demo resets every 2 hours and is rate-limited. See the [Live Demo](/guide/live-demo) page for details.
 

@@ -1,5 +1,5 @@
 {
-  "name": "@kitchenasty/server",
+  "name": "@shutter/server",
   "version": "0.2.0",
   "private": true,
   "scripts": {
@@ -23,7 +23,7 @@
     "seed": "tsx ../../prisma/seed.ts"
   },
   "dependencies": {
-    "@kitchenasty/shared": "*",
+    "@shutter/shared": "*",
     "@line/bot-sdk": "^9.6.0",
     "@prisma/client": "^5.22.0",
     "bcryptjs": "^3.0.3",

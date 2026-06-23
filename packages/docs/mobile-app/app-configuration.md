@@ -77,7 +77,7 @@ Open `packages/mobile/app.json` in a text editor. This is the main configuration
 | 🎨 `splash.backgroundColor` | Splash screen background color (hex) | `"#E53E3E"` |
 | 🍎 `ios.bundleIdentifier` | Unique iOS app identifier | `"com.mariospizza.app"` |
 | 🤖 `android.package` | Unique Android app identifier | `"com.mariospizza.app"` |
-| 🌐 `extra.apiBaseUrl` | Your KitchenAsty API server URL (with https) | `"https://api.mariospizza.com"` |
+| 🌐 `extra.apiBaseUrl` | Your Shutter API server URL (with https) | `"https://api.mariospizza.com"` |
 | 🏗️ `extra.eas.projectId` | Your EAS project ID (set up later) | — |
 
 ::: warning ⚠️ Bundle Identifier

@@ -1,6 +1,6 @@
 # ⚡ Real-Time Events
 
-KitchenAsty uses [Socket.IO](https://socket.io/) for real-time communication between the server and connected clients (admin dashboard, kitchen display).
+Shutter uses [Socket.IO](https://socket.io/) for real-time communication between the server and connected clients (admin dashboard, kitchen display).
 
 ## 🏗️ Architecture
 

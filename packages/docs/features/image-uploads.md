@@ -1,6 +1,6 @@
 # 🖼️ Image Uploads
 
-KitchenAsty supports image uploads for menu items via a multipart form data API.
+Shutter supports image uploads for menu items via a multipart form data API.
 
 ## ⬆️ Upload an Image
 

@@ -1,6 +1,6 @@
 # 🔒 Reverse Proxy & SSL
 
-A reverse proxy sits between the internet and your KitchenAsty containers. It handles HTTPS encryption, routes requests to the correct service, and provides a professional setup with proper SSL certificates.
+A reverse proxy sits between the internet and your Shutter containers. It handles HTTPS encryption, routes requests to the correct service, and provides a professional setup with proper SSL certificates.
 
 We cover two options: **Caddy** (easiest, recommended) and **Nginx + Certbot** (most common). Choose one.
 
@@ -84,7 +84,7 @@ That's the entire configuration. Caddy will:
 Caddy needs to reach the Docker containers. The easiest way is to add Caddy to the same Docker network:
 
 ```bash
-# Connect Caddy to the KitchenAsty Docker network
+# Connect Caddy to the Shutter Docker network
 docker network connect kitchenasty caddy 2>/dev/null || true
 ```
 

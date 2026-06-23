@@ -1,6 +1,6 @@
 # 🔌 API Overview
 
-KitchenAsty exposes a RESTful JSON API at `/api/`.
+Shutter exposes a RESTful JSON API at `/api/`.
 
 ## 🌐 Base URL
 

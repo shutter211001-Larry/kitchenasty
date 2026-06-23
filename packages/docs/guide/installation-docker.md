@@ -1,6 +1,6 @@
 # 🐳 Install with Docker
 
-The fastest way to get KitchenAsty running. Docker Compose starts the API server, admin dashboard, storefront, and PostgreSQL in one command.
+The fastest way to get Shutter running. Docker Compose starts the API server, admin dashboard, storefront, and PostgreSQL in one command.
 
 ## 1. 📥 Clone the Repository
 
@@ -54,7 +54,7 @@ docker compose exec server npx tsx ../../prisma/seed.ts
 ### 🛠️ Admin Dashboard
 
 - URL: http://localhost:5173
-- Email: `admin@kitchenasty.com`
+- Email: `admin@shutter.com`
 - Password: `admin123`
 
 ### 🛍️ Storefront

@@ -1,13 +1,13 @@
 # 📜 License
 
-KitchenAsty is released under the **MIT License**.
+Shutter is released under the **MIT License**.
 
 ## 📄 MIT License
 
 ```
 MIT License
 
-Copyright (c) 2025 KitchenAsty Contributors
+Copyright (c) 2025 Shutter Contributors
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -32,13 +32,13 @@ SOFTWARE.
 
 The MIT License is one of the most permissive open-source licenses. It allows you to:
 
-- ✅ **Use** KitchenAsty for any purpose (personal, commercial, or otherwise)
+- ✅ **Use** Shutter for any purpose (personal, commercial, or otherwise)
 - 📋 **Copy** and distribute the software
 - ✏️ **Modify** the source code to fit your needs
 - 🔗 **Merge** it into your own projects
 - 📤 **Publish** your modified versions
 - 📜 **Sublicense** to others
-- 💰 **Sell** copies or services built on KitchenAsty
+- 💰 **Sell** copies or services built on Shutter
 
 The only requirement is that you **include the copyright notice and license text** in any copy or substantial portion of the software.
 
@@ -48,7 +48,7 @@ The software is provided "as is" without warranty of any kind. The authors and c
 
 ## 📦 Third-Party Licenses
 
-KitchenAsty depends on many open-source packages, each with their own licenses. Most dependencies use MIT, Apache 2.0, or BSD licenses. You can view the full dependency tree with:
+Shutter depends on many open-source packages, each with their own licenses. Most dependencies use MIT, Apache 2.0, or BSD licenses. You can view the full dependency tree with:
 
 ```bash
 npm ls
@@ -56,4 +56,4 @@ npm ls
 
 ## 🤝 Contributing
 
-By contributing to KitchenAsty, you agree that your contributions will be licensed under the same MIT License.
+By contributing to Shutter, you agree that your contributions will be licensed under the same MIT License.

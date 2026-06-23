@@ -2,11 +2,11 @@
 
 ## ⚖️ Information pursuant to Section 5 TMG (German Telemedia Act)
 
-**KitchenAsty** is an open-source project maintained by its community of contributors.
+**Shutter** is an open-source project maintained by its community of contributors.
 
 ### 👥 Project Maintainer
 
-KitchenAsty Contributors\
+Shutter Contributors\
 GitHub: [github.com/mighty840/kitchenasty](https://github.com/mighty840/kitchenasty)
 
 ### 📬 Contact
@@ -37,5 +37,5 @@ The European Commission provides a platform for online dispute resolution (OS): 
 ---
 
 ::: info 🏠 Note for Self-Hosters
-If you operate a KitchenAsty instance for your restaurant business, you are responsible for providing your own impressum/legal notice that complies with the laws of your jurisdiction. This page covers only the open-source project and its documentation website.
+If you operate a Shutter instance for your restaurant business, you are responsible for providing your own impressum/legal notice that complies with the laws of your jurisdiction. This page covers only the open-source project and its documentation website.
 :::

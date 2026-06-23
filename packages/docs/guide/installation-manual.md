@@ -81,7 +81,7 @@ npm run dev:storefront
 
 | Role | Email | Password |
 |------|-------|----------|
-| Super Admin | admin@kitchenasty.com | admin123 |
+| Super Admin | admin@shutter.com | admin123 |
 
 ## 🧰 Useful Commands
 

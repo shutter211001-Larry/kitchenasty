@@ -279,7 +279,7 @@
     "findOrderTitle": "找不到訂單？",
     "findOrderDesc": "輸入您在下單時填寫的信箱/電話與訂單號碼來找回紀錄。",
     "lookupEmail": "電子郵件",
-    "lookupNumber": "訂單號碼 (如 #KA-XXXX)",
+    "lookupNumber": "訂單號碼 (如 #SH-XXXX)",
     "lookupSubmit": "找回訂單",
     "lookupSearching": "搜尋中...",
     "lookupError": "找不到匹配的訂單，請檢查輸入資訊是否正確。",

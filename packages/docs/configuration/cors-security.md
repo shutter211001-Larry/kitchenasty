@@ -1,6 +1,6 @@
 # 🛡️ CORS & Security
 
-KitchenAsty includes several security measures out of the box.
+Shutter includes several security measures out of the box.
 
 ## 🌐 CORS
 

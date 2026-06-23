@@ -277,7 +277,7 @@
     "findOrderTitle": "Não consegue encontrar o seu pedido?",
     "findOrderDesc": "Introduza o email/telefone e o número do pedido que utilizou ao fazer o pedido para encontrar o registo.",
     "lookupEmail": "Email",
-    "lookupNumber": "Número do pedido (ex: #KA-XXXX)",
+    "lookupNumber": "Número do pedido (ex: #SH-XXXX)",
     "lookupSubmit": "Recuperar Pedido",
     "lookupSearching": "Pesquisando...",
     "lookupError": "Não foi encontrado nenhum pedido correspondente. Por favor, verifique se as informações inseridas estão corretas.",

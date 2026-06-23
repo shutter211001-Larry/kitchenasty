@@ -9,10 +9,10 @@ async function main() {
   // Create admin user
   const hashedPassword = await bcrypt.hash('admin123', 10);
   await prisma.user.upsert({
-    where: { email: 'admin@kitchenasty.com' },
+    where: { email: 'admin@shutter.com' },
     update: {},
     create: {
-      email: 'admin@kitchenasty.com',
+      email: 'admin@shutter.com',
       password: hashedPassword,
       name: 'Admin',
       role: 'SUPER_ADMIN',
@@ -539,7 +539,7 @@ async function main() {
 
     await prisma.order.create({
       data: {
-        orderNumber: `KA-SEED-${String(i + 1).padStart(3, '0')}`,
+        orderNumber: `SH-SEED-${String(i + 1).padStart(3, '0')}`,
         customerId: customer.id,
         locationId: location.id,
         orderType,
@@ -639,7 +639,7 @@ async function main() {
       title: 'Privacy Policy',
       content: `# Privacy Policy
 
-We value your privacy. This policy explains how KitchenAsty collects, uses, and protects your personal information.
+We value your privacy. This policy explains how Shutter collects, uses, and protects your personal information.
 
 ## Information We Collect
 
@@ -657,7 +657,7 @@ You have the right to access, correct, or delete your personal data at any time 
 
 ## Contact
 
-If you have questions about this policy, please email us at privacy@kitchenasty.com.`,
+If you have questions about this policy, please email us at privacy@shutter.com.`,
     },
   });
 
@@ -671,17 +671,17 @@ If you have questions about this policy, please email us at privacy@kitchenasty.
 
 ## Company Information
 
-**KitchenAsty**
+**Shutter**
 123 Main Street
 San Francisco, CA 94102
 United States
 
-**Email:** info@kitchenasty.com
+**Email:** info@shutter.com
 **Phone:** (555) 123-4567
 
 ## Responsible for Content
 
-KitchenAsty Management Team`,
+Shutter Management Team`,
     },
   });
 
@@ -702,7 +702,7 @@ KitchenAsty Management Team`,
 
   console.log('Seed completed successfully!');
   console.log('');
-  console.log('Admin login: admin@kitchenasty.com / admin123');
+  console.log('Admin login: admin@shutter.com / admin123');
   console.log('Customer login: customer@example.com / customer123');
 }
 

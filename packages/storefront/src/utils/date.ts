@@ -1,5 +1,5 @@
 /**
- * Utility for consistent date and time handling across KitchenAsty storefront.
+ * Utility for consistent date and time handling across Shutter storefront.
  * Aligns with Asia/Taipei timezone calculations.
  */
 

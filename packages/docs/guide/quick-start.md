@@ -1,6 +1,6 @@
 # ⚡ Quick Start
 
-After [installing KitchenAsty](/guide/installation-docker), follow this walkthrough to explore the platform.
+After [installing Shutter](/guide/installation-docker), follow this walkthrough to explore the platform.
 
 ## 🛒 Place Your First Order
 
@@ -16,7 +16,7 @@ After [installing KitchenAsty](/guide/installation-docker), follow this walkthro
 ## 📋 Manage Orders in Admin
 
 1. Open the **Admin Dashboard** at http://localhost:5173
-2. Log in with `admin@kitchenasty.com` / `admin123`
+2. Log in with `admin@shutter.com` / `admin123`
 3. Navigate to **Orders** to see the order you just placed
 4. Update the order status: Pending → Confirmed → Preparing → Ready → Delivered/Picked Up
 
