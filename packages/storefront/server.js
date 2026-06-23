@@ -85,6 +85,6 @@ app.use(async (req, res) => {
   }
 });
 
-app.listen(port, () => {
+app.listen(port, '0.0.0.0', () => {
   console.log(`[Storefront] Node server listening on port ${port}`);
 });
