@@ -53,17 +53,17 @@ const CartContext = createContext<CartContextType | null>(null);
 export function CartProvider({ children }: { children: React.ReactNode }) {
   // Generate or retrieve a persistent client ID for this browser session
   const [clientId] = useState(() => {
-    let id = sessionStorage.getItem('kitchenasty-client-id');
+    let id = sessionStorage.getItem('shutter-client-id');
     if (!id) {
       id = Math.random().toString(36).substring(2, 10);
-      sessionStorage.setItem('kitchenasty-client-id', id);
+      sessionStorage.setItem('shutter-client-id', id);
     }
     return id;
   });
 
   const [items, setItems] = useState<CartItem[]>(() => {
     try {
-      const saved = localStorage.getItem('kitchenasty-cart');
+      const saved = localStorage.getItem('shutter-cart');
       return saved ? JSON.parse(saved) : [];
     } catch (e) {
       return [];
@@ -72,37 +72,37 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const [isOpen, setIsOpen] = useState(false);
   const [tableName, setTableName] = useState<string | null>(() => {
-    try { return sessionStorage.getItem('kitchenasty-table-name'); } catch { return null; }
+    try { return sessionStorage.getItem('shutter-table-name'); } catch { return null; }
   });
   
   const [groupSessionId, setGroupSessionId] = useState<string | null>(() => {
-    try { return sessionStorage.getItem('kitchenasty-group-session'); } catch { return null; }
+    try { return sessionStorage.getItem('shutter-group-session'); } catch { return null; }
   });
   
   const [groupPin, setGroupPin] = useState<string | null>(() => {
-    try { return sessionStorage.getItem('kitchenasty-group-pin'); } catch { return null; }
+    try { return sessionStorage.getItem('shutter-group-pin'); } catch { return null; }
   });
 
   const socketRef = useRef<Socket | null>(null);
 
   useEffect(() => {
-    try { localStorage.setItem('kitchenasty-cart', JSON.stringify(items)); } catch {}
+    try { localStorage.setItem('shutter-cart', JSON.stringify(items)); } catch {}
   }, [items]);
 
   useEffect(() => {
     try {
-      if (tableName) sessionStorage.setItem('kitchenasty-table-name', tableName);
-      else sessionStorage.removeItem('kitchenasty-table-name');
+      if (tableName) sessionStorage.setItem('shutter-table-name', tableName);
+      else sessionStorage.removeItem('shutter-table-name');
     } catch {}
   }, [tableName]);
 
   useEffect(() => {
     try {
-      if (groupSessionId) sessionStorage.setItem('kitchenasty-group-session', groupSessionId);
-      else sessionStorage.removeItem('kitchenasty-group-session');
+      if (groupSessionId) sessionStorage.setItem('shutter-group-session', groupSessionId);
+      else sessionStorage.removeItem('shutter-group-session');
       
-      if (groupPin) sessionStorage.setItem('kitchenasty-group-pin', groupPin);
-      else sessionStorage.removeItem('kitchenasty-group-pin');
+      if (groupPin) sessionStorage.setItem('shutter-group-pin', groupPin);
+      else sessionStorage.removeItem('shutter-group-pin');
     } catch {}
   }, [groupSessionId, groupPin]);
 
@@ -152,7 +152,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const addItem = useCallback((item: Omit<CartItem, 'id' | 'clientId'>) => {
     const randomId = Math.random().toString(36).substring(2, 9);
-    const guestName = sessionStorage.getItem('kitchenasty-guest-name') || '顧客';
+    const guestName = sessionStorage.getItem('shutter-guest-name') || '顧客';
     const newItem = { ...item, id: randomId, clientId, guestName };
     setItems((prev) => {
       const updated = [...prev, newItem];
@@ -193,7 +193,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       }
       return [];
     });
-    try { localStorage.removeItem('kitchenasty-cart'); } catch {}
+    try { localStorage.removeItem('shutter-cart'); } catch {}
   }, [groupSessionId, clientId]);
 
   const itemCount = items.reduce((sum, i) => sum + i.quantity, 0);

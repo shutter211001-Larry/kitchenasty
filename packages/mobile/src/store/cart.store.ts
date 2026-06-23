@@ -72,7 +72,7 @@ export const useCartStore = create<CartState>()(
       },
     }),
     {
-      name: 'kitchenasty-cart',
+      name: 'shutter-cart',
       storage: createJSONStorage(() => AsyncStorage),
       partialize: (state) => ({ items: state.items }),
     },

@@ -3,31 +3,31 @@ services:
     image: postgres:16-alpine
     restart: unless-stopped
     environment:
-      POSTGRES_DB: kitchenasty
-      POSTGRES_USER: kitchenasty
+      POSTGRES_DB: shutter
+      POSTGRES_USER: shutter
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - pgdata:/var/lib/postgresql/data
 
   server:
-    image: ghcr.io/mighty840/kitchenasty-server:${TAG:-latest}
+    image: ghcr.io/mighty840/shutter-server:${TAG:-latest}
     restart: unless-stopped
     depends_on:
       - postgres
     environment:
-      DATABASE_URL: postgresql://kitchenasty:${POSTGRES_PASSWORD}@postgres:5432/kitchenasty
+      DATABASE_URL: postgresql://shutter:${POSTGRES_PASSWORD}@postgres:5432/shutter
       JWT_SECRET: ${JWT_SECRET}
-      CORS_ORIGINS: https://demo.kitchenasty.com
+      CORS_ORIGINS: https://demo.shutter.com
       NODE_ENV: production
 
   admin:
-    image: ghcr.io/mighty840/kitchenasty-admin:${TAG:-latest}
+    image: ghcr.io/mighty840/shutter-admin:${TAG:-latest}
     restart: unless-stopped
     depends_on:
       - server
 
   storefront:
-    image: ghcr.io/mighty840/kitchenasty-storefront:${TAG:-latest}
+    image: ghcr.io/mighty840/shutter-storefront:${TAG:-latest}
     restart: unless-stopped
     depends_on:
       - server

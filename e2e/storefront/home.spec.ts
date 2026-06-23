@@ -4,7 +4,7 @@ test.describe('Storefront Home Page', () => {
   test('loads the storefront home page', async ({ page }) => {
     await page.goto('/');
     // Title comes from DB seed — accept either seeded or default
-    await expect(page).toHaveTitle(/Saffron & Sage|KitchenAsty/);
+    await expect(page).toHaveTitle(/Saffron & Sage|Shutter/);
   });
 
   test('displays header with brand name', async ({ page }) => {
@@ -12,7 +12,7 @@ test.describe('Storefront Home Page', () => {
     const header = page.locator('header');
     await expect(header).toBeVisible();
     // Brand name comes from DB seed
-    await expect(header).toContainText(/Saffron & Sage|KitchenAsty/);
+    await expect(header).toContainText(/Saffron & Sage|Shutter/);
   });
 
   test('displays desktop navigation links', async ({ page }) => {
@@ -56,7 +56,7 @@ test.describe('Storefront Home Page', () => {
     await page.goto('/');
     const footer = page.locator('footer');
     await expect(footer).toBeVisible();
-    await expect(footer).toContainText(/Saffron & Sage|KitchenAsty/);
+    await expect(footer).toContainText(/Saffron & Sage|Shutter/);
     await expect(footer).toContainText('Quick Links');
     await expect(footer).toContainText('Account');
   });

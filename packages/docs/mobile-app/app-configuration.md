@@ -7,8 +7,8 @@ Before building the app, you need to customize it with your restaurant's brandin
 On your development computer, clone the repository and install dependencies:
 
 ```bash
-git clone https://github.com/kitchenasty/kitchenasty.git
-cd kitchenasty
+git clone https://github.com/shutter/shutter.git
+cd shutter
 npm install
 ```
 

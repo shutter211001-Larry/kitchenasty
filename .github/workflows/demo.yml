@@ -7,7 +7,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_PREFIX: ghcr.io/mighty840/kitchenasty
+  IMAGE_PREFIX: ghcr.io/mighty840/shutter
 
 jobs:
   build-and-push:
@@ -74,7 +74,7 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           source: "deploy/docker-compose.demo.yml,deploy/Caddyfile,deploy/Dockerfile.caddy"
-          target: /opt/kitchenasty
+          target: /opt/shutter
           strip_components: 1
 
       - name: Deploy
@@ -84,7 +84,7 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            cd /opt/kitchenasty
+            cd /opt/shutter
 
             # Login to GHCR
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin

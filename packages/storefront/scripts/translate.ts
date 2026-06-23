@@ -62,7 +62,7 @@ async function translateBatch(
 
   const jsonBlock = JSON.stringify(Object.fromEntries(entries), null, 2);
 
-  const prompt = `You are a professional translator for a restaurant ordering app called KitchenAsty. Translate the following JSON values from English to ${langName}. Keep all JSON keys exactly the same. Preserve any {{variables}} inside curly braces exactly as they are. Keep translations natural, concise, and appropriate for a food ordering UI. Return ONLY valid JSON, no explanation.
+  const prompt = `You are a professional translator for a restaurant ordering app called Shutter. Translate the following JSON values from English to ${langName}. Keep all JSON keys exactly the same. Preserve any {{variables}} inside curly braces exactly as they are. Keep translations natural, concise, and appropriate for a food ordering UI. Return ONLY valid JSON, no explanation.
 
 ${jsonBlock}`;
 

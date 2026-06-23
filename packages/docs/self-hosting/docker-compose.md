@@ -5,9 +5,9 @@ This page explains how to configure and run Shutter in production using Docker C
 ## 1️⃣ Step 1: Clone the Repository
 
 ```bash
-cd /home/kitchenasty
-git clone https://github.com/kitchenasty/kitchenasty.git
-cd kitchenasty
+cd /home/shutter
+git clone https://github.com/shutter/shutter.git
+cd shutter
 ```
 
 ## 2️⃣ Step 2: Create the Environment File
@@ -78,15 +78,15 @@ Paste the following:
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: kitchenasty-db
+    container_name: shutter-db
     environment:
-      POSTGRES_USER: kitchenasty
+      POSTGRES_USER: shutter
       POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: kitchenasty
+      POSTGRES_DB: shutter
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U kitchenasty"]
+      test: ["CMD-SHELL", "pg_isready -U shutter"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -97,11 +97,11 @@ services:
     build:
       context: .
       dockerfile: packages/server/Dockerfile
-    container_name: kitchenasty-server
+    container_name: shutter-server
     environment:
       PORT: 3000
       NODE_ENV: production
-      DATABASE_URL: postgresql://kitchenasty:${DB_PASSWORD}@postgres:5432/kitchenasty
+      DATABASE_URL: postgresql://shutter:${DB_PASSWORD}@postgres:5432/shutter
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRES_IN: 7d
       CORS_ORIGINS: ${CORS_ORIGINS}
@@ -129,7 +129,7 @@ services:
     build:
       context: .
       dockerfile: packages/admin/Dockerfile
-    container_name: kitchenasty-admin
+    container_name: shutter-admin
     depends_on:
       - server
     restart: unless-stopped
@@ -138,7 +138,7 @@ services:
     build:
       context: .
       dockerfile: packages/storefront/Dockerfile
-    container_name: kitchenasty-storefront
+    container_name: shutter-storefront
     depends_on:
       - server
     restart: unless-stopped
@@ -149,7 +149,7 @@ volumes:
 
 networks:
   default:
-    name: kitchenasty
+    name: shutter
 ```
 
 ::: warning 🔒 Security
@@ -174,10 +174,10 @@ Expected output:
 
 ```
 NAME                    STATUS              PORTS
-kitchenasty-db          running (healthy)
-kitchenasty-server      running
-kitchenasty-admin       running
-kitchenasty-storefront  running
+shutter-db          running (healthy)
+shutter-server      running
+shutter-admin       running
+shutter-storefront  running
 ```
 
 ## 5️⃣ Step 5: Run Database Migrations and Seed

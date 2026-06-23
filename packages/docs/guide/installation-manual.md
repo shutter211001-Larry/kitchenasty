@@ -5,8 +5,8 @@ For local development or environments where Docker is not available.
 ## 1. 📥 Clone & Install Dependencies
 
 ```bash
-git clone https://github.com/kitchenasty/kitchenasty.git
-cd kitchenasty
+git clone https://github.com/shutter/shutter.git
+cd shutter
 npm ci
 ```
 
@@ -15,8 +15,8 @@ npm ci
 Create a database and user:
 
 ```sql
-CREATE USER kitchenasty WITH PASSWORD 'kitchenasty';
-CREATE DATABASE kitchenasty OWNER kitchenasty;
+CREATE USER shutter WITH PASSWORD 'shutter';
+CREATE DATABASE shutter OWNER shutter;
 ```
 
 ## 3. ⚙️ Configure Environment
@@ -28,7 +28,7 @@ cp packages/server/.env.example packages/server/.env
 Edit `packages/server/.env`:
 
 ```dotenv
-DATABASE_URL=postgresql://kitchenasty:kitchenasty@localhost:5432/kitchenasty
+DATABASE_URL=postgresql://shutter:shutter@localhost:5432/shutter
 JWT_SECRET=your-random-secret-here
 CORS_ORIGINS=http://localhost:5173,http://localhost:5174
 ```

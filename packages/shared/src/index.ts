@@ -1,4 +1,4 @@
-// Shared types and constants for KitchenAsty
+// Shared types and constants for Shutter
 
 export const ORDER_STATUSES = [
   'pending',

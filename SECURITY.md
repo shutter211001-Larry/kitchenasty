@@ -55,4 +55,4 @@ If you are self-hosting Shutter, please ensure:
 - Regular backups are maintained
 - Dependencies are kept up to date
 
-See the [Self-Hosting Guide](https://mighty840.github.io/kitchenasty/self-hosting/overview.html) for detailed setup instructions.
+See the [Self-Hosting Guide](https://mighty840.github.io/shutter/self-hosting/overview.html) for detailed setup instructions.

@@ -26,7 +26,7 @@ Shutter is a self-hosted, open-source restaurant ordering platform built with a 
 Shutter is a monorepo with four packages:
 
 ```
-kitchenasty/
+shutter/
 ├── packages/server      # Express + Prisma REST API
 ├── packages/admin       # React admin dashboard (Vite)
 ├── packages/storefront  # React customer-facing app (Vite)

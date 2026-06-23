@@ -7,14 +7,14 @@
 ### 👥 Project Maintainer
 
 Shutter Contributors\
-GitHub: [github.com/mighty840/kitchenasty](https://github.com/mighty840/kitchenasty)
+GitHub: [github.com/mighty840/shutter](https://github.com/mighty840/shutter)
 
 ### 📬 Contact
 
 For questions about this project, please use one of the following channels:
 
-- 🐛 **GitHub Issues**: [github.com/mighty840/kitchenasty/issues](https://github.com/mighty840/kitchenasty/issues)
-- 💬 **GitHub Discussions**: [github.com/mighty840/kitchenasty/discussions](https://github.com/mighty840/kitchenasty/discussions)
+- 🐛 **GitHub Issues**: [github.com/mighty840/shutter/issues](https://github.com/mighty840/shutter/issues)
+- 💬 **GitHub Discussions**: [github.com/mighty840/shutter/discussions](https://github.com/mighty840/shutter/discussions)
 
 ### ⚠️ Disclaimer
 

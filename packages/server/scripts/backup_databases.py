@@ -240,7 +240,7 @@ def main():
             "urls": [
                 "postgresql://postgres:password@localhost:5432/my_kitchen_db",
                 "mysql://root:password@127.0.0.1:3306/storefront_db",
-                "sqlite:///C:/Github/kitchenasty/packages/server/data/local.db"
+                "sqlite:///C:/Github/shutter/packages/server/data/local.db"
             ]
         }
         config_path_to_write = os.path.join(SERVER_DIR, config_file)

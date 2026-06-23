@@ -9,8 +9,8 @@
 ## 📥 Clone & Install
 
 ```bash
-git clone https://github.com/kitchenasty/kitchenasty.git
-cd kitchenasty
+git clone https://github.com/shutter/shutter.git
+cd shutter
 npm ci
 ```
 
@@ -18,7 +18,7 @@ npm ci
 
 ```bash
 # Create database
-createdb kitchenasty
+createdb shutter
 
 # Configure connection
 cp packages/server/.env.example packages/server/.env

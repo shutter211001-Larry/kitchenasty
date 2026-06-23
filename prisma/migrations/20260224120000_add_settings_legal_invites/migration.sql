@@ -4,8 +4,8 @@ ALTER TABLE "customers" ADD COLUMN "expoPushToken" TEXT;
 -- CreateTable
 CREATE TABLE "site_settings" (
     "id" TEXT NOT NULL DEFAULT 'default',
-    "siteName" TEXT NOT NULL DEFAULT 'KitchenAsty',
-    "siteTitle" TEXT NOT NULL DEFAULT 'KitchenAsty - Order Online',
+    "siteName" TEXT NOT NULL DEFAULT 'Shutter',
+    "siteTitle" TEXT NOT NULL DEFAULT 'Shutter - Order Online',
     "favicon" TEXT,
     "logo" TEXT,
     "colorPrimary" TEXT NOT NULL DEFAULT '#ea580c',

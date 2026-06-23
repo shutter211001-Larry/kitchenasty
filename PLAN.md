@@ -25,7 +25,7 @@ Shutter is a self-hosted restaurant online ordering, table reservation, and mana
 ## Monorepo Structure
 
 ```
-kitchenasty/
+shutter/
 ├── packages/
 │   ├── server/          # Express API server
 │   ├── admin/           # React admin panel

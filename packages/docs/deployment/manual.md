@@ -19,7 +19,7 @@ This builds shared, server, admin, and storefront packages.
 ```bash
 npm install -g pm2
 
-pm2 start packages/server/dist/index.js --name kitchenasty-api \
+pm2 start packages/server/dist/index.js --name shutter-api \
   --env PORT=3000 \
   --env NODE_ENV=production \
   --env DATABASE_URL=postgresql://... \
@@ -28,7 +28,7 @@ pm2 start packages/server/dist/index.js --name kitchenasty-api \
 
 ### ⚙️ systemd
 
-Create `/etc/systemd/system/kitchenasty-api.service`:
+Create `/etc/systemd/system/shutter-api.service`:
 
 ```ini
 [Unit]
@@ -37,10 +37,10 @@ After=network.target postgresql.service
 
 [Service]
 Type=simple
-User=kitchenasty
-WorkingDirectory=/opt/kitchenasty
+User=shutter
+WorkingDirectory=/opt/shutter
 ExecStart=/usr/bin/node packages/server/dist/index.js
-EnvironmentFile=/opt/kitchenasty/.env
+EnvironmentFile=/opt/shutter/.env
 Restart=on-failure
 
 [Install]
@@ -48,8 +48,8 @@ WantedBy=multi-user.target
 ```
 
 ```bash
-sudo systemctl enable kitchenasty-api
-sudo systemctl start kitchenasty-api
+sudo systemctl enable shutter-api
+sudo systemctl start shutter-api
 ```
 
 ## 🌐 Serve Frontend with nginx
@@ -61,7 +61,7 @@ The admin and storefront build outputs are static files in `packages/admin/dist/
 server {
     listen 80;
     server_name admin.yourdomain.com;
-    root /opt/kitchenasty/packages/admin/dist;
+    root /opt/shutter/packages/admin/dist;
     index index.html;
 
     location /api/ {
@@ -90,7 +90,7 @@ server {
 server {
     listen 80;
     server_name order.yourdomain.com;
-    root /opt/kitchenasty/packages/storefront/dist;
+    root /opt/shutter/packages/storefront/dist;
     index index.html;
 
     location /api/ {

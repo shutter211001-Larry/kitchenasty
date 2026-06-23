@@ -7,10 +7,10 @@ This privacy policy explains how the Shutter documentation website (hosted on Gi
 
 ## 1️⃣ Who We Are
 
-Shutter is an open-source restaurant ordering platform. This privacy policy applies to the **documentation website** at [mighty840.github.io/kitchenasty](https://mighty840.github.io/kitchenasty/), not to individual Shutter installations operated by restaurants.
+Shutter is an open-source restaurant ordering platform. This privacy policy applies to the **documentation website** at [mighty840.github.io/shutter](https://mighty840.github.io/shutter/), not to individual Shutter installations operated by restaurants.
 
 - 📦 **Project**: Shutter (open-source)
-- 🔗 **Repository**: [github.com/mighty840/kitchenasty](https://github.com/mighty840/kitchenasty)
+- 🔗 **Repository**: [github.com/mighty840/shutter](https://github.com/mighty840/shutter)
 
 ## 2️⃣ What Data We Collect
 
@@ -74,13 +74,13 @@ This documentation website does not knowingly collect any personal information f
 
 ## 7️⃣ Changes to This Policy
 
-We may update this privacy policy from time to time. Changes will be reflected in the "Last updated" date at the top of this page and committed to the [project repository](https://github.com/mighty840/kitchenasty).
+We may update this privacy policy from time to time. Changes will be reflected in the "Last updated" date at the top of this page and committed to the [project repository](https://github.com/mighty840/shutter).
 
 ## 8️⃣ Contact
 
 For privacy-related questions about this documentation website, please open an issue on our GitHub repository:
 
-📬 [github.com/mighty840/kitchenasty/issues](https://github.com/mighty840/kitchenasty/issues)
+📬 [github.com/mighty840/shutter/issues](https://github.com/mighty840/shutter/issues)
 
 ---
 

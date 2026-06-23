@@ -150,7 +150,7 @@ export async function sendEmail(options: EmailOptions): Promise<void> {
       let finalHtml = options.html;
       try {
         const branding = await getMailBranding();
-        finalHtml = finalHtml.replace(/KitchenAsty/g, branding.emailBrandName).replace(/夏特點餐系統/g, branding.emailBrandName);
+        finalHtml = finalHtml.replace(/Shutter/g, branding.emailBrandName).replace(/夏特點餐系統/g, branding.emailBrandName);
         finalHtml = finalHtml.replace(/#f97316/g, branding.emailHeaderColor);
         // Wrap with the custom email outer background color
         finalHtml = `

@@ -109,7 +109,7 @@ const Integration = () => {
       setMappings(mappingsRes.data.data || []);
 
       // 3. Fetch Sync Data (Orders, MenuItems, Reservations) via PizzaMaster Integration Controller Proxy
-      const proxyRes = await axios.get('http://localhost:3000/api/integration/kitchenasty-data');
+      const proxyRes = await axios.get('http://localhost:3000/api/integration/shutter-data');
       const proxyData = proxyRes.data.data;
       setConnectionOk(proxyData.connectionOk);
       setMenuItems(proxyData.menuItems || []);
@@ -700,7 +700,7 @@ const Integration = () => {
                   <div className="py-20 text-center text-muted-foreground bg-muted/20 border border-dashed border-border rounded-3xl">
                     <Database className="w-12 h-12 mx-auto mb-4 opacity-25" />
                     <p className="font-semibold text-gray-500">尚無線上訂餐庫存扣減日誌</p>
-                    <p className="text-xs text-muted-foreground mt-1.5">當您在 KitchenAsty 點擊「確認訂單」且商品已綁定食譜時，系統會自動產生日誌</p>
+                    <p className="text-xs text-muted-foreground mt-1.5">當您在 Shutter 點擊「確認訂單」且商品已綁定食譜時，系統會自動產生日誌</p>
                   </div>
                 ) : (
                   <div className="overflow-x-auto max-h-[500px] overflow-y-auto">

@@ -3,12 +3,12 @@ import { test, expect } from './fixtures.js';
 test.describe('Admin Dashboard', () => {
   test('loads the admin dashboard page', async ({ page }) => {
     await page.goto('/');
-    await expect(page).toHaveTitle('KitchenAsty Admin');
+    await expect(page).toHaveTitle('Shutter Admin');
   });
 
   test('displays sidebar with app name', async ({ page }) => {
     await page.goto('/');
-    await expect(page.getByText('KitchenAsty')).toBeVisible();
+    await expect(page.getByText('Shutter')).toBeVisible();
     await expect(page.getByText('Admin Panel')).toBeVisible();
   });
 

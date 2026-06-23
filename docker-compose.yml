@@ -1,17 +1,17 @@
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: kitchenasty-db
+    container_name: shutter-db
     environment:
-      POSTGRES_USER: kitchenasty
-      POSTGRES_PASSWORD: kitchenasty
-      POSTGRES_DB: kitchenasty
+      POSTGRES_USER: shutter
+      POSTGRES_PASSWORD: shutter
+      POSTGRES_DB: shutter
     ports:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U kitchenasty"]
+      test: ["CMD-SHELL", "pg_isready -U shutter"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -20,13 +20,13 @@ services:
     build:
       context: .
       dockerfile: packages/server/Dockerfile
-    container_name: kitchenasty-server
+    container_name: shutter-server
     ports:
       - "3000:3000"
     environment:
       PORT: 3000
       NODE_ENV: development
-      DATABASE_URL: postgresql://kitchenasty:kitchenasty@postgres:5432/kitchenasty
+      DATABASE_URL: postgresql://shutter:shutter@postgres:5432/shutter
       CORS_ORIGINS: http://localhost:5173,http://localhost:5174
       JWT_SECRET: change-this-to-a-random-secret
       JWT_EXPIRES_IN: 7d
@@ -38,7 +38,7 @@ services:
     build:
       context: .
       dockerfile: packages/admin/Dockerfile
-    container_name: kitchenasty-admin
+    container_name: shutter-admin
     ports:
       - "5173:80"
     depends_on:
@@ -48,7 +48,7 @@ services:
     build:
       context: .
       dockerfile: packages/storefront/Dockerfile
-    container_name: kitchenasty-storefront
+    container_name: shutter-storefront
     ports:
       - "5174:80"
     depends_on:
@@ -58,7 +58,7 @@ services:
     build:
       context: .
       dockerfile: packages/docs/Dockerfile
-    container_name: kitchenasty-docs
+    container_name: shutter-docs
     ports:
       - "5175:80"
 

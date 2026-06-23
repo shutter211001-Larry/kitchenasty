@@ -9,13 +9,13 @@ services:
   postgres:
     image: postgres:16-alpine
     environment:
-      POSTGRES_USER: kitchenasty
+      POSTGRES_USER: shutter
       POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: kitchenasty
+      POSTGRES_DB: shutter
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U kitchenasty"]
+      test: ["CMD-SHELL", "pg_isready -U shutter"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -28,7 +28,7 @@ services:
     environment:
       PORT: 3000
       NODE_ENV: production
-      DATABASE_URL: postgresql://kitchenasty:${DB_PASSWORD}@postgres:5432/kitchenasty
+      DATABASE_URL: postgresql://shutter:${DB_PASSWORD}@postgres:5432/shutter
       JWT_SECRET: ${JWT_SECRET}
       CORS_ORIGINS: https://admin.yourdomain.com,https://order.yourdomain.com
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}

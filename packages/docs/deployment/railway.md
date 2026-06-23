@@ -43,7 +43,7 @@ Shutter 是一個包含多個模組的大型系統。在您的架構中，包含
 
 因為我們使用的是 Monorepo (單一儲存庫)，您需要**重複 4 次**從 GitHub 匯入同一個儲存庫，並為每個服務設定不同的「根目錄 (Root Directory)」。
 
-1. 點擊 **Create** -> **GitHub Repo**，選擇您的 `kitchenasty` 儲存庫。（請重複此動作 4 次，建立 4 個 App 服務）
+1. 點擊 **Create** -> **GitHub Repo**，選擇您的 `shutter` 儲存庫。（請重複此動作 4 次，建立 4 個 App 服務）
 2. 針對這 4 個卡片，分別點擊進入 **Settings** 分頁，往下找到 **Root Directory**。
 3. 依照下方對應表，更改 Root Directory，並在上方更改卡片名稱：
 

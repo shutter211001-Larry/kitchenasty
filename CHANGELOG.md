@@ -187,5 +187,5 @@ and management platform.
 - GitHub issue templates (bug report, feature request) and PR template
 - Funding configuration
 
-[0.2.0]: https://github.com/mighty840/kitchenasty/releases/tag/v0.2.0
-[0.1.0]: https://github.com/mighty840/kitchenasty/releases/tag/v0.1.0
+[0.2.0]: https://github.com/mighty840/shutter/releases/tag/v0.2.0
+[0.1.0]: https://github.com/mighty840/shutter/releases/tag/v0.1.0

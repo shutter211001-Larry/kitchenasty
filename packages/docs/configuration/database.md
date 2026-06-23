@@ -7,7 +7,7 @@ Shutter uses **PostgreSQL 16** with **Prisma ORM** for schema management, migrat
 Set the connection string in your `.env`:
 
 ```dotenv
-DATABASE_URL=postgresql://user:password@host:5432/kitchenasty
+DATABASE_URL=postgresql://user:password@host:5432/shutter
 ```
 
 ## 📐 Prisma Schema

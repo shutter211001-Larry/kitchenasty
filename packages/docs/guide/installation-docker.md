@@ -5,8 +5,8 @@ The fastest way to get Shutter running. Docker Compose starts the API server, ad
 ## 1. 📥 Clone the Repository
 
 ```bash
-git clone https://github.com/kitchenasty/kitchenasty.git
-cd kitchenasty
+git clone https://github.com/shutter/shutter.git
+cd shutter
 ```
 
 ## 2. ⚙️ Configure Environment
@@ -18,7 +18,7 @@ cp packages/server/.env.example packages/server/.env
 Edit `packages/server/.env` and set at minimum:
 
 ```dotenv
-DATABASE_URL=postgresql://kitchenasty:kitchenasty@postgres:5432/kitchenasty
+DATABASE_URL=postgresql://shutter:shutter@postgres:5432/shutter
 JWT_SECRET=your-random-secret-here
 CORS_ORIGINS=http://localhost:5173,http://localhost:5174
 ```

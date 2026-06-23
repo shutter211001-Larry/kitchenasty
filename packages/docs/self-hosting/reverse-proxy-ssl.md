@@ -59,17 +59,17 @@ Replace the contents with:
 ```caddyfile
 # Admin Dashboard
 admin.yourdomain.com {
-    reverse_proxy kitchenasty-admin:80
+    reverse_proxy shutter-admin:80
 }
 
 # Customer Storefront
 order.yourdomain.com {
-    reverse_proxy kitchenasty-storefront:80
+    reverse_proxy shutter-storefront:80
 }
 
 # API Server
 api.yourdomain.com {
-    reverse_proxy kitchenasty-server:3000
+    reverse_proxy shutter-server:3000
 }
 ```
 
@@ -85,7 +85,7 @@ Caddy needs to reach the Docker containers. The easiest way is to add Caddy to t
 
 ```bash
 # Connect Caddy to the Shutter Docker network
-docker network connect kitchenasty caddy 2>/dev/null || true
+docker network connect shutter caddy 2>/dev/null || true
 ```
 
 However, since Caddy is installed as a system service (not a container), you need to expose the container ports on localhost instead. Update your `docker-compose.prod.yml` to expose ports on `127.0.0.1` only (not publicly):
@@ -196,7 +196,7 @@ docker compose -f docker-compose.prod.yml up -d
 Now create the Nginx site configs:
 
 ```bash
-sudo nano /etc/nginx/sites-available/kitchenasty
+sudo nano /etc/nginx/sites-available/shutter
 ```
 
 Paste the following:
@@ -308,7 +308,7 @@ server {
 
 ```bash
 # Enable the config
-sudo ln -s /etc/nginx/sites-available/kitchenasty /etc/nginx/sites-enabled/
+sudo ln -s /etc/nginx/sites-available/shutter /etc/nginx/sites-enabled/
 
 # Remove the default site
 sudo rm -f /etc/nginx/sites-enabled/default

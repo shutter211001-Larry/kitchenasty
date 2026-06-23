@@ -1,17 +1,17 @@
 #!/bin/bash
-# Reset the KitchenAsty demo database.
+# Reset the Shutter demo database.
 # Intended to run as a cron job every 2 hours.
 set -euo pipefail
 
-cd /opt/kitchenasty
+cd /opt/shutter
 
 echo "[$(date)] Resetting demo database..."
 
 # Drop and recreate the database
 docker compose -f docker-compose.demo.yml exec -T postgres \
-  psql -U kitchenasty -d postgres -c 'DROP DATABASE IF EXISTS kitchenasty;'
+  psql -U shutter -d postgres -c 'DROP DATABASE IF EXISTS shutter;'
 docker compose -f docker-compose.demo.yml exec -T postgres \
-  psql -U kitchenasty -d postgres -c 'CREATE DATABASE kitchenasty OWNER kitchenasty;'
+  psql -U shutter -d postgres -c 'CREATE DATABASE shutter OWNER shutter;'
 
 # Restart the server so Prisma reconnects
 docker compose -f docker-compose.demo.yml restart server

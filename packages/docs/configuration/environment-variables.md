@@ -119,7 +119,7 @@ NODE_ENV=development
 CORS_ORIGINS=http://localhost:5173,http://localhost:5174
 STOREFRONT_URL=http://localhost:5174
 
-DATABASE_URL=postgresql://kitchenasty:kitchenasty@localhost:5432/kitchenasty
+DATABASE_URL=postgresql://shutter:shutter@localhost:5432/shutter
 JWT_SECRET=change-this-to-a-random-secret
 JWT_EXPIRES_IN=7d
 

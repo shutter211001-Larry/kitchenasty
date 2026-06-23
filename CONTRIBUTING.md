@@ -19,12 +19,12 @@ Thank you for your interest in contributing to Shutter! This guide will help you
 1. **Fork** the repository on GitHub
 2. **Clone** your fork locally:
    ```bash
-   git clone git@github.com:YOUR_USERNAME/kitchenasty.git
-   cd kitchenasty
+   git clone git@github.com:YOUR_USERNAME/shutter.git
+   cd shutter
    ```
 3. **Add the upstream remote**:
    ```bash
-   git remote add upstream git@github.com:mighty840/kitchenasty.git
+   git remote add upstream git@github.com:mighty840/shutter.git
    ```
 
 ## Development Setup
@@ -60,7 +60,7 @@ npm run dev:storefront  # Storefront  → http://localhost:5174
 ## Project Structure
 
 ```
-kitchenasty/
+shutter/
 ├── packages/
 │   ├── admin/        # React admin panel
 │   ├── docs/         # VitePress documentation
@@ -130,7 +130,7 @@ All tests must pass before a pull request can be merged.
    git fetch upstream
    git rebase upstream/main
    ```
-2. Push your branch and open a PR against `mighty840/kitchenasty:main`
+2. Push your branch and open a PR against `mighty840/shutter:main`
 3. Fill out the PR template with:
    - A clear description of **what** changed and **why**
    - Steps to test your changes
@@ -147,8 +147,8 @@ All tests must pass before a pull request can be merged.
 
 ## Reporting Issues
 
-- **Bug reports**: Use the [bug report template](https://github.com/mighty840/kitchenasty/issues/new?template=bug_report.md)
-- **Feature requests**: Use the [feature request template](https://github.com/mighty840/kitchenasty/issues/new?template=feature_request.md)
+- **Bug reports**: Use the [bug report template](https://github.com/mighty840/shutter/issues/new?template=bug_report.md)
+- **Feature requests**: Use the [feature request template](https://github.com/mighty840/shutter/issues/new?template=feature_request.md)
 - **Security issues**: See [SECURITY.md](SECURITY.md) — do **not** open a public issue
 
 ## Community
@@ -159,7 +159,7 @@ All tests must pass before a pull request can be merged.
 
 ### Good First Issues
 
-Look for issues labeled [`good first issue`](https://github.com/mighty840/kitchenasty/labels/good%20first%20issue) — these are great starting points for new contributors.
+Look for issues labeled [`good first issue`](https://github.com/mighty840/shutter/labels/good%20first%20issue) — these are great starting points for new contributors.
 
 ---
 

@@ -3,12 +3,12 @@ import { defineConfig } from 'vitepress'
 const base = process.env.VITEPRESS_BASE || '/'
 
 export default defineConfig({
-  title: 'KitchenAsty',
+  title: 'Shutter',
   description: 'Self-hosted restaurant ordering platform — documentation',
   base,
 
   sitemap: {
-    hostname: 'https://kitchenasty.com',
+    hostname: 'https://shutter.com',
   },
 
   ignoreDeadLinks: [
@@ -34,7 +34,7 @@ export default defineConfig({
           { text: 'Architecture', link: '/architecture/project-structure' },
           { text: 'Deployment', link: '/deployment/docker' },
           { text: 'Contributing', link: '/contributing/development-setup' },
-          { text: 'GitHub', link: 'https://github.com/kitchenasty/kitchenasty' },
+          { text: 'GitHub', link: 'https://github.com/shutter/shutter' },
           { text: 'Swagger UI', link: 'http://localhost:3000/api/docs' },
         ],
       },
@@ -193,17 +193,17 @@ export default defineConfig({
     },
 
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/mighty840/kitchenasty' },
+      { icon: 'github', link: 'https://github.com/mighty840/shutter' },
     ],
 
     editLink: {
-      pattern: 'https://github.com/mighty840/kitchenasty/edit/main/packages/docs/:path',
+      pattern: 'https://github.com/mighty840/shutter/edit/main/packages/docs/:path',
       text: 'Edit this page on GitHub',
     },
 
     footer: {
       message: `Released under the <a href="${base}legal/license.html">MIT License</a>. <a href="${base}legal/privacy-policy.html">Privacy Policy</a> · <a href="${base}legal/impressum.html">Impressum</a>`,
-      copyright: 'Copyright &copy; 2025 KitchenAsty Contributors',
+      copyright: 'Copyright &copy; 2025 Shutter Contributors',
     },
   },
 })

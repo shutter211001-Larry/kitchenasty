@@ -1,4 +1,4 @@
-demo.kitchenasty.com {
+demo.shutter.com {
 	# Rate limiting: 10 requests/second per IP, burst of 20
 	rate_limit {
 		zone demo_limit {

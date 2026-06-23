@@ -3,7 +3,7 @@ import {
   getMappings,
   saveMapping,
   deleteMapping,
-  getKitchenAstyData,
+  getShutterData,
   deductInventory,
   getForecast,
   getProductRecipes
@@ -20,10 +20,10 @@ router.post('/mappings', saveMapping);
 // Delete mapping by menuItemId
 router.delete('/mappings/:menuItemId', deleteMapping);
 
-// Get sync data from KitchenAsty
-router.get('/kitchenasty-data', getKitchenAstyData);
+// Get sync data from Shutter
+router.get('/shutter-data', getShutterData);
 
-// Real-time order stock deduction (called by KitchenAsty hook)
+// Real-time order stock deduction (called by Shutter hook)
 router.post('/deduct-inventory', deductInventory);
 
 // Reservation-based intelligent ingredient demand forecasting

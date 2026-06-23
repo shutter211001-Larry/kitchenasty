@@ -8,7 +8,7 @@ test.describe('Storefront Locations Page', () => {
 
   test('displays locations description', async ({ page }) => {
     await page.goto('/locations');
-    await expect(page.getByText('Find a KitchenAsty near you')).toBeVisible();
+    await expect(page.getByText('Find a Shutter near you')).toBeVisible();
   });
 
   test('navigating to locations from header', async ({ page }) => {

@@ -5,7 +5,7 @@ Shutter is organized as an npm workspaces monorepo.
 ## 📂 Directory Tree
 
 ```
-kitchenasty/
+shutter/
 ├── packages/
 │   ├── server/          # Express API server
 │   │   ├── src/

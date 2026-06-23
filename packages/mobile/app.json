@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "KitchenAsty",
-    "slug": "kitchenasty",
+    "name": "Shutter",
+    "slug": "shutter",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "scheme": "kitchenasty",
+    "scheme": "shutter",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
@@ -15,14 +15,14 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.kitchenasty.app"
+      "bundleIdentifier": "com.shutter.app"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#F97316"
       },
-      "package": "com.kitchenasty.app"
+      "package": "com.shutter.app"
     },
     "plugins": [
       "expo-router",

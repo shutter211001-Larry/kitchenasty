@@ -39,8 +39,8 @@ const writeMappings = (mappings: any[]) => {
   }
 };
 
-// Get KitchenAsty URL and Token
-const getKitchenAstyUrl = () => {
+// Get Shutter URL and Token
+const getShutterUrl = () => {
   const port = process.env.PORT || '3000';
   let url = (process.env.KITCHENASTY_API_URL || process.env.SHUTTER_ERP_API_URL || `http://127.0.0.1:${port}`).trim();
   if (url && !url.startsWith('http://') && !url.startsWith('https://')) {
@@ -53,9 +53,9 @@ const getIntegrationKey = () => {
   return process.env.INTEGRATION_KEY || 'pizzamaster-integration-secret-key';
 };
 
-// Helper to make API calls to KitchenAsty
-const fetchKitchenAsty = async (endpoint: string) => {
-  const url = `${getKitchenAstyUrl()}${endpoint}`;
+// Helper to make API calls to Shutter
+const fetchShutter = async (endpoint: string) => {
+  const url = `${getShutterUrl()}${endpoint}`;
   try {
     const response = await fetch(url, {
       headers: {
@@ -65,7 +65,7 @@ const fetchKitchenAsty = async (endpoint: string) => {
     });
     
     if (!response.ok) {
-      throw new Error(`KitchenAsty returned HTTP ${response.status}`);
+      throw new Error(`Shutter returned HTTP ${response.status}`);
     }
     
     const result = await response.json().catch(() => ({ success: false, error: 'Invalid JSON' }));
@@ -137,10 +137,10 @@ export const deleteMapping = async (req: Request, res: Response) => {
   }
 };
 
-// 4. Proxy KitchenAsty Data
-export const getKitchenAstyData = async (req: Request, res: Response) => {
+// 4. Proxy Shutter Data
+export const getShutterData = async (req: Request, res: Response) => {
   try {
-    console.log('[Integration ERP] Syncing data from KitchenAsty...');
+    console.log('[Integration ERP] Syncing data from Shutter...');
     
     let menuItems = [];
     let orders = [];
@@ -149,13 +149,13 @@ export const getKitchenAstyData = async (req: Request, res: Response) => {
     let connError = '';
 
     try {
-      menuItems = await fetchKitchenAsty('/api/integration/menu-items');
-      orders = await fetchKitchenAsty('/api/integration/orders');
-      reservations = await fetchKitchenAsty('/api/integration/reservations');
+      menuItems = await fetchShutter('/api/integration/menu-items');
+      orders = await fetchShutter('/api/integration/orders');
+      reservations = await fetchShutter('/api/integration/reservations');
       connectionOk = true;
     } catch (e: any) {
       connError = e.message;
-      console.warn('[Integration ERP] KitchenAsty connection offline:', e.message);
+      console.warn('[Integration ERP] Shutter connection offline:', e.message);
     }
 
     res.json({
@@ -176,7 +176,7 @@ export const getKitchenAstyData = async (req: Request, res: Response) => {
 // 5. Deduct Inventory (Idempotent)
 export const deductInventory = async (req: Request, res: Response) => {
   try {
-    // Check if integration key in header matches (incoming request from KitchenAsty)
+    // Check if integration key in header matches (incoming request from Shutter)
     const key = req.headers['x-integration-key'];
     if (key !== getIntegrationKey()) {
       return res.status(401).json({ success: false, error: 'Unauthorized integration key' });
@@ -288,16 +288,16 @@ export const getForecast = async (req: Request, res: Response) => {
       });
     }
 
-    // Fetch KitchenAsty orders and reservations
+    // Fetch Shutter orders and reservations
     let orders = [];
     let reservations = [];
     try {
-      orders = await fetchKitchenAsty('/api/integration/orders');
-      reservations = await fetchKitchenAsty('/api/integration/reservations');
+      orders = await fetchShutter('/api/integration/orders');
+      reservations = await fetchShutter('/api/integration/reservations');
     } catch (e: any) {
       return res.status(503).json({
         success: false,
-        error: `Cannot calculate forecast because KitchenAsty is offline: ${e.message}`
+        error: `Cannot calculate forecast because Shutter is offline: ${e.message}`
       });
     }
 

@@ -9,13 +9,13 @@ When a new version is released, follow these steps to update:
 ### 1️⃣ Step 1: Back Up First
 
 ```bash
-/home/kitchenasty/backup.sh
+/home/shutter/backup.sh
 ```
 
 ### 2️⃣ Step 2: Pull the Latest Code
 
 ```bash
-cd /home/kitchenasty/kitchenasty
+cd /home/shutter/shutter
 git pull origin main
 ```
 
@@ -84,7 +84,7 @@ Run `docker system prune` periodically (e.g., monthly) to reclaim disk space fro
 
 ```bash
 docker compose -f docker-compose.prod.yml exec postgres \
-  psql -U kitchenasty -c "SELECT pg_size_pretty(pg_database_size('kitchenasty'));"
+  psql -U shutter -c "SELECT pg_size_pretty(pg_database_size('shutter'));"
 ```
 
 ### 🌐 Uptime Monitoring (External)
@@ -202,7 +202,7 @@ If you've lost access to the admin account:
 
 ```bash
 docker compose -f docker-compose.prod.yml exec postgres \
-  psql -U kitchenasty -c "
+  psql -U shutter -c "
     UPDATE users SET password = '\$2a\$10\$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy'
     WHERE email = 'admin@shutter.com';
   "

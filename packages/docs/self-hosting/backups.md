@@ -8,7 +8,7 @@ Losing your database means losing all orders, customers, menu items, and setting
 |------|----------|----------|
 | 🗄️ PostgreSQL database | `pgdata` Docker volume | **Critical** |
 | 🖼️ Uploaded images | `uploads` Docker volume | Important |
-| 🔑 Environment file | `/home/kitchenasty/kitchenasty/.env` | Important |
+| 🔑 Environment file | `/home/shutter/shutter/.env` | Important |
 | 🐳 Docker Compose file | `docker-compose.prod.yml` | Nice to have (in git) |
 
 ## 🔄 Automatic Database Backups
@@ -16,10 +16,10 @@ Losing your database means losing all orders, customers, menu items, and setting
 ### 📝 Create the Backup Script
 
 ```bash
-sudo mkdir -p /opt/backups/kitchenasty
-sudo chown kitchenasty:kitchenasty /opt/backups/kitchenasty
+sudo mkdir -p /opt/backups/shutter
+sudo chown shutter:shutter /opt/backups/shutter
 
-nano /home/kitchenasty/backup.sh
+nano /home/shutter/backup.sh
 ```
 
 Paste:
@@ -29,23 +29,23 @@ Paste:
 # Shutter Database Backup Script
 set -euo pipefail
 
-BACKUP_DIR="/opt/backups/kitchenasty"
+BACKUP_DIR="/opt/backups/shutter"
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 KEEP_DAYS=30
 
 echo "[$(date)] Starting backup..."
 
 # Dump the database from the running PostgreSQL container
-docker compose -f /home/kitchenasty/kitchenasty/docker-compose.prod.yml \
-  exec -T postgres pg_dump -U kitchenasty -Fc kitchenasty \
+docker compose -f /home/shutter/shutter/docker-compose.prod.yml \
+  exec -T postgres pg_dump -U shutter -Fc shutter \
   > "${BACKUP_DIR}/db_${TIMESTAMP}.dump"
 
 # Back up uploaded images
 tar -czf "${BACKUP_DIR}/uploads_${TIMESTAMP}.tar.gz" \
-  -C /var/lib/docker/volumes/ kitchenasty_uploads 2>/dev/null || true
+  -C /var/lib/docker/volumes/ shutter_uploads 2>/dev/null || true
 
 # Back up environment file
-cp /home/kitchenasty/kitchenasty/.env \
+cp /home/shutter/shutter/.env \
   "${BACKUP_DIR}/env_${TIMESTAMP}.bak"
 
 # Delete backups older than KEEP_DAYS
@@ -58,19 +58,19 @@ echo "Backup size: $(du -sh ${BACKUP_DIR}/db_${TIMESTAMP}.dump | cut -f1)"
 Make it executable:
 
 ```bash
-chmod +x /home/kitchenasty/backup.sh
+chmod +x /home/shutter/backup.sh
 ```
 
 ### 🧪 Test the Script
 
 ```bash
-/home/kitchenasty/backup.sh
+/home/shutter/backup.sh
 ```
 
 Verify the backup was created:
 
 ```bash
-ls -lh /opt/backups/kitchenasty/
+ls -lh /opt/backups/shutter/
 ```
 
 ### ⏰ Schedule Automatic Backups
@@ -84,7 +84,7 @@ crontab -e
 Add this line:
 
 ```
-0 3 * * * /home/kitchenasty/backup.sh >> /opt/backups/kitchenasty/backup.log 2>&1
+0 3 * * * /home/shutter/backup.sh >> /opt/backups/shutter/backup.log 2>&1
 ```
 
 ## 🔄 Restoring from a Backup
@@ -97,8 +97,8 @@ docker compose -f docker-compose.prod.yml stop server admin storefront
 
 # Restore the database
 docker compose -f docker-compose.prod.yml exec -T postgres \
-  pg_restore -U kitchenasty -d kitchenasty --clean --if-exists \
-  < /opt/backups/kitchenasty/db_20260220_030000.dump
+  pg_restore -U shutter -d shutter --clean --if-exists \
+  < /opt/backups/shutter/db_20260220_030000.dump
 
 # Start everything again
 docker compose -f docker-compose.prod.yml up -d
@@ -114,7 +114,7 @@ Local backups protect against accidental deletion, but not against server failur
 
 ```bash
 # Add to the backup script or as a separate cron job
-rsync -az /opt/backups/kitchenasty/ user@backup-server:/backups/kitchenasty/
+rsync -az /opt/backups/shutter/ user@backup-server:/backups/shutter/
 ```
 
 ### ☁️ Option 2: Upload to S3 or Backblaze B2
@@ -127,7 +127,7 @@ sudo apt install -y awscli
 aws configure  # Enter your access keys
 
 # Add to backup script:
-aws s3 sync /opt/backups/kitchenasty/ s3://your-bucket/kitchenasty-backups/
+aws s3 sync /opt/backups/shutter/ s3://your-bucket/shutter-backups/
 ```
 
 ```bash
@@ -136,7 +136,7 @@ pip install b2-sdk
 b2 authorize-account YOUR_KEY_ID YOUR_APP_KEY
 
 # Add to backup script:
-b2 sync /opt/backups/kitchenasty/ b2://your-bucket/kitchenasty-backups/
+b2 sync /opt/backups/shutter/ b2://your-bucket/shutter-backups/
 ```
 
 ### 📧 Option 3: Email Notification on Failure
@@ -156,19 +156,19 @@ Periodically verify that your backups are restorable. You can test on a separate
 
 ```bash
 # Create a temporary test database
-docker exec kitchenasty-db createdb -U kitchenasty kitchenasty_test
+docker exec shutter-db createdb -U shutter shutter_test
 
 # Restore into the test database
-docker exec -i kitchenasty-db \
-  pg_restore -U kitchenasty -d kitchenasty_test --clean --if-exists \
-  < /opt/backups/kitchenasty/db_latest.dump
+docker exec -i shutter-db \
+  pg_restore -U shutter -d shutter_test --clean --if-exists \
+  < /opt/backups/shutter/db_latest.dump
 
 # Verify
-docker exec kitchenasty-db psql -U kitchenasty -d kitchenasty_test \
+docker exec shutter-db psql -U shutter -d shutter_test \
   -c "SELECT count(*) FROM orders;"
 
 # Clean up
-docker exec kitchenasty-db dropdb -U kitchenasty kitchenasty_test
+docker exec shutter-db dropdb -U shutter shutter_test
 ```
 
 ## ➡️ Next Step

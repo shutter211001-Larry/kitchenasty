@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="https://github.com/mighty840/kitchenasty">
+  <a href="https://github.com/mighty840/shutter">
     <img src="assets/logo.svg" alt="Shutter Logo" width="420" />
   </a>
 </p>
@@ -11,8 +11,8 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/mighty840/kitchenasty/actions/workflows/ci.yml"><img src="https://github.com/mighty840/kitchenasty/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
-  <a href="https://mighty840.github.io/kitchenasty/"><img src="https://img.shields.io/badge/Docs-GitHub%20Pages-blue?logo=readthedocs&logoColor=white" alt="Docs" /></a>
+  <a href="https://github.com/mighty840/shutter/actions/workflows/ci.yml"><img src="https://github.com/mighty840/shutter/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
+  <a href="https://mighty840.github.io/shutter/"><img src="https://img.shields.io/badge/Docs-GitHub%20Pages-blue?logo=readthedocs&logoColor=white" alt="Docs" /></a>
   <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-5.7-blue?logo=typescript&logoColor=white" alt="TypeScript" /></a>
   <a href="https://react.dev/"><img src="https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=white" alt="React" /></a>
   <a href="https://nodejs.org/"><img src="https://img.shields.io/badge/Node.js-22-339933?logo=nodedotjs&logoColor=white" alt="Node.js" /></a>
@@ -31,23 +31,23 @@
 </p>
 
 <p align="center">
-  <a href="https://www.producthunt.com/products/kitchenasty?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-kitchenasty" target="_blank" rel="noopener noreferrer"><img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1084792&theme=light&t=1772014081416" alt="Shutter - Open-source, self-hosted restaurant ordering and management | Product Hunt" width="250" height="54" /></a>
+  <a href="https://www.producthunt.com/products/shutter?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-shutter" target="_blank" rel="noopener noreferrer"><img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1084792&theme=light&t=1772014081416" alt="Shutter - Open-source, self-hosted restaurant ordering and management | Product Hunt" width="250" height="54" /></a>
 </p>
 
 <p align="center">
   <a href="https://demo.shutter.com"><strong>Live Demo</strong></a> &middot;
   <a href="#quick-start">Quick Start</a> &middot;
-  <a href="https://mighty840.github.io/kitchenasty/">Docs</a> &middot;
-  <a href="https://github.com/mighty840/kitchenasty/issues/new?template=bug_report.md">Report Bug</a> &middot;
-  <a href="https://github.com/mighty840/kitchenasty/issues/new?template=feature_request.md">Request Feature</a> &middot;
-  <a href="https://github.com/mighty840/kitchenasty/discussions">Discussions</a>
+  <a href="https://mighty840.github.io/shutter/">Docs</a> &middot;
+  <a href="https://github.com/mighty840/shutter/issues/new?template=bug_report.md">Report Bug</a> &middot;
+  <a href="https://github.com/mighty840/shutter/issues/new?template=feature_request.md">Request Feature</a> &middot;
+  <a href="https://github.com/mighty840/shutter/discussions">Discussions</a>
 </p>
 
 ---
 
 > **Try it now:** [demo.shutter.com](https://demo.shutter.com) (storefront) | [demo.shutter.com/admin](https://demo.shutter.com/admin/) (admin — `admin@shutter.com` / `admin123`)
 >
-> The demo resets every 2 hours and is rate-limited. See the [docs](https://mighty840.github.io/kitchenasty/guide/live-demo.html) for details.
+> The demo resets every 2 hours and is rate-limited. See the [docs](https://mighty840.github.io/shutter/guide/live-demo.html) for details.
 
 ---
 
@@ -160,8 +160,8 @@ Shutter enables restaurants, cafes, and takeaways to accept online orders for de
 ### 1. Clone & install
 
 ```bash
-git clone git@github.com:mighty840/kitchenasty.git
-cd kitchenasty
+git clone git@github.com:mighty840/shutter.git
+cd shutter
 npm install
 ```
 
@@ -192,7 +192,7 @@ npm run dev:storefront  # Storefront  → http://localhost:5174
 ## Project Structure
 
 ```
-kitchenasty/
+shutter/
 ├── .github/workflows/     # CI pipeline
 ├── assets/                # Logo and brand assets
 ├── e2e/                   # Playwright E2E tests
@@ -216,13 +216,13 @@ kitchenasty/
 
 ## Documentation
 
-Full documentation is available at **[mighty840.github.io/kitchenasty](https://mighty840.github.io/kitchenasty/)**, including:
+Full documentation is available at **[mighty840.github.io/shutter](https://mighty840.github.io/shutter/)**, including:
 
-- [Getting Started Guide](https://mighty840.github.io/kitchenasty/guide/introduction.html)
-- [Self-Hosting Guide](https://mighty840.github.io/kitchenasty/self-hosting/overview.html) — server setup, Docker, reverse proxy, SSL, backups
-- [Mobile App Publishing](https://mighty840.github.io/kitchenasty/mobile-app/overview.html) — developer accounts, building, app store submission
-- [API Reference](https://mighty840.github.io/kitchenasty/api/overview.html) — all endpoints with request/response schemas
-- [Configuration](https://mighty840.github.io/kitchenasty/configuration/environment-variables.html) — environment variables, payments, email, social login
+- [Getting Started Guide](https://mighty840.github.io/shutter/guide/introduction.html)
+- [Self-Hosting Guide](https://mighty840.github.io/shutter/self-hosting/overview.html) — server setup, Docker, reverse proxy, SSL, backups
+- [Mobile App Publishing](https://mighty840.github.io/shutter/mobile-app/overview.html) — developer accounts, building, app store submission
+- [API Reference](https://mighty840.github.io/shutter/api/overview.html) — all endpoints with request/response schemas
+- [Configuration](https://mighty840.github.io/shutter/configuration/environment-variables.html) — environment variables, payments, email, social login
 
 Interactive Swagger UI is served at [`/api/docs`](http://localhost:3000/api/docs) when the server is running.
 
@@ -237,7 +237,7 @@ We welcome contributions of all kinds! Please read our **[Contributing Guide](CO
 3. Ensure all tests pass: `npm test && npm run test:e2e`
 4. Push and open a pull request
 
-Looking for a good starting point? Check out issues labeled [`good first issue`](https://github.com/mighty840/kitchenasty/labels/good%20first%20issue).
+Looking for a good starting point? Check out issues labeled [`good first issue`](https://github.com/mighty840/shutter/labels/good%20first%20issue).
 
 See [`PLAN.md`](PLAN.md) for the full roadmap and feature ideas.
 
@@ -245,8 +245,8 @@ See [`PLAN.md`](PLAN.md) for the full roadmap and feature ideas.
 
 ## Community
 
-- [GitHub Discussions](https://github.com/mighty840/kitchenasty/discussions) — Ask questions, share ideas, get help
-- [Issue Tracker](https://github.com/mighty840/kitchenasty/issues) — Report bugs and request features
+- [GitHub Discussions](https://github.com/mighty840/shutter/discussions) — Ask questions, share ideas, get help
+- [Issue Tracker](https://github.com/mighty840/shutter/issues) — Report bugs and request features
 - [Security Policy](SECURITY.md) — Report vulnerabilities responsibly
 - [Code of Conduct](CODE_OF_CONDUCT.md) — Our community standards
 

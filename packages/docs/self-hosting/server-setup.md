@@ -33,24 +33,24 @@ Running everything as `root` is a security risk. Create a dedicated user:
 
 ```bash
 # Create user
-adduser kitchenasty
+adduser shutter
 
 # Give sudo privileges
-usermod -aG sudo kitchenasty
+usermod -aG sudo shutter
 
 # If you used an SSH key, copy it to the new user
-mkdir -p /home/kitchenasty/.ssh
-cp ~/.ssh/authorized_keys /home/kitchenasty/.ssh/
-chown -R kitchenasty:kitchenasty /home/kitchenasty/.ssh
-chmod 700 /home/kitchenasty/.ssh
-chmod 600 /home/kitchenasty/.ssh/authorized_keys
+mkdir -p /home/shutter/.ssh
+cp ~/.ssh/authorized_keys /home/shutter/.ssh/
+chown -R shutter:shutter /home/shutter/.ssh
+chmod 700 /home/shutter/.ssh
+chmod 600 /home/shutter/.ssh/authorized_keys
 ```
 
 Log out and reconnect as the new user:
 
 ```bash
 exit
-ssh kitchenasty@203.0.113.50
+ssh shutter@203.0.113.50
 ```
 
 ## 4️⃣ Step 4: Update the System
@@ -80,14 +80,14 @@ sudo apt update
 sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
 # Add your user to the docker group (avoids needing sudo for docker commands)
-sudo usermod -aG docker kitchenasty
+sudo usermod -aG docker shutter
 ```
 
 **Log out and log back in** for the group change to take effect:
 
 ```bash
 exit
-ssh kitchenasty@203.0.113.50
+ssh shutter@203.0.113.50
 ```
 
 Verify Docker is working:
