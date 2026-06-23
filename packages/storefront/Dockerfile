@@ -25,18 +25,22 @@ FROM node:22-alpine
 
 WORKDIR /app
 
-# Copy built assets
-COPY --from=builder /app/packages/storefront/dist ./dist
+# Copy all package files to preserve workspace structure
+COPY package.json package-lock.json ./
+COPY packages/shared/package.json packages/shared/
+COPY packages/server/package.json packages/server/
+COPY packages/admin/package.json packages/admin/
+COPY packages/storefront/package.json packages/storefront/
+COPY packages/shutter-erp-frontend/package.json packages/shutter-erp-frontend/
 
-# Copy package files and install production dependencies for the server script
-COPY packages/storefront/package.json ./
-RUN npm install --omit=dev
+# Install production dependencies at the root workspace
+RUN npm install --omit=dev --no-audit --no-fund
 
-# Copy the server script
-COPY packages/storefront/server.js ./
+# Copy built assets and server script
+COPY --from=builder /app/packages/storefront/dist packages/storefront/dist
+COPY packages/storefront/server.js packages/storefront/
 
 EXPOSE 80
-
 ENV PORT=80
 
-CMD ["node", "server.js"]
+CMD ["node", "packages/storefront/server.js"]
