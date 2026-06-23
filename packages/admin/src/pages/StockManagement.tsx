@@ -569,7 +569,8 @@ export default function StockManagement() {
                         }
 
                         return (
-                          <tr key={item.id} className="hover:bg-slate-50/50 transition-colors">
+                          <React.Fragment key={item.id}>
+                            <tr className="hover:bg-slate-50/50 transition-colors">
                             {/* Product Name */}
                             <td className="px-6 py-3 whitespace-nowrap">
                               <div className="text-sm font-semibold text-gray-900">{item.name}</div>
