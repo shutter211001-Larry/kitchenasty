@@ -41,7 +41,4 @@ COPY --from=builder /app/packages/storefront/dist packages/storefront/dist
 COPY packages/storefront/server.js packages/storefront/
 COPY packages/storefront/app.js packages/storefront/
 
-EXPOSE 80
-ENV PORT=80
-
 CMD ["node", "packages/storefront/server.js"]
