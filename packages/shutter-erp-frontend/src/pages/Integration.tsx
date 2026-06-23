@@ -81,6 +81,7 @@ const Integration = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [forecastedIngredients, setForecastedIngredients] = useState<ForecastedIngredient[]>([]);
+  const [globalSettings, setGlobalSettings] = useState<any>(null);
   
   // UI states
   const [searchQuery, setSearchQuery] = useState('');
@@ -126,6 +127,10 @@ const Integration = () => {
       const logsRes = await axios.get('http://localhost:3000/api/inventory/logs');
       const filteredLogs = (logsRes.data || []).filter((log: any) => log.reason?.includes('線上訂餐'));
       setDeductionLogs(filteredLogs);
+
+      // 6. Fetch Global Settings for unit formatting
+      const settingsRes = await axios.get('http://localhost:3000/api/settings');
+      setGlobalSettings(settingsRes.data);
 
     } catch (error: any) {
       console.error('Failed to sync ERP data', error);
