@@ -235,7 +235,9 @@
     "selectDateFirst": "Pumili ng petsa ng pickup/delivery",
     "timeSelectionConfirmed": "Napili na ang iskedyul ng oras",
     "scheduledFor": "Naka-iskedyul ka para sa",
-    "noAvailableSlots": "Walang magagamit na iskedyul ng oras"
+    "noAvailableSlots": "Walang magagamit na iskedyul ng oras",
+    "discountsAndRewards": "Mga Diskwento at Gantimpala",
+    "locationNotAcceptingOrders": "Ang lokasyong ito ay kasalukuyang hindi tumatanggap ng mga order."
   },
   "orderConfirmation": {
     "title": "Nai-place na ang Order!",

@@ -235,7 +235,9 @@
     "selectDateFirst": "Seleziona la data di ritiro/consegna",
     "timeSelectionConfirmed": "Orario programmato selezionato",
     "scheduledFor": "Hai programmato per",
-    "noAvailableSlots": "Nessuna fascia oraria disponibile"
+    "noAvailableSlots": "Nessuna fascia oraria disponibile",
+    "discountsAndRewards": "Sconti e Premi",
+    "locationNotAcceptingOrders": "Questa sede attualmente non accetta ordini."
   },
   "orderConfirmation": {
     "title": "Ordine Effettuato!",

@@ -245,7 +245,9 @@
     "selectDateFirst": "Select pickup/delivery date",
     "timeSelectionConfirmed": "Scheduled time selected",
     "scheduledFor": "You have scheduled for",
-    "noAvailableSlots": "No available time slots"
+    "noAvailableSlots": "No available time slots",
+    "discountsAndRewards": "Discounts & Rewards",
+    "locationNotAcceptingOrders": "This location is currently not accepting orders."
   },
   "orderConfirmation": {
     "title": "Order Placed!",

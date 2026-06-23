@@ -235,7 +235,9 @@
     "selectDateFirst": "เลือกวันที่รับ/จัดส่ง",
     "timeSelectionConfirmed": "เลือกเวลาจองแล้ว",
     "scheduledFor": "คุณจองไว้สำหรับ",
-    "noAvailableSlots": "ไม่มีช่วงเวลาที่สามารถเลือกได้"
+    "noAvailableSlots": "ไม่มีช่วงเวลาที่สามารถเลือกได้",
+    "discountsAndRewards": "ส่วนลดและรางวัล",
+    "locationNotAcceptingOrders": "สาขานี้ยังไม่รับคำสั่งซื้อในขณะนี้"
   },
   "orderConfirmation": {
     "title": "สั่งอาหารสำเร็จ!",

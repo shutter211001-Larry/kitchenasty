@@ -235,7 +235,9 @@
     "selectDateFirst": "Chọn ngày nhận/giao hàng",
     "timeSelectionConfirmed": "Thời gian hẹn đã được chọn",
     "scheduledFor": "Bạn đã đặt lịch vào",
-    "noAvailableSlots": "Không có khung giờ trống nào"
+    "noAvailableSlots": "Không có khung giờ trống nào",
+    "discountsAndRewards": "Giảm giá & Phần thưởng",
+    "locationNotAcceptingOrders": "Chi nhánh này hiện không nhận đơn đặt hàng."
   },
   "orderConfirmation": {
     "title": "Đặt hàng thành công!",

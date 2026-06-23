@@ -234,7 +234,9 @@
     "selectDateFirst": "수령/배달 날짜 선택",
     "timeSelectionConfirmed": "예약 시간이 선택되었습니다",
     "scheduledFor": "예약 시간: ",
-    "noAvailableSlots": "이용 가능한 예약 시간대가 없습니다"
+    "noAvailableSlots": "이용 가능한 예약 시간대가 없습니다",
+    "discountsAndRewards": "할인 및 보상",
+    "locationNotAcceptingOrders": "이 지점은 현재 주문을 받지 않습니다."
   },
   "orderConfirmation": {
     "title": "주문 완료!",

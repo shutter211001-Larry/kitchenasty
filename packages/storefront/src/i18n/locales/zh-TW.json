@@ -237,7 +237,9 @@
     "selectDateFirst": "選擇取餐/外送日期",
     "timeSelectionConfirmed": "預約時間已選定",
     "scheduledFor": "您已預約於",
-    "noAvailableSlots": "暫無可用預約時段"
+    "noAvailableSlots": "暫無可用預約時段",
+    "discountsAndRewards": "優惠與紅利",
+    "locationNotAcceptingOrders": "此分店目前不接受點餐。"
   },
   "orderConfirmation": {
     "title": "點餐成功！",

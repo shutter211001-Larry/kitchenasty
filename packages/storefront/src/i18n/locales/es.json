@@ -235,7 +235,9 @@
     "selectDateFirst": "Seleccionar fecha de recogida/entrega",
     "timeSelectionConfirmed": "Hora programada seleccionada",
     "scheduledFor": "Ha programado para",
-    "noAvailableSlots": "No hay franjas horarias disponibles"
+    "noAvailableSlots": "No hay franjas horarias disponibles",
+    "discountsAndRewards": "Descuentos y Recompensas",
+    "locationNotAcceptingOrders": "Esta ubicación actualmente no acepta pedidos."
   },
   "orderConfirmation": {
     "title": "¡Pedido Realizado!",

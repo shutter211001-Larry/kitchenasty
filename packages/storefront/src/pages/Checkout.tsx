@@ -165,14 +165,15 @@ export default function Checkout() {
         const loc = data.data?.[0];
         if (loc) {
           setLocationId(loc.id);
-          if (loc.isBusy) {
+          // Allow employees to bypass the busy state
+          if (loc.isBusy && !user?.isEmployee) {
             setIsBusy(true);
-            setBusyMessage(loc.busyMessage || 'This location is currently not accepting orders.');
+            setBusyMessage(loc.busyMessage || t('checkout.locationNotAcceptingOrders') || 'This location is currently not accepting orders.');
           }
         }
       })
       .catch(() => {});
-  }, []);
+  }, [user?.isEmployee, t]);
 
   // Fetch available slots when location or order type changes
   useEffect(() => {

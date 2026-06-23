@@ -235,7 +235,9 @@
     "selectDateFirst": "Selecionar data de retirada/entrega",
     "timeSelectionConfirmed": "Horário agendado selecionado",
     "scheduledFor": "Você agendou para",
-    "noAvailableSlots": "Sem horários disponíveis"
+    "noAvailableSlots": "Sem horários disponíveis",
+    "discountsAndRewards": "Descontos e Recompensas",
+    "locationNotAcceptingOrders": "Este local não está aceitando pedidos no momento."
   },
   "orderConfirmation": {
     "title": "Pedido Realizado!",

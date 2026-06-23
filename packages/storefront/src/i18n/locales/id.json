@@ -235,7 +235,9 @@
     "selectDateFirst": "Pilih tanggal pengambilan/pengiriman",
     "timeSelectionConfirmed": "Waktu pemesanan telah dipilih",
     "scheduledFor": "Anda telah menjadwalkan pada",
-    "noAvailableSlots": "Tidak ada slot waktu yang tersedia"
+    "noAvailableSlots": "Tidak ada slot waktu yang tersedia",
+    "discountsAndRewards": "Diskon & Hadiah",
+    "locationNotAcceptingOrders": "Lokasi ini saat ini tidak menerima pesanan."
   },
   "orderConfirmation": {
     "title": "Pesanan Berhasil!",

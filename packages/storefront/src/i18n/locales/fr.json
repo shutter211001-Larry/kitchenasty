@@ -235,7 +235,9 @@
     "selectDateFirst": "Sélectionner la date de retrait/livraison",
     "timeSelectionConfirmed": "Heure de rendez-vous sélectionnée",
     "scheduledFor": "Vous avez planifié pour",
-    "noAvailableSlots": "Aucun créneau horaire disponible"
+    "noAvailableSlots": "Aucun créneau horaire disponible",
+    "discountsAndRewards": "Réductions et Récompenses",
+    "locationNotAcceptingOrders": "Ce lieu n'accepte actuellement pas les commandes."
   },
   "orderConfirmation": {
     "title": "Commande Passée !",

@@ -235,7 +235,9 @@
     "selectDateFirst": "Datum für Abholung/Lieferung wählen",
     "timeSelectionConfirmed": "Gewünschte Zeit ausgewählt",
     "scheduledFor": "Sie haben reserviert für",
-    "noAvailableSlots": "Keine verfügbaren Zeitfenster"
+    "noAvailableSlots": "Keine verfügbaren Zeitfenster",
+    "discountsAndRewards": "Rabatte & Belohnungen",
+    "locationNotAcceptingOrders": "Dieser Standort nimmt derzeit keine Bestellungen an."
   },
   "orderConfirmation": {
     "title": "Bestellung Aufgegeben!",

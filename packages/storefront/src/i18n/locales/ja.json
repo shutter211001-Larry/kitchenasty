@@ -234,7 +234,9 @@
     "selectDateFirst": "受取/配達日を選択してください",
     "timeSelectionConfirmed": "予約時間が確定しました",
     "scheduledFor": "予約日時：",
-    "noAvailableSlots": "利用可能な時間帯はありません"
+    "noAvailableSlots": "利用可能な時間帯はありません",
+    "discountsAndRewards": "割引と特典",
+    "locationNotAcceptingOrders": "この店舗は現在注文を受け付けていません。"
   },
   "orderConfirmation": {
     "title": "注文が完了しました！",
