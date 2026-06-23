@@ -98,6 +98,12 @@ export async function listMenuItems(req: Request, res: Response): Promise<void> 
         allergens: { include: { allergen: true } },
         dietaryPreferences: { include: { dietaryPreference: true } },
         _count: { select: { options: true } },
+        options: {
+          orderBy: { sortOrder: 'asc' },
+          include: {
+            values: { orderBy: { sortOrder: 'asc' } },
+          },
+        },
       },
     }),
     prisma.menuItem.count({ where }),

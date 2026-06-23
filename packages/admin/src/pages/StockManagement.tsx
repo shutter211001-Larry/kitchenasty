@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { api } from '../lib/api.js';
 
 interface Category {
@@ -7,6 +7,27 @@ interface Category {
   trackSharedStock: boolean;
   sharedStockQty: number;
   sharedStockThreshold: number;
+}
+
+interface OptionValue {
+  id: string;
+  name: string;
+  priceModifier: number;
+  trackStock: boolean;
+  stockQty: number;
+  sortOrder: number;
+  isDefault: boolean;
+}
+
+interface MenuOption {
+  id: string;
+  name: string;
+  displayType: string;
+  isRequired: boolean;
+  minSelect: number;
+  maxSelect: number;
+  sortOrder: number;
+  values: OptionValue[];
 }
 
 interface MenuItem {
@@ -21,6 +42,7 @@ interface MenuItem {
     id: string;
     name: string;
   };
+  options?: MenuOption[];
 }
 
 interface Recipe {
@@ -115,6 +137,38 @@ export default function StockManagement() {
       setTimeout(() => setSavedFeedbackId(null), 1500);
     } catch (err: any) {
       alert(`更新商品庫存失敗: ${err.message}`);
+    } finally {
+      setSavingId(null);
+    }
+  };
+
+  // Instant update handler for Option Value
+  const handleOptionValueUpdate = async (itemId: string, optionId: string, valueId: string, updates: Partial<OptionValue>) => {
+    setSavingId(valueId);
+    setSavedFeedbackId(null);
+    try {
+      const currentItem = items.find(i => i.id === itemId);
+      if (!currentItem || !currentItem.options) return;
+
+      // Deep clone options
+      const updatedOptions = currentItem.options.map(opt => ({
+        ...opt,
+        values: opt.values.map(v => 
+          v.id === valueId 
+            ? { ...v, ...updates, stockQty: updates.stockQty !== undefined ? Number(updates.stockQty) : v.stockQty } 
+            : v
+        )
+      }));
+
+      // We only send the options array to patch
+      const payload = { options: updatedOptions };
+      const res = await api.patch<{ data: MenuItem }>(`/menu/items/${itemId}`, payload);
+      
+      setItems(prev => prev.map(i => i.id === itemId ? { ...i, ...res.data } : i));
+      setSavedFeedbackId(valueId);
+      setTimeout(() => setSavedFeedbackId(null), 1500);
+    } catch (err: any) {
+      alert(`更新選項庫存失敗: ${err.message}`);
     } finally {
       setSavingId(null);
     }
@@ -665,7 +719,95 @@ export default function StockManagement() {
                               )}
                             </td>
                           </tr>
-                        );
+                          
+                          {/* Option Values Sub-rows */}
+                          {item.options?.flatMap(opt => 
+                            opt.values.map(v => {
+                              const vEffectiveStock = v.trackStock ? v.stockQty : effectiveStock;
+                              const vIsSoldOut = vEffectiveStock === 0;
+                              const vIsWarning = typeof vEffectiveStock === 'number' && vEffectiveStock <= 5;
+                              
+                              return (
+                                <tr key={v.id} className="bg-slate-50/40 hover:bg-slate-50/80 transition-colors">
+                                  <td className="px-6 py-2.5 whitespace-nowrap pl-12 border-l-4 border-l-slate-200">
+                                    <div className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                                      <span className="text-gray-400 text-xs">↳</span> {v.name}
+                                    </div>
+                                    <div className="text-[10px] text-gray-400 ml-4">({opt.name}) {v.priceModifier > 0 ? `+NT$ ${v.priceModifier}` : ''}</div>
+                                  </td>
+                                  <td className="px-6 py-2.5 whitespace-nowrap border-l-4 border-l-slate-200 text-xs text-gray-400 italic">
+                                    {/* Options typically don't have direct ERP recipe bindings in this simple matrix, so we leave it blank or show a badge */}
+                                    -
+                                  </td>
+                                  <td className="px-6 py-2.5 whitespace-nowrap border-l-4 border-l-slate-200">
+                                    <label className="inline-flex items-center gap-1.5 cursor-pointer select-none">
+                                      <input
+                                        type="checkbox"
+                                        checked={v.trackStock}
+                                        onChange={(e) => handleOptionValueUpdate(item.id, opt.id, v.id, { trackStock: e.target.checked })}
+                                        className="rounded border-gray-300 text-indigo-500 focus:ring-indigo-400 w-3.5 h-3.5"
+                                      />
+                                      <span className="text-xs font-medium text-gray-500">選項庫存</span>
+                                    </label>
+                                  </td>
+                                  <td className="px-6 py-2.5 whitespace-nowrap border-l-4 border-l-slate-200">
+                                    <div className="flex items-center">
+                                      <button
+                                        type="button"
+                                        disabled={!v.trackStock}
+                                        onClick={() => handleOptionValueUpdate(item.id, opt.id, v.id, { stockQty: Math.max(0, v.stockQty - 1) })}
+                                        className="w-6 h-6 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-l flex items-center justify-center font-bold text-xs disabled:opacity-40 disabled:cursor-not-allowed"
+                                      >
+                                        -
+                                      </button>
+                                      <input
+                                        type="number"
+                                        disabled={!v.trackStock}
+                                        value={v.trackStock ? v.stockQty : ''}
+                                        placeholder="跟隨主商品"
+                                        onChange={(e) => handleOptionValueUpdate(item.id, opt.id, v.id, { stockQty: Math.max(0, parseInt(e.target.value) || 0) })}
+                                        className="w-16 h-6 border-y border-gray-200 text-center text-xs font-bold focus:ring-0 focus:outline-none disabled:bg-gray-100 disabled:text-gray-400"
+                                      />
+                                      <button
+                                        type="button"
+                                        disabled={!v.trackStock}
+                                        onClick={() => handleOptionValueUpdate(item.id, opt.id, v.id, { stockQty: v.stockQty + 1 })}
+                                        className="w-6 h-6 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-r flex items-center justify-center font-bold text-xs disabled:opacity-40 disabled:cursor-not-allowed"
+                                      >
+                                        +
+                                      </button>
+                                      {savingId === v.id && (
+                                        <span className="text-[10px] text-gray-400 animate-pulse ml-2">存...</span>
+                                      )}
+                                      {savedFeedbackId === v.id && (
+                                        <span className="text-[10px] text-green-600 font-bold ml-2 animate-bounce">✓</span>
+                                      )}
+                                    </div>
+                                  </td>
+                                  <td className="px-6 py-2.5 whitespace-nowrap border-l-4 border-l-slate-200">
+                                    {v.trackStock ? (
+                                      <span className={`text-sm font-extrabold ${vIsSoldOut ? 'text-red-700' : vIsWarning ? 'text-amber-700 animate-pulse' : 'text-indigo-600'}`}>
+                                        {v.stockQty} <span className="text-xs font-normal text-gray-400">份</span>
+                                      </span>
+                                    ) : (
+                                      <span className="text-xs text-gray-400 italic">同上</span>
+                                    )}
+                                  </td>
+                                  <td className="px-6 py-2.5 whitespace-nowrap border-l-4 border-l-slate-200">
+                                    {v.trackStock ? (
+                                      <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-50 text-indigo-800 border border-indigo-200 max-w-max">
+                                        🎯 選項獨立
+                                      </span>
+                                    ) : (
+                                      <span className="text-xs text-gray-400 italic">-</span>
+                                    )}
+                                  </td>
+                                </tr>
+                              );
+                            })
+                          )}
+                        </React.Fragment>
+                      );
                       })}
                     </tbody>
                   </table>
