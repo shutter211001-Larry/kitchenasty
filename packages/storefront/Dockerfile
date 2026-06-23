@@ -21,11 +21,22 @@ ENV VITE_API_URL=${VITE_API_URL}
 
 RUN npm run build -w packages/storefront
 
-FROM nginx:alpine
+FROM node:22-alpine
 
-COPY --from=builder /app/packages/storefront/dist/ /usr/share/nginx/html/
-COPY packages/storefront/nginx.conf /etc/nginx/conf.d/default.conf
+WORKDIR /app
+
+# Copy built assets
+COPY --from=builder /app/packages/storefront/dist ./dist
+
+# Copy package files and install production dependencies for the server script
+COPY packages/storefront/package.json ./
+RUN npm install --omit=dev
+
+# Copy the server script
+COPY packages/storefront/server.js ./
 
 EXPOSE 80
 
-CMD ["/bin/sh", "-c", "RESOLVER=$(awk '/^nameserver/ {print $2; exit}' /etc/resolv.conf); if echo \"$RESOLVER\" | grep -q \":\"; then RESOLVER=\"[$RESOLVER]\"; fi; echo \"resolver $RESOLVER valid=10s;\" > /etc/nginx/conf.d/resolver.conf && nginx -g 'daemon off;'"]
+ENV PORT=80
+
+CMD ["node", "server.js"]
