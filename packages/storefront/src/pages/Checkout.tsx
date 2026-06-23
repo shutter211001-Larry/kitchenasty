@@ -169,6 +169,9 @@ export default function Checkout() {
           if (loc.isBusy && !user?.isEmployee) {
             setIsBusy(true);
             setBusyMessage(loc.busyMessage || t('checkout.locationNotAcceptingOrders') || 'This location is currently not accepting orders.');
+          } else {
+            setIsBusy(false);
+            setBusyMessage('');
           }
         }
       })
