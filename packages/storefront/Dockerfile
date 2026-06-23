@@ -39,6 +39,5 @@ RUN npm install --omit=dev --no-audit --no-fund
 # Copy built assets and server script
 COPY --from=builder /app/packages/storefront/dist packages/storefront/dist
 COPY packages/storefront/server.js packages/storefront/
-COPY packages/storefront/app.js packages/storefront/
 
 CMD ["node", "packages/storefront/server.js"]
