@@ -252,6 +252,8 @@ model MenuOptionValue {
   isDefault        Boolean           @default(false)
   sortOrder        Int               @default(0)
   nameTranslations Json?
+  trackStock       Boolean           @default(false)
+  stockQty         Int               @default(0)
   menuOption       MenuOption        @relation(fields: [menuOptionId], references: [id], onDelete: Cascade)
   orderItemOptions OrderItemOption[]
 

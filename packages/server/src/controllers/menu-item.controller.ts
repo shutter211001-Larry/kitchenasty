@@ -24,6 +24,8 @@ const menuOptionValueSchema = z.object({
   priceModifier: z.number().default(0),
   isDefault: z.boolean().default(false),
   sortOrder: z.number().int().min(0).default(0),
+  trackStock: z.boolean().default(false).optional(),
+  stockQty: z.number().int().min(0).default(0).optional(),
 });
 
 const menuOptionSchema = z.object({
@@ -207,6 +209,8 @@ export async function createMenuItem(req: Request, res: Response): Promise<void>
               priceModifier: v.priceModifier,
               isDefault: v.isDefault,
               sortOrder: v.sortOrder,
+              trackStock: v.trackStock,
+              stockQty: v.stockQty,
             })),
           },
         })),
@@ -304,6 +308,8 @@ export async function updateMenuItem(req: Request<{ id: string }>, res: Response
               priceModifier: v.priceModifier,
               isDefault: v.isDefault,
               sortOrder: v.sortOrder,
+              trackStock: v.trackStock,
+              stockQty: v.stockQty,
             })),
           },
         })),

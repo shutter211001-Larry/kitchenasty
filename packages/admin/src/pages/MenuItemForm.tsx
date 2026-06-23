@@ -11,6 +11,8 @@ interface OptionValue {
   priceModifier: number;
   isDefault: boolean;
   sortOrder: number;
+  trackStock?: boolean;
+  stockQty?: number;
 }
 
 interface MenuOption {
@@ -114,7 +116,7 @@ const LANGUAGES = [
   { code: 'pt', label: '葡萄牙文 (Portuguese)' },
 ];
 
-const emptyOptionValue: OptionValue = { name: '', priceModifier: 0, isDefault: false, sortOrder: 0 };
+const emptyOptionValue: OptionValue = { name: '', priceModifier: 0, isDefault: false, sortOrder: 0, trackStock: false, stockQty: 0 };
 const emptyOption: MenuOption = {
   name: '',
   displayType: 'SELECT',
@@ -222,6 +224,8 @@ export default function MenuItemForm() {
               priceModifier: v.priceModifier,
               isDefault: v.isDefault,
               sortOrder: v.sortOrder,
+              trackStock: v.trackStock || false,
+              stockQty: v.stockQty || 0,
             })),
           })));
         }
@@ -840,6 +844,27 @@ export default function MenuItemForm() {
                         />
                         <span className="text-xs text-gray-500">預設值</span>
                       </label>
+                      <label className="flex items-center gap-1 ml-2">
+                        <input
+                          type="checkbox"
+                          checked={val.trackStock || false}
+                          onChange={(e) => updateOptionValue(optIdx, valIdx, 'trackStock', e.target.checked)}
+                          className="rounded border-gray-300 text-primary-600"
+                        />
+                        <span className="text-xs text-gray-500">追蹤庫存</span>
+                      </label>
+                      {val.trackStock && (
+                        <div className="flex items-center gap-1 ml-1">
+                          <span className="text-xs text-gray-500">數量:</span>
+                          <input
+                            type="number"
+                            value={val.stockQty || 0}
+                            onChange={(e) => updateOptionValue(optIdx, valIdx, 'stockQty', parseInt(e.target.value) || 0)}
+                            min={0}
+                            className="w-16 border border-gray-300 rounded px-1 py-1 text-xs"
+                          />
+                        </div>
+                      )}
                       {opt.values.length > 1 && (
                         <button type="button" onClick={() => removeOptionValue(optIdx, valIdx)} className="text-red-400 hover:text-red-600 text-xs" aria-label={`Remove value ${val.name || valIdx + 1}`}>
                           X
