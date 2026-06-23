@@ -20,6 +20,7 @@ export default function CouponForm() {
   const [isAutomatic, setIsAutomatic] = useState(false);
   
   // BOGO specific states
+  const [bogoMode, setBogoMode] = useState<'BUY_GET' | 'VOLUME'>('BUY_GET');
   const [buyQuantity, setBuyQuantity] = useState<number>(1);
   const [getQuantity, setGetQuantity] = useState<number>(1);
   const [getDiscountType, setGetDiscountType] = useState<'FREE' | 'PERCENTAGE' | 'FIXED'>('FREE');
@@ -75,10 +76,12 @@ export default function CouponForm() {
             setApplicableCategoryIds(parsed.applicableCategoryIds || []);
             setApplicableMenuItemIds(parsed.applicableMenuItemIds || []);
             if (c.type === 'BOGO') {
-              setBuyQuantity(parsed.buyQuantity || 1);
+              const bq = parsed.buyQuantity !== undefined ? parsed.buyQuantity : 1;
+              setBuyQuantity(bq);
               setGetQuantity(parsed.getQuantity || 1);
               setGetDiscountType(parsed.getDiscountType || 'FREE');
               setGetDiscountValue(parsed.getDiscountValue || 0);
+              setBogoMode(bq === 0 ? 'VOLUME' : 'BUY_GET');
             }
           } catch (e) {
             console.error('Failed to parse conditions');
@@ -99,7 +102,7 @@ export default function CouponForm() {
     if (applicableMenuItemIds.length > 0) conditionsObj.applicableMenuItemIds = applicableMenuItemIds;
 
     if (type === 'BOGO') {
-      conditionsObj.buyQuantity = buyQuantity;
+      conditionsObj.buyQuantity = bogoMode === 'VOLUME' ? 0 : buyQuantity;
       conditionsObj.getQuantity = getQuantity;
       conditionsObj.getDiscountType = getDiscountType;
       conditionsObj.getDiscountValue = getDiscountValue;
@@ -180,7 +183,7 @@ export default function CouponForm() {
               <option value="PERCENTAGE">百分比折扣 (Percentage Off)</option>
               <option value="FIXED">固定金額折扣 (Fixed Amount Off)</option>
               <option value="FREE_DELIVERY">免運費 (Free Delivery)</option>
-              <option value="BOGO">組合優惠 (BOGO: 買X件享Y件優惠)</option>
+              <option value="BOGO">數量組合優惠 (滿件折 / 買就送)</option>
             </select>
           </div>
         </div>
@@ -188,30 +191,75 @@ export default function CouponForm() {
         {type === 'BOGO' && (
           <div className="bg-blue-50/50 p-4 rounded-xl border border-blue-100 space-y-4">
             <h3 className="text-sm font-bold text-blue-900 flex items-center gap-2">
-              組合優惠設定 (BOGO Settings)
+              數量組合優惠設定 (Quantity Combo Settings)
             </h3>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">需購買數量 (Buy X items)</label>
+            
+            <div className="flex gap-4 mb-2">
+              <label className="flex items-center gap-2 cursor-pointer">
                 <input
-                  type="number"
-                  min="1"
-                  value={buyQuantity}
-                  onChange={(e) => setBuyQuantity(parseInt(e.target.value) || 1)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                  type="radio"
+                  name="bogoMode"
+                  checked={bogoMode === 'BUY_GET'}
+                  onChange={() => { setBogoMode('BUY_GET'); setGetDiscountType('FREE'); }}
+                  className="text-blue-600 focus:ring-blue-500"
                 />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">優惠數量 (Get Y items)</label>
+                <span className="text-sm font-medium text-gray-700">買 X 送 Y (Buy X Get Y)</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
                 <input
-                  type="number"
-                  min="1"
-                  value={getQuantity}
-                  onChange={(e) => setGetQuantity(parseInt(e.target.value) || 1)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                  type="radio"
+                  name="bogoMode"
+                  checked={bogoMode === 'VOLUME'}
+                  onChange={() => { setBogoMode('VOLUME'); setGetDiscountType('PERCENTAGE'); }}
+                  className="text-blue-600 focus:ring-blue-500"
                 />
-              </div>
+                <span className="text-sm font-medium text-gray-700">滿 X 件享折扣 (Volume Discount)</span>
+              </label>
             </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              {bogoMode === 'BUY_GET' ? (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">需購買數量 (Buy X items)</label>
+                    <input
+                      type="number"
+                      min="1"
+                      value={buyQuantity}
+                      onChange={(e) => setBuyQuantity(parseInt(e.target.value) || 1)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">優惠數量 (Get Y items)</label>
+                    <input
+                      type="number"
+                      min="1"
+                      value={getQuantity}
+                      onChange={(e) => setGetQuantity(parseInt(e.target.value) || 1)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                    />
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">滿件門檻 (Min X items)</label>
+                    <input
+                      type="number"
+                      min="1"
+                      value={getQuantity}
+                      onChange={(e) => setGetQuantity(parseInt(e.target.value) || 1)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                    />
+                  </div>
+                  <div className="text-sm text-gray-500 flex items-center">
+                    (設定「2」代表只要滿2件，這2件都會享有下方設定的折扣)
+                  </div>
+                </>
+              )}
+            </div>
+            
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">優惠方式 (Discount Type)</label>
@@ -220,7 +268,7 @@ export default function CouponForm() {
                   onChange={(e) => setGetDiscountType(e.target.value as any)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"
                 >
-                  <option value="FREE">免費送 (Free)</option>
+                  {bogoMode === 'BUY_GET' && <option value="FREE">免費送 (Free)</option>}
                   <option value="PERCENTAGE">打折 (Percentage Off)</option>
                   <option value="FIXED">固定金額折抵 (Fixed Amount Off)</option>
                 </select>

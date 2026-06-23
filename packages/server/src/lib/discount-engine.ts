@@ -183,8 +183,8 @@ export function validateAndCalculateDiscount(
   let freeDelivery = false;
 
   if (campaign.type === ('BOGO' as any)) {
-    const buyQ = rules.buyQuantity || 1;
-    const getQ = rules.getQuantity || 1;
+    const buyQ = rules.buyQuantity ?? 1;
+    const getQ = rules.getQuantity ?? 1;
     const discountType = rules.getDiscountType || 'FREE';
     const discountValue = rules.getDiscountValue || 0;
 

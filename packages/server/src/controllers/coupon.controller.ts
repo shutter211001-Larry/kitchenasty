@@ -10,7 +10,7 @@ const createCouponSchema = z.object({
   isAutomatic: z.boolean().optional(),
   conditions: z.any().nullable().optional(),
   locationId: z.string().nullable().optional(),
-  type: z.enum(['PERCENTAGE', 'FIXED', 'FREE_DELIVERY']),
+  type: z.enum(['PERCENTAGE', 'FIXED', 'FREE_DELIVERY', 'BOGO']),
   value: z.number().min(0),
   minOrder: z.number().min(0).optional(),
   maxDiscount: z.number().min(0).nullable().optional(),
