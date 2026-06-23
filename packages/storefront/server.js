@@ -35,7 +35,7 @@ app.use('/uploads', createProxyMiddleware(proxyOptions));
 app.use(express.static(path.join(__dirname, 'dist'), { index: false }));
 
 // 3. Catch-all route to serve index.html with dynamically injected SEO tags
-app.get(/.*/, async (req, res) => {
+app.use(async (req, res) => {
   try {
     const indexPath = path.join(__dirname, 'dist', 'index.html');
     let html = await fs.readFile(indexPath, 'utf-8');
