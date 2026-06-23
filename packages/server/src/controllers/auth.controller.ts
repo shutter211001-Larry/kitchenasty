@@ -10,7 +10,7 @@ import { grantRegistrationBonus } from '../lib/registrationBonus.js';
 // ============================================================
 
 const staffLoginSchema = z.object({
-  email: z.string().email(),
+  email: z.string().trim().toLowerCase().email(),
   password: z.string().min(6),
 });
 
@@ -73,7 +73,7 @@ export async function staffLogin(req: Request, res: Response): Promise<void> {
 }
 
 const staffRegisterSchema = z.object({
-  email: z.string().email(),
+  email: z.string().trim().toLowerCase().email(),
   password: z.string().min(6),
   name: z.string().min(1),
   role: z.enum(['SUPER_ADMIN', 'MANAGER', 'STAFF']).optional(),
@@ -116,7 +116,7 @@ export async function staffRegister(req: Request, res: Response): Promise<void> 
 // ============================================================
 
 const customerRegisterSchema = z.object({
-  email: z.string().email(),
+  email: z.string().trim().toLowerCase().email(),
   password: z.string().min(6),
   name: z.string().min(1),
   phone: z.string().optional(),
@@ -164,7 +164,7 @@ export async function customerRegister(req: Request, res: Response): Promise<voi
 }
 
 const customerLoginSchema = z.object({
-  email: z.string().email(),
+  email: z.string().trim().toLowerCase().email(),
   password: z.string().min(1),
 });
 
