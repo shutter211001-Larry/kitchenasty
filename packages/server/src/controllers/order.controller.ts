@@ -687,6 +687,19 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
   });
   const optionValueMap = new Map(dbOptionValues.map(v => [v.id, v]));
 
+  // Validate option stock
+  for (const item of items) {
+    for (const opt of item.options || []) {
+      const dbValue = optionValueMap.get(opt.menuOptionValueId);
+      if (dbValue && dbValue.trackStock) {
+        if (dbValue.stockQty < item.quantity) {
+          res.status(400).json({ success: false, error: `選項已售完或庫存不足: ${dbValue.name}` });
+          return;
+        }
+      }
+    }
+  }
+
   const orderItemsData = items.map((item) => {
     const menuItem = menuItemMap.get(item.menuItemId)!;
     let unitPrice = menuItem.price;
@@ -1017,6 +1030,17 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
         where: { id: menuItem.categoryId },
         data: { sharedStockQty: { decrement: item.quantity } },
       });
+    }
+
+    // 3. Decrement option stock
+    for (const opt of item.options || []) {
+      const dbValue = optionValueMap.get(opt.menuOptionValueId);
+      if (dbValue && dbValue.trackStock) {
+        await prisma.menuOptionValue.update({
+          where: { id: opt.menuOptionValueId },
+          data: { stockQty: { decrement: item.quantity } },
+        });
+      }
     }
   }
 

@@ -14,6 +14,8 @@ interface OptionValue {
   priceModifier: number;
   isDefault: boolean;
   sortOrder: number;
+  trackStock?: boolean;
+  stockQty?: number;
 }
 
 interface MenuOption {
@@ -290,35 +292,45 @@ export default function MenuItemModal({ itemId, onClose }: Props) {
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
                         >
                           {!opt.isRequired && <option value="">{t('common.none')}</option>}
-                          {opt.values.map((val) => (
-                            <option key={val.id} value={val.id}>
-                              {getTranslated(val.name, val.nameTranslations, i18n.language)}
-                              {val.priceModifier !== 0 && ` (+$${val.priceModifier.toFixed(2)})`}
-                            </option>
-                          ))}
+                          {opt.values.map((val) => {
+                            const isSoldOut = val.trackStock && (val.stockQty || 0) <= 0;
+                            return (
+                              <option key={val.id} value={val.id} disabled={isSoldOut}>
+                                {getTranslated(val.name, val.nameTranslations, i18n.language)}
+                                {val.priceModifier !== 0 && ` (+$${val.priceModifier.toFixed(2)})`}
+                                {isSoldOut ? ' (已售完)' : ''}
+                              </option>
+                            );
+                          })}
                         </select>
                       ) : (
                         <div className="space-y-2">
                           {opt.values.map((val) => {
                             const isSelected = (selections[opt.id] || []).includes(val.id);
                             const isRadio = opt.displayType === 'RADIO';
+                            const isSoldOut = val.trackStock && (val.stockQty || 0) <= 0;
                             return (
                               <label
                                 key={val.id}
-                                className={`flex items-center gap-3 p-2.5 rounded-lg border cursor-pointer transition-colors ${
+                                className={`flex items-center gap-3 p-2.5 rounded-lg border transition-colors ${
+                                  isSoldOut ? 'opacity-50 cursor-not-allowed bg-gray-50 border-gray-200' :
                                   isSelected
-                                    ? 'border-primary-300 bg-primary-50'
-                                    : 'border-gray-200 hover:border-gray-300'
+                                    ? 'border-primary-300 bg-primary-50 cursor-pointer'
+                                    : 'border-gray-200 hover:border-gray-300 cursor-pointer'
                                 }`}
                               >
                                 <input
                                   type={isRadio ? 'radio' : 'checkbox'}
                                   name={`option-${opt.id}`}
                                   checked={isSelected}
+                                  disabled={isSoldOut}
                                   onChange={() => handleSelect(opt.id, val.id, opt.displayType, opt.maxSelect)}
-                                  className="accent-primary-600"
+                                  className="accent-primary-600 disabled:opacity-50"
                                 />
-                                <span className="text-sm text-main flex-1">{getTranslated(val.name, val.nameTranslations, i18n.language)}</span>
+                                <span className="text-sm text-main flex-1">
+                                  {getTranslated(val.name, val.nameTranslations, i18n.language)}
+                                  {isSoldOut && <span className="text-xs text-red-500 ml-2 font-semibold">已售完</span>}
+                                </span>
                                 {val.priceModifier !== 0 && (
                                   <span className="text-xs text-gray-500">
                                     +${val.priceModifier.toFixed(2)}
