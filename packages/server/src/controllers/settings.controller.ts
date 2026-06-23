@@ -8,6 +8,7 @@ import { autoTranslateSiteSettings } from '../lib/translation-helper.js';
 const updateSettingsSchema = z.object({
   siteName: z.string().min(1).optional(),
   siteTitle: z.string().min(1).optional(),
+  siteDescription: z.string().optional(),
   colorPrimary: z.string().regex(/^#[0-9a-fA-F]{6}$/).optional(),
   colorSecondary: z.string().regex(/^#[0-9a-fA-F]{6}$/).optional(),
   darkMode: z.enum(['light', 'dark', 'system']).optional(),
@@ -83,6 +84,7 @@ function toPublicSettings(settings: Awaited<ReturnType<typeof getOrCreateSetting
     id: settings.id,
     siteName: settings.siteName,
     siteTitle: settings.siteTitle,
+    siteDescription: settings.siteDescription,
     favicon: settings.favicon,
     logo: settings.logo,
     colorPrimary: settings.colorPrimary,

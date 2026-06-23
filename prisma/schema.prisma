@@ -534,6 +534,7 @@ model SiteSettings {
   id                  String   @id @default("default")
   siteName            String   @default("Shutter")
   siteTitle           String   @default("Shutter - Order Online")
+  siteDescription     String   @default("Shutter - Order Online")
   favicon             String?
   logo                String?
   colorPrimary        String   @default("#ea580c")

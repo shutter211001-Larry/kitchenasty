@@ -10,6 +10,7 @@ export default function DesignBranding() {
 
   const [siteName, setSiteName] = useState('');
   const [siteTitle, setSiteTitle] = useState('');
+  const [siteDescription, setSiteDescription] = useState('');
   const [logo, setLogo] = useState<string | null>(null);
   const [favicon, setFavicon] = useState<string | null>(null);
 
@@ -23,6 +24,7 @@ export default function DesignBranding() {
         if (res.success && res.data) {
           setSiteName(res.data.siteName);
           setSiteTitle(res.data.siteTitle);
+          setSiteDescription(res.data.siteDescription || '');
           setLogo(getFullUrl(res.data.logo));
           setFavicon(getFullUrl(res.data.favicon));
         }
@@ -39,7 +41,7 @@ export default function DesignBranding() {
       const res = await fetch('/api/settings', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ siteName, siteTitle }),
+        body: JSON.stringify({ siteName, siteTitle, siteDescription }),
       });
       const data = await res.json();
       if (data.success) {
@@ -124,6 +126,18 @@ export default function DesignBranding() {
             placeholder="PizzaStudio - 線上訂餐"
           />
           <p className="mt-1 text-xs text-gray-500">顯示於瀏覽器分頁標題。</p>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">網站描述 (Site Description)</label>
+          <textarea
+            value={siteDescription}
+            onChange={(e) => setSiteDescription(e.target.value)}
+            className="w-full max-w-md px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+            placeholder="專門提供美味手工披薩與線上點餐服務"
+            rows={3}
+          />
+          <p className="mt-1 text-xs text-gray-500">顯示於 Google 搜尋結果與 LINE 分享時的網址描述 (SEO / OpenGraph)。</p>
         </div>
       </div>
 
