@@ -237,7 +237,9 @@
     "scheduledFor": "Bạn đã đặt lịch vào",
     "noAvailableSlots": "Không có khung giờ trống nào",
     "discountsAndRewards": "Giảm giá & Phần thưởng",
-    "locationNotAcceptingOrders": "Chi nhánh này hiện không nhận đơn đặt hàng."
+    "locationNotAcceptingOrders": "Chi nhánh này hiện không nhận đơn đặt hàng.",
+    "free": "Miễn phí",
+    "enterCouponCode": "Nhập mã giảm giá"
   },
   "orderConfirmation": {
     "title": "Đặt hàng thành công!",

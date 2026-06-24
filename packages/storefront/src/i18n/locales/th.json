@@ -237,7 +237,9 @@
     "scheduledFor": "คุณจองไว้สำหรับ",
     "noAvailableSlots": "ไม่มีช่วงเวลาที่สามารถเลือกได้",
     "discountsAndRewards": "ส่วนลดและรางวัล",
-    "locationNotAcceptingOrders": "สาขานี้ยังไม่รับคำสั่งซื้อในขณะนี้"
+    "locationNotAcceptingOrders": "สาขานี้ยังไม่รับคำสั่งซื้อในขณะนี้",
+    "free": "ฟรี",
+    "enterCouponCode": "ใส่รหัสส่วนลด"
   },
   "orderConfirmation": {
     "title": "สั่งอาหารสำเร็จ!",

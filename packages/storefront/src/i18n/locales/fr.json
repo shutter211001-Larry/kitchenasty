@@ -237,7 +237,9 @@
     "scheduledFor": "Vous avez planifié pour",
     "noAvailableSlots": "Aucun créneau horaire disponible",
     "discountsAndRewards": "Réductions et Récompenses",
-    "locationNotAcceptingOrders": "Ce lieu n'accepte actuellement pas les commandes."
+    "locationNotAcceptingOrders": "Ce lieu n'accepte actuellement pas les commandes.",
+    "free": "Gratuit",
+    "enterCouponCode": "Entrer le code de réduction"
   },
   "orderConfirmation": {
     "title": "Commande Passée !",

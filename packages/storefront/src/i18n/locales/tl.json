@@ -237,7 +237,9 @@
     "scheduledFor": "Naka-iskedyul ka para sa",
     "noAvailableSlots": "Walang magagamit na iskedyul ng oras",
     "discountsAndRewards": "Mga Diskwento at Gantimpala",
-    "locationNotAcceptingOrders": "Ang lokasyong ito ay kasalukuyang hindi tumatanggap ng mga order."
+    "locationNotAcceptingOrders": "Ang lokasyong ito ay kasalukuyang hindi tumatanggap ng mga order.",
+    "free": "Libre",
+    "enterCouponCode": "Ilagay ang discount code"
   },
   "orderConfirmation": {
     "title": "Nai-place na ang Order!",

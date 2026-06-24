@@ -237,7 +237,9 @@
     "scheduledFor": "Sie haben reserviert für",
     "noAvailableSlots": "Keine verfügbaren Zeitfenster",
     "discountsAndRewards": "Rabatte & Belohnungen",
-    "locationNotAcceptingOrders": "Dieser Standort nimmt derzeit keine Bestellungen an."
+    "locationNotAcceptingOrders": "Dieser Standort nimmt derzeit keine Bestellungen an.",
+    "free": "Kostenlos",
+    "enterCouponCode": "Rabattcode eingeben"
   },
   "orderConfirmation": {
     "title": "Bestellung Aufgegeben!",

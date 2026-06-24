@@ -237,7 +237,9 @@
     "scheduledFor": "Anda telah menjadwalkan pada",
     "noAvailableSlots": "Tidak ada slot waktu yang tersedia",
     "discountsAndRewards": "Diskon & Hadiah",
-    "locationNotAcceptingOrders": "Lokasi ini saat ini tidak menerima pesanan."
+    "locationNotAcceptingOrders": "Lokasi ini saat ini tidak menerima pesanan.",
+    "free": "Gratis",
+    "enterCouponCode": "Masukkan kode diskon"
   },
   "orderConfirmation": {
     "title": "Pesanan Berhasil!",
