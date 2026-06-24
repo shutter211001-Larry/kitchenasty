@@ -1352,7 +1352,7 @@ export default function Checkout() {
                 <span className="text-main font-medium">{t('checkout.tax')}</span>
                 <span className="text-main">${tax.toFixed(2)}</span>
               </div>
-              {orderType === 'delivery' && (
+              {(orderType === 'delivery' || orderType === 'frozen_delivery') && (
                 <div className="flex justify-between">
                   <span className="text-main font-medium">{t('checkout.deliveryFee')}</span>
                   {freeDelivery ? (
