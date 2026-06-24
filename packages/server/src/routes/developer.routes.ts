@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { authenticate, requireStaff, requireRole } from '../middleware/auth.js';
-import { getMetrics, getEndpointMetrics, getAuditLogs, syncDatabase } from '../controllers/developer.controller.js';
+import { getMetrics, getEndpointMetrics, getAuditLogs, syncDatabase, syncLocales } from '../controllers/developer.controller.js';
 
 const router = Router();
 
@@ -11,5 +11,6 @@ router.get('/metrics/endpoints', authenticate, requireStaff, requireRole('SUPER_
 // SUPER_ADMIN only for audit logs and sync
 router.get('/audit-logs', authenticate, requireStaff, requireRole('SUPER_ADMIN'), getAuditLogs);
 router.post('/sync-db', authenticate, requireStaff, requireRole('SUPER_ADMIN'), syncDatabase);
+router.post('/sync-locales', authenticate, requireStaff, requireRole('SUPER_ADMIN'), syncLocales);
 
 export default router;
