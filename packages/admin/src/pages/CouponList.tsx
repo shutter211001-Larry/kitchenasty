@@ -14,6 +14,7 @@ interface Coupon {
   startsAt: string | null;
   expiresAt: string | null;
   isActive: boolean;
+  conditions?: any;
 }
 
 interface Pagination {
