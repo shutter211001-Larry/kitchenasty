@@ -687,18 +687,6 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
   });
   const optionValueMap = new Map(dbOptionValues.map(v => [v.id, v]));
 
-  // Validate option stock
-  for (const item of items) {
-    for (const opt of item.options || []) {
-      const dbValue = optionValueMap.get(opt.menuOptionValueId);
-      if (dbValue && dbValue.trackStock) {
-        if (dbValue.stockQty < item.quantity) {
-          res.status(400).json({ success: false, error: `選項已售完或庫存不足: ${dbValue.name}` });
-          return;
-        }
-      }
-    }
-  }
 
   const orderItemsData = items.map((item) => {
     const menuItem = menuItemMap.get(item.menuItemId)!;
@@ -1032,16 +1020,7 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
       });
     }
 
-    // 3. Decrement option stock
-    for (const opt of item.options || []) {
-      const dbValue = optionValueMap.get(opt.menuOptionValueId);
-      if (dbValue && dbValue.trackStock) {
-        await prisma.menuOptionValue.update({
-          where: { id: opt.menuOptionValueId },
-          data: { stockQty: { decrement: item.quantity } },
-        });
-      }
-    }
+
   }
 
   // Earn loyalty points using dynamic loyaltyEarnRate
@@ -2240,4 +2219,219 @@ export async function addOrderPayment(req: Request<{ id: string }>, res: Respons
   res.json({ success: true, data: updatedOrder });
 }
 
+export async function calculateOrderSummary(req: Request, res: Response): Promise<void> {
+  const {
+    items = [],
+    orderType = 'PICKUP',
+    locationId,
+    couponCode,
+    loyaltyPointsRedeem = 0,
+    address,
+  } = req.body;
+
+  if (!items || !Array.isArray(items) || items.length === 0) {
+    res.status(400).json({ success: false, error: '購物車不得為空' });
+    return;
+  }
+
+  // Get location
+  const location = await prisma.location.findFirst({
+    where: { 
+      ...(locationId ? { id: locationId } : { isActive: true })
+    },
+  });
+
+  if (!location) {
+    res.status(400).json({ success: false, error: 'Location not found' });
+    return;
+  }
+
+  const siteSettings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
+  const orderSettings = (siteSettings?.orderSettings as any) || {};
+
+  // Fetch menu items to validate and get prices
+  const menuItemIds = items.map((i: any) => i.menuItemId);
+  const menuItems = await prisma.menuItem.findMany({
+    where: { id: { in: menuItemIds } },
+    include: {
+      options: { include: { values: true } },
+      category: true,
+    },
+  });
+
+  const menuItemMap = new Map(menuItems.map((m) => [m.id, m]));
+
+  let subtotal = 0;
+  
+  // Fetch all option values
+  const allOptionValueIds = items.flatMap((i: any) => (i.options || []).map((o: any) => o.menuOptionValueId)).filter(Boolean);
+  const dbOptionValues = await prisma.menuOptionValue.findMany({
+    where: { id: { in: allOptionValueIds } }
+  });
+  const optionValueMap = new Map(dbOptionValues.map(v => [v.id, v]));
+
+  const engineCartItems: Array<{
+    menuItemId: string;
+    categoryId: string;
+    price: number;
+    quantity: number;
+  }> = [];
+
+  for (const item of items) {
+    const menuItem = menuItemMap.get(item.menuItemId);
+    if (!menuItem || !menuItem.isActive) continue;
+
+    let unitPrice = menuItem.price;
+    (item.options || []).forEach((opt: any) => {
+      const dbValue = optionValueMap.get(opt.menuOptionValueId);
+      if (dbValue) {
+        unitPrice += dbValue.priceModifier;
+      }
+    });
+
+    const isRedeemed = !!item.redeemedWithPoints;
+    if (!isRedeemed) {
+      subtotal += unitPrice * item.quantity;
+      engineCartItems.push({
+        menuItemId: item.menuItemId,
+        categoryId: menuItem.categoryId,
+        price: unitPrice,
+        quantity: item.quantity,
+      });
+    }
+  }
+
+  // Calculate delivery fee
+  let deliveryFee = 0;
+  if (orderType === 'DELIVERY') {
+    if (address?.lat != null && address?.lng != null) {
+      const zones = await prisma.deliveryZone.findMany({
+        where: { locationId: location.id, isActive: true },
+      });
+
+      let matchedZone = null;
+      for (const zone of zones) {
+        if (zone.boundaries && Array.isArray(zone.boundaries)) {
+          if (isPointInPolygon(address.lat, address.lng, zone.boundaries as [number, number][])) {
+            matchedZone = zone;
+            break;
+          }
+        }
+      }
+      if (matchedZone) {
+        deliveryFee = matchedZone.charge;
+      } else {
+        deliveryFee = 4.99;
+      }
+    } else {
+      const defaultZone = await prisma.deliveryZone.findFirst({
+        where: { locationId: location.id, isActive: true },
+        orderBy: { charge: 'asc' },
+      });
+      deliveryFee = defaultZone ? defaultZone.charge : 4.99;
+    }
+  } else if (orderType === 'FROZEN_DELIVERY') {
+    deliveryFee = orderSettings.frozenDeliveryFee !== undefined ? Number(orderSettings.frozenDeliveryFee) : 0;
+  }
+
+  // Loyalty points redemption
+  let loyaltyDiscount = 0;
+  let redeemRate = 100.0;
+  if (orderSettings.loyaltyRedeemRate !== undefined) redeemRate = Number(orderSettings.loyaltyRedeemRate);
+
+  if (loyaltyPointsRedeem && loyaltyPointsRedeem > 0) {
+    const advancedSettings = (siteSettings?.advancedSettings as any) || {};
+    const redemptionRules = advancedSettings.loyaltyRedemptionRules || {};
+    let maxRedemptionForCart = 0;
+
+    items.forEach((item: any) => {
+      if (item.redeemedWithPoints) return;
+      const menuItem = menuItemMap.get(item.menuItemId);
+      if (!menuItem) return;
+      let unitPrice = menuItem.price;
+      (item.options || []).forEach((opt: any) => {
+        const dbValue = optionValueMap.get(opt.menuOptionValueId);
+        unitPrice += dbValue ? dbValue.priceModifier : 0;
+      });
+      const itemSubtotal = unitPrice * item.quantity;
+      const rule = redemptionRules[item.menuItemId] || { isRedeemable: false, maxRedemptionAmount: 0 };
+      if (rule.isRedeemable) {
+        const allowedDiscount = rule.maxRedemptionAmount > 0 
+          ? Math.min(itemSubtotal, item.quantity * rule.maxRedemptionAmount)
+          : itemSubtotal;
+        maxRedemptionForCart += allowedDiscount;
+      }
+    });
+
+    const proposedDiscount = loyaltyPointsRedeem / redeemRate;
+    loyaltyDiscount = Math.min(proposedDiscount, maxRedemptionForCart);
+  }
+
+  let currentTaxRate = orderSettings.taxRate !== undefined ? Number(orderSettings.taxRate) : 0;
+  if (isNaN(currentTaxRate)) currentTaxRate = 0;
+
+  // Calculate discount using Unified Discount Engine
+  let couponDiscount = 0;
+  let freeDelivery = false;
+  let appliedPromo: { id: string, name: string, code?: string | null } | null = null;
+
+  // A. Automatic promotions
+  const autoPromo = await findAndApplyBestAutomaticDiscount(
+    { subtotal, orderType: orderType as any, locationId: location.id },
+    engineCartItems
+  );
+  if (autoPromo.campaign) {
+    couponDiscount = autoPromo.discountAmount;
+    freeDelivery = autoPromo.freeDelivery;
+    appliedPromo = { id: autoPromo.campaign.id, name: autoPromo.campaign.name, code: autoPromo.campaign.code };
+  }
+
+  // B. Manual coupon override
+  let manualCouponError = null;
+  if (couponCode) {
+    const coupon = await prisma.coupon.findUnique({ where: { code: couponCode.toUpperCase() } });
+    if (!coupon) {
+      manualCouponError = '無效的優惠碼';
+    } else {
+      const validation = validateAndCalculateDiscount(
+        coupon,
+        { subtotal, orderType: orderType as any, locationId: location.id },
+        engineCartItems
+      );
+      if (!validation.isValid) {
+        manualCouponError = validation.reason || '此優惠碼目前無法套用';
+      } else {
+        if (validation.freeDelivery) {
+          freeDelivery = true;
+        }
+        if (validation.discountAmount > 0) {
+          couponDiscount += validation.discountAmount;
+        }
+        appliedPromo = { id: coupon.id, name: coupon.name, code: coupon.code };
+      }
+    }
+  }
+
+  if (freeDelivery) {
+    deliveryFee = 0;
+  }
+
+  const tax = subtotal * (currentTaxRate / 100);
+  const total = Math.max(0, subtotal + tax + deliveryFee - loyaltyDiscount - couponDiscount);
+
+  res.json({
+    success: true,
+    data: {
+      subtotal,
+      tax,
+      deliveryFee,
+      loyaltyDiscount,
+      couponDiscount,
+      total,
+      freeDelivery,
+      appliedPromo,
+      manualCouponError
+    }
+  });
+}
 

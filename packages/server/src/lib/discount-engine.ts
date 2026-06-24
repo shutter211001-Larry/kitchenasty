@@ -313,7 +313,7 @@ export async function findAndApplyBestAutomaticDiscount(
       // Prioritize free delivery, or whichever gives the higher absolute discount amount
       if (
         (result.freeDelivery && !bestFreeDelivery) || 
-        (result.discountAmount > bestDiscountAmount)
+        (result.freeDelivery === bestFreeDelivery && result.discountAmount > bestDiscountAmount)
       ) {
         bestCampaign = campaign;
         bestDiscountAmount = result.discountAmount;

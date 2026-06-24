@@ -103,20 +103,11 @@ export default function Checkout() {
   // Loyalty points
   const [loyaltyBalance, setLoyaltyBalance] = useState(0);
   const [loyaltyRedeem, setLoyaltyRedeem] = useState(0);
-  
+
   const loyaltyRedeemRate = orderSettings?.loyaltyRedeemRate ?? 100;
-  const loyaltyDiscount = loyaltyRedeem / loyaltyRedeemRate;
 
   const myItems = groupSessionId ? items.filter(i => i.clientId === clientId) : items;
-  const subtotal = myItems.reduce((sum, item) => {
-    if (item.redeemedWithPoints) return sum;
-    const optionsTotal = item.options.reduce((s, o) => s + o.priceModifier, 0);
-    return sum + (item.price + optionsTotal) * item.quantity;
-  }, 0);
 
-  let currentTaxRate = orderSettings?.taxRate ?? DEFAULT_TAX_RATE;
-  if (isNaN(currentTaxRate)) currentTaxRate = 0;
-  const tax = subtotal * (currentTaxRate / 100);
   const isOnlyFrozenItems = myItems.length > 0 && myItems.every(item => item.isFrozenDelivery === true);
   const frozenDeliveryEnabled = orderSettings?.frozenDeliveryEnabled ?? false;
   const showFrozenDeliveryOption = isOnlyFrozenItems && frozenDeliveryEnabled;
@@ -126,13 +117,79 @@ export default function Checkout() {
     orderSettings?.pickupEnabled && { id: 'pickup', label: t('checkout.pickup') },
   ].filter(Boolean) as { id: 'delivery' | 'pickup'; label: string }[];
 
-  const frozenDeliveryFee = orderSettings?.frozenDeliveryFee ?? 0;
-  const currentDeliveryFee = orderType === 'delivery' 
-    ? deliveryFee 
-    : orderType === 'frozen_delivery'
-      ? frozenDeliveryFee
-      : 0;
-  const total = subtotal + tax + currentDeliveryFee - loyaltyDiscount;
+  const [summary, setSummary] = useState<{
+    subtotal: number;
+    tax: number;
+    deliveryFee: number;
+    loyaltyDiscount: number;
+    couponDiscount: number;
+    total: number;
+    freeDelivery: boolean;
+    appliedPromo: { name: string, code?: string } | null;
+    manualCouponError: string | null;
+  } | null>(null);
+  const [isCalculating, setIsCalculating] = useState(false);
+
+  // Debounced API call for summary
+  useEffect(() => {
+    if (myItems.length === 0) {
+      setSummary(null);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      setIsCalculating(true);
+      try {
+        const orderItems = myItems.map((item) => ({
+          menuItemId: item.menuItemId,
+          quantity: item.quantity,
+          comment: item.comment,
+          redeemedWithPoints: item.redeemedWithPoints || undefined,
+          options: item.options.map((o) => ({
+            menuOptionValueId: o.valueId,
+          })),
+        }));
+
+        const body: any = {
+          items: orderItems,
+          orderType: orderType.toUpperCase(),
+          locationId: locationId || undefined,
+          loyaltyPointsRedeem: loyaltyRedeem,
+          couponCode: couponCode || undefined,
+        };
+
+        if (orderType === 'delivery' || orderType === 'frozen_delivery') {
+          body.address = address;
+        }
+
+        const res = await fetch(`${API_BASE}/orders/summary`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+        const data = await res.json();
+        if (data.success) {
+          setSummary(data.data);
+        }
+      } catch (err) {
+        console.error('Failed to calculate summary', err);
+      } finally {
+        setIsCalculating(false);
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [myItems, orderType, locationId, loyaltyRedeem, couponCode, address.line1]);
+
+  const subtotal = summary?.subtotal ?? 0;
+  const tax = summary?.tax ?? 0;
+  const currentDeliveryFee = summary?.deliveryFee ?? 0;
+  const loyaltyDiscount = summary?.loyaltyDiscount ?? 0;
+  const couponDiscount = summary?.couponDiscount ?? 0;
+  const total = summary?.total ?? 0;
+  const freeDelivery = summary?.freeDelivery ?? false;
+  const manualCouponError = summary?.manualCouponError ?? null;
+  const appliedPromo = summary?.appliedPromo ?? null;
 
   // Set defaults based on settings
   useEffect(() => {
@@ -926,6 +983,11 @@ export default function Checkout() {
                     {t('checkout.apply')}
                   </button>
                 </div>
+                {manualCouponError && (
+                  <p className="mt-2 text-sm text-red-500 font-medium">
+                    {manualCouponError}
+                  </p>
+                )}
               </div>
 
               {/* Loyalty Points Redemption */}
@@ -1293,7 +1355,31 @@ export default function Checkout() {
               {orderType === 'delivery' && (
                 <div className="flex justify-between">
                   <span className="text-main font-medium">{t('checkout.deliveryFee')}</span>
-                  <span className="text-main">${currentDeliveryFee.toFixed(2)}</span>
+                  {freeDelivery ? (
+                    <span className="text-green-600 font-medium">
+                      {t('checkout.free') || '免運費'}
+                      {appliedPromo && couponDiscount === 0 && (
+                        <span className="ml-2 text-[10px] bg-green-100 text-green-700 px-1.5 py-0.5 rounded">
+                          {appliedPromo.name}
+                        </span>
+                      )}
+                    </span>
+                  ) : (
+                    <span className="text-main">${currentDeliveryFee.toFixed(2)}</span>
+                  )}
+                </div>
+              )}
+              {couponDiscount > 0 && (
+                <div className="flex justify-between text-green-600 font-medium">
+                  <span className="flex items-center gap-2">
+                    {t('checkout.discount') || '折扣'}
+                    {appliedPromo && (
+                      <span className="text-[10px] bg-green-100 text-green-700 px-1.5 py-0.5 rounded">
+                        {appliedPromo.name}
+                      </span>
+                    )}
+                  </span>
+                  <span>-${couponDiscount.toFixed(2)}</span>
                 </div>
               )}
               {loyaltyDiscount > 0 && (
@@ -1302,7 +1388,7 @@ export default function Checkout() {
                   <span>-${loyaltyDiscount.toFixed(2)}</span>
                 </div>
               )}
-              <div className="flex justify-between border-t border-input pt-2 font-bold text-lg">
+              <div className={`flex justify-between border-t border-input pt-2 font-bold text-lg transition-opacity ${isCalculating ? 'opacity-50' : 'opacity-100'}`}>
                 <span className="text-main">{t('checkout.total')}</span>
                 <span className="text-primary-600">${total.toFixed(2)}</span>
               </div>
@@ -1311,12 +1397,12 @@ export default function Checkout() {
             <button
               ref={submitButtonRef}
               type="submit"
-              disabled={loading || isBusy}
-              className="w-full mt-4 btn-primary disabled:opacity-50"
+              disabled={loading || isBusy || isCalculating}
+              className="w-full mt-4 btn-primary disabled:opacity-50 transition-all"
             >
               {isBusy
                 ? t('checkout.currentlyUnavailable')
-                : loading
+                : loading || isCalculating
                   ? t('checkout.processing')
                   : `${t('checkout.placeOrder')} — $${total.toFixed(2)}`}
             </button>

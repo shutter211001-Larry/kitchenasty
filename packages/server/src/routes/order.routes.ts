@@ -5,7 +5,7 @@ import {
   createOrder, listOrders, listCustomerOrders, getOrder, 
   updateOrderStatus, deleteOrder, exportOrders, importOrders, 
   downloadOrderTemplate, checkOrderReminders, lookupOrder, claimOrder,
-  cancelOrder, updateOrderDiscount, updateOrderPaymentStatus, addOrderPayment
+  cancelOrder, updateOrderDiscount, updateOrderPaymentStatus, addOrderPayment, calculateOrderSummary
 } from '../controllers/order.controller.js';
 import { checkIPBlacklist, checkCustomerBlacklist, orderRateLimiter } from '../middleware/security.js';
 
@@ -17,6 +17,9 @@ router.post('/:id/cancel', optionalAuth, checkIPBlacklist, checkCustomerBlacklis
 
 // Customer creates order (optionalAuth - allows guest checkout)
 router.post('/', optionalAuth, checkIPBlacklist, checkCustomerBlacklist, orderRateLimiter, createOrder);
+
+// Calculate order summary (public, for checkout UI)
+router.post('/summary', optionalAuth, checkIPBlacklist, calculateOrderSummary);
 
 // Lookup order by email/number (public)
 router.get('/lookup', lookupOrder);
