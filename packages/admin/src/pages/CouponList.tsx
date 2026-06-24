@@ -128,7 +128,20 @@ export default function CouponList() {
                             : '—'}
                     </td>
                     <td className="px-4 py-3 text-gray-600">
-                      {coupon.minOrder > 0 ? `$${coupon.minOrder.toFixed(2)}` : '—'}
+                      {(() => {
+                        let parsed: any = {};
+                        if (coupon.conditions) {
+                          try {
+                            parsed = typeof coupon.conditions === 'string' ? JSON.parse(coupon.conditions) : coupon.conditions;
+                          } catch (e) {}
+                        }
+                        const minOrderText = coupon.minOrder > 0 ? `$${coupon.minOrder.toFixed(2)}` : '';
+                        const minItemText = parsed.minItemCount > 0 ? `${parsed.minItemCount}件` : '';
+                        if (minOrderText && minItemText) return `${minOrderText} / ${minItemText}`;
+                        if (minOrderText) return minOrderText;
+                        if (minItemText) return minItemText;
+                        return '—';
+                      })()}
                     </td>
                     <td className="px-4 py-3 text-gray-600">
                       {coupon.usageCount}{coupon.usageLimit ? ` / ${coupon.usageLimit}` : ''}

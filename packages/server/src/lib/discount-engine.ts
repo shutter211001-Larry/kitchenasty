@@ -3,18 +3,24 @@ import prisma from './db.js';
 
 export interface DiscountConditions {
   allowedOrderTypes?: OrderType[];
-  requireCategoryIds?: string[];
-  minItemCount?: number;
-  minCategoryItemCount?: number;
   timeOfDay?: {
     startTime: string; // 'HH:MM' e.g. '14:00'
     endTime: string;   // 'HH:MM' e.g. '17:00'
   };
+  
+  // Participating items (Buy group)
   applicableCategoryIds?: string[];
   applicableMenuItemIds?: string[];
-  // BOGO specific conditions
-  buyQuantity?: number;
-  getQuantity?: number;
+  
+  // Thresholds (evaluated ONLY on the participating items above)
+  minItemCount?: number; // 滿件 (Overrides campaign.minOrder if set, or can be used together)
+
+  // Get group items (if different from participating items)
+  getCategoryIds?: string[];
+  getMenuItemIds?: string[];
+
+  // Get N items discount config
+  getQuantity?: number; // "送Y件"
   getDiscountType?: 'FREE' | 'PERCENTAGE' | 'FIXED';
   getDiscountValue?: number;
 }
@@ -69,17 +75,7 @@ export function validateAndCalculateDiscount(
     return { isValid: false, discountAmount: 0, freeDelivery: false, reason: '此優惠券/活動不適用於此門市' };
   }
 
-  // 5. Minimum Order Subtotal check
-  if (orderData.subtotal < campaign.minOrder) {
-    return { 
-      isValid: false, 
-      discountAmount: 0, 
-      freeDelivery: false, 
-      reason: `未達最低消費金額門檻 $${campaign.minOrder.toFixed(2)}` 
-    };
-  }
-
-  // 6. Advanced Custom Conditions parsing
+  // 5. Parse Advanced Conditions
   let rules: DiscountConditions = {};
   if (campaign.conditions) {
     try {
@@ -98,39 +94,7 @@ export function validateAndCalculateDiscount(
       }
     }
 
-    // B. Required Categories
-    if (rules.requireCategoryIds && rules.requireCategoryIds.length > 0) {
-      const hasCategory = cartItems.some(item => rules.requireCategoryIds?.includes(item.categoryId));
-      if (!hasCategory) {
-        return { isValid: false, discountAmount: 0, freeDelivery: false, reason: '購物車內未包含指定分類商品' };
-      }
-
-      // B2. Minimum Category Item Count (buy at least N items specifically in the required categories)
-      if (rules.minCategoryItemCount !== undefined && rules.minCategoryItemCount > 0) {
-        const categoryItemCount = cartItems
-          .filter(item => rules.requireCategoryIds?.includes(item.categoryId))
-          .reduce((sum, item) => sum + item.quantity, 0);
-
-        if (categoryItemCount < rules.minCategoryItemCount) {
-          return {
-            isValid: false,
-            discountAmount: 0,
-            freeDelivery: false,
-            reason: `指定分類商品總數量需達到 ${rules.minCategoryItemCount} 件`
-          };
-        }
-      }
-    }
-
-    // C. Minimum total item count in cart
-    if (rules.minItemCount !== undefined && rules.minItemCount > 0) {
-      const totalCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
-      if (totalCount < rules.minItemCount) {
-        return { isValid: false, discountAmount: 0, freeDelivery: false, reason: `商品總數量需達到 ${rules.minItemCount} 件` };
-      }
-    }
-
-    // D. Time of Day (Happy Hour)
+    // B. Time of Day (Happy Hour)
     if (rules.timeOfDay) {
       const localTaiwanParts = new Intl.DateTimeFormat('en-US', {
         timeZone: 'Asia/Taipei',
@@ -157,88 +121,105 @@ export function validateAndCalculateDiscount(
     }
   }
 
-  // Calculate Applicable Subtotal for granular rules
-  let applicableSubtotal = orderData.subtotal;
-  let hasApplicableRestrictions = false;
-
+  // 6. Identify Participating Items
+  let eligibleItems = [];
   if (rules.applicableCategoryIds?.length || rules.applicableMenuItemIds?.length) {
-    hasApplicableRestrictions = true;
-    applicableSubtotal = cartItems.reduce((sum, item) => {
-      const matchCategory = rules.applicableCategoryIds?.includes(item.categoryId);
-      const matchItem = rules.applicableMenuItemIds?.includes(item.menuItemId);
-      if (matchCategory || matchItem) {
-        return sum + (item.price * item.quantity);
-      }
-      return sum;
-    }, 0);
-
-    // If there are restrictions and no applicable items are in the cart, the discount is 0.
-    if (applicableSubtotal <= 0) {
-      return { isValid: false, discountAmount: 0, freeDelivery: false, reason: '購物車內沒有符合此優惠條件的指定商品' };
-    }
+    eligibleItems = cartItems.filter(item => 
+      rules.applicableCategoryIds?.includes(item.categoryId) || 
+      rules.applicableMenuItemIds?.includes(item.menuItemId)
+    );
+  } else {
+    eligibleItems = [...cartItems];
   }
 
-  // 7. Calculate Discount Amount
+  const applicableSubtotal = eligibleItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const applicableItemCount = eligibleItems.reduce((sum, item) => sum + item.quantity, 0);
+
+  // If there are restrictions but no matching items in cart
+  if ((rules.applicableCategoryIds?.length || rules.applicableMenuItemIds?.length) && eligibleItems.length === 0) {
+    return { isValid: false, discountAmount: 0, freeDelivery: false, reason: '購物車內沒有符合此優惠條件的指定商品' };
+  }
+
+  // 7. Threshold Checks (Evaluated ONLY on eligible items)
+  if (campaign.minOrder > 0 && applicableSubtotal < campaign.minOrder) {
+    return { isValid: false, discountAmount: 0, freeDelivery: false, reason: `指定商品未達最低消費金額門檻 $${campaign.minOrder.toFixed(2)}` };
+  }
+
+  if (rules.minItemCount !== undefined && rules.minItemCount > 0 && applicableItemCount < rules.minItemCount) {
+    return { isValid: false, discountAmount: 0, freeDelivery: false, reason: `指定商品未達最低消費件數門檻 ${rules.minItemCount} 件` };
+  }
+
+  // 8. Calculate Discount Amount
   let discountAmount = 0;
   let freeDelivery = false;
 
   if (campaign.type === ('BOGO' as any)) {
-    const buyQ = rules.buyQuantity ?? 1;
+    // GET_N_ITEMS logic
+    let triggerCount = 0;
+    
+    // Determine how many times the promotion triggers
+    if (campaign.minOrder > 0) {
+      triggerCount = Math.floor(applicableSubtotal / campaign.minOrder);
+    } else if (rules.minItemCount && rules.minItemCount > 0) {
+      triggerCount = Math.floor(applicableItemCount / rules.minItemCount);
+    } else {
+      triggerCount = 1; // No threshold, trigger once
+    }
+
+    if (triggerCount <= 0) {
+      return { isValid: false, discountAmount: 0, freeDelivery: false, reason: `未達贈送條件門檻` };
+    }
+
     const getQ = rules.getQuantity ?? 1;
     const discountType = rules.getDiscountType || 'FREE';
     const discountValue = rules.getDiscountValue || 0;
 
-    // Get all applicable items based on restrictions (or all items if no restrictions)
-    let eligibleItems = [];
-    if (rules.applicableCategoryIds?.length || rules.applicableMenuItemIds?.length) {
-      eligibleItems = cartItems.filter(item => 
-        rules.applicableCategoryIds?.includes(item.categoryId) || 
-        rules.applicableMenuItemIds?.includes(item.menuItemId)
+    // Identify Get items
+    let getItems = [];
+    if (rules.getCategoryIds?.length || rules.getMenuItemIds?.length) {
+      getItems = cartItems.filter(item => 
+        rules.getCategoryIds?.includes(item.categoryId) || 
+        rules.getMenuItemIds?.includes(item.menuItemId)
       );
     } else {
-      eligibleItems = [...cartItems];
+      getItems = eligibleItems;
     }
 
-    // Flatten items so each quantity=1 is its own element
-    const flattenedItems: number[] = [];
-    for (const item of eligibleItems) {
+    // Flatten get items so each quantity=1 is its own element
+    const flattenedGetItems: number[] = [];
+    for (const item of getItems) {
       for (let i = 0; i < item.quantity; i++) {
-        flattenedItems.push(item.price);
+        flattenedGetItems.push(item.price);
       }
     }
 
-    // Sort ascending (lowest price first) to apply discount to cheapest items
-    flattenedItems.sort((a, b) => a - b);
+    // Sort ascending (lowest price first)
+    flattenedGetItems.sort((a, b) => a - b);
 
-    const requiredBatchSize = buyQ + getQ;
-    const numberOfBatches = Math.floor(flattenedItems.length / requiredBatchSize);
+    const totalDiscountableItems = triggerCount * getQ;
+    let itemsDiscounted = 0;
 
-    if (numberOfBatches > 0) {
-      // The number of items we can apply the discount to
-      const totalDiscountableItems = numberOfBatches * getQ;
-      
-      // Since sorted ascending, the first `totalDiscountableItems` are the cheapest
-      for (let i = 0; i < totalDiscountableItems; i++) {
-        const itemPrice = flattenedItems[i];
-        if (discountType === 'FREE') {
-          discountAmount += itemPrice;
-        } else if (discountType === 'PERCENTAGE') {
-          discountAmount += itemPrice * (discountValue / 100);
-        } else if (discountType === 'FIXED') {
-          discountAmount += Math.min(itemPrice, discountValue);
-        }
+    for (let i = 0; i < Math.min(totalDiscountableItems, flattenedGetItems.length); i++) {
+      const itemPrice = flattenedGetItems[i];
+      if (discountType === 'FREE') {
+        discountAmount += itemPrice;
+      } else if (discountType === 'PERCENTAGE') {
+        discountAmount += itemPrice * (discountValue / 100);
+      } else if (discountType === 'FIXED') {
+        discountAmount += Math.min(itemPrice, discountValue);
       }
-    } else {
-      return { isValid: false, discountAmount: 0, freeDelivery: false, reason: `購買數量未達活動門檻 (需購買 ${buyQ} 件)` };
+      itemsDiscounted++;
+    }
+
+    if (itemsDiscounted === 0) {
+      return { isValid: false, discountAmount: 0, freeDelivery: false, reason: '購物車內沒有符合贈送條件的商品' };
     }
   } else if (campaign.type === 'FIXED') {
     discountAmount = campaign.value;
-    // Cap fixed discount at applicable subtotal to avoid negative totals
-    if (hasApplicableRestrictions) {
+    if (rules.applicableCategoryIds?.length || rules.applicableMenuItemIds?.length) {
       discountAmount = Math.min(discountAmount, applicableSubtotal);
     }
   } else if (campaign.type === 'PERCENTAGE') {
-    // campaign.value is percentage, e.g. 10 means 10% off
     discountAmount = applicableSubtotal * (campaign.value / 100);
     if (campaign.maxDiscount !== null && campaign.maxDiscount !== undefined) {
       discountAmount = Math.min(discountAmount, campaign.maxDiscount);
@@ -247,7 +228,6 @@ export function validateAndCalculateDiscount(
     freeDelivery = true;
   }
 
-  // Round to 2 decimal places
   discountAmount = Math.round(discountAmount * 100) / 100;
 
   return {
