@@ -7,6 +7,10 @@ export default function CouponForm() {
   const navigate = useNavigate();
   const isEdit = Boolean(id);
 
+  // Stepper State
+  const [currentStep, setCurrentStep] = useState(1);
+  const totalSteps = 4;
+
   const [code, setCode] = useState('');
   const [type, setType] = useState('PERCENTAGE'); // PERCENTAGE, FIXED, FREE_DELIVERY, BOGO (送N件商品)
   const [value, setValue] = useState(0);
@@ -103,8 +107,27 @@ export default function CouponForm() {
       .finally(() => setLoading(false));
   }, [id, token]);
 
+  const validateStep = (step: number) => {
+    if (step === 1 && !code.trim() && !isAutomatic) {
+      setError('請填寫優惠碼');
+      return false;
+    }
+    setError('');
+    return true;
+  };
+
+  const nextStep = () => {
+    if (validateStep(currentStep)) {
+      setCurrentStep(s => Math.min(s + 1, totalSteps));
+    }
+  };
+
+  const prevStep = () => setCurrentStep(s => Math.max(s - 1, 1));
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!validateStep(currentStep)) return;
+
     setSaving(true);
     setError('');
 
@@ -125,7 +148,7 @@ export default function CouponForm() {
     }
 
     const body = {
-      code,
+      code: isAutomatic && !code ? 'AUTO_' + Date.now() : code,
       type,
       value,
       minOrder,
@@ -164,6 +187,13 @@ export default function CouponForm() {
     );
   }
 
+  const stepTitles = [
+    '基本設定',
+    '觸發門檻',
+    '優惠方式',
+    '套用商品'
+  ];
+
   return (
     <div className="max-w-4xl mx-auto pb-12">
       <div className="flex items-center gap-4 mb-6">
@@ -177,244 +207,341 @@ export default function CouponForm() {
         </h1>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        
-        {/* Section 1: Basic Info & Active State */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h2 className="text-lg font-bold text-gray-900 mb-4">基本設定</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">優惠碼 / 活動代碼 (Code)</label>
-              <input
-                value={code}
-                onChange={(e) => setCode(e.target.value.toUpperCase().replace(/\s/g, ''))}
-                placeholder={isAutomatic ? "AUTO_PROMO_01" : "SAVE20"}
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none font-mono"
-              />
-            </div>
-            <div className="flex flex-col gap-2 justify-center">
-              <label className="flex items-center gap-2 mt-4 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={isActive}
-                  onChange={(e) => setIsActive(e.target.checked)}
-                  className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-                />
-                <span className="text-sm font-medium text-gray-700">啟用 (Active)</span>
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={isAutomatic}
-                  onChange={(e) => setIsAutomatic(e.target.checked)}
-                  className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-                />
-                <span className="text-sm font-bold text-indigo-700">
-                  自動套用優惠 (無需輸入代碼)
+      {/* Stepper */}
+      <div className="mb-8">
+        <div className="flex items-center justify-between relative">
+          <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-full h-1 bg-gray-200 -z-10"></div>
+          <div 
+            className="absolute left-0 top-1/2 transform -translate-y-1/2 h-1 bg-primary-600 -z-10 transition-all duration-300"
+            style={{ width: `${((currentStep - 1) / (totalSteps - 1)) * 100}%` }}
+          ></div>
+          
+          {stepTitles.map((title, index) => {
+            const stepNum = index + 1;
+            const isCompleted = stepNum < currentStep;
+            const isCurrent = stepNum === currentStep;
+            
+            return (
+              <div key={stepNum} className="flex flex-col items-center">
+                <div 
+                  className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-colors border-4 border-white
+                    ${isCurrent ? 'bg-primary-600 text-white shadow-md' : 
+                      isCompleted ? 'bg-primary-600 text-white' : 'bg-gray-200 text-gray-500'}`}
+                >
+                  {isCompleted ? (
+                     <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                     </svg>
+                  ) : (
+                    stepNum
+                  )}
+                </div>
+                <span className={`mt-2 text-xs font-medium ${isCurrent ? 'text-primary-700' : 'text-gray-500'}`}>
+                  {title}
                 </span>
-              </label>
-            </div>
-          </div>
-        </div>
-
-        {/* Section 2: Participating Items (Buy Group) */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h2 className="text-lg font-bold text-gray-900 mb-4">1. 參與商品 (Participating Items)</h2>
-          <p className="text-sm text-gray-500 mb-4">決定哪些商品會被計入門檻（滿額/滿件），並適用後續的折扣。</p>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-              <label className="block text-sm font-medium text-gray-700 mb-2">指定適用分類 (Categories)</label>
-              <div className="max-h-48 overflow-y-auto space-y-2 pr-2">
-                {categories.map((cat) => (
-                  <label key={cat.id} className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={applicableCategoryIds.includes(cat.id)}
-                      onChange={(e) => {
-                        if (e.target.checked) setApplicableCategoryIds([...applicableCategoryIds, cat.id]);
-                        else setApplicableCategoryIds(applicableCategoryIds.filter(id => id !== cat.id));
-                      }}
-                      className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-                    />
-                    {cat.name || cat.id}
-                  </label>
-                ))}
               </div>
-              <p className="text-xs text-gray-500 mt-2">* 若皆未勾選，表示全館商品皆參與。</p>
-            </div>
-
-            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-              <label className="block text-sm font-medium text-gray-700 mb-2">指定適用單品 (Menu Items)</label>
-              <div className="max-h-48 overflow-y-auto space-y-2 pr-2">
-                {menuItems.map((item) => (
-                  <label key={item.id} className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={applicableMenuItemIds.includes(item.id)}
-                      onChange={(e) => {
-                        if (e.target.checked) setApplicableMenuItemIds([...applicableMenuItemIds, item.id]);
-                        else setApplicableMenuItemIds(applicableMenuItemIds.filter(id => id !== item.id));
-                      }}
-                      className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-                    />
-                    {item.name || item.id}
-                  </label>
-                ))}
-              </div>
-            </div>
-          </div>
+            );
+          })}
         </div>
+      </div>
 
-        {/* Section 3: Thresholds */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h2 className="text-lg font-bold text-gray-900 mb-4">2. 觸發門檻 (Thresholds)</h2>
-          <p className="text-sm text-gray-500 mb-4">顧客購買的「參與商品」必須達到以下門檻，才會觸發折扣。</p>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">最低消費金額 (滿額 $)</label>
-              <input
-                type="number"
-                step="0.01"
-                min="0"
-                value={minOrder}
-                onChange={(e) => setMinOrder(parseFloat(e.target.value) || 0)}
-                placeholder="0 為無金額限制"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">最低購買件數 (滿件)</label>
-              <input
-                type="number"
-                min="0"
-                value={minItemCount}
-                onChange={(e) => setMinItemCount(parseInt(e.target.value) || 0)}
-                placeholder="0 為無件數限制"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none"
-              />
-            </div>
-          </div>
-        </div>
+      {error && <div className="mb-6 text-red-600 text-sm bg-red-50 p-4 rounded-lg border border-red-200">{error}</div>}
 
-        {/* Section 4: Discount Setup */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h2 className="text-lg font-bold text-gray-900 mb-4">3. 優惠設定 (Discount Setup)</h2>
-          
-          <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-1">優惠類型</label>
-            <select
-              value={type}
-              onChange={(e) => setType(e.target.value)}
-              className="w-full md:w-1/2 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none bg-gray-50"
-            >
-              <option value="PERCENTAGE">打折 (Percentage Off)</option>
-              <option value="FIXED">直接折抵金額 (Fixed Amount Off)</option>
-              <option value="BOGO">送 N 件商品 (Get N Items Off)</option>
-              <option value="FREE_DELIVERY">免運費 (Free Delivery)</option>
-            </select>
-          </div>
-
-          {/* Value Inputs for PERCENTAGE or FIXED */}
-          {(type === 'PERCENTAGE' || type === 'FIXED') && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 sm:p-8">
+        {/* Step 1: Basic Info */}
+        {currentStep === 1 && (
+          <div className="space-y-6 animate-fadeIn">
+            <h2 className="text-xl font-bold text-gray-900 mb-6">1. 基本與時間設定</h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  折扣數值 {type === 'PERCENTAGE' ? '(%)' : '($)'}
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">優惠碼 / 活動代碼 (Code)</label>
                 <input
-                  type="number"
-                  step={type === 'PERCENTAGE' ? '1' : '0.01'}
-                  min="0"
-                  value={value}
-                  onChange={(e) => setValue(parseFloat(e.target.value) || 0)}
+                  value={code}
+                  onChange={(e) => setCode(e.target.value.toUpperCase().replace(/\s/g, ''))}
+                  placeholder={isAutomatic ? "留空系統將自動產生" : "SAVE20"}
+                  required={!isAutomatic}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none font-mono"
+                />
+              </div>
+              <div className="flex flex-col gap-3 justify-center mt-6">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={isActive}
+                    onChange={(e) => setIsActive(e.target.checked)}
+                    className="rounded border-gray-300 w-4 h-4 text-primary-600 focus:ring-primary-500"
+                  />
+                  <span className="text-sm font-medium text-gray-700">啟用 (Active)</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={isAutomatic}
+                    onChange={(e) => setIsAutomatic(e.target.checked)}
+                    className="rounded border-gray-300 w-4 h-4 text-primary-600 focus:ring-primary-500"
+                  />
+                  <span className="text-sm font-bold text-indigo-700">自動套用優惠 (無需輸入代碼)</span>
+                </label>
+              </div>
+            </div>
+
+            <div className="border-t border-gray-100 pt-6 mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">生效日期</label>
+                <input
+                  type="date"
+                  value={startsAt}
+                  onChange={(e) => setStartsAt(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none"
                 />
               </div>
-              {type === 'PERCENTAGE' && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">截止日期</label>
+                <input
+                  type="date"
+                  value={expiresAt}
+                  onChange={(e) => setExpiresAt(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none"
+                />
+              </div>
+            </div>
+
+            <div className="border-t border-gray-100 pt-6 mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">每位顧客使用次數上限</label>
+                <input
+                  type="number"
+                  min="1"
+                  value={perCustomer}
+                  onChange={(e) => setPerCustomer(parseInt(e.target.value) || 1)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">總發行/套用數量上限</label>
+                <input
+                  type="number"
+                  min="1"
+                  value={usageLimit}
+                  onChange={(e) => setUsageLimit(e.target.value)}
+                  placeholder="無限制"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none"
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Step 2: Thresholds */}
+        {currentStep === 2 && (
+          <div className="space-y-6 animate-fadeIn">
+            <h2 className="text-xl font-bold text-gray-900 mb-2">2. 觸發門檻 (Thresholds)</h2>
+            <p className="text-sm text-gray-500 mb-6">顧客購物車內的「參與商品」必須達到以下門檻，才會獲得折扣。</p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="bg-gray-50 p-5 rounded-xl border border-gray-200">
+                <label className="block text-sm font-bold text-gray-800 mb-2">最低消費金額 (滿額 $)</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={minOrder}
+                  onChange={(e) => setMinOrder(parseFloat(e.target.value) || 0)}
+                  placeholder="0 為無金額限制"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:ring-2 focus:ring-primary-500 outline-none bg-white shadow-sm"
+                />
+                <p className="text-xs text-gray-500 mt-2">例如：滿 $500 才可打折。</p>
+              </div>
+              <div className="bg-gray-50 p-5 rounded-xl border border-gray-200">
+                <label className="block text-sm font-bold text-gray-800 mb-2">最低購買件數 (滿件)</label>
+                <input
+                  type="number"
+                  min="0"
+                  value={minItemCount}
+                  onChange={(e) => setMinItemCount(parseInt(e.target.value) || 0)}
+                  placeholder="0 為無件數限制"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:ring-2 focus:ring-primary-500 outline-none bg-white shadow-sm"
+                />
+                <p className="text-xs text-gray-500 mt-2">例如：買滿 3 件才可打折。</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Step 3: Discount Method */}
+        {currentStep === 3 && (
+          <div className="space-y-6 animate-fadeIn">
+            <h2 className="text-xl font-bold text-gray-900 mb-2">3. 優惠方式 (Discount Setup)</h2>
+            <p className="text-sm text-gray-500 mb-6">設定達成門檻後，顧客可以獲得什麼折扣。</p>
+            
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">優惠類型</label>
+              <select
+                value={type}
+                onChange={(e) => setType(e.target.value)}
+                className="w-full md:w-1/2 px-4 py-3 border border-gray-300 rounded-xl text-base focus:ring-2 focus:ring-primary-500 outline-none shadow-sm font-medium text-gray-800"
+              >
+                <option value="PERCENTAGE">🎁 打折 (Percentage Off)</option>
+                <option value="FIXED">💰 直接折抵金額 (Fixed Amount Off)</option>
+                <option value="BOGO">📦 送 N 件商品 (Buy X Get Y)</option>
+                <option value="FREE_DELIVERY">🚚 免運費 (Free Delivery)</option>
+              </select>
+            </div>
+
+            {/* Value Inputs for PERCENTAGE or FIXED */}
+            {(type === 'PERCENTAGE' || type === 'FIXED') && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-green-50 rounded-xl border border-green-100">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">最高折扣金額上限 ($)</label>
+                  <label className="block text-sm font-bold text-green-900 mb-2">
+                    折扣數值 {type === 'PERCENTAGE' ? '(%)' : '($)'}
+                  </label>
                   <input
                     type="number"
-                    step="0.01"
+                    step={type === 'PERCENTAGE' ? '1' : '0.01'}
                     min="0"
-                    value={maxDiscount}
-                    onChange={(e) => setMaxDiscount(e.target.value)}
-                    placeholder="無上限"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none"
+                    value={value}
+                    onChange={(e) => setValue(parseFloat(e.target.value) || 0)}
+                    className="w-full px-4 py-3 border border-green-200 rounded-lg text-base focus:ring-2 focus:ring-green-500 outline-none"
                   />
+                  {type === 'PERCENTAGE' && <p className="text-xs text-green-700 mt-2">填寫 20 代表打 8 折 (20% off)。</p>}
                 </div>
-              )}
-            </div>
-          )}
+                {type === 'PERCENTAGE' && (
+                  <div>
+                    <label className="block text-sm font-bold text-green-900 mb-2">最高折扣金額上限 ($)</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={maxDiscount}
+                      onChange={(e) => setMaxDiscount(e.target.value)}
+                      placeholder="無上限"
+                      className="w-full px-4 py-3 border border-green-200 rounded-lg text-base focus:ring-2 focus:ring-green-500 outline-none"
+                    />
+                  </div>
+                )}
+              </div>
+            )}
 
-          {/* GET_N_ITEMS (BOGO) Config */}
-          {type === 'BOGO' && (
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-blue-50 rounded-lg border border-blue-100">
+            {/* GET_N_ITEMS (BOGO) Config */}
+            {type === 'BOGO' && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-blue-50 rounded-xl border border-blue-100">
                 <div>
-                  <label className="block text-sm font-bold text-blue-900 mb-1">贈送件數 (Get N items)</label>
+                  <label className="block text-sm font-bold text-blue-900 mb-2">獲得/贈送件數 (Get N items)</label>
                   <input
                     type="number"
                     min="1"
                     value={getQuantity}
                     onChange={(e) => setGetQuantity(parseInt(e.target.value) || 1)}
-                    className="w-full px-3 py-2 border border-blue-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                    className="w-full px-4 py-3 border border-blue-200 rounded-lg text-base focus:ring-2 focus:ring-blue-500 outline-none"
                   />
-                  <p className="text-xs text-blue-700 mt-1">每次達成上方門檻時，可獲得 N 件商品折扣。</p>
+                  <p className="text-xs text-blue-700 mt-2">每次達成門檻時，可獲得 N 件商品折扣。</p>
                 </div>
                 
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-blue-900 mb-1">折扣方式</label>
+                    <label className="block text-sm font-bold text-blue-900 mb-2">贈品折扣方式</label>
                     <select
                       value={getDiscountType}
                       onChange={(e) => setGetDiscountType(e.target.value as any)}
-                      className="w-full px-3 py-2 border border-blue-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                      className="w-full px-4 py-3 border border-blue-200 rounded-lg text-base focus:ring-2 focus:ring-blue-500 outline-none"
                     >
-                      <option value="FREE">免費 (Free)</option>
-                      <option value="PERCENTAGE">打折 (%)</option>
-                      <option value="FIXED">固定特價 ($)</option>
+                      <option value="FREE">免費送 (Free)</option>
+                      <option value="PERCENTAGE">第二件打折 (%)</option>
+                      <option value="FIXED">第二件固定特價 ($)</option>
                     </select>
                   </div>
                   {getDiscountType !== 'FREE' && (
                     <div>
-                      <label className="block text-sm font-medium text-blue-900 mb-1">數值</label>
+                      <label className="block text-sm font-bold text-blue-900 mb-2">數值</label>
                       <input
                         type="number"
                         min="0"
                         step={getDiscountType === 'PERCENTAGE' ? '1' : '0.01'}
                         value={getDiscountValue}
                         onChange={(e) => setGetDiscountValue(parseFloat(e.target.value) || 0)}
-                        className="w-full px-3 py-2 border border-blue-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                        className="w-full px-4 py-3 border border-blue-200 rounded-lg text-base focus:ring-2 focus:ring-blue-500 outline-none"
                       />
                     </div>
                   )}
                 </div>
               </div>
+            )}
+          </div>
+        )}
 
-              {/* Get Group Target */}
-              <div className="p-4 border border-gray-200 rounded-lg">
-                <h3 className="text-sm font-bold text-gray-900 mb-3">贈品區選擇 (Get Group)</h3>
-                <label className="flex items-center gap-2 mb-4 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={isGetGroupDifferent}
-                    onChange={(e) => setIsGetGroupDifferent(e.target.checked)}
-                    className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-                  />
-                  <span className="text-sm text-gray-700">贈品區與「參與商品」**不同** (勾選以自訂)</span>
-                </label>
+        {/* Step 4: Applicable Items */}
+        {currentStep === 4 && (
+          <div className="space-y-6 animate-fadeIn">
+            <h2 className="text-xl font-bold text-gray-900 mb-2">4. 套用商品 (Applicable Items)</h2>
+            <p className="text-sm text-gray-500 mb-6">決定哪些商品會被計入門檻，並且可被折扣。</p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="bg-gray-50 p-5 rounded-xl border border-gray-200">
+                <label className="block text-sm font-bold text-gray-800 mb-3">勾選適用分類 (Categories)</label>
+                <div className="h-64 overflow-y-auto space-y-2 pr-2 custom-scrollbar">
+                  {categories.map((cat) => (
+                    <label key={cat.id} className="flex items-center gap-3 p-2 hover:bg-gray-100 rounded-lg cursor-pointer transition-colors border border-transparent hover:border-gray-200">
+                      <input
+                        type="checkbox"
+                        checked={applicableCategoryIds.includes(cat.id)}
+                        onChange={(e) => {
+                          if (e.target.checked) setApplicableCategoryIds([...applicableCategoryIds, cat.id]);
+                          else setApplicableCategoryIds(applicableCategoryIds.filter(id => id !== cat.id));
+                        }}
+                        className="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                      />
+                      <span className="text-sm font-medium text-gray-700">{cat.name || cat.id}</span>
+                    </label>
+                  ))}
+                </div>
+                <p className="text-xs text-gray-500 mt-3 font-medium bg-white p-2 rounded border border-gray-100">* 若皆未勾選，表示全館商品皆參與。</p>
+              </div>
 
-                {isGetGroupDifferent && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                      <label className="block text-sm font-medium text-gray-700 mb-2">贈品區分類</label>
-                      <div className="max-h-40 overflow-y-auto space-y-2 pr-2">
+              <div className="bg-gray-50 p-5 rounded-xl border border-gray-200">
+                <label className="block text-sm font-bold text-gray-800 mb-3">勾選適用單品 (Menu Items)</label>
+                <div className="h-64 overflow-y-auto space-y-2 pr-2 custom-scrollbar">
+                  {menuItems.map((item) => (
+                    <label key={item.id} className="flex items-center gap-3 p-2 hover:bg-gray-100 rounded-lg cursor-pointer transition-colors border border-transparent hover:border-gray-200">
+                      <input
+                        type="checkbox"
+                        checked={applicableMenuItemIds.includes(item.id)}
+                        onChange={(e) => {
+                          if (e.target.checked) setApplicableMenuItemIds([...applicableMenuItemIds, item.id]);
+                          else setApplicableMenuItemIds(applicableMenuItemIds.filter(id => id !== item.id));
+                        }}
+                        className="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                      />
+                      <span className="text-sm font-medium text-gray-700">{item.name || item.id}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Get Group Target (For BOGO only) */}
+            {type === 'BOGO' && (
+              <div className="mt-8 p-6 bg-blue-50 border border-blue-200 rounded-xl">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-bold text-blue-900">🎁 贈品區選擇 (Get Group)</h3>
+                  <label className="flex items-center gap-2 cursor-pointer bg-white px-3 py-1.5 rounded-lg border border-blue-200 shadow-sm">
+                    <input
+                      type="checkbox"
+                      checked={isGetGroupDifferent}
+                      onChange={(e) => setIsGetGroupDifferent(e.target.checked)}
+                      className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    <span className="text-sm font-bold text-blue-800">贈品與參與商品不同</span>
+                  </label>
+                </div>
+
+                {isGetGroupDifferent ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                    <div className="bg-white p-4 rounded-lg border border-blue-100 shadow-sm">
+                      <label className="block text-sm font-bold text-gray-700 mb-2">選擇贈品分類</label>
+                      <div className="max-h-48 overflow-y-auto space-y-1 custom-scrollbar">
                         {categories.map((cat) => (
-                          <label key={cat.id} className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                          <label key={cat.id} className="flex items-center gap-2 text-sm text-gray-700 p-1.5 hover:bg-gray-50 rounded cursor-pointer">
                             <input
                               type="checkbox"
                               checked={getCategoryIds.includes(cat.id)}
@@ -422,18 +549,18 @@ export default function CouponForm() {
                                 if (e.target.checked) setGetCategoryIds([...getCategoryIds, cat.id]);
                                 else setGetCategoryIds(getCategoryIds.filter(id => id !== cat.id));
                               }}
-                              className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                             />
                             {cat.name || cat.id}
                           </label>
                         ))}
                       </div>
                     </div>
-                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                      <label className="block text-sm font-medium text-gray-700 mb-2">贈品區單品</label>
-                      <div className="max-h-40 overflow-y-auto space-y-2 pr-2">
+                    <div className="bg-white p-4 rounded-lg border border-blue-100 shadow-sm">
+                      <label className="block text-sm font-bold text-gray-700 mb-2">選擇贈品單品</label>
+                      <div className="max-h-48 overflow-y-auto space-y-1 custom-scrollbar">
                         {menuItems.map((item) => (
-                          <label key={item.id} className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                          <label key={item.id} className="flex items-center gap-2 text-sm text-gray-700 p-1.5 hover:bg-gray-50 rounded cursor-pointer">
                             <input
                               type="checkbox"
                               checked={getMenuItemIds.includes(item.id)}
@@ -441,7 +568,7 @@ export default function CouponForm() {
                                 if (e.target.checked) setGetMenuItemIds([...getMenuItemIds, item.id]);
                                 else setGetMenuItemIds(getMenuItemIds.filter(id => id !== item.id));
                               }}
-                              className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                             />
                             {item.name || item.id}
                           </label>
@@ -449,78 +576,54 @@ export default function CouponForm() {
                       </div>
                     </div>
                   </div>
+                ) : (
+                  <p className="text-sm text-blue-700">目前設定：顧客選購的「參與商品」本身即可作為贈品折抵。</p>
                 )}
               </div>
-            </div>
-          )}
-        </div>
-
-        {/* Section 5: Limits and Dates */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h2 className="text-lg font-bold text-gray-900 mb-4">4. 限制與期限 (Limits & Dates)</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">每位顧客使用限制 (次)</label>
-              <input
-                type="number"
-                min="1"
-                value={perCustomer}
-                onChange={(e) => setPerCustomer(parseInt(e.target.value) || 1)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">總發行數量限制 (次)</label>
-              <input
-                type="number"
-                min="1"
-                value={usageLimit}
-                onChange={(e) => setUsageLimit(e.target.value)}
-                placeholder="無限制"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none"
-              />
-            </div>
+            )}
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">生效日期</label>
-              <input
-                type="date"
-                value={startsAt}
-                onChange={(e) => setStartsAt(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">截止日期</label>
-              <input
-                type="date"
-                value={expiresAt}
-                onChange={(e) => setExpiresAt(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none"
-              />
-            </div>
-          </div>
-        </div>
+        )}
+      </div>
 
-        {error && <div className="text-red-600 text-sm bg-red-50 p-3 rounded-lg border border-red-200">{error}</div>}
+      {/* Navigation Buttons */}
+      <div className="flex items-center justify-between mt-8">
+        <button
+          type="button"
+          onClick={prevStep}
+          disabled={currentStep === 1 || saving}
+          className="px-6 py-2.5 rounded-lg text-sm font-bold transition-colors disabled:opacity-50 border border-gray-300 text-gray-700 hover:bg-gray-50 bg-white shadow-sm"
+        >
+          上一步 (Previous)
+        </button>
 
-        <div className="flex justify-end gap-3 pt-4">
+        <div className="flex gap-3">
           <Link
             to="/promotions"
-            className="border border-gray-300 text-gray-700 px-6 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
+            className="px-6 py-2.5 rounded-lg text-sm font-bold text-gray-500 hover:text-gray-700 transition-colors"
           >
             取消
           </Link>
-          <button
-            type="submit"
-            disabled={saving}
-            className="bg-primary-600 text-white px-8 py-2 rounded-lg text-sm font-medium hover:bg-primary-700 transition-colors disabled:opacity-50"
-          >
-            {saving ? '儲存中...' : isEdit ? '更新優惠券' : '建立優惠券'}
-          </button>
+          
+          {currentStep < totalSteps ? (
+            <button
+              type="button"
+              onClick={nextStep}
+              className="px-8 py-2.5 rounded-lg text-sm font-bold transition-colors bg-primary-600 text-white hover:bg-primary-700 shadow-sm"
+            >
+              下一步 (Next)
+            </button>
+          ) : (
+            <button
+              onClick={handleSubmit}
+              disabled={saving}
+              className="px-8 py-2.5 rounded-lg text-sm font-bold transition-colors bg-green-600 text-white hover:bg-green-700 shadow-sm disabled:opacity-50 flex items-center gap-2"
+            >
+              {saving && <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />}
+              {saving ? '儲存中...' : isEdit ? '更新優惠活動 (Update)' : '建立優惠活動 (Create)'}
+            </button>
+          )}
         </div>
-      </form>
+      </div>
     </div>
   );
 }
