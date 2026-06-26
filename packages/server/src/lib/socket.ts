@@ -10,16 +10,24 @@ let io: Server | null = null;
 
 export function initSocket(httpServer: HttpServer): Server {
   const corsOrigins = [
-    process.env.STORE_URL_PUBLIC?.replace(/\/$/, ''),
-    process.env.ADMIN_URL_PUBLIC?.replace(/\/$/, ''),
-    process.env.ERP_URL_PUBLIC?.replace(/\/$/, ''),
+    process.env.STORE_URL_PUBLIC,
+    process.env.ADMIN_URL_PUBLIC,
+    process.env.ERP_URL_PUBLIC,
     'http://localhost:5173', 
     'http://localhost:5174', 
     'http://localhost:5175',
     'http://localhost:3000',
     'https://admin-panel-production-7660.up.railway.app',
     'https://storefront-production-31e8.up.railway.app'
-  ].filter(Boolean) as string[];
+  ].filter(Boolean).map(url => {
+    let normalized = url!.replace(/\/$/, '');
+    if (!normalized.startsWith('http://') && !normalized.startsWith('https://')) {
+      return normalized.includes('localhost') || normalized.includes('127.0.0.1')
+        ? `http://${normalized}`
+        : `https://${normalized}`;
+    }
+    return normalized;
+  }) as string[];
 
   io = new Server(httpServer, {
     cors: {

@@ -85,7 +85,15 @@ export function createApp() {
     'http://localhost:5174', 
     'http://localhost:5175',
     'http://localhost:3000'
-  ].filter(Boolean) as string[];
+  ].filter(Boolean).map(url => {
+    let normalized = url!.replace(/\/$/, '');
+    if (!normalized.startsWith('http://') && !normalized.startsWith('https://')) {
+      return normalized.includes('localhost') || normalized.includes('127.0.0.1')
+        ? `http://${normalized}`
+        : `https://${normalized}`;
+    }
+    return normalized;
+  }) as string[];
   app.use(cors({
     origin: (origin, callback) => {
       if (!origin || corsOrigins.includes('*')) {
