@@ -50,14 +50,12 @@ if (API_URL.includes('.railway.internal') && !API_URL.match(/:\d+$/)) {
 console.log(`[Storefront] Starting server. Target API_URL is: ${API_URL}`);
 
 // 1. Setup reverse proxy for API and Uploads (Replicating previous Nginx behavior)
-// We only proxy if the request path starts with /api or /uploads AND VITE_API_URL is NOT set to an external domain
-// Actually, if VITE_API_URL is set to an external domain, the frontend code will fetch directly from that domain, 
-// so these proxy routes might not even be hit. But it's safe to always proxy them just in case.
+// We use pathFilter so that http-proxy-middleware preserves the /api or /uploads prefix in the forwarded request.
 const proxyOptions = {
   target: API_URL,
   changeOrigin: true,
-  // Disable SSL verification for internal proxying if needed
-  secure: false,
+  pathFilter: ['/api', '/uploads'], // Only proxy these paths, keeping the prefix intact
+  secure: false, // Disable SSL verification for internal proxying if needed
 };
 
 // Fast healthcheck route for Railway to prevent timeouts
@@ -65,8 +63,8 @@ app.get('/health', (req, res) => {
   res.status(200).send('OK');
 });
 
-app.use('/api', createProxyMiddleware(proxyOptions));
-app.use('/uploads', createProxyMiddleware(proxyOptions));
+// Use the proxy globally so it can inspect all paths and filter them
+app.use(createProxyMiddleware(proxyOptions));
 
 // 2. Serve static files from the 'dist' directory, EXCEPT index.html
 app.use(express.static(path.join(__dirname, 'dist'), { index: false }));
