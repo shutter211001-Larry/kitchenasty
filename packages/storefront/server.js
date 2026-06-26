@@ -22,7 +22,17 @@ const port = process.env.PORT || 80;
 
 // For server-side proxying and SSR fetching, we strongly prefer the internal private URL (API_URL_PRIVATE).
 // This bypasses Cloudflare WAF and DNS overhead, preventing 403 Forbidden errors when Railway IPs are blocked.
-let API_URL = process.env.API_URL_PRIVATE || process.env.VITE_API_URL_PUBLIC || 'http://api-server.railway.internal:3000';
+let API_URL;
+if (process.env.API_URL_PRIVATE) {
+  API_URL = process.env.API_URL_PRIVATE;
+} else if (process.env.RAILWAY_ENVIRONMENT) {
+  // If we are on Railway, default to the standard internal URL for the api-server
+  // This saves the user from having to manually add API_URL_PRIVATE to every frontend service
+  API_URL = 'http://api-server.railway.internal:3000';
+} else {
+  // Fallback to public URL (e.g. if hosted on Vercel or local)
+  API_URL = process.env.VITE_API_URL_PUBLIC || 'http://localhost:3000';
+}
 
 // Ensure API_URL has a valid protocol to prevent 'Invalid URL' crashes
 if (API_URL && !API_URL.startsWith('http://') && !API_URL.startsWith('https://')) {
