@@ -6,7 +6,7 @@ import { generateToken } from '../../middleware/auth.js';
 // Setup environment variables
 process.env.LINE_CHANNEL_SECRET = 'test-secret';
 process.env.LINE_CHANNEL_ACCESS_TOKEN = 'test-token';
-process.env.STOREFRONT_URL = 'http://localhost:5174';
+process.env.STORE_URL_PUBLIC = 'http://localhost:5174';
 
 // Mock DB
 vi.mock('../../lib/db.js', () => {

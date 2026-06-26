@@ -77,14 +77,22 @@ export function createApp() {
     crossOriginResourcePolicy: { policy: "cross-origin" },
     contentSecurityPolicy: false, // In development/simple production, we can disable or fine-tune this
   }));
-  const corsOrigins = process.env.CORS_ORIGINS?.split(',') || ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:3000'];
+  const corsOrigins = [
+    process.env.STORE_URL_PUBLIC,
+    process.env.ADMIN_URL_PUBLIC,
+    process.env.ERP_URL_PUBLIC,
+    'http://localhost:5173', 
+    'http://localhost:5174', 
+    'http://localhost:5175',
+    'http://localhost:3000'
+  ].filter(Boolean) as string[];
   app.use(cors({
     origin: (origin, callback) => {
       if (!origin || corsOrigins.includes('*')) {
         return callback(null, true);
       }
-      // Allow configured origins + any local development IPs
-      const isLocal = origin.includes('localhost') || origin.includes('127.0.0.1') || origin.includes('192.168.') || origin.includes('10.');
+      // Allow configured origins + any local development or internal IPs
+      const isLocal = origin.includes('localhost') || origin.includes('127.0.0.1') || origin.includes('192.168.') || origin.includes('10.') || origin.includes('.railway.internal');
       const isAllowed = corsOrigins.includes(origin) || isLocal;
 
       if (isAllowed) {

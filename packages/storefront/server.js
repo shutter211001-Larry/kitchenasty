@@ -23,7 +23,7 @@ const port = process.env.PORT || 80;
 // The backend API URL for fetching dynamic settings
 // If deployed in Railway with Internal Networking (Option A), this defaults to the internal URL
 // If deployed with separate domains (Option B), VITE_API_URL should be set
-const API_URL = process.env.VITE_API_URL || process.env.BACKEND_URL || 'http://api-server.railway.internal:3000';
+const API_URL = process.env.VITE_API_URL_PUBLIC || process.env.API_URL_PRIVATE || 'http://api-server.railway.internal:3000';
 
 console.log(`[Storefront] Starting server. Target API_URL is: ${API_URL}`);
 

@@ -88,7 +88,7 @@ async function handleEvent(client: Client, event: WebhookEvent) {
   const settings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
   const lineSettings = (settings?.lineSettings as any) || {};
   const liffId = lineSettings.liffId || '';
-  const storefrontUrl = process.env.STOREFRONT_URL || 'http://localhost:5174';
+  const storefrontUrl = process.env.STORE_URL_PUBLIC || 'http://localhost:5174';
   const liffUrl = liffId ? `https://liff.line.me/${liffId}` : storefrontUrl;
 
   if (event.type === 'follow') {
@@ -252,7 +252,7 @@ async function handleEvent(client: Client, event: WebhookEvent) {
             hero: {
               type: 'image',
               url: cat.image
-                ? (cat.image.startsWith('http') ? cat.image : `${(process.env.SERVER_URL || 'http://localhost:3000').replace(/\/$/, '')}${cat.image}`)
+                ? (cat.image.startsWith('http') ? cat.image : `${(process.env.API_URL_PUBLIC || 'http://localhost:3000').replace(/\/$/, '')}${cat.image}`)
                 : 'https://img.freepik.com/free-photo/delicious-pizza-indoors_23-2150873874.jpg',
               size: 'full',
               aspectRatio: '20:13',

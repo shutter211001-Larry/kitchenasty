@@ -13,7 +13,7 @@ export const initPassport = () => {
         {
           clientID: process.env.GOOGLE_LOGIN_CLIENT_ID,
           clientSecret: process.env.GOOGLE_LOGIN_CLIENT_SECRET,
-          callbackURL: `${(process.env.SERVER_URL || 'http://localhost:3000').replace(/\/$/, '')}/api/auth/google/callback`,
+          callbackURL: `${(process.env.API_URL_PUBLIC || 'http://localhost:3000').replace(/\/$/, '')}/api/auth/google/callback`,
           passReqToCallback: true,
         },
         async (req, accessToken, refreshToken, profile, done) => {

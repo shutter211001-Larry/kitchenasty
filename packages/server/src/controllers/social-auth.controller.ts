@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { generateToken } from '../middleware/auth.js';
 
-const STOREFRONT_URL = process.env.STOREFRONT_URL || 'http://localhost:5174';
+const STOREFRONT_URL = process.env.STORE_URL_PUBLIC || 'http://localhost:5174';
 
 export function handleSocialCallback(req: Request, res: Response): void {
   const customer = req.user as any;

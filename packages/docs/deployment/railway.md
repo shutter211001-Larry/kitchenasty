@@ -70,13 +70,17 @@ Shutter 是一個包含多個模組的大型系統。在您的架構中，包含
 |----------|------|
 | `PORT` | 填寫 `3000` |
 | `NODE_ENV` | 填寫 `production` |
-| `CORS_ORIGINS` | 填寫您 **3 個前端**的網址，以逗號分隔。例如：`https://admin.up.railway.app,https://store.up.railway.app,https://erp.up.railway.app` |
-| `STOREFRONT_URL` | 填寫 `Storefront` 服務的網址。用於信件與 LINE 推播中的返回連結。 |
+| `STORE_URL_PUBLIC` | 填寫 `Storefront` 前台服務的公開網址（例如 `https://store.up.railway.app`）。用於信件、LINE 推播與登入後的返回連結。 |
+| `ADMIN_URL_PUBLIC` | 填寫 `Admin` 後台服務的公開網址（例如 `https://admin.up.railway.app`）。 |
+| `ERP_URL_PUBLIC` | 填寫 `ERP Frontend` 服務的公開網址（例如 `https://erp.up.railway.app`）。 |
+| `API_URL_PUBLIC` | 填寫您的 `Server` 對外 API 網址（例如 `https://api.up.railway.app`）。 |
+| `API_URL_PRIVATE` | 填寫您的 `Server` Railway 內部網路網址（例如 `http://server.railway.internal:3000`），加速 SSR 與內部微服務通訊。 |
 | `DATABASE_URL` | 填入第一階段取得的 `Shutter DB` 連線字串 |
 | `SHUTTER_ERP_DATABASE_URL`| 填入第一階段取得的 `Shutter ERP DB` 連線字串 |
-| `SHUTTER_ERP_API_URL` | 填寫您的 `Server` 對外 API 網址 (與 KITCHENASTY_API_URL 相同，因 ERP API 合併在 Server 中) |
-| `KITCHENASTY_API_URL` | 填寫您的 `Server` 對外 API 網址 |
 | `INTEGRATION_KEY` | ERP 與主系統間的內部驗證金鑰（請自訂一段隨機字串，例如 `super-secret-key`） |
+
+> [!NOTE]
+> 系統會自動將 `STORE_URL_PUBLIC`、`ADMIN_URL_PUBLIC` 與 `ERP_URL_PUBLIC` 加入 CORS 允許清單，因此您在 Railway 上**不再需要手動設定 `CORS_ORIGINS` 變數**。
 
 ### 📌 2. 安全驗證 (Authentication)
 | 變數名稱 | 說明 |
@@ -107,14 +111,14 @@ Shutter 是一個包含多個模組的大型系統。在您的架構中，包含
 ## 第四部分：設定前端環境變數 (Admin, Storefront, ERP)
 
 對於 3 個前端服務 (`Admin`, `Storefront`, `ERP Frontend`)，您需要在各自的 **Variables** 分頁中，告訴它們後端 API 在哪裡。
-請依照您的 Vite 前端設定，加入環境變數（通常為 `VITE_API_URL`）：
+請依照您的 Vite 前端設定，加入環境變數：
 
 | 變數名稱 | 說明 |
 |----------|------|
-| `VITE_API_URL` | 填寫您的 `Server` 網址（例如 `https://server-production.up.railway.app`） |
+| `VITE_API_URL_PUBLIC` | 填寫您的 `Server` 對外網址（例如 `https://server-production.up.railway.app`） |
 
 > [!IMPORTANT]
-> **重新建置前端**：前端的環境變數必須在「建置階段 (Build time)」寫入，因此在設定好 `VITE_API_URL` 後，請務必點擊各自前端服務右上角的 **Deploy** 按鈕來觸發重新建置。
+> **重新建置前端**：前端的環境變數必須在「建置階段 (Build time)」寫入，因此在設定好 `VITE_API_URL_PUBLIC` 後，請務必點擊各自前端服務右上角的 **Deploy** 按鈕來觸發重新建置。
 
 ---
 
@@ -123,6 +127,6 @@ Shutter 是一個包含多個模組的大型系統。在您的架構中，包含
 - [ ] 在 Railway 畫面上，您可以看到 6 個方塊 (2 個 DB, 1 個 Server, 3 個 Frontend)。
 - [ ] 3 個前端服務都有設定對應的 `/packages/xxx` 作為 Root Directory。
 - [ ] `Server` 已經成功連結了兩個資料庫的連線字串 (`DATABASE_URL` 與 `SHUTTER_ERP_DATABASE_URL`)。
-- [ ] `Server` 的 `CORS_ORIGINS` 包含了 3 個前端的完整網址 (確保不會產生 CORS 跨網域錯誤)。
+- [ ] `Server` 有填寫 `STORE_URL_PUBLIC` 與 `ADMIN_URL_PUBLIC`，系統會自動處理 CORS。
 - [ ] 第三方金鑰（Google、LINE、Gemini）皆已正確填入 `Server`。
 - [ ] 所有前端與後端服務皆顯示 **Active (綠燈)**。

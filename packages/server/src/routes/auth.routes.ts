@@ -5,7 +5,7 @@ import * as authController from '../controllers/auth.controller.js';
 import { authenticate, generateToken, requireRole } from '../middleware/auth.js';
 
 const router = Router();
-const STOREFRONT_URL = process.env.STOREFRONT_URL || 'http://localhost:5174';
+const STOREFRONT_URL = process.env.STORE_URL_PUBLIC || 'http://localhost:5174';
 
 // STAFF AUTH
 router.post('/staff/login', authController.staffLogin);

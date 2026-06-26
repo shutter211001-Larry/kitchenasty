@@ -9,13 +9,17 @@ const expo = new Expo();
 let io: Server | null = null;
 
 export function initSocket(httpServer: HttpServer): Server {
-  const corsOrigins = process.env.CORS_ORIGINS?.split(',').map(s => s.trim().replace(/\/$/, '')) || [
+  const corsOrigins = [
+    process.env.STORE_URL_PUBLIC?.replace(/\/$/, ''),
+    process.env.ADMIN_URL_PUBLIC?.replace(/\/$/, ''),
+    process.env.ERP_URL_PUBLIC?.replace(/\/$/, ''),
     'http://localhost:5173', 
     'http://localhost:5174', 
+    'http://localhost:5175',
     'http://localhost:3000',
     'https://admin-panel-production-7660.up.railway.app',
     'https://storefront-production-31e8.up.railway.app'
-  ];
+  ].filter(Boolean) as string[];
 
   io = new Server(httpServer, {
     cors: {
@@ -23,7 +27,7 @@ export function initSocket(httpServer: HttpServer): Server {
         if (!origin || corsOrigins.includes('*')) {
           return callback(null, true);
         }
-        const isLocal = origin.includes('localhost') || origin.includes('127.0.0.1') || origin.includes('192.168.') || origin.includes('10.');
+        const isLocal = origin.includes('localhost') || origin.includes('127.0.0.1') || origin.includes('192.168.') || origin.includes('10.') || origin.includes('.railway.internal');
         const isAllowed = corsOrigins.includes(origin) || isLocal;
         if (isAllowed) {
           callback(null, true);

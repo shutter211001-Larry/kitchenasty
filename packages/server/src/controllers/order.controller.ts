@@ -1354,7 +1354,7 @@ export async function listCustomerOrders(req: Request, res: Response): Promise<v
 // ERP Integration: Background call to deduct inventory in PizzaMaster
 async function notifyPizzaMasterOfDeduction(order: any) {
   try {
-    let url = (process.env.SHUTTER_ERP_API_URL || 'http://localhost:3000').trim();
+    let url = (process.env.API_URL_PUBLIC || 'http://localhost:3000').trim();
     if (url && !url.startsWith('http://') && !url.startsWith('https://')) {
       url = `https://${url}`;
     }

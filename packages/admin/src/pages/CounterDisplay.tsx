@@ -269,7 +269,7 @@ export default function CounterDisplay() {
 
   // Setup Socket.io for real-time updates
   useEffect(() => {
-    const SOCKET_URL = import.meta.env.VITE_API_URL || '';
+    const SOCKET_URL = import.meta.env.VITE_API_URL_PUBLIC || '';
     const token = localStorage.getItem('token');
     
     const socket = io(SOCKET_URL, {

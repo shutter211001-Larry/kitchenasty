@@ -144,7 +144,7 @@ export async function getMenuItem(req: Request<{ id: string }>, res: Response): 
   let recipeId = null;
   let recipeName = null;
   try {
-    const url = process.env.SHUTTER_ERP_API_URL || 'http://localhost:3000';
+    const url = process.env.API_URL_PUBLIC || 'http://localhost:3000';
     const response = await fetch(`${getErpUrl(url)}/api/integration/mappings`, {
       headers: {
         'x-integration-key': process.env.INTEGRATION_KEY || 'pizzamaster-integration-secret-key'
@@ -245,7 +245,7 @@ export async function createMenuItem(req: Request, res: Response): Promise<void>
   // If a recipeId is provided, automatically link it with PizzaMaster ERP
   if (recipeId) {
     try {
-      const url = process.env.SHUTTER_ERP_API_URL || 'http://localhost:3000';
+      const url = process.env.API_URL_PUBLIC || 'http://localhost:3000';
       const response = await fetch(`${getErpUrl(url)}/api/integration/mappings`, {
         method: 'POST',
         headers: {
@@ -347,7 +347,7 @@ export async function updateMenuItem(req: Request<{ id: string }>, res: Response
   // Update or delete R&D recipe binding in Shutter ERP if recipeId is specified
   if (recipeId !== undefined) {
     try {
-      const url = process.env.SHUTTER_ERP_API_URL || 'http://localhost:3000';
+      const url = process.env.API_URL_PUBLIC || 'http://localhost:3000';
       if (recipeId) {
         // Save/update mapping
         const response = await fetch(`${getErpUrl(url)}/api/integration/mappings`, {
@@ -463,7 +463,7 @@ export async function deleteMenuItemImage(req: Request<{ id: string }>, res: Res
 
 export async function getErpProductRecipes(req: Request, res: Response): Promise<void> {
   try {
-    const url = process.env.SHUTTER_ERP_API_URL || 'http://localhost:3000';
+    const url = process.env.API_URL_PUBLIC || 'http://localhost:3000';
     const response = await fetch(`${getErpUrl(url)}/api/integration/product-recipes`, {
       headers: {
         'x-integration-key': process.env.INTEGRATION_KEY || 'pizzamaster-integration-secret-key'

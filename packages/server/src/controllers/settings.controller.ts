@@ -134,7 +134,7 @@ function toPublicSettings(settings: Awaited<ReturnType<typeof getOrCreateSetting
       enabled: isTrue(reservation.enabled, true),
     } : undefined,
     lineSettings: getJson(settings.lineSettings),
-    storefrontUrl: process.env.STOREFRONT_URL || 'http://localhost:5173',
+    storefrontUrl: process.env.STORE_URL_PUBLIC || 'http://localhost:5173',
     createdAt: settings.createdAt,
     updatedAt: settings.updatedAt,
   };

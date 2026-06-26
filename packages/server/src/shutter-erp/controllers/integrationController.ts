@@ -42,7 +42,7 @@ const writeMappings = (mappings: any[]) => {
 // Get Shutter URL and Token
 const getShutterUrl = () => {
   const port = process.env.PORT || '3000';
-  let url = (process.env.KITCHENASTY_API_URL || process.env.SHUTTER_ERP_API_URL || `http://127.0.0.1:${port}`).trim();
+  let url = (process.env.API_URL_PUBLIC || process.env.API_URL_PUBLIC || `http://127.0.0.1:${port}`).trim();
   if (url && !url.startsWith('http://') && !url.startsWith('https://')) {
     url = `https://${url}`;
   }
