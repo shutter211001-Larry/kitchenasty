@@ -20,10 +20,9 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const port = process.env.PORT || 80;
 
-// The backend API URL for fetching dynamic settings
-// If deployed in Railway with Internal Networking (Option A), this defaults to the internal URL
-// If deployed with separate domains (Option B), VITE_API_URL should be set
-let API_URL = process.env.VITE_API_URL_PUBLIC || process.env.API_URL_PRIVATE || 'http://api-server.railway.internal:3000';
+// For server-side proxying and SSR fetching, we strongly prefer the internal private URL (API_URL_PRIVATE).
+// This bypasses Cloudflare WAF and DNS overhead, preventing 403 Forbidden errors when Railway IPs are blocked.
+let API_URL = process.env.API_URL_PRIVATE || process.env.VITE_API_URL_PUBLIC || 'http://api-server.railway.internal:3000';
 
 // Ensure API_URL has a valid protocol to prevent 'Invalid URL' crashes
 if (API_URL && !API_URL.startsWith('http://') && !API_URL.startsWith('https://')) {
@@ -32,6 +31,10 @@ if (API_URL && !API_URL.startsWith('http://') && !API_URL.startsWith('https://')
   } else {
     API_URL = `https://${API_URL}`;
   }
+}
+// Add default port for Railway internal if missing
+if (API_URL.includes('.railway.internal') && !API_URL.match(/:\d+$/)) {
+  API_URL = `${API_URL}:3000`;
 }
 
 console.log(`[Storefront] Starting server. Target API_URL is: ${API_URL}`);
