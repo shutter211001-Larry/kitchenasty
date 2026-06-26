@@ -1,6 +1,24 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
+// Globally normalize all public URLs to ensure they have the correct protocol prefix
+// This fixes broken image URLs in LINE Flex messages, OAuth callbacks, and CORS issues
+['API_URL_PUBLIC', 'STORE_URL_PUBLIC', 'ADMIN_URL_PUBLIC', 'ERP_URL_PUBLIC'].forEach(key => {
+  let val = process.env[key];
+  if (val) {
+    val = val.trim().replace(/\/$/, '');
+    if (!val.startsWith('http://') && !val.startsWith('https://')) {
+      if (val.includes('localhost') || val.includes('127.0.0.1')) {
+        process.env[key] = `http://${val}`;
+      } else {
+        process.env[key] = `https://${val}`;
+      }
+    } else {
+      process.env[key] = val;
+    }
+  }
+});
+
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
