@@ -18,6 +18,8 @@ RUN npm run build -w packages/shared
 COPY packages/shutter-erp-frontend/ packages/shutter-erp-frontend/
 ARG VITE_API_URL
 ENV VITE_API_URL=${VITE_API_URL}
+ARG VITE_API_URL_PUBLIC
+ENV VITE_API_URL_PUBLIC=${VITE_API_URL_PUBLIC}
 
 RUN npm run build -w packages/shutter-erp-frontend
 
