@@ -7,6 +7,11 @@ import App from './App.tsx'
 // Global Axios Interceptor to dynamically redirect all local API calls to the production backend URL
 axios.interceptors.request.use((config) => {
   let backendUrl = import.meta.env.VITE_API_URL_PUBLIC || '';
+  if (!backendUrl && typeof window !== 'undefined') {
+    // 白牌化動態推導: erp.xxx.com -> api.xxx.com
+    backendUrl = window.location.origin.replace(/(:\/\/)?erp/, '$1api');
+  }
+  
   if (backendUrl && !backendUrl.startsWith('http')) {
     backendUrl = `https://${backendUrl}`;
   }
