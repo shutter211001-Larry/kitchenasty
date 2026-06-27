@@ -373,7 +373,7 @@ export default function OrderStatus() {
               
               <p className="text-sm font-semibold text-primary-700">
                 {t('orderStatus.scheduledForTime') || '預計取餐/送達時間：'}
-                <span className="text-base font-extrabold underline underline-offset-4 decoration-primary-300 decoration-2">
+                <span className="text-base font-extrabold text-gray-900 underline underline-offset-4 decoration-primary-300 decoration-2">
                   {formatToFullDateTime(order.scheduledAt, i18n.language)}
                 </span>
               </p>
