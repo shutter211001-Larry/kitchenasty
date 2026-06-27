@@ -331,12 +331,23 @@ export default function StockManagement() {
             視覺化觀察「分類共用庫存 (如：當日麵團顆數)」與「商品獨立庫存」的關聯。您可在本頁面直接修改，系統會即時存檔。
           </p>
         </div>
-        <button
-          onClick={fetchData}
-          className="self-start md:self-auto px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 shadow-sm transition-colors inline-flex items-center gap-1.5"
-        >
-          🔄 重新整理
-        </button>
+        <div className="flex flex-wrap items-center gap-2 self-start md:self-auto">
+          <button
+            onClick={() => {
+              const url = import.meta.env.VITE_ERP_URL_PUBLIC || window.location.origin.replace('admin.', 'erp.');
+              window.open(url, '_blank');
+            }}
+            className="px-4 py-2 bg-indigo-600 border border-transparent rounded-lg text-sm font-medium text-white hover:bg-indigo-700 shadow-sm transition-colors inline-flex items-center gap-1.5"
+          >
+            🏢 前往 ERP 管理
+          </button>
+          <button
+            onClick={fetchData}
+            className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 shadow-sm transition-colors inline-flex items-center gap-1.5"
+          >
+            🔄 重新整理
+          </button>
+        </div>
       </div>
 
       {/* Error display */}
