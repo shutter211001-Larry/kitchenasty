@@ -121,6 +121,12 @@ export async function updateStaff(req: Request<{ id: string }>, res: Response): 
     return;
   }
 
+  // Prevent self-deactivation
+  if (req.user!.id === targetId && parsed.data.isActive === false) {
+    res.status(400).json({ success: false, error: 'Cannot deactivate your own account' });
+    return;
+  }
+
   const existing = await prisma.user.findUnique({ where: { id: targetId } });
   if (!existing) {
     res.status(404).json({ success: false, error: 'Staff member not found' });

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '../context/AuthContext.js';
 
 interface Staff {
   id: string;
@@ -34,6 +35,7 @@ const ROLE_LABELS: Record<string, string> = {
 
 export default function StaffList() {
   const { t } = useTranslation();
+  const { user: currentUser } = useAuth();
   const [staff, setStaff] = useState<Staff[]>([]);
   const [pagination, setPagination] = useState<Pagination | null>(null);
   const [loading, setLoading] = useState(true);
@@ -159,9 +161,13 @@ export default function StaffList() {
                     <td className="px-4 py-3">
                       <button
                         onClick={() => toggleActive(member.id, !member.isActive)}
-                        className={`text-xs px-2 py-0.5 rounded-full font-medium ${member.isActive
-                            ? 'bg-green-100 text-green-700'
-                            : 'bg-gray-100 text-gray-500'
+                        disabled={member.id === currentUser?.id}
+                        className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                          member.id === currentUser?.id
+                            ? 'opacity-50 cursor-not-allowed bg-gray-100 text-gray-500'
+                            : member.isActive
+                              ? 'bg-green-100 text-green-700'
+                              : 'bg-gray-100 text-gray-500'
                           }`}
                         aria-label={`${member.isActive ? '停用' : '啟用'} ${member.name}`}
                       >

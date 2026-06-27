@@ -155,7 +155,8 @@ export default function StaffEdit() {
           <select
             value={role}
             onChange={(e) => setRole(e.target.value)}
-            className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+            disabled={user?.id === staff.id}
+            className={`w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none ${user?.id === staff.id ? 'opacity-70 cursor-not-allowed bg-gray-50' : ''}`}
           >
             <option value="STAFF">{t('staff.roles.staff')}</option>
             <option value="MANAGER">{t('staff.roles.manager')}</option>
@@ -193,7 +194,8 @@ export default function StaffEdit() {
             id="isActive"
             checked={isActive}
             onChange={(e) => setIsActive(e.target.checked)}
-            className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+            disabled={user?.id === staff.id}
+            className={`rounded border-gray-300 text-primary-600 focus:ring-primary-500 ${user?.id === staff.id ? 'opacity-50 cursor-not-allowed' : ''}`}
           />
           <label htmlFor="isActive" className="text-sm text-gray-700">{t('staff.active')}</label>
         </div>
