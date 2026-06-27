@@ -630,6 +630,9 @@ export async function sendTestEmail(req: Request, res: Response): Promise<void> 
       };
 
       const accessToken = await getAccessToken();
+      if (!accessToken) {
+        throw new Error('無法取得 Google OAuth2 Access Token。請檢查 Railway 變數中的 GOOGLE_REFRESH_TOKEN、CLIENT_ID 等是否正確，或是否已過期 (Google 測試應用的憑證效期只有 7 天)。');
+      }
       const message = [
         `To: ${to}`,
         `Subject: 夏特點餐系統 — 測試信件 (Gmail API)`,
