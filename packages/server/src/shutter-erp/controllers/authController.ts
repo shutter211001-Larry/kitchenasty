@@ -61,11 +61,11 @@ export const login = async (req: Request, res: Response) => {
     // Auto-seed default administrator if the user table is empty
     const userCount = await prisma.user.count();
     if (userCount === 0) {
-      console.log('Seeding default administrator admin@shutter-erp.com / admin123...');
+      console.log('Seeding default administrator admin@shutter.com / admin123...');
       const adminHash = await bcrypt.hash('admin123', 10);
       await prisma.user.create({
         data: {
-          email: 'admin@shutter-erp.com',
+          email: 'admin@shutter.com',
           name: '系統管理員',
           passwordHash: adminHash,
           role: 'ADMIN'
