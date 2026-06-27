@@ -105,7 +105,7 @@ function parseJSONWithMarkdownFallback(text: string) {
 export async function translateContent(
   text: string,
   targetLanguages: string[],
-  sourceLanguage: string = 'Traditional Chinese'
+  sourceLanguage: string = 'its original language'
 ): Promise<TranslationResult> {
   const apiKey = getApiKey();
   if (!apiKey) {
@@ -117,7 +117,8 @@ export async function translateContent(
 
   const prompt = `
     You are a professional translator for a global food ordering platform.
-    Translate the following text from ${sourceLanguage} into these languages: ${targetLanguages.join(', ')}.
+    Identify the source language of the text, and translate it into ALL of the following target languages: ${targetLanguages.join(', ')}.
+    If the text is already in one of the target languages, you must still output it for that language code.
     
     Text to translate: "${text}"
     
@@ -156,7 +157,7 @@ export async function translateContent(
 export async function translateFields(
   fields: { key: string; value: string }[],
   targetLanguages: string[],
-  sourceLanguage: string = 'Traditional Chinese'
+  sourceLanguage: string = 'its original language'
 ): Promise<{ [key: string]: TranslationResult }> {
   try {
     const apiKey = getApiKey();
@@ -169,7 +170,8 @@ export async function translateFields(
 
     const prompt = `
       You are a professional translator for a global food ordering platform.
-      Translate the following fields from ${sourceLanguage} into these languages: ${targetLanguages.join(', ')}.
+      Identify the source language of each field, and translate it into ALL of the following target languages: ${targetLanguages.join(', ')}.
+      If a field's text is already in one of the target languages, you must still output it for that language code.
       
       Fields:
       ${fields.map(f => `${f.key}: "${f.value}"`).join('\n')}

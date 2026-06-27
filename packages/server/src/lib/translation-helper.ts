@@ -1,7 +1,7 @@
 import { translateContent, translateFields } from './ai.js';
 import logger from './logger.js';
 
-export const SUPPORTED_LANGUAGES = ['en', 'th', 'id', 'vi', 'tl', 'es', 'fr', 'de', 'it', 'pt', 'ja', 'ko'];
+export const SUPPORTED_LANGUAGES = ['zh-TW', 'en', 'th', 'id', 'vi', 'tl', 'es', 'fr', 'de', 'it', 'pt', 'ja', 'ko'];
 
 /**
  * Automatically translates a menu item's fields if they are missing translations.
