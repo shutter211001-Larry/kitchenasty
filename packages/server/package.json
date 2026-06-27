@@ -4,15 +4,15 @@
   "private": true,
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "build": "npx prisma@5.22.0 generate --schema=../../prisma/schema.prisma && npx prisma@5.22.0 generate --schema=../../prisma/shutter-erp.prisma && tsc",
-    "start": "npx prisma@5.22.0 migrate deploy --schema=../../prisma/schema.prisma && npx prisma@5.22.0 migrate deploy --schema=../../prisma/shutter-erp.prisma && node dist/index.js",
+    "build": "npx prisma@5.22.0 generate --schema=../../prisma/schema.prisma && npx prisma@5.22.0 generate --schema=../../prisma/erp/shutter-erp.prisma && tsc",
+    "start": "npx prisma@5.22.0 migrate deploy --schema=../../prisma/schema.prisma && npx prisma@5.22.0 migrate deploy --schema=../../prisma/erp/shutter-erp.prisma && node dist/index.js",
     "db:migrate": "npx prisma migrate dev --schema=../../prisma/schema.prisma",
-    "db:migrate:shutter-erp": "npx prisma migrate dev --schema=../../prisma/shutter-erp.prisma",
-    "db:deploy:shutter-erp": "npx prisma migrate deploy --schema=../../prisma/shutter-erp.prisma",
+    "db:migrate:shutter-erp": "npx prisma migrate dev --schema=../../prisma/erp/shutter-erp.prisma",
+    "db:deploy:shutter-erp": "npx prisma migrate deploy --schema=../../prisma/erp/shutter-erp.prisma",
     "db:seed": "npx prisma db seed",
     "db:reset": "npx prisma migrate reset --schema=../../prisma/schema.prisma",
     "db:studio": "npx prisma studio --schema=../../prisma/schema.prisma",
-    "db:studio:shutter-erp": "npx prisma studio --schema=../../prisma/shutter-erp.prisma",
+    "db:studio:shutter-erp": "npx prisma studio --schema=../../prisma/erp/shutter-erp.prisma",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:unit": "vitest run src/__tests__/unit",
@@ -68,3 +68,4 @@
     "vitest": "^4.0.18"
   }
 }
+

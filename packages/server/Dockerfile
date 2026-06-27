@@ -47,4 +47,4 @@ COPY --from=builder /app/packages/server/dist/ packages/server/dist/
 
 EXPOSE 3000
 
-CMD ["sh", "-c", "npx prisma migrate deploy --schema prisma/schema.prisma && npx prisma db push --schema prisma/shutter-erp.prisma && node packages/server/dist/index.js"]
+CMD ["sh", "-c", "npx prisma migrate deploy --schema prisma/schema.prisma && npx prisma migrate deploy --schema prisma/erp/shutter-erp.prisma && node packages/server/dist/index.js"]

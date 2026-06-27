@@ -1,6 +1,6 @@
 generator client {
   provider      = "prisma-client-js"
-  output        = "../packages/server/node_modules/@shutter-erp/client"
+  output        = "../../packages/server/node_modules/@shutter-erp/client"
   binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
