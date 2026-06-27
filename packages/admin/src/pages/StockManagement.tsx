@@ -334,11 +334,8 @@ export default function StockManagement() {
         <div className="flex flex-wrap items-center gap-2 self-start md:self-auto">
           <button
             onClick={() => {
-              const url = import.meta.env.VITE_ERP_URL_PUBLIC;
-              if (!url) {
-                alert('系統尚未設定 ERP_URL_PUBLIC 環境變數，無法自動跳轉！');
-                return;
-              }
+              // 優先讀取前端環境變數，若無則透過目前網域動態推導 (白牌化設計)
+              const url = import.meta.env.VITE_ERP_URL_PUBLIC || window.location.origin.replace('admin', 'erp');
               window.open(url, '_blank');
             }}
             className="px-4 py-2 bg-indigo-600 border border-transparent rounded-lg text-sm font-medium text-white hover:bg-indigo-700 shadow-sm transition-colors inline-flex items-center gap-1.5"
