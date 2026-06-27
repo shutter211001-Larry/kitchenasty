@@ -643,7 +643,7 @@ export async function sendTestEmail(req: Request, res: Response): Promise<void> 
 
       const encodedMessage = Buffer.from(message).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 
-      const apiResponse = await fetch(`https://gmail.googleapis.com/gmail/v1/users/${oauth2Config.user}/messages/send`, {
+      const apiResponse = await fetch(`https://gmail.googleapis.com/gmail/v1/users/me/messages/send`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${accessToken}`,
