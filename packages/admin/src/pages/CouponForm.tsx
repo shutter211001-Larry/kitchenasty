@@ -18,6 +18,7 @@ export default function CouponForm() {
   const [minItemCount, setMinItemCount] = useState(0);
   const [maxDiscount, setMaxDiscount] = useState<string>('');
   const [usageLimit, setUsageLimit] = useState<string>('');
+  const [isUnlimitedUsage, setIsUnlimitedUsage] = useState(true);
   const [perCustomer, setPerCustomer] = useState(1);
   const [startsAt, setStartsAt] = useState('');
   const [expiresAt, setExpiresAt] = useState('');
@@ -73,6 +74,7 @@ export default function CouponForm() {
         setMinOrder(c.minOrder);
         setMaxDiscount(c.maxDiscount !== null ? String(c.maxDiscount) : '');
         setUsageLimit(c.usageLimit !== null ? String(c.usageLimit) : '');
+        setIsUnlimitedUsage(c.usageLimit === null);
         setPerCustomer(c.perCustomer);
         setStartsAt(c.startsAt ? c.startsAt.split('T')[0] : '');
         setExpiresAt(c.expiresAt ? c.expiresAt.split('T')[0] : '');
@@ -153,7 +155,7 @@ export default function CouponForm() {
       value,
       minOrder,
       maxDiscount: maxDiscount ? parseFloat(maxDiscount) : null,
-      usageLimit: usageLimit ? parseInt(usageLimit) : null,
+      usageLimit: isUnlimitedUsage ? null : (usageLimit ? parseInt(usageLimit) : null),
       perCustomer,
       startsAt: startsAt || null,
       expiresAt: expiresAt || null,
@@ -320,14 +322,28 @@ export default function CouponForm() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">總發行/套用數量上限</label>
-                <input
-                  type="number"
-                  min="1"
-                  value={usageLimit}
-                  onChange={(e) => setUsageLimit(e.target.value)}
-                  placeholder="無限制"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none"
-                />
+                <div className="flex items-center gap-3">
+                  <input
+                    type="number"
+                    min="1"
+                    value={usageLimit}
+                    onChange={(e) => setUsageLimit(e.target.value)}
+                    disabled={isUnlimitedUsage}
+                    className={`w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none ${isUnlimitedUsage ? 'bg-gray-100 text-gray-400' : ''}`}
+                  />
+                  <label className="flex items-center gap-2 shrink-0 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={isUnlimitedUsage}
+                      onChange={(e) => {
+                        setIsUnlimitedUsage(e.target.checked);
+                        if (e.target.checked) setUsageLimit('');
+                      }}
+                      className="rounded border-gray-300 w-4 h-4 text-primary-600 focus:ring-primary-500"
+                    />
+                    <span className="text-sm font-medium text-gray-700">無限次數</span>
+                  </label>
+                </div>
               </div>
             </div>
           </div>
