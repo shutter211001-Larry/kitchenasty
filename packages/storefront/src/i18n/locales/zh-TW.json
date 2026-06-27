@@ -362,5 +362,13 @@
     "join": "加入",
     "orEnterCodeToJoin": "或輸入代碼加入訂單",
     "enterCodeToJoinTogether": "輸入代碼一起點餐"
+  },
+  "cookie": {
+    "title": "Cookie 設定",
+    "description": "我們使用 cookies 來提升您的瀏覽體驗。您可以在下方自訂您的設定。",
+    "showDetails": "顯示詳細資訊",
+    "hideDetails": "隱藏詳細資訊",
+    "savePreferences": "儲存設定",
+    "acceptAll": "全部接受"
   }
 }

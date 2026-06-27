@@ -113,16 +113,16 @@ export default function CookieBanner() {
         <div className="flex flex-col gap-3">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h3 className="text-sm font-semibold text-gray-900">Cookie Preferences</h3>
+              <h3 className="text-sm font-semibold text-gray-900">{t('cookie.title', { defaultValue: 'Cookie Preferences' })}</h3>
               <p className="text-xs text-gray-500 mt-1">
-                We use cookies to enhance your experience. You can customize your preferences below.
+                {t('cookie.description', { defaultValue: 'We use cookies to enhance your experience. You can customize your preferences below.' })}
               </p>
             </div>
             <button
               onClick={() => setShowDetails(!showDetails)}
               className="text-xs text-primary-600 hover:text-primary-700 whitespace-nowrap"
             >
-              {showDetails ? 'Hide details' : 'Show details'}
+              {showDetails ? t('cookie.hideDetails', { defaultValue: 'Hide details' }) : t('cookie.showDetails', { defaultValue: 'Show details' })}
             </button>
           </div>
 
@@ -160,13 +160,13 @@ export default function CookieBanner() {
               onClick={saveSelected}
               className="px-4 py-2 text-xs font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
             >
-              Save Preferences
+              {t('cookie.savePreferences', { defaultValue: 'Save Preferences' })}
             </button>
             <button
               onClick={acceptAll}
               className="px-4 py-2 text-xs font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 transition-colors"
             >
-              Accept All
+              {t('cookie.acceptAll', { defaultValue: 'Accept All' })}
             </button>
           </div>
         </div>
