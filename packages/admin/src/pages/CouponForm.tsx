@@ -17,6 +17,7 @@ export default function CouponForm() {
   const [minOrder, setMinOrder] = useState(0);
   const [minItemCount, setMinItemCount] = useState(0);
   const [maxDiscount, setMaxDiscount] = useState<string>('');
+  const [usageLimit, setUsageLimit] = useState<string>('');
   const [isUnlimitedUsage, setIsUnlimitedUsage] = useState(true);
   const [perCustomer, setPerCustomer] = useState(1);
   const [isUnlimitedPerCustomer, setIsUnlimitedPerCustomer] = useState(false);
