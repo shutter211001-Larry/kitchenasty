@@ -28,6 +28,15 @@ import {
 
 const router = Router();
 
+// Public environment variables (useful for frontend config dynamically fetched from backend)
+router.get('/public-env', (req, res) => {
+  res.json({
+    erpUrl: process.env.ERP_URL_PUBLIC || '',
+    storeUrl: process.env.STORE_URL_PUBLIC || '',
+    adminUrl: process.env.ADMIN_URL_PUBLIC || '',
+  });
+});
+
 // Debug raw data
 router.get('/debug', debugSettings);
 
