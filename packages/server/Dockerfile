@@ -20,7 +20,7 @@ RUN npm run build -w packages/shared
 
 COPY packages/server/ packages/server/
 RUN npx -w packages/server prisma generate --schema ../../prisma/schema.prisma
-RUN npx -w packages/server prisma generate --schema ../../prisma/shutter-erp.prisma
+RUN npx -w packages/server prisma generate --schema ../../prisma/erp/shutter-erp.prisma
 RUN npm run build -w packages/server
 
 FROM node:22-alpine
@@ -40,7 +40,7 @@ RUN npm install --omit=dev --no-audit --no-fund
 
 COPY prisma/ prisma/
 RUN npx -w packages/server prisma generate --schema ../../prisma/schema.prisma
-RUN npx -w packages/server prisma generate --schema ../../prisma/shutter-erp.prisma
+RUN npx -w packages/server prisma generate --schema ../../prisma/erp/shutter-erp.prisma
 
 COPY --from=builder /app/packages/shared/dist/ packages/shared/dist/
 COPY --from=builder /app/packages/server/dist/ packages/server/dist/
@@ -48,3 +48,4 @@ COPY --from=builder /app/packages/server/dist/ packages/server/dist/
 EXPOSE 3000
 
 CMD ["sh", "-c", "npx prisma migrate deploy --schema prisma/schema.prisma && npx prisma migrate deploy --schema prisma/erp/shutter-erp.prisma && node packages/server/dist/index.js"]
+
