@@ -96,20 +96,16 @@ export function createApp() {
     crossOriginResourcePolicy: { policy: "cross-origin" },
     contentSecurityPolicy: false, // In development/simple production, we can disable or fine-tune this
   }));
-  // Parse additional CORS origins from .env
-  const extraOrigins = process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(',') : [];
-
   const corsOrigins = [
     process.env.STORE_URL_PUBLIC,
     process.env.ADMIN_URL_PUBLIC,
     process.env.ERP_URL_PUBLIC,
-    ...extraOrigins,
     'http://localhost:5173', 
     'http://localhost:5174', 
     'http://localhost:5175',
     'http://localhost:3000'
   ].filter(Boolean).map(url => {
-    let normalized = url!.trim().replace(/\/$/, '');
+    let normalized = url!.replace(/\/$/, '');
     if (!normalized.startsWith('http://') && !normalized.startsWith('https://')) {
       return normalized.includes('localhost') || normalized.includes('127.0.0.1')
         ? `http://${normalized}`
@@ -117,16 +113,14 @@ export function createApp() {
     }
     return normalized;
   }) as string[];
-  
   app.use(cors({
     origin: (origin, callback) => {
       if (!origin || corsOrigins.includes('*')) {
         return callback(null, true);
       }
-      // Allow configured origins + any local development or internal IPs + Railway deployments
+      // Allow configured origins + any local development or internal IPs
       const isLocal = origin.includes('localhost') || origin.includes('127.0.0.1') || origin.includes('192.168.') || origin.includes('10.') || origin.includes('.railway.internal');
-      const isRailway = origin.endsWith('.up.railway.app');
-      const isAllowed = corsOrigins.includes(origin) || isLocal || isRailway;
+      const isAllowed = corsOrigins.includes(origin) || isLocal;
 
       if (isAllowed) {
         callback(null, true);
