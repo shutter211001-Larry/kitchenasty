@@ -178,16 +178,26 @@ export async function deleteLocation(req: Request<{ id: string }>, res: Response
   }
 
   const orderCount = await prisma.order.count({ where: { locationId: id } });
+  const reservationCount = await prisma.reservation.count({ where: { locationId: id } });
 
-  if (orderCount > 0) {
+  if (orderCount > 0 || reservationCount > 0) {
     res.status(409).json({
       success: false,
-      error: 'Cannot delete location with existing orders. Deactivate it instead.',
+      error: 'Cannot delete location with existing orders or reservations. Deactivate it instead.',
     });
     return;
   }
 
-  await prisma.location.delete({ where: { id } });
+  try {
+    await prisma.location.delete({ where: { id } });
+  } catch (error: any) {
+    if (error.code === 'P2003') {
+      res.status(409).json({ success: false, error: 'Cannot delete location because it is still referenced by other records (e.g. inventory or mealtimes). Deactivate it instead.' });
+      return;
+    }
+    throw error;
+  }
+
   auditLog(req, { action: 'delete', entity: 'Location', entityId: id, details: { name: existing.name } });
   res.json({ success: true, message: 'Location deleted' });
 }
