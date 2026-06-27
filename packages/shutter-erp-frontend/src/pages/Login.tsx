@@ -40,7 +40,7 @@ const Login: React.FC = () => {
   };
 
   const handleQuickFill = () => {
-    setEmail('admin@pizzamaster.com');
+    setEmail('admin@shutter.com');
     setPassword('admin123');
     setError(null);
   };
@@ -154,7 +154,7 @@ const Login: React.FC = () => {
                   <span className="px-1.5 py-0.5 bg-emerald-500/10 text-emerald-400 text-[8px] font-black uppercase rounded">Auto</span>
                 </div>
                 <div className="text-[10px] text-slate-400 mt-0.5">
-                  帳號: admin@pizzamaster.com | 密碼: admin123
+                  帳號: admin@shutter.com | 密碼: admin123
                 </div>
               </div>
             </button>
