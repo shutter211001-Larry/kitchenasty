@@ -42,6 +42,7 @@ export default function SettingsGeneral() {
   const [navShowMenu, setNavShowMenu] = useState(true);
   const [navShowReservations, setNavShowReservations] = useState(true);
   const [showMembership, setShowMembership] = useState(true);
+  const [showLanguageEmoji, setShowLanguageEmoji] = useState(false);
 
   useEffect(() => {
     fetch('/api/settings/general', { headers: { Authorization: `Bearer ${token}` } })
@@ -62,6 +63,7 @@ export default function SettingsGeneral() {
           if (d.navShowMenu !== undefined) setNavShowMenu(d.navShowMenu);
           if (d.navShowReservations !== undefined) setNavShowReservations(d.navShowReservations);
           if (d.showMembership !== undefined) setShowMembership(d.showMembership);
+          if (d.showLanguageEmoji !== undefined) setShowLanguageEmoji(d.showLanguageEmoji);
         }
       })
       .catch(() => {})
@@ -79,7 +81,7 @@ export default function SettingsGeneral() {
         body: JSON.stringify({
           contactEmail, contactPhone, timezone, distanceUnit, defaultCurrency,
           currencySymbol, currencyPosition, googleMapsApiKey,
-          navShowHome, navShowLocations, navShowMenu, navShowReservations, showMembership
+          navShowHome, navShowLocations, navShowMenu, navShowReservations, showMembership, showLanguageEmoji
         }),
       });
       const data = await res.json();
@@ -159,6 +161,13 @@ export default function SettingsGeneral() {
                 <div>
                   <p className="text-sm font-bold text-gray-900">啟用會員系統</p>
                   <p className="text-xs text-gray-500">關閉後將隱藏登入/註冊按鈕</p>
+                </div>
+              </label>
+              <label className="flex items-center gap-3 cursor-pointer p-3 bg-gray-50 rounded-lg border border-gray-200">
+                <input type="checkbox" checked={showLanguageEmoji} onChange={(e) => setShowLanguageEmoji(e.target.checked)} className="w-4 h-4 text-primary-600 rounded" />
+                <div>
+                  <p className="text-sm font-bold text-gray-900">顯示語言選單國旗/Emoji</p>
+                  <p className="text-xs text-gray-500">開啟後將在語言選單顯示國旗圖示</p>
                 </div>
               </label>
             </div>

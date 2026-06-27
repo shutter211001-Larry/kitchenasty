@@ -87,6 +87,7 @@ export interface SiteSettings {
   };
   orderStatusMessage?: string;
   orderStatusMessageTranslations?: Record<string, string>;
+  showLanguageEmoji?: boolean;
 }
 
 interface ThemeContextType {

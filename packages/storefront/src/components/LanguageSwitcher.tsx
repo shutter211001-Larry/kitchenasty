@@ -1,9 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { SUPPORTED_LANGUAGES } from '../i18n/index.js';
+import { useTheme } from '../context/ThemeContext.js';
 
 export default function LanguageSwitcher() {
   const { i18n } = useTranslation();
+  const { settings } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -47,9 +49,11 @@ export default function LanguageSwitcher() {
         className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-main bg-surface border border-input rounded-full hover:bg-surface-soft transition-all shadow-sm active:scale-95"
         type="button"
       >
-        <span className="flex items-center justify-center min-w-[20px]">
-          <Flag code={currentLanguage.code} flag={currentLanguage.flag} />
-        </span>
+        {settings.showLanguageEmoji && (
+          <span className="flex items-center justify-center min-w-[20px]">
+            <Flag code={currentLanguage.code} flag={currentLanguage.flag} />
+          </span>
+        )}
         <span className="hidden sm:inline text-main">{currentLanguage.name}</span>
         <svg
           className={`w-4 h-4 text-sub transition-transform ${isOpen ? 'rotate-180' : ''}`}
@@ -77,9 +81,11 @@ export default function LanguageSwitcher() {
                     : 'text-main hover:bg-surface-soft'
                 }`}
               >
-                <span className="leading-none flex items-center justify-center">
-                  <Flag code={lang.code} flag={lang.flag} />
-                </span>
+                {settings.showLanguageEmoji && (
+                  <span className="leading-none flex items-center justify-center">
+                    <Flag code={lang.code} flag={lang.flag} />
+                  </span>
+                )}
                 <span className="text-main">{lang.name}</span>
                 {i18n.language === lang.code && (
                   <svg className="ml-auto w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">

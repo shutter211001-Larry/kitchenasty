@@ -102,6 +102,7 @@ function toPublicSettings(settings: Awaited<ReturnType<typeof getOrCreateSetting
     showMembership: isTrue(general.showMembership, true),
     orderStatusMessage: general.orderStatusMessage,
     orderStatusMessageTranslations: general.orderStatusMessageTranslations,
+    showLanguageEmoji: isTrue(general.showLanguageEmoji, false),
     orderSettings: settings.orderSettings ? {
       enabled: isTrue(order.enabled, true),
       deliveryEnabled: isTrue(order.deliveryEnabled, true),
@@ -343,6 +344,7 @@ const generalSettingsSchema = z.object({
   permissions: z.record(z.record(z.boolean())).optional(),
   orderStatusMessage: z.string().optional(),
   orderStatusMessageTranslations: z.record(z.string()).optional(),
+  showLanguageEmoji: z.boolean().optional(),
 });
 
 const orderSettingsSchema = z.object({
