@@ -17,9 +17,9 @@ export default function CouponForm() {
   const [minOrder, setMinOrder] = useState(0);
   const [minItemCount, setMinItemCount] = useState(0);
   const [maxDiscount, setMaxDiscount] = useState<string>('');
-  const [usageLimit, setUsageLimit] = useState<string>('');
   const [isUnlimitedUsage, setIsUnlimitedUsage] = useState(true);
   const [perCustomer, setPerCustomer] = useState(1);
+  const [isUnlimitedPerCustomer, setIsUnlimitedPerCustomer] = useState(false);
   const [startsAt, setStartsAt] = useState('');
   const [expiresAt, setExpiresAt] = useState('');
   const [isActive, setIsActive] = useState(true);
@@ -76,6 +76,7 @@ export default function CouponForm() {
         setUsageLimit(c.usageLimit !== null ? String(c.usageLimit) : '');
         setIsUnlimitedUsage(c.usageLimit === null);
         setPerCustomer(c.perCustomer);
+        setIsUnlimitedPerCustomer(c.perCustomer === 0);
         setStartsAt(c.startsAt ? c.startsAt.split('T')[0] : '');
         setExpiresAt(c.expiresAt ? c.expiresAt.split('T')[0] : '');
         setIsActive(c.isActive);
@@ -156,7 +157,7 @@ export default function CouponForm() {
       minOrder,
       maxDiscount: maxDiscount ? parseFloat(maxDiscount) : null,
       usageLimit: isUnlimitedUsage ? null : (usageLimit ? parseInt(usageLimit) : null),
-      perCustomer,
+      perCustomer: isUnlimitedPerCustomer ? 0 : perCustomer,
       startsAt: startsAt || null,
       expiresAt: expiresAt || null,
       isActive,
@@ -312,13 +313,29 @@ export default function CouponForm() {
             <div className="border-t border-gray-100 pt-6 mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">每位顧客使用次數上限</label>
-                <input
-                  type="number"
-                  min="1"
-                  value={perCustomer}
-                  onChange={(e) => setPerCustomer(parseInt(e.target.value) || 1)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none"
-                />
+                <div className="flex items-center gap-3">
+                  <input
+                    type="number"
+                    min="1"
+                    value={perCustomer}
+                    onChange={(e) => setPerCustomer(parseInt(e.target.value) || 1)}
+                    disabled={isUnlimitedPerCustomer}
+                    className={`w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none ${isUnlimitedPerCustomer ? 'bg-gray-100 text-gray-400' : ''}`}
+                  />
+                  <label className="flex items-center gap-2 shrink-0 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={isUnlimitedPerCustomer}
+                      onChange={(e) => {
+                        setIsUnlimitedPerCustomer(e.target.checked);
+                        if (e.target.checked) setPerCustomer(0);
+                        else setPerCustomer(1);
+                      }}
+                      className="rounded border-gray-300 w-4 h-4 text-primary-600 focus:ring-primary-500"
+                    />
+                    <span className="text-sm font-medium text-gray-700">無限次數</span>
+                  </label>
+                </div>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">總發行/套用數量上限</label>
