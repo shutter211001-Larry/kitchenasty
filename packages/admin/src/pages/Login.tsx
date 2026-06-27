@@ -83,6 +83,18 @@ export default function Login({ onLogin }: Props) {
           >
             {loading ? 'Signing in...' : 'Sign In'}
           </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setEmail('admin@shutter.com');
+              setPassword('admin123');
+            }}
+            className="w-full bg-gray-50 text-gray-600 py-2 rounded-lg text-sm font-medium hover:bg-gray-100 transition-colors border border-gray-200 flex items-center justify-center gap-2 mt-3"
+          >
+            <span>✨</span>
+            <span>一鍵帶入預設管理員</span>
+          </button>
         </form>
       </div>
     </div>
