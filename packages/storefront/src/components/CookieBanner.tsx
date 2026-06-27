@@ -15,7 +15,7 @@ interface CookieCategory {
 const STORAGE_KEY = 'cookie-consent';
 
 export default function CookieBanner() {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [visible, setVisible] = useState(false);
   const [categories, setCategories] = useState<CookieCategory[]>([]);
   const [preferences, setPreferences] = useState<Record<string, boolean>>({});
