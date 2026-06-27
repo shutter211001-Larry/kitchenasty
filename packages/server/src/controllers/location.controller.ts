@@ -9,7 +9,7 @@ import { auditLog } from '../lib/audit.js';
 
 const createLocationSchema = z.object({
   name: z.string().min(1),
-  slug: z.string().min(1).regex(/^[a-z0-9-]+$/, 'Slug must be lowercase alphanumeric with hyphens'),
+  slug: z.string().min(1).regex(/^[a-zA-Z0-9-]+$/, 'Slug must be alphanumeric with hyphens').toLowerCase(),
   description: z.string().optional(),
   phone: z.string().optional(),
   email: z.string().email().optional(),

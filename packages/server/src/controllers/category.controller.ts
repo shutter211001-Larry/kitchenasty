@@ -7,7 +7,7 @@ import { autoTranslateCategory } from '../lib/translation-helper.js';
 const createCategorySchema = z.object({
   name: z.string().min(1),
   nameTranslations: z.record(z.string().nullable()).optional(),
-  slug: z.string().min(1).regex(/^[a-z0-9-]+$/, 'Slug must be lowercase alphanumeric with hyphens'),
+  slug: z.string().min(1).regex(/^[a-zA-Z0-9-]+$/, 'Slug must be alphanumeric with hyphens').toLowerCase(),
   description: z.string().nullable().optional(),
   descriptionTranslations: z.record(z.string().nullable()).optional(),
   image: z.string().nullable().optional(),
