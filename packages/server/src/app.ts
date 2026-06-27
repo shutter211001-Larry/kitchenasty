@@ -119,7 +119,7 @@ export function createApp() {
         return callback(null, true);
       }
       // Allow configured origins + any local development or internal IPs
-      const isLocal = origin.includes('localhost') || origin.includes('127.0.0.1') || origin.includes('192.168.') || origin.includes('10.') || origin.includes('.railway.internal') || origin.includes('.up.railway.app');
+      const isLocal = origin.includes('localhost') || origin.includes('127.0.0.1') || origin.includes('192.168.') || origin.includes('10.') || origin.includes('.railway.internal');
       const isAllowed = corsOrigins.includes(origin) || isLocal;
 
       if (isAllowed) {
