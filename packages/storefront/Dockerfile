@@ -18,7 +18,8 @@ RUN npm run build -w packages/shared
 COPY packages/storefront/ packages/storefront/
 ARG VITE_API_URL
 ENV VITE_API_URL=${VITE_API_URL}
-
+ARG VITE_API_URL_PUBLIC
+ENV VITE_API_URL_PUBLIC=${VITE_API_URL_PUBLIC}
 RUN npm run build -w packages/storefront
 
 FROM node:22-alpine
