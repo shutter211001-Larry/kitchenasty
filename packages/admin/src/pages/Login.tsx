@@ -1,4 +1,4 @@
-import { useState, FormEvent } from 'react';
+import { useState, FormEvent, useEffect } from 'react';
 
 interface Props {
   onLogin: (token: string) => void;
@@ -9,6 +9,18 @@ export default function Login({ onLogin }: Props) {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [hasSuperAdmin, setHasSuperAdmin] = useState(true);
+
+  useEffect(() => {
+    fetch('/api/auth/staff/setup-status')
+      .then(res => res.json())
+      .then(data => {
+        if (data && typeof data.hasSuperAdmin === 'boolean') {
+          setHasSuperAdmin(data.hasSuperAdmin);
+        }
+      })
+      .catch(err => console.error('Failed to fetch setup status:', err));
+  }, []);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -79,22 +91,24 @@ export default function Login({ onLogin }: Props) {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-primary-600 text-white py-2.5 rounded-lg font-semibold hover:bg-primary-700 transition-colors disabled:opacity-50"
+            className="w-full bg-primary-600 text-white py-3 rounded-lg font-medium hover:bg-primary-700 transition-colors disabled:opacity-50"
           >
             {loading ? 'Signing in...' : 'Sign In'}
           </button>
 
-          <button
-            type="button"
-            onClick={() => {
-              setEmail('admin@shutter.com');
-              setPassword('admin123');
-            }}
-            className="w-full bg-gray-50 text-gray-600 py-2 rounded-lg text-sm font-medium hover:bg-gray-100 transition-colors border border-gray-200 flex items-center justify-center gap-2 mt-3"
-          >
-            <span>✨</span>
-            <span>一鍵帶入預設管理員</span>
-          </button>
+          {!hasSuperAdmin && (
+            <button
+              type="button"
+              onClick={() => {
+                setEmail('admin@shutter.com');
+                setPassword('admin123');
+              }}
+              className="w-full bg-gray-50 text-gray-600 py-2 rounded-lg text-sm font-medium hover:bg-gray-100 transition-colors border border-gray-200 flex items-center justify-center gap-2 mt-3"
+            >
+              <span>✨</span>
+              <span>一鍵帶入預設管理員</span>
+            </button>
+          )}
         </form>
       </div>
     </div>

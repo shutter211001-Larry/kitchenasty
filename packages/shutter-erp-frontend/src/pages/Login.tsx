@@ -131,6 +131,7 @@ const Login: React.FC = () => {
           </button>
         </form>
 
+        {!hasSuperAdmin && (
           <>
             {/* Divider */}
             <div className="w-full flex items-center gap-3 my-6">

@@ -14,6 +14,15 @@ const staffLoginSchema = z.object({
   password: z.string().min(6),
 });
 
+export async function getSetupStatus(req: Request, res: Response): Promise<void> {
+  try {
+    const adminCount = await prisma.user.count({ where: { role: 'SUPER_ADMIN' } });
+    res.json({ hasSuperAdmin: adminCount > 0 });
+  } catch (err) {
+    res.status(500).json({ error: '獲取系統初始化狀態失敗' });
+  }
+}
+
 export async function staffLogin(req: Request, res: Response): Promise<void> {
   const parsed = staffLoginSchema.safeParse(req.body);
   if (!parsed.success) {

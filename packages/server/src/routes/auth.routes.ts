@@ -8,6 +8,7 @@ const router = Router();
 const STOREFRONT_URL = process.env.STORE_URL_PUBLIC || 'http://localhost:5174';
 
 // STAFF AUTH
+router.get('/staff/setup-status', authController.getSetupStatus);
 router.post('/staff/login', authController.staffLogin);
 router.post('/staff/register', authenticate, requireRole('SUPER_ADMIN'), authController.staffRegister);
 

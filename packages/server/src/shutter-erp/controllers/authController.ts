@@ -132,8 +132,8 @@ export const getMe = async (req: AuthenticatedRequest, res: Response) => {
 
 export const getSetupStatus = async (req: Request, res: Response) => {
   try {
-    const userCount = await prisma.user.count();
-    res.json({ hasUsers: userCount > 0 });
+    const adminCount = await prisma.user.count({ where: { role: 'ADMIN' } });
+    res.json({ hasSuperAdmin: adminCount > 0 });
   } catch (error) {
     res.status(500).json({ error: '獲取系統初始化狀態失敗' });
   }
