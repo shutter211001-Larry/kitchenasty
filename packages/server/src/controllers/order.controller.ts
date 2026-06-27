@@ -23,7 +23,7 @@ import { validateAndCalculateDiscount, findAndApplyBestAutomaticDiscount } from 
 // HELPERS
 // ============================================================
 
-function formatNotificationMessage(template: string, order: any, customer?: any) {
+function formatNotificationMessage(template: string, order: any, customer?: any, timezone?: string) {
   const userLang = order.language || 'zh-TW';
   
   const guestNames: Record<string, string> = {
@@ -90,7 +90,7 @@ function formatNotificationMessage(template: string, order: any, customer?: any)
         userLang === 'th' ? 'th-TH' :
         userLang === 'tl' ? 'fil-PH' :
         userLang === 'vi' ? 'vi-VN' : 'en-US', 
-        { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }
+        { timeZone: timezone || 'Asia/Taipei', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }
       )
     : (asapLabels[userLang] || asapLabels['en']);
 
@@ -1153,6 +1153,8 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
       const { sendLinePush } = await import('./line.controller.js');
       const settings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
       const lineSettings = (settings?.lineSettings as any) || {};
+      const generalSettings = (settings?.generalSettings as any) || {};
+      const timezone = generalSettings.timezone || 'Asia/Taipei';
       const lineNotifications = lineSettings.notifications || {};
       
       const isEnabled = lineNotifications['PLACED']?.enabled !== false;
@@ -1181,7 +1183,7 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
       }
 
       if (isEnabled && template) {
-        const formattedMessage = formatNotificationMessage(template, order, customer);
+        const formattedMessage = formatNotificationMessage(template, order, customer, timezone);
         const prefixObj = linePrefixLocales[langKey] || linePrefixLocales['en'];
         const prefix = prefixObj.placed;
         
@@ -1490,7 +1492,9 @@ export async function updateOrderStatus(req: Request<{ id: string }>, res: Respo
         }
 
         if (template) {
-          let formattedMsg = formatNotificationMessage(template, updated, order.customer);
+          const generalSettings = (settings?.generalSettings as any) || {};
+          const timezone = generalSettings.timezone || 'Asia/Taipei';
+          let formattedMsg = formatNotificationMessage(template, updated, order.customer, timezone);
           
           if (!isPreTranslated && statusConfig?.message) {
             try {
@@ -1581,7 +1585,9 @@ export async function updateOrderStatus(req: Request<{ id: string }>, res: Respo
       console.log(`[LINE Notify] isEnabled: ${isEnabled}, template: ${template}`);
 
       if (isEnabled && template) {
-        const formattedMessage = formatNotificationMessage(template, updated, order.customer);
+        const generalSettings = (settings?.generalSettings as any) || {};
+        const timezone = generalSettings.timezone || 'Asia/Taipei';
+        const formattedMessage = formatNotificationMessage(template, updated, order.customer, timezone);
         const prefixObj = linePrefixLocales[langKey] || linePrefixLocales['en'];
         const prefix = prefixObj.update;
 
