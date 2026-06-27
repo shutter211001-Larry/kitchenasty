@@ -9,12 +9,12 @@ const Login: React.FC = () => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [hasUsers, setHasUsers] = useState(true); // default true for security, check dynamically upon mount
+  const [hasSuperAdmin, setHasSuperAdmin] = useState(true); // default true for security, check dynamically upon mount
 
   useEffect(() => {
     axios.get('http://localhost:3000/api/auth/setup-status')
       .then(res => {
-        setHasUsers(res.data.hasUsers);
+        setHasSuperAdmin(res.data.hasSuperAdmin);
       })
       .catch(err => {
         console.error('Failed to fetch setup status', err);
@@ -159,6 +159,7 @@ const Login: React.FC = () => {
               </div>
             </button>
           </>
+        )}
 
       </div>
     </div>
