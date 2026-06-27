@@ -71,6 +71,21 @@ export default function CouponList() {
     }
   }
 
+  async function handleDelete(id: string, code: string) {
+    if (!window.confirm(`您確定要刪除優惠券 ${code} 嗎？此操作將無法復原。`)) return;
+    try {
+      const res = await fetch(`/api/coupons/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || '刪除失敗');
+      setCoupons((prev) => prev.filter((c) => c.id !== id));
+    } catch (err: any) {
+      alert(err.message);
+    }
+  }
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
@@ -160,13 +175,22 @@ export default function CouponList() {
                       </button>
                     </td>
                     <td className="px-4 py-3">
-                      <Link
-                        to={`/promotions/coupons/${coupon.id}`}
-                        className="text-primary-600 hover:text-primary-700 text-xs font-medium"
-                        aria-label={`編輯優惠券 ${coupon.code}`}
-                      >
-                        編輯
-                      </Link>
+                      <div className="flex items-center gap-3">
+                        <Link
+                          to={`/promotions/coupons/${coupon.id}`}
+                          className="text-primary-600 hover:text-primary-700 text-xs font-medium"
+                          aria-label={`編輯優惠券 ${coupon.code}`}
+                        >
+                          編輯
+                        </Link>
+                        <button
+                          onClick={() => handleDelete(coupon.id, coupon.code)}
+                          className="text-red-500 hover:text-red-700 text-xs font-medium"
+                          aria-label={`刪除優惠券 ${coupon.code}`}
+                        >
+                          刪除
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

@@ -135,7 +135,16 @@ export async function deleteCoupon(req: Request<{ id: string }>, res: Response):
     return;
   }
 
-  await prisma.coupon.delete({ where: { id: req.params.id } });
+  try {
+    await prisma.coupon.delete({ where: { id: req.params.id } });
+  } catch (error: any) {
+    if (error.code === 'P2003') {
+      res.status(409).json({ success: false, error: 'Cannot delete this coupon because it is already associated with existing orders. You can disable it instead.' });
+      return;
+    }
+    throw error;
+  }
+
   auditLog(req, { action: 'delete', entity: 'Coupon', entityId: req.params.id, details: { code: existing.code } });
   res.json({ success: true, message: 'Coupon deleted' });
 }
