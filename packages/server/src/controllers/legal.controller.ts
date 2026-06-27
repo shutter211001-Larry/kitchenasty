@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { z } from 'zod';
 import prisma from '../lib/db.js';
+import { autoTranslateCookieCategory } from '../lib/translation-helper.js';
 
 const upsertPageSchema = z.object({
   title: z.string().min(1),
@@ -64,7 +65,8 @@ export async function createCookieCategory(req: Request, res: Response): Promise
     return;
   }
 
-  const category = await prisma.cookieCategory.create({ data: parsed.data });
+  const translatedData = await autoTranslateCookieCategory(parsed.data);
+  const category = await prisma.cookieCategory.create({ data: translatedData });
   res.status(201).json({ success: true, data: category });
 }
 
@@ -81,9 +83,11 @@ export async function updateCookieCategory(req: Request<{ id: string }>, res: Re
     return;
   }
 
+  const translatedData = await autoTranslateCookieCategory(parsed.data, existing);
+
   const category = await prisma.cookieCategory.update({
     where: { id: req.params.id },
-    data: parsed.data,
+    data: translatedData,
   });
   res.json({ success: true, data: category });
 }

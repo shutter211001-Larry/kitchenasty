@@ -353,3 +353,47 @@ export async function autoTranslateDietaryPreference(data: any, existingData?: a
     return data;
   }
 }
+
+/**
+ * Automatically translates a cookie category's fields.
+ */
+export async function autoTranslateCookieCategory(data: any, existingData?: any) {
+  try {
+    const fieldsToTranslate: { key: string; value: string }[] = [];
+
+    const shouldTranslate = (field: string, translationsField: string) => {
+      if (!data[field]) return false;
+      if (existingData && data[field] !== existingData[field]) return true;
+      if (!data[translationsField] || Object.keys(data[translationsField]).length < SUPPORTED_LANGUAGES.length) return true;
+      return false;
+    };
+
+    if (shouldTranslate('label', 'labelTranslations')) {
+      fieldsToTranslate.push({ key: 'label', value: data.label });
+    }
+
+    if (shouldTranslate('description', 'descriptionTranslations')) {
+      fieldsToTranslate.push({ key: 'description', value: data.description });
+    }
+
+    if (fieldsToTranslate.length === 0) {
+      logger.info(`[DEBUG] No fields to translate for cookie category: ${data.name}`);
+      return data;
+    }
+
+    logger.info({ fieldsCount: fieldsToTranslate.length }, `Auto-translating cookie category: ${data.name}`);
+    const translations = await translateFields(fieldsToTranslate, SUPPORTED_LANGUAGES);
+    
+    if (translations.label) {
+      data.labelTranslations = { ...(data.labelTranslations || {}), ...translations.label };
+    }
+    if (translations.description) {
+      data.descriptionTranslations = { ...(data.descriptionTranslations || {}), ...translations.description };
+    }
+
+    return data;
+  } catch (error) {
+    logger.error(error as any, '[DEBUG] Auto-translation for cookie category failed:');
+    return data;
+  }
+}

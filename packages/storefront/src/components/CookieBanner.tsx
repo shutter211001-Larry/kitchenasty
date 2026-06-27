@@ -1,17 +1,21 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { API_BASE } from '../lib/api.js';
 
 interface CookieCategory {
   id: string;
   name: string;
   label: string;
+  labelTranslations?: Record<string, string>;
   description: string;
+  descriptionTranslations?: Record<string, string>;
   isRequired: boolean;
 }
 
 const STORAGE_KEY = 'cookie-consent';
 
 export default function CookieBanner() {
+  const { i18n } = useTranslation();
   const [visible, setVisible] = useState(false);
   const [categories, setCategories] = useState<CookieCategory[]>([]);
   const [preferences, setPreferences] = useState<Record<string, boolean>>({});
@@ -130,8 +134,12 @@ export default function CookieBanner() {
                   className="flex items-center justify-between gap-3 text-sm"
                 >
                   <div>
-                    <span className="font-medium text-gray-800">{cat.label}</span>
-                    <span className="block text-xs text-gray-500">{cat.description}</span>
+                    <span className="font-medium text-gray-800">
+                      {cat.labelTranslations?.[i18n.language] || cat.labelTranslations?.[i18n.language.split('-')[0]] || cat.label}
+                    </span>
+                    <span className="block text-xs text-gray-500">
+                      {cat.descriptionTranslations?.[i18n.language] || cat.descriptionTranslations?.[i18n.language.split('-')[0]] || cat.description}
+                    </span>
                   </div>
                   <input
                     type="checkbox"

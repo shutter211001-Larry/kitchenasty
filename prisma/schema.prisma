@@ -576,7 +576,9 @@ model CookieCategory {
   id          String          @id @default(cuid())
   name        String          @unique
   label       String
+  labelTranslations Json?
   description String
+  descriptionTranslations Json?
   isRequired  Boolean         @default(false)
   isActive    Boolean         @default(true)
   sortOrder   Int             @default(0)
