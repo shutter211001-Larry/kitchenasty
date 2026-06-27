@@ -131,7 +131,6 @@ const Login: React.FC = () => {
           </button>
         </form>
 
-        {!hasUsers && (
           <>
             {/* Divider */}
             <div className="w-full flex items-center gap-3 my-6">
@@ -159,7 +158,6 @@ const Login: React.FC = () => {
               </div>
             </button>
           </>
-        )}
 
       </div>
     </div>
