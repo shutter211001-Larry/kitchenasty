@@ -23,15 +23,16 @@
     "seed": "tsx ../../prisma/seed.ts"
   },
   "dependencies": {
-    "@shutter/shared": "*",
     "@line/bot-sdk": "^9.6.0",
     "@prisma/client": "^5.22.0",
+    "@shutter/shared": "*",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.5",
     "csv-parse": "^6.2.1",
     "dotenv": "^16.4.0",
     "expo-server-sdk": "^3.13.0",
     "express": "^4.21.0",
+    "express-async-errors": "^3.1.1",
     "express-rate-limit": "^8.2.1",
     "helmet": "^8.0.0",
     "jsonwebtoken": "^9.0.3",

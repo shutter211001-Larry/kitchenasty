@@ -1,5 +1,6 @@
 import dotenv from 'dotenv';
 dotenv.config();
+import 'express-async-errors';
 
 // Globally normalize all public URLs to ensure they have the correct protocol prefix
 // This fixes broken image URLs in LINE Flex messages, OAuth callbacks, and CORS issues
