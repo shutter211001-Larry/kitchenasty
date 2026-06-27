@@ -111,7 +111,7 @@ export default function DesignBranding() {
             value={siteName}
             onChange={(e) => setSiteName(e.target.value)}
             className="w-full max-w-md px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-            placeholder="PizzaStudio"
+            placeholder="雲端點餐系統"
           />
           <p className="mt-1 text-xs text-gray-500">顯示於頁首、頁尾以及瀏覽器分頁。</p>
         </div>
@@ -123,7 +123,7 @@ export default function DesignBranding() {
             value={siteTitle}
             onChange={(e) => setSiteTitle(e.target.value)}
             className="w-full max-w-md px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-            placeholder="PizzaStudio - 線上訂餐"
+            placeholder="雲端點餐系統 - 線上訂餐"
           />
           <p className="mt-1 text-xs text-gray-500">顯示於瀏覽器分頁標題。</p>
         </div>

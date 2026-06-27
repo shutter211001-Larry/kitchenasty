@@ -3,7 +3,7 @@ import { createProxyMiddleware } from 'http-proxy-middleware';
 
 const app = express();
 app.use(createProxyMiddleware({
-  target: 'https://api.pizzastudio26.com',
+  target: 'http://localhost:3000',
   changeOrigin: true,
   secure: false,
   pathFilter: ['/api', '/uploads'],

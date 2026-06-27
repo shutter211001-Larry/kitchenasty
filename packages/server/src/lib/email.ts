@@ -139,7 +139,7 @@ interface EmailOptions {
  */
 export async function sendEmail(options: EmailOptions): Promise<void> {
   if (process.env.NODE_ENV === 'test') return;
-  if (options.to && options.to.endsWith('@line.pizzastudio.com')) return;
+  if (options.to && options.to.endsWith('@line.shutterorder.com')) return;
 
   // Run in a self-contained async block to avoid blocking the caller's thread
   (async () => {

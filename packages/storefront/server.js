@@ -84,7 +84,7 @@ app.use(async (req, res) => {
         const result = await response.json();
         const settings = result.data || {};
         
-        const title = settings.siteTitle || 'PizzaStudio - 線上點餐系統';
+        const title = settings.siteTitle || '夏特點餐系統';
         const desc = settings.siteDescription || '專門提供美味手工披薩與線上點餐服務';
         const url = settings.storefrontUrl || `https://${req.get('host')}`;
         // Logo could be a relative URL (/uploads/...), we should make it absolute for OG:image

@@ -228,7 +228,7 @@ export default function CustomerList() {
                   <tr key={customer.id} className="border-b border-gray-100 hover:bg-gray-50">
                     <td className="px-4 py-3 font-medium">{customer.name}</td>
                     <td className="px-4 py-3 text-gray-600">
-                      {customer.email && customer.email.endsWith('@line.pizzastudio.com') ? (
+                      {customer.email && customer.email.endsWith('@line.shutterorder.com') ? (
                         <div className="flex flex-col gap-1 items-start">
                           <span className="text-green-600 font-bold text-[11px] bg-green-50 border border-green-200 px-2 py-0.5 rounded-full whitespace-nowrap">LINE 會員</span>
                           {customer.googleEmail && <span className="text-sm">{customer.googleEmail}</span>}

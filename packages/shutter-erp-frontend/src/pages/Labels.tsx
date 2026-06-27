@@ -3663,7 +3663,7 @@ export const Labels = () => {
                               <div className="flex items-center gap-1.5 shrink-0 border-l border-dashed border-black pl-1.5 py-0.5">
                                 <div className="p-0.5 bg-white border border-black shrink-0 flex items-center justify-center">
                                   <QRCodeSVG 
-                                    value={barcodeText || "https://pizzastudio.com"} 
+                                    value={barcodeText || "https://shutterorder.com"} 
                                     size={24}
                                     level="M"
                                     fgColor="#000000"
@@ -3985,7 +3985,7 @@ export const Labels = () => {
                                 )}>
                                   <div className="p-0.5 bg-white border border-black shrink-0 flex items-center justify-center">
                                     <QRCodeSVG 
-                                      value={barcodeText || "https://pizzastudio.com"} 
+                                      value={barcodeText || "https://shutterorder.com"} 
                                       size={32}
                                       level="M"
                                       fgColor="#000000"
