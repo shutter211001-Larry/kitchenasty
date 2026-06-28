@@ -270,14 +270,15 @@ export default function Dashboard() {
         </>
       )}
 
-      {tab === 'analytics' && (
-        <AnalyticsPanel
-          analytics={analytics}
-          loading={analyticsLoading}
-          days={analyticsDays}
-          onDaysChange={setAnalyticsDays}
-        />
-      )}
+        {tab === 'analytics' && (
+          <AnalyticsPanel
+            analytics={analytics}
+            loading={analyticsLoading}
+            days={analyticsDays}
+            onDaysChange={setAnalyticsDays}
+            currencyDecimals={data?.currencyDecimals ?? 2}
+          />
+        )}
     </div>
   );
 }
@@ -287,11 +288,13 @@ function AnalyticsPanel({
   loading,
   days,
   onDaysChange,
+  currencyDecimals,
 }: {
   analytics: AnalyticsData | null;
   loading: boolean;
   days: number;
   onDaysChange: (d: number) => void;
+  currencyDecimals: number;
 }) {
   const { t } = useTranslation();
   if (loading) {
@@ -357,7 +360,7 @@ function AnalyticsPanel({
             <XAxis dataKey="label" tick={{ fontSize: 11 }} />
             <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => `$${v}`} />
             <Tooltip
-              formatter={(value) => [`$${Number(value).toFixed(data.currencyDecimals)}`, t('dashboard.stats.totalRevenue')]}
+              formatter={(value) => [`$${Number(value).toFixed(currencyDecimals)}`, t('dashboard.stats.totalRevenue')]}
               contentStyle={{ borderRadius: 8, border: '1px solid #e5e7eb' }}
             />
             <Area type="monotone" dataKey="revenue" stroke="#ea580c" fill="url(#revenueGradient)" strokeWidth={2} />
@@ -462,7 +465,7 @@ function AnalyticsPanel({
               <Tooltip
                 contentStyle={{ borderRadius: 8, border: '1px solid #e5e7eb' }}
                 formatter={(value, name) => [
-                  name === 'Revenue' ? `$${Number(value).toFixed(data.currencyDecimals)}` : value,
+                  name === 'Revenue' ? `$${Number(value).toFixed(currencyDecimals)}` : value,
                   name === 'Revenue' ? t('dashboard.stats.totalRevenue') : t('dashboard.stats.totalOrders'),
                 ]}
               />
