@@ -102,12 +102,18 @@ export default function SettingsPayments() {
       <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-gray-900">Stripe (信用卡)</h2>
-          <label className="flex items-center gap-2">
-            <input type="checkbox" checked={stripeEnabled} onChange={(e) => setStripeEnabled(e.target.checked)} className="w-4 h-4 text-primary-600 rounded" />
+          <label className={`flex items-center gap-2 ${(stripePublishableKey.trim() === '' || stripeSecretKey.trim() === '') ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}>
+            <input 
+              type="checkbox" 
+              checked={stripeEnabled && stripePublishableKey.trim() !== '' && stripeSecretKey.trim() !== ''} 
+              onChange={(e) => setStripeEnabled(e.target.checked)} 
+              disabled={stripePublishableKey.trim() === '' || stripeSecretKey.trim() === ''}
+              className="w-4 h-4 text-primary-600 rounded disabled:opacity-50 disabled:cursor-not-allowed" 
+            />
             <span className="text-sm text-gray-700">啟用</span>
           </label>
         </div>
-        <div className={`space-y-4 ${!stripeEnabled ? 'opacity-50 pointer-events-none' : ''}`}>
+        <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">可發佈金鑰 (Publishable Key)</label>
             <input type="text" value={stripePublishableKey} onChange={(e) => setStripePublishableKey(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500" placeholder="pk_..." />
@@ -127,12 +133,18 @@ export default function SettingsPayments() {
       <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-gray-900">PayPal</h2>
-          <label className="flex items-center gap-2">
-            <input type="checkbox" checked={paypalEnabled} onChange={(e) => setPaypalEnabled(e.target.checked)} className="w-4 h-4 text-primary-600 rounded" />
+          <label className={`flex items-center gap-2 ${(paypalClientId.trim() === '' || paypalClientSecret.trim() === '') ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}>
+            <input 
+              type="checkbox" 
+              checked={paypalEnabled && paypalClientId.trim() !== '' && paypalClientSecret.trim() !== ''} 
+              onChange={(e) => setPaypalEnabled(e.target.checked)} 
+              disabled={paypalClientId.trim() === '' || paypalClientSecret.trim() === ''}
+              className="w-4 h-4 text-primary-600 rounded disabled:opacity-50 disabled:cursor-not-allowed" 
+            />
             <span className="text-sm text-gray-700">啟用</span>
           </label>
         </div>
-        <div className={`space-y-4 ${!paypalEnabled ? 'opacity-50 pointer-events-none' : ''}`}>
+        <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">客戶 ID (Client ID)</label>
             <input type="text" value={paypalClientId} onChange={(e) => setPaypalClientId(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500" />

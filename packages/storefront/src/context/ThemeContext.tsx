@@ -95,6 +95,7 @@ interface ThemeContextType {
   settings: SiteSettings;
   isDark: boolean;
   isInitialized: boolean;
+  refreshSettings: () => Promise<void>;
 }
 
 const defaultSettings: SiteSettings = {
@@ -117,6 +118,7 @@ const ThemeContext = createContext<ThemeContextType>({
   settings: defaultSettings,
   isDark: false,
   isInitialized: false,
+  refreshSettings: async () => {},
 });
 
 function hexToHsl(hex: string): [number, number, number] {
@@ -185,6 +187,28 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     return defaultSettings;
   });
   const [isDark, setIsDark] = useState(false);
+
+  const refreshSettings = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/settings`);
+      const json = await res.json();
+      if (json.success && json.data) {
+        const data = json.data;
+        if (data.logo) data.logo = getFullUrl(data.logo);
+        if (data.favicon) data.favicon = getFullUrl(data.favicon);
+        if (data.heroSection?.backgroundImage) {
+          data.heroSection.backgroundImage = getFullUrl(data.heroSection.backgroundImage);
+        }
+        setSettings((prev) => {
+          const finalSettings = { ...defaultSettings, ...data };
+          localStorage.setItem('site_settings', JSON.stringify(finalSettings));
+          return finalSettings;
+        });
+      }
+    } catch (err) {
+      console.error('Failed to fetch settings:', err);
+    }
+  };
 
   useEffect(() => {
     fetch(`${API_BASE}/settings`)
@@ -275,7 +299,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   }, [settings.heroSection?.backgroundImage]);
 
   return (
-    <ThemeContext.Provider value={{ settings, isDark, isInitialized: isInitialized && isHeroLoaded }}>
+    <ThemeContext.Provider value={{ settings, isDark, isInitialized: isInitialized && isHeroLoaded, refreshSettings }}>
       {children}
     </ThemeContext.Provider>
   );

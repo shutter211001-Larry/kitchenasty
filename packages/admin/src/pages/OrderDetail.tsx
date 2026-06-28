@@ -59,6 +59,7 @@ export default function OrderDetailPage() {
   const [error, setError] = useState('');
   const [updating, setUpdating] = useState(false);
   const [adjustedTotalInput, setAdjustedTotalInput] = useState('');
+  const [currencyDecimals, setCurrencyDecimals] = useState(2);
   const { user } = useAuth();
   const canManage = user?.role === 'SUPER_ADMIN' || user?.role === 'MANAGER';
 
@@ -74,8 +75,12 @@ export default function OrderDetailPage() {
       })
       .then((data) => {
         setOrder(data.data);
+        const decimals = data.currencyDecimals !== undefined ? data.currencyDecimals : 2;
+        setCurrencyDecimals(decimals);
         if (data.data) {
-          setAdjustedTotalInput(data.data.total.toString());
+          const unrounded = data.data.subtotal + data.data.tax + data.data.deliveryFee - data.data.discount;
+          const roundedTotal = Number(unrounded.toFixed(decimals));
+          setAdjustedTotalInput(roundedTotal.toString());
         }
       })
       .catch((err) => setError(err.message))
@@ -143,7 +148,9 @@ export default function OrderDetailPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || '調整折讓失敗');
       setOrder((prev) => prev ? { ...prev, ...data.data } : data.data);
-      setAdjustedTotalInput(data.data.total.toString());
+      const unrounded = data.data.subtotal + data.data.tax + data.data.deliveryFee - data.data.discount;
+      const roundedTotal = Number(unrounded.toFixed(currencyDecimals));
+      setAdjustedTotalInput(roundedTotal.toString());
       alert('折讓價格套用成功！');
     } catch (err: any) {
       setError(err.message);
@@ -247,14 +254,18 @@ export default function OrderDetailPage() {
                 <span className="text-gray-600">{t('orders.subtotal')}</span>
                 <span>${order.subtotal.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">{t('orders.tax')}</span>
-                <span>${order.tax.toFixed(2)}</span>
-              </div>
-              {order.deliveryFee > 0 && (
+              {order.tax > 0 && (
+                <div className="flex justify-between">
+                  <span className="text-gray-600">{t('orders.tax')}</span>
+                  <span>${order.tax.toFixed(2)}</span>
+                </div>
+              )}
+              {(order.orderType === 'DELIVERY' || order.orderType === 'FROZEN_DELIVERY') && (
                 <div className="flex justify-between">
                   <span className="text-gray-600">{t('orders.deliveryFee')}</span>
-                  <span>${order.deliveryFee.toFixed(2)}</span>
+                  <span className={order.deliveryFee === 0 ? "text-green-600 font-medium" : ""}>
+                    {order.deliveryFee === 0 ? (t('orders.free') || '免運費') : `$${order.deliveryFee.toFixed(2)}`}
+                  </span>
                 </div>
               )}
               {order.discount > 0 && (
@@ -263,9 +274,22 @@ export default function OrderDetailPage() {
                   <span>-${order.discount.toFixed(2)}</span>
                 </div>
               )}
+              {(() => {
+                const unrounded = order.subtotal + order.tax + order.deliveryFee - order.discount;
+                const diff = order.total - unrounded;
+                if (Math.abs(diff) > 0.001) {
+                  return (
+                    <div className="flex justify-between text-gray-500">
+                      <span>結算調整 (Rounding)</span>
+                      <span>{diff > 0 ? '+' : ''}${diff.toFixed(2)}</span>
+                    </div>
+                  );
+                }
+                return null;
+              })()}
               <div className="flex justify-between font-bold text-base pt-2 border-t border-gray-200">
                 <span>{t('orders.total')}</span>
-                <span className="text-primary-600">${order.total.toFixed(2)}</span>
+                <span className="text-primary-600">${order.total}</span>
               </div>
 
               {canManage && (

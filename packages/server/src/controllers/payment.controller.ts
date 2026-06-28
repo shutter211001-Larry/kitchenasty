@@ -242,7 +242,7 @@ export async function createLinePayPayment(req: Request, res: Response): Promise
 
   const order = await prisma.order.findUnique({ 
     where: { id: orderId },
-    include: { items: true }
+    include: { items: true, table: true }
   });
   
   if (!order) {
@@ -262,10 +262,17 @@ export async function createLinePayPayment(req: Request, res: Response): Promise
   try {
     const linePay = new LinePayClient();
     
-    // Check return url from environment or fallback to frontend
-    const returnUrl = process.env.LINE_PAY_RETURN_URL || 'http://localhost:5173/checkout/linepay/confirm';
-    
     const siteSettings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
+    const storefrontBaseUrl = process.env.VITE_STORE_URL_PUBLIC || process.env.STORE_URL_PUBLIC || 'http://localhost:5174';
+    const baseUrl = storefrontBaseUrl.replace(/\/$/, '');
+    
+    const queryParams = new URLSearchParams();
+    if (order.table) queryParams.set('table', order.table.name);
+    if (order.groupId) queryParams.set('groupSessionId', order.groupId);
+    
+    const queryString = queryParams.toString() ? `?${queryParams.toString()}` : '';
+    const returnUrl = `${baseUrl}/checkout/linepay/confirm${queryString}`;
+
     let currencyDecimals = 0;
     if (siteSettings && siteSettings.generalSettings) {
       const general = typeof siteSettings.generalSettings === 'string' 
@@ -302,7 +309,7 @@ export async function createLinePayPayment(req: Request, res: Response): Promise
     // Construct the payload for LINE Pay
     const payload = {
       amount: finalAmount,
-      currency: 'TWD',
+      currency: 'TWD' as const,
       orderId: order.orderNumber,
       packages: [
         {
@@ -327,7 +334,7 @@ export async function createLinePayPayment(req: Request, res: Response): Promise
           orderId: order.id,
           method: 'LINE_PAY',
           status: 'PENDING',
-          amount: order.total,
+          amount: finalAmount,
           transactionId: transactionId,
         },
       });
@@ -382,8 +389,8 @@ export async function confirmLinePayPayment(req: Request, res: Response): Promis
 
     const linePay = new LinePayClient();
     const payload = {
-      amount: order.total,
-      currency: 'TWD',
+      amount: payment.amount,
+      currency: 'TWD' as const,
     };
 
     const result = await linePay.confirmPayment(transactionId, payload);

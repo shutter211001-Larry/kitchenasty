@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { API_BASE } from '../lib/api.js';
 import { useTranslation } from 'react-i18next';
@@ -13,6 +13,10 @@ export default function LinePayConfirm() {
   
   const transactionId = searchParams.get('transactionId');
   const orderId = searchParams.get('orderId');
+  const table = searchParams.get('table');
+  const groupSessionId = searchParams.get('groupSessionId');
+
+  const hasConfirmed = React.useRef(false);
 
   useEffect(() => {
     if (!transactionId || !orderId) {
@@ -20,6 +24,9 @@ export default function LinePayConfirm() {
       setErrorMessage(t('common.error') || 'Missing parameters');
       return;
     }
+
+    if (hasConfirmed.current) return;
+    hasConfirmed.current = true;
 
     const confirmPayment = async () => {
       try {
@@ -39,10 +46,21 @@ export default function LinePayConfirm() {
         
         if (data.success) {
           setStatus('success');
+          
+          // Restore session storage for table and group context
+          if (table) {
+            sessionStorage.setItem('shutter-table-name', table);
+          }
+          if (groupSessionId) {
+            sessionStorage.setItem('shutter-group-session', groupSessionId);
+          }
+
           // Wait a brief moment to show success state before redirecting
+          // If the backend returns the actual UUID in data.order.id, use it.
+          // Otherwise fallback to orderId (which is orderNumber).
+          const redirectId = data.order?.id || orderId;
           setTimeout(() => {
-            // Need to fetch order details or just navigate with ID
-            navigate(`/orders/${orderId}`);
+            navigate(`/orders/${redirectId}`);
           }, 1500);
         } else {
           throw new Error(data.error || 'Payment confirmation failed');

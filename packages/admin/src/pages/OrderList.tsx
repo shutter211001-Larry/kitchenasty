@@ -73,6 +73,8 @@ export default function OrderList() {
     }
   }
 
+  const [currencyDecimals, setCurrencyDecimals] = useState(2);
+
   useEffect(() => {
     setLoading(true);
     const params = new URLSearchParams({ page: String(page), limit: '20' });
@@ -89,6 +91,7 @@ export default function OrderList() {
       .then((data) => {
         setOrders(data.data);
         setPagination(data.pagination);
+        if (data.currencyDecimals !== undefined) setCurrencyDecimals(data.currencyDecimals);
       })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
@@ -400,7 +403,7 @@ export default function OrderList() {
                       </button>
                     </td>
                     <td className="px-4 py-3 text-gray-600">{order._count.items}</td>
-                    <td className="px-4 py-3 text-right font-medium">${order.total.toFixed(2)}</td>
+                    <td className="px-4 py-3 text-right font-medium">${order.total}</td>
                     <td className="px-4 py-3 text-gray-500 text-xs">
                       {new Date(order.createdAt).toLocaleDateString()}
                     </td>
@@ -472,7 +475,7 @@ export default function OrderList() {
                   <span className={`px-2 py-0.5 rounded-full font-bold ${order.orderType === 'DELIVERY' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'}`}>
                     {order.orderType === 'DELIVERY' ? '外送' : '自取'}
                   </span>
-                  <span className="font-extrabold text-primary-600 text-sm">${order.total.toFixed(2)}</span>
+                  <span className="font-extrabold text-primary-600 text-sm">${order.total}</span>
                 </div>
 
                 <div className="flex justify-between items-center pt-2.5 border-t border-gray-100 gap-2">

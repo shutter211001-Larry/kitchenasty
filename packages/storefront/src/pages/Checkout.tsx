@@ -20,7 +20,7 @@ export default function Checkout() {
   const { t, i18n } = useTranslation();
   const { items, clear, tableName, setTableName, groupSessionId, groupPin, clientId, setGroupSession } = useCart();
   const { user, token } = useAuth();
-  const { settings } = useTheme();
+  const { settings, refreshSettings } = useTheme();
   const { addOrder } = useRecentOrders();
   const navigate = useNavigate();
 
@@ -207,11 +207,25 @@ export default function Checkout() {
     }
   }, [orderSettings, tableName]);
 
-  // We explicitly DO NOT auto-select payment method to force user choice
+  // Refresh settings on mount to ensure payment options are up-to-date
   useEffect(() => {
-    if (paymentSettings) {
-      setPaymentMethod(null);
-    }
+    refreshSettings();
+  }, []);
+
+  // We explicitly DO NOT auto-select payment method to force user choice
+  // Ensure we don't clear user selection if the background refresh finishes after they clicked,
+  // UNLESS their selected method is no longer enabled.
+  useEffect(() => {
+    setPaymentMethod((current) => {
+      if (!current) return null;
+      if (!paymentSettings) return null;
+      const isValid = 
+        (current === 'stripe' && paymentSettings.stripeEnabled) ||
+        (current === 'paypal' && paymentSettings.paypalEnabled) ||
+        (current === 'linepay' && paymentSettings.linePayEnabled) ||
+        (current === 'cash' && paymentSettings.cashEnabled);
+      return isValid ? current : null;
+    });
   }, [paymentSettings]);
 
   // Check busy mode on mount
@@ -363,6 +377,7 @@ export default function Checkout() {
       }
     }
 
+    let redirecting = false;
     try {
       const orderItems = myItems.map((item) => ({
         menuItemId: item.menuItemId,
@@ -465,8 +480,7 @@ export default function Checkout() {
         }
       }
 
-      clear();
-      addOrder({
+      const orderData = {
         id: data.data.id,
         orderNumber: data.data.orderNumber,
         date: new Date().toISOString(),
@@ -474,7 +488,7 @@ export default function Checkout() {
         orderType: data.data.orderType,
         itemCount: data.data.items?.length || 0,
         scheduledAt: data.data.scheduledAt || undefined,
-      });
+      };
 
       if (paymentMethod === 'linepay') {
         const lineRes = await fetch(`${API_BASE}/payments/linepay/create`, {
@@ -484,18 +498,32 @@ export default function Checkout() {
         });
         const lineData = await lineRes.json();
         if (lineData.success && lineData.data.paymentUrl) {
+          redirecting = true;
+          clear();
+          addOrder(orderData);
           window.location.href = lineData.data.paymentUrl;
           return;
         } else {
+          // If LINE Pay fails, we still want to clear the cart because the order is created
+          redirecting = true;
+          clear();
+          addOrder(orderData);
           throw new Error(lineData.error || 'LINE Pay redirect failed');
         }
       }
 
+      redirecting = true;
+      clear();
+      addOrder(orderData);
       navigate(`/orders/${data.data.id}`, { state: { order: data.data } });
     } catch (err: any) {
-      setError(err.message || t('common.error'));
+      if (!redirecting) {
+        setError(err.message || t('common.error'));
+      }
     } finally {
-      setLoading(false);
+      if (!redirecting) {
+        setLoading(false);
+      }
     }
   }
 
@@ -1388,10 +1416,12 @@ export default function Checkout() {
                 <span className="text-main font-medium">{t('checkout.subtotal')}</span>
                 <span className="text-main">${subtotal.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-main font-medium">{t('checkout.tax')}</span>
-                <span className="text-main">${tax.toFixed(2)}</span>
-              </div>
+              {tax > 0 && (
+                <div className="flex justify-between">
+                  <span className="text-main font-medium">{t('checkout.tax')}</span>
+                  <span className="text-main">${tax.toFixed(2)}</span>
+                </div>
+              )}
               {(orderType === 'delivery' || orderType === 'frozen_delivery') && (
                 <div className="flex justify-between">
                   <span className="text-main font-medium">{t('checkout.deliveryFee')}</span>
@@ -1428,9 +1458,24 @@ export default function Checkout() {
                   <span>-${loyaltyDiscount.toFixed(2)}</span>
                 </div>
               )}
+              {(() => {
+                const decimals = (settings as any).currencyDecimals ?? 2;
+                const unrounded = subtotal + tax + currentDeliveryFee - couponDiscount - loyaltyDiscount;
+                const rounded = Number(unrounded.toFixed(decimals));
+                const diff = rounded - unrounded;
+                if (Math.abs(diff) > 0.001) {
+                  return (
+                    <div className="flex justify-between text-sub font-medium">
+                      <span>{t('checkout.roundingAdjustment') || '結算調整 (Rounding)'}</span>
+                      <span>{diff > 0 ? '+' : ''}${diff.toFixed(2)}</span>
+                    </div>
+                  );
+                }
+                return null;
+              })()}
               <div className={`flex justify-between border-t border-input pt-2 font-bold text-lg transition-opacity ${isCalculating ? 'opacity-50' : 'opacity-100'}`}>
                 <span className="text-main">{t('checkout.total')}</span>
-                <span className="text-primary-600">${total.toFixed(2)}</span>
+                <span className="text-primary-600">${Number(total.toFixed((settings as any).currencyDecimals ?? 2)).toFixed((settings as any).currencyDecimals ?? 2)}</span>
               </div>
             </div>
 
@@ -1444,7 +1489,7 @@ export default function Checkout() {
                 ? t('checkout.currentlyUnavailable')
                 : loading || isCalculating
                   ? t('checkout.processing')
-                  : `${t('checkout.placeOrder')} — $${total.toFixed(2)}`}
+                  : `${t('checkout.placeOrder')} — $${Number(total.toFixed((settings as any).currencyDecimals ?? 2)).toFixed((settings as any).currencyDecimals ?? 2)}`}
             </button>
           </div>
         </div>
@@ -1455,7 +1500,7 @@ export default function Checkout() {
         <div className="fixed bottom-0 left-0 right-0 p-4 surface-card/90 backdrop-blur-md border-t shadow-[0_-4px_12px_rgba(0,0,0,0.1)] z-50 lg:hidden flex items-center justify-between animate-in slide-in-from-bottom duration-300">
           <div className="flex flex-col">
             <span className="text-[10px] text-hint font-bold uppercase tracking-wider">{t('checkout.total')}</span>
-            <span className="text-xl font-black text-primary-600 leading-none">${total.toFixed(2)}</span>
+            <span className="text-xl font-black text-primary-600 leading-none">${Number(total.toFixed((settings as any).currencyDecimals ?? 2)).toFixed((settings as any).currencyDecimals ?? 2)}</span>
           </div>
           <button
             onClick={scrollToSubmit}

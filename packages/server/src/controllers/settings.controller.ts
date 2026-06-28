@@ -129,15 +129,15 @@ function toPublicSettings(settings: Awaited<ReturnType<typeof getOrCreateSetting
     } : undefined,
     paymentSettings: {
       cashEnabled: isTrue(payment.cashEnabled, true),
-      stripeEnabled: isTrue(payment.stripeEnabled, false),
-      paypalEnabled: isTrue(payment.paypalEnabled, false),
-      linePayEnabled: isTrue(payment.linePayEnabled, false),
+      stripeEnabled: isTrue(payment.stripeEnabled, false) && !!payment.stripePublishableKey && !!payment.stripeSecretKey,
+      paypalEnabled: isTrue(payment.paypalEnabled, false) && !!payment.paypalClientId && !!payment.paypalClientSecret,
+      linePayEnabled: isTrue(payment.linePayEnabled, false) && !!process.env.LINE_PAY_CHANNEL_ID && !!process.env.LINE_PAY_CHANNEL_SECRET,
     },
     reservationSettings: settings.reservationSettings ? {
       enabled: isTrue(reservation.enabled, true),
     } : undefined,
     lineSettings: getJson(settings.lineSettings),
-    storefrontUrl: process.env.STORE_URL_PUBLIC || 'http://localhost:5173',
+    storefrontUrl: process.env.VITE_STORE_URL_PUBLIC || process.env.STORE_URL_PUBLIC || 'http://localhost:5174',
     createdAt: settings.createdAt,
     updatedAt: settings.updatedAt,
   };

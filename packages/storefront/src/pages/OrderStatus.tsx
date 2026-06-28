@@ -481,21 +481,42 @@ export default function OrderStatus() {
             <span>{t('orders.subtotal')}</span>
             <span>${order.subtotal.toFixed(2)}</span>
           </div>
-          {order.deliveryFee > 0 && (
-            <div className="flex justify-between">
+          {order.tax > 0 && (
+            <div className="flex justify-between text-sm text-sub">
+              <span>{t('checkout.tax') || '稅金 (Tax)'}</span>
+              <span>${order.tax.toFixed(2)}</span>
+            </div>
+          )}
+          {(order.orderType === 'DELIVERY' || order.orderType === 'FROZEN_DELIVERY') && (
+            <div className="flex justify-between text-sm text-sub">
               <span className="text-sub">{t('checkout.deliveryFee')}</span>
-              <span className="text-main">${order.deliveryFee.toFixed(2)}</span>
+              <span className={order.deliveryFee === 0 ? "text-green-600 font-medium" : "text-main"}>
+                {order.deliveryFee === 0 ? (t('checkout.free') || '免運費') : `$${order.deliveryFee.toFixed(2)}`}
+              </span>
             </div>
           )}
           {order.discount > 0 && (
-            <div className="flex justify-between text-green-600">
+            <div className="flex justify-between text-sm text-green-600">
               <span>{t('checkout.discount')}</span>
               <span>-${order.discount.toFixed(2)}</span>
             </div>
           )}
+          {(() => {
+            const unrounded = order.subtotal + order.tax + order.deliveryFee - order.discount;
+            const diff = order.total - unrounded;
+            if (Math.abs(diff) > 0.001) {
+              return (
+                <div className="flex justify-between text-sm text-sub">
+                  <span>{t('checkout.roundingAdjustment') || '結算調整 (Rounding)'}</span>
+                  <span>{diff > 0 ? '+' : ''}${diff.toFixed(2)}</span>
+                </div>
+              );
+            }
+            return null;
+          })()}
           <div className="flex justify-between font-bold text-base pt-2 border-t border-input">
             <span>{t('checkout.total')}</span>
-            <span className="text-primary-600">${order.total.toFixed(2)}</span>
+            <span className="text-main">${order.total}</span>
           </div>
         </div>
       </div>

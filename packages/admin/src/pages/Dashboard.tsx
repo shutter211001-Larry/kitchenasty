@@ -35,6 +35,7 @@ interface DashboardData {
     name: string;
     totalQuantity: number;
   }[];
+  currencyDecimals: number;
 }
 
 interface AnalyticsData {
@@ -167,8 +168,8 @@ export default function Dashboard() {
         </div>
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <p className="text-sm text-gray-500">{t('dashboard.stats.todayRevenue')}</p>
-          <p className="text-3xl font-bold text-primary-600 mt-1">${m.revenueToday.toFixed(2)}</p>
-          <p className="text-xs text-gray-400 mt-1">${m.revenueThisMonth.toFixed(2)} {t('dashboard.stats.revenueThisMonth')}</p>
+          <p className="text-3xl font-bold text-primary-600 mt-1">${m.revenueToday.toFixed(data.currencyDecimals)}</p>
+          <p className="text-xs text-gray-400 mt-1">${m.revenueThisMonth.toFixed(data.currencyDecimals)} {t('dashboard.stats.revenueThisMonth')}</p>
         </div>
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <p className="text-sm text-gray-500">{t('dashboard.stats.activeReservations')}</p>
@@ -191,7 +192,7 @@ export default function Dashboard() {
               <p className="text-xs text-gray-500">{t('dashboard.stats.totalOrders')}</p>
             </div>
             <div className="bg-gray-50 rounded-lg p-4 text-center">
-              <p className="text-2xl font-bold text-gray-900">${m.totalRevenue.toFixed(2)}</p>
+              <p className="text-2xl font-bold text-gray-900">${m.totalRevenue.toFixed(data.currencyDecimals)}</p>
               <p className="text-xs text-gray-500">{t('dashboard.stats.totalRevenue')}</p>
             </div>
             <div className="bg-gray-50 rounded-lg p-4 text-center">
@@ -199,7 +200,7 @@ export default function Dashboard() {
               <p className="text-xs text-gray-500">{t('dashboard.stats.ordersThisMonth')}</p>
             </div>
             <div className="bg-gray-50 rounded-lg p-4 text-center">
-              <p className="text-2xl font-bold text-gray-900">${m.revenueThisWeek.toFixed(2)}</p>
+              <p className="text-2xl font-bold text-gray-900">${m.revenueThisWeek.toFixed(data.currencyDecimals)}</p>
               <p className="text-xs text-gray-500">{t('dashboard.stats.revenueThisWeek')}</p>
             </div>
           </div>
@@ -233,7 +234,7 @@ export default function Dashboard() {
                         <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_COLORS[order.status] || 'bg-gray-100'}`}>
                           {order.status.replace(/_/g, ' ')}
                         </span>
-                        <span className="text-sm font-medium">${order.total.toFixed(2)}</span>
+                        <span className="text-sm font-medium">${order.total.toFixed(data.currencyDecimals)}</span>
                       </div>
                     </Link>
                   ))}
@@ -356,7 +357,7 @@ function AnalyticsPanel({
             <XAxis dataKey="label" tick={{ fontSize: 11 }} />
             <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => `$${v}`} />
             <Tooltip
-              formatter={(value) => [`$${Number(value).toFixed(2)}`, t('dashboard.stats.totalRevenue')]}
+              formatter={(value) => [`$${Number(value).toFixed(data.currencyDecimals)}`, t('dashboard.stats.totalRevenue')]}
               contentStyle={{ borderRadius: 8, border: '1px solid #e5e7eb' }}
             />
             <Area type="monotone" dataKey="revenue" stroke="#ea580c" fill="url(#revenueGradient)" strokeWidth={2} />
@@ -461,7 +462,7 @@ function AnalyticsPanel({
               <Tooltip
                 contentStyle={{ borderRadius: 8, border: '1px solid #e5e7eb' }}
                 formatter={(value, name) => [
-                  name === 'Revenue' ? `$${Number(value).toFixed(2)}` : value,
+                  name === 'Revenue' ? `$${Number(value).toFixed(data.currencyDecimals)}` : value,
                   name === 'Revenue' ? t('dashboard.stats.totalRevenue') : t('dashboard.stats.totalOrders'),
                 ]}
               />

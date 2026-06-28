@@ -10,6 +10,12 @@ export async function getDashboardStats(req: Request, res: Response): Promise<vo
     weekStart.setDate(weekStart.getDate() - 7);
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
 
+    const siteSettings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
+    const generalSettings = typeof siteSettings?.generalSettings === 'string' 
+      ? JSON.parse(siteSettings.generalSettings) 
+      : siteSettings?.generalSettings || {};
+    const currencyDecimals = generalSettings.currencyDecimals !== undefined ? Number(generalSettings.currencyDecimals) : 2;
+
     const [orderMetrics] = await prisma.$queryRaw<any[]>`
       SELECT
         COUNT(CASE WHEN "createdAt" >= ${todayStart} THEN 1 END)::bigint AS "ordersToday",
@@ -85,6 +91,7 @@ export async function getDashboardStats(req: Request, res: Response): Promise<vo
           name: item.name,
           totalQuantity: item._sum.quantity || 0,
         })),
+        currencyDecimals,
       },
     });
   } catch (error) {

@@ -55,7 +55,9 @@
     "createdAt": "建立時間",
     "updatedAt": "更新時間",
     "refresh": "重新整理",
-    "guest": "顧客"
+    "guest": "顧客",
+    "noResults": "沒有找到結果",
+    "none": "無"
   },
   "dashboard": {
     "title": "控制面板",
@@ -104,7 +106,12 @@
     "discount": "折讓金額",
     "subtotal": "小計",
     "tax": "稅金",
-    "deliveryFee": "外送費"
+    "deliveryFee": "外送費",
+    "roundingAdjustment": "結算調整 (Rounding)",
+    "backToOrders": "返回訂單列表",
+    "items": "訂單品項",
+    "free": "免費",
+    "orderDetail": "訂單詳情"
   },
   "kitchen": {
     "title": "廚房看板",
@@ -220,5 +227,12 @@
     },
     "none": "無",
     "back": "← 返回"
+  },
+  "checkout": {
+    "orderNotes": "訂單備註",
+    "roundingAdjustment": "結算調整 (Rounding)"
+  },
+  "reservations": {
+    "location": "分店位置"
   }
 }

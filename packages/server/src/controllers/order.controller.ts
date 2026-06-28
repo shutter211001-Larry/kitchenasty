@@ -897,7 +897,14 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
   }
 
   const tax = subtotal * (currentTaxRate / 100);
-  const total = subtotal + tax + deliveryFee - loyaltyDiscount - couponDiscount;
+  const unroundedTotal = Math.max(0, subtotal + tax + deliveryFee - loyaltyDiscount - couponDiscount);
+  
+  const generalSettings = typeof siteSettings?.generalSettings === 'string' 
+    ? JSON.parse(siteSettings.generalSettings) 
+    : siteSettings?.generalSettings || {};
+  const currencyDecimals = generalSettings.currencyDecimals !== undefined ? Number(generalSettings.currencyDecimals) : 2;
+  
+  const total = Number(unroundedTotal.toFixed(currencyDecimals));
 
   if (isNaN(total)) {
     res.status(400).json({ success: false, error: 'Calculation error: invalid amounts' });
@@ -1273,18 +1280,28 @@ export async function listOrders(req: Request, res: Response): Promise<void> {
     prisma.order.count({ where }),
   ]);
 
+  const siteSettings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
+  const generalSettings = typeof siteSettings?.generalSettings === 'string' ? JSON.parse(siteSettings.generalSettings) : siteSettings?.generalSettings || {};
+  const currencyDecimals = generalSettings.currencyDecimals !== undefined ? Number(generalSettings.currencyDecimals) : 2;
+
   res.json({
     success: true,
     data: orders,
     pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+    currencyDecimals
   });
 }
 
 export async function getOrder(req: Request<{ id: string }>, res: Response): Promise<void> {
   const { id } = req.params;
+  console.log('GET ORDER CALLED WITH ID:', JSON.stringify(id));
+
+  const whereClause = id.startsWith('SH-') || id.length < 20 
+    ? { orderNumber: id } 
+    : { id };
 
   const order = await prisma.order.findUnique({
-    where: { id },
+    where: whereClause as any,
     include: {
       customer: { select: { id: true, name: true, email: true, phone: true } },
       location: { select: { id: true, name: true } },
@@ -1316,7 +1333,11 @@ export async function getOrder(req: Request<{ id: string }>, res: Response): Pro
     }
   }
 
-  res.json({ success: true, data: order });
+  const siteSettings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
+  const generalSettings = typeof siteSettings?.generalSettings === 'string' ? JSON.parse(siteSettings.generalSettings) : siteSettings?.generalSettings || {};
+  const currencyDecimals = generalSettings.currencyDecimals !== undefined ? Number(generalSettings.currencyDecimals) : 2;
+
+  res.json({ success: true, data: order, currencyDecimals });
 }
 
 export async function listCustomerOrders(req: Request, res: Response): Promise<void> {
@@ -2423,7 +2444,14 @@ export async function calculateOrderSummary(req: Request, res: Response): Promis
   }
 
   const tax = subtotal * (currentTaxRate / 100);
-  const total = Math.max(0, subtotal + tax + deliveryFee - loyaltyDiscount - couponDiscount);
+  const unroundedTotal = Math.max(0, subtotal + tax + deliveryFee - loyaltyDiscount - couponDiscount);
+  
+  const generalSettings = typeof siteSettings?.generalSettings === 'string' 
+    ? JSON.parse(siteSettings.generalSettings) 
+    : siteSettings?.generalSettings || {};
+  const currencyDecimals = generalSettings.currencyDecimals !== undefined ? Number(generalSettings.currencyDecimals) : 2;
+  
+  const total = Number(unroundedTotal.toFixed(currencyDecimals));
 
   res.json({
     success: true,

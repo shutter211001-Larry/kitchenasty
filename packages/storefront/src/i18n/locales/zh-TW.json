@@ -15,7 +15,8 @@
     "close": "關閉",
     "none": "無",
     "guest": "顧客",
-    "confirmCancel": "確定要取消這筆訂單嗎？"
+    "confirmCancel": "確定要取消這筆訂單嗎？",
+    "success": "成功"
   },
   "nav": {
     "home": "首頁",
@@ -241,7 +242,11 @@
     "scheduledFor": "您已預約於",
     "noAvailableSlots": "暫無可用預約時段",
     "discountsAndRewards": "優惠與紅利",
-    "locationNotAcceptingOrders": "此分店目前不接受點餐。"
+    "locationNotAcceptingOrders": "此分店目前不接受點餐。",
+    "roundingAdjustment": "結算調整 (Rounding)",
+    "loyaltyTitle": "會員紅利",
+    "loyaltyPointsToRedeem": "欲折抵點數",
+    "cashOnDeliverySub": "現場以現金或實體卡片付款"
   },
   "orderConfirmation": {
     "title": "點餐成功！",
@@ -292,7 +297,9 @@
     "recentGuestOrdersDesc": "這些是存放在此瀏覽器中的訂單紀錄。",
     "loginToViewFull": "登入以查看完整紀錄",
     "lookupPhone": "電話號碼",
-    "lookupEmailOrPhoneRequired": "請輸入電子郵件或電話號碼來找回訂單"
+    "lookupEmailOrPhoneRequired": "請輸入電子郵件或電話號碼來找回訂單",
+    "roundingAdjustment": "結算調整 (Rounding)",
+    "errorLoadingDesc": "載入訂單時發生錯誤"
   },
   "orderStatus": {
     "placed": "已下單",
@@ -370,5 +377,6 @@
     "hideDetails": "隱藏詳細資訊",
     "savePreferences": "儲存設定",
     "acceptAll": "全部接受"
-  }
+  },
+  "recent_orders_updated": "最新訂單已更新"
 }

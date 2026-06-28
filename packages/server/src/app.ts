@@ -1,5 +1,10 @@
 import dotenv from 'dotenv';
-dotenv.config();
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+dotenv.config(); // Load packages/server/.env
+dotenv.config({ path: path.resolve(__dirname, '../../../.env') }); // Load root .env
 import 'express-async-errors';
 
 // Globally normalize all public URLs to ensure they have the correct protocol prefix
