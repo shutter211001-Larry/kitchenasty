@@ -1,8 +1,6 @@
 import dotenv from 'dotenv';
 import path from 'path';
-import { fileURLToPath } from 'url';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config(); // Load packages/server/.env
 dotenv.config({ path: path.resolve(__dirname, '../../../.env') }); // Load root .env
 import 'express-async-errors';
@@ -30,7 +28,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import swaggerUi from 'swagger-ui-express';
-import path from 'path';
+
 import authRoutes from './routes/auth.routes.js';
 import locationRoutes from './routes/location.routes.js';
 import menuRoutes from './routes/menu.routes.js';
