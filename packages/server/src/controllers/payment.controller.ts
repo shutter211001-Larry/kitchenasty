@@ -3,6 +3,7 @@ import { getStripe } from '../lib/stripe.js';
 import prisma from '../lib/db.js';
 import { createPayPalOrder, capturePayPalOrder } from '../lib/paypal.js';
 import { emitOrderStatusUpdate } from '../lib/socket.js';
+import { LinePayClient } from '../lib/linepay.js';
 
 export async function createPaymentIntent(req: Request, res: Response): Promise<void> {
   const { orderId } = req.body;
@@ -228,5 +229,160 @@ export async function capturePayPalPayment(req: Request, res: Response): Promise
     }
   } catch (err: any) {
     res.status(500).json({ success: false, error: err.message || 'PayPal capture failed' });
+  }
+}
+
+export async function createLinePayPayment(req: Request, res: Response): Promise<void> {
+  const { orderId } = req.body;
+
+  if (!orderId) {
+    res.status(400).json({ success: false, error: 'orderId is required' });
+    return;
+  }
+
+  const order = await prisma.order.findUnique({ 
+    where: { id: orderId },
+    include: { items: true }
+  });
+  
+  if (!order) {
+    res.status(404).json({ success: false, error: 'Order not found' });
+    return;
+  }
+
+  const existingPayment = await prisma.payment.findFirst({
+    where: { orderId, status: 'COMPLETED' },
+  });
+  
+  if (existingPayment) {
+    res.status(409).json({ success: false, error: 'Order already paid' });
+    return;
+  }
+
+  try {
+    const linePay = new LinePayClient();
+    
+    // Check return url from environment or fallback to frontend
+    const returnUrl = process.env.LINE_PAY_RETURN_URL || 'http://localhost:5173/checkout/linepay/confirm';
+    
+    // Construct the payload for LINE Pay
+    const payload = {
+      amount: order.total,
+      currency: 'TWD',
+      orderId: order.orderNumber,
+      packages: [
+        {
+          id: `pkg_${order.id}`,
+          amount: order.total,
+          products: order.items.map(item => ({
+            name: item.name,
+            quantity: item.quantity,
+            price: item.unitPrice,
+          })),
+        },
+      ],
+      redirectUrls: {
+        confirmUrl: returnUrl,
+        cancelUrl: returnUrl, // Typically we handle cancel on the same page and show an error
+      },
+    };
+
+    const response = await linePay.requestPayment(payload);
+
+    if (response.returnCode === '0000') {
+      const transactionId = response.info.transactionId.toString(); // API v3 returns number, important to convert to string
+
+      await prisma.payment.create({
+        data: {
+          orderId: order.id,
+          method: 'LINE_PAY',
+          status: 'PENDING',
+          amount: order.total,
+          transactionId: transactionId,
+        },
+      });
+
+      res.json({
+        success: true,
+        data: {
+          paymentUrl: response.info.paymentUrl.web,
+          transactionId: transactionId,
+        },
+      });
+    } else {
+      res.status(400).json({ success: false, error: response.returnMessage });
+    }
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message || 'LINE Pay order creation failed' });
+  }
+}
+
+export async function confirmLinePayPayment(req: Request, res: Response): Promise<void> {
+  const { transactionId, orderId } = req.body;
+
+  if (!transactionId || !orderId) {
+    res.status(400).json({ success: false, error: 'transactionId and orderId are required' });
+    return;
+  }
+
+  try {
+    const order = await prisma.order.findUnique({
+      where: { orderNumber: orderId } // Notice we use orderNumber here because LINE Pay passes back our original orderId string
+    });
+
+    if (!order) {
+      res.status(404).json({ success: false, error: 'Order not found' });
+      return;
+    }
+
+    const payment = await prisma.payment.findFirst({
+      where: { orderId: order.id, transactionId: transactionId, method: 'LINE_PAY' }
+    });
+
+    if (!payment) {
+      res.status(404).json({ success: false, error: 'Payment record not found' });
+      return;
+    }
+
+    if (payment.status === 'COMPLETED') {
+       res.json({ success: true, data: { status: 'ALREADY_COMPLETED' } });
+       return;
+    }
+
+    const linePay = new LinePayClient();
+    const payload = {
+      amount: order.total,
+      currency: 'TWD',
+    };
+
+    const result = await linePay.confirmPayment(transactionId, payload);
+
+    if (result.returnCode === '0000') {
+      await prisma.payment.update({
+        where: { id: payment.id },
+        data: { status: 'COMPLETED' },
+      });
+
+      const updatedOrder = await prisma.order.update({
+        where: { id: order.id },
+        data: { status: 'CONFIRMED', paymentStatus: 'PAID' },
+      });
+
+      emitOrderStatusUpdate({
+        id: updatedOrder.id,
+        orderNumber: updatedOrder.orderNumber,
+        status: updatedOrder.status,
+        orderType: updatedOrder.orderType,
+        customerId: updatedOrder.customerId,
+        locationId: updatedOrder.locationId,
+        paymentStatus: updatedOrder.paymentStatus,
+      } as any);
+
+      res.json({ success: true, data: { status: 'COMPLETED' } });
+    } else {
+      res.status(400).json({ success: false, error: result.returnMessage });
+    }
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message || 'LINE Pay capture failed' });
   }
 }

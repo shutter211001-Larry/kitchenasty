@@ -716,6 +716,7 @@ enum PaymentMethod {
   CASH
   STRIPE
   PAYPAL
+  LINE_PAY
 }
 
 enum PaymentStatus {

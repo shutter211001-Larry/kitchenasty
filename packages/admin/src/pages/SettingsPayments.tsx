@@ -23,6 +23,9 @@ export default function SettingsPayments() {
   // Cash
   const [cashEnabled, setCashEnabled] = useState(true);
 
+  // LINE Pay
+  const [linePayEnabled, setLinePayEnabled] = useState(false);
+
   useEffect(() => {
     fetch('/api/settings/payment', { headers: { Authorization: `Bearer ${token}` } })
       .then((r) => r.json())
@@ -38,6 +41,7 @@ export default function SettingsPayments() {
           if (d.paypalClientSecret) setPaypalClientSecret(d.paypalClientSecret);
           if (d.paypalSandbox !== undefined) setPaypalSandbox(d.paypalSandbox);
           if (d.cashEnabled !== undefined) setCashEnabled(d.cashEnabled);
+          if (d.linePayEnabled !== undefined) setLinePayEnabled(d.linePayEnabled);
         }
       })
       .catch(() => {})
@@ -55,7 +59,7 @@ export default function SettingsPayments() {
         body: JSON.stringify({
           stripeEnabled, stripePublishableKey, stripeSecretKey, stripeWebhookSecret,
           paypalEnabled, paypalClientId, paypalClientSecret, paypalSandbox,
-          cashEnabled,
+          cashEnabled, linePayEnabled
         }),
       });
       const data = await res.json();
@@ -142,6 +146,20 @@ export default function SettingsPayments() {
             <span className="text-sm font-medium text-gray-700">沙盒測試模式 (Sandbox mode)</span>
           </label>
         </div>
+      </div>
+
+      {/* LINE Pay */}
+      <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-gray-900">LINE Pay</h2>
+          <label className="flex items-center gap-2">
+            <input type="checkbox" checked={linePayEnabled} onChange={(e) => setLinePayEnabled(e.target.checked)} className="w-4 h-4 text-primary-600 rounded" />
+            <span className="text-sm text-gray-700">啟用</span>
+          </label>
+        </div>
+        <p className="text-xs text-gray-500 mt-2">
+          注意：LINE Pay 的 Channel ID 與 Secret 請在環境變數 (.env) 中設定。
+        </p>
       </div>
 
       {/* Cash */}

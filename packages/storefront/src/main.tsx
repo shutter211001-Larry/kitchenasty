@@ -20,6 +20,7 @@ import AuthCallback from './pages/AuthCallback.js';
 import PrivacyPolicy from './pages/PrivacyPolicy.js';
 import Impressum from './pages/Impressum.js';
 import NotFound from './pages/NotFound.js';
+import LinePayConfirm from './pages/LinePayConfirm.js';
 import './i18n/index.js';
 import './index.css';
 
@@ -73,6 +74,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
                 element={<ConditionalRoute element={<Reservations />} condition={(s) => s.navShowReservations !== false && s.reservationSettings?.enabled !== false} />} 
               />
               <Route path="/checkout" element={<Checkout />} />
+              <Route path="/checkout/linepay/confirm" element={<LinePayConfirm />} />
               <Route path="/order/:id" element={<OrderConfirmation />} />
               <Route 
                 path="/login" 

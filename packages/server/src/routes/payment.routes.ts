@@ -1,7 +1,15 @@
 import { Router } from 'express';
 import express from 'express';
 import { optionalAuth, authenticate, requireStaff } from '../middleware/auth.js';
-import { createPaymentIntent, handleWebhook, markCashPayment, createPayPalPayment, capturePayPalPayment } from '../controllers/payment.controller.js';
+import { 
+  createPaymentIntent, 
+  handleWebhook, 
+  markCashPayment, 
+  createPayPalPayment, 
+  capturePayPalPayment,
+  createLinePayPayment,
+  confirmLinePayPayment
+} from '../controllers/payment.controller.js';
 
 const router = Router();
 
@@ -17,5 +25,9 @@ router.post('/cash', authenticate, requireStaff, markCashPayment);
 // PayPal
 router.post('/paypal/create', optionalAuth, createPayPalPayment);
 router.post('/paypal/capture', optionalAuth, capturePayPalPayment);
+
+// LINE Pay
+router.post('/linepay/create', optionalAuth, createLinePayPayment);
+router.post('/linepay/confirm', optionalAuth, confirmLinePayPayment);
 
 export default router;
