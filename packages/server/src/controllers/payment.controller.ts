@@ -265,24 +265,54 @@ export async function createLinePayPayment(req: Request, res: Response): Promise
     // Check return url from environment or fallback to frontend
     const returnUrl = process.env.LINE_PAY_RETURN_URL || 'http://localhost:5173/checkout/linepay/confirm';
     
+    const siteSettings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
+    let currencyDecimals = 0;
+    if (siteSettings && siteSettings.generalSettings) {
+      const general = typeof siteSettings.generalSettings === 'string' 
+        ? JSON.parse(siteSettings.generalSettings) 
+        : siteSettings.generalSettings;
+      if ((general as any).currencyDecimals !== undefined) {
+        currencyDecimals = Number((general as any).currencyDecimals);
+      }
+    }
+    const roundPrice = (val: number) => Number(val.toFixed(currencyDecimals));
+
+    const lineProducts = (() => {
+      const products = order.items.map(item => ({
+        name: item.name,
+        quantity: item.quantity,
+        price: roundPrice(item.unitPrice),
+      }));
+
+      if (order.tax && order.tax > 0) {
+        products.push({ name: '稅金 (Tax)', quantity: 1, price: roundPrice(order.tax) });
+      }
+      if (order.deliveryFee && order.deliveryFee > 0) {
+        products.push({ name: '運費 (Delivery)', quantity: 1, price: roundPrice(order.deliveryFee) });
+      }
+      if (order.discount && order.discount > 0) {
+        products.push({ name: '折扣 (Discount)', quantity: 1, price: -roundPrice(order.discount) });
+      }
+      
+      return products;
+    })();
+
+    const finalAmount = lineProducts.reduce((sum, p) => sum + p.price * p.quantity, 0);
+
     // Construct the payload for LINE Pay
     const payload = {
-      amount: order.total,
+      amount: finalAmount,
       currency: 'TWD',
       orderId: order.orderNumber,
       packages: [
         {
           id: `pkg_${order.id}`,
-          amount: order.total,
-          products: order.items.map(item => ({
-            name: item.name,
-            quantity: item.quantity,
-            price: item.unitPrice,
-          })),
+          amount: finalAmount,
+          products: lineProducts,
         },
       ],
       redirectUrls: {
-        confirmUrl: returnUrl,
+        confirmUrl: `${returnUrl}?orderId=${order.orderNumber}`,
         cancelUrl: returnUrl, // Typically we handle cancel on the same page and show an error
       },
     };
@@ -310,6 +340,7 @@ export async function createLinePayPayment(req: Request, res: Response): Promise
         },
       });
     } else {
+      console.error('[LINE Pay Request Rejected]', response);
       res.status(400).json({ success: false, error: response.returnMessage });
     }
   } catch (err: any) {

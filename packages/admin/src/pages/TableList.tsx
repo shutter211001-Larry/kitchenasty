@@ -40,7 +40,7 @@ export default function TableList() {
       .then(([locRes, tableRes, settingsRes]) => {
         setLocation(locRes.data);
         setTables(tableRes.data);
-        setStorefrontUrl(settingsRes.data.storefrontUrl || import.meta.env.VITE_STORE_URL_PUBLIC || window.location.origin.replace('5174', '5173'));
+        setStorefrontUrl(settingsRes.data.storefrontUrl || import.meta.env.VITE_STORE_URL_PUBLIC || window.location.origin.replace('5173', '5174'));
         setLoading(false);
       })
       .catch((err) => { setError(err.message); setLoading(false); });

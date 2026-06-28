@@ -36,6 +36,7 @@ export default function SettingsGeneral() {
   const [defaultCurrency, setDefaultCurrency] = useState('USD');
   const [currencySymbol, setCurrencySymbol] = useState('$');
   const [currencyPosition, setCurrencyPosition] = useState<'before' | 'after'>('before');
+  const [currencyDecimals, setCurrencyDecimals] = useState<number>(2);
   const [googleMapsApiKey, setGoogleMapsApiKey] = useState('');
   const [navShowHome, setNavShowHome] = useState(true);
   const [navShowLocations, setNavShowLocations] = useState(true);
@@ -57,6 +58,7 @@ export default function SettingsGeneral() {
           if (d.defaultCurrency) setDefaultCurrency(d.defaultCurrency);
           if (d.currencySymbol) setCurrencySymbol(d.currencySymbol);
           if (d.currencyPosition) setCurrencyPosition(d.currencyPosition);
+          if (d.currencyDecimals !== undefined) setCurrencyDecimals(d.currencyDecimals);
           if (d.googleMapsApiKey) setGoogleMapsApiKey(d.googleMapsApiKey);
           if (d.navShowHome !== undefined) setNavShowHome(d.navShowHome);
           if (d.navShowLocations !== undefined) setNavShowLocations(d.navShowLocations);
@@ -80,7 +82,7 @@ export default function SettingsGeneral() {
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({
           contactEmail, contactPhone, timezone, distanceUnit, defaultCurrency,
-          currencySymbol, currencyPosition, googleMapsApiKey,
+          currencySymbol, currencyPosition, currencyDecimals, googleMapsApiKey,
           navShowHome, navShowLocations, navShowMenu, navShowReservations, showMembership, showLanguageEmoji
         }),
       });
@@ -199,7 +201,7 @@ export default function SettingsGeneral() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">預設幣別</label>
               <input type="text" maxLength={3} value={defaultCurrency} onChange={(e) => setDefaultCurrency(e.target.value.toUpperCase())} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500" placeholder="TWD" />
@@ -220,6 +222,16 @@ export default function SettingsGeneral() {
                   後方 (10$)
                 </label>
               </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">結帳金額小數點位數</label>
+              <select value={currencyDecimals} onChange={(e) => setCurrencyDecimals(Number(e.target.value))} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                <option value={0}>0 (整數，如台幣/日圓)</option>
+                <option value={1}>1</option>
+                <option value={2}>2 (兩位小數，如美金)</option>
+                <option value={3}>3</option>
+                <option value={4}>4</option>
+              </select>
             </div>
           </div>
         </div>
