@@ -11,7 +11,7 @@ import { useRecentOrders } from '../hooks/useRecentOrders.js';
 import { formatToLocalDate, formatToLocalTime, formatToFullDateTime, getDateFriendlyLabel } from '../utils/date.js';
 
 type OrderType = 'delivery' | 'pickup' | 'frozen_delivery';
-type PaymentMethod = 'cash' | 'stripe' | 'paypal';
+type PaymentMethod = 'cash' | 'stripe' | 'paypal' | 'linepay';
 
 // Default tax rate fallback if settings not loaded
 const DEFAULT_TAX_RATE = 0;
@@ -475,6 +475,22 @@ export default function Checkout() {
         itemCount: data.data.items?.length || 0,
         scheduledAt: data.data.scheduledAt || undefined,
       });
+
+      if (paymentMethod === 'linepay') {
+        const lineRes = await fetch(`${API_BASE}/payments/linepay/create`, {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({ orderId: data.data.id })
+        });
+        const lineData = await lineRes.json();
+        if (lineData.success && lineData.data.paymentUrl) {
+          window.location.href = lineData.data.paymentUrl;
+          return;
+        } else {
+          throw new Error(lineData.error || 'LINE Pay redirect failed');
+        }
+      }
+
       navigate(`/orders/${data.data.id}`, { state: { order: data.data } });
     } catch (err: any) {
       setError(err.message || t('common.error'));
@@ -1024,7 +1040,7 @@ export default function Checkout() {
           </div>
 
           {/* Payment method */}
-          {paymentSettings?.stripeEnabled || paymentSettings?.paypalEnabled || paymentSettings?.cashEnabled ? (
+          {paymentSettings?.stripeEnabled || paymentSettings?.paypalEnabled || paymentSettings?.cashEnabled || paymentSettings?.linePayEnabled ? (
             <div 
               ref={paymentSectionRef}
               className={`surface-card rounded-xl shadow-sm border p-6 transition-all duration-300 ${
@@ -1108,6 +1124,30 @@ export default function Checkout() {
                       <span className="text-[10px] opacity-70">{t('checkout.paypalSub') || '使用 PayPal 帳戶支付'}</span>
                     </div>
                   </label>
+                )}
+                
+                {paymentSettings?.linePayEnabled && (
+                  <label className={`flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition-all ${
+                    paymentMethod === 'linepay'
+                      ? 'border-primary-600 bg-primary-50 text-primary-700 shadow-sm'
+                      : 'border-input hover:border-gray-300 text-sub'
+                  }`}
+                  >
+                  <input
+                    type="radio"
+                    name="payment"
+                    checked={paymentMethod === 'linepay'}
+                    onChange={() => {
+                      setPaymentMethod('linepay');
+                      setShowPaymentError(false);
+                    }}
+                    className="accent-primary-600 w-4 h-4"
+                  />
+                  <div className="flex flex-col">
+                    <span className="text-sm font-bold">LINE Pay</span>
+                    <span className="text-[10px] opacity-70">使用 LINE Pay 快速結帳</span>
+                  </div>
+                </label>
                 )}
               </div>
             </div>

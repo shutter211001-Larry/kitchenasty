@@ -71,6 +71,7 @@ export interface SiteSettings {
     cashEnabled?: boolean;
     stripeEnabled?: boolean;
     paypalEnabled?: boolean;
+    linePayEnabled?: boolean;
   };
   reservationSettings?: {
     enabled?: boolean;
