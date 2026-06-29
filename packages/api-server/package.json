@@ -1,5 +1,5 @@
 {
-  "name": "@shutter/server",
+  "name": "@shutter/api-server",
   "version": "0.2.0",
   "private": true,
   "scripts": {
