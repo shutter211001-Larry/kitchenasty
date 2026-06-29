@@ -174,9 +174,9 @@ docker compose up -d
 ### 3. Set up environment & migrate
 
 ```bash
-cp packages/server/.env.example packages/server/.env
-npx -w packages/server prisma migrate dev --schema ../../prisma/schema.prisma
-npx -w packages/server prisma db seed
+cp packages/api-server/.env.example packages/api-server/.env
+npx -w packages/api-server prisma migrate dev --schema ../../prisma/schema.prisma
+npx -w packages/api-server prisma db seed
 ```
 
 ### 4. Start development servers
@@ -255,3 +255,4 @@ See [`PLAN.md`](PLAN.md) for the full roadmap and feature ideas.
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
+

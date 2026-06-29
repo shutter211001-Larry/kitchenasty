@@ -1,7 +1,7 @@
 const fs = require('fs');
 
 const storefrontPath = 'packages/storefront/src/i18n/locales/zh-TW.json';
-const adminPath = 'packages/admin/src/i18n/locales/zh-TW.json';
+const adminPath = 'packages/adminfront/src/i18n/locales/zh-TW.json';
 
 function addKeys(filePath, newKeys) {
   if (fs.existsSync(filePath)) {
@@ -46,3 +46,4 @@ addKeys(adminPath, {
   'common.noResults': '沒有找到結果',
   'common.none': '無'
 });
+

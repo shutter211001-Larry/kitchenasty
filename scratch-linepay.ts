@@ -1,4 +1,4 @@
-import { LinePayClient } from './packages/server/src/lib/linepay.js';
+﻿import { LinePayClient } from './packages/api-server/src/lib/linepay.js';
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -35,3 +35,4 @@ async function test() {
   }
 }
 test();
+

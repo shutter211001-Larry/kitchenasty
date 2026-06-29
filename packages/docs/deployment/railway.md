@@ -15,12 +15,12 @@ Shutter 是一個包含多個模組的大型系統。在您的架構中，包含
 2. `Shutter ERP DB` (ERP 資料庫)
 
 **後端伺服器 (Backend)**
-3. `Server` (API 伺服器，對應 `packages/server`)
+3. `api-server` (API 伺服器，對應 `packages/server`)
 
 **前端介面 (Frontends)**
-4. `Admin` (後台管理介面，對應 `packages/admin`)
-5. `Storefront` (顧客點餐前台，對應 `packages/storefront`)
-6. `ERP Frontend` (ERP 管理介面，對應 `packages/shutter-erp-frontend`)
+4. `adminfront` (後台管理介面，對應 `packages/admin`)
+5. `storefront` (顧客點餐前台，對應 `packages/storefront`)
+6. `erpfront` (ERP 管理介面，對應 `packages/shutter-erp-frontend`)
 
 ---
 
@@ -39,7 +39,7 @@ Shutter 是一個包含多個模組的大型系統。在您的架構中，包含
 
 ---
 
-## 第二部分：部署 Server 與 3 個前台
+## 第二部分：部署 api-server 與 3 個前台
 
 因為我們使用的是 Monorepo (單一儲存庫)，您需要**重複 4 次**從 GitHub 匯入同一個儲存庫，並為每個服務設定不同的「根目錄 (Root Directory)」。
 
@@ -49,10 +49,10 @@ Shutter 是一個包含多個模組的大型系統。在您的架構中，包含
 
 | 服務名稱 (建議命名) | Root Directory | 用途 |
 |-----------------|----------------|------|
-| `Server` | `/packages/server` | 後端 API |
-| `Admin` | `/packages/admin` | 管理員後台 |
-| `Storefront` | `/packages/storefront` | 顧客點餐前台 |
-| `ERP Frontend` | `/packages/shutter-erp-frontend` | ERP 前台系統 |
+| `api-server` | `/packages/server` | 後端 API |
+| `adminfront` | `/packages/admin` | 管理員後台 |
+| `storefront` | `/packages/storefront` | 顧客點餐前台 |
+| `erpfront` | `/packages/shutter-erp-frontend` | ERP 前台系統 |
 
 4. **綁定網域名稱 (Domains)**：
    - 分別進入這 4 個服務的 **Settings** -> **Public Networking**。
@@ -61,20 +61,20 @@ Shutter 是一個包含多個模組的大型系統。在您的架構中，包含
 
 ---
 
-## 第三部分：設定後端 (Server) 環境變數
+## 第三部分：設定後端 (api-server) 環境變數
 
-請點擊 **`Server`** 卡片，切換到 **"Variables"** 分頁。這些環境變數是系統運作的核心。
+請點擊 **`api-server`** 卡片，切換到 **"Variables"** 分頁。這些環境變數是系統運作的核心。
 
 ### 📌 1. 核心與資料庫設定
 | 變數名稱 | 說明 |
 |----------|------|
 | `PORT` | 填寫 `3000` |
 | `NODE_ENV` | 填寫 `production` |
-| `STORE_URL_PUBLIC` | 填寫 `Storefront` 前台服務的公開網址（例如 `https://store.up.railway.app`）。用於信件、LINE 推播與登入後的返回連結。 |
-| `ADMIN_URL_PUBLIC` | 填寫 `Admin` 後台服務的公開網址（例如 `https://admin.up.railway.app`）。 |
-| `ERP_URL_PUBLIC` | 填寫 `ERP Frontend` 服務的公開網址（例如 `https://erp.up.railway.app`）。 |
-| `API_URL_PUBLIC` | 填寫您的 `Server` 對外 API 網址（例如 `https://api.up.railway.app`）。 |
-| `API_URL_PRIVATE` | 填寫您的 `Server` Railway 內部網路網址（例如 `http://server.railway.internal:3000`），加速 SSR 與內部微服務通訊。 |
+| `STORE_URL_PUBLIC` | 填寫 `storefront` 前台服務的公開網址（例如 `https://store.up.railway.app`）。用於信件、LINE 推播與登入後的返回連結。 |
+| `ADMIN_URL_PUBLIC` | 填寫 `adminfront` 後台服務的公開網址（例如 `https://admin.up.railway.app`）。 |
+| `ERP_URL_PUBLIC` | 填寫 `erpfront` 服務的公開網址（例如 `https://erp.up.railway.app`）。 |
+| `API_URL_PUBLIC` | 填寫您的 `api-server` 對外 API 網址（例如 `https://api.up.railway.app`）。 |
+| `API_URL_PRIVATE` | 填寫您的 `api-server` Railway 內部網路網址（例如 `http://api-server.railway.internal:3000`），加速 SSR 與內部微服務通訊。 |
 | `DATABASE_URL` | 填入第一階段取得的 `Shutter DB` 連線字串 |
 | `SHUTTER_ERP_DATABASE_URL`| 填入第一階段取得的 `Shutter ERP DB` 連線字串 |
 | `INTEGRATION_KEY` | ERP 與主系統間的內部驗證金鑰（請自訂一段隨機字串，例如 `super-secret-key`） |
@@ -108,14 +108,14 @@ Shutter 是一個包含多個模組的大型系統。在您的架構中，包含
 
 ---
 
-## 第四部分：設定前端環境變數 (Admin, Storefront, ERP)
+## 第四部分：設定前端環境變數 (adminfront, storefront, erpfront)
 
-對於 3 個前端服務 (`Admin`, `Storefront`, `ERP Frontend`)，您需要在各自的 **Variables** 分頁中，告訴它們後端 API 在哪裡。
+對於 3 個前端服務 (`adminfront`, `storefront`, `erpfront`)，您需要在各自的 **Variables** 分頁中，告訴它們後端 API 在哪裡。
 請依照您的 Vite 前端設定，加入環境變數：
 
 | 變數名稱 | 說明 |
 |----------|------|
-| `VITE_API_URL_PUBLIC` | 填寫您的 `Server` 對外網址（例如 `https://server-production.up.railway.app`） |
+| `VITE_API_URL_PUBLIC` | 填寫您的 `api-server` 對外網址（例如 `https://server-production.up.railway.app`） |
 
 > [!IMPORTANT]
 > **重新建置前端**：前端的環境變數必須在「建置階段 (Build time)」寫入，因此在設定好 `VITE_API_URL_PUBLIC` 後，請務必點擊各自前端服務右上角的 **Deploy** 按鈕來觸發重新建置。
@@ -124,20 +124,20 @@ Shutter 是一個包含多個模組的大型系統。在您的架構中，包含
 
 ## ✅ 最終檢查清單
 
-- [ ] 在 Railway 畫面上，您可以看到 6 個方塊 (2 個 DB, 1 個 Server, 3 個 Frontend)。
+- [ ] 在 Railway 畫面上，您可以看到 6 個方塊 (2 個 DB, 1 個 api-server, 3 個 Frontend)。
 - [ ] 3 個前端服務都有設定對應的 `/packages/xxx` 作為 Root Directory。
-- [ ] `Server` 已經成功連結了兩個資料庫的連線字串 (`DATABASE_URL` 與 `SHUTTER_ERP_DATABASE_URL`)。
-- [ ] `Server` 有填寫 `STORE_URL_PUBLIC` 與 `ADMIN_URL_PUBLIC`，系統會自動處理 CORS。
-- [ ] 第三方金鑰（Google、LINE、Gemini）皆已正確填入 `Server`。
+- [ ] `api-server` 已經成功連結了兩個資料庫的連線字串 (`DATABASE_URL` 與 `SHUTTER_ERP_DATABASE_URL`)。
+- [ ] `api-server` 有填寫 `STORE_URL_PUBLIC` 與 `ADMIN_URL_PUBLIC`，系統會自動處理 CORS。
+- [ ] 第三方金鑰（Google、LINE、Gemini）皆已正確填入 `api-server`。
 - [ ] 所有前端與後端服務皆顯示 **Active (綠燈)**。
 
 ---
 
 ## 第五部分：資料庫初始化與預設資料 (首次部署)
 
-雖然 Server 啟動時會嘗試自動套用資料庫結構 (Migration)，但在**第一次部署**時，建議您直接透過 Railway 的終端機手動建立資料表並寫入預設的「管理員帳號與設定」(Seed data)，以確保系統初始化完整。
+雖然 api-server 啟動時會嘗試自動套用資料庫結構 (Migration)，但在**第一次部署**時，建議您直接透過 Railway 的終端機手動建立資料表並寫入預設的「管理員帳號與設定」(Seed data)，以確保系統初始化完整。
 
-1. 在 Railway 儀表板中點擊 **`Server`** 卡片。
+1. 在 Railway 儀表板中點擊 **`api-server`** 卡片。
 2. 切換到上方的 **Terminal** 分頁。
 3. 確保當前路徑在 `/app`，依序貼上並執行以下三個指令：
 
@@ -160,3 +160,4 @@ npm run db:seed -w packages/server
 > 這個步驟只需要在**專案第一次建立時**執行一次。之後如果有版本更新，系統啟動時會自動處理後續的 Migration。
 
 恭喜！您的 Shutter 系統已經完整部署並初始化完畢！
+

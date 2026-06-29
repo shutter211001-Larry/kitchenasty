@@ -2,15 +2,15 @@ const fs = require('fs');
 const path = require('path');
 
 const directories = [
-  'packages/server/src',
-  'packages/server/scripts',
-  'packages/server',
+  'packages/api-server/src',
+  'packages/api-server/scripts',
+  'packages/api-server',
   'packages/storefront/src',
   'packages/storefront/scripts',
   'packages/storefront',
-  'packages/admin/src',
-  'packages/admin',
-  'packages/shutter-erp-frontend/src',
+  'packages/adminfront/src',
+  'packages/adminfront',
+  'packages/erpfront/src',
   '.',
 ];
 
@@ -83,3 +83,4 @@ directories.forEach(dir => {
   processDirectory(path.resolve(__dirname, dir));
 });
 console.log('Done replacing environment variables.');
+

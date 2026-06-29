@@ -1,5 +1,5 @@
 {
-  "name": "@shutter/admin",
+  "name": "@shutter/adminfront",
   "version": "0.2.0",
   "private": true,
   "type": "module",
