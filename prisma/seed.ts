@@ -537,8 +537,10 @@ async function main() {
     createdAt.setDate(createdAt.getDate() - daysAgo);
     createdAt.setHours(10 + (i % 12), (i * 17) % 60);
 
-    await prisma.order.create({
-      data: {
+    await prisma.order.upsert({
+      where: { orderNumber: `SH-SEED-${String(i + 1).padStart(3, '0')}` },
+      update: {},
+      create: {
         orderNumber: `SH-SEED-${String(i + 1).padStart(3, '0')}`,
         customerId: customer.id,
         locationId: location.id,
