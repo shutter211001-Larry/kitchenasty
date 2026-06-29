@@ -10,6 +10,7 @@ interface User {
   lineUserId?: string | null;
   lineDisplayName?: string | null;
   locationId?: string | null;
+  preferredLanguage?: string | null;
 }
 
 interface AuthContextValue {
@@ -18,6 +19,7 @@ interface AuthContextValue {
   loading: boolean;
   login: (token: string) => void;
   logout: () => void;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -77,8 +79,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   }
 
+  async function refreshUser() {
+    if (!token) return;
+    try {
+      const res = await fetch('/api/auth/me', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setUser(data.data.user);
+      }
+    } catch (error) {
+      console.error('Failed to refresh user', error);
+    }
+  }
+
   return (
-    <AuthContext.Provider value={{ token, user, loading, login, logout }}>
+    <AuthContext.Provider value={{ token, user, loading, login, logout, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );
