@@ -121,6 +121,8 @@ export const getIngredientById = async (req: Request, res: Response) => {
   }
 };
 
+import { translateAndSave } from '../../lib/aiTranslator.js';
+
 export const createIngredient = async (req: Request, res: Response) => {
   try {
     const { 
@@ -191,6 +193,9 @@ export const createIngredient = async (req: Request, res: Response) => {
         prices: { include: { supplier: true } }
       }
     });
+
+    // Run AI translation in background
+    translateAndSave(name, 'ingredient').catch(console.error);
 
     res.status(201).json(refreshed);
   } catch (error: any) {

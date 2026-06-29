@@ -130,6 +130,7 @@ router.get('/me', authenticate, authController.getMe);
 router.delete('/me', authenticate, authController.deleteMe);
 router.post('/set-password', authenticate, authController.setPassword);
 router.patch('/me', authenticate, authController.updateMe);
+router.patch('/me/language', authenticate, authController.updateLanguage);
 router.post('/google/unbind', authenticate, authController.unbindGoogle);
 router.post('/social/merge', authenticate, authController.mergeSocialAccount);
 

@@ -1,0 +1,1 @@
+const { PrismaClient } = require("@prisma/client"); const prisma = new PrismaClient(); async function main() { try { await prisma.$executeRawUnsafe(`ALTER TABLE "users" ADD COLUMN "preferredLanguage" TEXT DEFAULT 'zh-TW';`); console.log("Column added successfully"); } catch(e) { console.error(e.message); } } main().finally(() => prisma.$disconnect());

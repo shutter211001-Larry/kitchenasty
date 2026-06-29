@@ -32,7 +32,7 @@ export const SUPPORTED_LANGUAGES = [
 
 export type LanguageCode = (typeof SUPPORTED_LANGUAGES)[number]['code'];
 
-const savedLanguage = localStorage.getItem('admin_language') || 'zh-TW';
+const savedLanguage = localStorage.getItem('erp_language') || 'zh-TW';
 
 i18n.use(initReactI18next).init({
   resources: {
@@ -54,7 +54,7 @@ i18n.use(initReactI18next).init({
   fallbackLng: 'en',
   saveMissing: import.meta.env.DEV, // Only save missing in development
   missingKeyHandler: (lngs, ns, key, fallbackValue) => {
-    fetch(`http://localhost:3000/api/i18n/locales/${lngs[0]}/${ns}/missing?project=admin`, {
+    fetch(`http://localhost:3000/api/i18n/locales/${lngs[0]}/${ns}/missing?project=shutter-erp-frontend`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ [key]: fallbackValue || key }),
@@ -66,7 +66,7 @@ i18n.use(initReactI18next).init({
 });
 
 i18n.on('languageChanged', (lng) => {
-  localStorage.setItem('admin_language', lng);
+  localStorage.setItem('erp_language', lng);
   document.documentElement.lang = lng;
 });
 

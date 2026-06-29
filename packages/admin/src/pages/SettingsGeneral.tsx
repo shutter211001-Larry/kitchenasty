@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { SUPPORTED_LANGUAGES } from '../i18n/index.js';
+import { useAuth } from '../context/AuthContext.js';
 
 const TIMEZONES = [
   { value: 'Asia/Taipei', label: '台北 (GMT+8) - 台灣標準時間' },
@@ -23,6 +26,8 @@ const TIMEZONES = [
 ];
 
 export default function SettingsGeneral() {
+  const { user, refreshUser } = useAuth();
+  const { i18n } = useTranslation();
   const token = localStorage.getItem('token') || '';
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -32,6 +37,7 @@ export default function SettingsGeneral() {
   const [contactEmail, setContactEmail] = useState('');
   const [contactPhone, setContactPhone] = useState('');
   const [timezone, setTimezone] = useState('UTC');
+  const [language, setLanguage] = useState(user?.preferredLanguage || i18n.language || 'zh-TW');
   const [distanceUnit, setDistanceUnit] = useState<'km' | 'mi'>('km');
   const [defaultCurrency, setDefaultCurrency] = useState('USD');
   const [currencySymbol, setCurrencySymbol] = useState('$');
@@ -44,6 +50,12 @@ export default function SettingsGeneral() {
   const [navShowReservations, setNavShowReservations] = useState(true);
   const [showMembership, setShowMembership] = useState(true);
   const [showLanguageEmoji, setShowLanguageEmoji] = useState(false);
+
+  useEffect(() => {
+    if (user?.preferredLanguage) {
+      setLanguage(user.preferredLanguage);
+    }
+  }, [user?.preferredLanguage]);
 
   useEffect(() => {
     fetch('/api/settings/general', { headers: { Authorization: `Bearer ${token}` } })
@@ -77,7 +89,7 @@ export default function SettingsGeneral() {
     setError('');
     setSuccess('');
     try {
-      const res = await fetch('/api/settings/general', {
+      const p1 = fetch('/api/settings/general', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({
@@ -86,9 +98,22 @@ export default function SettingsGeneral() {
           navShowHome, navShowLocations, navShowMenu, navShowReservations, showMembership, showLanguageEmoji
         }),
       });
+
+      const p2 = fetch('/api/auth/me/language', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ language }),
+      });
+
+      const [res, langRes] = await Promise.all([p1, p2]);
       const data = await res.json();
+      
       if (data.success) {
-        setSuccess('一般設定已更新');
+        if (langRes.ok) {
+          i18n.changeLanguage(language);
+          if (refreshUser) refreshUser();
+        }
+        setSuccess('一般設定與個人化設定已更新');
         setTimeout(() => setSuccess(''), 3000);
       } else {
         setError(typeof data.error === 'string' ? data.error : '儲存失敗');
@@ -117,6 +142,23 @@ export default function SettingsGeneral() {
       {success && <div className="mb-4 p-3 bg-green-50 border border-green-200 text-green-700 rounded-lg text-sm">{success}</div>}
 
       <div className="space-y-6">
+        {/* Personal Preference */}
+        <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-4">
+          <h2 className="text-lg font-semibold text-gray-900">個人化設定</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">系統顯示語言</label>
+              <select value={language} onChange={(e) => setLanguage(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                {SUPPORTED_LANGUAGES.map((l) => (
+                  <option key={l.code} value={l.code}>
+                    {l.flag} {l.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </div>
+
         {/* Contact Info */}
         <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-4">
           <h2 className="text-lg font-semibold text-gray-900">聯絡資訊</h2>
