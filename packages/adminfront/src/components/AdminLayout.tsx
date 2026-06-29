@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext.js';
 import AdminChatWidget from './AdminChatWidget';
+import LanguageSwitcher from './LanguageSwitcher';
 
 type Role = 'SUPER_ADMIN' | 'MANAGER' | 'STAFF';
 
@@ -324,6 +325,12 @@ export default function AdminLayout({ children, onLogout }: { children: React.Re
                 </svg>
               </Link>
             )}
+
+            {/* Separator */}
+            <div className="w-px h-6 bg-gray-200 hidden sm:block" />
+
+            {/* Language Switcher */}
+            <LanguageSwitcher />
 
             {/* Separator */}
             <div className="w-px h-6 bg-gray-200" />
