@@ -18,7 +18,7 @@ Applied in order in `app.ts`:
 
 ## 🔐 Authentication Middleware
 
-Defined in `packages/server/src/middleware/auth.ts`:
+Defined in `packages/api-server/src/middleware/auth.ts`:
 
 ### `authenticate`
 
@@ -74,7 +74,7 @@ The payload includes:
 
 ## 📤 Upload Middleware
 
-Defined in `packages/server/src/middleware/upload.ts`:
+Defined in `packages/api-server/src/middleware/upload.ts`:
 
 Uses [Multer](https://github.com/expressjs/multer) for multipart file uploads:
 

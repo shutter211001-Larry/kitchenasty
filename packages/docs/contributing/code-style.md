@@ -44,7 +44,7 @@ Key patterns:
 
 ## 📂 Route Organization
 
-Routes are organized by domain in `packages/server/src/routes/`:
+Routes are organized by domain in `packages/api-server/src/routes/`:
 
 - 📄 One file per domain (e.g., `order.routes.ts`)
 - 🔗 Routes registered in `app.ts`

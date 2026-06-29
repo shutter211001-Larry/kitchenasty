@@ -27,8 +27,8 @@ Shutter is a monorepo with four packages:
 
 ```
 shutter/
-├── packages/server      # Express + Prisma REST API
-├── packages/admin       # React admin dashboard (Vite)
+├── packages/api-server      # Express + Prisma REST API
+├── packages/adminfront       # React admin dashboard (Vite)
 ├── packages/storefront  # React customer-facing app (Vite)
 ├── packages/shared      # Shared types and utilities
 └── prisma/              # Database schema and seeds

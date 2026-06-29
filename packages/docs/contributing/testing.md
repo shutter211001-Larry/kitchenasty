@@ -5,7 +5,7 @@ Shutter has three levels of testing: unit, integration, and end-to-end.
 ## 📁 Test Structure
 
 ```
-packages/server/src/__tests__/
+packages/api-server/src/__tests__/
 ├── unit/           # Unit tests (no database)
 └── integration/    # Integration tests (uses database)
 
@@ -31,18 +31,18 @@ npm run test:e2e
 npm run test -w packages/shared
 
 # Server unit tests
-npm run test:unit -w packages/server
+npm run test:unit -w packages/api-server
 
 # Server integration tests
-npm run test:integration -w packages/server
+npm run test:integration -w packages/api-server
 ```
 
 ## 🔧 Test Frameworks
 
 | Level | Framework | Location |
 |-------|-----------|----------|
-| 🧩 Unit | Vitest | `packages/server/src/__tests__/unit/` |
-| 🔗 Integration | Vitest | `packages/server/src/__tests__/integration/` |
+| 🧩 Unit | Vitest | `packages/api-server/src/__tests__/unit/` |
+| 🔗 Integration | Vitest | `packages/api-server/src/__tests__/integration/` |
 | 📦 Shared | Vitest | `packages/shared/src/__tests__/` |
 | 🌐 E2E | Playwright | `e2e/` |
 

@@ -12,10 +12,10 @@ cd shutter
 ## 2. ⚙️ Configure Environment
 
 ```bash
-cp packages/server/.env.example packages/server/.env
+cp packages/api-server/.env.example packages/api-server/.env
 ```
 
-Edit `packages/server/.env` and set at minimum:
+Edit `packages/api-server/.env` and set at minimum:
 
 ```dotenv
 DATABASE_URL=postgresql://shutter:shutter@postgres:5432/shutter

@@ -15,12 +15,12 @@ Shutter 是一個包含多個模組的大型系統。在您的架構中，包含
 2. `Shutter ERP DB` (ERP 資料庫)
 
 **後端伺服器 (Backend)**
-3. `api-server` (API 伺服器，對應 `packages/server`)
+3. `api-server` (API 伺服器，對應 `packages/api-server`)
 
 **前端介面 (Frontends)**
-4. `adminfront` (後台管理介面，對應 `packages/admin`)
+4. `adminfront` (後台管理介面，對應 `packages/adminfront`)
 5. `storefront` (顧客點餐前台，對應 `packages/storefront`)
-6. `erpfront` (ERP 管理介面，對應 `packages/shutter-erp-frontend`)
+6. `erpfront` (ERP 管理介面，對應 `packages/erpfront`)
 
 ---
 
@@ -49,10 +49,10 @@ Shutter 是一個包含多個模組的大型系統。在您的架構中，包含
 
 | 服務名稱 (建議命名) | Root Directory | 用途 |
 |-----------------|----------------|------|
-| `api-server` | `/packages/server` | 後端 API |
-| `adminfront` | `/packages/admin` | 管理員後台 |
+| `api-server` | `/packages/api-server` | 後端 API |
+| `adminfront` | `/packages/adminfront` | 管理員後台 |
 | `storefront` | `/packages/storefront` | 顧客點餐前台 |
-| `erpfront` | `/packages/shutter-erp-frontend` | ERP 前台系統 |
+| `erpfront` | `/packages/erpfront` | ERP 前台系統 |
 
 4. **綁定網域名稱 (Domains)**：
    - 分別進入這 4 個服務的 **Settings** -> **Public Networking**。
@@ -153,7 +153,7 @@ npx prisma migrate deploy --schema prisma/erp/shutter-erp.prisma
 
 **寫入種子資料 (Seed)**
 ```bash
-npm run db:seed -w packages/server
+npm run db:seed -w packages/api-server
 ```
 
 > [!NOTE]

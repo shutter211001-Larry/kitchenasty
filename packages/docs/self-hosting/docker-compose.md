@@ -96,7 +96,7 @@ services:
   server:
     build:
       context: .
-      dockerfile: packages/server/Dockerfile
+      dockerfile: packages/api-server/Dockerfile
     container_name: shutter-server
     environment:
       PORT: 3000
@@ -128,7 +128,7 @@ services:
   admin:
     build:
       context: .
-      dockerfile: packages/admin/Dockerfile
+      dockerfile: packages/adminfront/Dockerfile
     container_name: shutter-admin
     depends_on:
       - server
