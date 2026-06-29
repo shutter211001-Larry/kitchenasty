@@ -22,10 +22,10 @@ CREATE DATABASE shutter OWNER shutter;
 ## 3. ⚙️ Configure Environment
 
 ```bash
-cp packages/server/.env.example packages/server/.env
+cp packages/api-server/.env.example packages/api-server/.env
 ```
 
-Edit `packages/server/.env`:
+Edit `packages/api-server/.env`:
 
 ```dotenv
 DATABASE_URL=postgresql://shutter:shutter@localhost:5432/shutter
@@ -36,8 +36,8 @@ CORS_ORIGINS=http://localhost:5173,http://localhost:5174
 ## 4. 🔄 Generate Prisma Client & Migrate
 
 ```bash
-npx -w packages/server prisma generate --schema ../../prisma/schema.prisma
-npx -w packages/server prisma migrate deploy --schema ../../prisma/schema.prisma
+npx -w packages/api-server prisma generate --schema ../../prisma/schema.prisma
+npx -w packages/api-server prisma migrate deploy --schema ../../prisma/schema.prisma
 ```
 
 ## 5. 🌱 Seed the Database
@@ -87,10 +87,10 @@ npm run dev:storefront
 
 ```bash
 # Open Prisma Studio (database GUI)
-npx -w packages/server prisma studio --schema ../../prisma/schema.prisma
+npx -w packages/api-server prisma studio --schema ../../prisma/schema.prisma
 
 # Reset database (drops all data)
-npx -w packages/server prisma migrate reset --schema ../../prisma/schema.prisma
+npx -w packages/api-server prisma migrate reset --schema ../../prisma/schema.prisma
 
 # Run all tests
 npm test

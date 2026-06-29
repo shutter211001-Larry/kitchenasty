@@ -21,14 +21,14 @@ npm ci
 createdb shutter
 
 # Configure connection
-cp packages/server/.env.example packages/server/.env
+cp packages/api-server/.env.example packages/api-server/.env
 # Edit .env with your PostgreSQL credentials
 
 # Generate Prisma client
-npx -w packages/server prisma generate --schema ../../prisma/schema.prisma
+npx -w packages/api-server prisma generate --schema ../../prisma/schema.prisma
 
 # Run migrations
-npx -w packages/server prisma migrate dev --schema ../../prisma/schema.prisma
+npx -w packages/api-server prisma migrate dev --schema ../../prisma/schema.prisma
 
 # Seed data
 npx tsx prisma/seed.ts
@@ -51,7 +51,7 @@ npm run dev:storefront  # Storefront on :5174
 ### 🔎 Prisma Studio
 
 ```bash
-npx -w packages/server prisma studio --schema ../../prisma/schema.prisma
+npx -w packages/api-server prisma studio --schema ../../prisma/schema.prisma
 ```
 
 Opens a database browser at http://localhost:5555.

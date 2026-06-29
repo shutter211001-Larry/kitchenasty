@@ -254,7 +254,7 @@ export async function syncDatabase(req: Request, res: Response) {
         console.log(`[Developer] Ingredient count in DB: ${count}`);
         if (count === 0) {
           console.log('[Developer] Ingredient table is empty. Seeding food data...');
-          const seedScriptPath = path.resolve(rootDir, 'packages/server/scripts/shutter-erp/seedFoodData.ts');
+          const seedScriptPath = path.resolve(rootDir, 'packages/api-server/scripts/shutter-erp/seedFoodData.ts');
           if (fs.existsSync(seedScriptPath)) {
             const seedRes = await execAsync(`npx tsx "${seedScriptPath}"`, {
               cwd: rootDir,
@@ -323,110 +323,124 @@ function unflattenObject(ob: Record<string, string>): any {
 
 export async function syncLocales(req: Request, res: Response): Promise<void> {
   try {
-    const localesDir = path.resolve(__dirname, '../../../../storefront/src/i18n/locales');
-    if (!fs.existsSync(localesDir)) {
-      throw new Error(`Locales directory not found at ${localesDir}`);
-    }
+    const targetDirs = [
+      path.resolve(__dirname, '../../../storefront/src/i18n/locales'),
+      path.resolve(__dirname, '../../../adminfront/src/i18n/locales'),
+      path.resolve(__dirname, '../../../erpfront/src/i18n/locales'),
+      path.resolve(__dirname, '../../../mobile/src/i18n/locales'),
+    ];
 
-    const files = fs.readdirSync(localesDir).filter(f => f.endsWith('.json'));
-    
-    // 1. Load all files and their flattened structures
-    const fileContents: Record<string, Record<string, string>> = {};
-    for (const file of files) {
-      const lang = file.replace('.json', '');
-      const content = JSON.parse(fs.readFileSync(path.join(localesDir, file), 'utf8'));
-      fileContents[lang] = flattenObject(content);
-    }
+    let totalUpdatedCount = 0;
+    const allTargetLanguages = new Set<string>();
 
-    // 2. Build a global dictionary of all known keys
-    const globalKeys = new Set<string>();
-    for (const lang of Object.keys(fileContents)) {
-      for (const key of Object.keys(fileContents[lang])) {
-        globalKeys.add(key);
+    for (const localesDir of targetDirs) {
+      if (!fs.existsSync(localesDir)) {
+        console.warn(`[Developer] Skipping missing locales directory: ${localesDir}`);
+        continue;
       }
-    }
 
-    const missingByLanguage: Record<string, string[]> = {};
-    const allMissingKeys = new Set<string>();
-    
-    // Find missing keys for each language
-    for (const lang of Object.keys(fileContents)) {
-      missingByLanguage[lang] = [];
-      const flat = fileContents[lang];
-      for (const key of globalKeys) {
-        if (flat[key] === undefined || flat[key] === null || flat[key] === '') {
-          missingByLanguage[lang].push(key);
-          allMissingKeys.add(key);
+      const files = fs.readdirSync(localesDir).filter(f => f.endsWith('.json'));
+      
+      // 1. Load all files and their flattened structures
+      const fileContents: Record<string, Record<string, string>> = {};
+      for (const file of files) {
+        const lang = file.replace('.json', '');
+        allTargetLanguages.add(lang);
+        const content = JSON.parse(fs.readFileSync(path.join(localesDir, file), 'utf8'));
+        fileContents[lang] = flattenObject(content);
+      }
+
+      // 2. Build a global dictionary of all known keys
+      const globalKeys = new Set<string>();
+      for (const lang of Object.keys(fileContents)) {
+        for (const key of Object.keys(fileContents[lang])) {
+          globalKeys.add(key);
         }
       }
-    }
 
-    if (allMissingKeys.size === 0) {
-      res.json({ success: true, message: 'All languages are already up to date.', updatedCount: 0 });
-      return;
-    }
-
-    // 3. For every missing key, find the best source value to translate from
-    const fieldsToTranslate: { key: string; value: string }[] = [];
-    for (const key of allMissingKeys) {
-      let bestValue = '';
+      const missingByLanguage: Record<string, string[]> = {};
+      const allMissingKeys = new Set<string>();
       
-      // Prioritize zh-TW, then en, then any first available language
-      if (fileContents['zh-TW'] && fileContents['zh-TW'][key]) {
-        bestValue = fileContents['zh-TW'][key];
-      } else if (fileContents['en'] && fileContents['en'][key]) {
-        bestValue = fileContents['en'][key];
-      } else {
-        for (const lang of Object.keys(fileContents)) {
-          if (fileContents[lang][key]) {
-            bestValue = fileContents[lang][key];
-            break;
+      // Find missing keys for each language
+      for (const lang of Object.keys(fileContents)) {
+        missingByLanguage[lang] = [];
+        const flat = fileContents[lang];
+        for (const key of globalKeys) {
+          if (flat[key] === undefined || flat[key] === null || flat[key] === '') {
+            missingByLanguage[lang].push(key);
+            allMissingKeys.add(key);
           }
         }
       }
-      fieldsToTranslate.push({ key, value: bestValue });
-    }
 
-    const targetLanguages = Object.keys(fileContents);
-    
-    // Call AI
-    const translatedFields = await translateFields(
-      fieldsToTranslate, 
-      targetLanguages, 
-      'its original language (e.g. Traditional Chinese, English, or others)'
-    );
-    
-    if (!translatedFields || Object.keys(translatedFields).length === 0) {
-      throw new Error('AI translation returned empty result or failed.');
-    }
-
-    // 4. Merge back
-    let updatedCount = 0;
-    for (const lang of Object.keys(fileContents)) {
-      const missingKeys = missingByLanguage[lang];
-      if (missingKeys.length === 0) continue;
-
-      const filepath = path.join(localesDir, `${lang}.json`);
-      const flat = fileContents[lang];
-
-      for (const key of missingKeys) {
-        if (translatedFields[key] && translatedFields[key][lang]) {
-          flat[key] = translatedFields[key][lang];
-          updatedCount++;
-        } else if (translatedFields[key] && translatedFields[key][lang.split('-')[0]]) {
-          flat[key] = translatedFields[key][lang.split('-')[0]];
-          updatedCount++;
-        }
+      if (allMissingKeys.size === 0) {
+        continue; // Up to date for this directory
       }
 
-      const newContent = unflattenObject(flat);
-      fs.writeFileSync(filepath, JSON.stringify(newContent, null, 2) + '\n', 'utf8');
+      // 3. For every missing key, find the best source value to translate from
+      const fieldsToTranslate: { key: string; value: string }[] = [];
+      for (const key of allMissingKeys) {
+        let bestValue = '';
+        
+        // Prioritize zh-TW, then en, then any first available language
+        if (fileContents['zh-TW'] && fileContents['zh-TW'][key]) {
+          bestValue = fileContents['zh-TW'][key];
+        } else if (fileContents['en'] && fileContents['en'][key]) {
+          bestValue = fileContents['en'][key];
+        } else {
+          for (const lang of Object.keys(fileContents)) {
+            if (fileContents[lang][key]) {
+              bestValue = fileContents[lang][key];
+              break;
+            }
+          }
+        }
+        fieldsToTranslate.push({ key, value: bestValue });
+      }
+
+      const targetLanguages = Object.keys(fileContents);
+      
+      // Call AI
+      const translatedFields = await translateFields(
+        fieldsToTranslate, 
+        targetLanguages, 
+        'its original language (e.g. Traditional Chinese, English, or others)'
+      );
+      
+      if (!translatedFields || Object.keys(translatedFields).length === 0) {
+        throw new Error(`AI translation returned empty result or failed for directory: ${localesDir}`);
+      }
+
+      // 4. Merge back
+      let updatedCountForDir = 0;
+      for (const lang of Object.keys(fileContents)) {
+        const missingKeys = missingByLanguage[lang];
+        if (missingKeys.length === 0) continue;
+
+        const filepath = path.join(localesDir, `${lang}.json`);
+        const flat = fileContents[lang];
+
+        for (const key of missingKeys) {
+          if (translatedFields[key] && translatedFields[key][lang]) {
+            flat[key] = translatedFields[key][lang];
+            updatedCountForDir++;
+          } else if (translatedFields[key] && translatedFields[key][lang.split('-')[0]]) {
+            flat[key] = translatedFields[key][lang.split('-')[0]];
+            updatedCountForDir++;
+          }
+        }
+
+        const newContent = unflattenObject(flat);
+        fs.writeFileSync(filepath, JSON.stringify(newContent, null, 2) + '\n', 'utf8');
+      }
+      
+      totalUpdatedCount += updatedCountForDir;
     }
 
     res.json({
       success: true,
-      message: `Successfully synchronized locales. Translated ${updatedCount} missing values across ${targetLanguages.length} languages.`,
-      updatedCount
+      message: `Successfully synchronized locales. Translated ${totalUpdatedCount} missing values across all apps.`,
+      updatedCount: totalUpdatedCount
     });
   } catch (error: any) {
     console.error('[Developer] Sync Locales failed:', error);

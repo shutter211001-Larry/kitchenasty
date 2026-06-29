@@ -68,8 +68,8 @@ shutter/
 
 | Package | Purpose | Port |
 |---------|---------|------|
-| `packages/server` | REST API, WebSocket server, business logic | 3000 |
-| `packages/admin` | Staff dashboard for managing the restaurant | 5173 |
+| `packages/api-server` | REST API, WebSocket server, business logic | 3000 |
+| `packages/adminfront` | Staff dashboard for managing the restaurant | 5173 |
 | `packages/storefront` | Customer-facing ordering and reservation app | 5174 |
 | `packages/shared` | TypeScript types shared between packages | — |
 | `packages/docs` | Developer documentation (VitePress) | 5175 |

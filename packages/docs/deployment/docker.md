@@ -24,7 +24,7 @@ services:
   server:
     build:
       context: .
-      dockerfile: packages/server/Dockerfile
+      dockerfile: packages/api-server/Dockerfile
     environment:
       PORT: 3000
       NODE_ENV: production
@@ -43,7 +43,7 @@ services:
   admin:
     build:
       context: .
-      dockerfile: packages/admin/Dockerfile
+      dockerfile: packages/adminfront/Dockerfile
     ports:
       - "5173:80"
     depends_on:

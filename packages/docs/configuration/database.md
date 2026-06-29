@@ -21,19 +21,19 @@ See [Database Schema](/architecture/database-schema) for the full model referenc
 ### 🆕 Generate a migration after schema changes
 
 ```bash
-npx -w packages/server prisma migrate dev --schema ../../prisma/schema.prisma --name describe_your_change
+npx -w packages/api-server prisma migrate dev --schema ../../prisma/schema.prisma --name describe_your_change
 ```
 
 ### 🚀 Deploy migrations in production
 
 ```bash
-npx -w packages/server prisma migrate deploy --schema ../../prisma/schema.prisma
+npx -w packages/api-server prisma migrate deploy --schema ../../prisma/schema.prisma
 ```
 
 ### ⚡ Push schema without migrations (development)
 
 ```bash
-npx -w packages/server prisma db push --schema ../../prisma/schema.prisma
+npx -w packages/api-server prisma db push --schema ../../prisma/schema.prisma
 ```
 
 ## 🌱 Seeding
@@ -57,7 +57,7 @@ npx tsx prisma/seed.ts
 Browse and edit data with the built-in GUI:
 
 ```bash
-npx -w packages/server prisma studio --schema ../../prisma/schema.prisma
+npx -w packages/api-server prisma studio --schema ../../prisma/schema.prisma
 ```
 
 Opens at http://localhost:5555.
@@ -67,7 +67,7 @@ Opens at http://localhost:5555.
 Drop all data and re-run migrations + seed:
 
 ```bash
-npx -w packages/server prisma migrate reset --schema ../../prisma/schema.prisma
+npx -w packages/api-server prisma migrate reset --schema ../../prisma/schema.prisma
 ```
 
 ::: warning

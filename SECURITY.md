@@ -30,7 +30,7 @@ Send an email to **sharang@meghsakha.com** with:
 
 The following are in scope:
 
-- The Shutter API server (`packages/server`)
+- The Shutter API server (`packages/api-server`)
 - Authentication and authorization mechanisms
 - Payment processing (Stripe integration)
 - Database access and data exposure

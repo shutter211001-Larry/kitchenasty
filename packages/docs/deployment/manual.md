@@ -6,7 +6,7 @@ For deployments without Docker.
 
 ```bash
 npm ci
-npx -w packages/server prisma generate --schema ../../prisma/schema.prisma
+npx -w packages/api-server prisma generate --schema ../../prisma/schema.prisma
 npm run build
 ```
 
@@ -19,7 +19,7 @@ This builds shared, server, admin, and storefront packages.
 ```bash
 npm install -g pm2
 
-pm2 start packages/server/dist/index.js --name shutter-api \
+pm2 start packages/api-server/dist/index.js --name shutter-api \
   --env PORT=3000 \
   --env NODE_ENV=production \
   --env DATABASE_URL=postgresql://... \
@@ -39,7 +39,7 @@ After=network.target postgresql.service
 Type=simple
 User=shutter
 WorkingDirectory=/opt/shutter
-ExecStart=/usr/bin/node packages/server/dist/index.js
+ExecStart=/usr/bin/node packages/api-server/dist/index.js
 EnvironmentFile=/opt/shutter/.env
 Restart=on-failure
 
@@ -54,14 +54,14 @@ sudo systemctl start shutter-api
 
 ## 🌐 Serve Frontend with nginx
 
-The admin and storefront build outputs are static files in `packages/admin/dist/` and `packages/storefront/dist/`.
+The admin and storefront build outputs are static files in `packages/adminfront/dist/` and `packages/storefront/dist/`.
 
 ```nginx
 # Admin dashboard
 server {
     listen 80;
     server_name admin.yourdomain.com;
-    root /opt/shutter/packages/admin/dist;
+    root /opt/shutter/packages/adminfront/dist;
     index index.html;
 
     location /api/ {
@@ -121,5 +121,5 @@ server {
 Run migrations before starting the server:
 
 ```bash
-npx -w packages/server prisma migrate deploy --schema ../../prisma/schema.prisma
+npx -w packages/api-server prisma migrate deploy --schema ../../prisma/schema.prisma
 ```

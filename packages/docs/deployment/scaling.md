@@ -51,7 +51,7 @@ Update the `DATABASE_URL` to point to PgBouncer instead of PostgreSQL directly.
 Serve the admin and storefront static builds from a CDN:
 
 1. Build the frontends: `npm run build`
-2. Upload `packages/admin/dist/` and `packages/storefront/dist/` to your CDN
+2. Upload `packages/adminfront/dist/` and `packages/storefront/dist/` to your CDN
 3. Configure the CDN to serve `index.html` for all routes (SPA fallback)
 
 ## 📌 Session Stickiness

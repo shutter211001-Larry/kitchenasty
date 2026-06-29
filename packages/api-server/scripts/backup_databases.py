@@ -26,7 +26,7 @@ from urllib.parse import urlparse, unquote
 # ==================== CONFIGURATION ====================
 # Resolve paths relative to this script
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-SERVER_DIR = os.path.dirname(SCRIPT_DIR) # packages/server
+SERVER_DIR = os.path.dirname(SCRIPT_DIR) # packages/api-server
 
 # Default directory where backups will be saved.
 DEFAULT_BACKUP_DIR = os.path.join(SERVER_DIR, "database_backups")
@@ -240,7 +240,7 @@ def main():
             "urls": [
                 "postgresql://postgres:password@localhost:5432/my_kitchen_db",
                 "mysql://root:password@127.0.0.1:3306/storefront_db",
-                "sqlite:///C:/Github/shutter/packages/server/data/local.db"
+                "sqlite:///C:/Github/shutter/packages/api-server/data/local.db"
             ]
         }
         config_path_to_write = os.path.join(SERVER_DIR, config_file)

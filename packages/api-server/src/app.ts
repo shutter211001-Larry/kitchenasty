@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 import path from 'path';
 
-dotenv.config(); // Load packages/server/.env
+dotenv.config(); // Load packages/api-server/.env
 dotenv.config({ path: path.resolve(__dirname, '../../../.env') }); // Load root .env
 import 'express-async-errors';
 

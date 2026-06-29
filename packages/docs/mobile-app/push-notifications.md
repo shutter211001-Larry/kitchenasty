@@ -121,7 +121,7 @@ Alternatively, upload via the Expo website:
 The Shutter server already includes push notification support via `expo-server-sdk`. The server automatically:
 
 1. 💾 Stores the customer's Expo Push Token when they log in (via `POST /api/auth/push-token`)
-2. 📤 Sends push notifications when order status changes (in `packages/server/src/lib/socket.ts`)
+2. 📤 Sends push notifications when order status changes (in `packages/api-server/src/lib/socket.ts`)
 
 No additional server configuration is needed.
 
