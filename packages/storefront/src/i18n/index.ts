@@ -52,6 +52,14 @@ i18n.use(initReactI18next).init({
   },
   lng: savedLanguage,
   fallbackLng: 'en',
+  saveMissing: import.meta.env.DEV, // Only save missing in development
+  missingKeyHandler: (lngs, ns, key, fallbackValue) => {
+    fetch(`http://localhost:3000/api/i18n/locales/${lngs[0]}/${ns}/missing?project=storefront`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ [key]: fallbackValue || key }),
+    }).catch(console.error);
+  },
   interpolation: {
     escapeValue: false,
   },

@@ -253,7 +253,7 @@ export async function getMe(req: Request, res: Response): Promise<void> {
   if (req.user.type === 'staff') {
     const user = await prisma.user.findUnique({
       where: { id: req.user.id },
-      select: { id: true, email: true, name: true, role: true, phone: true, avatar: true, lineUserId: true, lineDisplayName: true, locationId: true },
+      select: { id: true, email: true, name: true, role: true, phone: true, avatar: true, lineUserId: true, lineDisplayName: true, locationId: true, preferredLanguage: true },
     });
     if (!user) {
       res.status(401).json({ success: false, error: 'User not found' });
@@ -375,6 +375,31 @@ export async function updateMe(req: Request, res: Response): Promise<void> {
     res.json({ success: true, data: updated });
   } catch (err) {
     res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+}
+
+export async function updateLanguage(req: Request, res: Response): Promise<void> {
+  if (!req.user || req.user.type !== 'staff') {
+    res.status(401).json({ success: false, error: 'Not authenticated as staff' });
+    return;
+  }
+
+  const schema = z.object({ language: z.string().min(2) });
+  const parsed = schema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ success: false, error: 'Invalid language code' });
+    return;
+  }
+
+  try {
+    const updated = await prisma.user.update({
+      where: { id: req.user.id },
+      data: { preferredLanguage: parsed.data.language },
+      select: { id: true, preferredLanguage: true },
+    });
+    res.json({ success: true, data: updated });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Failed to update language preference' });
   }
 }
 

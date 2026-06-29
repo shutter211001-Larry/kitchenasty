@@ -72,6 +72,8 @@ export const setActionGroupDefaultUnits = async (req: Request, res: Response) =>
   }
 };
 
+import { translateAndSave } from '../../lib/aiTranslator.js';
+
 export const createAction = async (req: Request, res: Response) => {
   try {
     const { name, groupId } = req.body;
@@ -79,6 +81,9 @@ export const createAction = async (req: Request, res: Response) => {
       data: { name, groupId },
       include: { defaultUnitGroups: true }
     });
+
+    translateAndSave(name, 'action').catch(console.error);
+
     res.json(action);
   } catch (error) {
     res.status(500).json({ error: 'Failed to create action' });
@@ -138,6 +143,9 @@ export const createUnit = async (req: Request, res: Response) => {
   try {
     const { name, groupId } = req.body;
     const unit = await prisma.unit.create({ data: { name, groupId } });
+
+    translateAndSave(name, 'unit').catch(console.error);
+
     res.json(unit);
   } catch (error) {
     res.status(500).json({ error: 'Failed to create unit' });

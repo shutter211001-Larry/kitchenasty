@@ -17,6 +17,7 @@ model User {
   phone           String?
   avatar          String?
   isActive        Boolean   @default(true)
+  preferredLanguage String  @default("zh-TW")
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
   locationId      String?

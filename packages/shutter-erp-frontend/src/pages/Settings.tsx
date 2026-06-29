@@ -2,18 +2,30 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Settings as SettingsIcon, Plus, Trash2, AlertCircle, ChevronDown, ChevronRight, Check } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { useTranslation } from 'react-i18next';
+import { SUPPORTED_LANGUAGES } from '../i18n';
+import { useAuth } from '../context/AuthContext';
 
 const API = 'http://localhost:3000/api/dictionaries';
 
 export default function Settings() {
+  const { i18n } = useTranslation();
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<'actions' | 'units' | 'global'>('actions');
   const [actionGroups, setActionGroups] = useState<any[]>([]);
   const [unitGroups, setUnitGroups] = useState<any[]>([]);
+  const [language, setLanguage] = useState(user?.preferredLanguage || i18n.language || 'zh-TW');
   const [globalSettings, setGlobalSettings] = useState({
     decimalPrecision: 1,
     autoUnitConversionThreshold: 1000
   });
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (user?.preferredLanguage) {
+      setLanguage(user.preferredLanguage);
+    }
+  }, [user?.preferredLanguage]);
 
   // Group CRUD state
   const [newGroupName, setNewGroupName] = useState('');
@@ -103,8 +115,14 @@ export default function Settings() {
 
   const handleSaveGlobalSettings = async () => {
     try {
-      await axios.put('http://localhost:3000/api/settings', globalSettings);
-      alert('系統全域設定已儲存！');
+      const p1 = axios.put('http://localhost:3000/api/settings', globalSettings);
+      const p2 = axios.patch('http://localhost:3000/api/auth/me/language', { language });
+
+      await Promise.all([p1, p2]);
+      i18n.changeLanguage(language);
+      
+      // Need to re-check auth to update context user if needed (although checkAuth isn't exported directly, we can just trigger a reload or rely on next refresh)
+      alert('系統全域設定與語言偏好已儲存！');
     } catch (e) {
       console.error('Failed to save settings:', e);
       alert('儲存失敗，請重試。');
@@ -162,7 +180,6 @@ export default function Settings() {
 
                   <hr className="border-border" />
 
-                  {/* Auto Unit Conversion Threshold */}
                   <div className="space-y-2">
                     <label className="text-sm font-black text-gray-800">自動單位進位閾值</label>
                     <p className="text-xs text-muted-foreground">當數量超過此設定值時，系統會在合適的介面中自動嘗試換算為較大的單位 (例如：超過 1000g 時，自動顯示為 1kg)。設為 0 表示不自動進位。</p>
@@ -176,6 +193,24 @@ export default function Settings() {
                       />
                       <span className="text-sm font-bold text-muted-foreground whitespace-nowrap">基本單位 (如 g, ml)</span>
                     </div>
+                  </div>
+
+                  <hr className="border-border" />
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-black text-gray-800">系統顯示語言</label>
+                    <p className="text-xs text-muted-foreground">設定 ERP 系統的操作語言，這將綁定到您的個人帳號偏好設定。</p>
+                    <select
+                      value={language}
+                      onChange={e => setLanguage(e.target.value)}
+                      className="w-full px-4 py-3 bg-muted/20 border border-border rounded-xl font-bold text-gray-800 outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all"
+                    >
+                      {SUPPORTED_LANGUAGES.map((l) => (
+                        <option key={l.code} value={l.code}>
+                          {l.flag} {l.name}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 </div>
 
