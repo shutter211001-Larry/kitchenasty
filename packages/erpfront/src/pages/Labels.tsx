@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { 
-  Printer, 
-  Settings2, 
-  Layers, 
-  Database, 
+import i18n from "../i18n";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import {
+  Printer,
+  Settings2,
+  Layers,
+  Database,
   RotateCcw,
   Sparkles,
   Flame,
@@ -16,20 +17,18 @@ import {
   ChevronUp,
   Sliders,
   Plus,
-  Trash2
-} from 'lucide-react';
-import { cn } from '../lib/utils';
-import { QRCodeSVG } from 'qrcode.react';
-import { useTranslation } from 'react-i18next';
-import { SUPPORTED_LANGUAGES } from '../i18n';
-
+  Trash2,
+} from "lucide-react";
+import { cn } from "../lib/utils";
+import { QRCodeSVG } from "qrcode.react";
+import { useTranslation } from "react-i18next";
+import { SUPPORTED_LANGUAGES } from "../i18n";
 interface IngredientItem {
   id: string;
   name: string;
   quantity: number;
   unit: string;
 }
-
 interface Recipe {
   id: string;
   name: string;
@@ -50,33 +49,39 @@ interface Recipe {
   isProduct?: boolean;
   bakingLossRate?: number;
 }
-
 export const Labels = () => {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
-  const [selectedRecipeId, setSelectedRecipeId] = useState('');
+  const [selectedRecipeId, setSelectedRecipeId] = useState("");
   const [loading, setLoading] = useState(false);
   const [allIngredients, setAllIngredients] = useState<any[]>([]);
-  const [expandedIngredients, setExpandedIngredients] = useState<Record<string, boolean>>({});
+  const [expandedIngredients, setExpandedIngredients] = useState<
+    Record<string, boolean>
+  >({});
   const { t } = useTranslation();
-  const [printLanguage, setPrintLanguage] = useState<string>('en'); // Target dual language
+  const [printLanguage, setPrintLanguage] = useState<string>("en"); // Target dual language
 
   const parseIngredientReferences = (text: string) => {
     const regex = /\{([^,}]+)(?:,\s*name\s*:\s*(?:"([^"]*)"|'([^']*)'))?\}/g;
-    const references: { raw: string; ingredientName: string; customName?: string }[] = [];
+    const references: {
+      raw: string;
+      ingredientName: string;
+      customName?: string;
+    }[] = [];
     let match;
     regex.lastIndex = 0;
-    while ((match = regex.exec(text || '')) !== null) {
+    while ((match = regex.exec(text || "")) !== null) {
       references.push({
         raw: match[0],
         ingredientName: match[1].trim(),
-        customName: (match[2] || match[3] || '').trim() || undefined
+        customName: (match[2] || match[3] || "").trim() || undefined,
       });
     }
     return references;
   };
-
   const getIngredientComponents = (name: string): string | null => {
-    const recipeIng = loadedRecipe?.totalIngredients?.find((i: any) => i.name === name);
+    const recipeIng = loadedRecipe?.totalIngredients?.find(
+      (i: any) => i.name === name,
+    );
     if (recipeIng && recipeIng.components) {
       return recipeIng.components;
     }
@@ -86,28 +91,29 @@ export const Labels = () => {
     }
     return null;
   };
-
   const [enableDualLanguage, setEnableDualLanguage] = useState<boolean>(false);
-
   const getFormattedIngredientsText = (): string => {
-    let formatted = ingredientsText || '';
+    let formatted = ingredientsText || "";
     const references = parseIngredientReferences(ingredientsText);
     references.forEach((ref) => {
       const displayName = ref.customName || ref.ingredientName;
       const isExpanded = !!expandedIngredients[ref.raw];
       const comps = getIngredientComponents(ref.ingredientName);
-      
       let replacement = displayName;
-      
       if (enableDualLanguage) {
-        const translatedName = t(ref.ingredientName, { lng: printLanguage, fallbackLng: 'zh-TW' });
+        const translatedName = t(ref.ingredientName, {
+          lng: printLanguage,
+          fallbackLng: "zh-TW",
+        });
         if (translatedName && translatedName !== ref.ingredientName) {
-           replacement = `${displayName} (${translatedName})`;
+          replacement = `${displayName} (${translatedName})`;
         }
       }
-
       if (isExpanded && comps) {
-        const formattedComps = comps.split(/[,，、\s]+/).filter(Boolean).join('、');
+        const formattedComps = comps
+          .split(/[,，、\s]+/)
+          .filter(Boolean)
+          .join("、");
         replacement = `${replacement}(${formattedComps})`;
       }
       formatted = formatted.replaceAll(ref.raw, replacement);
@@ -116,208 +122,269 @@ export const Labels = () => {
   };
 
   // Layout Size Options
-  type LabelSize = '100x100' | '80x80' | '100x150' | '70x50';
-  const [labelSize, setLabelSize] = useState<LabelSize>('100x100');
+  type LabelSize = "100x100" | "80x80" | "100x150" | "70x50";
+  const [labelSize, setLabelSize] = useState<LabelSize>("100x100");
 
   // Group Collapse Accordion States
-  const [activeAccordion, setActiveAccordion] = useState<'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'L' | null>('A');
+  const [activeAccordion, setActiveAccordion] = useState<
+    "A" | "B" | "C" | "D" | "E" | "F" | "L" | null
+  >("A");
 
   // Group Font Scales (Multiplier from 0.6 to 2.0)
-  const [groupFontScales, setGroupFontScales] = useState<Record<'A' | 'B' | 'C' | 'D' | 'E' | 'F', number>>({
+  const [groupFontScales, setGroupFontScales] = useState<
+    Record<"A" | "B" | "C" | "D" | "E" | "F", number>
+  >({
     A: 1.0,
     B: 1.0,
     C: 1.0,
     D: 1.0,
     E: 1.0,
-    F: 1.0
+    F: 1.0,
   });
-
-  const updateGroupFontScale = (key: 'A' | 'B' | 'C' | 'D' | 'E' | 'F', value: number) => {
-    setGroupFontScales(prev => ({
+  const updateGroupFontScale = (
+    key: "A" | "B" | "C" | "D" | "E" | "F",
+    value: number,
+  ) => {
+    setGroupFontScales((prev) => ({
       ...prev,
-      [key]: value
+      [key]: value,
     }));
   };
 
   // Barcode Explanation dynamic text
-  const [barcodeExplanation, setBarcodeExplanation] = useState<string>('掃碼查看\n復熱教學影片');
+  const [barcodeExplanation, setBarcodeExplanation] = useState<string>(
+    t("erp_444"),
+  );
 
   // Copy and Paste Layout configuration utilities
-  const [targetRecipeIdToCopyTo, setTargetRecipeIdToCopyTo] = useState<string>('');
-  const [copyingLayoutToRecipe, setCopyingLayoutToRecipe] = useState<boolean>(false);
+  const [targetRecipeIdToCopyTo, setTargetRecipeIdToCopyTo] =
+    useState<string>("");
+  const [copyingLayoutToRecipe, setCopyingLayoutToRecipe] =
+    useState<boolean>(false);
 
   // Warning Label for Non-Ready-To-Eat
   const [showNotReadyToEat, setShowNotReadyToEat] = useState<boolean>(true);
-  const [notReadyToEatText, setNotReadyToEatText] = useState<string>('非供即食，應充分加熱');
+  const [notReadyToEatText, setNotReadyToEatText] = useState<string>(
+    t("erp_445"),
+  );
 
   // Nutrition Precision and Max Length Configs
-  const [nutritionConfigs, setNutritionConfigs] = useState<Record<string, { decimals: number; maxLength: number }>>({
-    calories: { decimals: -1, maxLength: 8 },
-    protein: { decimals: 1, maxLength: 8 },
-    fat: { decimals: 1, maxLength: 8 },
-    saturatedFat: { decimals: 1, maxLength: 8 },
-    transFat: { decimals: 1, maxLength: 8 },
-    carbs: { decimals: 1, maxLength: 8 },
-    sugar: { decimals: 1, maxLength: 8 },
-    sodium: { decimals: -1, maxLength: 8 }
+  const [nutritionConfigs, setNutritionConfigs] = useState<
+    Record<
+      string,
+      {
+        decimals: number;
+        maxLength: number;
+      }
+    >
+  >({
+    calories: {
+      decimals: -1,
+      maxLength: 8,
+    },
+    protein: {
+      decimals: 1,
+      maxLength: 8,
+    },
+    fat: {
+      decimals: 1,
+      maxLength: 8,
+    },
+    saturatedFat: {
+      decimals: 1,
+      maxLength: 8,
+    },
+    transFat: {
+      decimals: 1,
+      maxLength: 8,
+    },
+    carbs: {
+      decimals: 1,
+      maxLength: 8,
+    },
+    sugar: {
+      decimals: 1,
+      maxLength: 8,
+    },
+    sodium: {
+      decimals: -1,
+      maxLength: 8,
+    },
   });
-
-  const updateNutritionConfig = (key: string, updates: Partial<{ decimals: number; maxLength: number }>) => {
-    setNutritionConfigs(prev => ({
+  const updateNutritionConfig = (
+    key: string,
+    updates: Partial<{
+      decimals: number;
+      maxLength: number;
+    }>,
+  ) => {
+    setNutritionConfigs((prev) => ({
       ...prev,
-      [key]: { ...prev[key], ...updates }
+      [key]: {
+        ...prev[key],
+        ...updates,
+      },
     }));
   };
 
   // Custom Line Segments
   interface CustomLine {
     id: string;
-    type: 'horizontal' | 'vertical';
+    type: "horizontal" | "vertical";
     left: number;
     top: number;
     length: number;
     thickness: string;
-    style: 'solid' | 'dashed' | 'dotted' | 'double';
+    style: "solid" | "dashed" | "dotted" | "double";
     color: string;
   }
-
   const [customLines, setCustomLines] = useState<CustomLine[]>([]);
   const [draggingLineId, setDraggingLineId] = useState<string | null>(null);
   const [resizingLineId, setResizingLineId] = useState<string | null>(null);
-  const [dragLineStartPos, setDragLineStartPos] = useState({ x: 0, y: 0 });
-  const [dragLineStartLayout, setDragLineStartLayout] = useState({ left: 0, top: 0, length: 0 });
-
+  const [dragLineStartPos, setDragLineStartPos] = useState({
+    x: 0,
+    y: 0,
+  });
+  const [dragLineStartLayout, setDragLineStartLayout] = useState({
+    left: 0,
+    top: 0,
+    length: 0,
+  });
   const handleAddLine = () => {
     const newLine: CustomLine = {
       id: `line_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      type: 'horizontal',
+      type: "horizontal",
       left: 25,
       top: 50,
       length: 50,
-      thickness: '1pt',
-      style: 'solid',
-      color: '#000000'
+      thickness: "1pt",
+      style: "solid",
+      color: "#000000",
     };
-    setCustomLines(prev => [...prev, newLine]);
+    setCustomLines((prev) => [...prev, newLine]);
   };
-
   const handleDeleteLine = (id: string) => {
-    setCustomLines(prev => prev.filter(l => l.id !== id));
+    setCustomLines((prev) => prev.filter((l) => l.id !== id));
   };
-
   const handleUpdateLine = (id: string, updates: Partial<CustomLine>) => {
-    setCustomLines(prev => prev.map(l => l.id === id ? { ...l, ...updates } : l));
+    setCustomLines((prev) =>
+      prev.map((l) =>
+        l.id === id
+          ? {
+              ...l,
+              ...updates,
+            }
+          : l,
+      ),
+    );
   };
-
   const handleLineDragStart = (e: React.MouseEvent, id: string) => {
     e.preventDefault();
     e.stopPropagation();
-    const line = customLines.find(l => l.id === id);
+    const line = customLines.find((l) => l.id === id);
     if (!line) return;
     setDraggingLineId(id);
-    setDragLineStartPos({ x: e.clientX, y: e.clientY });
-    setDragLineStartLayout({ left: line.left, top: line.top, length: line.length });
+    setDragLineStartPos({
+      x: e.clientX,
+      y: e.clientY,
+    });
+    setDragLineStartLayout({
+      left: line.left,
+      top: line.top,
+      length: line.length,
+    });
   };
-
   const handleLineResizeStart = (e: React.MouseEvent, id: string) => {
     e.preventDefault();
     e.stopPropagation();
-    const line = customLines.find(l => l.id === id);
+    const line = customLines.find((l) => l.id === id);
     if (!line) return;
     setResizingLineId(id);
-    setDragLineStartPos({ x: e.clientX, y: e.clientY });
-    setDragLineStartLayout({ left: line.left, top: line.top, length: line.length });
+    setDragLineStartPos({
+      x: e.clientX,
+      y: e.clientY,
+    });
+    setDragLineStartLayout({
+      left: line.left,
+      top: line.top,
+      length: line.length,
+    });
   };
-
   useEffect(() => {
     const handleLineMouseMove = (e: MouseEvent) => {
       if (!draggingLineId && !resizingLineId) return;
-      const labelEl = document.getElementById('printable-label');
+      const labelEl = document.getElementById("printable-label");
       if (!labelEl) return;
       const rect = labelEl.getBoundingClientRect();
       const deltaX = e.clientX - dragLineStartPos.x;
       const deltaY = e.clientY - dragLineStartPos.y;
       const deltaXPercent = (deltaX / rect.width) * 100;
       const deltaYPercent = (deltaY / rect.height) * 100;
-
       setCustomLines((prevLines) => {
         const lineId = draggingLineId || resizingLineId;
-        const targetLine = prevLines.find(l => l.id === lineId);
+        const targetLine = prevLines.find((l) => l.id === lineId);
         if (!targetLine) return prevLines;
-
         const start = dragLineStartLayout;
-
         return prevLines.map((line) => {
           if (line.id !== lineId) return line;
-
           if (draggingLineId) {
             let newLeft = Math.round((start.left + deltaXPercent) / 2) * 2;
             let newTop = Math.round((start.top + deltaYPercent) / 2) * 2;
-
             if (newLeft < 0) newLeft = 0;
             if (newTop < 0) newTop = 0;
-
-            if (line.type === 'horizontal') {
+            if (line.type === "horizontal") {
               if (newLeft + line.length > 100) newLeft = 100 - line.length;
             } else {
               if (newLeft > 100) newLeft = 100;
             }
-
-            if (line.type === 'vertical') {
+            if (line.type === "vertical") {
               if (newTop + line.length > 100) newTop = 100 - line.length;
             } else {
               if (newTop > 100) newTop = 100;
             }
-
             return {
               ...line,
               left: newLeft,
-              top: newTop
+              top: newTop,
             };
           } else if (resizingLineId) {
-            let newLength = line.type === 'horizontal'
-              ? Math.round((start.length + deltaXPercent) / 2) * 2
-              : Math.round((start.length + deltaYPercent) / 2) * 2;
-
+            let newLength =
+              line.type === "horizontal"
+                ? Math.round((start.length + deltaXPercent) / 2) * 2
+                : Math.round((start.length + deltaYPercent) / 2) * 2;
             if (newLength < 2) newLength = 2;
-
-            if (line.type === 'horizontal') {
+            if (line.type === "horizontal") {
               if (line.left + newLength > 100) newLength = 100 - line.left;
             } else {
               if (line.top + newLength > 100) newLength = 100 - line.top;
             }
-
             return {
               ...line,
-              length: newLength
+              length: newLength,
             };
           }
           return line;
         });
       });
     };
-
     const handleLineMouseUp = () => {
       if (draggingLineId || resizingLineId) {
         setDraggingLineId(null);
         setResizingLineId(null);
       }
     };
-
     if (draggingLineId || resizingLineId) {
-      window.addEventListener('mousemove', handleLineMouseMove);
-      window.addEventListener('mouseup', handleLineMouseUp);
+      window.addEventListener("mousemove", handleLineMouseMove);
+      window.addEventListener("mouseup", handleLineMouseUp);
     }
-
     return () => {
-      window.removeEventListener('mousemove', handleLineMouseMove);
-      window.removeEventListener('mouseup', handleLineMouseUp);
+      window.removeEventListener("mousemove", handleLineMouseMove);
+      window.removeEventListener("mouseup", handleLineMouseUp);
     };
   }, [draggingLineId, resizingLineId, dragLineStartPos, dragLineStartLayout]);
 
   // Drag-and-Resize Custom Positioning Layout Mode
   const [useCustomLayout, setUseCustomLayout] = useState<boolean>(false);
-
   interface GroupLayout {
     left: number;
     top: number;
@@ -332,54 +399,177 @@ export const Labels = () => {
     E: GroupLayout;
     F: GroupLayout;
   }
-
-  const DEFAULT_LAYOUTS: Record<'100x100' | '80x80' | '100x150' | '70x50', LabelLayout> = {
-    '100x100': {
-      A: { left: 2, top: 48, width: 48, height: 34 },
-      B: { left: 2, top: 2, width: 96, height: 14 },
-      F: { left: 2, top: 16, width: 50, height: 30 },
-      C: { left: 52, top: 48, width: 46, height: 34 },
-      D: { left: 2, top: 84, width: 96, height: 14 },
-      E: { left: 54, top: 16, width: 44, height: 30 }
+  const DEFAULT_LAYOUTS: Record<
+    "100x100" | "80x80" | "100x150" | "70x50",
+    LabelLayout
+  > = {
+    "100x100": {
+      A: {
+        left: 2,
+        top: 48,
+        width: 48,
+        height: 34,
+      },
+      B: {
+        left: 2,
+        top: 2,
+        width: 96,
+        height: 14,
+      },
+      F: {
+        left: 2,
+        top: 16,
+        width: 50,
+        height: 30,
+      },
+      C: {
+        left: 52,
+        top: 48,
+        width: 46,
+        height: 34,
+      },
+      D: {
+        left: 2,
+        top: 84,
+        width: 96,
+        height: 14,
+      },
+      E: {
+        left: 54,
+        top: 16,
+        width: 44,
+        height: 30,
+      },
     },
-    '80x80': {
-      A: { left: 2, top: 48, width: 48, height: 34 },
-      B: { left: 2, top: 2, width: 96, height: 14 },
-      F: { left: 2, top: 16, width: 50, height: 30 },
-      C: { left: 52, top: 48, width: 46, height: 34 },
-      D: { left: 2, top: 84, width: 96, height: 14 },
-      E: { left: 54, top: 16, width: 44, height: 30 }
+    "80x80": {
+      A: {
+        left: 2,
+        top: 48,
+        width: 48,
+        height: 34,
+      },
+      B: {
+        left: 2,
+        top: 2,
+        width: 96,
+        height: 14,
+      },
+      F: {
+        left: 2,
+        top: 16,
+        width: 50,
+        height: 30,
+      },
+      C: {
+        left: 52,
+        top: 48,
+        width: 46,
+        height: 34,
+      },
+      D: {
+        left: 2,
+        top: 84,
+        width: 96,
+        height: 14,
+      },
+      E: {
+        left: 54,
+        top: 16,
+        width: 44,
+        height: 30,
+      },
     },
-    '100x150': {
-      B: { left: 2, top: 2, width: 96, height: 12 },
-      F: { left: 2, top: 14, width: 96, height: 16 },
-      E: { left: 2, top: 32, width: 96, height: 32 },
-      C: { left: 2, top: 66, width: 96, height: 20 },
-      A: { left: 2, top: 88, width: 96, height: 28 },
-      D: { left: 2, top: 118, width: 96, height: 30 }
+    "100x150": {
+      B: {
+        left: 2,
+        top: 2,
+        width: 96,
+        height: 12,
+      },
+      F: {
+        left: 2,
+        top: 14,
+        width: 96,
+        height: 16,
+      },
+      E: {
+        left: 2,
+        top: 32,
+        width: 96,
+        height: 32,
+      },
+      C: {
+        left: 2,
+        top: 66,
+        width: 96,
+        height: 20,
+      },
+      A: {
+        left: 2,
+        top: 88,
+        width: 96,
+        height: 28,
+      },
+      D: {
+        left: 2,
+        top: 118,
+        width: 96,
+        height: 30,
+      },
     },
-    '70x50': {
-      B: { left: 2, top: 2, width: 96, height: 18 },
-      F: { left: 2, top: 20, width: 96, height: 30 },
-      E: { left: 2, top: 52, width: 96, height: 22 },
-      C: { left: 2, top: 76, width: 96, height: 12 },
-      A: { left: 2, top: 90, width: 96, height: 4 },
-      D: { left: 2, top: 96, width: 96, height: 2 }
-    }
+    "70x50": {
+      B: {
+        left: 2,
+        top: 2,
+        width: 96,
+        height: 18,
+      },
+      F: {
+        left: 2,
+        top: 20,
+        width: 96,
+        height: 30,
+      },
+      E: {
+        left: 2,
+        top: 52,
+        width: 96,
+        height: 22,
+      },
+      C: {
+        left: 2,
+        top: 76,
+        width: 96,
+        height: 12,
+      },
+      A: {
+        left: 2,
+        top: 90,
+        width: 96,
+        height: 4,
+      },
+      D: {
+        left: 2,
+        top: 96,
+        width: 96,
+        height: 2,
+      },
+    },
   };
-
-  const [groupLayouts, setGroupLayouts] = useState<LabelLayout>(DEFAULT_LAYOUTS['100x100']);
+  const [groupLayouts, setGroupLayouts] = useState<LabelLayout>(
+    DEFAULT_LAYOUTS["100x100"],
+  );
 
   // Update layout defaults when labelSize changes
   useEffect(() => {
     const saved = localStorage.getItem(`group_layouts_${labelSize}`);
-    const defaults = DEFAULT_LAYOUTS[labelSize] || DEFAULT_LAYOUTS['100x100'];
+    const defaults = DEFAULT_LAYOUTS[labelSize] || DEFAULT_LAYOUTS["100x100"];
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
         setGroupLayouts({
           ...defaults,
-          ...parsed
+          ...parsed,
         });
       } catch (e) {
         setGroupLayouts(defaults);
@@ -390,89 +580,98 @@ export const Labels = () => {
   }, [labelSize]);
 
   // Drag and Resize Mouse Listeners
-  const [draggingGroup, setDraggingGroup] = useState<'A' | 'B' | 'C' | 'D' | 'E' | 'F' | null>(null);
-  const [resizingGroup, setResizingGroup] = useState<'A' | 'B' | 'C' | 'D' | 'E' | 'F' | null>(null);
-  const [dragStartPos, setDragStartPos] = useState({ x: 0, y: 0 });
-  const [dragStartLayout, setDragStartLayout] = useState({ left: 0, top: 0, width: 0, height: 0 });
-
+  const [draggingGroup, setDraggingGroup] = useState<
+    "A" | "B" | "C" | "D" | "E" | "F" | null
+  >(null);
+  const [resizingGroup, setResizingGroup] = useState<
+    "A" | "B" | "C" | "D" | "E" | "F" | null
+  >(null);
+  const [dragStartPos, setDragStartPos] = useState({
+    x: 0,
+    y: 0,
+  });
+  const [dragStartLayout, setDragStartLayout] = useState({
+    left: 0,
+    top: 0,
+    width: 0,
+    height: 0,
+  });
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       if (!draggingGroup && !resizingGroup) return;
-      const labelEl = document.getElementById('printable-label');
+      const labelEl = document.getElementById("printable-label");
       if (!labelEl) return;
       const rect = labelEl.getBoundingClientRect();
       const deltaX = e.clientX - dragStartPos.x;
       const deltaY = e.clientY - dragStartPos.y;
       const deltaXPercent = (deltaX / rect.width) * 100;
       const deltaYPercent = (deltaY / rect.height) * 100;
-
       setGroupLayouts((prev) => {
-        const currentLayouts = { ...prev };
+        const currentLayouts = {
+          ...prev,
+        };
         const group = draggingGroup || resizingGroup;
         if (!group) return prev;
         const start = dragStartLayout;
-        
         if (draggingGroup) {
           let newLeft = Math.round((start.left + deltaXPercent) / 2) * 2;
           let newTop = Math.round((start.top + deltaYPercent) / 2) * 2;
-          
           if (newLeft < 0) newLeft = 0;
           if (newTop < 0) newTop = 0;
           if (newLeft + start.width > 100) newLeft = 100 - start.width;
           if (newTop + start.height > 100) newTop = 100 - start.height;
-          
           currentLayouts[group] = {
             ...currentLayouts[group],
             left: newLeft,
-            top: newTop
+            top: newTop,
           };
         } else if (resizingGroup) {
           let newWidth = Math.round((start.width + deltaXPercent) / 2) * 2;
           let newHeight = Math.round((start.height + deltaYPercent) / 2) * 2;
-          
           if (newWidth < 10) newWidth = 10;
           if (newHeight < 6) newHeight = 6;
           if (start.left + newWidth > 100) newWidth = 100 - start.left;
           if (start.top + newHeight > 100) newHeight = 100 - start.top;
-          
           currentLayouts[group] = {
             ...currentLayouts[group],
             width: newWidth,
-            height: newHeight
+            height: newHeight,
           };
         }
         return currentLayouts;
       });
     };
-
     const handleMouseUp = () => {
       if (draggingGroup || resizingGroup) {
         setGroupLayouts((current) => {
-          localStorage.setItem(`group_layouts_${labelSize}`, JSON.stringify(current));
+          localStorage.setItem(
+            `group_layouts_${labelSize}`,
+            JSON.stringify(current),
+          );
           return current;
         });
         setDraggingGroup(null);
         setResizingGroup(null);
       }
     };
-
     if (draggingGroup || resizingGroup) {
-      window.addEventListener('mousemove', handleMouseMove);
-      window.addEventListener('mouseup', handleMouseUp);
+      window.addEventListener("mousemove", handleMouseMove);
+      window.addEventListener("mouseup", handleMouseUp);
     }
-
     return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
     };
   }, [draggingGroup, resizingGroup, dragStartPos, dragStartLayout, labelSize]);
 
   // Continuous Spacing Options (Label Gap in mm)
-  const [labelGap, setLabelGap] = useState<number>(3); 
+  const [labelGap, setLabelGap] = useState<number>(3);
   const [includeGapInPrint, setIncludeGapInPrint] = useState<boolean>(true);
   const [previewContinuous, setPreviewContinuous] = useState<boolean>(true);
   const [labelBorderRadius, setLabelBorderRadius] = useState<number>(4);
-  const [gapAlignment, setGapAlignment] = useState<'top' | 'center' | 'bottom'>('bottom');
+  const [gapAlignment, setGapAlignment] = useState<"top" | "center" | "bottom">(
+    "bottom",
+  );
 
   // Toggle options (Checkboxes for adaptive columns)
   const [showBranding, setShowBranding] = useState(true);
@@ -492,29 +691,31 @@ export const Labels = () => {
   const [showBarcode, setShowBarcode] = useState(true);
 
   // Field values
-  const [productZh, setProductZh] = useState('美式臘腸披薩');
-  const [productEn, setProductEn] = useState('PEPPERONI PIZZA');
-  const [ingredientsText, setIngredientsText] = useState('{麵粉}、{水}、{酵母}、{食鹽}、{美式臘腸}、{莫札瑞拉乳酪}、{番茄醬汁}');
-  const [netWeight, setNetWeight] = useState('240公克 ± 5%');
-  const [storageCondition, setStorageCondition] = useState('冷凍 -18°C 以下保存');
-  const [shelfLife, setShelfLife] = useState('一年');
-  const [expiryOption, setExpiryOption] = useState<'printed' | 'date'>('printed'); // 'printed' -> 標示於封口, 'date' -> 特定日期
-  const [expiryDate, setExpiryDate] = useState('2027/05/20');
-  
+  const [productZh, setProductZh] = useState(t("erp_446"));
+  const [productEn, setProductEn] = useState("PEPPERONI PIZZA");
+  const [ingredientsText, setIngredientsText] = useState(t("erp_447"));
+  const [netWeight, setNetWeight] = useState(t("erp_448"));
+  const [storageCondition, setStorageCondition] = useState(t("erp_449"));
+  const [shelfLife, setShelfLife] = useState(t("erp_450"));
+  const [expiryOption, setExpiryOption] = useState<"printed" | "date">(
+    "printed",
+  ); // 'printed' -> 標示於封口, 'date' -> 特定日期
+  const [expiryDate, setExpiryDate] = useState("2027/05/20");
+
   // Customizable Brand Names
-  const [brandNameZh, setBrandNameZh] = useState('美味食品研發中心');
-  const [brandNameEn, setBrandNameEn] = useState('PREMIUM FOOD LAB');
+  const [brandNameZh, setBrandNameZh] = useState(t("erp_451"));
+  const [brandNameEn, setBrandNameEn] = useState("PREMIUM FOOD LAB");
 
   // Custom Logo Options
-  const [logoType, setLogoType] = useState<'icon' | 'upload' | 'text'>('icon');
-  const [selectedIconName, setSelectedIconName] = useState<string>('ChefHat');
-  const [uploadedLogo, setUploadedLogo] = useState<string>(''); // Base64 image data-url
+  const [logoType, setLogoType] = useState<"icon" | "upload" | "text">("icon");
+  const [selectedIconName, setSelectedIconName] = useState<string>("ChefHat");
+  const [uploadedLogo, setUploadedLogo] = useState<string>(""); // Base64 image data-url
 
   // Responsible Party Info
-  const [companyName, setCompanyName] = useState('美味食品股份有限公司');
-  const [companyPhone, setCompanyPhone] = useState('02-2345-6789');
-  const [companyAddress, setCompanyAddress] = useState('台北市美味特區研發路 88 號');
-  const [originCountry, setOriginCountry] = useState('台灣');
+  const [companyName, setCompanyName] = useState(t("erp_452"));
+  const [companyPhone, setCompanyPhone] = useState("02-2345-6789");
+  const [companyAddress, setCompanyAddress] = useState(t("erp_453"));
+  const [originCountry, setOriginCountry] = useState(t("erp_454"));
 
   // Individual corporate detail display toggles
   const [showAddress, setShowAddress] = useState(true);
@@ -523,12 +724,12 @@ export const Labels = () => {
   const [showManufacturer, setShowManufacturer] = useState(true);
 
   // Allergen Statement
-  const [allergenWarning, setAllergenWarning] = useState('本產品含有麩質、牛奶及其製品，不適合對其過敏體質者食用。');
+  const [allergenWarning, setAllergenWarning] = useState(t("erp_455"));
 
   // Reheating Instructions
-  const [airFryerSteps, setAirFryerSteps] = useState('180-200°C 預熱 5-10分鐘。\n披薩前後微噴水，烤 3-5分鐘。');
-  const [ovenSteps, setOvenSteps] = useState('200-220°C 預熱 10-15分鐘。\n披薩前後微噴水，烤 3-5分鐘。');
-  const [panSteps, setPanSteps] = useState('披薩底面及表面輕微噴水。\n放入平底鍋以中小火乾煎 8-13 分鐘。');
+  const [airFryerSteps, setAirFryerSteps] = useState(t("erp_456"));
+  const [ovenSteps, setOvenSteps] = useState(t("erp_457"));
+  const [panSteps, setPanSteps] = useState(t("erp_458"));
 
   // Reheating Instructions Font Sizes
   const [reheatingMainTitleSize, setReheatingMainTitleSize] = useState(7.5);
@@ -536,39 +737,41 @@ export const Labels = () => {
   const [reheatingContentSize, setReheatingContentSize] = useState(6.2);
 
   // Reheating Instructions Custom Titles
-  const [reheatingMainTitle, setReheatingMainTitle] = useState('美味復熱指引');
-  const [airFryerTitle, setAirFryerTitle] = useState('氣炸烤箱');
-  const [ovenTitle, setOvenTitle] = useState('家用烤箱');
-  const [panTitle, setPanTitle] = useState('平底鍋');
+  const [reheatingMainTitle, setReheatingMainTitle] = useState(t("erp_459"));
+  const [airFryerTitle, setAirFryerTitle] = useState(t("erp_460"));
+  const [ovenTitle, setOvenTitle] = useState(t("erp_461"));
+  const [panTitle, setPanTitle] = useState(t("erp_462"));
 
   // Recipe portion scaling states
   const [loadedRecipe, setLoadedRecipe] = useState<any | null>(null);
   const [portionScale, setPortionScale] = useState(1.0);
 
   // Nutrition Facts (per 100g)
-  const [portionSize, setPortionSize] = useState('100'); // 每一份量克數
-  const [portionsPerPkg, setPortionsPerPkg] = useState('2.4'); // 本包裝含幾份
-  
-  const [calories, setCalories] = useState('265');
-  const [protein, setProtein] = useState('12.5');
-  const [fat, setFat] = useState('8.4');
-  const [saturatedFat, setSaturatedFat] = useState('3.2');
-  const [transFat, setTransFat] = useState('0');
-  const [carbs, setCarbs] = useState('35.2');
-  const [sugar, setSugar] = useState('1.8');
-  const [sodium, setSodium] = useState('480');
+  const [portionSize, setPortionSize] = useState("100"); // 每一份量克數
+  const [portionsPerPkg, setPortionsPerPkg] = useState("2.4"); // 本包裝含幾份
+
+  const [calories, setCalories] = useState("265");
+  const [protein, setProtein] = useState("12.5");
+  const [fat, setFat] = useState("8.4");
+  const [saturatedFat, setSaturatedFat] = useState("3.2");
+  const [transFat, setTransFat] = useState("0");
+  const [carbs, setCarbs] = useState("35.2");
+  const [sugar, setSugar] = useState("1.8");
+  const [sodium, setSodium] = useState("480");
 
   // Barcode / QR Code content
-  const [barcodeText, setBarcodeText] = useState('https://smartkitchen-erp.com/recipe');
+  const [barcodeText, setBarcodeText] = useState(
+    "https://smartkitchen-erp.com/recipe",
+  );
 
   // Load recipes list
   const fetchRecipes = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('http://localhost:3000/api/recipes');
+      const response = await axios.get("http://localhost:3000/api/recipes");
       setRecipes(response.data);
     } catch (error) {
-      console.error('Failed to load recipes', error);
+      console.error("Failed to load recipes", error);
     } finally {
       setLoading(false);
     }
@@ -577,170 +780,234 @@ export const Labels = () => {
   // Load ingredients list
   const fetchIngredients = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/api/ingredients');
+      const response = await axios.get("http://localhost:3000/api/ingredients");
       setAllIngredients(response.data);
     } catch (error) {
-      console.error('Failed to load ingredients', error);
+      console.error("Failed to load ingredients", error);
     }
   };
-
   useEffect(() => {
     fetchRecipes();
     fetchIngredients();
 
     // Load saved label settings if they exist
-    const saved = localStorage.getItem('pizzamaster_label_settings');
+    const saved = localStorage.getItem("pizzamaster_label_settings");
     if (saved) {
       try {
         const settings = JSON.parse(saved);
         if (settings.labelSize) setLabelSize(settings.labelSize);
         if (settings.labelGap !== undefined) setLabelGap(settings.labelGap);
-        if (settings.includeGapInPrint !== undefined) setIncludeGapInPrint(settings.includeGapInPrint);
-        if (settings.previewContinuous !== undefined) setPreviewContinuous(settings.previewContinuous);
-        if (settings.labelBorderRadius !== undefined) setLabelBorderRadius(settings.labelBorderRadius);
-        if (settings.gapAlignment !== undefined) setGapAlignment(settings.gapAlignment);
-        if (settings.showBranding !== undefined) setShowBranding(settings.showBranding);
-        if (settings.showProductZh !== undefined) setShowProductZh(settings.showProductZh);
-        if (settings.showProductEn !== undefined) setShowProductEn(settings.showProductEn);
-        if (settings.showIngredients !== undefined) setShowIngredients(settings.showIngredients);
-        if (settings.showNetWeight !== undefined) setShowNetWeight(settings.showNetWeight);
-        if (settings.showStorage !== undefined) setShowStorage(settings.showStorage);
-        if (settings.showExpiry !== undefined) setShowExpiry(settings.showExpiry);
-        if (settings.showResponsible !== undefined) setShowResponsible(settings.showResponsible);
-        if (settings.showReheating !== undefined) setShowReheating(settings.showReheating);
-        if (settings.showAirFryer !== undefined) setShowAirFryer(settings.showAirFryer);
+        if (settings.includeGapInPrint !== undefined)
+          setIncludeGapInPrint(settings.includeGapInPrint);
+        if (settings.previewContinuous !== undefined)
+          setPreviewContinuous(settings.previewContinuous);
+        if (settings.labelBorderRadius !== undefined)
+          setLabelBorderRadius(settings.labelBorderRadius);
+        if (settings.gapAlignment !== undefined)
+          setGapAlignment(settings.gapAlignment);
+        if (settings.showBranding !== undefined)
+          setShowBranding(settings.showBranding);
+        if (settings.showProductZh !== undefined)
+          setShowProductZh(settings.showProductZh);
+        if (settings.showProductEn !== undefined)
+          setShowProductEn(settings.showProductEn);
+        if (settings.showIngredients !== undefined)
+          setShowIngredients(settings.showIngredients);
+        if (settings.showNetWeight !== undefined)
+          setShowNetWeight(settings.showNetWeight);
+        if (settings.showStorage !== undefined)
+          setShowStorage(settings.showStorage);
+        if (settings.showExpiry !== undefined)
+          setShowExpiry(settings.showExpiry);
+        if (settings.showResponsible !== undefined)
+          setShowResponsible(settings.showResponsible);
+        if (settings.showReheating !== undefined)
+          setShowReheating(settings.showReheating);
+        if (settings.showAirFryer !== undefined)
+          setShowAirFryer(settings.showAirFryer);
         if (settings.showOven !== undefined) setShowOven(settings.showOven);
         if (settings.showPan !== undefined) setShowPan(settings.showPan);
-        if (settings.showNutrition !== undefined) setShowNutrition(settings.showNutrition);
-        if (settings.showAllergens !== undefined) setShowAllergens(settings.showAllergens);
-        if (settings.showBarcode !== undefined) setShowBarcode(settings.showBarcode);
-        if (settings.expandedIngredients !== undefined) setExpandedIngredients(settings.expandedIngredients);
-        
-        if (settings.showAddress !== undefined) setShowAddress(settings.showAddress);
+        if (settings.showNutrition !== undefined)
+          setShowNutrition(settings.showNutrition);
+        if (settings.showAllergens !== undefined)
+          setShowAllergens(settings.showAllergens);
+        if (settings.showBarcode !== undefined)
+          setShowBarcode(settings.showBarcode);
+        if (settings.expandedIngredients !== undefined)
+          setExpandedIngredients(settings.expandedIngredients);
+        if (settings.showAddress !== undefined)
+          setShowAddress(settings.showAddress);
         if (settings.showPhone !== undefined) setShowPhone(settings.showPhone);
-        if (settings.showOrigin !== undefined) setShowOrigin(settings.showOrigin);
-        if (settings.showManufacturer !== undefined) setShowManufacturer(settings.showManufacturer);
-        
-        if (settings.useCustomLayout !== undefined) setUseCustomLayout(settings.useCustomLayout);
-        if (settings.showNotReadyToEat !== undefined) setShowNotReadyToEat(settings.showNotReadyToEat);
-        if (settings.notReadyToEatText !== undefined) setNotReadyToEatText(settings.notReadyToEatText);
-        if (settings.nutritionConfigs !== undefined) setNutritionConfigs(settings.nutritionConfigs);
+        if (settings.showOrigin !== undefined)
+          setShowOrigin(settings.showOrigin);
+        if (settings.showManufacturer !== undefined)
+          setShowManufacturer(settings.showManufacturer);
+        if (settings.useCustomLayout !== undefined)
+          setUseCustomLayout(settings.useCustomLayout);
+        if (settings.showNotReadyToEat !== undefined)
+          setShowNotReadyToEat(settings.showNotReadyToEat);
+        if (settings.notReadyToEatText !== undefined)
+          setNotReadyToEatText(settings.notReadyToEatText);
+        if (settings.nutritionConfigs !== undefined)
+          setNutritionConfigs(settings.nutritionConfigs);
         if (settings.groupFontScales !== undefined) {
           setGroupFontScales({
-            A: 1.0, B: 1.0, C: 1.0, D: 1.0, E: 1.0, F: 1.0,
-            ...settings.groupFontScales
+            A: 1.0,
+            B: 1.0,
+            C: 1.0,
+            D: 1.0,
+            E: 1.0,
+            F: 1.0,
+            ...settings.groupFontScales,
           });
         }
-        if (settings.barcodeExplanation !== undefined) setBarcodeExplanation(settings.barcodeExplanation);
+        if (settings.barcodeExplanation !== undefined)
+          setBarcodeExplanation(settings.barcodeExplanation);
         if (settings.brandNameZh) setBrandNameZh(settings.brandNameZh);
         if (settings.brandNameEn) setBrandNameEn(settings.brandNameEn);
         if (settings.logoType) setLogoType(settings.logoType);
-        if (settings.selectedIconName) setSelectedIconName(settings.selectedIconName);
+        if (settings.selectedIconName)
+          setSelectedIconName(settings.selectedIconName);
         if (settings.uploadedLogo) setUploadedLogo(settings.uploadedLogo);
         if (settings.companyName) setCompanyName(settings.companyName);
         if (settings.companyPhone) setCompanyPhone(settings.companyPhone);
         if (settings.companyAddress) setCompanyAddress(settings.companyAddress);
         if (settings.originCountry) setOriginCountry(settings.originCountry);
         if (settings.barcodeText) setBarcodeText(settings.barcodeText);
-        
-        if (settings.reheatingMainTitle) setReheatingMainTitle(settings.reheatingMainTitle);
+        if (settings.reheatingMainTitle)
+          setReheatingMainTitle(settings.reheatingMainTitle);
         if (settings.airFryerTitle) setAirFryerTitle(settings.airFryerTitle);
         if (settings.ovenTitle) setOvenTitle(settings.ovenTitle);
         if (settings.panTitle) setPanTitle(settings.panTitle);
-        
-        if (settings.reheatingMainTitleSize) setReheatingMainTitleSize(settings.reheatingMainTitleSize);
-        if (settings.reheatingSubTitleSize) setReheatingSubTitleSize(settings.reheatingSubTitleSize);
-        if (settings.reheatingContentSize) setReheatingContentSize(settings.reheatingContentSize);
-        if (settings.customLines !== undefined) setCustomLines(settings.customLines);
-        if (settings.enableDualLanguage !== undefined) setEnableDualLanguage(settings.enableDualLanguage);
-        if (settings.printLanguage !== undefined) setPrintLanguage(settings.printLanguage);
+        if (settings.reheatingMainTitleSize)
+          setReheatingMainTitleSize(settings.reheatingMainTitleSize);
+        if (settings.reheatingSubTitleSize)
+          setReheatingSubTitleSize(settings.reheatingSubTitleSize);
+        if (settings.reheatingContentSize)
+          setReheatingContentSize(settings.reheatingContentSize);
+        if (settings.customLines !== undefined)
+          setCustomLines(settings.customLines);
+        if (settings.enableDualLanguage !== undefined)
+          setEnableDualLanguage(settings.enableDualLanguage);
+        if (settings.printLanguage !== undefined)
+          setPrintLanguage(settings.printLanguage);
       } catch (e) {
-        console.error('Failed to parse saved settings', e);
+        console.error("Failed to parse saved settings", e);
       }
     }
   }, []);
-
   const [savingLabelConfig, setSavingLabelConfig] = useState(false);
-
   const restoreLabelConfig = (config: any) => {
     if (!config) return;
-    
+
     // Continuous Spacing details
     if (config.labelGap !== undefined) setLabelGap(config.labelGap);
-    if (config.includeGapInPrint !== undefined) setIncludeGapInPrint(config.includeGapInPrint);
-    if (config.previewContinuous !== undefined) setPreviewContinuous(config.previewContinuous);
-    if (config.labelBorderRadius !== undefined) setLabelBorderRadius(config.labelBorderRadius);
+    if (config.includeGapInPrint !== undefined)
+      setIncludeGapInPrint(config.includeGapInPrint);
+    if (config.previewContinuous !== undefined)
+      setPreviewContinuous(config.previewContinuous);
+    if (config.labelBorderRadius !== undefined)
+      setLabelBorderRadius(config.labelBorderRadius);
     if (config.gapAlignment !== undefined) setGapAlignment(config.gapAlignment);
 
     // Core details
-    if (config.useCustomLayout !== undefined) setUseCustomLayout(config.useCustomLayout);
-    if (config.customLines !== undefined) setCustomLines(config.customLines || []);
-    if (config.showNotReadyToEat !== undefined) setShowNotReadyToEat(config.showNotReadyToEat);
-    if (config.notReadyToEatText !== undefined) setNotReadyToEatText(config.notReadyToEatText);
-    if (config.nutritionConfigs !== undefined) setNutritionConfigs(config.nutritionConfigs);
+    if (config.useCustomLayout !== undefined)
+      setUseCustomLayout(config.useCustomLayout);
+    if (config.customLines !== undefined)
+      setCustomLines(config.customLines || []);
+    if (config.showNotReadyToEat !== undefined)
+      setShowNotReadyToEat(config.showNotReadyToEat);
+    if (config.notReadyToEatText !== undefined)
+      setNotReadyToEatText(config.notReadyToEatText);
+    if (config.nutritionConfigs !== undefined)
+      setNutritionConfigs(config.nutritionConfigs);
     if (config.groupLayouts !== undefined) {
-      const defaults = DEFAULT_LAYOUTS[labelSize] || DEFAULT_LAYOUTS['100x100'];
+      const defaults = DEFAULT_LAYOUTS[labelSize] || DEFAULT_LAYOUTS["100x100"];
       setGroupLayouts({
         ...defaults,
-        ...config.groupLayouts
+        ...config.groupLayouts,
       });
     }
     if (config.groupFontScales !== undefined) {
       setGroupFontScales({
-        A: 1.0, B: 1.0, C: 1.0, D: 1.0, E: 1.0, F: 1.0,
-        ...config.groupFontScales
+        A: 1.0,
+        B: 1.0,
+        C: 1.0,
+        D: 1.0,
+        E: 1.0,
+        F: 1.0,
+        ...config.groupFontScales,
       });
     }
-    if (config.barcodeExplanation !== undefined) setBarcodeExplanation(config.barcodeExplanation);
+    if (config.barcodeExplanation !== undefined)
+      setBarcodeExplanation(config.barcodeExplanation);
     if (config.productZh !== undefined) setProductZh(config.productZh);
     if (config.productEn !== undefined) setProductEn(config.productEn);
-    if (config.ingredientsText !== undefined) setIngredientsText(config.ingredientsText);
+    if (config.ingredientsText !== undefined)
+      setIngredientsText(config.ingredientsText);
     if (config.netWeight !== undefined) setNetWeight(config.netWeight);
-    if (config.storageCondition !== undefined) setStorageCondition(config.storageCondition);
+    if (config.storageCondition !== undefined)
+      setStorageCondition(config.storageCondition);
     if (config.shelfLife !== undefined) setShelfLife(config.shelfLife);
     if (config.expiryOption !== undefined) setExpiryOption(config.expiryOption);
     if (config.brandNameZh !== undefined) setBrandNameZh(config.brandNameZh);
     if (config.brandNameEn !== undefined) setBrandNameEn(config.brandNameEn);
     if (config.logoType !== undefined) setLogoType(config.logoType);
-    
+
     // Corporate & Warnings
     if (config.companyName !== undefined) setCompanyName(config.companyName);
     if (config.companyPhone !== undefined) setCompanyPhone(config.companyPhone);
-    if (config.companyAddress !== undefined) setCompanyAddress(config.companyAddress);
-    if (config.originCountry !== undefined) setOriginCountry(config.originCountry);
-    if (config.allergenWarning !== undefined) setAllergenWarning(config.allergenWarning);
+    if (config.companyAddress !== undefined)
+      setCompanyAddress(config.companyAddress);
+    if (config.originCountry !== undefined)
+      setOriginCountry(config.originCountry);
+    if (config.allergenWarning !== undefined)
+      setAllergenWarning(config.allergenWarning);
     if (config.barcodeText !== undefined) setBarcodeText(config.barcodeText);
-    
+
     // Toggle Visibility Options
     if (config.showBranding !== undefined) setShowBranding(config.showBranding);
-    if (config.showProductZh !== undefined) setShowProductZh(config.showProductZh);
-    if (config.showProductEn !== undefined) setShowProductEn(config.showProductEn);
-    if (config.showIngredients !== undefined) setShowIngredients(config.showIngredients);
-    if (config.showNetWeight !== undefined) setShowNetWeight(config.showNetWeight);
+    if (config.showProductZh !== undefined)
+      setShowProductZh(config.showProductZh);
+    if (config.showProductEn !== undefined)
+      setShowProductEn(config.showProductEn);
+    if (config.showIngredients !== undefined)
+      setShowIngredients(config.showIngredients);
+    if (config.showNetWeight !== undefined)
+      setShowNetWeight(config.showNetWeight);
     if (config.showStorage !== undefined) setShowStorage(config.showStorage);
     if (config.showExpiry !== undefined) setShowExpiry(config.showExpiry);
-    if (config.showResponsible !== undefined) setShowResponsible(config.showResponsible);
-    if (config.showReheating !== undefined) setShowReheating(config.showReheating);
+    if (config.showResponsible !== undefined)
+      setShowResponsible(config.showResponsible);
+    if (config.showReheating !== undefined)
+      setShowReheating(config.showReheating);
     if (config.showAirFryer !== undefined) setShowAirFryer(config.showAirFryer);
     if (config.showOven !== undefined) setShowOven(config.showOven);
     if (config.showPan !== undefined) setShowPan(config.showPan);
-    if (config.showNutrition !== undefined) setShowNutrition(config.showNutrition);
-    if (config.showAllergens !== undefined) setShowAllergens(config.showAllergens);
+    if (config.showNutrition !== undefined)
+      setShowNutrition(config.showNutrition);
+    if (config.showAllergens !== undefined)
+      setShowAllergens(config.showAllergens);
     if (config.showBarcode !== undefined) setShowBarcode(config.showBarcode);
-    if (config.expandedIngredients !== undefined) setExpandedIngredients(config.expandedIngredients || {});
+    if (config.expandedIngredients !== undefined)
+      setExpandedIngredients(config.expandedIngredients || {});
 
     // Reheating Details
-    if (config.airFryerSteps !== undefined) setAirFryerSteps(config.airFryerSteps);
+    if (config.airFryerSteps !== undefined)
+      setAirFryerSteps(config.airFryerSteps);
     if (config.ovenSteps !== undefined) setOvenSteps(config.ovenSteps);
     if (config.panSteps !== undefined) setPanSteps(config.panSteps);
-    if (config.reheatingMainTitle !== undefined) setReheatingMainTitle(config.reheatingMainTitle);
-    if (config.airFryerTitle !== undefined) setAirFryerTitle(config.airFryerTitle);
+    if (config.reheatingMainTitle !== undefined)
+      setReheatingMainTitle(config.reheatingMainTitle);
+    if (config.airFryerTitle !== undefined)
+      setAirFryerTitle(config.airFryerTitle);
     if (config.ovenTitle !== undefined) setOvenTitle(config.ovenTitle);
     if (config.panTitle !== undefined) setPanTitle(config.panTitle);
 
     // Nutrition values
     if (config.portionSize !== undefined) setPortionSize(config.portionSize);
-    if (config.portionsPerPkg !== undefined) setPortionsPerPkg(config.portionsPerPkg);
+    if (config.portionsPerPkg !== undefined)
+      setPortionsPerPkg(config.portionsPerPkg);
     if (config.calories !== undefined) setCalories(config.calories);
     if (config.protein !== undefined) setProtein(config.protein);
     if (config.fat !== undefined) setFat(config.fat);
@@ -754,24 +1021,30 @@ export const Labels = () => {
     if (config.portionScale !== undefined) setPortionScale(config.portionScale);
 
     // Dual Language
-    if (config.enableDualLanguage !== undefined) setEnableDualLanguage(config.enableDualLanguage);
-    if (config.printLanguage !== undefined) setPrintLanguage(config.printLanguage);
+    if (config.enableDualLanguage !== undefined)
+      setEnableDualLanguage(config.enableDualLanguage);
+    if (config.printLanguage !== undefined)
+      setPrintLanguage(config.printLanguage);
   };
 
   // Copy and Paste Layout configuration utilities
   const handleCopyLayoutToClipboard = () => {
-    localStorage.setItem('shutter_layout_clipboard', JSON.stringify({
-      groupLayouts,
-      groupFontScales,
-      customLines
-    }));
-    alert('📋 已複製當前群組位置、文字大小與自訂線段設定！您可以在切換至其他食譜後點選「貼上排版」套用。');
+    const { t } = useTranslation();
+    localStorage.setItem(
+      "shutter_layout_clipboard",
+      JSON.stringify({
+        groupLayouts,
+        groupFontScales,
+        customLines,
+      }),
+    );
+    alert(t("erp_463"));
   };
-
   const handlePasteLayoutFromClipboard = () => {
-    const data = localStorage.getItem('shutter_layout_clipboard');
+    const { t } = useTranslation();
+    const data = localStorage.getItem("shutter_layout_clipboard");
     if (!data) {
-      alert('📋 剪貼簿為空！請先複製來源配方的排版。');
+      alert(t("erp_464"));
       return;
     }
     try {
@@ -779,52 +1052,56 @@ export const Labels = () => {
       if (parsed.groupLayouts) setGroupLayouts(parsed.groupLayouts);
       if (parsed.groupFontScales) setGroupFontScales(parsed.groupFontScales);
       if (parsed.customLines !== undefined) setCustomLines(parsed.customLines);
-      alert('📋 已成功貼上並套用群組位置、文字大小與自訂線段排版！請點擊下方「儲存設定」按鈕將變更儲存至伺服器。');
+      alert(t("erp_465"));
     } catch (e) {
-      alert('📋 貼上排版失敗，剪貼簿資料格式不正確。');
+      alert(t("erp_466"));
     }
   };
-
   const handleCopyLayoutToRecipe = async () => {
+    const { t } = useTranslation();
     if (!selectedRecipeId) {
-      alert('請先選擇當前來源食譜配方');
+      alert(t("erp_467"));
       return;
     }
     if (!targetRecipeIdToCopyTo) {
-      alert('請選擇一個目標食譜配方');
+      alert(t("erp_468"));
       return;
     }
     try {
       setCopyingLayoutToRecipe(true);
-      const res = await axios.get(`http://localhost:3000/api/recipes/${targetRecipeIdToCopyTo}`);
+      const res = await axios.get(
+        `http://localhost:3000/api/recipes/${targetRecipeIdToCopyTo}`,
+      );
       const targetRecipe = res.data;
       const oldConfig = targetRecipe.labelConfig || {};
-      
       const updatedConfig = {
         ...oldConfig,
         useCustomLayout,
         groupLayouts,
         groupFontScales,
-        customLines
+        customLines,
       };
-      
-      await axios.patch(`http://localhost:3000/api/recipes/${targetRecipeIdToCopyTo}/label-config`, { labelConfig: updatedConfig });
-      alert('🎉 排版已成功複製並套用到目標食譜！您可以切換到該食譜查看。');
-      setTargetRecipeIdToCopyTo('');
+      await axios.patch(
+        `http://localhost:3000/api/recipes/${targetRecipeIdToCopyTo}/label-config`,
+        {
+          labelConfig: updatedConfig,
+        },
+      );
+      alert(t("erp_469"));
+      setTargetRecipeIdToCopyTo("");
     } catch (error) {
-      console.error('Failed to copy layout to recipe', error);
-      alert('複製排版失敗，請檢查網路連線');
+      console.error("Failed to copy layout to recipe", error);
+      alert(t("erp_470"));
     } finally {
       setCopyingLayoutToRecipe(false);
     }
   };
-
   const handleSaveLabelConfig = async () => {
+    const { t } = useTranslation();
     if (!selectedRecipeId) {
-      alert('請先選擇一個食譜配方');
+      alert(t("erp_471"));
       return;
     }
-    
     try {
       setSavingLabelConfig(true);
       const labelConfig = {
@@ -890,21 +1167,24 @@ export const Labels = () => {
         sugar,
         sodium,
         portionScale,
-        expandedIngredients
+        expandedIngredients,
       };
-      
-      await axios.patch(`http://localhost:3000/api/recipes/${selectedRecipeId}/label-config`, { labelConfig });
-      alert('🎉 標籤設計已成功儲存！下次載入此食譜時，系統會自動還原您的自訂設計！');
-      
+      await axios.patch(
+        `http://localhost:3000/api/recipes/${selectedRecipeId}/label-config`,
+        {
+          labelConfig,
+        },
+      );
+      alert(t("erp_472"));
       if (loadedRecipe) {
         setLoadedRecipe({
           ...loadedRecipe,
-          labelConfig
+          labelConfig,
         });
       }
     } catch (error) {
-      console.error('Failed to save label design', error);
-      alert('儲存標籤設計失敗，請檢查網路連線或伺服器狀態');
+      console.error("Failed to save label design", error);
+      alert(t("erp_473"));
     } finally {
       setSavingLabelConfig(false);
     }
@@ -912,58 +1192,71 @@ export const Labels = () => {
 
   // Sync state when recipe is selected
   const handleRecipeChange = async (recipeId: string) => {
+    const { t } = useTranslation();
     setSelectedRecipeId(recipeId);
     setPortionScale(1.0); // Reset scale to 1.0 on recipe change
     if (!recipeId) {
       setLoadedRecipe(null);
       return;
     }
-
     try {
       setLoading(true);
-      const response = await axios.get(`http://localhost:3000/api/recipes/${recipeId}`);
+      const response = await axios.get(
+        `http://localhost:3000/api/recipes/${recipeId}`,
+      );
       const recipe = response.data;
       setLoadedRecipe(recipe);
-      
       if (recipe.labelConfig) {
         restoreLabelConfig(recipe.labelConfig);
       } else {
         applyRecipeData(recipe, 1.0);
       }
     } catch (error) {
-      console.error('Failed to load recipe details', error);
-      alert('自動載入配方資料失敗');
+      console.error("Failed to load recipe details", error);
+      alert(t("erp_474"));
     } finally {
       setLoading(false);
     }
   };
-
   const handlePortionScaleChange = (scale: number) => {
     setPortionScale(scale);
     if (loadedRecipe) {
       if (loadedRecipe.labelConfig) {
         // Dynamically scale weight and packaging quantity, keeping other customs intact
-        const baseWeight = loadedRecipe.totalWeight || 250; 
-        const yieldCount = loadedRecipe.yieldAmount && loadedRecipe.yieldAmount > 0 ? loadedRecipe.yieldAmount : 1;
+        const baseWeight = loadedRecipe.totalWeight || 250;
+        const yieldCount =
+          loadedRecipe.yieldAmount && loadedRecipe.yieldAmount > 0
+            ? loadedRecipe.yieldAmount
+            : 1;
         const singlePortionWeight = baseWeight / yieldCount;
         const weight = singlePortionWeight * scale;
         setNetWeight(`${weight.toFixed(0)}公克 ± 5%`);
-        setPortionsPerPkg(String(Number((1 * scale).toFixed(1))).replace(/\.0$/, ''));
+        setPortionsPerPkg(
+          String(Number((1 * scale).toFixed(1))).replace(/\.0$/, ""),
+        );
       } else {
         applyRecipeData(loadedRecipe, scale);
       }
     }
   };
-
   const applyRecipeData = (recipe: any, scale: number) => {
+    const { t } = useTranslation();
     // 1. Set Product Name (Chinese & English)
     setProductZh(recipe.name);
-    setProductEn(recipe.description ? recipe.description.toUpperCase().slice(0, 30) : 'HANDCRAFTED PIZZA');
+    setProductEn(
+      recipe.description
+        ? recipe.description.toUpperCase().slice(0, 30)
+        : "HANDCRAFTED PIZZA",
+    );
 
     // 2. Build Ingredients list (sorted by quantity from most to least)
-    const sortedIngredients = [...(recipe.totalIngredients || [])].sort((a, b) => b.quantity - a.quantity);
-    const ingNames = sortedIngredients.map((i: any) => `{${i.name}}`).join('、');
-    setIngredientsText(ingNames || '{麵粉}、{水}、{酵母}、{起司}');
+    const sortedIngredients = [...(recipe.totalIngredients || [])].sort(
+      (a, b) => b.quantity - a.quantity,
+    );
+    const ingNames = sortedIngredients
+      .map((i: any) => `{${i.name}}`)
+      .join("、");
+    setIngredientsText(ingNames || t("erp_475"));
 
     // 2.5 Auto-initialize expanded status for ingredients that have components in the database
     const autoExpanded: Record<string, boolean> = {};
@@ -983,48 +1276,81 @@ export const Labels = () => {
         if (ing.allergens) {
           ing.allergens.forEach((a: any) => allergensSet.add(a.name));
         }
-        
+
         // Fallback parsing (keeps original logic as robust fallback!)
         const name = ing.name;
-        if (name.includes('麥') || name.includes('麵粉') || name.includes('麩')) allergensSet.add('麩質');
-        if (name.includes('奶') || name.includes('起司') || name.includes('乳') || name.includes('乾酪')) allergensSet.add('牛奶');
-        if (name.includes('蛋')) allergensSet.add('蛋類');
-        if (name.includes('豆') || name.includes('醬油')) allergensSet.add('大豆');
-        if (name.includes('魚') || name.includes('鯖') || name.includes('鱈') || name.includes('鮭')) allergensSet.add('魚類');
-        if (name.includes('蝦') || name.includes('蟹') || name.includes('貝')) allergensSet.add('甲殼類');
-        if (name.includes('芝麻')) allergensSet.add('芝麻');
-        if (name.includes('堅果') || name.includes('花生')) allergensSet.add('堅果花生');
+        if (
+          name.includes(i18n.t("erp_476")) ||
+          name.includes(i18n.t("erp_477")) ||
+          name.includes(i18n.t("erp_478"))
+        )
+          allergensSet.add(i18n.t("erp_479"));
+        if (
+          name.includes(i18n.t("erp_480")) ||
+          name.includes(i18n.t("erp_481")) ||
+          name.includes(i18n.t("erp_482")) ||
+          name.includes(i18n.t("erp_483"))
+        )
+          allergensSet.add(i18n.t("erp_484"));
+        if (name.includes(i18n.t("erp_485")))
+          allergensSet.add(i18n.t("erp_486"));
+        if (
+          name.includes(i18n.t("erp_487")) ||
+          name.includes(i18n.t("erp_488"))
+        )
+          allergensSet.add(i18n.t("erp_489"));
+        if (
+          name.includes(i18n.t("erp_490")) ||
+          name.includes(i18n.t("erp_491")) ||
+          name.includes(i18n.t("erp_492")) ||
+          name.includes(i18n.t("erp_493"))
+        )
+          allergensSet.add(i18n.t("erp_494"));
+        if (
+          name.includes(i18n.t("erp_495")) ||
+          name.includes(i18n.t("erp_496")) ||
+          name.includes(i18n.t("erp_497"))
+        )
+          allergensSet.add(i18n.t("erp_498"));
+        if (name.includes(i18n.t("erp_499")))
+          allergensSet.add(i18n.t("erp_499"));
+        if (
+          name.includes(i18n.t("erp_500")) ||
+          name.includes(i18n.t("erp_501"))
+        )
+          allergensSet.add(i18n.t("erp_502"));
       });
     }
-
     if (allergensSet.size > 0) {
-      setAllergenWarning(`本產品含有${Array.from(allergensSet).join('、')}及其製品，不適合對其過敏體質者食用。`);
+      setAllergenWarning(
+        `本產品含有${Array.from(allergensSet).join("、")}及其製品，不適合對其過敏體質者食用。`,
+      );
       setShowAllergens(true);
     } else {
-      setAllergenWarning('本產品無已知常見過敏原。');
+      setAllergenWarning(t("erp_503"));
       setShowAllergens(false);
     }
 
     // 4. Calculate Nutrition per 100g (scaled based on totalWeight and portionScale!)
-    const baseWeight = recipe.totalWeight || 250; 
-    const yieldCount = recipe.yieldAmount && recipe.yieldAmount > 0 ? recipe.yieldAmount : 1;
+    const baseWeight = recipe.totalWeight || 250;
+    const yieldCount =
+      recipe.yieldAmount && recipe.yieldAmount > 0 ? recipe.yieldAmount : 1;
     const singlePortionWeight = baseWeight / yieldCount;
-    
+
     // In practice, packaging is based on the minimum quantity (1 portion).
     // The scale (portionScale) determines how many portions are packaged together.
     const weight = singlePortionWeight * scale;
     setNetWeight(`${weight.toFixed(0)}公克 ± 5%`);
-    
+
     // Portions per package is 1 scaled by portionScale. Serving size is always 1 portion.
     const portionsPerPkgVal = Number((1 * scale).toFixed(1));
     const portionSizeVal = Number(singlePortionWeight.toFixed(1));
-    
-    setPortionSize(String(portionSizeVal).replace(/\.0$/, ''));
-    setPortionsPerPkg(String(portionsPerPkgVal).replace(/\.0$/, ''));
+    setPortionSize(String(portionSizeVal).replace(/\.0$/, ""));
+    setPortionsPerPkg(String(portionsPerPkgVal).replace(/\.0$/, ""));
 
     // Nutrition values per 100g DO NOT change because they are relative to 100g!
     // But we still calculate them relative to the recipe stats
-    const nutritionScale = baseWeight > 0 ? (baseWeight / 100) : 1;
+    const nutritionScale = baseWeight > 0 ? baseWeight / 100 : 1;
     setCalories(String(Math.round(recipe.calories / nutritionScale)));
     setProtein(String((recipe.protein / nutritionScale).toFixed(1)));
     setFat(String((recipe.fat / nutritionScale).toFixed(1)));
@@ -1033,64 +1359,88 @@ export const Labels = () => {
     setCarbs(String((recipe.carbohydrates / nutritionScale).toFixed(1)));
     setSugar(String((recipe.sugar / nutritionScale).toFixed(1)));
     setSodium(String(Math.round(recipe.sodium / nutritionScale)));
-
     setBarcodeText(`https://smartkitchen-erp.com/recipe/${recipe.id}`);
   };
 
   // Reset form to default Pizza Studio Pepperoni
   const handleReset = () => {
-    setSelectedRecipeId('');
+    const { t } = useTranslation();
+    setSelectedRecipeId("");
     setUseCustomLayout(false);
     setCustomLines([]);
     setShowNotReadyToEat(true);
-    setNotReadyToEatText('非供即食，應充分加熱');
+    setNotReadyToEatText(t("erp_445"));
     setNutritionConfigs({
-      calories: { decimals: -1, maxLength: 8 },
-      protein: { decimals: 1, maxLength: 8 },
-      fat: { decimals: 1, maxLength: 8 },
-      saturatedFat: { decimals: 1, maxLength: 8 },
-      transFat: { decimals: 1, maxLength: 8 },
-      carbs: { decimals: 1, maxLength: 8 },
-      sugar: { decimals: 1, maxLength: 8 },
-      sodium: { decimals: -1, maxLength: 8 }
+      calories: {
+        decimals: -1,
+        maxLength: 8,
+      },
+      protein: {
+        decimals: 1,
+        maxLength: 8,
+      },
+      fat: {
+        decimals: 1,
+        maxLength: 8,
+      },
+      saturatedFat: {
+        decimals: 1,
+        maxLength: 8,
+      },
+      transFat: {
+        decimals: 1,
+        maxLength: 8,
+      },
+      carbs: {
+        decimals: 1,
+        maxLength: 8,
+      },
+      sugar: {
+        decimals: 1,
+        maxLength: 8,
+      },
+      sodium: {
+        decimals: -1,
+        maxLength: 8,
+      },
     });
-    setGroupLayouts(DEFAULT_LAYOUTS[labelSize] || DEFAULT_LAYOUTS['100x100']);
-    setActiveAccordion('A');
+    setGroupLayouts(DEFAULT_LAYOUTS[labelSize] || DEFAULT_LAYOUTS["100x100"]);
+    setActiveAccordion("A");
     setLoadedRecipe(null);
     setPortionScale(1.0);
     setLabelGap(3);
     setIncludeGapInPrint(true);
     setPreviewContinuous(true);
     setLabelBorderRadius(4);
-    setGapAlignment('bottom');
-    setProductZh('美式臘腸披薩');
-    setProductEn('PEPPERONI PIZZA');
-    setIngredientsText('{麵粉}、{水}、{酵母}、{食鹽}、{美式臘腸}、{莫札瑞拉乳酪}、{番茄醬汁}');
-    setNetWeight('240公克 ± 5%');
-    setStorageCondition('冷凍 -18°C 以下保存');
-    setShelfLife('一年');
-    setExpiryOption('printed');
-    setBrandNameZh('美味食品研發中心');
-    setBrandNameEn('PREMIUM FOOD LAB');
-    setLogoType('icon');
-    setSelectedIconName('ChefHat');
-    setUploadedLogo('');
-    setCompanyName('美味食品股份有限公司');
-    setCompanyPhone('02-2345-6789');
-    setCompanyAddress('台北市美味特區研發路 88 號');
-    setOriginCountry('台灣');
-    setAllergenWarning('本產品含有麩質、牛奶及其製品，不適合對其過敏體質者食用。');
-    setCalories('265');
-    setProtein('12.5');
-    setFat('8.4');
-    setSaturatedFat('3.2');
-    setTransFat('0');
-    setCarbs('35.2');
-    setSugar('1.8');
-    setSodium('480');
-    setPortionSize('100');
-    setPortionsPerPkg('2.4');
-    setBarcodeText('https://smartkitchen-erp.com/recipe');
+    setGapAlignment("bottom");
+    setProductZh(t("erp_446"));
+    setProductEn("PEPPERONI PIZZA");
+    setIngredientsText(t("erp_447"));
+    setNetWeight(t("erp_448"));
+    setStorageCondition(t("erp_449"));
+    setShelfLife(t("erp_450"));
+    setExpiryOption("printed");
+    setBrandNameZh(t("erp_451"));
+    setBrandNameEn("PREMIUM FOOD LAB");
+    setLogoType("icon");
+    setSelectedIconName("ChefHat");
+    setUploadedLogo("");
+    setCompanyName(t("erp_452"));
+    setCompanyPhone("02-2345-6789");
+    setCompanyAddress(t("erp_453"));
+    setOriginCountry(t("erp_454"));
+    setAllergenWarning(t("erp_455"));
+    setCalories("265");
+    setProtein("12.5");
+    setFat("8.4");
+    setSaturatedFat("3.2");
+    setTransFat("0");
+    setCarbs("35.2");
+    setSugar("1.8");
+    setSodium("480");
+    setPortionSize("100");
+    setPortionsPerPkg("2.4");
+    setBarcodeText("https://smartkitchen-erp.com/recipe");
     setShowReheating(true);
     setShowAirFryer(true);
     setShowOven(true);
@@ -1102,10 +1452,10 @@ export const Labels = () => {
     setReheatingMainTitleSize(7.5);
     setReheatingSubTitleSize(7.2);
     setReheatingContentSize(6.2);
-    setReheatingMainTitle('美味復熱指引');
-    setAirFryerTitle('氣炸烤箱');
-    setOvenTitle('家用烤箱');
-    setPanTitle('平底鍋');
+    setReheatingMainTitle(t("erp_459"));
+    setAirFryerTitle(t("erp_460"));
+    setOvenTitle(t("erp_461"));
+    setPanTitle(t("erp_462"));
     setShowAddress(true);
     setShowPhone(true);
     setShowOrigin(true);
@@ -1116,16 +1466,16 @@ export const Labels = () => {
       C: 1.0,
       D: 1.0,
       E: 1.0,
-      F: 1.0
+      F: 1.0,
     });
-    setBarcodeExplanation('掃碼查看\n復熱教學影片');
+    setBarcodeExplanation(t("erp_444"));
     setExpandedIngredients({});
     setEnableDualLanguage(false);
-    setPrintLanguage('en');
-    localStorage.removeItem('pizzamaster_label_settings');
+    setPrintLanguage("en");
+    localStorage.removeItem("pizzamaster_label_settings");
   };
-
   const handleSaveSettings = () => {
+    const { t } = useTranslation();
     const settings = {
       useCustomLayout,
       customLines,
@@ -1178,94 +1528,110 @@ export const Labels = () => {
       reheatingContentSize,
       expandedIngredients,
       enableDualLanguage,
-      printLanguage
+      printLanguage,
     };
-    localStorage.setItem('pizzamaster_label_settings', JSON.stringify(settings));
-    alert('🎉 標籤列印設定已成功儲存至瀏覽器！下次開啟將自動套用您的客製化版面。');
+    localStorage.setItem(
+      "pizzamaster_label_settings",
+      JSON.stringify(settings),
+    );
+    alert(t("erp_504"));
   };
-
   const renderLabelLogo = () => {
-    if (logoType === 'upload' && uploadedLogo) {
+    const { t } = useTranslation();
+    if (logoType === "upload" && uploadedLogo) {
       return (
-        <img 
-          src={uploadedLogo} 
-          alt="Custom Logo" 
-          style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+        <img
+          src={uploadedLogo}
+          alt="Custom Logo"
+          style={{
+            width: "100%",
+            height: "100%",
+            objectFit: "contain",
+          }}
           className="filter contrast-200 grayscale brightness-105 mix-blend-multiply shrink-0"
         />
       );
     }
-    
-    if (logoType === 'text') {
-      const abbreviation = brandNameZh ? brandNameZh.substring(0, 2) : '美味';
+    if (logoType === "text") {
+      const abbreviation = brandNameZh
+        ? brandNameZh.substring(0, 2)
+        : t("erp_505");
       return (
         <div className="w-full h-full bg-black text-white flex items-center justify-center font-black text-[9pt] leading-none select-none">
           {abbreviation}
         </div>
       );
     }
-    
+
     // Default to Vector Icon
-    const IconComponent = 
-      selectedIconName === 'ChefHat' ? ChefHat :
-      selectedIconName === 'Utensils' ? Utensils :
-      selectedIconName === 'Flame' ? Flame :
-      selectedIconName === 'Award' ? Award :
-      selectedIconName === 'Sparkles' ? Sparkles :
-      selectedIconName === 'Layers' ? Layers :
-      ChefHat;
-      
+    const IconComponent =
+      selectedIconName === "ChefHat"
+        ? ChefHat
+        : selectedIconName === "Utensils"
+          ? Utensils
+          : selectedIconName === "Flame"
+            ? Flame
+            : selectedIconName === "Award"
+              ? Award
+              : selectedIconName === "Sparkles"
+                ? Sparkles
+                : selectedIconName === "Layers"
+                  ? Layers
+                  : ChefHat;
     return <IconComponent className="w-full h-full text-black stroke-[2]" />;
   };
-
   const formattedIngredients = getFormattedIngredientsText();
   const isBottomLeftEmpty = !showBarcode || !showNutrition || !showResponsible;
-  const isRightColumnCrowded = (formattedIngredients || '').length > 85 || (allergenWarning || '').length > 60;
+  const isRightColumnCrowded =
+    (formattedIngredients || "").length > 85 ||
+    (allergenWarning || "").length > 60;
   const shouldMoveInfoToBottomLeft = isBottomLeftEmpty || isRightColumnCrowded;
-  const hasActiveReheating = showReheating && (showAirFryer || showOven || showPan);
-
+  const hasActiveReheating =
+    showReheating && (showAirFryer || showOven || showPan);
   const getLabelDimensions = () => {
     let w = 100;
     let h = 100;
-    if (labelSize === '80x80') {
+    if (labelSize === "80x80") {
       w = 80;
       h = 80;
-    } else if (labelSize === '100x150') {
+    } else if (labelSize === "100x150") {
       w = 100;
       h = 150;
-    } else if (labelSize === '70x50') {
+    } else if (labelSize === "70x50") {
       w = 70;
       h = 50;
     }
-    return { w, h };
+    return {
+      w,
+      h,
+    };
   };
 
   // Generate dynamic container styling and fluid scaling for full adaptive layout
   const getLabelStyle = (): React.CSSProperties => {
-    let width = '100mm';
-    let height = '100mm';
-    let padding = '3mm';
-    let baseFontSize = '9.5pt';
-
-    if (labelSize === '80x80') {
-      width = '80mm';
-      height = '80mm';
-      padding = '2.5mm';
-      baseFontSize = '8.2pt';
-    } else if (labelSize === '100x150') {
-      width = '100mm';
-      height = '150mm';
-      padding = '4mm';
-      baseFontSize = '10.5pt';
-    } else if (labelSize === '70x50') {
-      width = '70mm';
-      height = '50mm';
-      padding = '1.2mm';
-      baseFontSize = '6.8pt';
+    let width = "100mm";
+    let height = "100mm";
+    let padding = "3mm";
+    let baseFontSize = "9.5pt";
+    if (labelSize === "80x80") {
+      width = "80mm";
+      height = "80mm";
+      padding = "2.5mm";
+      baseFontSize = "8.2pt";
+    } else if (labelSize === "100x150") {
+      width = "100mm";
+      height = "150mm";
+      padding = "4mm";
+      baseFontSize = "10.5pt";
+    } else if (labelSize === "70x50") {
+      width = "70mm";
+      height = "50mm";
+      padding = "1.2mm";
+      baseFontSize = "6.8pt";
     }
 
     // Dynamic Font Scaling Factor based on active content sections
-    if (labelSize !== '70x50') {
+    if (labelSize !== "70x50") {
       let score = 0;
       if (showNotReadyToEat) score += 0.5;
       if (showReheating) {
@@ -1278,12 +1644,10 @@ export const Labels = () => {
       if (showIngredients) score += 1.2;
       if (showAllergens) score += 0.8;
       if (showResponsible) score += 1;
-
       let scaleFactor = 1.0;
-      if (score >= 4) scaleFactor = 0.90;
+      if (score >= 4) scaleFactor = 0.9;
       if (score >= 6) scaleFactor = 0.82;
-      if (score >= 7.5) scaleFactor = 0.73; 
-
+      if (score >= 7.5) scaleFactor = 0.73;
       const baseVal = parseFloat(baseFontSize);
       baseFontSize = `${(baseVal * scaleFactor).toFixed(1)}pt`;
     } else {
@@ -1292,38 +1656,34 @@ export const Labels = () => {
       if (showNotReadyToEat) score += 0.4;
       if (showIngredients) score += 1;
       if (showAllergens) score += 0.8;
-      
       let scaleFactor = 1.0;
       if (score > 1.5) scaleFactor = 0.85;
       if (formattedIngredients.length > 50) scaleFactor *= 0.88;
-
       const baseVal = parseFloat(baseFontSize);
       baseFontSize = `${(baseVal * scaleFactor).toFixed(1)}pt`;
     }
-
     return {
       width,
       height,
       padding,
       fontSize: baseFontSize,
-      boxSizing: 'border-box',
+      boxSizing: "border-box",
       fontFamily: '"Noto Sans TC", "Noto Serif TC", sans-serif',
       lineHeight: 1.25,
-      backgroundColor: '#ffffff',
-      color: '#000000',
-      borderColor: '#000000',
-      borderWidth: '1.2mm',
-      borderStyle: 'solid',
+      backgroundColor: "#ffffff",
+      color: "#000000",
+      borderColor: "#000000",
+      borderWidth: "1.2mm",
+      borderStyle: "solid",
       borderRadius: `${labelBorderRadius}mm`,
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'space-between',
-      overflow: 'hidden',
-      position: 'relative',
-      userSelect: 'none'
+      display: "flex",
+      flexDirection: "column",
+      justifyContent: "space-between",
+      overflow: "hidden",
+      position: "relative",
+      userSelect: "none",
     };
   };
-
   return (
     <div className="space-y-6">
       {/* Page Header */}
@@ -1333,20 +1693,22 @@ export const Labels = () => {
             <Printer className="text-white w-6 h-6" />
           </div>
           <div>
-            <h2 className="text-2xl font-black text-gray-800">自適應食品標籤列印器</h2>
+            <h2 className="text-2xl font-black text-gray-800">
+              {t("erp_506")}
+            </h2>
             <p className="text-xs text-muted-foreground mt-0.5">
-              台灣冷凍/預包裝食品法規完全規格對齊 · 動態勾選排版與食譜資料庫一鍵連動
+              {t("erp_507")}
             </p>
           </div>
         </div>
-        
+
         <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
           <button
             onClick={handleSaveSettings}
             className="flex-1 md:flex-none px-4 py-2 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl font-bold text-xs shadow-sm hover:bg-emerald-100 transition-all active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer"
           >
             <Save className="w-3.5 h-3.5" />
-            <span>儲存設定</span>
+            <span>{t("erp_508")}</span>
           </button>
 
           <button
@@ -1354,38 +1716,38 @@ export const Labels = () => {
             className="flex-1 md:flex-none px-4 py-2 bg-white border border-border text-gray-700 rounded-xl font-bold text-xs shadow-sm hover:bg-muted transition-all active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer"
           >
             <RotateCcw className="w-3.5 h-3.5" />
-            <span>重置預設</span>
+            <span>{t("erp_509")}</span>
           </button>
-          
+
           <button
             onClick={() => window.print()}
             className="w-full md:w-auto px-6 py-2.5 bg-gray-900 text-white rounded-xl font-black text-xs shadow-xl hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
           >
             <Printer className="w-4 h-4" />
-            <span>列印標籤</span>
+            <span>{t("erp_510")}</span>
           </button>
         </div>
       </div>
 
       {/* Main content grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        
         {/* Left Side: Controls Panel */}
         <div className="lg:col-span-5 bg-white border border-border rounded-3xl p-6 space-y-6 shadow-sm print:hidden max-h-[82vh] overflow-y-auto">
-          
           {/* Section: Recipe Database Integrator */}
           <div className="bg-primary/5 border border-primary/10 rounded-2xl p-4 space-y-3">
             <div className="flex items-center justify-between text-primary">
               <div className="flex items-center gap-1.5">
                 <Database className="w-4 h-4" />
-                <h4 className="text-xs font-black uppercase tracking-wider">食譜配方庫一鍵帶入</h4>
+                <h4 className="text-xs font-black uppercase tracking-wider">
+                  {t("erp_511")}
+                </h4>
               </div>
               {loading && (
                 <div className="w-3.5 h-3.5 border-2 border-primary border-t-transparent rounded-full animate-spin shrink-0"></div>
               )}
             </div>
             <p className="text-[10px] text-muted-foreground font-semibold">
-              選取食譜後，系統會自動按比例從多到少排列成分、精算八大營養素、彙整食材過敏原。
+              {t("erp_512")}
             </p>
             <select
               disabled={loading}
@@ -1393,19 +1755,27 @@ export const Labels = () => {
               value={selectedRecipeId}
               onChange={(e) => handleRecipeChange(e.target.value)}
             >
-              <option value="">-- 手動輸入 (不連結食譜) --</option>
-              {recipes.filter(recipe => recipe.isProduct !== false).map(recipe => (
-                <option key={recipe.id} value={recipe.id}>
-                  🍳 {recipe.name} (份量: {recipe.yieldAmount}{recipe.yieldUnit})
-                </option>
-              ))}
+              <option value="">{t("erp_513")}</option>
+              {recipes
+                .filter((recipe) => recipe.isProduct !== false)
+                .map((recipe) => (
+                  <option key={recipe.id} value={recipe.id}>
+                    🍳 {recipe.name}
+                    {t("erp_514")}
+                    {recipe.yieldAmount}
+                    {recipe.yieldUnit})
+                  </option>
+                ))}
             </select>
 
             {selectedRecipeId && (
               <div className="space-y-1.5 animate-in fade-in slide-in-from-top-1 duration-150 mt-2 border-t border-primary/10 pt-2">
                 <label className="text-[10px] font-black text-primary flex justify-between">
-                  <span>🔢 帶入食譜產出份數倍率</span>
-                  <span className="font-extrabold">{portionScale} 倍</span>
+                  <span>{t("erp_515")}</span>
+                  <span className="font-extrabold">
+                    {portionScale}
+                    {t("erp_516")}
+                  </span>
                 </label>
                 <input
                   type="number"
@@ -1414,23 +1784,36 @@ export const Labels = () => {
                   max="10"
                   className="w-full px-3 py-1.5 bg-white border border-border rounded-xl font-bold text-xs outline-none focus:ring-2 focus:ring-primary/20"
                   value={portionScale}
-                  onChange={(e) => handlePortionScaleChange(parseFloat(e.target.value) || 1.0)}
+                  onChange={(e) =>
+                    handlePortionScaleChange(parseFloat(e.target.value) || 1.0)
+                  }
                 />
                 <span className="text-[8.5px] text-muted-foreground leading-normal block pb-1.5">
-                  調整倍率會自動按比例重新縮放「淨重」與「營養標示之包裝份數」。
+                  {t("erp_517")}
                 </span>
 
                 {loadedRecipe && loadedRecipe.bakingLossRate > 0 && (
                   <div className="bg-orange-50 border border-orange-200 rounded-2xl p-3.5 my-2.5 text-[10px] text-orange-800 space-y-1 animate-in fade-in slide-in-from-top-1 duration-200">
                     <div className="font-black flex items-center gap-1">
                       <Flame className="w-3.5 h-3.5 text-orange-600 animate-pulse shrink-0" />
-                      <span>已套用 {loadedRecipe.bakingLossRate}% 烤焙水份損耗</span>
+                      <span>
+                        {t("erp_518")}
+                        {loadedRecipe.bakingLossRate}
+                        {t("erp_519")}
+                      </span>
                     </div>
                     <p className="leading-relaxed font-medium">
-                      原始生重：{((loadedRecipe.totalWeight / (1 - loadedRecipe.bakingLossRate / 100)) * portionScale).toFixed(0)}g ➜ 成品淨重：{(loadedRecipe.totalWeight * portionScale).toFixed(0)}g。
+                      {t("erp_520")}
+                      {(
+                        (loadedRecipe.totalWeight /
+                          (1 - loadedRecipe.bakingLossRate / 100)) *
+                        portionScale
+                      ).toFixed(0)}
+                      {t("erp_521")}
+                      {(loadedRecipe.totalWeight * portionScale).toFixed(0)}g。
                     </p>
                     <p className="leading-relaxed text-[9px] text-orange-700/80">
-                      分母已自動縮減，每 100g 營養素密度已進行等比例「濃縮計算」。
+                      {t("erp_522")}
                     </p>
                   </div>
                 )}
@@ -1441,14 +1824,16 @@ export const Labels = () => {
                   disabled={savingLabelConfig}
                   className="w-full py-2.5 bg-primary hover:bg-primary/90 text-white rounded-xl font-black text-xs shadow-md active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
                 >
-                  <span>💾 儲存目前標籤設計</span>
+                  <span>{t("erp_523")}</span>
                 </button>
 
                 {/* Layout Replication Panel */}
                 <div className="bg-slate-50 border border-slate-200 p-3.5 rounded-2xl space-y-3 mt-3.5 animate-in fade-in duration-200">
                   <div className="flex items-center gap-1.5 text-gray-700 pb-1.5 border-b border-dashed border-slate-200">
                     <Sparkles className="w-3.5 h-3.5 text-teal-600 animate-pulse" />
-                    <span className="text-[10px] font-black text-slate-800">排版剪貼簿 & 跨配方一鍵複製</span>
+                    <span className="text-[10px] font-black text-slate-800">
+                      {t("erp_524")}
+                    </span>
                   </div>
 
                   {/* Clipboard Row */}
@@ -1458,27 +1843,31 @@ export const Labels = () => {
                       onClick={handleCopyLayoutToClipboard}
                       className="py-1.5 px-2 border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 rounded-xl font-black text-[10px] flex items-center justify-center gap-1 cursor-pointer transition-colors active:scale-95"
                     >
-                      📋 複製目前排版
+                      {t("erp_525")}
                     </button>
                     <button
                       type="button"
                       onClick={handlePasteLayoutFromClipboard}
                       className="py-1.5 px-2 border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 rounded-xl font-black text-[10px] flex items-center justify-center gap-1 cursor-pointer transition-colors active:scale-95"
                     >
-                      📋 貼上排版設定
+                      {t("erp_526")}
                     </button>
                   </div>
 
                   {/* Sync to Other Recipe */}
                   <div className="space-y-1.5 pt-1.5 border-t border-dashed border-slate-200">
-                    <label className="text-[8.5px] font-black text-gray-500 block">同步複製當前排版至其他食譜</label>
+                    <label className="text-[8.5px] font-black text-gray-500 block">
+                      {t("erp_527")}
+                    </label>
                     <div className="flex gap-1.5">
                       <select
                         className="flex-1 px-2.5 py-1.5 bg-white border border-border rounded-xl font-bold text-[11px] outline-none"
                         value={targetRecipeIdToCopyTo}
-                        onChange={(e) => setTargetRecipeIdToCopyTo(e.target.value)}
+                        onChange={(e) =>
+                          setTargetRecipeIdToCopyTo(e.target.value)
+                        }
                       >
-                        <option value="">-- 選擇目標食譜 --</option>
+                        <option value="">{t("erp_528")}</option>
                         {recipes
                           .filter((r) => r.id !== selectedRecipeId)
                           .map((r) => (
@@ -1490,10 +1879,12 @@ export const Labels = () => {
                       <button
                         type="button"
                         onClick={handleCopyLayoutToRecipe}
-                        disabled={copyingLayoutToRecipe || !targetRecipeIdToCopyTo}
+                        disabled={
+                          copyingLayoutToRecipe || !targetRecipeIdToCopyTo
+                        }
                         className="py-1.5 px-3 bg-teal-600 hover:bg-teal-700 disabled:bg-slate-200 disabled:text-slate-400 text-white rounded-xl font-black text-[10px] flex items-center justify-center gap-1 cursor-pointer transition-colors disabled:cursor-not-allowed"
                       >
-                        {copyingLayoutToRecipe ? '同步中...' : '一鍵同步'}
+                        {copyingLayoutToRecipe ? t("erp_529") : t("erp_530")}
                       </button>
                     </div>
                   </div>
@@ -1506,9 +1897,11 @@ export const Labels = () => {
           <div className="space-y-3 bg-indigo-50/50 border border-indigo-100 p-4 rounded-2xl">
             <div className="flex items-center gap-1.5 text-indigo-700">
               <Settings2 className="w-4 h-4" />
-              <h4 className="text-xs font-black uppercase tracking-wider">標籤雙語設定 (成分翻譯)</h4>
+              <h4 className="text-xs font-black uppercase tracking-wider">
+                {t("erp_531")}
+              </h4>
             </div>
-            
+
             <div className="flex items-center gap-3">
               <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-gray-700">
                 <input
@@ -1517,9 +1910,9 @@ export const Labels = () => {
                   checked={enableDualLanguage}
                   onChange={(e) => setEnableDualLanguage(e.target.checked)}
                 />
-                啟用雙語成分顯示
+                {t("erp_532")}
               </label>
-              
+
               {enableDualLanguage && (
                 <select
                   className="flex-1 px-3 py-1.5 bg-white border border-border rounded-xl font-bold text-xs outline-none"
@@ -1534,37 +1927,55 @@ export const Labels = () => {
                 </select>
               )}
             </div>
-            <p className="text-[10px] text-muted-foreground">
-              啟用後，系統將自動從翻譯庫中載入外文，並與中文成分並排顯示。
-            </p>
+            <p className="text-[10px] text-muted-foreground">{t("erp_533")}</p>
           </div>
 
           {/* Section: Size & Dimension Selection */}
           <div className="space-y-3">
             <div className="flex items-center gap-1.5 text-gray-700">
               <Layers className="w-4 h-4" />
-              <h4 className="text-xs font-black uppercase tracking-wider">選擇實體標籤列印尺寸</h4>
+              <h4 className="text-xs font-black uppercase tracking-wider">
+                {t("erp_534")}
+              </h4>
             </div>
             <div className="grid grid-cols-2 gap-2">
               {[
-                { id: '100x100', label: '100x100 mm', desc: '方型披薩盒貼紙 (精緻款)' },
-                { id: '80x80', label: '80x80 mm', desc: '標準方型貼紙 (精簡款)' },
-                { id: '100x150', label: '100x150 mm', desc: '長條型大貼紙 (資訊全配)' },
-                { id: '70x50', label: '70x50 mm', desc: '迷你標籤 (僅含法定最少項目)' },
-              ].map(opt => (
+                {
+                  id: "100x100",
+                  label: "100x100 mm",
+                  desc: t("erp_535"),
+                },
+                {
+                  id: "80x80",
+                  label: "80x80 mm",
+                  desc: t("erp_536"),
+                },
+                {
+                  id: "100x150",
+                  label: "100x150 mm",
+                  desc: t("erp_537"),
+                },
+                {
+                  id: "70x50",
+                  label: "70x50 mm",
+                  desc: t("erp_538"),
+                },
+              ].map((opt) => (
                 <button
                   key={opt.id}
                   type="button"
                   onClick={() => setLabelSize(opt.id as LabelSize)}
                   className={cn(
                     "p-3 border rounded-xl text-left transition-all active:scale-98",
-                    labelSize === opt.id 
-                      ? "border-primary bg-primary/5 text-primary shadow-sm ring-1 ring-primary/20" 
-                      : "border-border hover:bg-muted text-gray-700"
+                    labelSize === opt.id
+                      ? "border-primary bg-primary/5 text-primary shadow-sm ring-1 ring-primary/20"
+                      : "border-border hover:bg-muted text-gray-700",
                   )}
                 >
                   <p className="text-xs font-black">{opt.label}</p>
-                  <p className="text-[9px] text-muted-foreground mt-0.5 font-medium leading-normal">{opt.desc}</p>
+                  <p className="text-[9px] text-muted-foreground mt-0.5 font-medium leading-normal">
+                    {opt.desc}
+                  </p>
                 </button>
               ))}
             </div>
@@ -1575,18 +1986,24 @@ export const Labels = () => {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5 text-gray-700">
                 <Settings2 className="w-4 h-4 text-primary" />
-                <h4 className="text-xs font-black uppercase tracking-wider">連續捲筒貼紙設定</h4>
+                <h4 className="text-xs font-black uppercase tracking-wider">
+                  {t("erp_539")}
+                </h4>
               </div>
               <span className="px-2 py-0.5 bg-primary/10 text-primary text-[10px] font-black rounded-md">
-                {labelGap === 0 ? '連續紙' : `間距: ${labelGap} mm`}
+                {labelGap === 0 ? t("erp_540") : `間距: ${labelGap} mm`}
               </span>
             </div>
 
             {/* Gap Slider & Quick Selections */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <label className="text-[10px] font-bold text-gray-600">貼紙與貼紙間距 (Gap)</label>
-                <span className="text-[10px] font-mono font-black text-slate-500">{labelGap}mm</span>
+                <label className="text-[10px] font-bold text-gray-600">
+                  {t("erp_541")}
+                </label>
+                <span className="text-[10px] font-mono font-black text-slate-500">
+                  {labelGap}mm
+                </span>
               </div>
               <div className="flex items-center gap-3">
                 <input
@@ -1599,14 +2016,26 @@ export const Labels = () => {
                   onChange={(e) => setLabelGap(parseFloat(e.target.value))}
                 />
               </div>
-              
+
               {/* Quick Choice Pills */}
               <div className="flex flex-wrap gap-1.5 pt-1">
                 {[
-                  { value: 0, label: '0mm (無)' },
-                  { value: 2, label: '2mm' },
-                  { value: 3, label: '3mm (標準)' },
-                  { value: 4, label: '4mm' }
+                  {
+                    value: 0,
+                    label: t("erp_542"),
+                  },
+                  {
+                    value: 2,
+                    label: "2mm",
+                  },
+                  {
+                    value: 3,
+                    label: t("erp_543"),
+                  },
+                  {
+                    value: 4,
+                    label: "4mm",
+                  },
                 ].map((pill) => (
                   <button
                     key={pill.value}
@@ -1616,7 +2045,7 @@ export const Labels = () => {
                       "px-2 py-1 text-[9.5px] font-black rounded-lg border transition-all cursor-pointer",
                       labelGap === pill.value
                         ? "bg-slate-900 border-slate-900 text-white shadow-sm"
-                        : "bg-white border-border text-gray-600 hover:bg-slate-50"
+                        : "bg-white border-border text-gray-600 hover:bg-slate-50",
                     )}
                   >
                     {pill.label}
@@ -1628,8 +2057,12 @@ export const Labels = () => {
             {/* Corner Radius Settings */}
             <div className="space-y-2 pt-2.5 border-t border-slate-200">
               <div className="flex items-center justify-between">
-                <label className="text-[10px] font-bold text-gray-600">貼紙邊角圓角 (Corner Radius)</label>
-                <span className="text-[10px] font-mono font-black text-slate-500">{labelBorderRadius}mm</span>
+                <label className="text-[10px] font-bold text-gray-600">
+                  {t("erp_544")}
+                </label>
+                <span className="text-[10px] font-mono font-black text-slate-500">
+                  {labelBorderRadius}mm
+                </span>
               </div>
               <div className="flex items-center gap-3">
                 <input
@@ -1639,18 +2072,35 @@ export const Labels = () => {
                   step="0.5"
                   className="flex-1 h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary"
                   value={labelBorderRadius}
-                  onChange={(e) => setLabelBorderRadius(parseFloat(e.target.value))}
+                  onChange={(e) =>
+                    setLabelBorderRadius(parseFloat(e.target.value))
+                  }
                 />
               </div>
-              
+
               {/* Quick Choice Pills */}
               <div className="flex flex-wrap gap-1.5 pt-1">
                 {[
-                  { value: 0, label: '0mm (直角)' },
-                  { value: 1.5, label: '1.5mm' },
-                  { value: 3, label: '3mm' },
-                  { value: 4, label: '4mm (標準)' },
-                  { value: 6, label: '6mm' }
+                  {
+                    value: 0,
+                    label: t("erp_545"),
+                  },
+                  {
+                    value: 1.5,
+                    label: "1.5mm",
+                  },
+                  {
+                    value: 3,
+                    label: "3mm",
+                  },
+                  {
+                    value: 4,
+                    label: t("erp_546"),
+                  },
+                  {
+                    value: 6,
+                    label: "6mm",
+                  },
                 ].map((pill) => (
                   <button
                     key={pill.value}
@@ -1660,7 +2110,7 @@ export const Labels = () => {
                       "px-2 py-1 text-[9.5px] font-black rounded-lg border transition-all cursor-pointer",
                       labelBorderRadius === pill.value
                         ? "bg-slate-900 border-slate-900 text-white shadow-sm"
-                        : "bg-white border-border text-gray-600 hover:bg-slate-50"
+                        : "bg-white border-border text-gray-600 hover:bg-slate-50",
                     )}
                   >
                     {pill.label}
@@ -1672,19 +2122,37 @@ export const Labels = () => {
             {/* Gap Alignment Settings */}
             <div className="space-y-2 pt-2.5 border-t border-slate-200">
               <div className="flex items-center justify-between">
-                <label className="text-[10px] font-bold text-gray-600">紙張垂直出紙對齊 (高度補償)</label>
+                <label className="text-[10px] font-bold text-gray-600">
+                  {t("erp_547")}
+                </label>
                 <span className="px-1.5 py-0.5 bg-slate-100 text-slate-700 text-[9px] font-black rounded font-mono uppercase">
-                  {gapAlignment === 'top' ? '間距在上方' : gapAlignment === 'center' ? '上下均分' : '間距在下方'}
+                  {gapAlignment === "top"
+                    ? t("erp_548")
+                    : gapAlignment === "center"
+                      ? t("erp_549")
+                      : t("erp_550")}
                 </span>
               </div>
               <p className="text-[8.5px] text-muted-foreground font-semibold leading-normal">
-                解決第一張標籤上半被裁切的問題。依您的印表機感應點，調整列印版面在實體標籤上的上下偏移位置。
+                {t("erp_551")}
               </p>
               <div className="grid grid-cols-3 gap-1 bg-white border border-border p-1 rounded-xl">
                 {[
-                  { id: 'bottom', label: '靠上列印', desc: '間距留於下方' },
-                  { id: 'center', label: '置中列印', desc: '間距上下均分' },
-                  { id: 'top', label: '靠下列印', desc: '間距留於上方' }
+                  {
+                    id: "bottom",
+                    label: t("erp_552"),
+                    desc: t("erp_553"),
+                  },
+                  {
+                    id: "center",
+                    label: t("erp_554"),
+                    desc: t("erp_555"),
+                  },
+                  {
+                    id: "top",
+                    label: t("erp_556"),
+                    desc: t("erp_557"),
+                  },
                 ].map((t) => (
                   <button
                     key={t.id}
@@ -1692,13 +2160,15 @@ export const Labels = () => {
                     onClick={() => setGapAlignment(t.id as any)}
                     className={cn(
                       "py-1 px-1 text-[9.5px] font-black rounded-lg transition-all cursor-pointer flex flex-col items-center justify-center gap-0.5",
-                      gapAlignment === t.id 
-                        ? "bg-slate-900 text-white shadow-sm" 
-                        : "text-slate-500 hover:bg-slate-50 hover:text-slate-700"
+                      gapAlignment === t.id
+                        ? "bg-slate-900 text-white shadow-sm"
+                        : "text-slate-500 hover:bg-slate-50 hover:text-slate-700",
                     )}
                   >
                     <span>{t.label}</span>
-                    <span className="text-[7.5px] font-semibold opacity-80 leading-none">{t.desc}</span>
+                    <span className="text-[7.5px] font-semibold opacity-80 leading-none">
+                      {t.desc}
+                    </span>
                   </button>
                 ))}
               </div>
@@ -1715,9 +2185,11 @@ export const Labels = () => {
                   className="w-3.5 h-3.5 accent-primary rounded border-border focus:ring-primary/20 shrink-0 mt-0.5"
                 />
                 <div className="flex-1 min-w-0">
-                  <span className="text-[10.5px] font-bold text-gray-700 block leading-tight">列印尺寸包含間距 (高度優化)</span>
+                  <span className="text-[10.5px] font-bold text-gray-700 block leading-tight">
+                    {t("erp_558")}
+                  </span>
                   <span className="text-[8.5px] text-muted-foreground font-semibold leading-normal block mt-0.5">
-                    啟用後，系統列印高度會自動包含間距，有助於 Zebra/TSC 等熱敏印表機完美對齊而不跳頁。
+                    {t("erp_559")}
                   </span>
                 </div>
               </label>
@@ -1731,9 +2203,11 @@ export const Labels = () => {
                   className="w-3.5 h-3.5 accent-primary rounded border-border focus:ring-primary/20 shrink-0 mt-0.5"
                 />
                 <div className="flex-1 min-w-0">
-                  <span className="text-[10.5px] font-bold text-gray-700 block leading-tight">啟用連續捲筒底紙模擬</span>
+                  <span className="text-[10.5px] font-bold text-gray-700 block leading-tight">
+                    {t("erp_560")}
+                  </span>
                   <span className="text-[8.5px] text-muted-foreground font-semibold leading-normal block mt-0.5">
-                    在右側列印預覽中，呈現格拉辛底紙與相鄰貼紙間距的 1:1 視覺對齊效果。
+                    {t("erp_561")}
                   </span>
                 </div>
               </label>
@@ -1746,34 +2220,58 @@ export const Labels = () => {
               <div className="flex items-center gap-2">
                 <Sliders className="w-5 h-5 text-indigo-600" />
                 <div>
-                  <h4 className="text-xs font-black text-indigo-900 uppercase tracking-wide">群組拖拉與縮放排版</h4>
-                  <p className="text-[9.5px] text-indigo-700/80 font-medium">支援自由拖曳位置、縮放欄位大小並對齊網格</p>
+                  <h4 className="text-xs font-black text-indigo-900 uppercase tracking-wide">
+                    {t("erp_562")}
+                  </h4>
+                  <p className="text-[9.5px] text-indigo-700/80 font-medium">
+                    {t("erp_563")}
+                  </p>
                 </div>
               </div>
               <label className="relative inline-flex items-center cursor-pointer select-none">
-                <input 
-                  type="checkbox" 
-                  checked={useCustomLayout} 
-                  onChange={(e) => setUseCustomLayout(e.target.checked)} 
-                  className="sr-only peer" 
+                <input
+                  type="checkbox"
+                  checked={useCustomLayout}
+                  onChange={(e) => setUseCustomLayout(e.target.checked)}
+                  className="sr-only peer"
                 />
                 <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
               </label>
             </div>
             {useCustomLayout && (
               <div className="text-[9px] text-indigo-800 leading-relaxed font-semibold bg-white/70 rounded-xl p-2.5 border border-indigo-100 flex flex-col gap-1">
-                <span>✨ 拖拉說明：</span>
-                <span>1. 按住標籤預覽區中各群組的「<span className="font-black text-indigo-700">灰色拖曳把手 ✛</span>」可自由移動。</span>
-                <span>2. 拖曳或縮放時會自動對齊 <span className="font-black text-indigo-700">2% 網格</span>，並顯示輔助點與座標。</span>
-                <span>3. 拉動右下角的「<span className="font-black text-indigo-700">縮放把手 ↘</span>」可調整寬高。</span>
+                <span>{t("erp_564")}</span>
+                <span>
+                  {t("erp_565")}
+                  <span className="font-black text-indigo-700">
+                    {t("erp_566")}
+                  </span>
+                  {t("erp_567")}
+                </span>
+                <span>
+                  {t("erp_568")}
+                  <span className="font-black text-indigo-700">
+                    {t("erp_569")}
+                  </span>
+                  {t("erp_570")}
+                </span>
+                <span>
+                  {t("erp_571")}
+                  <span className="font-black text-indigo-700">
+                    {t("erp_572")}
+                  </span>
+                  {t("erp_573")}
+                </span>
                 <button
                   type="button"
                   onClick={() => {
-                    setGroupLayouts(DEFAULT_LAYOUTS[labelSize] || DEFAULT_LAYOUTS['100x100']);
+                    setGroupLayouts(
+                      DEFAULT_LAYOUTS[labelSize] || DEFAULT_LAYOUTS["100x100"],
+                    );
                   }}
                   className="mt-2.5 w-full py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg text-[9px] font-black tracking-wider transition-colors border border-indigo-200 cursor-pointer"
                 >
-                  重置目前尺寸版面位置
+                  {t("erp_574")}
                 </button>
               </div>
             )}
@@ -1782,30 +2280,49 @@ export const Labels = () => {
           {/* Collapsible Accordion Groups A to E */}
           <div className="space-y-3">
             {/* GROUP A: 覆熱指引 */}
-            <div className={cn("border rounded-2xl overflow-hidden bg-white shadow-sm transition-all", activeAccordion === 'A' ? "border-primary/40 ring-1 ring-primary/10" : "border-border")}>
+            <div
+              className={cn(
+                "border rounded-2xl overflow-hidden bg-white shadow-sm transition-all",
+                activeAccordion === "A"
+                  ? "border-primary/40 ring-1 ring-primary/10"
+                  : "border-border",
+              )}
+            >
               <button
                 type="button"
-                onClick={() => setActiveAccordion(activeAccordion === 'A' ? null : 'A')}
+                onClick={() =>
+                  setActiveAccordion(activeAccordion === "A" ? null : "A")
+                }
                 className="w-full px-4 py-3 flex items-center justify-between bg-slate-50 hover:bg-slate-100/80 transition-colors cursor-pointer"
               >
                 <div className="flex items-center gap-2">
-                  <span className="w-5 h-5 bg-orange-500 text-white rounded-lg flex items-center justify-center font-bold text-xs">A</span>
+                  <span className="w-5 h-5 bg-orange-500 text-white rounded-lg flex items-center justify-center font-bold text-xs">
+                    A
+                  </span>
                   <div className="text-left">
-                    <span className="text-[11px] font-black text-gray-800 block">覆熱指引</span>
-                    <span className="text-[9px] text-muted-foreground font-semibold">氣炸、烤箱、煎鍋等烹調方式與字型微調</span>
+                    <span className="text-[11px] font-black text-gray-800 block">
+                      {t("erp_575")}
+                    </span>
+                    <span className="text-[9px] text-muted-foreground font-semibold">
+                      {t("erp_576")}
+                    </span>
                   </div>
                 </div>
-                {activeAccordion === 'A' ? <ChevronUp className="w-4 h-4 text-gray-500" /> : <ChevronDown className="w-4 h-4 text-gray-500" />}
+                {activeAccordion === "A" ? (
+                  <ChevronUp className="w-4 h-4 text-gray-500" />
+                ) : (
+                  <ChevronDown className="w-4 h-4 text-gray-500" />
+                )}
               </button>
-              
-              {activeAccordion === 'A' && (
+
+              {activeAccordion === "A" && (
                 <div className="p-4 border-t border-border space-y-4 animate-in fade-in duration-200">
                   {/* Font Scale Slider */}
                   <div className="bg-slate-50 border border-slate-200/60 p-3 rounded-2xl space-y-1.5 shrink-0">
                     <div className="flex items-center justify-between">
                       <span className="text-[10px] font-black text-gray-700 flex items-center gap-1">
                         <Sliders className="w-3.5 h-3.5 text-orange-600" />
-                        字體縮放比例
+                        {t("erp_577")}
                       </span>
                       <span className="text-[10px] font-bold text-orange-600 font-mono bg-orange-50 px-1.5 py-0.5 rounded-md">
                         {Math.round(groupFontScales.A * 100)}%
@@ -1817,7 +2334,9 @@ export const Labels = () => {
                       max="2.0"
                       step="0.05"
                       value={groupFontScales.A}
-                      onChange={(e) => updateGroupFontScale('A', parseFloat(e.target.value))}
+                      onChange={(e) =>
+                        updateGroupFontScale("A", parseFloat(e.target.value))
+                      }
                       className="w-full h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-orange-600"
                     />
                   </div>
@@ -1830,25 +2349,31 @@ export const Labels = () => {
                         onChange={(e) => setShowReheating(e.target.checked)}
                         className="w-3.5 h-3.5 accent-primary rounded border-border"
                       />
-                      <span>啟用覆熱指引區</span>
+                      <span>{t("erp_578")}</span>
                     </label>
                   </div>
 
                   {showReheating && (
                     <div className="space-y-3.5">
                       <div className="space-y-1">
-                        <label className="text-[9.5px] font-bold text-gray-600">覆熱主標題文字</label>
+                        <label className="text-[9.5px] font-bold text-gray-600">
+                          {t("erp_579")}
+                        </label>
                         <input
                           type="text"
                           className="w-full px-3 py-1.5 bg-slate-50 border border-border rounded-xl font-bold text-xs outline-none focus:ring-2 focus:ring-primary/10"
                           value={reheatingMainTitle}
-                          onChange={(e) => setReheatingMainTitle(e.target.value)}
+                          onChange={(e) =>
+                            setReheatingMainTitle(e.target.value)
+                          }
                         />
                       </div>
 
                       <div className="grid grid-cols-3 gap-2">
                         <div className="space-y-1">
-                          <label className="text-[8.5px] font-bold text-gray-600">氣炸小標題</label>
+                          <label className="text-[8.5px] font-bold text-gray-600">
+                            {t("erp_580")}
+                          </label>
                           <input
                             type="text"
                             className="w-full px-2 py-1.5 bg-slate-50 border border-border rounded-xl font-bold text-xs outline-none focus:ring-2 focus:ring-primary/10"
@@ -1857,7 +2382,9 @@ export const Labels = () => {
                           />
                         </div>
                         <div className="space-y-1">
-                          <label className="text-[8.5px] font-bold text-gray-600">烤箱小標題</label>
+                          <label className="text-[8.5px] font-bold text-gray-600">
+                            {t("erp_581")}
+                          </label>
                           <input
                             type="text"
                             className="w-full px-2 py-1.5 bg-slate-50 border border-border rounded-xl font-bold text-xs outline-none focus:ring-2 focus:ring-primary/10"
@@ -1866,7 +2393,9 @@ export const Labels = () => {
                           />
                         </div>
                         <div className="space-y-1">
-                          <label className="text-[8.5px] font-bold text-gray-600">煎鍋小標題</label>
+                          <label className="text-[8.5px] font-bold text-gray-600">
+                            {t("erp_582")}
+                          </label>
                           <input
                             type="text"
                             className="w-full px-2 py-1.5 bg-slate-50 border border-border rounded-xl font-bold text-xs outline-none focus:ring-2 focus:ring-primary/10"
@@ -1877,21 +2406,40 @@ export const Labels = () => {
                       </div>
 
                       <div className="space-y-2 pt-1.5">
-                        <span className="text-[9px] font-black uppercase text-slate-500 tracking-wider block">🍳 烹調方式顯示子項</span>
+                        <span className="text-[9px] font-black uppercase text-slate-500 tracking-wider block">
+                          {t("erp_583")}
+                        </span>
                         <div className="grid grid-cols-3 gap-2">
                           {[
-                            { state: showAirFryer, setter: setShowAirFryer, label: airFryerTitle || '氣炸烤箱' },
-                            { state: showOven, setter: setShowOven, label: ovenTitle || '家用烤箱' },
-                            { state: showPan, setter: setShowPan, label: panTitle || '平底鍋' }
+                            {
+                              state: showAirFryer,
+                              setter: setShowAirFryer,
+                              label: airFryerTitle || t("erp_460"),
+                            },
+                            {
+                              state: showOven,
+                              setter: setShowOven,
+                              label: ovenTitle || t("erp_461"),
+                            },
+                            {
+                              state: showPan,
+                              setter: setShowPan,
+                              label: panTitle || t("erp_462"),
+                            },
                           ].map((sub, idx) => (
-                            <label key={idx} className="flex items-center gap-1.5 cursor-pointer select-none">
+                            <label
+                              key={idx}
+                              className="flex items-center gap-1.5 cursor-pointer select-none"
+                            >
                               <input
                                 type="checkbox"
                                 checked={sub.state}
                                 onChange={(e) => sub.setter(e.target.checked)}
                                 className="w-3.5 h-3.5 accent-primary rounded border-border focus:ring-primary/20 cursor-pointer"
                               />
-                              <span className="text-[10px] font-bold text-gray-700 truncate">{sub.label}</span>
+                              <span className="text-[10px] font-bold text-gray-700 truncate">
+                                {sub.label}
+                              </span>
                             </label>
                           ))}
                         </div>
@@ -1899,7 +2447,10 @@ export const Labels = () => {
 
                       {showAirFryer && (
                         <div className="space-y-1 animate-in fade-in duration-150">
-                          <label className="text-[9px] font-bold text-gray-500">{airFryerTitle} 步驟說明</label>
+                          <label className="text-[9px] font-bold text-gray-500">
+                            {airFryerTitle}
+                            {t("erp_584")}
+                          </label>
                           <textarea
                             rows={2}
                             className="w-full px-3 py-1.5 bg-slate-50 border border-border rounded-xl font-bold text-xs"
@@ -1911,7 +2462,10 @@ export const Labels = () => {
 
                       {showOven && (
                         <div className="space-y-1 animate-in fade-in duration-150">
-                          <label className="text-[9px] font-bold text-gray-500">{ovenTitle} 步驟說明</label>
+                          <label className="text-[9px] font-bold text-gray-500">
+                            {ovenTitle}
+                            {t("erp_584")}
+                          </label>
                           <textarea
                             rows={2}
                             className="w-full px-3 py-1.5 bg-slate-50 border border-border rounded-xl font-bold text-xs"
@@ -1923,7 +2477,10 @@ export const Labels = () => {
 
                       {showPan && (
                         <div className="space-y-1 animate-in fade-in duration-150">
-                          <label className="text-[9px] font-bold text-gray-500">{panTitle} 步驟說明</label>
+                          <label className="text-[9px] font-bold text-gray-500">
+                            {panTitle}
+                            {t("erp_584")}
+                          </label>
                           <textarea
                             rows={2}
                             className="w-full px-3 py-1.5 bg-slate-50 border border-border rounded-xl font-bold text-xs"
@@ -1934,48 +2491,65 @@ export const Labels = () => {
                       )}
 
                       <div className="bg-slate-50 border border-slate-100 p-3 rounded-2xl space-y-2 mt-2">
-                        <span className="text-[9px] font-black text-gray-600 uppercase block mb-1">🔍 復熱字型大小微調 (pt)</span>
+                        <span className="text-[9px] font-black text-gray-600 uppercase block mb-1">
+                          {t("erp_585")}
+                        </span>
                         <div className="grid grid-cols-3 gap-2">
                           <div className="space-y-1">
-                            <label className="text-[8px] font-bold text-gray-500 block">主標 ({reheatingMainTitleSize}pt)</label>
-                            <input 
-                              type="range" 
-                              min="5" 
-                              max="12" 
-                              step="0.1" 
-                              value={reheatingMainTitleSize} 
-                              onChange={(e) => setReheatingMainTitleSize(Number(e.target.value))}
+                            <label className="text-[8px] font-bold text-gray-500 block">
+                              {t("erp_586")}
+                              {reheatingMainTitleSize}pt)
+                            </label>
+                            <input
+                              type="range"
+                              min="5"
+                              max="12"
+                              step="0.1"
+                              value={reheatingMainTitleSize}
+                              onChange={(e) =>
+                                setReheatingMainTitleSize(
+                                  Number(e.target.value),
+                                )
+                              }
                               className="w-full h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary"
                             />
                           </div>
                           <div className="space-y-1">
-                            <label className="text-[8px] font-bold text-gray-500 block">小標 ({reheatingSubTitleSize}pt)</label>
-                            <input 
-                              type="range" 
-                              min="5" 
-                              max="11" 
-                              step="0.1" 
-                              value={reheatingSubTitleSize} 
-                              onChange={(e) => setReheatingSubTitleSize(Number(e.target.value))}
+                            <label className="text-[8px] font-bold text-gray-500 block">
+                              {t("erp_587")}
+                              {reheatingSubTitleSize}pt)
+                            </label>
+                            <input
+                              type="range"
+                              min="5"
+                              max="11"
+                              step="0.1"
+                              value={reheatingSubTitleSize}
+                              onChange={(e) =>
+                                setReheatingSubTitleSize(Number(e.target.value))
+                              }
                               className="w-full h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary"
                             />
                           </div>
                           <div className="space-y-1">
-                            <label className="text-[8px] font-bold text-gray-500 block">步驟 ({reheatingContentSize}pt)</label>
-                            <input 
-                              type="range" 
-                              min="4.5" 
-                              max="10" 
-                              step="0.1" 
-                              value={reheatingContentSize} 
-                              onChange={(e) => setReheatingContentSize(Number(e.target.value))}
+                            <label className="text-[8px] font-bold text-gray-500 block">
+                              {t("erp_588")}
+                              {reheatingContentSize}pt)
+                            </label>
+                            <input
+                              type="range"
+                              min="4.5"
+                              max="10"
+                              step="0.1"
+                              value={reheatingContentSize}
+                              onChange={(e) =>
+                                setReheatingContentSize(Number(e.target.value))
+                              }
                               className="w-full h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary"
                             />
                           </div>
                         </div>
                       </div>
-
-
                     </div>
                   )}
                 </div>
@@ -1983,30 +2557,49 @@ export const Labels = () => {
             </div>
 
             {/* GROUP B: 品牌與品名 */}
-            <div className={cn("border rounded-2xl overflow-hidden bg-white shadow-sm transition-all", activeAccordion === 'B' ? "border-primary/40 ring-1 ring-primary/10" : "border-border")}>
+            <div
+              className={cn(
+                "border rounded-2xl overflow-hidden bg-white shadow-sm transition-all",
+                activeAccordion === "B"
+                  ? "border-primary/40 ring-1 ring-primary/10"
+                  : "border-border",
+              )}
+            >
               <button
                 type="button"
-                onClick={() => setActiveAccordion(activeAccordion === 'B' ? null : 'B')}
+                onClick={() =>
+                  setActiveAccordion(activeAccordion === "B" ? null : "B")
+                }
                 className="w-full px-4 py-3 flex items-center justify-between bg-slate-50 hover:bg-slate-100/80 transition-colors cursor-pointer"
               >
                 <div className="flex items-center gap-2">
-                  <span className="w-5 h-5 bg-teal-500 text-white rounded-lg flex items-center justify-center font-bold text-xs">B</span>
+                  <span className="w-5 h-5 bg-teal-500 text-white rounded-lg flex items-center justify-center font-bold text-xs">
+                    B
+                  </span>
                   <div className="text-left">
-                    <span className="text-[11px] font-black text-gray-800 block">品牌與品名</span>
-                    <span className="text-[9px] text-muted-foreground font-semibold">品牌Logo、中英文品名設定</span>
+                    <span className="text-[11px] font-black text-gray-800 block">
+                      {t("erp_589")}
+                    </span>
+                    <span className="text-[9px] text-muted-foreground font-semibold">
+                      {t("erp_590")}
+                    </span>
                   </div>
                 </div>
-                {activeAccordion === 'B' ? <ChevronUp className="w-4 h-4 text-gray-500" /> : <ChevronDown className="w-4 h-4 text-gray-500" />}
+                {activeAccordion === "B" ? (
+                  <ChevronUp className="w-4 h-4 text-gray-500" />
+                ) : (
+                  <ChevronDown className="w-4 h-4 text-gray-500" />
+                )}
               </button>
-              
-              {activeAccordion === 'B' && (
+
+              {activeAccordion === "B" && (
                 <div className="p-4 border-t border-border space-y-4 animate-in fade-in duration-200">
                   {/* Font Scale Slider */}
                   <div className="bg-slate-50 border border-slate-200/60 p-3 rounded-2xl space-y-1.5 shrink-0">
                     <div className="flex items-center justify-between">
                       <span className="text-[10px] font-black text-gray-700 flex items-center gap-1">
                         <Sliders className="w-3.5 h-3.5 text-teal-600" />
-                        字體縮放比例
+                        {t("erp_577")}
                       </span>
                       <span className="text-[10px] font-bold text-teal-600 font-mono bg-teal-50 px-1.5 py-0.5 rounded-md">
                         {Math.round(groupFontScales.B * 100)}%
@@ -2018,7 +2611,9 @@ export const Labels = () => {
                       max="2.0"
                       step="0.05"
                       value={groupFontScales.B}
-                      onChange={(e) => updateGroupFontScale('B', parseFloat(e.target.value))}
+                      onChange={(e) =>
+                        updateGroupFontScale("B", parseFloat(e.target.value))
+                      }
                       className="w-full h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-teal-600"
                     />
                   </div>
@@ -2032,7 +2627,7 @@ export const Labels = () => {
                           onChange={(e) => setShowBranding(e.target.checked)}
                           className="w-3.5 h-3.5 accent-primary rounded border-border"
                         />
-                        <span>啟用品牌 Logo 識別</span>
+                        <span>{t("erp_591")}</span>
                       </label>
                     </div>
 
@@ -2040,7 +2635,9 @@ export const Labels = () => {
                       <div className="space-y-3.5 animate-in fade-in duration-150">
                         <div className="grid grid-cols-2 gap-3">
                           <div className="space-y-1">
-                            <label className="text-[9.5px] font-bold text-gray-600">品牌中文名稱</label>
+                            <label className="text-[9.5px] font-bold text-gray-600">
+                              {t("erp_592")}
+                            </label>
                             <input
                               type="text"
                               className="w-full px-3 py-1.5 bg-white border border-border rounded-xl font-bold text-xs outline-none focus:ring-2 focus:ring-primary/20"
@@ -2049,7 +2646,9 @@ export const Labels = () => {
                             />
                           </div>
                           <div className="space-y-1">
-                            <label className="text-[9.5px] font-bold text-gray-600">品牌英文名稱</label>
+                            <label className="text-[9.5px] font-bold text-gray-600">
+                              {t("erp_593")}
+                            </label>
                             <input
                               type="text"
                               className="w-full px-3 py-1.5 bg-white border border-border rounded-xl font-bold text-xs outline-none focus:ring-2 focus:ring-primary/20"
@@ -2061,12 +2660,23 @@ export const Labels = () => {
 
                         {/* Logo Source Type Selection */}
                         <div className="space-y-1 pt-1">
-                          <span className="text-[9px] font-black uppercase tracking-wider text-slate-500 block">自訂 Logo 標誌樣式</span>
+                          <span className="text-[9px] font-black uppercase tracking-wider text-slate-500 block">
+                            {t("erp_594")}
+                          </span>
                           <div className="grid grid-cols-3 gap-1 bg-white border border-border p-1 rounded-xl">
                             {[
-                              { id: 'icon', label: '精選圖章' },
-                              { id: 'upload', label: '上傳圖檔' },
-                              { id: 'text', label: '文字印記' }
+                              {
+                                id: "icon",
+                                label: t("erp_595"),
+                              },
+                              {
+                                id: "upload",
+                                label: t("erp_596"),
+                              },
+                              {
+                                id: "text",
+                                label: t("erp_597"),
+                              },
                             ].map((t) => (
                               <button
                                 key={t.id}
@@ -2074,9 +2684,9 @@ export const Labels = () => {
                                 onClick={() => setLogoType(t.id as any)}
                                 className={cn(
                                   "py-1 text-[9.5px] font-black rounded-lg transition-all cursor-pointer",
-                                  logoType === t.id 
-                                    ? "bg-primary text-white shadow-sm" 
-                                    : "text-slate-500 hover:bg-slate-50 hover:text-slate-700"
+                                  logoType === t.id
+                                    ? "bg-primary text-white shadow-sm"
+                                    : "text-slate-500 hover:bg-slate-50 hover:text-slate-700",
                                 )}
                               >
                                 {t.label}
@@ -2086,33 +2696,63 @@ export const Labels = () => {
                         </div>
 
                         {/* Logo Source Type Options Editor */}
-                        {logoType === 'icon' && (
+                        {logoType === "icon" && (
                           <div className="space-y-1.5 pt-1 animate-in fade-in duration-200">
-                            <span className="text-[9px] font-bold text-slate-400 block mb-1">🔍 選擇一個向量印章圖案</span>
+                            <span className="text-[9px] font-bold text-slate-400 block mb-1">
+                              {t("erp_598")}
+                            </span>
                             <div className="grid grid-cols-3 gap-1.5">
                               {[
-                                { name: 'ChefHat', label: '廚師帽', icon: ChefHat },
-                                { name: 'Utensils', label: '餐具', icon: Utensils },
-                                { name: 'Flame', label: '火焰', icon: Flame },
-                                { name: 'Award', label: '榮譽獎章', icon: Award },
-                                { name: 'Sparkles', label: '閃耀星芒', icon: Sparkles },
-                                { name: 'Layers', label: '層疊製程', icon: Layers }
+                                {
+                                  name: "ChefHat",
+                                  label: t("erp_599"),
+                                  icon: ChefHat,
+                                },
+                                {
+                                  name: "Utensils",
+                                  label: t("erp_600"),
+                                  icon: Utensils,
+                                },
+                                {
+                                  name: "Flame",
+                                  label: t("erp_601"),
+                                  icon: Flame,
+                                },
+                                {
+                                  name: "Award",
+                                  label: t("erp_602"),
+                                  icon: Award,
+                                },
+                                {
+                                  name: "Sparkles",
+                                  label: t("erp_603"),
+                                  icon: Sparkles,
+                                },
+                                {
+                                  name: "Layers",
+                                  label: t("erp_604"),
+                                  icon: Layers,
+                                },
                               ].map((item) => {
                                 const Icon = item.icon;
                                 return (
                                   <button
                                     key={item.name}
                                     type="button"
-                                    onClick={() => setSelectedIconName(item.name)}
+                                    onClick={() =>
+                                      setSelectedIconName(item.name)
+                                    }
                                     className={cn(
                                       "flex items-center gap-1.5 px-2 py-1.5 rounded-lg border text-[9.5px] font-bold transition-all cursor-pointer justify-center",
                                       selectedIconName === item.name
                                         ? "border-primary bg-primary/5 text-primary shadow-sm"
-                                        : "border-border bg-white text-gray-500 hover:bg-slate-50"
+                                        : "border-border bg-white text-gray-500 hover:bg-slate-50",
                                     )}
                                   >
                                     <Icon className="w-3.5 h-3.5 shrink-0" />
-                                    <span className="truncate">{item.label}</span>
+                                    <span className="truncate">
+                                      {item.label}
+                                    </span>
                                   </button>
                                 );
                               })}
@@ -2120,12 +2760,14 @@ export const Labels = () => {
                           </div>
                         )}
 
-                        {logoType === 'upload' && (
+                        {logoType === "upload" && (
                           <div className="space-y-1.5 pt-1 animate-in fade-in duration-200">
-                            <span className="text-[9px] font-bold text-slate-400 block">📸 上傳商標 Logo 檔案 (PNG/JPG)</span>
+                            <span className="text-[9px] font-bold text-slate-400 block">
+                              {t("erp_605")}
+                            </span>
                             <div className="flex items-center gap-3 bg-white p-2.5 border border-border rounded-xl">
                               <label className="shrink-0 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 border border-slate-200 hover:border-slate-300 rounded-lg text-[9px] font-black text-gray-600 transition-all cursor-pointer relative">
-                                選擇圖片
+                                {t("erp_606")}
                                 <input
                                   type="file"
                                   accept="image/*"
@@ -2136,7 +2778,9 @@ export const Labels = () => {
                                       const reader = new FileReader();
                                       reader.onload = (event) => {
                                         if (event.target?.result) {
-                                          setUploadedLogo(event.target.result as string);
+                                          setUploadedLogo(
+                                            event.target.result as string,
+                                          );
                                         }
                                       };
                                       reader.readAsDataURL(file);
@@ -2148,30 +2792,41 @@ export const Labels = () => {
                                 {uploadedLogo ? (
                                   <div className="flex items-center gap-2">
                                     <div className="w-7 h-7 border border-border rounded overflow-hidden shrink-0 flex items-center justify-center bg-slate-50 shadow-inner">
-                                      <img src={uploadedLogo} className="w-full h-full object-contain mix-blend-multiply" />
+                                      <img
+                                        src={uploadedLogo}
+                                        className="w-full h-full object-contain mix-blend-multiply"
+                                      />
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                      <p className="text-[9px] text-emerald-600 font-extrabold truncate">已載入</p>
-                                      <button 
+                                      <p className="text-[9px] text-emerald-600 font-extrabold truncate">
+                                        {t("erp_607")}
+                                      </p>
+                                      <button
                                         type="button"
-                                        onClick={() => setUploadedLogo('')}
+                                        onClick={() => setUploadedLogo("")}
                                         className="text-[9px] text-red-500 font-bold hover:underline cursor-pointer"
                                       >
-                                        清除
+                                        {t("erp_608")}
                                       </button>
                                     </div>
                                   </div>
                                 ) : (
-                                  <span className="text-[9px] text-gray-400 font-semibold block leading-tight font-sans">無 Logo (純文字排版)</span>
+                                  <span className="text-[9px] text-gray-400 font-semibold block leading-tight font-sans">
+                                    {t("erp_609")}
+                                  </span>
                                 )}
                               </div>
                             </div>
                           </div>
                         )}
 
-                        {logoType === 'text' && (
+                        {logoType === "text" && (
                           <div className="bg-white p-2.5 border border-border rounded-xl text-[9px] text-gray-500 leading-normal font-semibold animate-in fade-in duration-200">
-                            💡 純文字印記風格：前兩個中文字（目前為：「{brandNameZh ? brandNameZh.substring(0, 2) : '美味'}」）會以黑色反白小方塊呈現。
+                            {t("erp_610")}
+                            {brandNameZh
+                              ? brandNameZh.substring(0, 2)
+                              : t("erp_505")}
+                            {t("erp_611")}
                           </div>
                         )}
                       </div>
@@ -2181,7 +2836,9 @@ export const Labels = () => {
                   {/* Basic Info Names */}
                   <div className="grid grid-cols-2 gap-3 pt-1">
                     <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-gray-600">中文品名</label>
+                      <label className="text-[10px] font-bold text-gray-600">
+                        {t("erp_612")}
+                      </label>
                       <input
                         type="text"
                         className="w-full px-3 py-1.5 bg-slate-50 border border-border rounded-xl font-bold text-xs"
@@ -2190,7 +2847,9 @@ export const Labels = () => {
                       />
                     </div>
                     <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-gray-600">英文名稱</label>
+                      <label className="text-[10px] font-bold text-gray-600">
+                        {t("erp_613")}
+                      </label>
                       <input
                         type="text"
                         className="w-full px-3 py-1.5 bg-slate-50 border border-border rounded-xl font-bold text-xs"
@@ -2204,30 +2863,49 @@ export const Labels = () => {
             </div>
 
             {/* GROUP F: 成分與警告 */}
-            <div className={cn("border rounded-2xl overflow-hidden bg-white shadow-sm transition-all", activeAccordion === 'F' ? "border-primary/40 ring-1 ring-primary/10" : "border-border")}>
+            <div
+              className={cn(
+                "border rounded-2xl overflow-hidden bg-white shadow-sm transition-all",
+                activeAccordion === "F"
+                  ? "border-primary/40 ring-1 ring-primary/10"
+                  : "border-border",
+              )}
+            >
               <button
                 type="button"
-                onClick={() => setActiveAccordion(activeAccordion === 'F' ? null : 'F')}
+                onClick={() =>
+                  setActiveAccordion(activeAccordion === "F" ? null : "F")
+                }
                 className="w-full px-4 py-3 flex items-center justify-between bg-slate-50 hover:bg-slate-100/80 transition-colors cursor-pointer"
               >
                 <div className="flex items-center gap-2">
-                  <span className="w-5 h-5 bg-amber-500 text-white rounded-lg flex items-center justify-center font-bold text-xs">F</span>
+                  <span className="w-5 h-5 bg-amber-500 text-white rounded-lg flex items-center justify-center font-bold text-xs">
+                    F
+                  </span>
                   <div className="text-left">
-                    <span className="text-[11px] font-black text-gray-800 block">成分與警告</span>
-                    <span className="text-[9px] text-muted-foreground font-semibold">內容物成分、非供即食警告、過敏原設定</span>
+                    <span className="text-[11px] font-black text-gray-800 block">
+                      {t("erp_614")}
+                    </span>
+                    <span className="text-[9px] text-muted-foreground font-semibold">
+                      {t("erp_615")}
+                    </span>
                   </div>
                 </div>
-                {activeAccordion === 'F' ? <ChevronUp className="w-4 h-4 text-gray-500" /> : <ChevronDown className="w-4 h-4 text-gray-500" />}
+                {activeAccordion === "F" ? (
+                  <ChevronUp className="w-4 h-4 text-gray-500" />
+                ) : (
+                  <ChevronDown className="w-4 h-4 text-gray-500" />
+                )}
               </button>
-              
-              {activeAccordion === 'F' && (
+
+              {activeAccordion === "F" && (
                 <div className="p-4 border-t border-border space-y-4 animate-in fade-in duration-200">
                   {/* Font Scale Slider */}
                   <div className="bg-slate-50 border border-slate-200/60 p-3 rounded-2xl space-y-1.5 shrink-0">
                     <div className="flex items-center justify-between">
                       <span className="text-[10px] font-black text-gray-700 flex items-center gap-1">
                         <Sliders className="w-3.5 h-3.5 text-amber-600" />
-                        字體縮放比例
+                        {t("erp_577")}
                       </span>
                       <span className="text-[10px] font-bold text-amber-600 font-mono bg-amber-50 px-1.5 py-0.5 rounded-md">
                         {Math.round(groupFontScales.F * 100)}%
@@ -2239,7 +2917,9 @@ export const Labels = () => {
                       max="2.0"
                       step="0.05"
                       value={groupFontScales.F}
-                      onChange={(e) => updateGroupFontScale('F', parseFloat(e.target.value))}
+                      onChange={(e) =>
+                        updateGroupFontScale("F", parseFloat(e.target.value))
+                      }
                       className="w-full h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-amber-600"
                     />
                   </div>
@@ -2252,7 +2932,7 @@ export const Labels = () => {
                         onChange={(e) => setShowIngredients(e.target.checked)}
                         className="w-3.5 h-3.5 accent-primary rounded border-border"
                       />
-                      <span>顯示內容物成分</span>
+                      <span>{t("erp_616")}</span>
                     </label>
                     {showIngredients && (
                       <div className="space-y-1">
@@ -2261,48 +2941,75 @@ export const Labels = () => {
                           className="w-full px-3 py-1.5 bg-slate-50 border border-border rounded-xl font-bold text-xs leading-relaxed"
                           value={ingredientsText}
                           onChange={(e) => setIngredientsText(e.target.value)}
-                          placeholder="例如：{水}、{小麥麵粉}、{蘭花莫札瑞拉起司, name: '起司'}..."
+                          placeholder={t("erp_617")}
                         />
                         <div className="text-[9.5px] text-gray-500 font-bold leading-normal bg-amber-50/60 border border-amber-100/60 p-2.5 rounded-xl space-y-1">
                           <div>
-                            💡 <b>動態引用食材庫</b>：在成分中輸入 <code>{"{食材名稱}"}</code>（例如：<code>{"{蘭花莫札瑞拉起司}"}</code>），即可在下方自動解析出勾選框，控制是否在標籤上「展開」顯示其詳細內容物。
+                            💡 <b>{t("erp_618")}</b>
+                            {t("erp_619")}
+                            <code>{t("erp_620")}</code>
+                            {t("erp_621")}
+                            <code>{t("erp_622")}</code>
+                            {t("erp_623")}
                           </div>
                           <div>
-                            ✍️ <b>自訂顯示名稱</b>：若要在標籤上以簡稱呈現，可輸入 <code>{"{食材名稱, name: \"自訂名稱\"}"}</code>（例如：<code>{"{蘭花莫札瑞拉起司, name: \"起司\"}"}</code>）。
+                            ✍️ <b>{t("erp_624")}</b>
+                            {t("erp_625")}
+                            <code>{t("erp_626")}</code>
+                            {t("erp_621")}
+                            <code>{t("erp_627")}</code>）。
                           </div>
                         </div>
                       </div>
                     )}
-                    {showIngredients && parseIngredientReferences(ingredientsText).length > 0 && (
-                      <div className="mt-3 space-y-2 bg-slate-50 p-3 border border-border rounded-xl animate-in fade-in duration-150 text-left">
-                        <span className="text-[10px] font-black text-gray-500 block mb-1.5">🔗 食材內容物展開選項</span>
-                        {parseIngredientReferences(ingredientsText).map((ref, idx) => {
-                          const comps = getIngredientComponents(ref.ingredientName);
-                          const isExpanded = !!expandedIngredients[ref.raw];
-                          
-                          return (
-                            <label key={idx} className="flex items-center gap-2 cursor-pointer select-none">
-                              <input
-                                type="checkbox"
-                                checked={isExpanded}
-                                disabled={!comps}
-                                onChange={(e) => {
-                                  setExpandedIngredients(prev => ({
-                                    ...prev,
-                                    [ref.raw]: e.target.checked
-                                  }));
-                                }}
-                                className="w-3.5 h-3.5 accent-primary rounded border-border cursor-pointer disabled:opacity-50"
-                              />
-                              <span className={cn("text-[10.5px] font-bold text-gray-700", !comps && "text-gray-400")}>
-                                展開 {ref.customName ? `${ref.ingredientName} (${ref.customName})` : ref.ingredientName}
-                                {comps ? ` [${comps}]` : " (尚未設定內容物)"}
-                              </span>
-                            </label>
-                          );
-                        })}
-                      </div>
-                    )}
+                    {showIngredients &&
+                      parseIngredientReferences(ingredientsText).length > 0 && (
+                        <div className="mt-3 space-y-2 bg-slate-50 p-3 border border-border rounded-xl animate-in fade-in duration-150 text-left">
+                          <span className="text-[10px] font-black text-gray-500 block mb-1.5">
+                            {t("erp_628")}
+                          </span>
+                          {parseIngredientReferences(ingredientsText).map(
+                            (ref, idx) => {
+                              const { t } = useTranslation();
+                              const comps = getIngredientComponents(
+                                ref.ingredientName,
+                              );
+                              const isExpanded = !!expandedIngredients[ref.raw];
+                              return (
+                                <label
+                                  key={idx}
+                                  className="flex items-center gap-2 cursor-pointer select-none"
+                                >
+                                  <input
+                                    type="checkbox"
+                                    checked={isExpanded}
+                                    disabled={!comps}
+                                    onChange={(e) => {
+                                      setExpandedIngredients((prev) => ({
+                                        ...prev,
+                                        [ref.raw]: e.target.checked,
+                                      }));
+                                    }}
+                                    className="w-3.5 h-3.5 accent-primary rounded border-border cursor-pointer disabled:opacity-50"
+                                  />
+                                  <span
+                                    className={cn(
+                                      "text-[10.5px] font-bold text-gray-700",
+                                      !comps && "text-gray-400",
+                                    )}
+                                  >
+                                    {t("erp_629")}
+                                    {ref.customName
+                                      ? `${ref.ingredientName} (${ref.customName})`
+                                      : ref.ingredientName}
+                                    {comps ? ` [${comps}]` : i18n.t("erp_630")}
+                                  </span>
+                                </label>
+                              );
+                            },
+                          )}
+                        </div>
+                      )}
                   </div>
 
                   {/* Non-ready-to-eat Warning Toggle & Input */}
@@ -2314,7 +3021,7 @@ export const Labels = () => {
                         onChange={(e) => setShowNotReadyToEat(e.target.checked)}
                         className="w-3.5 h-3.5 accent-amber-600 rounded border-amber-200"
                       />
-                      <span>啟用「非供即食」警告標籤</span>
+                      <span>{t("erp_631")}</span>
                     </label>
                     {showNotReadyToEat && (
                       <input
@@ -2335,7 +3042,7 @@ export const Labels = () => {
                         onChange={(e) => setShowAllergens(e.target.checked)}
                         className="w-3.5 h-3.5 accent-rose-600 rounded border-rose-200"
                       />
-                      <span>顯示過敏原防呆聲明</span>
+                      <span>{t("erp_632")}</span>
                     </label>
                     {showAllergens && (
                       <textarea
@@ -2351,30 +3058,49 @@ export const Labels = () => {
             </div>
 
             {/* GROUP C: 商品規格與保存條件 */}
-            <div className={cn("border rounded-2xl overflow-hidden bg-white shadow-sm transition-all", activeAccordion === 'C' ? "border-primary/40 ring-1 ring-primary/10" : "border-border")}>
+            <div
+              className={cn(
+                "border rounded-2xl overflow-hidden bg-white shadow-sm transition-all",
+                activeAccordion === "C"
+                  ? "border-primary/40 ring-1 ring-primary/10"
+                  : "border-border",
+              )}
+            >
               <button
                 type="button"
-                onClick={() => setActiveAccordion(activeAccordion === 'C' ? null : 'C')}
+                onClick={() =>
+                  setActiveAccordion(activeAccordion === "C" ? null : "C")
+                }
                 className="w-full px-4 py-3 flex items-center justify-between bg-slate-50 hover:bg-slate-100/80 transition-colors cursor-pointer"
               >
                 <div className="flex items-center gap-2">
-                  <span className="w-5 h-5 bg-emerald-500 text-white rounded-lg flex items-center justify-center font-bold text-xs">C</span>
+                  <span className="w-5 h-5 bg-emerald-500 text-white rounded-lg flex items-center justify-center font-bold text-xs">
+                    C
+                  </span>
                   <div className="text-left">
-                    <span className="text-[11px] font-black text-gray-800 block">商品規格與保存條件</span>
-                    <span className="text-[9px] text-muted-foreground font-semibold">淨重、冷凍保存、有效日期與保存期限、產地</span>
+                    <span className="text-[11px] font-black text-gray-800 block">
+                      {t("erp_633")}
+                    </span>
+                    <span className="text-[9px] text-muted-foreground font-semibold">
+                      {t("erp_634")}
+                    </span>
                   </div>
                 </div>
-                {activeAccordion === 'C' ? <ChevronUp className="w-4 h-4 text-gray-500" /> : <ChevronDown className="w-4 h-4 text-gray-500" />}
+                {activeAccordion === "C" ? (
+                  <ChevronUp className="w-4 h-4 text-gray-500" />
+                ) : (
+                  <ChevronDown className="w-4 h-4 text-gray-500" />
+                )}
               </button>
-              
-              {activeAccordion === 'C' && (
+
+              {activeAccordion === "C" && (
                 <div className="p-4 border-t border-border space-y-4 animate-in fade-in duration-200">
                   {/* Font Scale Slider */}
                   <div className="bg-slate-50 border border-slate-200/60 p-3 rounded-2xl space-y-1.5 shrink-0">
                     <div className="flex items-center justify-between">
                       <span className="text-[10px] font-black text-gray-700 flex items-center gap-1">
                         <Sliders className="w-3.5 h-3.5 text-emerald-600" />
-                        字體縮放比例
+                        {t("erp_577")}
                       </span>
                       <span className="text-[10px] font-bold text-emerald-600 font-mono bg-emerald-50 px-1.5 py-0.5 rounded-md">
                         {Math.round(groupFontScales.C * 100)}%
@@ -2386,7 +3112,9 @@ export const Labels = () => {
                       max="2.0"
                       step="0.05"
                       value={groupFontScales.C}
-                      onChange={(e) => updateGroupFontScale('C', parseFloat(e.target.value))}
+                      onChange={(e) =>
+                        updateGroupFontScale("C", parseFloat(e.target.value))
+                      }
                       className="w-full h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-emerald-600"
                     />
                   </div>
@@ -2400,7 +3128,7 @@ export const Labels = () => {
                           onChange={(e) => setShowNetWeight(e.target.checked)}
                           className="w-3.5 h-3.5 accent-primary rounded border-border"
                         />
-                        <span>商品淨重</span>
+                        <span>{t("erp_635")}</span>
                       </label>
                       {showNetWeight && (
                         <input
@@ -2420,7 +3148,7 @@ export const Labels = () => {
                           onChange={(e) => setShowOrigin(e.target.checked)}
                           className="w-3.5 h-3.5 accent-primary rounded border-border"
                         />
-                        <span>原產地</span>
+                        <span>{t("erp_636")}</span>
                       </label>
                       {showOrigin && (
                         <input
@@ -2435,8 +3163,10 @@ export const Labels = () => {
 
                   {/* Merged Preservation & Expiry Conditions setup card */}
                   <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 space-y-4">
-                    <span className="text-[10px] font-black text-slate-700 uppercase tracking-wider block border-b border-slate-200 pb-1.5">📅 保存條件與日期標示設定群組</span>
-                    
+                    <span className="text-[10px] font-black text-slate-700 uppercase tracking-wider block border-b border-slate-200 pb-1.5">
+                      {t("erp_637")}
+                    </span>
+
                     {/* Storage Condition */}
                     <div className="space-y-1.5">
                       <label className="flex items-center gap-1.5 cursor-pointer font-black text-[9.5px] text-gray-600">
@@ -2446,7 +3176,7 @@ export const Labels = () => {
                           onChange={(e) => setShowStorage(e.target.checked)}
                           className="w-3.5 h-3.5 accent-primary rounded border-border"
                         />
-                        <span>啟用冷凍保存條件</span>
+                        <span>{t("erp_638")}</span>
                       </label>
                       {showStorage && (
                         <input
@@ -2467,40 +3197,48 @@ export const Labels = () => {
                           onChange={(e) => setShowExpiry(e.target.checked)}
                           className="w-3.5 h-3.5 accent-primary rounded border-border"
                         />
-                        <span>啟用保存期限與日期</span>
+                        <span>{t("erp_639")}</span>
                       </label>
 
                       {showExpiry && (
                         <div className="space-y-3.5 p-3 bg-white border border-slate-100 rounded-xl animate-in fade-in duration-150">
                           <div className="flex items-center justify-between">
-                            <span className="text-[9.5px] font-bold text-gray-500">有效日期標記法</span>
+                            <span className="text-[9.5px] font-bold text-gray-500">
+                              {t("erp_640")}
+                            </span>
                             <div className="flex gap-1.5">
                               <button
                                 type="button"
-                                onClick={() => setExpiryOption('printed')}
+                                onClick={() => setExpiryOption("printed")}
                                 className={cn(
                                   "px-2 py-0.5 rounded text-[8.5px] font-black tracking-wide cursor-pointer",
-                                  expiryOption === 'printed' ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+                                  expiryOption === "printed"
+                                    ? "bg-slate-900 text-white"
+                                    : "bg-slate-100 text-slate-500 hover:bg-slate-200",
                                 )}
                               >
-                                標示於封口
+                                {t("erp_641")}
                               </button>
                               <button
                                 type="button"
-                                onClick={() => setExpiryOption('date')}
+                                onClick={() => setExpiryOption("date")}
                                 className={cn(
                                   "px-2 py-0.5 rounded text-[8.5px] font-black tracking-wide cursor-pointer",
-                                  expiryOption === 'date' ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+                                  expiryOption === "date"
+                                    ? "bg-slate-900 text-white"
+                                    : "bg-slate-100 text-slate-500 hover:bg-slate-200",
                                 )}
                               >
-                                指定列印日
+                                {t("erp_642")}
                               </button>
                             </div>
                           </div>
 
-                          {expiryOption === 'date' ? (
+                          {expiryOption === "date" ? (
                             <div className="space-y-1 animate-in fade-in duration-150">
-                              <label className="text-[8.5px] font-bold text-gray-500">有效日期 (YYYY/MM/DD)</label>
+                              <label className="text-[8.5px] font-bold text-gray-500">
+                                {t("erp_643")}
+                              </label>
                               <input
                                 type="text"
                                 className="w-full px-2.5 py-1 bg-slate-50 border border-border rounded-lg font-mono font-bold text-xs"
@@ -2510,12 +3248,14 @@ export const Labels = () => {
                             </div>
                           ) : (
                             <p className="text-[8.5px] text-muted-foreground font-semibold leading-relaxed">
-                              ※ 標籤有效日期欄將自動呈現「標示於封口處」供生產包裝時壓印。
+                              {t("erp_644")}
                             </p>
                           )}
 
                           <div className="space-y-1 pt-1 border-t border-slate-100">
-                            <label className="text-[8.5px] font-bold text-gray-500">保存期限</label>
+                            <label className="text-[8.5px] font-bold text-gray-500">
+                              {t("erp_645")}
+                            </label>
                             <input
                               type="text"
                               className="w-full px-2.5 py-1 bg-slate-50 border border-border rounded-lg font-bold text-xs"
@@ -2532,30 +3272,49 @@ export const Labels = () => {
             </div>
 
             {/* GROUP D: 廠商資訊 */}
-            <div className={cn("border rounded-2xl overflow-hidden bg-white shadow-sm transition-all", activeAccordion === 'D' ? "border-primary/40 ring-1 ring-primary/10" : "border-border")}>
+            <div
+              className={cn(
+                "border rounded-2xl overflow-hidden bg-white shadow-sm transition-all",
+                activeAccordion === "D"
+                  ? "border-primary/40 ring-1 ring-primary/10"
+                  : "border-border",
+              )}
+            >
               <button
                 type="button"
-                onClick={() => setActiveAccordion(activeAccordion === 'D' ? null : 'D')}
+                onClick={() =>
+                  setActiveAccordion(activeAccordion === "D" ? null : "D")
+                }
                 className="w-full px-4 py-3 flex items-center justify-between bg-slate-50 hover:bg-slate-100/80 transition-colors cursor-pointer"
               >
                 <div className="flex items-center gap-2">
-                  <span className="w-5 h-5 bg-sky-500 text-white rounded-lg flex items-center justify-center font-bold text-xs">D</span>
+                  <span className="w-5 h-5 bg-sky-500 text-white rounded-lg flex items-center justify-center font-bold text-xs">
+                    D
+                  </span>
                   <div className="text-left">
-                    <span className="text-[11px] font-black text-gray-800 block">廠商資訊</span>
-                    <span className="text-[9px] text-muted-foreground font-semibold">負責商、電話、地址、製造商細項開關</span>
+                    <span className="text-[11px] font-black text-gray-800 block">
+                      {t("erp_646")}
+                    </span>
+                    <span className="text-[9px] text-muted-foreground font-semibold">
+                      {t("erp_647")}
+                    </span>
                   </div>
                 </div>
-                {activeAccordion === 'D' ? <ChevronUp className="w-4 h-4 text-gray-500" /> : <ChevronDown className="w-4 h-4 text-gray-500" />}
+                {activeAccordion === "D" ? (
+                  <ChevronUp className="w-4 h-4 text-gray-500" />
+                ) : (
+                  <ChevronDown className="w-4 h-4 text-gray-500" />
+                )}
               </button>
-              
-              {activeAccordion === 'D' && (
+
+              {activeAccordion === "D" && (
                 <div className="p-4 border-t border-border space-y-4 animate-in fade-in duration-200">
                   {/* Font Scale Slider */}
                   <div className="bg-slate-50 border border-slate-200/60 p-3 rounded-2xl space-y-1.5 shrink-0">
                     <div className="flex items-center justify-between">
                       <span className="text-[10px] font-black text-gray-700 flex items-center gap-1">
                         <Sliders className="w-3.5 h-3.5 text-sky-600" />
-                        字體縮放比例
+                        {t("erp_577")}
                       </span>
                       <span className="text-[10px] font-bold text-sky-600 font-mono bg-sky-50 px-1.5 py-0.5 rounded-md">
                         {Math.round(groupFontScales.D * 100)}%
@@ -2567,7 +3326,9 @@ export const Labels = () => {
                       max="2.0"
                       step="0.05"
                       value={groupFontScales.D}
-                      onChange={(e) => updateGroupFontScale('D', parseFloat(e.target.value))}
+                      onChange={(e) =>
+                        updateGroupFontScale("D", parseFloat(e.target.value))
+                      }
                       className="w-full h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-sky-600"
                     />
                   </div>
@@ -2579,14 +3340,16 @@ export const Labels = () => {
                         onChange={(e) => setShowResponsible(e.target.checked)}
                         className="w-3.5 h-3.5 accent-primary rounded border-border"
                       />
-                      <span>啟用廠商資訊板塊</span>
+                      <span>{t("erp_648")}</span>
                     </label>
                   </div>
 
                   {showResponsible && (
                     <div className="space-y-3.5 animate-in fade-in duration-150">
                       <div className="space-y-1">
-                        <label className="text-[9.5px] font-bold text-gray-600">負責廠商名稱</label>
+                        <label className="text-[9.5px] font-bold text-gray-600">
+                          {t("erp_649")}
+                        </label>
                         <input
                           type="text"
                           className="w-full px-3 py-1.5 bg-slate-50 border border-border rounded-xl font-bold text-xs"
@@ -2597,7 +3360,9 @@ export const Labels = () => {
 
                       <div className="grid grid-cols-2 gap-3">
                         <div className="space-y-1">
-                          <label className="text-[9.5px] font-bold text-gray-600">聯絡電話</label>
+                          <label className="text-[9.5px] font-bold text-gray-600">
+                            {t("erp_262")}
+                          </label>
                           <input
                             type="text"
                             className="w-full px-3 py-1.5 bg-slate-50 border border-border rounded-xl font-bold text-xs"
@@ -2608,7 +3373,9 @@ export const Labels = () => {
                       </div>
 
                       <div className="space-y-1">
-                        <label className="text-[9.5px] font-bold text-gray-600">負責廠商地址</label>
+                        <label className="text-[9.5px] font-bold text-gray-600">
+                          {t("erp_650")}
+                        </label>
                         <input
                           type="text"
                           className="w-full px-3 py-1.5 bg-slate-50 border border-border rounded-xl font-bold text-xs"
@@ -2618,22 +3385,45 @@ export const Labels = () => {
                       </div>
 
                       <div className="bg-slate-50/60 p-3 border border-slate-200/50 rounded-2xl space-y-2">
-                        <span className="text-[9px] font-black text-slate-500 uppercase tracking-wider block mb-1">🏢 廠商資訊顯示細項設定</span>
+                        <span className="text-[9px] font-black text-slate-500 uppercase tracking-wider block mb-1">
+                          {t("erp_651")}
+                        </span>
                         <div className="grid grid-cols-2 gap-x-3 gap-y-2">
                           {[
-                            { state: showAddress, setter: setShowAddress, label: '顯示地址' },
-                            { state: showPhone, setter: setShowPhone, label: '顯示電話' },
-                            { state: showOrigin, setter: setShowOrigin, label: '顯示產地' },
-                            { state: showManufacturer, setter: setShowManufacturer, label: '顯示製造商' },
+                            {
+                              state: showAddress,
+                              setter: setShowAddress,
+                              label: t("erp_652"),
+                            },
+                            {
+                              state: showPhone,
+                              setter: setShowPhone,
+                              label: t("erp_653"),
+                            },
+                            {
+                              state: showOrigin,
+                              setter: setShowOrigin,
+                              label: t("erp_654"),
+                            },
+                            {
+                              state: showManufacturer,
+                              setter: setShowManufacturer,
+                              label: t("erp_655"),
+                            },
                           ].map((sub, idx) => (
-                            <label key={idx} className="flex items-center gap-1.5 cursor-pointer select-none">
+                            <label
+                              key={idx}
+                              className="flex items-center gap-1.5 cursor-pointer select-none"
+                            >
                               <input
                                 type="checkbox"
                                 checked={sub.state}
                                 onChange={(e) => sub.setter(e.target.checked)}
                                 className="w-3.5 h-3.5 accent-primary rounded border-border focus:ring-primary/20 cursor-pointer"
                               />
-                              <span className="text-[10.5px] font-bold text-gray-700">{sub.label}</span>
+                              <span className="text-[10.5px] font-bold text-gray-700">
+                                {sub.label}
+                              </span>
                             </label>
                           ))}
                         </div>
@@ -2650,12 +3440,14 @@ export const Labels = () => {
                         onChange={(e) => setShowBarcode(e.target.checked)}
                         className="w-3.5 h-3.5 accent-primary rounded border-border"
                       />
-                      <span>顯示烹調說明/條碼 QR Code</span>
+                      <span>{t("erp_656")}</span>
                     </label>
                     {showBarcode && (
                       <div className="space-y-3 animate-in fade-in duration-150">
                         <div className="space-y-1">
-                          <span className="text-[8.5px] font-bold text-gray-500 block">條碼連結 URL 網址</span>
+                          <span className="text-[8.5px] font-bold text-gray-500 block">
+                            {t("erp_657")}
+                          </span>
                           <input
                             type="text"
                             className="w-full px-3 py-1.5 bg-slate-50 border border-border rounded-xl font-bold text-xs font-mono"
@@ -2664,13 +3456,17 @@ export const Labels = () => {
                           />
                         </div>
                         <div className="space-y-1">
-                          <span className="text-[8.5px] font-bold text-gray-500 block">條碼旁說明文字 (支援多行)</span>
+                          <span className="text-[8.5px] font-bold text-gray-500 block">
+                            {t("erp_658")}
+                          </span>
                           <textarea
                             className="w-full px-3 py-1.5 bg-slate-50 border border-border rounded-xl font-bold text-xs resize-none font-sans"
                             rows={2}
-                            placeholder={"掃碼查看\n復熱教學影片"}
+                            placeholder={t("erp_444")}
                             value={barcodeExplanation}
-                            onChange={(e) => setBarcodeExplanation(e.target.value)}
+                            onChange={(e) =>
+                              setBarcodeExplanation(e.target.value)
+                            }
                           />
                         </div>
                       </div>
@@ -2681,30 +3477,49 @@ export const Labels = () => {
             </div>
 
             {/* GROUP E: 營養標示 */}
-            <div className={cn("border rounded-2xl overflow-hidden bg-white shadow-sm transition-all", activeAccordion === 'E' ? "border-primary/40 ring-1 ring-primary/10" : "border-border")}>
+            <div
+              className={cn(
+                "border rounded-2xl overflow-hidden bg-white shadow-sm transition-all",
+                activeAccordion === "E"
+                  ? "border-primary/40 ring-1 ring-primary/10"
+                  : "border-border",
+              )}
+            >
               <button
                 type="button"
-                onClick={() => setActiveAccordion(activeAccordion === 'E' ? null : 'E')}
+                onClick={() =>
+                  setActiveAccordion(activeAccordion === "E" ? null : "E")
+                }
                 className="w-full px-4 py-3 flex items-center justify-between bg-slate-50 hover:bg-slate-100/80 transition-colors cursor-pointer"
               >
                 <div className="flex items-center gap-2">
-                  <span className="w-5 h-5 bg-purple-500 text-white rounded-lg flex items-center justify-center font-bold text-xs">E</span>
+                  <span className="w-5 h-5 bg-purple-500 text-white rounded-lg flex items-center justify-center font-bold text-xs">
+                    E
+                  </span>
                   <div className="text-left">
-                    <span className="text-[11px] font-black text-gray-800 block">營養標示</span>
-                    <span className="text-[9px] text-muted-foreground font-semibold">標準八大營養素、每一份量與顆數精度、字數限寬</span>
+                    <span className="text-[11px] font-black text-gray-800 block">
+                      {t("erp_97")}
+                    </span>
+                    <span className="text-[9px] text-muted-foreground font-semibold">
+                      {t("erp_659")}
+                    </span>
                   </div>
                 </div>
-                {activeAccordion === 'E' ? <ChevronUp className="w-4 h-4 text-gray-500" /> : <ChevronDown className="w-4 h-4 text-gray-500" />}
+                {activeAccordion === "E" ? (
+                  <ChevronUp className="w-4 h-4 text-gray-500" />
+                ) : (
+                  <ChevronDown className="w-4 h-4 text-gray-500" />
+                )}
               </button>
-              
-              {activeAccordion === 'E' && (
+
+              {activeAccordion === "E" && (
                 <div className="p-4 border-t border-border space-y-4 animate-in fade-in duration-200">
                   {/* Font Scale Slider */}
                   <div className="bg-slate-50 border border-slate-200/60 p-3 rounded-2xl space-y-1.5 shrink-0">
                     <div className="flex items-center justify-between">
                       <span className="text-[10px] font-black text-gray-700 flex items-center gap-1">
                         <Sliders className="w-3.5 h-3.5 text-purple-600" />
-                        字體縮放比例
+                        {t("erp_577")}
                       </span>
                       <span className="text-[10px] font-bold text-purple-600 font-mono bg-purple-50 px-1.5 py-0.5 rounded-md">
                         {Math.round(groupFontScales.E * 100)}%
@@ -2716,7 +3531,9 @@ export const Labels = () => {
                       max="2.0"
                       step="0.05"
                       value={groupFontScales.E}
-                      onChange={(e) => updateGroupFontScale('E', parseFloat(e.target.value))}
+                      onChange={(e) =>
+                        updateGroupFontScale("E", parseFloat(e.target.value))
+                      }
                       className="w-full h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-purple-600"
                     />
                   </div>
@@ -2728,7 +3545,7 @@ export const Labels = () => {
                         onChange={(e) => setShowNutrition(e.target.checked)}
                         className="w-3.5 h-3.5 accent-primary rounded border-border"
                       />
-                      <span>啟用標準八大營養標示</span>
+                      <span>{t("erp_660")}</span>
                     </label>
                   </div>
 
@@ -2737,7 +3554,9 @@ export const Labels = () => {
                       {/* Servings Info */}
                       <div className="grid grid-cols-2 gap-3 bg-slate-50 p-3 border border-slate-200/50 rounded-2xl">
                         <div className="space-y-1">
-                          <span className="text-[9px] font-bold text-gray-500">每一份量 (g/公克)</span>
+                          <span className="text-[9px] font-bold text-gray-500">
+                            {t("erp_661")}
+                          </span>
                           <input
                             type="number"
                             className="w-full px-2.5 py-1.5 bg-white border border-border rounded-xl font-mono text-xs text-right font-bold"
@@ -2746,7 +3565,9 @@ export const Labels = () => {
                           />
                         </div>
                         <div className="space-y-1">
-                          <span className="text-[9px] font-bold text-gray-500">本包裝含 (份/包)</span>
+                          <span className="text-[9px] font-bold text-gray-500">
+                            {t("erp_662")}
+                          </span>
                           <input
                             type="number"
                             step="any"
@@ -2759,21 +3580,70 @@ export const Labels = () => {
 
                       {/* Granular decimals and length selectors */}
                       <div className="space-y-2">
-                        <span className="text-[9.5px] font-black text-slate-500 uppercase tracking-wider block">📊 八大營養小數精度與字數防溢出設定</span>
+                        <span className="text-[9.5px] font-black text-slate-500 uppercase tracking-wider block">
+                          {t("erp_663")}
+                        </span>
                         <div className="space-y-2 max-h-[220px] overflow-y-auto pr-1">
                           {[
-                            { key: 'calories', label: '熱量 (kcal)', val: calories, setter: setCalories },
-                            { key: 'protein', label: '蛋白質 (g)', val: protein, setter: setProtein },
-                            { key: 'fat', label: '脂肪 (g)', val: fat, setter: setFat },
-                            { key: 'saturatedFat', label: '飽和脂肪 (g)', val: saturatedFat, setter: setSaturatedFat },
-                            { key: 'transFat', label: '反式脂肪 (g)', val: transFat, setter: setTransFat },
-                            { key: 'carbs', label: '碳水化合物 (g)', val: carbs, setter: setCarbs },
-                            { key: 'sugar', label: '糖 (g)', val: sugar, setter: setSugar },
-                            { key: 'sodium', label: '鈉 (mg)', val: sodium, setter: setSodium }
+                            {
+                              key: "calories",
+                              label: t("erp_664"),
+                              val: calories,
+                              setter: setCalories,
+                            },
+                            {
+                              key: "protein",
+                              label: t("erp_665"),
+                              val: protein,
+                              setter: setProtein,
+                            },
+                            {
+                              key: "fat",
+                              label: t("erp_666"),
+                              val: fat,
+                              setter: setFat,
+                            },
+                            {
+                              key: "saturatedFat",
+                              label: t("erp_667"),
+                              val: saturatedFat,
+                              setter: setSaturatedFat,
+                            },
+                            {
+                              key: "transFat",
+                              label: t("erp_668"),
+                              val: transFat,
+                              setter: setTransFat,
+                            },
+                            {
+                              key: "carbs",
+                              label: t("erp_669"),
+                              val: carbs,
+                              setter: setCarbs,
+                            },
+                            {
+                              key: "sugar",
+                              label: t("erp_670"),
+                              val: sugar,
+                              setter: setSugar,
+                            },
+                            {
+                              key: "sodium",
+                              label: t("erp_671"),
+                              val: sodium,
+                              setter: setSodium,
+                            },
                           ].map((nut) => {
-                            const cfg = nutritionConfigs[nut.key] || { decimals: 1, maxLength: 8 };
+                            const { t } = useTranslation();
+                            const cfg = nutritionConfigs[nut.key] || {
+                              decimals: 1,
+                              maxLength: 8,
+                            };
                             return (
-                              <div key={nut.key} className="p-2 bg-slate-50/50 border border-slate-200/50 rounded-xl space-y-1">
+                              <div
+                                key={nut.key}
+                                className="p-2 bg-slate-50/50 border border-slate-200/50 rounded-xl space-y-1"
+                              >
                                 <div className="flex justify-between items-center text-[9px] font-bold text-gray-700">
                                   <span>{nut.label}</span>
                                 </div>
@@ -2783,31 +3653,44 @@ export const Labels = () => {
                                       type="number"
                                       className="w-full px-2 py-1 bg-white border border-border rounded-lg font-mono text-[10.5px] text-right font-bold"
                                       value={nut.val}
-                                      onChange={(e) => nut.setter(e.target.value)}
+                                      onChange={(e) =>
+                                        nut.setter(e.target.value)
+                                      }
                                     />
                                   </div>
                                   <div className="col-span-4">
                                     <select
                                       className="w-full px-1 py-1 bg-white border border-border rounded-lg text-[9px] font-bold text-gray-700 outline-none"
                                       value={cfg.decimals}
-                                      onChange={(e) => updateNutritionConfig(nut.key, { decimals: parseInt(e.target.value) })}
+                                      onChange={(e) =>
+                                        updateNutritionConfig(nut.key, {
+                                          decimals: parseInt(e.target.value),
+                                        })
+                                      }
                                     >
-                                      <option value="-1">四捨五入</option>
-                                      <option value="0">0位小數</option>
-                                      <option value="1">1位小數</option>
-                                      <option value="2">2位小數</option>
-                                      <option value="3">3位小數</option>
+                                      <option value="-1">{t("erp_672")}</option>
+                                      <option value="0">{t("erp_673")}</option>
+                                      <option value="1">{t("erp_674")}</option>
+                                      <option value="2">{t("erp_675")}</option>
+                                      <option value="3">{t("erp_676")}</option>
                                     </select>
                                   </div>
                                   <div className="col-span-3 flex items-center gap-0.5">
-                                    <span className="text-[7.5px] text-slate-400 font-bold">限寬:</span>
+                                    <span className="text-[7.5px] text-slate-400 font-bold">
+                                      {t("erp_677")}
+                                    </span>
                                     <input
                                       type="number"
                                       min="1"
                                       max="20"
                                       className="w-full px-1 py-0.5 bg-white border border-border rounded text-[9px] font-mono text-center font-bold text-gray-700"
                                       value={cfg.maxLength}
-                                      onChange={(e) => updateNutritionConfig(nut.key, { maxLength: parseInt(e.target.value) || 8 })}
+                                      onChange={(e) =>
+                                        updateNutritionConfig(nut.key, {
+                                          maxLength:
+                                            parseInt(e.target.value) || 8,
+                                        })
+                                      }
                                     />
                                   </div>
                                 </div>
@@ -2823,23 +3706,42 @@ export const Labels = () => {
             </div>
 
             {/* GROUP L: 自訂分隔線段 */}
-            <div className={cn("border rounded-2xl overflow-hidden bg-white shadow-sm transition-all", activeAccordion === 'L' ? "border-primary/40 ring-1 ring-primary/10" : "border-border")}>
+            <div
+              className={cn(
+                "border rounded-2xl overflow-hidden bg-white shadow-sm transition-all",
+                activeAccordion === "L"
+                  ? "border-primary/40 ring-1 ring-primary/10"
+                  : "border-border",
+              )}
+            >
               <button
                 type="button"
-                onClick={() => setActiveAccordion(activeAccordion === 'L' ? null : 'L')}
+                onClick={() =>
+                  setActiveAccordion(activeAccordion === "L" ? null : "L")
+                }
                 className="w-full px-4 py-3 flex items-center justify-between bg-slate-50 hover:bg-slate-100/80 transition-colors cursor-pointer"
               >
                 <div className="flex items-center gap-2">
-                  <span className="w-5 h-5 bg-indigo-500 text-white rounded-lg flex items-center justify-center font-bold text-xs">L</span>
+                  <span className="w-5 h-5 bg-indigo-500 text-white rounded-lg flex items-center justify-center font-bold text-xs">
+                    L
+                  </span>
                   <div className="text-left">
-                    <span className="text-[11px] font-black text-gray-800 block">自訂分隔線段</span>
-                    <span className="text-[9px] text-muted-foreground font-semibold">新增水平線、垂直線，自由調整位置、長度與樣式</span>
+                    <span className="text-[11px] font-black text-gray-800 block">
+                      {t("erp_678")}
+                    </span>
+                    <span className="text-[9px] text-muted-foreground font-semibold">
+                      {t("erp_679")}
+                    </span>
                   </div>
                 </div>
-                {activeAccordion === 'L' ? <ChevronUp className="w-4 h-4 text-gray-500" /> : <ChevronDown className="w-4 h-4 text-gray-500" />}
+                {activeAccordion === "L" ? (
+                  <ChevronUp className="w-4 h-4 text-gray-500" />
+                ) : (
+                  <ChevronDown className="w-4 h-4 text-gray-500" />
+                )}
               </button>
-              
-              {activeAccordion === 'L' && (
+
+              {activeAccordion === "L" && (
                 <div className="p-4 border-t border-border space-y-4 animate-in fade-in duration-200">
                   <div className="flex gap-2">
                     <button
@@ -2848,35 +3750,46 @@ export const Labels = () => {
                       className="flex-1 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-black text-xs shadow-sm transition-all active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer"
                     >
                       <Plus className="w-3.5 h-3.5" />
-                      <span>新增自訂線段</span>
+                      <span>{t("erp_680")}</span>
                     </button>
                     {customLines.length > 0 && (
                       <button
                         type="button"
                         onClick={() => {
-                          if (confirm('確定要清空所有自訂線段嗎？')) {
+                          const { t } = useTranslation();
+                          if (confirm(t("erp_681"))) {
                             setCustomLines([]);
                           }
                         }}
                         className="px-3 py-2 bg-red-50 hover:bg-red-100 border border-red-200 text-red-700 rounded-xl font-bold text-xs transition-all active:scale-95 flex items-center justify-center gap-1 cursor-pointer"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
-                        <span>清空</span>
+                        <span>{t("erp_682")}</span>
                       </button>
                     )}
                   </div>
 
                   {customLines.length === 0 ? (
                     <div className="text-center py-6 border border-dashed border-slate-200 rounded-2xl text-slate-400 font-bold text-xs">
-                      目前無自訂線段。<br />點選上方按鈕新增，或在拖拉排版模式下編輯。
+                      {t("erp_683")}
+                      <br />
+                      {t("erp_684")}
                     </div>
                   ) : (
                     <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
                       {customLines.map((line, index) => (
-                        <div key={line.id} className="p-3 bg-slate-50 border border-slate-200 rounded-2xl space-y-3 relative group/item">
+                        <div
+                          key={line.id}
+                          className="p-3 bg-slate-50 border border-slate-200 rounded-2xl space-y-3 relative group/item"
+                        >
                           <div className="flex items-center justify-between">
                             <span className="text-[10px] font-black text-slate-700 font-sans">
-                              線段 #{index + 1} ({line.type === 'horizontal' ? '水平線' : '垂直線'})
+                              {t("erp_685")}
+                              {index + 1} (
+                              {line.type === "horizontal"
+                                ? i18n.t("erp_686")
+                                : i18n.t("erp_687")}
+                              )
                             </span>
                             <button
                               type="button"
@@ -2890,43 +3803,63 @@ export const Labels = () => {
                           <div className="grid grid-cols-2 gap-2">
                             {/* Direction toggle */}
                             <div className="space-y-1">
-                              <span className="text-[8.5px] font-bold text-gray-500 block">方向</span>
+                              <span className="text-[8.5px] font-bold text-gray-500 block">
+                                {t("erp_688")}
+                              </span>
                               <div className="flex rounded-lg border border-slate-200 overflow-hidden bg-white p-0.5">
                                 <button
                                   type="button"
-                                  onClick={() => handleUpdateLine(line.id, { type: 'horizontal' })}
+                                  onClick={() =>
+                                    handleUpdateLine(line.id, {
+                                      type: "horizontal",
+                                    })
+                                  }
                                   className={cn(
                                     "flex-1 py-1 text-[9px] font-black rounded cursor-pointer",
-                                    line.type === 'horizontal' ? "bg-slate-900 text-white" : "text-slate-600 hover:bg-slate-50"
+                                    line.type === "horizontal"
+                                      ? "bg-slate-900 text-white"
+                                      : "text-slate-600 hover:bg-slate-50",
                                   )}
                                 >
-                                  水平線
+                                  {t("erp_686")}
                                 </button>
                                 <button
                                   type="button"
-                                  onClick={() => handleUpdateLine(line.id, { type: 'vertical' })}
+                                  onClick={() =>
+                                    handleUpdateLine(line.id, {
+                                      type: "vertical",
+                                    })
+                                  }
                                   className={cn(
                                     "flex-1 py-1 text-[9px] font-black rounded cursor-pointer",
-                                    line.type === 'vertical' ? "bg-slate-900 text-white" : "text-slate-600 hover:bg-slate-50"
+                                    line.type === "vertical"
+                                      ? "bg-slate-900 text-white"
+                                      : "text-slate-600 hover:bg-slate-50",
                                   )}
                                 >
-                                  垂直線
+                                  {t("erp_687")}
                                 </button>
                               </div>
                             </div>
 
                             {/* Style dropdown */}
                             <div className="space-y-1">
-                              <span className="text-[8.5px] font-bold text-gray-500 block">線條樣式</span>
+                              <span className="text-[8.5px] font-bold text-gray-500 block">
+                                {t("erp_689")}
+                              </span>
                               <select
                                 className="w-full px-2 py-1 bg-white border border-slate-200 rounded-lg text-[9.5px] font-bold text-slate-700 outline-none"
                                 value={line.style}
-                                onChange={(e) => handleUpdateLine(line.id, { style: e.target.value as any })}
+                                onChange={(e) =>
+                                  handleUpdateLine(line.id, {
+                                    style: e.target.value as any,
+                                  })
+                                }
                               >
-                                <option value="solid">實線 (Solid)</option>
-                                <option value="dashed">虛線 (Dashed)</option>
-                                <option value="dotted">點線 (Dotted)</option>
-                                <option value="double">雙線 (Double)</option>
+                                <option value="solid">{t("erp_690")}</option>
+                                <option value="dashed">{t("erp_691")}</option>
+                                <option value="dotted">{t("erp_692")}</option>
+                                <option value="double">{t("erp_693")}</option>
                               </select>
                             </div>
                           </div>
@@ -2934,14 +3867,20 @@ export const Labels = () => {
                           <div className="grid grid-cols-2 gap-2">
                             {/* Thickness */}
                             <div className="space-y-1">
-                              <span className="text-[8.5px] font-bold text-gray-500 block">粗細</span>
+                              <span className="text-[8.5px] font-bold text-gray-500 block">
+                                {t("erp_694")}
+                              </span>
                               <select
                                 className="w-full px-2 py-1 bg-white border border-slate-200 rounded-lg text-[9.5px] font-bold text-slate-700 outline-none"
                                 value={line.thickness}
-                                onChange={(e) => handleUpdateLine(line.id, { thickness: e.target.value })}
+                                onChange={(e) =>
+                                  handleUpdateLine(line.id, {
+                                    thickness: e.target.value,
+                                  })
+                                }
                               >
                                 <option value="0.5pt">0.5 pt</option>
-                                <option value="1pt">1.0 pt (標準)</option>
+                                <option value="1pt">{t("erp_695")}</option>
                                 <option value="1.5pt">1.5 pt</option>
                                 <option value="2pt">2.0 pt</option>
                                 <option value="3pt">3.0 pt</option>
@@ -2951,8 +3890,12 @@ export const Labels = () => {
                             {/* Length */}
                             <div className="space-y-1">
                               <div className="flex justify-between items-center">
-                                <span className="text-[8.5px] font-bold text-gray-500 block">長度 (%)</span>
-                                <span className="text-[8.5px] font-mono font-bold text-slate-600">{line.length}%</span>
+                                <span className="text-[8.5px] font-bold text-gray-500 block">
+                                  {t("erp_696")}
+                                </span>
+                                <span className="text-[8.5px] font-mono font-bold text-slate-600">
+                                  {line.length}%
+                                </span>
                               </div>
                               <input
                                 type="range"
@@ -2960,7 +3903,11 @@ export const Labels = () => {
                                 max="100"
                                 className="w-full h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
                                 value={line.length}
-                                onChange={(e) => handleUpdateLine(line.id, { length: parseInt(e.target.value) || 50 })}
+                                onChange={(e) =>
+                                  handleUpdateLine(line.id, {
+                                    length: parseInt(e.target.value) || 50,
+                                  })
+                                }
                               />
                             </div>
                           </div>
@@ -2969,8 +3916,12 @@ export const Labels = () => {
                             {/* Position X (Left) */}
                             <div className="space-y-1">
                               <div className="flex justify-between items-center">
-                                <span className="text-[8.5px] font-bold text-gray-500 block">位置 X (%)</span>
-                                <span className="text-[8.5px] font-mono font-bold text-slate-600">{line.left}%</span>
+                                <span className="text-[8.5px] font-bold text-gray-500 block">
+                                  {t("erp_697")}
+                                </span>
+                                <span className="text-[8.5px] font-mono font-bold text-slate-600">
+                                  {line.left}%
+                                </span>
                               </div>
                               <input
                                 type="range"
@@ -2978,15 +3929,23 @@ export const Labels = () => {
                                 max="100"
                                 className="w-full h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
                                 value={line.left}
-                                onChange={(e) => handleUpdateLine(line.id, { left: parseInt(e.target.value) || 0 })}
+                                onChange={(e) =>
+                                  handleUpdateLine(line.id, {
+                                    left: parseInt(e.target.value) || 0,
+                                  })
+                                }
                               />
                             </div>
 
                             {/* Position Y (Top) */}
                             <div className="space-y-1">
                               <div className="flex justify-between items-center">
-                                <span className="text-[8.5px] font-bold text-gray-500 block">位置 Y (%)</span>
-                                <span className="text-[8.5px] font-mono font-bold text-slate-600">{line.top}%</span>
+                                <span className="text-[8.5px] font-bold text-gray-500 block">
+                                  {t("erp_698")}
+                                </span>
+                                <span className="text-[8.5px] font-mono font-bold text-slate-600">
+                                  {line.top}%
+                                </span>
                               </div>
                               <input
                                 type="range"
@@ -2994,7 +3953,11 @@ export const Labels = () => {
                                 max="100"
                                 className="w-full h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
                                 value={line.top}
-                                onChange={(e) => handleUpdateLine(line.id, { top: parseInt(e.target.value) || 0 })}
+                                onChange={(e) =>
+                                  handleUpdateLine(line.id, {
+                                    top: parseInt(e.target.value) || 0,
+                                  })
+                                }
                               />
                             </div>
                           </div>
@@ -3006,68 +3969,92 @@ export const Labels = () => {
               )}
             </div>
           </div>
-        </div>        {/* Right Side: Adaptive thermal label preview */}
+        </div>{" "}
+        {/* Right Side: Adaptive thermal label preview */}
         <div className="lg:col-span-7 flex flex-col items-center justify-start p-8 bg-[#D1D4D9] rounded-3xl min-h-[75vh] relative overflow-hidden border border-border shadow-inner print:bg-transparent print:border-none print:shadow-none print:p-0">
           <div className="absolute top-4 left-6 text-gray-500 font-bold text-[10px] tracking-widest uppercase flex items-center gap-1.5 print:hidden">
             <Sparkles className="w-3.5 h-3.5 text-primary" />
-            1 : 1 向量感熱標籤預覽區 (自適應排版)
+            {t("erp_699")}
           </div>
 
           {/* Sizing Container (for media query print sizing) */}
           {(() => {
+            const { t } = useTranslation();
             const { w: activeWidth, h: activeHeight } = getLabelDimensions();
-            const upperGap = gapAlignment === 'top' ? labelGap : gapAlignment === 'center' ? labelGap / 2 : 0;
-            const lowerGap = gapAlignment === 'bottom' ? labelGap : gapAlignment === 'center' ? labelGap / 2 : 0;
+            const upperGap =
+              gapAlignment === "top"
+                ? labelGap
+                : gapAlignment === "center"
+                  ? labelGap / 2
+                  : 0;
+            const lowerGap =
+              gapAlignment === "bottom"
+                ? labelGap
+                : gapAlignment === "center"
+                  ? labelGap / 2
+                  : 0;
             return (
-              <div className={cn(
-                "w-full flex flex-col items-center justify-start min-h-0 print:overflow-visible print:max-h-none print:py-0 print:pr-0",
-                previewContinuous ? "overflow-y-auto max-h-[62vh] py-8 pr-12 scrollbar-none print:pr-0 print:py-0" : "justify-center py-4"
-              )}>
+              <div
+                className={cn(
+                  "w-full flex flex-col items-center justify-start min-h-0 print:overflow-visible print:max-h-none print:py-0 print:pr-0",
+                  previewContinuous
+                    ? "overflow-y-auto max-h-[62vh] py-8 pr-12 scrollbar-none print:pr-0 print:py-0"
+                    : "justify-center py-4",
+                )}
+              >
                 {/* Simulated Continuous Backing Paper Roll Wrapper */}
-                <div 
+                <div
                   className={cn(
                     "continuous-backing-paper flex flex-col items-center relative transition-all duration-300",
-                    previewContinuous 
-                      ? "shadow-xl border-x-[1.5px] border-dashed border-[#D2C095] pt-[15mm] pb-[15mm] print:shadow-none print:border-none print:pt-0 print:pb-0" 
-                      : "pt-0 pb-0"
+                    previewContinuous
+                      ? "shadow-xl border-x-[1.5px] border-dashed border-[#D2C095] pt-[15mm] pb-[15mm] print:shadow-none print:border-none print:pt-0 print:pb-0"
+                      : "pt-0 pb-0",
                   )}
-                  style={previewContinuous ? {
-                    width: `${activeWidth + 8}mm`,
-                    background: 'linear-gradient(to right, #F3E6C4 0%, #FAF1D7 8%, #FDF7E7 50%, #FAF1D7 92%, #F3E6C4 100%)',
-                  } : {}}
+                  style={
+                    previewContinuous
+                      ? {
+                          width: `${activeWidth + 8}mm`,
+                          background:
+                            "linear-gradient(to right, #F3E6C4 0%, #FAF1D7 8%, #FDF7E7 50%, #FAF1D7 92%, #F3E6C4 100%)",
+                        }
+                      : {}
+                  }
                 >
-                  
                   {/* Dynamic Scale Ruler (Right Side) - Hidden in Print */}
                   {previewContinuous && (
                     <div className="absolute right-[-45px] top-0 bottom-0 w-[40px] flex flex-col items-start justify-center print:hidden text-slate-500 font-mono select-none">
                       {/* Label Height Indicator */}
-                      <div className="absolute flex flex-col items-center justify-center"
-                           style={{ 
-                             top: `${35 + upperGap}mm`, 
-                             height: `${activeHeight}mm`
-                           }}
+                      <div
+                        className="absolute flex flex-col items-center justify-center"
+                        style={{
+                          top: `${35 + upperGap}mm`,
+                          height: `${activeHeight}mm`,
+                        }}
                       >
                         <div className="w-[1px] bg-slate-400 h-full relative flex items-center justify-center">
                           <div className="absolute top-0 w-2 h-[1px] bg-slate-400"></div>
                           <div className="bg-[#D1D4D9] px-1 py-0.5 text-[8px] font-black text-slate-600 rotate-90 whitespace-nowrap shadow-sm border border-slate-300 rounded">
-                            標籤 {activeHeight}mm
+                            {t("erp_700")}
+                            {activeHeight}mm
                           </div>
                           <div className="absolute bottom-0 w-2 h-[1px] bg-slate-400"></div>
                         </div>
                       </div>
-                      
+
                       {/* Upper Label Gap Indicator */}
                       {upperGap > 0 && (
-                        <div className="absolute flex flex-col items-center justify-center animate-in fade-in duration-200"
-                             style={{ 
-                               top: `35mm`, 
-                               height: `${upperGap}mm`
-                             }}
+                        <div
+                          className="absolute flex flex-col items-center justify-center animate-in fade-in duration-200"
+                          style={{
+                            top: `35mm`,
+                            height: `${upperGap}mm`,
+                          }}
                         >
                           <div className="w-[1px] bg-red-400 h-full relative flex items-center justify-center">
                             <div className="absolute top-0 w-2 h-[1px] bg-red-400"></div>
                             <div className="bg-red-50 text-red-600 px-1 py-0.5 text-[7px] font-black absolute left-2 whitespace-nowrap shadow-sm border border-red-200 rounded">
-                              間距 {upperGap.toFixed(1).replace(/\.0$/, '')}mm
+                              {t("erp_701")}
+                              {upperGap.toFixed(1).replace(/\.0$/, "")}mm
                             </div>
                             <div className="absolute bottom-0 w-2 h-[1px] bg-red-400"></div>
                           </div>
@@ -3076,16 +4063,18 @@ export const Labels = () => {
 
                       {/* Lower Label Gap Indicator */}
                       {lowerGap > 0 && (
-                        <div className="absolute flex flex-col items-center justify-center animate-in fade-in duration-200"
-                             style={{ 
-                               top: `${35 + upperGap + activeHeight}mm`, 
-                               height: `${lowerGap}mm`
-                             }}
+                        <div
+                          className="absolute flex flex-col items-center justify-center animate-in fade-in duration-200"
+                          style={{
+                            top: `${35 + upperGap + activeHeight}mm`,
+                            height: `${lowerGap}mm`,
+                          }}
                         >
                           <div className="w-[1px] bg-red-400 h-full relative flex items-center justify-center">
                             <div className="absolute top-0 w-2 h-[1px] bg-red-400"></div>
                             <div className="bg-red-50 text-red-600 px-1 py-0.5 text-[7px] font-black absolute left-2 whitespace-nowrap shadow-sm border border-red-200 rounded">
-                              間距 {lowerGap.toFixed(1).replace(/\.0$/, '')}mm
+                              {t("erp_701")}
+                              {lowerGap.toFixed(1).replace(/\.0$/, "")}mm
                             </div>
                             <div className="absolute bottom-0 w-2 h-[1px] bg-red-400"></div>
                           </div>
@@ -3094,42 +4083,44 @@ export const Labels = () => {
                     </div>
                   )}
 
-
                   {/* 1. Ghost Previous Label at the top */}
                   {previewContinuous && (
-                    <div 
+                    <div
                       className="opacity-[0.12] border-2 border-black border-dashed rounded-none bg-white flex flex-col justify-between p-2 pointer-events-none select-none shrink-0 print:hidden animate-in fade-in duration-300"
                       style={{
                         width: `${activeWidth}mm`,
-                        height: '20mm',
+                        height: "20mm",
                         marginBottom: `${upperGap}mm`,
-                        overflow: 'hidden'
+                        overflow: "hidden",
                       }}
                     >
                       <div className="w-full border-b border-black pb-1 flex justify-between items-center text-[5.5pt]">
                         <span className="font-bold">PREVIOUS LABEL</span>
-                        <span className="font-mono">GAP: {upperGap.toFixed(1).replace(/\.0$/, '')}mm</span>
+                        <span className="font-mono">
+                          GAP: {upperGap.toFixed(1).replace(/\.0$/, "")}mm
+                        </span>
                       </div>
                     </div>
                   )}
 
                   {/* 2. Main Active Label */}
-                  <div 
+                  <div
                     id="printable-label"
                     style={getLabelStyle()}
                     className={cn(
                       "relative shadow-md print:shadow-none shrink-0 transition-shadow rounded-none overflow-hidden select-none",
-                      useCustomLayout && "border-slate-800"
+                      useCustomLayout && "border-slate-800",
                     )}
                   >
                     {/* Dotted Grid Background Overlay for Drag Alignment - Hidden in Print */}
                     {useCustomLayout && (
-                      <div 
-                        className="absolute inset-0 pointer-events-none print:hidden z-0" 
+                      <div
+                        className="absolute inset-0 pointer-events-none print:hidden z-0"
                         style={{
-                          backgroundImage: 'radial-gradient(#6366f1 0.8px, transparent 0.8px)',
-                          backgroundSize: '2% 2%',
-                          opacity: 0.15
+                          backgroundImage:
+                            "radial-gradient(#6366f1 0.8px, transparent 0.8px)",
+                          backgroundSize: "2% 2%",
+                          opacity: 0.15,
                         }}
                       />
                     )}
@@ -3140,15 +4131,29 @@ export const Labels = () => {
                         key={line.id}
                         className={cn(
                           "absolute pointer-events-auto",
-                          useCustomLayout ? "hover:bg-indigo-50/20 group/line" : "pointer-events-none"
+                          useCustomLayout
+                            ? "hover:bg-indigo-50/20 group/line"
+                            : "pointer-events-none",
                         )}
                         style={{
                           left: `${line.left}%`,
                           top: `${line.top}%`,
-                          width: line.type === 'horizontal' ? `${line.length}%` : `${line.thickness}`,
-                          height: line.type === 'vertical' ? `${line.length}%` : `${line.thickness}`,
-                          borderTop: line.type === 'horizontal' ? `${line.thickness} ${line.style} ${line.color}` : 'none',
-                          borderLeft: line.type === 'vertical' ? `${line.thickness} ${line.style} ${line.color}` : 'none',
+                          width:
+                            line.type === "horizontal"
+                              ? `${line.length}%`
+                              : `${line.thickness}`,
+                          height:
+                            line.type === "vertical"
+                              ? `${line.length}%`
+                              : `${line.thickness}`,
+                          borderTop:
+                            line.type === "horizontal"
+                              ? `${line.thickness} ${line.style} ${line.color}`
+                              : "none",
+                          borderLeft:
+                            line.type === "vertical"
+                              ? `${line.thickness} ${line.style} ${line.color}`
+                              : "none",
                           zIndex: 15,
                         }}
                       >
@@ -3157,9 +4162,12 @@ export const Labels = () => {
                           <>
                             {/* Hover info panel & Delete button */}
                             <div className="absolute top-[-16px] left-0 bg-slate-900 text-white font-mono text-[7px] px-1.5 py-0.5 rounded shadow opacity-0 group-hover/line:opacity-100 transition-opacity z-30 print:hidden flex items-center gap-1 select-none whitespace-nowrap">
-                              <span>線段 ({line.type === 'horizontal' ? 'H' : 'V'})</span>
-                              <button 
-                                type="button" 
+                              <span>
+                                {t("erp_702")}
+                                {line.type === "horizontal" ? "H" : "V"})
+                              </span>
+                              <button
+                                type="button"
                                 onClick={() => handleDeleteLine(line.id)}
                                 className="text-red-400 hover:text-red-600 font-bold ml-1 cursor-pointer"
                               >
@@ -3168,21 +4176,25 @@ export const Labels = () => {
                             </div>
                             {/* Drag Trigger Overlay */}
                             <div
-                              onMouseDown={(e) => handleLineDragStart(e, line.id)}
+                              onMouseDown={(e) =>
+                                handleLineDragStart(e, line.id)
+                              }
                               className="absolute inset-0 cursor-move print:hidden z-10 bg-transparent"
                               style={{
-                                padding: '4px',
-                                margin: '-4px'
+                                padding: "4px",
+                                margin: "-4px",
                               }}
                             />
                             {/* Resize Handle (circle anchor) */}
                             <div
-                              onMouseDown={(e) => handleLineResizeStart(e, line.id)}
+                              onMouseDown={(e) =>
+                                handleLineResizeStart(e, line.id)
+                              }
                               className={cn(
                                 "absolute bg-indigo-600 rounded-full w-2.5 h-2.5 border border-white cursor-pointer z-20 print:hidden shadow-sm hover:scale-125 transition-transform",
-                                line.type === 'horizontal' 
-                                  ? "right-0 top-1/2 -translate-y-1/2 translate-x-1/2" 
-                                  : "bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2"
+                                line.type === "horizontal"
+                                  ? "right-0 top-1/2 -translate-y-1/2 translate-x-1/2"
+                                  : "bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2",
                               )}
                             />
                           </>
@@ -3193,11 +4205,30 @@ export const Labels = () => {
                     {/* Drag-and-Resize Active Group Coordinates Overlay Tooltip - Hidden in Print */}
                     {useCustomLayout && (draggingGroup || resizingGroup) && (
                       <div className="absolute top-2 left-2 bg-indigo-900/90 text-white font-mono font-bold text-[7.5px] px-2 py-1 rounded shadow-md z-30 pointer-events-none animate-pulse print:hidden border border-indigo-700">
-                        {draggingGroup ? `DRAGGING [Group ${draggingGroup}]` : `RESIZING [Group ${resizingGroup}]`} : 
-                        L: {groupLayouts[draggingGroup || resizingGroup || 'A'].left}% 
-                        T: {groupLayouts[draggingGroup || resizingGroup || 'A'].top}% 
-                        W: {groupLayouts[draggingGroup || resizingGroup || 'A'].width}% 
-                        H: {groupLayouts[draggingGroup || resizingGroup || 'A'].height}%
+                        {draggingGroup
+                          ? `DRAGGING [Group ${draggingGroup}]`
+                          : `RESIZING [Group ${resizingGroup}]`}{" "}
+                        : L:{" "}
+                        {
+                          groupLayouts[draggingGroup || resizingGroup || "A"]
+                            .left
+                        }
+                        % T:{" "}
+                        {
+                          groupLayouts[draggingGroup || resizingGroup || "A"]
+                            .top
+                        }
+                        % W:{" "}
+                        {
+                          groupLayouts[draggingGroup || resizingGroup || "A"]
+                            .width
+                        }
+                        % H:{" "}
+                        {
+                          groupLayouts[draggingGroup || resizingGroup || "A"]
+                            .height
+                        }
+                        %
                       </div>
                     )}
 
@@ -3205,38 +4236,46 @@ export const Labels = () => {
                     {useCustomLayout ? (
                       // ABSOLUTE POSITION DRAG-AND-RESIZE LAYOUT
                       <div className="w-full h-full relative z-10">
-                        
                         {/* GROUP B: Brand & Product Name */}
-                        <div 
+                        <div
                           className={cn(
                             "absolute flex flex-col justify-start overflow-hidden border border-transparent hover:border-slate-300 transition-colors bg-white/95 rounded p-1 group/item",
-                            draggingGroup === 'B' && "border-indigo-500 bg-indigo-50/10 z-20 shadow-md",
-                            resizingGroup === 'B' && "border-purple-500 bg-purple-50/10 z-20 shadow-md"
+                            draggingGroup === "B" &&
+                              "border-indigo-500 bg-indigo-50/10 z-20 shadow-md",
+                            resizingGroup === "B" &&
+                              "border-purple-500 bg-purple-50/10 z-20 shadow-md",
                           )}
                           style={{
                             left: `${groupLayouts.B.left}%`,
                             top: `${groupLayouts.B.top}%`,
                             width: `${groupLayouts.B.width}%`,
-                            height: `${groupLayouts.B.height}%`
+                            height: `${groupLayouts.B.height}%`,
                           }}
                         >
                           {/* Drag Bar - Hidden in Print */}
-                          <div 
+                          <div
                             onMouseDown={(e) => {
                               e.preventDefault();
-                              setDraggingGroup('B');
-                              setDragStartPos({ x: e.clientX, y: e.clientY });
-                              setDragStartLayout({ ...groupLayouts.B });
+                              setDraggingGroup("B");
+                              setDragStartPos({
+                                x: e.clientX,
+                                y: e.clientY,
+                              });
+                              setDragStartLayout({
+                                ...groupLayouts.B,
+                              });
                             }}
                             className="absolute top-0 left-0 right-0 h-4 bg-slate-100 hover:bg-slate-200 border-b border-slate-200 cursor-move flex items-center justify-between px-1.5 opacity-0 group-hover/item:opacity-100 transition-opacity z-20 print:hidden text-[7.5px] font-black text-slate-600 select-none"
                           >
-                            <span>✛ 品牌與品名 (B)</span>
-                            <span className="font-mono opacity-80">{groupLayouts.B.width}% x {groupLayouts.B.height}%</span>
+                            <span>{t("erp_703")}</span>
+                            <span className="font-mono opacity-80">
+                              {groupLayouts.B.width}% x {groupLayouts.B.height}%
+                            </span>
                           </div>
 
                           {/* Content Container */}
                           <div className="w-full h-full flex items-center justify-between pt-3 pb-1 min-h-0 text-black px-1">
-                            {labelSize !== '70x50' ? (
+                            {labelSize !== "70x50" ? (
                               <>
                                 {/* Left Side: Brand Logo & Names */}
                                 {showBranding && (
@@ -3245,8 +4284,22 @@ export const Labels = () => {
                                       {renderLabelLogo()}
                                     </div>
                                     <div className="flex flex-col text-left min-w-0">
-                                      <span className="font-extrabold tracking-wide leading-none text-black truncate" style={{ fontSize: `${7.5 * groupFontScales.B}pt` }}>{brandNameZh}</span>
-                                      <span className="font-bold tracking-wider text-black uppercase leading-none truncate mt-0.5" style={{ fontSize: `${4.5 * groupFontScales.B}pt` }}>{brandNameEn}</span>
+                                      <span
+                                        className="font-extrabold tracking-wide leading-none text-black truncate"
+                                        style={{
+                                          fontSize: `${7.5 * groupFontScales.B}pt`,
+                                        }}
+                                      >
+                                        {brandNameZh}
+                                      </span>
+                                      <span
+                                        className="font-bold tracking-wider text-black uppercase leading-none truncate mt-0.5"
+                                        style={{
+                                          fontSize: `${4.5 * groupFontScales.B}pt`,
+                                        }}
+                                      >
+                                        {brandNameEn}
+                                      </span>
                                     </div>
                                   </div>
                                 )}
@@ -3254,12 +4307,22 @@ export const Labels = () => {
                                 {/* Right Side: Product Name */}
                                 <div className="text-right flex-1 pl-2 overflow-hidden leading-tight flex flex-col justify-center">
                                   {showProductZh && (
-                                    <h1 className="font-black leading-none tracking-tight text-black break-words" style={{ fontSize: `${10 * groupFontScales.B}pt` }}>
+                                    <h1
+                                      className="font-black leading-none tracking-tight text-black break-words"
+                                      style={{
+                                        fontSize: `${10 * groupFontScales.B}pt`,
+                                      }}
+                                    >
                                       {productZh}
                                     </h1>
                                   )}
                                   {showProductEn && (
-                                    <span className="font-bold uppercase text-black block leading-none truncate mt-0.5" style={{ fontSize: `${5 * groupFontScales.B}pt` }}>
+                                    <span
+                                      className="font-bold uppercase text-black block leading-none truncate mt-0.5"
+                                      style={{
+                                        fontSize: `${5 * groupFontScales.B}pt`,
+                                      }}
+                                    >
                                       {productEn}
                                     </span>
                                   )}
@@ -3269,12 +4332,22 @@ export const Labels = () => {
                               // 70x50 mini label side-by-side layout: Product name on left, Brand name on right
                               <div className="w-full flex items-center justify-between min-h-0 leading-none">
                                 {showProductZh && (
-                                  <span className="font-black text-black text-left truncate flex-1 pr-1.5" style={{ fontSize: `${9 * groupFontScales.B}pt` }}>
+                                  <span
+                                    className="font-black text-black text-left truncate flex-1 pr-1.5"
+                                    style={{
+                                      fontSize: `${9 * groupFontScales.B}pt`,
+                                    }}
+                                  >
                                     {productZh}
                                   </span>
                                 )}
                                 {showBranding && (
-                                  <span className="font-bold text-black text-right shrink-0" style={{ fontSize: `${5.5 * groupFontScales.B}pt` }}>
+                                  <span
+                                    className="font-bold text-black text-right shrink-0"
+                                    style={{
+                                      fontSize: `${5.5 * groupFontScales.B}pt`,
+                                    }}
+                                  >
                                     {brandNameZh}
                                   </span>
                                 )}
@@ -3283,13 +4356,18 @@ export const Labels = () => {
                           </div>
 
                           {/* Resize Handle - Hidden in Print */}
-                          <div 
+                          <div
                             onMouseDown={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
-                              setResizingGroup('B');
-                              setDragStartPos({ x: e.clientX, y: e.clientY });
-                              setDragStartLayout({ ...groupLayouts.B });
+                              setResizingGroup("B");
+                              setDragStartPos({
+                                x: e.clientX,
+                                y: e.clientY,
+                              });
+                              setDragStartLayout({
+                                ...groupLayouts.B,
+                              });
                             }}
                             className="absolute bottom-0 right-0 w-3 h-3 cursor-se-resize flex items-center justify-center bg-slate-200 border-t border-l border-slate-300 opacity-0 group-hover/item:opacity-100 transition-opacity z-20 print:hidden text-[7px] font-black text-slate-600 rounded-tl"
                           >
@@ -3298,31 +4376,40 @@ export const Labels = () => {
                         </div>
 
                         {/* GROUP F: Ingredients & Warnings & Allergens */}
-                        <div 
+                        <div
                           className={cn(
                             "absolute flex flex-col justify-start overflow-hidden border border-transparent hover:border-slate-300 transition-colors bg-white/95 rounded p-1 group/item",
-                            draggingGroup === 'F' && "border-indigo-500 bg-indigo-50/10 z-20 shadow-md",
-                            resizingGroup === 'F' && "border-purple-500 bg-purple-50/10 z-20 shadow-md"
+                            draggingGroup === "F" &&
+                              "border-indigo-500 bg-indigo-50/10 z-20 shadow-md",
+                            resizingGroup === "F" &&
+                              "border-purple-500 bg-purple-50/10 z-20 shadow-md",
                           )}
                           style={{
                             left: `${groupLayouts.F.left}%`,
                             top: `${groupLayouts.F.top}%`,
                             width: `${groupLayouts.F.width}%`,
-                            height: `${groupLayouts.F.height}%`
+                            height: `${groupLayouts.F.height}%`,
                           }}
                         >
                           {/* Drag Bar - Hidden in Print */}
-                          <div 
+                          <div
                             onMouseDown={(e) => {
                               e.preventDefault();
-                              setDraggingGroup('F');
-                              setDragStartPos({ x: e.clientX, y: e.clientY });
-                              setDragStartLayout({ ...groupLayouts.F });
+                              setDraggingGroup("F");
+                              setDragStartPos({
+                                x: e.clientX,
+                                y: e.clientY,
+                              });
+                              setDragStartLayout({
+                                ...groupLayouts.F,
+                              });
                             }}
                             className="absolute top-0 left-0 right-0 h-4 bg-slate-100 hover:bg-slate-200 border-b border-slate-200 cursor-move flex items-center justify-between px-1.5 opacity-0 group-hover/item:opacity-100 transition-opacity z-20 print:hidden text-[7.5px] font-black text-slate-600 select-none"
                           >
-                            <span>✛ 成分與警告 (F)</span>
-                            <span className="font-mono opacity-80">{groupLayouts.F.width}% x {groupLayouts.F.height}%</span>
+                            <span>{t("erp_704")}</span>
+                            <span className="font-mono opacity-80">
+                              {groupLayouts.F.width}% x {groupLayouts.F.height}%
+                            </span>
                           </div>
 
                           {/* Content Container */}
@@ -3330,10 +4417,20 @@ export const Labels = () => {
                             {/* Ingredients */}
                             {showIngredients && (
                               <div className="flex-1 flex flex-col justify-start min-h-0 overflow-hidden text-black leading-tight">
-                                <span className="font-black bg-black text-white px-1 py-[0.2mm] rounded-[0.2mm] self-start leading-none shrink-0 mb-0.5" style={{ fontSize: `${5.8 * groupFontScales.F}pt` }}>
-                                  成分
+                                <span
+                                  className="font-black bg-black text-white px-1 py-[0.2mm] rounded-[0.2mm] self-start leading-none shrink-0 mb-0.5"
+                                  style={{
+                                    fontSize: `${5.8 * groupFontScales.F}pt`,
+                                  }}
+                                >
+                                  {t("erp_705")}
                                 </span>
-                                <p className="font-semibold text-justify word-break break-all text-black leading-[1.25] overflow-y-auto" style={{ fontSize: `${5.8 * groupFontScales.F}pt` }}>
+                                <p
+                                  className="font-semibold text-justify word-break break-all text-black leading-[1.25] overflow-y-auto"
+                                  style={{
+                                    fontSize: `${5.8 * groupFontScales.F}pt`,
+                                  }}
+                                >
                                   {formattedIngredients}
                                 </p>
                               </div>
@@ -3342,26 +4439,42 @@ export const Labels = () => {
                             {/* Warnings Non-Ready-To-Eat & Allergens */}
                             <div className="shrink-0 space-y-0.5 mt-1 leading-none">
                               {showNotReadyToEat && (
-                                <div className="font-black text-center text-white bg-black border border-black py-0.5 rounded-[0.2mm]" style={{ fontSize: `${5.5 * groupFontScales.F}pt` }}>
+                                <div
+                                  className="font-black text-center text-white bg-black border border-black py-0.5 rounded-[0.2mm]"
+                                  style={{
+                                    fontSize: `${5.5 * groupFontScales.F}pt`,
+                                  }}
+                                >
                                   ⚠️ {notReadyToEatText}
                                 </div>
                               )}
                               {showAllergens && allergenWarning && (
-                                <div className="font-black text-black bg-white p-0.5 rounded-[0.2mm] border border-black border-dashed leading-tight" style={{ fontSize: `${5 * groupFontScales.F}pt` }}>
-                                  警告：{allergenWarning}
+                                <div
+                                  className="font-black text-black bg-white p-0.5 rounded-[0.2mm] border border-black border-dashed leading-tight"
+                                  style={{
+                                    fontSize: `${5 * groupFontScales.F}pt`,
+                                  }}
+                                >
+                                  {t("erp_706")}
+                                  {allergenWarning}
                                 </div>
                               )}
                             </div>
                           </div>
 
                           {/* Resize Handle - Hidden in Print */}
-                          <div 
+                          <div
                             onMouseDown={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
-                              setResizingGroup('F');
-                              setDragStartPos({ x: e.clientX, y: e.clientY });
-                              setDragStartLayout({ ...groupLayouts.F });
+                              setResizingGroup("F");
+                              setDragStartPos({
+                                x: e.clientX,
+                                y: e.clientY,
+                              });
+                              setDragStartLayout({
+                                ...groupLayouts.F,
+                              });
                             }}
                             className="absolute bottom-0 right-0 w-3 h-3 cursor-se-resize flex items-center justify-center bg-slate-200 border-t border-l border-slate-300 opacity-0 group-hover/item:opacity-100 transition-opacity z-20 print:hidden text-[7px] font-black text-slate-600 rounded-tl"
                           >
@@ -3369,110 +4482,234 @@ export const Labels = () => {
                           </div>
                         </div>
 
-
                         {/* GROUP E: Nutrition facts table */}
-                        <div 
+                        <div
                           className={cn(
                             "absolute flex flex-col justify-start overflow-hidden border border-transparent hover:border-slate-300 transition-colors bg-white/95 rounded p-1 group/item",
-                            draggingGroup === 'E' && "border-indigo-500 bg-indigo-50/10 z-20 shadow-md",
-                            resizingGroup === 'E' && "border-purple-500 bg-purple-50/10 z-20 shadow-md"
+                            draggingGroup === "E" &&
+                              "border-indigo-500 bg-indigo-50/10 z-20 shadow-md",
+                            resizingGroup === "E" &&
+                              "border-purple-500 bg-purple-50/10 z-20 shadow-md",
                           )}
                           style={{
                             left: `${groupLayouts.E.left}%`,
                             top: `${groupLayouts.E.top}%`,
                             width: `${groupLayouts.E.width}%`,
-                            height: `${groupLayouts.E.height}%`
+                            height: `${groupLayouts.E.height}%`,
                           }}
                         >
                           {/* Drag Bar - Hidden in Print */}
-                          <div 
+                          <div
                             onMouseDown={(e) => {
                               e.preventDefault();
-                              setDraggingGroup('E');
-                              setDragStartPos({ x: e.clientX, y: e.clientY });
-                              setDragStartLayout({ ...groupLayouts.E });
+                              setDraggingGroup("E");
+                              setDragStartPos({
+                                x: e.clientX,
+                                y: e.clientY,
+                              });
+                              setDragStartLayout({
+                                ...groupLayouts.E,
+                              });
                             }}
                             className="absolute top-0 left-0 right-0 h-4 bg-slate-100 hover:bg-slate-200 border-b border-slate-200 cursor-move flex items-center justify-between px-1.5 opacity-0 group-hover/item:opacity-100 transition-opacity z-20 print:hidden text-[7.5px] font-black text-slate-600 select-none"
                           >
-                            <span>✛ 營養標示 (E)</span>
-                            <span className="font-mono opacity-80">{groupLayouts.E.width}% x {groupLayouts.E.height}%</span>
+                            <span>{t("erp_707")}</span>
+                            <span className="font-mono opacity-80">
+                              {groupLayouts.E.width}% x {groupLayouts.E.height}%
+                            </span>
                           </div>
 
                           {/* Content Container */}
                           <div className="w-full h-full flex flex-col justify-end pt-3 pb-1 min-h-0 text-black">
                             {showNutrition ? (
                               <div className="flex flex-col justify-end text-black shrink-0 border border-black p-0.5 bg-white">
-                                <div className="font-black text-center border-b border-black pb-0.5 tracking-wider leading-none" style={{ fontSize: `${6.2 * groupFontScales.E}pt` }}>
-                                  營 養 標 示
+                                <div
+                                  className="font-black text-center border-b border-black pb-0.5 tracking-wider leading-none"
+                                  style={{
+                                    fontSize: `${6.2 * groupFontScales.E}pt`,
+                                  }}
+                                >
+                                  {t("erp_708")}
                                 </div>
-                                <div className="font-bold text-left py-0.5 border-b border-black leading-tight" style={{ fontSize: `${4.8 * groupFontScales.E}pt` }}>
-                                  每一份量 {portionSize} 公克<br />
-                                  本包裝含 {portionsPerPkg} 份
+                                <div
+                                  className="font-bold text-left py-0.5 border-b border-black leading-tight"
+                                  style={{
+                                    fontSize: `${4.8 * groupFontScales.E}pt`,
+                                  }}
+                                >
+                                  {t("erp_709")}
+                                  {portionSize}
+                                  {t("erp_77")}
+                                  <br />
+                                  {t("erp_710")}
+                                  {portionsPerPkg}
+                                  {t("erp_15")}
                                 </div>
-                                <table className="w-full text-center border-collapse mt-0.5" style={{ fontSize: `${5 * groupFontScales.E}pt` }}>
+                                <table
+                                  className="w-full text-center border-collapse mt-0.5"
+                                  style={{
+                                    fontSize: `${5 * groupFontScales.E}pt`,
+                                  }}
+                                >
                                   <thead>
-                                    <tr className="border-b border-black" style={{ fontSize: `${4.5 * groupFontScales.E}pt` }}>
+                                    <tr
+                                      className="border-b border-black"
+                                      style={{
+                                        fontSize: `${4.5 * groupFontScales.E}pt`,
+                                      }}
+                                    >
                                       <th className="py-0.5 text-left font-black"></th>
-                                      <th className="py-0.5 text-right font-black w-[28%]">每份</th>
-                                      <th className="py-0.5 text-right font-black w-[36%]">每100克</th>
+                                      <th className="py-0.5 text-right font-black w-[28%]">
+                                        {t("erp_711")}
+                                      </th>
+                                      <th className="py-0.5 text-right font-black w-[36%]">
+                                        {t("erp_712")}
+                                      </th>
                                     </tr>
                                   </thead>
                                   <tbody className="font-mono">
                                     {[
-                                      { name: '熱量', valPer100: Number(calories), key: 'calories', unit: '大卡', isZeroLimit: 0 },
-                                      { name: '蛋白質', valPer100: Number(protein), key: 'protein', unit: '公克', isZeroLimit: 0 },
-                                      { name: '脂肪', valPer100: Number(fat), key: 'fat', unit: '公克', isZeroLimit: 0 },
-                                      { name: '  飽和脂肪', valPer100: Number(saturatedFat), key: 'saturatedFat', unit: '公克', isZeroLimit: 0.1 },
-                                      { name: '  反式脂肪', valPer100: Number(transFat), key: 'transFat', unit: '公克', isZeroLimit: 0.3 },
-                                      { name: '碳水化合物', valPer100: Number(carbs), key: 'carbs', unit: '公克', isZeroLimit: 0 },
-                                      { name: '  糖', valPer100: Number(sugar), key: 'sugar', unit: '公克', isZeroLimit: 0.5 },
-                                      { name: '鈉', valPer100: Number(sodium), key: 'sodium', unit: '毫克', isZeroLimit: 5 },
+                                      {
+                                        name: i18n.t("erp_197"),
+                                        valPer100: Number(calories),
+                                        key: "calories",
+                                        unit: i18n.t("erp_713"),
+                                        isZeroLimit: 0,
+                                      },
+                                      {
+                                        name: i18n.t("erp_198"),
+                                        valPer100: Number(protein),
+                                        key: "protein",
+                                        unit: i18n.t("erp_77"),
+                                        isZeroLimit: 0,
+                                      },
+                                      {
+                                        name: i18n.t("erp_199"),
+                                        valPer100: Number(fat),
+                                        key: "fat",
+                                        unit: i18n.t("erp_77"),
+                                        isZeroLimit: 0,
+                                      },
+                                      {
+                                        name: i18n.t("erp_714"),
+                                        valPer100: Number(saturatedFat),
+                                        key: "saturatedFat",
+                                        unit: i18n.t("erp_77"),
+                                        isZeroLimit: 0.1,
+                                      },
+                                      {
+                                        name: i18n.t("erp_715"),
+                                        valPer100: Number(transFat),
+                                        key: "transFat",
+                                        unit: i18n.t("erp_77"),
+                                        isZeroLimit: 0.3,
+                                      },
+                                      {
+                                        name: i18n.t("erp_218"),
+                                        valPer100: Number(carbs),
+                                        key: "carbs",
+                                        unit: i18n.t("erp_77"),
+                                        isZeroLimit: 0,
+                                      },
+                                      {
+                                        name: i18n.t("erp_716"),
+                                        valPer100: Number(sugar),
+                                        key: "sugar",
+                                        unit: i18n.t("erp_77"),
+                                        isZeroLimit: 0.5,
+                                      },
+                                      {
+                                        name: i18n.t("erp_201"),
+                                        valPer100: Number(sodium),
+                                        key: "sodium",
+                                        unit: i18n.t("erp_717"),
+                                        isZeroLimit: 5,
+                                      },
                                     ].map((row, idx) => {
-                                      const sizeRatio = Number(portionSize) / 100;
-                                      const valPerPortion = row.valPer100 * sizeRatio;
+                                      const sizeRatio =
+                                        Number(portionSize) / 100;
+                                      const valPerPortion =
+                                        row.valPer100 * sizeRatio;
                                       const val100 = row.valPer100;
-
-                                      const cfg = nutritionConfigs[row.key] || { decimals: 1, maxLength: 8 };
-                                      
-                                      let displayPortion = '';
-                                      let display100 = '';
+                                      const cfg = nutritionConfigs[row.key] || {
+                                        decimals: 1,
+                                        maxLength: 8,
+                                      };
+                                      let displayPortion = "";
+                                      let display100 = "";
 
                                       // Handle rounding precision
                                       if (cfg.decimals === -1) {
-                                        displayPortion = Math.round(valPerPortion).toString();
-                                        display100 = Math.round(val100).toString();
+                                        displayPortion =
+                                          Math.round(valPerPortion).toString();
+                                        display100 =
+                                          Math.round(val100).toString();
                                       } else {
-                                        displayPortion = valPerPortion.toFixed(cfg.decimals);
-                                        display100 = val100.toFixed(cfg.decimals);
+                                        displayPortion = valPerPortion.toFixed(
+                                          cfg.decimals,
+                                        );
+                                        display100 = val100.toFixed(
+                                          cfg.decimals,
+                                        );
                                       }
 
                                       // FDA Zero and Sodium checks
-                                      if (row.key === 'sodium') {
-                                        displayPortion = valPerPortion < 5 ? '0' : Math.round(valPerPortion).toString();
-                                        display100 = val100 < 5 ? '0' : Math.round(val100).toString();
+                                      if (row.key === "sodium") {
+                                        displayPortion =
+                                          valPerPortion < 5
+                                            ? "0"
+                                            : Math.round(
+                                                valPerPortion,
+                                              ).toString();
+                                        display100 =
+                                          val100 < 5
+                                            ? "0"
+                                            : Math.round(val100).toString();
                                       } else if (row.isZeroLimit > 0) {
-                                        if (valPerPortion <= row.isZeroLimit) displayPortion = '0';
-                                        if (val100 <= row.isZeroLimit) display100 = '0';
+                                        if (valPerPortion <= row.isZeroLimit)
+                                          displayPortion = "0";
+                                        if (val100 <= row.isZeroLimit)
+                                          display100 = "0";
                                       }
 
                                       // Apply text limits to prevent visual overflows
-                                      if (displayPortion.length > cfg.maxLength) {
-                                        displayPortion = displayPortion.substring(0, cfg.maxLength);
+                                      if (
+                                        displayPortion.length > cfg.maxLength
+                                      ) {
+                                        displayPortion =
+                                          displayPortion.substring(
+                                            0,
+                                            cfg.maxLength,
+                                          );
                                       }
                                       if (display100.length > cfg.maxLength) {
-                                        display100 = display100.substring(0, cfg.maxLength);
+                                        display100 = display100.substring(
+                                          0,
+                                          cfg.maxLength,
+                                        );
                                       }
-
                                       return (
-                                        <tr key={idx} className="text-black font-black">
-                                          <td className={cn("py-[0.1mm] text-left pl-[0.2mm]", row.name.startsWith('  ') ? "pl-[1.2mm] font-semibold" : "font-black")}>
+                                        <tr
+                                          key={idx}
+                                          className="text-black font-black"
+                                        >
+                                          <td
+                                            className={cn(
+                                              "py-[0.1mm] text-left pl-[0.2mm]",
+                                              row.name.startsWith("  ")
+                                                ? "pl-[1.2mm] font-semibold"
+                                                : "font-black",
+                                            )}
+                                          >
                                             {row.name.trim()}
                                           </td>
                                           <td className="py-[0.1mm] text-right font-mono font-bold whitespace-nowrap">
-                                            {displayPortion}{row.unit}
+                                            {displayPortion}
+                                            {row.unit}
                                           </td>
                                           <td className="py-[0.1mm] text-right font-mono font-bold whitespace-nowrap">
-                                            {display100}{row.unit}
+                                            {display100}
+                                            {row.unit}
                                           </td>
                                         </tr>
                                       );
@@ -3482,19 +4719,24 @@ export const Labels = () => {
                               </div>
                             ) : (
                               <div className="w-full text-center text-[6pt] text-slate-400 font-bold border border-slate-200 border-dashed py-4 rounded">
-                                營養標示已停用
+                                {t("erp_718")}
                               </div>
                             )}
                           </div>
 
                           {/* Resize Handle - Hidden in Print */}
-                          <div 
+                          <div
                             onMouseDown={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
-                              setResizingGroup('E');
-                              setDragStartPos({ x: e.clientX, y: e.clientY });
-                              setDragStartLayout({ ...groupLayouts.E });
+                              setResizingGroup("E");
+                              setDragStartPos({
+                                x: e.clientX,
+                                y: e.clientY,
+                              });
+                              setDragStartLayout({
+                                ...groupLayouts.E,
+                              });
                             }}
                             className="absolute bottom-0 right-0 w-3 h-3 cursor-se-resize flex items-center justify-center bg-slate-200 border-t border-l border-slate-300 opacity-0 group-hover/item:opacity-100 transition-opacity z-20 print:hidden text-[7px] font-black text-slate-600 rounded-tl"
                           >
@@ -3502,81 +4744,103 @@ export const Labels = () => {
                           </div>
                         </div>
 
-
                         {/* GROUP C: Product Specs & Preservation Conditions */}
-                        <div 
+                        <div
                           className={cn(
                             "absolute flex flex-col justify-start overflow-hidden border border-transparent hover:border-slate-300 transition-colors bg-white/95 rounded p-1 group/item",
-                            draggingGroup === 'C' && "border-indigo-500 bg-indigo-50/10 z-20 shadow-md",
-                            resizingGroup === 'C' && "border-purple-500 bg-purple-50/10 z-20 shadow-md"
+                            draggingGroup === "C" &&
+                              "border-indigo-500 bg-indigo-50/10 z-20 shadow-md",
+                            resizingGroup === "C" &&
+                              "border-purple-500 bg-purple-50/10 z-20 shadow-md",
                           )}
                           style={{
                             left: `${groupLayouts.C.left}%`,
                             top: `${groupLayouts.C.top}%`,
                             width: `${groupLayouts.C.width}%`,
-                            height: `${groupLayouts.C.height}%`
+                            height: `${groupLayouts.C.height}%`,
                           }}
                         >
                           {/* Drag Bar - Hidden in Print */}
-                          <div 
+                          <div
                             onMouseDown={(e) => {
                               e.preventDefault();
-                              setDraggingGroup('C');
-                              setDragStartPos({ x: e.clientX, y: e.clientY });
-                              setDragStartLayout({ ...groupLayouts.C });
+                              setDraggingGroup("C");
+                              setDragStartPos({
+                                x: e.clientX,
+                                y: e.clientY,
+                              });
+                              setDragStartLayout({
+                                ...groupLayouts.C,
+                              });
                             }}
                             className="absolute top-0 left-0 right-0 h-4 bg-slate-100 hover:bg-slate-200 border-b border-slate-200 cursor-move flex items-center justify-between px-1.5 opacity-0 group-hover/item:opacity-100 transition-opacity z-20 print:hidden text-[7.5px] font-black text-slate-600 select-none"
                           >
-                            <span>✛ 規格與保存 (C)</span>
-                            <span className="font-mono opacity-80">{groupLayouts.C.width}% x {groupLayouts.C.height}%</span>
+                            <span>{t("erp_719")}</span>
+                            <span className="font-mono opacity-80">
+                              {groupLayouts.C.width}% x {groupLayouts.C.height}%
+                            </span>
                           </div>
 
                           {/* Content Container */}
                           <div className="w-full h-full flex flex-col justify-around pt-3 pb-1 min-h-0 text-black leading-tight">
-                            <div className="font-extrabold space-y-[0.3mm] text-black" style={{ fontSize: `${5.8 * groupFontScales.C}pt` }}>
+                            <div
+                              className="font-extrabold space-y-[0.3mm] text-black"
+                              style={{
+                                fontSize: `${5.8 * groupFontScales.C}pt`,
+                              }}
+                            >
                               {showNetWeight && (
                                 <div className="flex justify-between">
-                                  <span>淨重：</span>
+                                  <span>{t("erp_720")}</span>
                                   <span className="font-mono">{netWeight}</span>
                                 </div>
                               )}
                               {showStorage && (
                                 <div className="flex justify-between">
-                                  <span>保存條件：</span>
+                                  <span>{t("erp_721")}</span>
                                   <span>{storageCondition}</span>
                                 </div>
                               )}
                               {showExpiry && (
                                 <>
                                   <div className="flex justify-between">
-                                    <span>保存期限：</span>
+                                    <span>{t("erp_722")}</span>
                                     <span>{shelfLife}</span>
                                   </div>
                                   <div className="flex justify-between font-black">
-                                    <span>有效日期：</span>
+                                    <span>{t("erp_723")}</span>
                                     <span className="font-mono">
-                                      {expiryOption === 'printed' ? '標示於封口處' : expiryDate}
+                                      {expiryOption === "printed"
+                                        ? i18n.t("erp_724")
+                                        : expiryDate}
                                     </span>
                                   </div>
                                 </>
                               )}
                               {showOrigin && originCountry && (
                                 <div className="flex justify-between">
-                                  <span>原產地：</span>
-                                  <span className="font-extrabold">{originCountry}</span>
+                                  <span>{t("erp_725")}</span>
+                                  <span className="font-extrabold">
+                                    {originCountry}
+                                  </span>
                                 </div>
                               )}
                             </div>
                           </div>
 
                           {/* Resize Handle - Hidden in Print */}
-                          <div 
+                          <div
                             onMouseDown={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
-                              setResizingGroup('C');
-                              setDragStartPos({ x: e.clientX, y: e.clientY });
-                              setDragStartLayout({ ...groupLayouts.C });
+                              setResizingGroup("C");
+                              setDragStartPos({
+                                x: e.clientX,
+                                y: e.clientY,
+                              });
+                              setDragStartLayout({
+                                ...groupLayouts.C,
+                              });
                             }}
                             className="absolute bottom-0 right-0 w-3 h-3 cursor-se-resize flex items-center justify-center bg-slate-200 border-t border-l border-slate-300 opacity-0 group-hover/item:opacity-100 transition-opacity z-20 print:hidden text-[7px] font-black text-slate-600 rounded-tl"
                           >
@@ -3584,33 +4848,41 @@ export const Labels = () => {
                           </div>
                         </div>
 
-
                         {/* GROUP A: Reheating Guide */}
-                        <div 
+                        <div
                           className={cn(
                             "absolute flex flex-col justify-start overflow-hidden border border-transparent hover:border-slate-300 transition-colors bg-white/95 rounded p-1 group/item",
-                            draggingGroup === 'A' && "border-indigo-500 bg-indigo-50/10 z-20 shadow-md",
-                            resizingGroup === 'A' && "border-purple-500 bg-purple-50/10 z-20 shadow-md"
+                            draggingGroup === "A" &&
+                              "border-indigo-500 bg-indigo-50/10 z-20 shadow-md",
+                            resizingGroup === "A" &&
+                              "border-purple-500 bg-purple-50/10 z-20 shadow-md",
                           )}
                           style={{
                             left: `${groupLayouts.A.left}%`,
                             top: `${groupLayouts.A.top}%`,
                             width: `${groupLayouts.A.width}%`,
-                            height: `${groupLayouts.A.height}%`
+                            height: `${groupLayouts.A.height}%`,
                           }}
                         >
                           {/* Drag Bar - Hidden in Print */}
-                          <div 
+                          <div
                             onMouseDown={(e) => {
                               e.preventDefault();
-                              setDraggingGroup('A');
-                              setDragStartPos({ x: e.clientX, y: e.clientY });
-                              setDragStartLayout({ ...groupLayouts.A });
+                              setDraggingGroup("A");
+                              setDragStartPos({
+                                x: e.clientX,
+                                y: e.clientY,
+                              });
+                              setDragStartLayout({
+                                ...groupLayouts.A,
+                              });
                             }}
                             className="absolute top-0 left-0 right-0 h-4 bg-slate-100 hover:bg-slate-200 border-b border-slate-200 cursor-move flex items-center justify-between px-1.5 opacity-0 group-hover/item:opacity-100 transition-opacity z-20 print:hidden text-[7.5px] font-black text-slate-600 select-none"
                           >
-                            <span>✛ 覆熱指引 (A)</span>
-                            <span className="font-mono opacity-80">{groupLayouts.A.width}% x {groupLayouts.A.height}%</span>
+                            <span>{t("erp_726")}</span>
+                            <span className="font-mono opacity-80">
+                              {groupLayouts.A.width}% x {groupLayouts.A.height}%
+                            </span>
                           </div>
 
                           {/* Content Container */}
@@ -3618,8 +4890,10 @@ export const Labels = () => {
                             {showReheating ? (
                               <div className="w-full h-full flex flex-col justify-between overflow-hidden">
                                 <div className="flex justify-center shrink-0 mb-0.5">
-                                  <span 
-                                    style={{ fontSize: `${(reheatingMainTitleSize - 1) * groupFontScales.A}pt` }}
+                                  <span
+                                    style={{
+                                      fontSize: `${(reheatingMainTitleSize - 1) * groupFontScales.A}pt`,
+                                    }}
                                     className="font-black bg-black text-white px-1.5 py-[0.25mm] rounded-[0.25mm] text-center leading-none"
                                   >
                                     {reheatingMainTitle}
@@ -3627,36 +4901,68 @@ export const Labels = () => {
                                 </div>
                                 <div className="flex-1 flex flex-col justify-around min-h-0 overflow-y-auto leading-tight">
                                   {[
-                                    { title: airFryerTitle, steps: airFryerSteps, show: showAirFryer },
-                                    { title: ovenTitle, steps: ovenSteps, show: showOven },
-                                    { title: panTitle, steps: panSteps, show: showPan }
-                                  ].filter(m => m.show).map((m, idx) => (
-                                    <div key={idx} className="flex flex-col text-black">
-                                      <strong style={{ fontSize: `${(reheatingSubTitleSize - 1.2) * groupFontScales.A}pt` }} className="font-black">
-                                        ├─ {m.title}
-                                      </strong>
-                                      <p style={{ fontSize: `${(reheatingContentSize - 1.2) * groupFontScales.A}pt` }} className="font-bold whitespace-pre-line pl-2 leading-tight">
-                                        {m.steps}
-                                      </p>
-                                    </div>
-                                  ))}
+                                    {
+                                      title: airFryerTitle,
+                                      steps: airFryerSteps,
+                                      show: showAirFryer,
+                                    },
+                                    {
+                                      title: ovenTitle,
+                                      steps: ovenSteps,
+                                      show: showOven,
+                                    },
+                                    {
+                                      title: panTitle,
+                                      steps: panSteps,
+                                      show: showPan,
+                                    },
+                                  ]
+                                    .filter((m) => m.show)
+                                    .map((m, idx) => (
+                                      <div
+                                        key={idx}
+                                        className="flex flex-col text-black"
+                                      >
+                                        <strong
+                                          style={{
+                                            fontSize: `${(reheatingSubTitleSize - 1.2) * groupFontScales.A}pt`,
+                                          }}
+                                          className="font-black"
+                                        >
+                                          ├─ {m.title}
+                                        </strong>
+                                        <p
+                                          style={{
+                                            fontSize: `${(reheatingContentSize - 1.2) * groupFontScales.A}pt`,
+                                          }}
+                                          className="font-bold whitespace-pre-line pl-2 leading-tight"
+                                        >
+                                          {m.steps}
+                                        </p>
+                                      </div>
+                                    ))}
                                 </div>
                               </div>
                             ) : (
                               <div className="w-full text-center text-[5.5pt] text-slate-400 font-bold border border-slate-200 border-dashed py-2 rounded">
-                                覆熱指引已停用
+                                {t("erp_727")}
                               </div>
                             )}
                           </div>
 
                           {/* Resize Handle - Hidden in Print */}
-                          <div 
+                          <div
                             onMouseDown={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
-                              setResizingGroup('A');
-                              setDragStartPos({ x: e.clientX, y: e.clientY });
-                              setDragStartLayout({ ...groupLayouts.A });
+                              setResizingGroup("A");
+                              setDragStartPos({
+                                x: e.clientX,
+                                y: e.clientY,
+                              });
+                              setDragStartLayout({
+                                ...groupLayouts.A,
+                              });
                             }}
                             className="absolute bottom-0 right-0 w-3 h-3 cursor-se-resize flex items-center justify-center bg-slate-200 border-t border-l border-slate-300 opacity-0 group-hover/item:opacity-100 transition-opacity z-20 print:hidden text-[7px] font-black text-slate-600 rounded-tl"
                           >
@@ -3664,56 +4970,84 @@ export const Labels = () => {
                           </div>
                         </div>
 
-
                         {/* GROUP D: Manufacturer Info & Barcode */}
-                        <div 
+                        <div
                           className={cn(
                             "absolute flex flex-col justify-start overflow-hidden border border-transparent hover:border-slate-300 transition-colors bg-white/95 rounded p-1 group/item",
-                            draggingGroup === 'D' && "border-indigo-500 bg-indigo-50/10 z-20 shadow-md",
-                            resizingGroup === 'D' && "border-purple-500 bg-purple-50/10 z-20 shadow-md"
+                            draggingGroup === "D" &&
+                              "border-indigo-500 bg-indigo-50/10 z-20 shadow-md",
+                            resizingGroup === "D" &&
+                              "border-purple-500 bg-purple-50/10 z-20 shadow-md",
                           )}
                           style={{
                             left: `${groupLayouts.D.left}%`,
                             top: `${groupLayouts.D.top}%`,
                             width: `${groupLayouts.D.width}%`,
-                            height: `${groupLayouts.D.height}%`
+                            height: `${groupLayouts.D.height}%`,
                           }}
                         >
                           {/* Drag Bar - Hidden in Print */}
-                          <div 
+                          <div
                             onMouseDown={(e) => {
                               e.preventDefault();
-                              setDraggingGroup('D');
-                              setDragStartPos({ x: e.clientX, y: e.clientY });
-                              setDragStartLayout({ ...groupLayouts.D });
+                              setDraggingGroup("D");
+                              setDragStartPos({
+                                x: e.clientX,
+                                y: e.clientY,
+                              });
+                              setDragStartLayout({
+                                ...groupLayouts.D,
+                              });
                             }}
                             className="absolute top-0 left-0 right-0 h-4 bg-slate-100 hover:bg-slate-200 border-b border-slate-200 cursor-move flex items-center justify-between px-1.5 opacity-0 group-hover/item:opacity-100 transition-opacity z-20 print:hidden text-[7.5px] font-black text-slate-600 select-none"
                           >
-                            <span>✛ 廠商與條碼 (D)</span>
-                            <span className="font-mono opacity-80">{groupLayouts.D.width}% x {groupLayouts.D.height}%</span>
+                            <span>{t("erp_728")}</span>
+                            <span className="font-mono opacity-80">
+                              {groupLayouts.D.width}% x {groupLayouts.D.height}%
+                            </span>
                           </div>
 
                           {/* Content Container */}
                           <div className="w-full h-full flex items-center justify-between pt-3 pb-0.5 min-h-0 text-black leading-tight gap-1.5">
                             {/* Responsible party info */}
                             {showResponsible && (
-                              <div className="text-black font-semibold flex-1 min-w-0" style={{ fontSize: `${5.2 * groupFontScales.D}pt` }}>
+                              <div
+                                className="text-black font-semibold flex-1 min-w-0"
+                                style={{
+                                  fontSize: `${5.2 * groupFontScales.D}pt`,
+                                }}
+                              >
                                 {showAddress && (
                                   <div className="flex gap-[0.2mm]">
-                                    <span className="font-black shrink-0">地址：</span>
-                                    <span className="truncate">{companyAddress}</span>
+                                    <span className="font-black shrink-0">
+                                      {t("erp_729")}
+                                    </span>
+                                    <span className="truncate">
+                                      {companyAddress}
+                                    </span>
                                   </div>
                                 )}
                                 {showPhone && (
                                   <div className="flex gap-[0.2mm]">
-                                    <span className="font-black shrink-0">電話：</span>
-                                    <span className="font-mono">{companyPhone}</span>
+                                    <span className="font-black shrink-0">
+                                      {t("erp_730")}
+                                    </span>
+                                    <span className="font-mono">
+                                      {companyPhone}
+                                    </span>
                                   </div>
                                 )}
                                 {showManufacturer && (
-                                  <div className="flex gap-[0.2mm] text-slate-600 mt-0.5" style={{ fontSize: `${5 * groupFontScales.D}pt` }}>
-                                    <span>製造商：</span>
-                                    <span className="truncate">{companyName}</span>
+                                  <div
+                                    className="flex gap-[0.2mm] text-slate-600 mt-0.5"
+                                    style={{
+                                      fontSize: `${5 * groupFontScales.D}pt`,
+                                    }}
+                                  >
+                                    <span>{t("erp_731")}</span>
+                                    <span className="truncate">
+                                      {companyName}
+                                    </span>
                                   </div>
                                 )}
                               </div>
@@ -3723,15 +5057,22 @@ export const Labels = () => {
                             {showBarcode && (
                               <div className="flex items-center gap-1.5 shrink-0 border-l border-dashed border-black pl-1.5 py-0.5">
                                 <div className="p-0.5 bg-white border border-black shrink-0 flex items-center justify-center">
-                                  <QRCodeSVG 
-                                    value={barcodeText || "https://shutterorder.com"} 
+                                  <QRCodeSVG
+                                    value={
+                                      barcodeText || "https://shutterorder.com"
+                                    }
                                     size={24}
                                     level="M"
                                     fgColor="#000000"
                                     bgColor="#ffffff"
                                   />
                                 </div>
-                                <span className="font-sans font-black leading-tight text-black whitespace-pre-line text-left" style={{ fontSize: `${4.5 * groupFontScales.D}pt` }}>
+                                <span
+                                  className="font-sans font-black leading-tight text-black whitespace-pre-line text-left"
+                                  style={{
+                                    fontSize: `${4.5 * groupFontScales.D}pt`,
+                                  }}
+                                >
                                   {barcodeExplanation}
                                 </span>
                               </div>
@@ -3739,47 +5080,81 @@ export const Labels = () => {
                           </div>
 
                           {/* Resize Handle - Hidden in Print */}
-                          <div 
+                          <div
                             onMouseDown={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
-                              setResizingGroup('D');
-                              setDragStartPos({ x: e.clientX, y: e.clientY });
-                              setDragStartLayout({ ...groupLayouts.D });
+                              setResizingGroup("D");
+                              setDragStartPos({
+                                x: e.clientX,
+                                y: e.clientY,
+                              });
+                              setDragStartLayout({
+                                ...groupLayouts.D,
+                              });
                             }}
                             className="absolute bottom-0 right-0 w-3 h-3 cursor-se-resize flex items-center justify-center bg-slate-200 border-t border-l border-slate-300 opacity-0 group-hover/item:opacity-100 transition-opacity z-20 print:hidden text-[7px] font-black text-slate-600 rounded-tl"
                           >
                             ↘
                           </div>
                         </div>
-
                       </div>
                     ) : (
                       // STANDARD FLOW COLUMN/GRID LAYOUT
                       <div className="w-full h-full flex flex-col justify-between relative z-10 text-black">
                         {/* 1. Header (Brand Logo, Product Title) */}
-                        {labelSize !== '70x50' ? (
+                        {labelSize !== "70x50" ? (
                           <div className="w-full border-b-[0.8mm] border-black pb-[1.5mm] flex justify-between items-center shrink-0">
                             {showBranding && (
                               <div className="flex items-center gap-[2.5mm] overflow-hidden">
-                                <div style={{ width: '12mm', height: '12mm' }} className="shrink-0 flex items-center justify-center border border-black rounded-lg p-1 bg-white">
+                                <div
+                                  style={{
+                                    width: "12mm",
+                                    height: "12mm",
+                                  }}
+                                  className="shrink-0 flex items-center justify-center border border-black rounded-lg p-1 bg-white"
+                                >
                                   {renderLabelLogo()}
                                 </div>
                                 <div className="flex flex-col justify-center text-black">
-                                  <span className="font-extrabold tracking-wide leading-none text-black" style={{ fontSize: `${12 * groupFontScales.B}pt` }}>{brandNameZh}</span>
-                                  <span className="font-bold tracking-widest text-black uppercase mt-0.5 leading-none" style={{ fontSize: `${5.5 * groupFontScales.B}pt` }}>{brandNameEn}</span>
+                                  <span
+                                    className="font-extrabold tracking-wide leading-none text-black"
+                                    style={{
+                                      fontSize: `${12 * groupFontScales.B}pt`,
+                                    }}
+                                  >
+                                    {brandNameZh}
+                                  </span>
+                                  <span
+                                    className="font-bold tracking-widest text-black uppercase mt-0.5 leading-none"
+                                    style={{
+                                      fontSize: `${5.5 * groupFontScales.B}pt`,
+                                    }}
+                                  >
+                                    {brandNameEn}
+                                  </span>
                                 </div>
                               </div>
                             )}
-                            
+
                             <div className="text-right flex-1 pl-[3mm] overflow-hidden">
                               {showProductZh && (
-                                <h1 className="font-black tracking-tight leading-none text-black break-words" style={{ fontSize: `${13 * groupFontScales.B}pt` }}>
+                                <h1
+                                  className="font-black tracking-tight leading-none text-black break-words"
+                                  style={{
+                                    fontSize: `${13 * groupFontScales.B}pt`,
+                                  }}
+                                >
                                   {productZh}
                                 </h1>
                               )}
                               {showProductEn && (
-                                <span className="font-extrabold tracking-wide uppercase text-black block mt-1.5 leading-none truncate" style={{ fontSize: `${6.2 * groupFontScales.B}pt` }}>
+                                <span
+                                  className="font-extrabold tracking-wide uppercase text-black block mt-1.5 leading-none truncate"
+                                  style={{
+                                    fontSize: `${6.2 * groupFontScales.B}pt`,
+                                  }}
+                                >
                                   {productEn}
                                 </span>
                               )}
@@ -3788,57 +5163,99 @@ export const Labels = () => {
                         ) : (
                           // Mini Header layout (70x50)
                           <div className="w-full border-b-[0.5mm] border-black pb-[0.5mm] flex justify-between items-end shrink-0">
-                            <span className="font-black leading-none text-black" style={{ fontSize: `${9 * groupFontScales.B}pt` }}>{productZh}</span>
-                            <span className="font-bold text-black leading-none" style={{ fontSize: `${5.5 * groupFontScales.B}pt` }}>{brandNameZh}</span>
+                            <span
+                              className="font-black leading-none text-black"
+                              style={{
+                                fontSize: `${9 * groupFontScales.B}pt`,
+                              }}
+                            >
+                              {productZh}
+                            </span>
+                            <span
+                              className="font-bold text-black leading-none"
+                              style={{
+                                fontSize: `${5.5 * groupFontScales.B}pt`,
+                              }}
+                            >
+                              {brandNameZh}
+                            </span>
                           </div>
                         )}
 
                         {/* 2. Main content adaptive body */}
-                        {labelSize !== '70x50' ? (
+                        {labelSize !== "70x50" ? (
                           // Grid structure for big labels: Left (Reheating), Right (Ingredients/Nutrition/Info)
-                          <div 
-                            style={hasActiveReheating ? { gridTemplateColumns: '1.1fr 1fr' } : undefined}
+                          <div
+                            style={
+                              hasActiveReheating
+                                ? {
+                                    gridTemplateColumns: "1.1fr 1fr",
+                                  }
+                                : undefined
+                            }
                             className={cn(
                               "flex-1 min-h-0 text-black",
-                              hasActiveReheating 
-                                ? "grid gap-[3mm] py-[2mm] grid-cols-[1.1fr_1fr]" 
-                                : "py-[2mm] flex flex-col justify-between"
+                              hasActiveReheating
+                                ? "grid gap-[3mm] py-[2mm] grid-cols-[1.1fr_1fr]"
+                                : "py-[2mm] flex flex-col justify-between",
                             )}
                           >
-                            
                             {/* Left Column: Reheating steps */}
                             {hasActiveReheating && (
                               <div className="border-r-[0.3mm] border-black pr-[2mm] flex flex-col justify-between gap-[2.5mm] min-h-0 overflow-hidden text-black h-full">
                                 <div className="flex justify-center">
-                                  <span 
-                                    style={{ fontSize: `${reheatingMainTitleSize * groupFontScales.A}pt` }}
+                                  <span
+                                    style={{
+                                      fontSize: `${reheatingMainTitleSize * groupFontScales.A}pt`,
+                                    }}
                                     className="font-black bg-black text-white px-[2mm] py-[0.5mm] rounded-[0.5mm] text-center leading-none"
                                   >
                                     {reheatingMainTitle}
                                   </span>
                                 </div>
-                                
+
                                 <div className="flex-1 flex flex-col justify-around py-[1mm]">
                                   {[
-                                    { title: airFryerTitle, steps: airFryerSteps, show: showAirFryer },
-                                    { title: ovenTitle, steps: ovenSteps, show: showOven },
-                                    { title: panTitle, steps: panSteps, show: showPan }
-                                  ].filter(m => m.show).map((m, idx) => (
-                                    <div key={idx} className="flex flex-col gap-[0.5mm] text-black">
-                                      <strong 
-                                        style={{ fontSize: `${reheatingSubTitleSize * groupFontScales.A}pt` }}
-                                        className="font-extrabold text-black"
+                                    {
+                                      title: airFryerTitle,
+                                      steps: airFryerSteps,
+                                      show: showAirFryer,
+                                    },
+                                    {
+                                      title: ovenTitle,
+                                      steps: ovenSteps,
+                                      show: showOven,
+                                    },
+                                    {
+                                      title: panTitle,
+                                      steps: panSteps,
+                                      show: showPan,
+                                    },
+                                  ]
+                                    .filter((m) => m.show)
+                                    .map((m, idx) => (
+                                      <div
+                                        key={idx}
+                                        className="flex flex-col gap-[0.5mm] text-black"
                                       >
-                                        ├─ {m.title}
-                                      </strong>
-                                      <p 
-                                        style={{ fontSize: `${reheatingContentSize * groupFontScales.A}pt` }}
-                                        className="text-black font-semibold whitespace-pre-line pl-[3.5mm] leading-[1.3]"
-                                      >
-                                        {m.steps}
-                                      </p>
-                                    </div>
-                                  ))}
+                                        <strong
+                                          style={{
+                                            fontSize: `${reheatingSubTitleSize * groupFontScales.A}pt`,
+                                          }}
+                                          className="font-extrabold text-black"
+                                        >
+                                          ├─ {m.title}
+                                        </strong>
+                                        <p
+                                          style={{
+                                            fontSize: `${reheatingContentSize * groupFontScales.A}pt`,
+                                          }}
+                                          className="text-black font-semibold whitespace-pre-line pl-[3.5mm] leading-[1.3]"
+                                        >
+                                          {m.steps}
+                                        </p>
+                                      </div>
+                                    ))}
                                 </div>
                               </div>
                             )}
@@ -3848,10 +5265,20 @@ export const Labels = () => {
                               {/* Ingredients */}
                               {showIngredients && (
                                 <div className="flex flex-col gap-[1mm] min-h-0 overflow-hidden text-black flex-1 justify-start">
-                                  <span className="font-black bg-black text-white px-[1.5mm] py-[0.3mm] rounded-[0.3mm] self-start leading-none shrink-0 mb-1" style={{ fontSize: `${7 * groupFontScales.F}pt` }}>
-                                    成分
+                                  <span
+                                    className="font-black bg-black text-white px-[1.5mm] py-[0.3mm] rounded-[0.3mm] self-start leading-none shrink-0 mb-1"
+                                    style={{
+                                      fontSize: `${7 * groupFontScales.F}pt`,
+                                    }}
+                                  >
+                                    {t("erp_705")}
                                   </span>
-                                  <p className="font-semibold text-justify word-break break-all text-black pl-0.5 leading-[1.3] overflow-y-auto" style={{ fontSize: `${6.6 * groupFontScales.F}pt` }}>
+                                  <p
+                                    className="font-semibold text-justify word-break break-all text-black pl-0.5 leading-[1.3] overflow-y-auto"
+                                    style={{
+                                      fontSize: `${6.6 * groupFontScales.F}pt`,
+                                    }}
+                                  >
                                     {formattedIngredients}
                                   </p>
                                 </div>
@@ -3859,178 +5286,307 @@ export const Labels = () => {
 
                               {/* Non-ready-to-eat warning inside flow */}
                               {showNotReadyToEat && (
-                                <div className="font-black text-center text-white bg-black py-0.5 rounded-[0.3mm] shrink-0 my-0.5" style={{ fontSize: `${6.2 * groupFontScales.F}pt` }}>
+                                <div
+                                  className="font-black text-center text-white bg-black py-0.5 rounded-[0.3mm] shrink-0 my-0.5"
+                                  style={{
+                                    fontSize: `${6.2 * groupFontScales.F}pt`,
+                                  }}
+                                >
                                   ⚠️ {notReadyToEatText}
                                 </div>
                               )}
 
                               {/* Expiry / Weight */}
-                              {!shouldMoveInfoToBottomLeft && (showNetWeight || showStorage || showExpiry || showOrigin) && (
-                                <div className="leading-[1.35] font-bold space-y-[0.6mm] border-t-[0.2mm] border-dashed border-black pt-2 text-black shrink-0" style={{ fontSize: `${6.8 * groupFontScales.C}pt` }}>
-                                  {showNetWeight && (
-                                    <div className="flex justify-between text-black">
-                                      <span>淨重：</span>
-                                      <span className="font-mono">{netWeight}</span>
-                                    </div>
-                                  )}
-                                  {showStorage && (
-                                    <div className="flex justify-between text-black">
-                                      <span>保存條件：</span>
-                                      <span>{storageCondition}</span>
-                                    </div>
-                                  )}
-                                  {showExpiry && (
-                                    <>
+                              {!shouldMoveInfoToBottomLeft &&
+                                (showNetWeight ||
+                                  showStorage ||
+                                  showExpiry ||
+                                  showOrigin) && (
+                                  <div
+                                    className="leading-[1.35] font-bold space-y-[0.6mm] border-t-[0.2mm] border-dashed border-black pt-2 text-black shrink-0"
+                                    style={{
+                                      fontSize: `${6.8 * groupFontScales.C}pt`,
+                                    }}
+                                  >
+                                    {showNetWeight && (
                                       <div className="flex justify-between text-black">
-                                        <span>保存期限：</span>
-                                        <span>{shelfLife}</span>
-                                      </div>
-                                      <div className="flex justify-between font-black text-black">
-                                        <span>有效日期：</span>
+                                        <span>{t("erp_720")}</span>
                                         <span className="font-mono">
-                                          {expiryOption === 'printed' ? '標示於封口處' : expiryDate}
+                                          {netWeight}
                                         </span>
                                       </div>
-                                    </>
-                                  )}
-                                  {showOrigin && originCountry && (
-                                    <div className="flex justify-between text-black">
-                                      <span>原產地：</span>
-                                      <span className="font-extrabold">{originCountry}</span>
-                                    </div>
-                                  )}
-                                </div>
-                              )}
+                                    )}
+                                    {showStorage && (
+                                      <div className="flex justify-between text-black">
+                                        <span>{t("erp_721")}</span>
+                                        <span>{storageCondition}</span>
+                                      </div>
+                                    )}
+                                    {showExpiry && (
+                                      <>
+                                        <div className="flex justify-between text-black">
+                                          <span>{t("erp_722")}</span>
+                                          <span>{shelfLife}</span>
+                                        </div>
+                                        <div className="flex justify-between font-black text-black">
+                                          <span>{t("erp_723")}</span>
+                                          <span className="font-mono">
+                                            {expiryOption === "printed"
+                                              ? i18n.t("erp_724")
+                                              : expiryDate}
+                                          </span>
+                                        </div>
+                                      </>
+                                    )}
+                                    {showOrigin && originCountry && (
+                                      <div className="flex justify-between text-black">
+                                        <span>{t("erp_725")}</span>
+                                        <span className="font-extrabold">
+                                          {originCountry}
+                                        </span>
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
 
                               {/* Allergen alert */}
                               {showAllergens && allergenWarning && (
                                 <div className="text-[6pt] font-black text-black bg-white p-[1.2mm] rounded-[0.5mm] border-[0.25mm] border-black border-dashed leading-[1.2] shrink-0">
-                                  ⚠️ 警告：{allergenWarning}
+                                  {t("erp_732")}
+                                  {allergenWarning}
                                 </div>
                               )}
                             </div>
-
                           </div>
                         ) : (
                           // Mini Label (70x50) compact body
-                          <div className="flex-1 py-[1mm] flex flex-col justify-between text-black leading-[1.2] font-extrabold" style={{ fontSize: `${5.8 * groupFontScales.F}pt` }}>
+                          <div
+                            className="flex-1 py-[1mm] flex flex-col justify-between text-black leading-[1.2] font-extrabold"
+                            style={{
+                              fontSize: `${5.8 * groupFontScales.F}pt`,
+                            }}
+                          >
                             {showIngredients && (
-                              <p className="text-justify word-break break-all text-black font-semibold" style={{ fontSize: `${5.8 * groupFontScales.F}pt` }}>
-                                <span className="font-black text-black">成分：</span>{formattedIngredients}
+                              <p
+                                className="text-justify word-break break-all text-black font-semibold"
+                                style={{
+                                  fontSize: `${5.8 * groupFontScales.F}pt`,
+                                }}
+                              >
+                                <span className="font-black text-black">
+                                  {t("erp_733")}
+                                </span>
+                                {formattedIngredients}
                               </p>
                             )}
 
                             {showNotReadyToEat && (
-                              <div className="font-black text-center text-white bg-black py-0.5 rounded-[0.2mm] shrink-0 my-0.5" style={{ fontSize: `${5.2 * groupFontScales.F}pt` }}>
+                              <div
+                                className="font-black text-center text-white bg-black py-0.5 rounded-[0.2mm] shrink-0 my-0.5"
+                                style={{
+                                  fontSize: `${5.2 * groupFontScales.F}pt`,
+                                }}
+                              >
                                 ⚠️ {notReadyToEatText}
                               </div>
                             )}
-                            
-                            <div className="grid grid-cols-2 gap-[2mm] border-t-[0.1mm] border-black pt-[1mm] mt-[0.5mm]" style={{ fontSize: `${5.8 * groupFontScales.C}pt` }}>
+
+                            <div
+                              className="grid grid-cols-2 gap-[2mm] border-t-[0.1mm] border-black pt-[1mm] mt-[0.5mm]"
+                              style={{
+                                fontSize: `${5.8 * groupFontScales.C}pt`,
+                              }}
+                            >
                               <div>
-                                {showNetWeight && <p><span className="font-black">淨重：</span>{netWeight}</p>}
-                                {showStorage && <p><span className="font-black">保存：</span>{storageCondition}</p>}
-                                {showExpiry && <p><span className="font-black">效期：</span>{shelfLife}</p>}
+                                {showNetWeight && (
+                                  <p>
+                                    <span className="font-black">
+                                      {t("erp_720")}
+                                    </span>
+                                    {netWeight}
+                                  </p>
+                                )}
+                                {showStorage && (
+                                  <p>
+                                    <span className="font-black">
+                                      {t("erp_734")}
+                                    </span>
+                                    {storageCondition}
+                                  </p>
+                                )}
+                                {showExpiry && (
+                                  <p>
+                                    <span className="font-black">
+                                      {t("erp_735")}
+                                    </span>
+                                    {shelfLife}
+                                  </p>
+                                )}
                               </div>
                               <div className="text-right">
                                 {showExpiry && (
                                   <p className="font-black text-black">
-                                    有效：{expiryOption === 'printed' ? '標示於包裝' : expiryDate}
+                                    {t("erp_736")}
+                                    {expiryOption === "printed"
+                                      ? i18n.t("erp_737")
+                                      : expiryDate}
                                   </p>
                                 )}
-                                {showOrigin && originCountry && <p><span className="font-black">產地：</span>{originCountry}</p>}
+                                {showOrigin && originCountry && (
+                                  <p>
+                                    <span className="font-black">
+                                      {t("erp_738")}
+                                    </span>
+                                    {originCountry}
+                                  </p>
+                                )}
                               </div>
                             </div>
 
                             {showAllergens && (
-                              <p className="font-black text-black bg-white border-[0.1mm] border-dashed border-black p-0.5 mt-0.5" style={{ fontSize: `${5 * groupFontScales.F}pt` }}>
-                                過敏原：{allergenWarning.replace('本產品含有', '').replace('，不適合對其過敏體質者食用。', '')}
+                              <p
+                                className="font-black text-black bg-white border-[0.1mm] border-dashed border-black p-0.5 mt-0.5"
+                                style={{
+                                  fontSize: `${5 * groupFontScales.F}pt`,
+                                }}
+                              >
+                                {t("erp_739")}
+                                {allergenWarning
+                                  .replace(i18n.t("erp_740"), "")
+                                  .replace(i18n.t("erp_741"), "")}
                               </p>
                             )}
                           </div>
                         )}
 
                         {/* 3. Bottom Row: Nutrition facts table & corporate details & QR code */}
-                        {labelSize !== '70x50' ? (
-                          <div 
-                            style={showNutrition ? { gridTemplateColumns: '1.1fr 1fr' } : undefined}
+                        {labelSize !== "70x50" ? (
+                          <div
+                            style={
+                              showNutrition
+                                ? {
+                                    gridTemplateColumns: "1.1fr 1fr",
+                                  }
+                                : undefined
+                            }
                             className={cn(
                               "w-full border-t-[0.8mm] border-black pt-[2mm] shrink-0 text-black",
-                              showNutrition 
-                                ? "grid gap-[3mm] items-end grid-cols-[1.1fr_1fr]" 
-                                : "block"
+                              showNutrition
+                                ? "grid gap-[3mm] items-end grid-cols-[1.1fr_1fr]"
+                                : "block",
                             )}
                           >
-                            
                             {/* Bottom Left: Corporate Details + Barcode Area */}
-                            <div className={cn(
-                              "overflow-hidden text-black w-full",
-                              showNutrition ? "space-y-[2mm]" : "flex justify-between items-end gap-[4mm] border-b-[0.1mm] border-dashed border-slate-300 pb-1"
-                            )}>
-                              {shouldMoveInfoToBottomLeft && (showNetWeight || showStorage || showExpiry || showOrigin) && (
-                                <div className="leading-[1.35] font-bold space-y-[0.6mm] border-b-[0.2mm] border-dashed border-black pb-2 mb-2 text-black shrink-0" style={{ fontSize: `${6.8 * groupFontScales.C}pt` }}>
-                                  {showNetWeight && (
-                                    <div className="flex justify-between text-black">
-                                      <span>淨重：</span>
-                                      <span className="font-mono">{netWeight}</span>
-                                    </div>
-                                  )}
-                                  {showStorage && (
-                                    <div className="flex justify-between text-black">
-                                      <span>保存條件：</span>
-                                      <span>{storageCondition}</span>
-                                    </div>
-                                  )}
-                                  {showExpiry && (
-                                    <>
+                            <div
+                              className={cn(
+                                "overflow-hidden text-black w-full",
+                                showNutrition
+                                  ? "space-y-[2mm]"
+                                  : "flex justify-between items-end gap-[4mm] border-b-[0.1mm] border-dashed border-slate-300 pb-1",
+                              )}
+                            >
+                              {shouldMoveInfoToBottomLeft &&
+                                (showNetWeight ||
+                                  showStorage ||
+                                  showExpiry ||
+                                  showOrigin) && (
+                                  <div
+                                    className="leading-[1.35] font-bold space-y-[0.6mm] border-b-[0.2mm] border-dashed border-black pb-2 mb-2 text-black shrink-0"
+                                    style={{
+                                      fontSize: `${6.8 * groupFontScales.C}pt`,
+                                    }}
+                                  >
+                                    {showNetWeight && (
                                       <div className="flex justify-between text-black">
-                                        <span>保存期限：</span>
-                                        <span>{shelfLife}</span>
-                                      </div>
-                                      <div className="flex justify-between font-black text-black">
-                                        <span>有效日期：</span>
+                                        <span>{t("erp_720")}</span>
                                         <span className="font-mono">
-                                          {expiryOption === 'printed' ? '標示於封口處' : expiryDate}
+                                          {netWeight}
                                         </span>
                                       </div>
-                                    </>
-                                  )}
-                                  {showOrigin && originCountry && (
-                                    <div className="flex justify-between text-black">
-                                      <span>原產地：</span>
-                                      <span className="font-extrabold">{originCountry}</span>
-                                    </div>
-                                  )}
-                                </div>
-                              )}
+                                    )}
+                                    {showStorage && (
+                                      <div className="flex justify-between text-black">
+                                        <span>{t("erp_721")}</span>
+                                        <span>{storageCondition}</span>
+                                      </div>
+                                    )}
+                                    {showExpiry && (
+                                      <>
+                                        <div className="flex justify-between text-black">
+                                          <span>{t("erp_722")}</span>
+                                          <span>{shelfLife}</span>
+                                        </div>
+                                        <div className="flex justify-between font-black text-black">
+                                          <span>{t("erp_723")}</span>
+                                          <span className="font-mono">
+                                            {expiryOption === "printed"
+                                              ? i18n.t("erp_724")
+                                              : expiryDate}
+                                          </span>
+                                        </div>
+                                      </>
+                                    )}
+                                    {showOrigin && originCountry && (
+                                      <div className="flex justify-between text-black">
+                                        <span>{t("erp_725")}</span>
+                                        <span className="font-extrabold">
+                                          {originCountry}
+                                        </span>
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
 
                               {showResponsible && (
-                                <div className={cn(
-                                  "leading-[1.3] text-black font-semibold",
-                                  showNutrition ? "" : "flex-1"
-                                )} style={{ fontSize: `${6.2 * groupFontScales.D}pt` }}>
+                                <div
+                                  className={cn(
+                                    "leading-[1.3] text-black font-semibold",
+                                    showNutrition ? "" : "flex-1",
+                                  )}
+                                  style={{
+                                    fontSize: `${6.2 * groupFontScales.D}pt`,
+                                  }}
+                                >
                                   {showAddress && (
                                     <div className="flex gap-[0.5mm]">
-                                      <span className="font-black shrink-0">地址：</span>
+                                      <span className="font-black shrink-0">
+                                        {t("erp_729")}
+                                      </span>
                                       <span>{companyAddress}</span>
                                     </div>
                                   )}
                                   {showPhone && (
                                     <div className="flex gap-[0.5mm]">
-                                      <span className="font-black shrink-0">電話：</span>
-                                      <span className="font-mono">{companyPhone}</span>
+                                      <span className="font-black shrink-0">
+                                        {t("erp_730")}
+                                      </span>
+                                      <span className="font-mono">
+                                        {companyPhone}
+                                      </span>
                                     </div>
                                   )}
-                                  {showOrigin && !shouldMoveInfoToBottomLeft && (
-                                    <div className="flex gap-[0.5mm]">
-                                      <span className="font-black shrink-0">原產地：</span>
-                                      <span className="font-extrabold text-black">{originCountry}</span>
-                                    </div>
-                                  )}
+                                  {showOrigin &&
+                                    !shouldMoveInfoToBottomLeft && (
+                                      <div className="flex gap-[0.5mm]">
+                                        <span className="font-black shrink-0">
+                                          {t("erp_725")}
+                                        </span>
+                                        <span className="font-extrabold text-black">
+                                          {originCountry}
+                                        </span>
+                                      </div>
+                                    )}
                                   {showManufacturer && (
-                                    <div className="flex gap-[0.5mm] mt-0.5 text-black" style={{ fontSize: `${5.8 * groupFontScales.D}pt` }}>
-                                      <span>製造商：</span>
-                                      <span className="truncate">{companyName}</span>
+                                    <div
+                                      className="flex gap-[0.5mm] mt-0.5 text-black"
+                                      style={{
+                                        fontSize: `${5.8 * groupFontScales.D}pt`,
+                                      }}
+                                    >
+                                      <span>{t("erp_731")}</span>
+                                      <span className="truncate">
+                                        {companyName}
+                                      </span>
                                     </div>
                                   )}
                                 </div>
@@ -4038,22 +5594,32 @@ export const Labels = () => {
 
                               {/* QR Code Barcode area */}
                               {showBarcode && (
-                                <div className={cn(
-                                  "flex items-center gap-[2mm] shrink-0",
-                                  showNutrition 
-                                    ? "border-t-[0.2mm] border-dashed border-black pt-[1.5mm]" 
-                                    : "border-l-[0.2mm] border-dashed border-black pl-[4mm] py-0.5"
-                                )}>
+                                <div
+                                  className={cn(
+                                    "flex items-center gap-[2mm] shrink-0",
+                                    showNutrition
+                                      ? "border-t-[0.2mm] border-dashed border-black pt-[1.5mm]"
+                                      : "border-l-[0.2mm] border-dashed border-black pl-[4mm] py-0.5",
+                                  )}
+                                >
                                   <div className="p-0.5 bg-white border border-black shrink-0 flex items-center justify-center">
-                                    <QRCodeSVG 
-                                      value={barcodeText || "https://shutterorder.com"} 
+                                    <QRCodeSVG
+                                      value={
+                                        barcodeText ||
+                                        "https://shutterorder.com"
+                                      }
                                       size={32}
                                       level="M"
                                       fgColor="#000000"
                                       bgColor="#ffffff"
                                     />
                                   </div>
-                                  <span className="font-sans font-black leading-tight text-black whitespace-pre-line text-left" style={{ fontSize: `${5.2 * groupFontScales.D}pt` }}>
+                                  <span
+                                    className="font-sans font-black leading-tight text-black whitespace-pre-line text-left"
+                                    style={{
+                                      fontSize: `${5.2 * groupFontScales.D}pt`,
+                                    }}
+                                  >
                                     {barcodeExplanation}
                                   </span>
                                 </div>
@@ -4063,74 +5629,185 @@ export const Labels = () => {
                             {/* Bottom Right: Taiwan Nutrition Facts Table with Custom Decimal Precisions */}
                             {showNutrition && (
                               <div className="flex flex-col justify-end text-black shrink-0 border border-black p-1 bg-white">
-                                <div className="font-black text-center border-b-[0.25mm] border-black pb-0.5 tracking-[1mm] text-black leading-none" style={{ fontSize: `${7 * groupFontScales.E}pt` }}>
-                                  營 養 標 示
+                                <div
+                                  className="font-black text-center border-b-[0.25mm] border-black pb-0.5 tracking-[1mm] text-black leading-none"
+                                  style={{
+                                    fontSize: `${7 * groupFontScales.E}pt`,
+                                  }}
+                                >
+                                  {t("erp_708")}
                                 </div>
-                                <div className="font-bold text-left py-1 leading-normal border-b-[0.15mm] border-black text-black" style={{ fontSize: `${5.5 * groupFontScales.E}pt` }}>
-                                  每一份量 {portionSize} 公克<br />
-                                  本包裝含 {portionsPerPkg} 份
+                                <div
+                                  className="font-bold text-left py-1 leading-normal border-b-[0.15mm] border-black text-black"
+                                  style={{
+                                    fontSize: `${5.5 * groupFontScales.E}pt`,
+                                  }}
+                                >
+                                  {t("erp_709")}
+                                  {portionSize}
+                                  {t("erp_77")}
+                                  <br />
+                                  {t("erp_710")}
+                                  {portionsPerPkg}
+                                  {t("erp_15")}
                                 </div>
-                                
-                                <table className="w-full text-center border-collapse mt-0.5 text-black" style={{ fontSize: `${5.8 * groupFontScales.E}pt` }}>
+
+                                <table
+                                  className="w-full text-center border-collapse mt-0.5 text-black"
+                                  style={{
+                                    fontSize: `${5.8 * groupFontScales.E}pt`,
+                                  }}
+                                >
                                   <thead>
-                                    <tr className="border-b-[0.15mm] border-black text-black" style={{ fontSize: `${5 * groupFontScales.E}pt` }}>
+                                    <tr
+                                      className="border-b-[0.15mm] border-black text-black"
+                                      style={{
+                                        fontSize: `${5 * groupFontScales.E}pt`,
+                                      }}
+                                    >
                                       <th className="py-[0.2mm] text-left pl-[0.5mm] text-black font-black"></th>
-                                      <th className="py-[0.2mm] text-right pr-[0.5mm] text-black font-black w-[28%]">每份</th>
-                                      <th className="py-[0.2mm] text-right pr-[0.5mm] text-black font-black w-[36%]">每 100 公克</th>
+                                      <th className="py-[0.2mm] text-right pr-[0.5mm] text-black font-black w-[28%]">
+                                        {t("erp_711")}
+                                      </th>
+                                      <th className="py-[0.2mm] text-right pr-[0.5mm] text-black font-black w-[36%]">
+                                        {t("erp_742")}
+                                      </th>
                                     </tr>
                                   </thead>
                                   <tbody className="font-mono text-black">
                                     {[
-                                      { name: '熱量', valPer100: Number(calories), key: 'calories', unit: '大卡', isZeroLimit: 0 },
-                                      { name: '蛋白質', valPer100: Number(protein), key: 'protein', unit: '公克', isZeroLimit: 0 },
-                                      { name: '脂肪', valPer100: Number(fat), key: 'fat', unit: '公克', isZeroLimit: 0 },
-                                      { name: '  飽和脂肪', valPer100: Number(saturatedFat), key: 'saturatedFat', unit: '公克', isZeroLimit: 0.1 },
-                                      { name: '  反式脂肪', valPer100: Number(transFat), key: 'transFat', unit: '公克', isZeroLimit: 0.3 },
-                                      { name: '碳水化合物', valPer100: Number(carbs), key: 'carbs', unit: '公克', isZeroLimit: 0 },
-                                      { name: '  糖', valPer100: Number(sugar), key: 'sugar', unit: '公克', isZeroLimit: 0.5 },
-                                      { name: '鈉', valPer100: Number(sodium), key: 'sodium', unit: '毫克', isZeroLimit: 5 },
+                                      {
+                                        name: i18n.t("erp_197"),
+                                        valPer100: Number(calories),
+                                        key: "calories",
+                                        unit: i18n.t("erp_713"),
+                                        isZeroLimit: 0,
+                                      },
+                                      {
+                                        name: i18n.t("erp_198"),
+                                        valPer100: Number(protein),
+                                        key: "protein",
+                                        unit: i18n.t("erp_77"),
+                                        isZeroLimit: 0,
+                                      },
+                                      {
+                                        name: i18n.t("erp_199"),
+                                        valPer100: Number(fat),
+                                        key: "fat",
+                                        unit: i18n.t("erp_77"),
+                                        isZeroLimit: 0,
+                                      },
+                                      {
+                                        name: i18n.t("erp_714"),
+                                        valPer100: Number(saturatedFat),
+                                        key: "saturatedFat",
+                                        unit: i18n.t("erp_77"),
+                                        isZeroLimit: 0.1,
+                                      },
+                                      {
+                                        name: i18n.t("erp_715"),
+                                        valPer100: Number(transFat),
+                                        key: "transFat",
+                                        unit: i18n.t("erp_77"),
+                                        isZeroLimit: 0.3,
+                                      },
+                                      {
+                                        name: i18n.t("erp_218"),
+                                        valPer100: Number(carbs),
+                                        key: "carbs",
+                                        unit: i18n.t("erp_77"),
+                                        isZeroLimit: 0,
+                                      },
+                                      {
+                                        name: i18n.t("erp_716"),
+                                        valPer100: Number(sugar),
+                                        key: "sugar",
+                                        unit: i18n.t("erp_77"),
+                                        isZeroLimit: 0.5,
+                                      },
+                                      {
+                                        name: i18n.t("erp_201"),
+                                        valPer100: Number(sodium),
+                                        key: "sodium",
+                                        unit: i18n.t("erp_717"),
+                                        isZeroLimit: 5,
+                                      },
                                     ].map((row, idx) => {
-                                      const sizeRatio = Number(portionSize) / 100;
-                                      const valPerPortion = row.valPer100 * sizeRatio;
+                                      const sizeRatio =
+                                        Number(portionSize) / 100;
+                                      const valPerPortion =
+                                        row.valPer100 * sizeRatio;
                                       const val100 = row.valPer100;
-
-                                      const cfg = nutritionConfigs[row.key] || { decimals: 1, maxLength: 8 };
-
-                                      let displayPortion = '';
-                                      let display100 = '';
+                                      const cfg = nutritionConfigs[row.key] || {
+                                        decimals: 1,
+                                        maxLength: 8,
+                                      };
+                                      let displayPortion = "";
+                                      let display100 = "";
 
                                       // Handle rounding precision
                                       if (cfg.decimals === -1) {
-                                        displayPortion = Math.round(valPerPortion).toString();
-                                        display100 = Math.round(val100).toString();
+                                        displayPortion =
+                                          Math.round(valPerPortion).toString();
+                                        display100 =
+                                          Math.round(val100).toString();
                                       } else {
-                                        displayPortion = valPerPortion.toFixed(cfg.decimals);
-                                        display100 = val100.toFixed(cfg.decimals);
+                                        displayPortion = valPerPortion.toFixed(
+                                          cfg.decimals,
+                                        );
+                                        display100 = val100.toFixed(
+                                          cfg.decimals,
+                                        );
                                       }
 
                                       // Apply FDA Zero checks & Sodium checks
-                                      if (row.key === 'sodium') {
-                                        displayPortion = valPerPortion < 5 ? '0' : Math.round(valPerPortion).toString();
-                                        display100 = val100 < 5 ? '0' : Math.round(val100).toString();
+                                      if (row.key === "sodium") {
+                                        displayPortion =
+                                          valPerPortion < 5
+                                            ? "0"
+                                            : Math.round(
+                                                valPerPortion,
+                                              ).toString();
+                                        display100 =
+                                          val100 < 5
+                                            ? "0"
+                                            : Math.round(val100).toString();
                                       } else if (row.isZeroLimit > 0) {
-                                        if (valPerPortion <= row.isZeroLimit) displayPortion = '0';
-                                        if (val100 <= row.isZeroLimit) display100 = '0';
+                                        if (valPerPortion <= row.isZeroLimit)
+                                          displayPortion = "0";
+                                        if (val100 <= row.isZeroLimit)
+                                          display100 = "0";
                                       }
 
                                       // Limit length to prevent overflows
-                                      if (displayPortion.length > cfg.maxLength) {
-                                        displayPortion = displayPortion.substring(0, cfg.maxLength);
+                                      if (
+                                        displayPortion.length > cfg.maxLength
+                                      ) {
+                                        displayPortion =
+                                          displayPortion.substring(
+                                            0,
+                                            cfg.maxLength,
+                                          );
                                       }
                                       if (display100.length > cfg.maxLength) {
-                                        display100 = display100.substring(0, cfg.maxLength);
+                                        display100 = display100.substring(
+                                          0,
+                                          cfg.maxLength,
+                                        );
                                       }
-
                                       return (
-                                        <tr key={idx} className="text-black font-black">
-                                          <td className={cn(
-                                            "py-[0.2mm] text-left font-sans pl-[0.5mm] text-black",
-                                            row.name.startsWith('  ') ? "pl-[2mm] font-semibold text-black" : "font-black text-black"
-                                          )}>
+                                        <tr
+                                          key={idx}
+                                          className="text-black font-black"
+                                        >
+                                          <td
+                                            className={cn(
+                                              "py-[0.2mm] text-left font-sans pl-[0.5mm] text-black",
+                                              row.name.startsWith("  ")
+                                                ? "pl-[2mm] font-semibold text-black"
+                                                : "font-black text-black",
+                                            )}
+                                          >
                                             {row.name.trim()}
                                           </td>
                                           <td className="py-[0.2mm] text-right pr-[0.5mm] text-black font-mono font-bold whitespace-nowrap">
@@ -4146,56 +5823,67 @@ export const Labels = () => {
                                 </table>
                               </div>
                             )}
-
                           </div>
                         ) : (
                           // Mini Label bottom row (70x50)
-                          <div className="w-full border-t-[0.4mm] border-black pt-[0.5mm] flex justify-between items-center text-black font-black shrink-0" style={{ fontSize: `${5.2 * groupFontScales.D}pt` }}>
+                          <div
+                            className="w-full border-t-[0.4mm] border-black pt-[0.5mm] flex justify-between items-center text-black font-black shrink-0"
+                            style={{
+                              fontSize: `${5.2 * groupFontScales.D}pt`,
+                            }}
+                          >
                             {showResponsible && (
                               <span className="leading-none truncate max-w-[48mm]">
-                                負責商：{companyName} · 電話: {companyPhone}
+                                {t("erp_743")}
+                                {companyName}
+                                {t("erp_744")}
+                                {companyPhone}
                               </span>
                             )}
                             {showBarcode && (
-                              <span className="font-mono leading-none shrink-0 font-black border-[0.1mm] border-black px-0.5 rounded-[0.2mm]" style={{ fontSize: `${4.2 * groupFontScales.D}pt` }}>
+                              <span
+                                className="font-mono leading-none shrink-0 font-black border-[0.1mm] border-black px-0.5 rounded-[0.2mm]"
+                                style={{
+                                  fontSize: `${4.2 * groupFontScales.D}pt`,
+                                }}
+                              >
                                 QR: Cook Info
                               </span>
                             )}
                           </div>
                         )}
-
                       </div>
                     )}
                   </div>
 
-          {/* 3. Ghost Next Label at the bottom */}
-          {previewContinuous && (
-            <div 
-              className="opacity-[0.12] border-2 border-black border-dashed rounded-none bg-white flex flex-col justify-between p-2 pointer-events-none select-none shrink-0 print:hidden animate-in fade-in duration-300"
-              style={{
-                width: `${activeWidth}mm`,
-                height: '20mm',
-                marginTop: `${lowerGap}mm`,
-                overflow: 'hidden'
-              }}
-            >
-              <div className="w-full border-b border-black pb-1 flex justify-between items-center text-[5.5pt]">
-                <span className="font-bold">NEXT LABEL</span>
-                <span className="font-mono">GAP: {lowerGap.toFixed(1).replace(/\.0$/, '')}mm</span>
-              </div>
-            </div>
-          )}
-
+                  {/* 3. Ghost Next Label at the bottom */}
+                  {previewContinuous && (
+                    <div
+                      className="opacity-[0.12] border-2 border-black border-dashed rounded-none bg-white flex flex-col justify-between p-2 pointer-events-none select-none shrink-0 print:hidden animate-in fade-in duration-300"
+                      style={{
+                        width: `${activeWidth}mm`,
+                        height: "20mm",
+                        marginTop: `${lowerGap}mm`,
+                        overflow: "hidden",
+                      }}
+                    >
+                      <div className="w-full border-b border-black pb-1 flex justify-between items-center text-[5.5pt]">
+                        <span className="font-bold">NEXT LABEL</span>
+                        <span className="font-mono">
+                          GAP: {lowerGap.toFixed(1).replace(/\.0$/, "")}mm
+                        </span>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             );
           })()}
 
           <p className="text-[10px] text-gray-500 font-bold mt-6 print:hidden">
-            💡 提示：點擊右上角的「列印標籤」會調用瀏覽器列印。建議在列印設定中將邊距設為「無」，背景圖形設為「啟用」。
+            {t("erp_745")}
           </p>
         </div>
-
       </div>
 
       {/* Printing Media Style for Thermal Printer */}
@@ -4263,21 +5951,12 @@ export const Labels = () => {
             box-shadow: none !important;
             transform: none !important;
             page-break-inside: avoid;
-            margin: ${
-              gapAlignment === 'top' ? `${labelGap}mm auto 0` :
-              gapAlignment === 'center' ? `${labelGap / 2}mm auto 0` :
-              `0 auto`
-            } !important;
+            margin: ${gapAlignment === "top" ? `${labelGap}mm auto 0` : gapAlignment === "center" ? `${labelGap / 2}mm auto 0` : `0 auto`} !important;
             background-color: #ffffff !important;
             color: #000000 !important;
           }
           @page {
-            size: ${
-              labelSize === '100x100' ? `100mm ${100 + (includeGapInPrint ? labelGap : 0)}mm` :
-              labelSize === '80x80' ? `80mm ${80 + (includeGapInPrint ? labelGap : 0)}mm` :
-              labelSize === '100x150' ? `100mm ${150 + (includeGapInPrint ? labelGap : 0)}mm` :
-              `70mm ${50 + (includeGapInPrint ? labelGap : 0)}mm`
-            };
+            size: ${labelSize === "100x100" ? `100mm ${100 + (includeGapInPrint ? labelGap : 0)}mm` : labelSize === "80x80" ? `80mm ${80 + (includeGapInPrint ? labelGap : 0)}mm` : labelSize === "100x150" ? `100mm ${150 + (includeGapInPrint ? labelGap : 0)}mm` : `70mm ${50 + (includeGapInPrint ? labelGap : 0)}mm`};
             margin: 0;
           }
         }
@@ -4285,5 +5964,4 @@ export const Labels = () => {
     </div>
   );
 };
-
 export default Labels;
