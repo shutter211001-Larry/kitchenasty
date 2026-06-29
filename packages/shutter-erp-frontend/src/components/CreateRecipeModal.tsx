@@ -592,7 +592,7 @@ const CreateRecipeModal = ({ initialData, onClose, onSuccess }: Props) => {
             {/* Left Panel: Nested Steps */}
             <div className="flex-[1.5] p-4 md:p-8 overflow-y-auto border-b md:border-b-0 md:border-r border-border bg-muted/5 order-2 md:order-1 h-[40vh] md:h-auto pb-24 md:pb-8">
               <div className="space-y-4 md:space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="col-span-1 md:col-span-2 space-y-2">
                     <label className="text-xs font-black uppercase tracking-widest text-muted-foreground">食譜名稱</label>
                     <input 
