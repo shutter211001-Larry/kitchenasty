@@ -20,6 +20,8 @@ import {
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { QRCodeSVG } from 'qrcode.react';
+import { useTranslation } from 'react-i18next';
+import { SUPPORTED_LANGUAGES } from '../i18n';
 
 interface IngredientItem {
   id: string;
@@ -55,6 +57,8 @@ export const Labels = () => {
   const [loading, setLoading] = useState(false);
   const [allIngredients, setAllIngredients] = useState<any[]>([]);
   const [expandedIngredients, setExpandedIngredients] = useState<Record<string, boolean>>({});
+  const { t } = useTranslation();
+  const [printLanguage, setPrintLanguage] = useState<string>('en'); // Target dual language
 
   const parseIngredientReferences = (text: string) => {
     const regex = /\{([^,}]+)(?:,\s*name\s*:\s*(?:"([^"]*)"|'([^']*)'))?\}/g;
@@ -83,6 +87,8 @@ export const Labels = () => {
     return null;
   };
 
+  const [enableDualLanguage, setEnableDualLanguage] = useState<boolean>(false);
+
   const getFormattedIngredientsText = (): string => {
     let formatted = ingredientsText || '';
     const references = parseIngredientReferences(ingredientsText);
@@ -92,9 +98,17 @@ export const Labels = () => {
       const comps = getIngredientComponents(ref.ingredientName);
       
       let replacement = displayName;
+      
+      if (enableDualLanguage) {
+        const translatedName = t(ref.ingredientName, { lng: printLanguage, fallbackLng: 'zh-TW' });
+        if (translatedName && translatedName !== ref.ingredientName) {
+           replacement = `${displayName} (${translatedName})`;
+        }
+      }
+
       if (isExpanded && comps) {
         const formattedComps = comps.split(/[,，、\s]+/).filter(Boolean).join('、');
-        replacement = `${displayName}(${formattedComps})`;
+        replacement = `${replacement}(${formattedComps})`;
       }
       formatted = formatted.replaceAll(ref.raw, replacement);
     });
@@ -638,6 +652,8 @@ export const Labels = () => {
         if (settings.reheatingSubTitleSize) setReheatingSubTitleSize(settings.reheatingSubTitleSize);
         if (settings.reheatingContentSize) setReheatingContentSize(settings.reheatingContentSize);
         if (settings.customLines !== undefined) setCustomLines(settings.customLines);
+        if (settings.enableDualLanguage !== undefined) setEnableDualLanguage(settings.enableDualLanguage);
+        if (settings.printLanguage !== undefined) setPrintLanguage(settings.printLanguage);
       } catch (e) {
         console.error('Failed to parse saved settings', e);
       }
@@ -736,6 +752,10 @@ export const Labels = () => {
 
     // Scaling
     if (config.portionScale !== undefined) setPortionScale(config.portionScale);
+
+    // Dual Language
+    if (config.enableDualLanguage !== undefined) setEnableDualLanguage(config.enableDualLanguage);
+    if (config.printLanguage !== undefined) setPrintLanguage(config.printLanguage);
   };
 
   // Copy and Paste Layout configuration utilities
@@ -1100,6 +1120,8 @@ export const Labels = () => {
     });
     setBarcodeExplanation('掃碼查看\n復熱教學影片');
     setExpandedIngredients({});
+    setEnableDualLanguage(false);
+    setPrintLanguage('en');
     localStorage.removeItem('pizzamaster_label_settings');
   };
 
@@ -1154,7 +1176,9 @@ export const Labels = () => {
       reheatingMainTitleSize,
       reheatingSubTitleSize,
       reheatingContentSize,
-      expandedIngredients
+      expandedIngredients,
+      enableDualLanguage,
+      printLanguage
     };
     localStorage.setItem('pizzamaster_label_settings', JSON.stringify(settings));
     alert('🎉 標籤列印設定已成功儲存至瀏覽器！下次開啟將自動套用您的客製化版面。');
@@ -1476,6 +1500,43 @@ export const Labels = () => {
                 </div>
               </div>
             )}
+          </div>
+
+          {/* Section: Dual Language Selection */}
+          <div className="space-y-3 bg-indigo-50/50 border border-indigo-100 p-4 rounded-2xl">
+            <div className="flex items-center gap-1.5 text-indigo-700">
+              <Settings2 className="w-4 h-4" />
+              <h4 className="text-xs font-black uppercase tracking-wider">標籤雙語設定 (成分翻譯)</h4>
+            </div>
+            
+            <div className="flex items-center gap-3">
+              <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-gray-700">
+                <input
+                  type="checkbox"
+                  className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 w-4 h-4 cursor-pointer"
+                  checked={enableDualLanguage}
+                  onChange={(e) => setEnableDualLanguage(e.target.checked)}
+                />
+                啟用雙語成分顯示
+              </label>
+              
+              {enableDualLanguage && (
+                <select
+                  className="flex-1 px-3 py-1.5 bg-white border border-border rounded-xl font-bold text-xs outline-none"
+                  value={printLanguage}
+                  onChange={(e) => setPrintLanguage(e.target.value)}
+                >
+                  {SUPPORTED_LANGUAGES.map((l) => (
+                    <option key={l.code} value={l.code}>
+                      {l.flag} {l.name}
+                    </option>
+                  ))}
+                </select>
+              )}
+            </div>
+            <p className="text-[10px] text-muted-foreground">
+              啟用後，系統將自動從翻譯庫中載入外文，並與中文成分並排顯示。
+            </p>
           </div>
 
           {/* Section: Size & Dimension Selection */}

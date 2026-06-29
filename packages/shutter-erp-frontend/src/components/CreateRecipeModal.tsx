@@ -573,27 +573,27 @@ const CreateRecipeModal = ({ initialData, onClose, onSuccess }: Props) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
-      <div className="bg-white rounded-[2.5rem] w-full max-w-5xl max-h-[85vh] overflow-hidden shadow-2xl flex flex-col animate-in fade-in zoom-in duration-200">
-        <header className="p-8 pb-6 flex justify-between items-center border-b border-border bg-muted/20">
+    <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center p-0 md:p-4 bg-black/60 backdrop-blur-md">
+      <div className="bg-white rounded-t-[2rem] md:rounded-[2.5rem] w-full md:max-w-5xl h-[95vh] md:h-auto md:max-h-[85vh] overflow-hidden shadow-2xl flex flex-col animate-in fade-in slide-in-from-bottom-10 md:slide-in-from-bottom-0 md:zoom-in duration-200">
+        <header className="p-4 md:p-8 pb-4 md:pb-6 flex justify-between items-center border-b border-border bg-muted/20 shrink-0">
           <div>
-            <h3 className="text-3xl font-black text-gray-800 tracking-tight">
+            <h3 className="text-xl md:text-3xl font-black text-gray-800 tracking-tight">
               {initialData ? '編輯食譜內容' : '建立結構化食譜'}
             </h3>
-            <p className="text-sm text-muted-foreground mt-1">先建立步驟，再將食材加入動作中</p>
+            <p className="text-xs md:text-sm text-muted-foreground mt-1">先建立步驟，再將食材加入動作中</p>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-white rounded-full shadow-sm transition-all">
-            <X className="w-8 h-8 text-muted-foreground" />
+          <button onClick={onClose} className="p-2 hover:bg-white rounded-full shadow-sm transition-all bg-white/50 md:bg-transparent">
+            <X className="w-6 h-6 md:w-8 md:h-8 text-muted-foreground" />
           </button>
         </header>
 
         <DragDropContext onDragEnd={onDragEnd}>
-          <div className="flex-1 overflow-hidden flex">
+          <div className="flex-1 overflow-hidden flex flex-col md:flex-row">
             {/* Left Panel: Nested Steps */}
-            <div className="flex-[1.5] p-8 overflow-y-auto border-r border-border bg-muted/5">
-              <div className="space-y-6">
-                <div className="grid grid-cols-4 gap-4">
-                  <div className="col-span-2 space-y-2">
+            <div className="flex-[1.5] p-4 md:p-8 overflow-y-auto border-b md:border-b-0 md:border-r border-border bg-muted/5 order-2 md:order-1 h-[40vh] md:h-auto pb-24 md:pb-8">
+              <div className="space-y-4 md:space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <div className="col-span-1 md:col-span-2 space-y-2">
                     <label className="text-xs font-black uppercase tracking-widest text-muted-foreground">食譜名稱</label>
                     <input 
                       type="text" 
@@ -716,7 +716,7 @@ const CreateRecipeModal = ({ initialData, onClose, onSuccess }: Props) => {
                   </div>
 
                   {outputs.map((out, idx) => (
-                    <div key={idx} className="flex gap-2 items-center bg-muted/20 p-2 rounded-lg border border-border">
+                    <div key={idx} className="flex flex-col md:flex-row gap-2 md:items-center bg-muted/20 p-3 md:p-2 rounded-lg border border-border">
                       <select 
                         value={out.type} 
                         onChange={e => {
@@ -724,7 +724,7 @@ const CreateRecipeModal = ({ initialData, onClose, onSuccess }: Props) => {
                           newOutputs[idx].type = e.target.value;
                           setOutputs(newOutputs);
                         }}
-                        className="p-2 border rounded-lg text-sm bg-white"
+                        className="w-full md:w-auto p-2 border rounded-lg text-sm bg-white"
                       >
                         <option value="PRIMARY">主產品 (Primary)</option>
                         <option value="BYPRODUCT">副產品 (By-product)</option>
@@ -739,44 +739,46 @@ const CreateRecipeModal = ({ initialData, onClose, onSuccess }: Props) => {
                           newOutputs[idx].name = e.target.value;
                           setOutputs(newOutputs);
                         }}
-                        className="flex-1 p-2 border rounded-lg text-sm bg-white"
+                        className="w-full md:flex-1 p-2 border rounded-lg text-sm bg-white"
                       />
-                      <input 
-                        type="number" 
-                        placeholder="產出量" 
-                        value={out.yield || ''}
-                        onChange={e => {
-                          const newOutputs = [...outputs];
-                          newOutputs[idx].yield = parseFloat(e.target.value) || 0;
-                          setOutputs(newOutputs);
-                        }}
-                        className="w-24 p-2 border rounded-lg text-sm bg-white"
-                      />
-                      <select 
-                        value={out.unit} 
-                        onChange={e => {
-                          const newOutputs = [...outputs];
-                          newOutputs[idx].unit = e.target.value;
-                          setOutputs(newOutputs);
-                        }}
-                        className="w-20 p-2 border rounded-lg text-sm bg-white"
-                      >
-                        <option value="g">g</option>
-                        <option value="ml">ml</option>
-                        <option value="kg">kg</option>
-                        <option value="L">L</option>
-                      </select>
-                      <button 
-                        type="button" 
-                        onClick={() => {
-                          const newOutputs = [...outputs];
-                          newOutputs.splice(idx, 1);
-                          setOutputs(newOutputs);
-                        }}
-                        className="p-2 text-red-500 hover:bg-red-50 rounded"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                      <div className="flex gap-2 w-full md:w-auto">
+                        <input 
+                          type="number" 
+                          placeholder="產出量" 
+                          value={out.yield || ''}
+                          onChange={e => {
+                            const newOutputs = [...outputs];
+                            newOutputs[idx].yield = parseFloat(e.target.value) || 0;
+                            setOutputs(newOutputs);
+                          }}
+                          className="flex-1 md:w-24 p-2 border rounded-lg text-sm bg-white"
+                        />
+                        <select 
+                          value={out.unit} 
+                          onChange={e => {
+                            const newOutputs = [...outputs];
+                            newOutputs[idx].unit = e.target.value;
+                            setOutputs(newOutputs);
+                          }}
+                          className="w-20 p-2 border rounded-lg text-sm bg-white shrink-0"
+                        >
+                          <option value="g">g</option>
+                          <option value="ml">ml</option>
+                          <option value="kg">kg</option>
+                          <option value="L">L</option>
+                        </select>
+                        <button 
+                          type="button" 
+                          onClick={() => {
+                            const newOutputs = [...outputs];
+                            newOutputs.splice(idx, 1);
+                            setOutputs(newOutputs);
+                          }}
+                          className="p-2 text-red-500 hover:bg-red-50 rounded bg-white border border-border md:border-transparent md:bg-transparent shrink-0"
+                        >
+                          <Trash2 className="w-5 h-5 md:w-4 md:h-4" />
+                        </button>
+                      </div>
                     </div>
                   ))}
 
@@ -832,22 +834,25 @@ const CreateRecipeModal = ({ initialData, onClose, onSuccess }: Props) => {
                                   activeStepId === step.id ? "border-primary ring-2 ring-primary/20 shadow-lg" : "border-border"
                                 )}
                               >
-                                <div className="p-6 bg-muted/20 flex items-center gap-4 border-b border-border">
-                                  <div {...provided.dragHandleProps} className="text-muted-foreground"><GripVertical className="w-5 h-5" /></div>
-                                  <div className="w-8 h-8 rounded-full bg-gray-800 text-white flex items-center justify-center text-xs font-bold shrink-0">{index + 1}</div>
-                                  <div className="flex-1">
-                                    <div className="flex items-center gap-2">
-                                      <span className="px-2 py-0.5 bg-primary text-white rounded text-[10px] font-black uppercase">{step.action}</span>
-                                      <input 
-                                        type="text" 
-                                        className="font-bold text-sm bg-transparent outline-none border-b border-transparent focus:border-primary w-full"
-                                        placeholder="步驟補充說明..."
-                                        value={step.description}
-                                        onChange={(e) => setSteps(steps.map(s => s.id === step.id ? { ...s, description: e.target.value } : s))}
-                                      />
+                                <div className="p-4 md:p-6 bg-muted/20 flex flex-col md:flex-row md:items-center gap-4 border-b border-border">
+                                  <div className="flex items-center gap-4">
+                                    <div {...provided.dragHandleProps} className="text-muted-foreground"><GripVertical className="w-5 h-5" /></div>
+                                    <div className="w-8 h-8 rounded-full bg-gray-800 text-white flex items-center justify-center text-xs font-bold shrink-0">{index + 1}</div>
+                                    <div className="flex-1 md:w-auto">
+                                      <div className="flex flex-wrap items-center gap-2">
+                                        <span className="px-2 py-0.5 bg-primary text-white rounded text-[10px] font-black uppercase whitespace-nowrap">{step.action}</span>
+                                        <input 
+                                          type="text" 
+                                          className="font-bold text-sm bg-transparent outline-none border-b border-transparent focus:border-primary min-w-[120px] flex-1"
+                                          placeholder="步驟補充說明..."
+                                          value={step.description}
+                                          onChange={(e) => setSteps(steps.map(s => s.id === step.id ? { ...s, description: e.target.value } : s))}
+                                        />
+                                      </div>
                                     </div>
+                                    <button onClick={(e) => { e.stopPropagation(); removeStep(step.id); }} className="md:hidden p-2 text-muted-foreground hover:text-destructive shrink-0"><Trash2 className="w-4 h-4" /></button>
                                   </div>
-                                  <div className="flex items-center gap-2">
+                                  <div className="flex flex-col md:flex-row md:items-center gap-2 md:ml-auto">
                                     {index > 0 && (
                                       <div className="flex gap-1 mr-2">
                                         {steps.slice(0, index).map((prevStep, psIdx) => {
@@ -1094,8 +1099,8 @@ const CreateRecipeModal = ({ initialData, onClose, onSuccess }: Props) => {
             </div>
 
             {/* Right Panel: Modular Library */}
-            <div className="flex-1 bg-white p-8 overflow-y-auto border-l border-border">
-              <div className="space-y-10">
+            <div className="flex-1 bg-white p-4 md:p-8 overflow-y-auto md:border-l border-border order-1 md:order-2 h-[45vh] md:h-auto shrink-0 md:shrink border-b md:border-b-0 shadow-sm md:shadow-none z-10">
+              <div className="space-y-6 md:space-y-10">
                 {/* Grouped Actions - Accordion */}
                 <section className="space-y-4">
                   <label className="text-xs font-black uppercase tracking-widest text-primary flex items-center gap-2 mb-4">
@@ -1248,11 +1253,11 @@ const CreateRecipeModal = ({ initialData, onClose, onSuccess }: Props) => {
           </div>
         </DragDropContext>
 
-        <footer className="p-8 border-t border-border bg-muted/20 flex justify-between items-center">
-          <div className="flex gap-8">
+        <footer className="p-4 md:p-8 border-t border-border bg-muted/20 flex flex-col md:flex-row justify-between items-center gap-4 md:gap-0 shrink-0 mt-auto">
+          <div className="flex gap-4 md:gap-8 w-full md:w-auto justify-between md:justify-start">
             <div>
               <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mb-1">預估總時間</p>
-              <p className="text-2xl font-black text-primary">
+              <p className="text-xl md:text-2xl font-black text-primary">
                 {steps.reduce((sum, s) => {
                   const mins = s.parameters
                     .filter((p: any) => p.unit === 'min')
@@ -1266,31 +1271,32 @@ const CreateRecipeModal = ({ initialData, onClose, onSuccess }: Props) => {
             </div>
             <div>
               <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mb-1">配方項目</p>
-              <p className="text-2xl font-black text-gray-700">
+              <p className="text-xl md:text-2xl font-black text-gray-700">
                 {steps.reduce((sum, s) => sum + s.items.length, 0)} 個
               </p>
             </div>
           </div>
-          <div className="flex gap-4">
+          <div className="flex gap-2 md:gap-4 w-full md:w-auto">
             {initialData?.id && (
               <button
                 type="button"
                 onClick={handleDelete}
                 disabled={loading}
-                className="px-6 py-4 border border-destructive/20 text-destructive bg-destructive/5 hover:bg-destructive hover:text-white rounded-2xl font-bold transition-colors flex items-center gap-2"
+                className="px-3 md:px-6 py-3 md:py-4 border border-destructive/20 text-destructive bg-destructive/5 hover:bg-destructive hover:text-white rounded-2xl font-bold transition-colors flex items-center gap-2 text-sm md:text-base flex-1 md:flex-none justify-center"
               >
-                <Trash2 className="w-5 h-5" />
-                刪除食譜
+                <Trash2 className="w-4 h-4 md:w-5 md:h-5" />
+                <span className="hidden md:inline">刪除食譜</span>
+                <span className="inline md:hidden">刪除</span>
               </button>
             )}
-            <button onClick={onClose} className="px-8 py-4 border border-border rounded-2xl font-bold text-gray-600 hover:bg-white transition-all">取消</button>
+            <button onClick={onClose} className="px-4 md:px-8 py-3 md:py-4 border border-border rounded-2xl font-bold text-gray-600 hover:bg-white transition-all text-sm md:text-base flex-1 md:flex-none">取消</button>
             <button 
               onClick={handleSubmit}
               disabled={loading || !name}
-              className="px-10 py-4 bg-primary text-white rounded-2xl font-black shadow-xl shadow-primary/30 hover:scale-105 active:scale-95 disabled:opacity-50 transition-all flex items-center gap-2"
+              className="px-6 md:px-10 py-3 md:py-4 bg-primary text-white rounded-2xl font-black shadow-xl shadow-primary/30 hover:scale-105 active:scale-95 disabled:opacity-50 transition-all flex items-center justify-center gap-2 text-sm md:text-base flex-[2] md:flex-none"
             >
-              <Save className="w-5 h-5" />
-              {loading ? '儲存中...' : initialData ? '確認修改' : '儲存結構化食譜'}
+              <Save className="w-4 h-4 md:w-5 md:h-5" />
+              {loading ? '儲存中...' : initialData ? '確認修改' : '儲存'}
             </button>
           </div>
         </footer>
