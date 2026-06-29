@@ -130,3 +130,33 @@ Shutter 是一個包含多個模組的大型系統。在您的架構中，包含
 - [ ] `Server` 有填寫 `STORE_URL_PUBLIC` 與 `ADMIN_URL_PUBLIC`，系統會自動處理 CORS。
 - [ ] 第三方金鑰（Google、LINE、Gemini）皆已正確填入 `Server`。
 - [ ] 所有前端與後端服務皆顯示 **Active (綠燈)**。
+
+---
+
+## 第五部分：資料庫初始化與預設資料 (首次部署)
+
+雖然 Server 啟動時會嘗試自動套用資料庫結構 (Migration)，但在**第一次部署**時，建議您直接透過 Railway 的終端機手動建立資料表並寫入預設的「管理員帳號與設定」(Seed data)，以確保系統初始化完整。
+
+1. 在 Railway 儀表板中點擊 **`Server`** 卡片。
+2. 切換到上方的 **Terminal** 分頁。
+3. 確保當前路徑在 `/app`，依序貼上並執行以下三個指令：
+
+**建立主系統資料表**
+```bash
+npx prisma migrate deploy --schema prisma/schema.prisma
+```
+
+**建立 ERP 系統資料表**
+```bash
+npx prisma migrate deploy --schema prisma/erp/shutter-erp.prisma
+```
+
+**寫入種子資料 (Seed)**
+```bash
+npm run db:seed -w packages/server
+```
+
+> [!NOTE]
+> 這個步驟只需要在**專案第一次建立時**執行一次。之後如果有版本更新，系統啟動時會自動處理後續的 Migration。
+
+恭喜！您的 Shutter 系統已經完整部署並初始化完畢！
