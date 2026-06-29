@@ -138,3 +138,26 @@ export const getSetupStatus = async (req: Request, res: Response) => {
     res.status(500).json({ error: '獲取系統初始化狀態失敗' });
   }
 };
+
+export const updateLanguage = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const { language } = req.body;
+    if (!req.user) {
+      return res.status(401).json({ error: '使用者未驗證' });
+    }
+
+    if (!language || typeof language !== 'string') {
+      return res.status(400).json({ error: '無效的語言設定' });
+    }
+
+    const user = await prisma.user.update({
+      where: { id: req.user.id },
+      data: { preferredLanguage: language },
+    });
+
+    res.json({ success: true, preferredLanguage: user.preferredLanguage });
+  } catch (error: any) {
+    console.error('Update language failed', error);
+    res.status(500).json({ error: '更新語言設定失敗' });
+  }
+};
