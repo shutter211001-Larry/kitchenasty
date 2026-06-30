@@ -1,24 +1,7 @@
 import i18n from "../i18n";
 import { useState, useEffect } from "react";
 import axios from "axios";
-import {
-  Search,
-  Workflow,
-  Database,
-  Calendar,
-  ShoppingBag,
-  CheckCircle2,
-  AlertOctagon,
-  Save,
-  Link2,
-  Unlink,
-  TrendingUp,
-  RefreshCw,
-  AlertTriangle,
-  Truck,
-  ArrowRight,
-  Sparkles,
-} from "lucide-react";
+import { Search, Workflow, Database, Calendar, ShoppingBag, CheckCircle2, AlertOctagon, Save, Link2, Unlink, TrendingUp, RefreshCw, AlertTriangle, Truck, ArrowRight, Sparkles } from "lucide-react";
 import { formatUnit } from "../lib/utils";
 import { useTranslation } from "react-i18next";
 interface MenuItem {
@@ -77,10 +60,10 @@ interface ForecastedIngredient {
   shortageAmount: number;
 }
 const Integration = () => {
-  const { t } = useTranslation();
-  const [activeTab, setActiveTab] = useState<
-    "overview" | "binding" | "forecast" | "logs"
-  >("overview");
+  const {
+    t
+  } = useTranslation();
+  const [activeTab, setActiveTab] = useState<"overview" | "binding" | "forecast" | "logs">("overview");
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [connectionOk, setConnectionOk] = useState(false);
@@ -91,16 +74,12 @@ const Integration = () => {
   const [mappings, setMappings] = useState<Mapping[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [reservations, setReservations] = useState<Reservation[]>([]);
-  const [forecastedIngredients, setForecastedIngredients] = useState<
-    ForecastedIngredient[]
-  >([]);
+  const [forecastedIngredients, setForecastedIngredients] = useState<ForecastedIngredient[]>([]);
   const [globalSettings, setGlobalSettings] = useState<any>(null);
 
   // UI states
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedRecipeForMenu, setSelectedRecipeForMenu] = useState<
-    Record<string, string>
-  >({});
+  const [selectedRecipeForMenu, setSelectedRecipeForMenu] = useState<Record<string, string>>({});
   const [alertMessage, setAlertMessage] = useState<{
     type: "success" | "error";
     text: string;
@@ -111,30 +90,24 @@ const Integration = () => {
   const triggerAlert = (type: "success" | "error", text: string) => {
     setAlertMessage({
       type,
-      text,
+      text
     });
     setTimeout(() => setAlertMessage(null), 4000);
   };
   const fetchSyncData = async (silent = false) => {
-    const { t } = useTranslation();
     try {
-      if (!silent) setLoading(true);
-      else setRefreshing(true);
+      if (!silent) setLoading(true);else setRefreshing(true);
 
       // 1. Fetch Recipes from PizzaMaster
       const recipesRes = await axios.get("http://localhost:3000/api/recipes");
       setRecipes(recipesRes.data);
 
       // 2. Fetch Mappings from PizzaMaster
-      const mappingsRes = await axios.get(
-        "http://localhost:3000/api/integration/mappings",
-      );
+      const mappingsRes = await axios.get("http://localhost:3000/api/integration/mappings");
       setMappings(mappingsRes.data.data || []);
 
       // 3. Fetch Sync Data (Orders, MenuItems, Reservations) via PizzaMaster Integration Controller Proxy
-      const proxyRes = await axios.get(
-        "http://localhost:3000/api/integration/shutter-data",
-      );
+      const proxyRes = await axios.get("http://localhost:3000/api/integration/shutter-data");
       const proxyData = proxyRes.data.data;
       setConnectionOk(proxyData.connectionOk);
       setMenuItems(proxyData.menuItems || []);
@@ -143,19 +116,13 @@ const Integration = () => {
 
       // 4. Fetch Forecast from PizzaMaster if connected
       if (proxyData.connectionOk) {
-        const forecastRes = await axios.get(
-          "http://localhost:3000/api/integration/forecast",
-        );
+        const forecastRes = await axios.get("http://localhost:3000/api/integration/forecast");
         setForecastedIngredients(forecastRes.data.forecastedIngredients || []);
       }
 
       // 5. Fetch Inventory Logs (filter by '線上訂餐' to show ERP deductions)
-      const logsRes = await axios.get(
-        "http://localhost:3000/api/inventory/logs",
-      );
-      const filteredLogs = (logsRes.data || []).filter((log: any) =>
-        log.reason?.includes(i18n.t("erp_337")),
-      );
+      const logsRes = await axios.get("http://localhost:3000/api/inventory/logs");
+      const filteredLogs = (logsRes.data || []).filter((log: any) => log.reason?.includes(i18n.t("erp_337")));
       setDeductionLogs(filteredLogs);
 
       // 6. Fetch Global Settings for unit formatting
@@ -175,13 +142,12 @@ const Integration = () => {
 
   // Save binding mapping
   const handleSaveBinding = async (menuItem: MenuItem) => {
-    const { t } = useTranslation();
     const recipeId = selectedRecipeForMenu[menuItem.id];
     if (!recipeId) {
       triggerAlert("error", t("erp_339"));
       return;
     }
-    const recipe = recipes.find((r) => r.id === recipeId);
+    const recipe = recipes.find(r => r.id === recipeId);
     try {
       setRefreshing(true);
       await axios.post("http://localhost:3000/api/integration/mappings", {
@@ -189,12 +155,9 @@ const Integration = () => {
         recipeId: recipeId,
         menuItemName: menuItem.name,
         menuItemPrice: menuItem.price,
-        recipeName: recipe?.name || "",
+        recipeName: recipe?.name || ""
       });
-      triggerAlert(
-        "success",
-        `成功將「${menuItem.name}」綁定至食譜「${recipe?.name}」！`,
-      );
+      triggerAlert("success", `成功將「${menuItem.name}」綁定至食譜「${recipe?.name}」！`);
       fetchSyncData(true);
     } catch (error) {
       console.error("Failed to save binding", error);
@@ -205,22 +168,11 @@ const Integration = () => {
   };
 
   // Remove binding mapping
-  const handleRemoveBinding = async (
-    menuItemId: string,
-    menuItemName: string,
-  ) => {
-    const { t } = useTranslation();
-    if (
-      !confirm(
-        `確定要解除「${menuItemName}」的食譜綁定嗎？\n解除後，該商品的線上訂單將不再自動扣減中央廚房庫存。`,
-      )
-    )
-      return;
+  const handleRemoveBinding = async (menuItemId: string, menuItemName: string) => {
+    if (!confirm(`確定要解除「${menuItemName}」的食譜綁定嗎？\n解除後，該商品的線上訂單將不再自動扣減中央廚房庫存。`)) return;
     try {
       setRefreshing(true);
-      await axios.delete(
-        `http://localhost:3000/api/integration/mappings/${menuItemId}`,
-      );
+      await axios.delete(`http://localhost:3000/api/integration/mappings/${menuItemId}`);
       triggerAlert("success", `已解除「${menuItemName}」的食譜綁定關係。`);
       fetchSyncData(true);
     } catch (error) {
@@ -232,46 +184,25 @@ const Integration = () => {
   };
 
   // Alert Supplier Simulation
-  const handleAlertSupplier = (
-    ingredientName: string,
-    amount: number,
-    unit: string,
-  ) => {
-    alert(
-      `【採購請求送出】\n已自動向預設供應商發送「${ingredientName}」的緊急採購單！\n預計補貨數量：${Math.ceil(amount * 1.5)} ${unit}（含安全備料）`,
-    );
+  const handleAlertSupplier = (ingredientName: string, amount: number, unit: string) => {
+    alert(`【採購請求送出】\n已自動向預設供應商發送「${ingredientName}」的緊急採購單！\n預計補貨數量：${Math.ceil(amount * 1.5)} ${unit}（含安全備料）`);
     triggerAlert("success", `已送出「${ingredientName}」緊急採購通知！`);
   };
 
   // Filter MenuItems based on search
-  const filteredMenuItems = menuItems.filter((item) => {
-    const matchesSearch =
-      item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.category?.name.toLowerCase().includes(searchQuery.toLowerCase());
+  const filteredMenuItems = menuItems.filter(item => {
+    const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) || item.category?.name.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesSearch;
   });
-  const boundRatio =
-    menuItems.length > 0 ? (mappings.length / menuItems.length) * 100 : 0;
-  const totalUpcomingGuests = reservations.reduce(
-    (sum, r) => sum + (r.partySize || 0),
-    0,
-  );
-  const shortageCount = forecastedIngredients.filter((i) => i.shortage).length;
-  return (
-    <div className="flex flex-col gap-8">
+  const boundRatio = menuItems.length > 0 ? mappings.length / menuItems.length * 100 : 0;
+  const totalUpcomingGuests = reservations.reduce((sum, r) => sum + (r.partySize || 0), 0);
+  const shortageCount = forecastedIngredients.filter(i => i.shortage).length;
+  return <div className="flex flex-col gap-8">
       {/* Toast Alert */}
-      {alertMessage && (
-        <div
-          className={`fixed top-6 right-6 z-50 flex items-center gap-3 px-6 py-4 rounded-2xl shadow-xl border text-sm font-semibold transition-all duration-300 animate-in fade-in slide-in-from-top-4 ${alertMessage.type === "success" ? "bg-emerald-50 text-emerald-800 border-emerald-200" : "bg-red-50 text-red-800 border-red-200"}`}
-        >
-          {alertMessage.type === "success" ? (
-            <CheckCircle2 className="w-5 h-5 text-emerald-600" />
-          ) : (
-            <AlertOctagon className="w-5 h-5 text-red-600" />
-          )}
+      {alertMessage && <div className={`fixed top-6 right-6 z-50 flex items-center gap-3 px-6 py-4 rounded-2xl shadow-xl border text-sm font-semibold transition-all duration-300 animate-in fade-in slide-in-from-top-4 ${alertMessage.type === "success" ? "bg-emerald-50 text-emerald-800 border-emerald-200" : "bg-red-50 text-red-800 border-red-200"}`}>
+          {alertMessage.type === "success" ? <CheckCircle2 className="w-5 h-5 text-emerald-600" /> : <AlertOctagon className="w-5 h-5 text-red-600" />}
           <span>{alertMessage.text}</span>
-        </div>
-      )}
+        </div>}
 
       {/* Header */}
       <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -289,83 +220,52 @@ const Integration = () => {
 
         <div className="flex items-center gap-3 w-full sm:w-auto shrink-0">
           {/* Connection Status Monitor */}
-          <div
-            className={`flex-1 sm:flex-none flex items-center justify-center gap-2.5 px-4 py-2.5 rounded-xl border text-xs font-bold shadow-sm bg-white ${connectionOk ? "border-emerald-100 text-emerald-700" : "border-red-100 text-red-700"}`}
-          >
+          <div className={`flex-1 sm:flex-none flex items-center justify-center gap-2.5 px-4 py-2.5 rounded-xl border text-xs font-bold shadow-sm bg-white ${connectionOk ? "border-emerald-100 text-emerald-700" : "border-red-100 text-red-700"}`}>
             <span className={`relative flex h-2 w-2`}>
-              <span
-                className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${connectionOk ? "bg-emerald-400" : "bg-red-400"}`}
-              ></span>
-              <span
-                className={`relative inline-flex rounded-full h-2 w-2 ${connectionOk ? "bg-emerald-500" : "bg-red-500"}`}
-              ></span>
+              <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${connectionOk ? "bg-emerald-400" : "bg-red-400"}`}></span>
+              <span className={`relative inline-flex rounded-full h-2 w-2 ${connectionOk ? "bg-emerald-500" : "bg-red-500"}`}></span>
             </span>
             <span>Front App: {connectionOk ? t("erp_344") : t("erp_345")}</span>
           </div>
 
-          <button
-            onClick={() => fetchSyncData(true)}
-            disabled={refreshing}
-            className="flex-none p-3.5 bg-white border border-border hover:bg-muted text-gray-700 rounded-xl transition-all duration-200 disabled:opacity-55 active:scale-95 shadow-sm cursor-pointer"
-            title={t("erp_346")}
-          >
-            <RefreshCw
-              className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`}
-            />
+          <button onClick={() => fetchSyncData(true)} disabled={refreshing} className="flex-none p-3.5 bg-white border border-border hover:bg-muted text-gray-700 rounded-xl transition-all duration-200 disabled:opacity-55 active:scale-95 shadow-sm cursor-pointer" title={t("erp_346")}>
+            <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
           </button>
         </div>
       </header>
 
       {/* Main Tabs Selection */}
       <div className="flex border-b border-border gap-2 overflow-x-auto pb-1 scrollbar-none flex-nowrap shrink-0">
-        <button
-          onClick={() => setActiveTab("overview")}
-          className={`px-5 py-3 text-sm font-bold border-b-2 transition-all duration-150 flex items-center gap-2 whitespace-nowrap flex-shrink-0 cursor-pointer ${activeTab === "overview" ? "border-primary text-primary font-black" : "border-transparent text-muted-foreground hover:text-gray-700"}`}
-        >
+        <button onClick={() => setActiveTab("overview")} className={`px-5 py-3 text-sm font-bold border-b-2 transition-all duration-150 flex items-center gap-2 whitespace-nowrap flex-shrink-0 cursor-pointer ${activeTab === "overview" ? "border-primary text-primary font-black" : "border-transparent text-muted-foreground hover:text-gray-700"}`}>
           <Workflow className="w-4 h-4" />
           {t("erp_347")}
         </button>
-        <button
-          onClick={() => setActiveTab("binding")}
-          className={`px-5 py-3 text-sm font-bold border-b-2 transition-all duration-150 flex items-center gap-2 whitespace-nowrap flex-shrink-0 cursor-pointer ${activeTab === "binding" ? "border-primary text-primary font-black" : "border-transparent text-muted-foreground hover:text-gray-700"}`}
-        >
+        <button onClick={() => setActiveTab("binding")} className={`px-5 py-3 text-sm font-bold border-b-2 transition-all duration-150 flex items-center gap-2 whitespace-nowrap flex-shrink-0 cursor-pointer ${activeTab === "binding" ? "border-primary text-primary font-black" : "border-transparent text-muted-foreground hover:text-gray-700"}`}>
           <Link2 className="w-4 h-4" />
           {t("erp_348")}
           {mappings.length}/{menuItems.length})
         </button>
-        <button
-          onClick={() => setActiveTab("forecast")}
-          className={`px-5 py-3 text-sm font-bold border-b-2 transition-all duration-150 flex items-center gap-2 whitespace-nowrap flex-shrink-0 cursor-pointer ${activeTab === "forecast" ? "border-primary text-primary font-black" : "border-transparent text-muted-foreground hover:text-gray-700"}`}
-        >
+        <button onClick={() => setActiveTab("forecast")} className={`px-5 py-3 text-sm font-bold border-b-2 transition-all duration-150 flex items-center gap-2 whitespace-nowrap flex-shrink-0 cursor-pointer ${activeTab === "forecast" ? "border-primary text-primary font-black" : "border-transparent text-muted-foreground hover:text-gray-700"}`}>
           <TrendingUp className="w-4 h-4" />
           {t("erp_349")}
-          {shortageCount > 0 && (
-            <span className="px-1.5 py-0.5 bg-red-500 text-white text-[10px] rounded-full font-black animate-pulse">
+          {shortageCount > 0 && <span className="px-1.5 py-0.5 bg-red-500 text-white text-[10px] rounded-full font-black animate-pulse">
               {shortageCount}
-            </span>
-          )}
+            </span>}
         </button>
-        <button
-          onClick={() => setActiveTab("logs")}
-          className={`px-5 py-3 text-sm font-bold border-b-2 transition-all duration-150 flex items-center gap-2 whitespace-nowrap flex-shrink-0 cursor-pointer ${activeTab === "logs" ? "border-primary text-primary font-black" : "border-transparent text-muted-foreground hover:text-gray-700"}`}
-        >
+        <button onClick={() => setActiveTab("logs")} className={`px-5 py-3 text-sm font-bold border-b-2 transition-all duration-150 flex items-center gap-2 whitespace-nowrap flex-shrink-0 cursor-pointer ${activeTab === "logs" ? "border-primary text-primary font-black" : "border-transparent text-muted-foreground hover:text-gray-700"}`}>
           <ShoppingBag className="w-4 h-4" />
           {t("erp_350")}
         </button>
       </div>
 
-      {loading ? (
-        <div className="py-32 text-center bg-white/50 border border-border rounded-3xl backdrop-blur-md">
+      {loading ? <div className="py-32 text-center bg-white/50 border border-border rounded-3xl backdrop-blur-md">
           <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin mx-auto mb-4" />
           <p className="text-sm font-semibold text-muted-foreground tracking-widest">
             {t("erp_351")}
           </p>
-        </div>
-      ) : (
-        <>
+        </div> : <>
           {/* TAB 1: OVERVIEW */}
-          {activeTab === "overview" && (
-            <div className="flex flex-col gap-8">
+          {activeTab === "overview" && <div className="flex flex-col gap-8">
               {/* KPI Cards Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <div className="bg-white p-6 rounded-2xl border border-border shadow-sm flex items-center gap-4">
@@ -425,15 +325,9 @@ const Integration = () => {
                   </div>
                 </div>
 
-                <div
-                  className={`p-6 rounded-2xl border shadow-sm flex items-center gap-4 ${shortageCount > 0 ? "bg-red-50/50 border-red-200 text-red-900" : "bg-white border-border"}`}
-                >
-                  <div
-                    className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${shortageCount > 0 ? "bg-red-100" : "bg-gray-50"}`}
-                  >
-                    <AlertTriangle
-                      className={`w-6 h-6 ${shortageCount > 0 ? "text-red-600 animate-bounce" : "text-gray-400"}`}
-                    />
+                <div className={`p-6 rounded-2xl border shadow-sm flex items-center gap-4 ${shortageCount > 0 ? "bg-red-50/50 border-red-200 text-red-900" : "bg-white border-border"}`}>
+                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${shortageCount > 0 ? "bg-red-100" : "bg-gray-50"}`}>
+                    <AlertTriangle className={`w-6 h-6 ${shortageCount > 0 ? "text-red-600 animate-bounce" : "text-gray-400"}`} />
                   </div>
                   <div>
                     <span className="text-xs text-muted-foreground font-semibold">
@@ -550,46 +444,28 @@ const Integration = () => {
                   </div>
                 </div>
               </div>
-            </div>
-          )}
+            </div>}
 
           {/* TAB 2: BINDING */}
-          {activeTab === "binding" && (
-            <div className="flex flex-col gap-6">
+          {activeTab === "binding" && <div className="flex flex-col gap-6">
               {/* Search Bar */}
               <div className="bg-white/50 backdrop-blur-md p-4 rounded-2xl border border-border flex gap-4 items-center shadow-sm">
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                  <input
-                    type="text"
-                    placeholder={t("erp_377")}
-                    className="w-full pl-11 pr-4 py-2.5 bg-white border border-border rounded-xl outline-none focus:ring-2 focus:ring-primary/20 transition-all text-sm"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
+                  <input type="text" placeholder={t("erp_377")} className="w-full pl-11 pr-4 py-2.5 bg-white border border-border rounded-xl outline-none focus:ring-2 focus:ring-primary/20 transition-all text-sm" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
                 </div>
               </div>
 
               {/* Bindings Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredMenuItems.length === 0 ? (
-                  <div className="col-span-full py-20 text-center text-muted-foreground border-2 border-dashed border-border rounded-3xl bg-white/50">
+                {filteredMenuItems.length === 0 ? <div className="col-span-full py-20 text-center text-muted-foreground border-2 border-dashed border-border rounded-3xl bg-white/50">
                     <Search className="w-12 h-12 mx-auto mb-4 opacity-20" />
                     <p className="font-semibold text-gray-500">
                       {t("erp_378")}
                     </p>
-                  </div>
-                ) : (
-                  filteredMenuItems.map((item) => {
-                    const { t } = useTranslation();
-                    const bound = mappings.find(
-                      (m) => m.menuItemId === item.id,
-                    );
-                    return (
-                      <div
-                        key={item.id}
-                        className="bg-white rounded-2xl border border-border p-6 shadow-sm flex flex-col justify-between min-h-[220px] transition-all hover:shadow-md"
-                      >
+                  </div> : filteredMenuItems.map(item => {
+            const bound = mappings.find(m => m.menuItemId === item.id);
+            return <div key={item.id} className="bg-white rounded-2xl border border-border p-6 shadow-sm flex flex-col justify-between min-h-[220px] transition-all hover:shadow-md">
                         <div>
                           <div className="flex justify-between items-start mb-3">
                             <span className="px-2 py-0.5 bg-gray-100 rounded-md text-[10px] font-bold text-gray-600">
@@ -604,8 +480,7 @@ const Integration = () => {
                             {item.name}
                           </h4>
 
-                          {bound ? (
-                            <div className="mt-4 p-3 bg-emerald-50 border border-emerald-100 rounded-xl flex items-center justify-between">
+                          {bound ? <div className="mt-4 p-3 bg-emerald-50 border border-emerald-100 rounded-xl flex items-center justify-between">
                               <div className="min-w-0">
                                 <span className="text-[10px] text-emerald-600 font-extrabold uppercase block tracking-wider">
                                   {t("erp_380")}
@@ -614,68 +489,40 @@ const Integration = () => {
                                   {bound.recipeName}
                                 </span>
                               </div>
-                              <button
-                                onClick={() =>
-                                  handleRemoveBinding(item.id, item.name)
-                                }
-                                className="p-2 hover:bg-red-50 text-emerald-700 hover:text-red-600 rounded-lg transition-colors shrink-0"
-                                title={i18n.t("erp_381")}
-                              >
+                              <button onClick={() => handleRemoveBinding(item.id, item.name)} className="p-2 hover:bg-red-50 text-emerald-700 hover:text-red-600 rounded-lg transition-colors shrink-0" title={i18n.t("erp_381")}>
                                 <Unlink className="w-4 h-4" />
                               </button>
-                            </div>
-                          ) : (
-                            <div className="mt-4 p-3 bg-orange-50/50 border border-orange-100 rounded-xl">
+                            </div> : <div className="mt-4 p-3 bg-orange-50/50 border border-orange-100 rounded-xl">
                               <span className="text-[10px] text-orange-600 font-extrabold uppercase block tracking-wider mb-2">
                                 {t("erp_382")}
                               </span>
 
-                              <select
-                                className="w-full text-xs p-2 border border-orange-200 bg-white rounded-lg outline-none focus:ring-2 focus:ring-primary/20 text-gray-700 font-medium"
-                                value={selectedRecipeForMenu[item.id] || ""}
-                                onChange={(e) =>
-                                  setSelectedRecipeForMenu({
-                                    ...selectedRecipeForMenu,
-                                    [item.id]: e.target.value,
-                                  })
-                                }
-                              >
+                              <select className="w-full text-xs p-2 border border-orange-200 bg-white rounded-lg outline-none focus:ring-2 focus:ring-primary/20 text-gray-700 font-medium" value={selectedRecipeForMenu[item.id] || ""} onChange={e => setSelectedRecipeForMenu({
+                    ...selectedRecipeForMenu,
+                    [item.id]: e.target.value
+                  })}>
                                 <option value="">{t("erp_383")}</option>
-                                {recipes
-                                  .filter((r) => r.isProduct !== false)
-                                  .map((r) => (
-                                    <option key={r.id} value={r.id}>
+                                {recipes.filter(r => r.isProduct !== false).map(r => <option key={r.id} value={r.id}>
                                       {r.name}
                                       {t("erp_384")}
                                       {r.yieldAmount}
                                       {t("erp_385")}
-                                    </option>
-                                  ))}
+                                    </option>)}
                               </select>
-                            </div>
-                          )}
+                            </div>}
                         </div>
 
-                        {!bound && (
-                          <button
-                            onClick={() => handleSaveBinding(item)}
-                            className="mt-6 w-full flex items-center justify-center gap-2 py-2.5 bg-primary/10 hover:bg-primary text-primary hover:text-white rounded-xl text-xs font-bold transition-all duration-200"
-                          >
+                        {!bound && <button onClick={() => handleSaveBinding(item)} className="mt-6 w-full flex items-center justify-center gap-2 py-2.5 bg-primary/10 hover:bg-primary text-primary hover:text-white rounded-xl text-xs font-bold transition-all duration-200">
                             <Save className="w-4 h-4" />
                             {t("erp_386")}
-                          </button>
-                        )}
-                      </div>
-                    );
-                  })
-                )}
+                          </button>}
+                      </div>;
+          })}
               </div>
-            </div>
-          )}
+            </div>}
 
           {/* TAB 3: FORECAST */}
-          {activeTab === "forecast" && (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {activeTab === "forecast" && <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               {/* Upcoming Reservations Panel */}
               <div className="bg-white p-6 rounded-3xl border border-border shadow-sm h-fit">
                 <div className="flex items-center gap-2 mb-6">
@@ -687,18 +534,11 @@ const Integration = () => {
                   </h3>
                 </div>
 
-                {reservations.length === 0 ? (
-                  <div className="py-12 text-center text-muted-foreground bg-muted/20 border border-dashed border-border rounded-2xl">
+                {reservations.length === 0 ? <div className="py-12 text-center text-muted-foreground bg-muted/20 border border-dashed border-border rounded-2xl">
                     <Calendar className="w-8 h-8 mx-auto mb-2 opacity-30" />
                     <p className="text-xs font-medium">{t("erp_389")}</p>
-                  </div>
-                ) : (
-                  <div className="space-y-3.5 max-h-[480px] overflow-y-auto pr-1">
-                    {reservations.map((res) => (
-                      <div
-                        key={res.id}
-                        className="p-4 bg-muted/30 border border-border/50 rounded-2xl flex justify-between items-center hover:bg-muted/50 transition-colors"
-                      >
+                  </div> : <div className="space-y-3.5 max-h-[480px] overflow-y-auto pr-1">
+                    {reservations.map(res => <div key={res.id} className="p-4 bg-muted/30 border border-border/50 rounded-2xl flex justify-between items-center hover:bg-muted/50 transition-colors">
                         <div>
                           <h4 className="text-sm font-black text-gray-800">
                             {res.customer?.name || i18n.t("erp_390")}
@@ -713,10 +553,8 @@ const Integration = () => {
                             {t("erp_391")}
                           </span>
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                      </div>)}
+                  </div>}
               </div>
 
               {/* Demand Forecasting Report */}
@@ -735,15 +573,12 @@ const Integration = () => {
                   </span>
                 </div>
 
-                {forecastedIngredients.length === 0 ? (
-                  <div className="py-20 text-center text-muted-foreground bg-muted/20 border border-dashed border-border rounded-3xl">
+                {forecastedIngredients.length === 0 ? <div className="py-20 text-center text-muted-foreground bg-muted/20 border border-dashed border-border rounded-3xl">
                     <AlertTriangle className="w-12 h-12 mx-auto mb-4 opacity-25" />
                     <p className="font-semibold text-gray-500">
                       {t("erp_394")}
                     </p>
-                  </div>
-                ) : (
-                  <div className="overflow-x-auto">
+                  </div> : <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
                       <thead>
                         <tr className="border-b border-border text-xs text-muted-foreground uppercase tracking-wider font-extrabold">
@@ -757,11 +592,7 @@ const Integration = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {forecastedIngredients.map((ing) => (
-                          <tr
-                            key={ing.ingredientId}
-                            className="border-b border-border/40 text-sm hover:bg-muted/10 transition-colors"
-                          >
+                        {forecastedIngredients.map(ing => <tr key={ing.ingredientId} className="border-b border-border/40 text-sm hover:bg-muted/10 transition-colors">
                             <td className="py-4 font-bold text-gray-800">
                               {ing.name}
                             </td>
@@ -772,58 +603,35 @@ const Integration = () => {
                               {ing.currentStock.toFixed(1)} {ing.unit}
                             </td>
                             <td className="py-4">
-                              {ing.shortage ? (
-                                <span className="px-2.5 py-1 bg-red-50 border border-red-100 rounded-full text-[10px] text-red-600 font-black flex items-center gap-1 w-fit animate-pulse">
+                              {ing.shortage ? <span className="px-2.5 py-1 bg-red-50 border border-red-100 rounded-full text-[10px] text-red-600 font-black flex items-center gap-1 w-fit animate-pulse">
                                   <AlertCircleIcon />
                                   {t("erp_400")}
                                   {ing.shortageAmount.toFixed(1)} {ing.unit}
-                                </span>
-                              ) : ing.currentStock < ing.safetyStock ? (
-                                <span className="px-2.5 py-1 bg-yellow-50 border border-yellow-100 rounded-full text-[10px] text-yellow-600 font-black flex items-center gap-1 w-fit">
+                                </span> : ing.currentStock < ing.safetyStock ? <span className="px-2.5 py-1 bg-yellow-50 border border-yellow-100 rounded-full text-[10px] text-yellow-600 font-black flex items-center gap-1 w-fit">
                                   <WarningIcon />
                                   {t("erp_401")}
-                                </span>
-                              ) : (
-                                <span className="px-2.5 py-1 bg-emerald-50 border border-emerald-100 rounded-full text-[10px] text-emerald-600 font-black flex items-center gap-1 w-fit">
+                                </span> : <span className="px-2.5 py-1 bg-emerald-50 border border-emerald-100 rounded-full text-[10px] text-emerald-600 font-black flex items-center gap-1 w-fit">
                                   <CheckIcon />
                                   {t("erp_402")}
-                                </span>
-                              )}
+                                </span>}
                             </td>
                             <td className="py-4 text-right">
-                              {ing.shortage ? (
-                                <button
-                                  onClick={() =>
-                                    handleAlertSupplier(
-                                      ing.name,
-                                      ing.shortageAmount,
-                                      ing.unit,
-                                    )
-                                  }
-                                  className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-black shadow-sm shadow-red-200 transition-colors flex items-center gap-1 ml-auto"
-                                >
+                              {ing.shortage ? <button onClick={() => handleAlertSupplier(ing.name, ing.shortageAmount, ing.unit)} className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-black shadow-sm shadow-red-200 transition-colors flex items-center gap-1 ml-auto">
                                   <Truck className="w-3.5 h-3.5" />
                                   {t("erp_403")}
-                                </button>
-                              ) : (
-                                <span className="text-xs text-muted-foreground font-semibold">
+                                </button> : <span className="text-xs text-muted-foreground font-semibold">
                                   {t("erp_404")}
-                                </span>
-                              )}
+                                </span>}
                             </td>
-                          </tr>
-                        ))}
+                          </tr>)}
                       </tbody>
                     </table>
-                  </div>
-                )}
+                  </div>}
               </div>
-            </div>
-          )}
+            </div>}
 
           {/* TAB 4: LOGS */}
-          {activeTab === "logs" && (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {activeTab === "logs" && <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               {/* Online Orders Live List */}
               <div className="bg-white p-6 rounded-3xl border border-border shadow-sm">
                 <div className="flex items-center gap-2 mb-6">
@@ -835,48 +643,35 @@ const Integration = () => {
                   </h3>
                 </div>
 
-                {orders.length === 0 ? (
-                  <div className="py-12 text-center text-muted-foreground bg-muted/20 border border-dashed border-border rounded-2xl">
+                {orders.length === 0 ? <div className="py-12 text-center text-muted-foreground bg-muted/20 border border-dashed border-border rounded-2xl">
                     <ShoppingBag className="w-8 h-8 mx-auto mb-2 opacity-30" />
                     <p className="text-xs font-medium">{t("erp_406")}</p>
-                  </div>
-                ) : (
-                  <div className="space-y-4 max-h-[500px] overflow-y-auto pr-1">
-                    {orders.map((order) => (
-                      <div
-                        key={order.id}
-                        className="p-4 bg-muted/30 border border-border/50 rounded-2xl hover:bg-muted/50 transition-all"
-                      >
+                  </div> : <div className="space-y-4 max-h-[500px] overflow-y-auto pr-1">
+                    {orders.map(order => <div key={order.id} className="p-4 bg-muted/30 border border-border/50 rounded-2xl hover:bg-muted/50 transition-all">
                         <div className="flex justify-between items-start mb-2">
                           <span className="text-sm font-black text-gray-800">
                             #{order.orderNumber}
                           </span>
-                          <span
-                            className={`px-2 py-0.5 rounded-md text-[10px] font-black ${order.status === "CONFIRMED" || order.status === "DELIVERED" || order.status === "PREPARING" ? "bg-emerald-50 text-emerald-600" : order.status === "CANCELLED" ? "bg-red-50 text-red-600" : "bg-yellow-50 text-yellow-600"}`}
-                          >
+                          <span className={`px-2 py-0.5 rounded-md text-[10px] font-black ${order.status === "CONFIRMED" || order.status === "DELIVERED" || order.status === "PREPARING" ? "bg-emerald-50 text-emerald-600" : order.status === "CANCELLED" ? "bg-red-50 text-red-600" : "bg-yellow-50 text-yellow-600"}`}>
                             {order.status}
                           </span>
                         </div>
 
                         <div className="space-y-1.5 mt-3 border-t border-dashed border-border pt-2 text-xs font-medium text-gray-600">
-                          {order.items?.map((item) => (
-                            <div key={item.id} className="flex justify-between">
+                          {order.items?.map(item => <div key={item.id} className="flex justify-between">
                               <span>{item.name}</span>
                               <span className="font-bold text-gray-700">
                                 x{item.quantity}
                               </span>
-                            </div>
-                          ))}
+                            </div>)}
                         </div>
 
                         <div className="mt-3 text-right text-xs text-muted-foreground font-semibold">
                           {order.createdAt.split("T")[0]}{" "}
                           {order.createdAt.split("T")[1]?.substring(0, 5) || ""}
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                      </div>)}
+                  </div>}
               </div>
 
               {/* Stock Deduction Logs from PizzaMaster */}
@@ -888,8 +683,7 @@ const Integration = () => {
                   </h3>
                 </div>
 
-                {deductionLogs.length === 0 ? (
-                  <div className="py-20 text-center text-muted-foreground bg-muted/20 border border-dashed border-border rounded-3xl">
+                {deductionLogs.length === 0 ? <div className="py-20 text-center text-muted-foreground bg-muted/20 border border-dashed border-border rounded-3xl">
                     <Database className="w-12 h-12 mx-auto mb-4 opacity-25" />
                     <p className="font-semibold text-gray-500">
                       {t("erp_408")}
@@ -897,9 +691,7 @@ const Integration = () => {
                     <p className="text-xs text-muted-foreground mt-1.5">
                       {t("erp_409")}
                     </p>
-                  </div>
-                ) : (
-                  <div className="overflow-x-auto max-h-[500px] overflow-y-auto">
+                  </div> : <div className="overflow-x-auto max-h-[500px] overflow-y-auto">
                     <table className="w-full text-left border-collapse">
                       <thead>
                         <tr className="border-b border-border text-xs text-muted-foreground uppercase tracking-wider font-extrabold">
@@ -912,97 +704,41 @@ const Integration = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {deductionLogs.map((log) => (
-                          <tr
-                            key={log.id}
-                            className="border-b border-border/40 text-sm hover:bg-muted/10 transition-colors"
-                          >
+                        {deductionLogs.map(log => <tr key={log.id} className="border-b border-border/40 text-sm hover:bg-muted/10 transition-colors">
                             <td className="py-3.5 font-bold text-gray-800">
                               {log.ingredient?.name || i18n.t("erp_414")}
                             </td>
                             <td className="py-3.5 font-bold text-red-600">
                               -
-                              {
-                                formatUnit(
-                                  log.amount,
-                                  log.ingredient?.unit || "",
-                                  globalSettings,
-                                ).value
-                              }{" "}
-                              {
-                                formatUnit(
-                                  log.amount,
-                                  log.ingredient?.unit || "",
-                                  globalSettings,
-                                ).unit
-                              }
+                              {formatUnit(log.amount, log.ingredient?.unit || "", globalSettings).value}{" "}
+                              {formatUnit(log.amount, log.ingredient?.unit || "", globalSettings).unit}
                             </td>
-                            <td
-                              className="py-3.5 text-xs text-gray-600 font-semibold leading-relaxed max-w-[280px] truncate"
-                              title={log.reason}
-                            >
+                            <td className="py-3.5 text-xs text-gray-600 font-semibold leading-relaxed max-w-[280px] truncate" title={log.reason}>
                               {log.reason}
                             </td>
                             <td className="py-3.5 text-right text-xs text-muted-foreground font-semibold">
                               {new Date(log.createdAt).toLocaleString("zh-TW", {
-                                hour12: false,
-                              })}
+                      hour12: false
+                    })}
                             </td>
-                          </tr>
-                        ))}
+                          </tr>)}
                       </tbody>
                     </table>
-                  </div>
-                )}
+                  </div>}
               </div>
-            </div>
-          )}
-        </>
-      )}
-    </div>
-  );
+            </div>}
+        </>}
+    </div>;
 };
 
 // SVG icons as small inline components
-const AlertCircleIcon = () => (
-  <svg
-    className="w-3.5 h-3.5 shrink-0"
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-    strokeWidth="2.5"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-    />
-  </svg>
-);
-const WarningIcon = () => (
-  <svg
-    className="w-3.5 h-3.5 shrink-0"
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-    strokeWidth="2.5"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-    />
-  </svg>
-);
-const CheckIcon = () => (
-  <svg
-    className="w-3.5 h-3.5 shrink-0"
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-    strokeWidth="2.5"
-  >
+const AlertCircleIcon = () => <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+  </svg>;
+const WarningIcon = () => <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+  </svg>;
+const CheckIcon = () => <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-  </svg>
-);
+  </svg>;
 export default Integration;
