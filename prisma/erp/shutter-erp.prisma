@@ -254,3 +254,13 @@ model SystemSetting {
   updatedAt DateTime @updatedAt
 }
 
+model InviteToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  email     String
+  role      Role     @default(STAFF)
+  invitedBy String
+  usedAt    DateTime?
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}

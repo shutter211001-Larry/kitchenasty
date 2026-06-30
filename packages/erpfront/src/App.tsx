@@ -1,5 +1,5 @@
-import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+
+import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import Layout from "./components/Layout";
 import Dashboard from "./pages/Dashboard";
 import Ingredients from "./pages/Ingredients";
@@ -11,11 +11,13 @@ import Labels from "./pages/Labels";
 import Login from "./pages/Login";
 import Users from "./pages/Users";
 import Integration from "./pages/Integration";
+import AcceptInvite from "./pages/AcceptInvite";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { useTranslation } from "react-i18next";
 function AppContent() {
   const { t } = useTranslation();
   const { user, loading } = useAuth();
+  const location = useLocation();
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center text-white font-sans">
@@ -27,6 +29,13 @@ function AppContent() {
     );
   }
   if (!user) {
+    if (location.pathname === "/accept-invite") {
+      return (
+        <Routes>
+          <Route path="/accept-invite" element={<AcceptInvite />} />
+        </Routes>
+      );
+    }
     return <Login />;
   }
   return (
