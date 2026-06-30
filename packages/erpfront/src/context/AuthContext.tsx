@@ -16,7 +16,12 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{
   children: React.ReactNode;
-}> = ({ children }) => {
+}> = ({
+  children
+}) => {
+  const {
+    t
+  } = useTranslation();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -51,16 +56,15 @@ export const AuthProvider: React.FC<{
     checkAuth();
   }, []);
   const login = async (email: string, password: string) => {
-    const { t } = useTranslation();
     try {
-      const response = await axios.post(
-        "http://localhost:3000/api/auth/login",
-        {
-          email,
-          password,
-        },
-      );
-      const { token, user: loggedUser } = response.data;
+      const response = await axios.post("http://localhost:3000/api/auth/login", {
+        email,
+        password
+      });
+      const {
+        token,
+        user: loggedUser
+      } = response.data;
       localStorage.setItem("pizza_master_token", token);
       setAuthHeader(token);
       setUser(loggedUser);
@@ -73,18 +77,14 @@ export const AuthProvider: React.FC<{
     setAuthHeader(null);
     setUser(null);
   };
-  return (
-    <AuthContext.Provider
-      value={{
-        user,
-        loading,
-        login,
-        logout,
-      }}
-    >
+  return <AuthContext.Provider value={{
+    user,
+    loading,
+    login,
+    logout
+  }}>
       {children}
-    </AuthContext.Provider>
-  );
+    </AuthContext.Provider>;
 };
 export const useAuth = () => {
   const context = useContext(AuthContext);

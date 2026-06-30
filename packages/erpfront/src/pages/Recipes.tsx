@@ -1,38 +1,20 @@
 import i18n from "../i18n";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import {
-  ChefHat,
-  Plus,
-  Search,
-  Utensils,
-  Clock,
-  Trash2,
-  PieChart,
-  TrendingUp,
-  Pizza,
-} from "lucide-react";
+import { ChefHat, Plus, Search, Utensils, Clock, Trash2, PieChart, TrendingUp, Pizza } from "lucide-react";
 import CreateRecipeModal from "../components/CreateRecipeModal";
 import RecipeDetailModal from "../components/RecipeDetailModal";
 import { cn } from "../lib/utils";
 import { useTranslation } from "react-i18next";
 const isPortionUnit = (unit: string) => {
-  const { t } = useTranslation();
   if (!unit) return false;
-  const portionUnits = [
-    t("erp_15"),
-    t("erp_68"),
-    "pcs",
-    "piece",
-    t("erp_202"),
-    t("erp_203"),
-    t("erp_204"),
-    t("erp_205"),
-  ];
-  return portionUnits.some((u) => unit.toLowerCase().includes(u));
+  const portionUnits = [t("erp_15"), t("erp_68"), "pcs", "piece", t("erp_202"), t("erp_203"), t("erp_204"), t("erp_205")];
+  return portionUnits.some(u => unit.toLowerCase().includes(u));
 };
 const Recipes = () => {
-  const { t } = useTranslation();
+  const {
+    t
+  } = useTranslation();
   const [recipes, setRecipes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -51,12 +33,9 @@ const Recipes = () => {
     }
   };
   const handleEdit = async (e: React.MouseEvent, recipeId: string) => {
-    const { t } = useTranslation();
     e.stopPropagation();
     try {
-      const response = await axios.get(
-        `http://localhost:3000/api/recipes/${recipeId}`,
-      );
+      const response = await axios.get(`http://localhost:3000/api/recipes/${recipeId}`);
       setEditingRecipe(response.data);
     } catch (error) {
       console.error("Failed to fetch full recipe", error);
@@ -65,9 +44,7 @@ const Recipes = () => {
   };
   const handleView = async (recipeId: string) => {
     try {
-      const response = await axios.get(
-        `http://localhost:3000/api/recipes/${recipeId}`,
-      );
+      const response = await axios.get(`http://localhost:3000/api/recipes/${recipeId}`);
       setSelectedRecipe(response.data);
     } catch (error) {
       console.error("Failed to fetch recipe detail", error);
@@ -76,19 +53,15 @@ const Recipes = () => {
   useEffect(() => {
     fetchRecipes();
   }, []);
-  const mainRecipes = recipes.filter((r) => !r.isSubRecipe);
-  const subRecipes = recipes.filter((r) => r.isSubRecipe);
-  return (
-    <div className="flex flex-col gap-8">
+  const mainRecipes = recipes.filter(r => !r.isSubRecipe);
+  const subRecipes = recipes.filter(r => r.isSubRecipe);
+  return <div className="flex flex-col gap-8">
       <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 print:hidden">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">{t("erp_190")}</h2>
           <p className="text-muted-foreground mt-1">{t("erp_759")}</p>
         </div>
-        <button
-          onClick={() => setShowCreateModal(true)}
-          className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-white rounded-xl font-bold shadow-lg shadow-primary/20 hover:opacity-90 transition-opacity cursor-pointer text-sm"
-        >
+        <button onClick={() => setShowCreateModal(true)} className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-white rounded-xl font-bold shadow-lg shadow-primary/20 hover:opacity-90 transition-opacity cursor-pointer text-sm">
           <Plus className="w-4 h-4" />
           <span>{t("erp_760")}</span>
         </button>
@@ -112,25 +85,15 @@ const Recipes = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-            {loading ? (
-              <div className="col-span-full py-20 text-center text-muted-foreground">
+            {loading ? <div className="col-span-full py-20 text-center text-muted-foreground">
                 {t("erp_10")}
-              </div>
-            ) : mainRecipes.length === 0 ? (
-              <div className="col-span-full py-20 text-center text-muted-foreground border-2 border-dashed border-border rounded-[2rem] bg-white/50">
+              </div> : mainRecipes.length === 0 ? <div className="col-span-full py-20 text-center text-muted-foreground border-2 border-dashed border-border rounded-[2rem] bg-white/50">
                 <Utensils className="w-12 h-12 mx-auto mb-4 opacity-20" />
                 <p className="font-bold">{t("erp_763")}</p>
                 <p className="text-xs text-muted-foreground mt-1">
                   {t("erp_764")}
                 </p>
-              </div>
-            ) : (
-              mainRecipes.map((r) => (
-                <div
-                  key={r.id}
-                  onClick={() => handleView(r.id)}
-                  className="bg-white rounded-[2rem] border border-border overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 group cursor-pointer"
-                >
+              </div> : mainRecipes.map(r => <div key={r.id} onClick={() => handleView(r.id)} className="bg-white rounded-[2rem] border border-border overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 group cursor-pointer">
                   <div className="h-36 bg-gradient-to-br from-orange-100 to-primary/20 flex items-center justify-center relative overflow-hidden">
                     <Utensils className="w-14 h-14 text-primary/40 group-hover:scale-110 transition-transform duration-500" />
                     <div className="absolute top-4 right-4 bg-white/80 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold text-primary">
@@ -163,13 +126,11 @@ const Recipes = () => {
                               ${r.cost?.toFixed(1) || "0"}
                             </span>
                           </div>
-                          {isPortionUnit(r.yieldUnit) && r.yieldAmount > 0 && (
-                            <span className="text-[9px] font-black text-emerald-700 mt-1 bg-emerald-50 px-1.5 py-0.5 rounded-md w-max border border-emerald-100 shadow-sm">
+                          {isPortionUnit(r.yieldUnit) && r.yieldAmount > 0 && <span className="text-[9px] font-black text-emerald-700 mt-1 bg-emerald-50 px-1.5 py-0.5 rounded-md w-max border border-emerald-100 shadow-sm">
                               {t("erp_769")}
                               {(r.cost / r.yieldAmount).toFixed(1)}/
                               {r.yieldUnit}
-                            </span>
-                          )}
+                            </span>}
                         </div>
                       </div>
                       <div>
@@ -187,47 +148,21 @@ const Recipes = () => {
                       <Clock className="w-3 h-3" />
                       <span>{new Date(r.createdAt).toLocaleDateString()}</span>
                     </div>
-                    <button
-                      onClick={(e) => handleEdit(e, r.id)}
-                      className="text-xs font-bold text-primary hover:underline"
-                    >
+                    <button onClick={e => handleEdit(e, r.id)} className="text-xs font-bold text-primary hover:underline">
                       {t("erp_771")}
                     </button>
                   </div>
-                </div>
-              ))
-            )}
+                </div>)}
           </div>
         </div>
 
         {/* Right Side: Collapsible Semi-Finished products sidebar (半成品) */}
-        <div
-          className={cn(
-            "bg-white border border-border rounded-[2rem] shadow-sm transition-all duration-300 shrink-0 flex flex-col overflow-hidden lg:h-[72vh] w-full",
-            sidebarExpanded ? "lg:w-80 h-[72vh]" : "lg:w-16 h-16 lg:h-[72vh]",
-          )}
-        >
+        <div className={cn("bg-white border border-border rounded-[2rem] shadow-sm transition-all duration-300 shrink-0 flex flex-col overflow-hidden lg:h-[72vh] w-full", sidebarExpanded ? "lg:w-80 h-[72vh]" : "lg:w-16 h-16 lg:h-[72vh]")}>
           {/* Header */}
-          <div
-            className={cn(
-              "p-5 border-b border-border flex items-center justify-between bg-muted/20 select-none",
-              sidebarExpanded ? "flex-row" : "flex-col gap-4 py-6",
-            )}
-          >
-            <div
-              className={cn(
-                "flex items-center gap-2",
-                sidebarExpanded ? "" : "flex-col",
-              )}
-            >
-              <ChefHat
-                className={cn(
-                  "text-primary",
-                  sidebarExpanded ? "w-5 h-5" : "w-6 h-6",
-                )}
-              />
-              {sidebarExpanded ? (
-                <div>
+          <div className={cn("p-5 border-b border-border flex items-center justify-between bg-muted/20 select-none", sidebarExpanded ? "flex-row" : "flex-col gap-4 py-6")}>
+            <div className={cn("flex items-center gap-2", sidebarExpanded ? "" : "flex-col")}>
+              <ChefHat className={cn("text-primary", sidebarExpanded ? "w-5 h-5" : "w-6 h-6")} />
+              {sidebarExpanded ? <div>
                   <h4 className="text-xs font-black text-gray-800">
                     {t("erp_772")}
                     {subRecipes.length})
@@ -235,55 +170,33 @@ const Recipes = () => {
                   <p className="text-[9px] text-muted-foreground mt-0.5">
                     {t("erp_773")}
                   </p>
-                </div>
-              ) : (
-                <span className="px-2 py-0.5 bg-primary/10 text-primary text-[10px] font-black rounded-full">
+                </div> : <span className="px-2 py-0.5 bg-primary/10 text-primary text-[10px] font-black rounded-full">
                   {subRecipes.length}
-                </span>
-              )}
+                </span>}
             </div>
 
-            <button
-              onClick={() => setSidebarExpanded(!sidebarExpanded)}
-              className="p-1.5 hover:bg-white rounded-lg shadow-sm border border-border/40 transition-all text-muted-foreground hover:text-primary shrink-0"
-              title={sidebarExpanded ? t("erp_774") : t("erp_775")}
-            >
-              {sidebarExpanded ? (
-                <span className="text-[10px] font-bold flex items-center gap-1">
+            <button onClick={() => setSidebarExpanded(!sidebarExpanded)} className="p-1.5 hover:bg-white rounded-lg shadow-sm border border-border/40 transition-all text-muted-foreground hover:text-primary shrink-0" title={sidebarExpanded ? t("erp_774") : t("erp_775")}>
+              {sidebarExpanded ? <span className="text-[10px] font-bold flex items-center gap-1">
                   <span className="hidden lg:inline">{t("erp_776")}</span>
                   <span className="lg:hidden">{t("erp_777")}</span>
-                </span>
-              ) : (
-                <span className="text-[10px] font-bold flex items-center gap-1">
+                </span> : <span className="text-[10px] font-bold flex items-center gap-1">
                   <span className="hidden lg:inline">{t("erp_778")}</span>
                   <span className="lg:hidden">{t("erp_779")}</span>
-                </span>
-              )}
+                </span>}
             </button>
           </div>
 
           {/* List content */}
-          {sidebarExpanded ? (
-            <div className="flex-1 overflow-y-auto p-5 space-y-4">
-              {loading ? (
-                <div className="py-10 text-center text-xs text-muted-foreground">
+          {sidebarExpanded ? <div className="flex-1 overflow-y-auto p-5 space-y-4">
+              {loading ? <div className="py-10 text-center text-xs text-muted-foreground">
                   {t("erp_10")}
-                </div>
-              ) : subRecipes.length === 0 ? (
-                <div className="py-12 border border-dashed border-border rounded-2xl text-center text-muted-foreground flex flex-col items-center justify-center p-4 bg-muted/5">
+                </div> : subRecipes.length === 0 ? <div className="py-12 border border-dashed border-border rounded-2xl text-center text-muted-foreground flex flex-col items-center justify-center p-4 bg-muted/5">
                   <Utensils className="w-8 h-8 opacity-25 mb-2" />
                   <p className="text-xs font-bold">{t("erp_780")}</p>
                   <p className="text-[10px] text-muted-foreground mt-0.5 leading-normal">
                     {t("erp_781")}
                   </p>
-                </div>
-              ) : (
-                subRecipes.map((r) => (
-                  <div
-                    key={r.id}
-                    onClick={() => handleView(r.id)}
-                    className="p-4 bg-muted/20 border border-border hover:border-primary/30 rounded-2xl shadow-sm hover:shadow transition-all group cursor-pointer flex justify-between items-center"
-                  >
+                </div> : subRecipes.map(r => <div key={r.id} onClick={() => handleView(r.id)} className="p-4 bg-muted/20 border border-border hover:border-primary/30 rounded-2xl shadow-sm hover:shadow transition-all group cursor-pointer flex justify-between items-center">
                     <div className="space-y-1 flex-1 min-w-0 pr-2">
                       <h5 className="text-xs font-black text-gray-800 truncate">
                         {r.name}
@@ -299,66 +212,37 @@ const Recipes = () => {
                           {t("erp_782")}
                           {r.cost?.toFixed(1) || "0"}
                         </span>
-                        {isPortionUnit(r.yieldUnit) && r.yieldAmount > 0 && (
-                          <>
+                        {isPortionUnit(r.yieldUnit) && r.yieldAmount > 0 && <>
                             <span>·</span>
                             <span className="text-emerald-700 font-bold bg-emerald-50 px-1 rounded">
                               {t("erp_783")}
                               {(r.cost / r.yieldAmount).toFixed(1)}/
                               {r.yieldUnit}
                             </span>
-                          </>
-                        )}
+                          </>}
                       </div>
                     </div>
 
-                    <button
-                      onClick={(e) => handleEdit(e, r.id)}
-                      className="px-2.5 py-1 bg-white border border-border text-primary hover:bg-primary hover:text-white rounded-lg text-[10px] font-bold shadow-sm transition-all shrink-0"
-                    >
+                    <button onClick={e => handleEdit(e, r.id)} className="px-2.5 py-1 bg-white border border-border text-primary hover:bg-primary hover:text-white rounded-lg text-[10px] font-bold shadow-sm transition-all shrink-0">
                       {t("erp_336")}
                     </button>
-                  </div>
-                ))
-              )}
-            </div>
-          ) : (
-            // Collapsed view mini list
-            <div className="flex-1 flex flex-col items-center justify-start py-6 gap-4 overflow-y-auto w-full px-2">
-              {!loading &&
-                subRecipes.map((r) => (
-                  <button
-                    key={r.id}
-                    onClick={() => handleView(r.id)}
-                    title={`${r.name} (成本: $${r.cost?.toFixed(1) || "0"})`}
-                    className="w-10 h-10 bg-muted/50 hover:bg-primary/10 border border-border rounded-full flex items-center justify-center text-[10px] font-black text-gray-700 hover:text-primary transition-all shrink-0 shadow-sm"
-                  >
+                  </div>)}
+            </div> :
+        // Collapsed view mini list
+        <div className="flex-1 flex flex-col items-center justify-start py-6 gap-4 overflow-y-auto w-full px-2">
+              {!loading && subRecipes.map(r => <button key={r.id} onClick={() => handleView(r.id)} title={`${r.name} (成本: $${r.cost?.toFixed(1) || "0"})`} className="w-10 h-10 bg-muted/50 hover:bg-primary/10 border border-border rounded-full flex items-center justify-center text-[10px] font-black text-gray-700 hover:text-primary transition-all shrink-0 shadow-sm">
                     {r.name.slice(0, 2)}
-                  </button>
-                ))}
-            </div>
-          )}
+                  </button>)}
+            </div>}
         </div>
       </div>
 
-      {(showCreateModal || editingRecipe) && (
-        <CreateRecipeModal
-          initialData={editingRecipe}
-          onClose={() => {
-            setShowCreateModal(false);
-            setEditingRecipe(null);
-          }}
-          onSuccess={fetchRecipes}
-        />
-      )}
+      {(showCreateModal || editingRecipe) && <CreateRecipeModal initialData={editingRecipe} onClose={() => {
+      setShowCreateModal(false);
+      setEditingRecipe(null);
+    }} onSuccess={fetchRecipes} />}
 
-      {selectedRecipe && (
-        <RecipeDetailModal
-          recipe={selectedRecipe}
-          onClose={() => setSelectedRecipe(null)}
-        />
-      )}
-    </div>
-  );
+      {selectedRecipe && <RecipeDetailModal recipe={selectedRecipe} onClose={() => setSelectedRecipe(null)} />}
+    </div>;
 };
 export default Recipes;
