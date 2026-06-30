@@ -8,7 +8,7 @@ import { cn } from "../lib/utils";
 import { useTranslation } from "react-i18next";
 const isPortionUnit = (unit: string) => {
   if (!unit) return false;
-  const portionUnits = [t("erp_15"), t("erp_68"), "pcs", "piece", t("erp_202"), t("erp_203"), t("erp_204"), t("erp_205")];
+  const portionUnits = [i18n.t("erp_15"), i18n.t("erp_68"), "pcs", "piece", i18n.t("erp_202"), i18n.t("erp_203"), i18n.t("erp_204"), i18n.t("erp_205")];
   return portionUnits.some(u => unit.toLowerCase().includes(u));
 };
 const Recipes = () => {
