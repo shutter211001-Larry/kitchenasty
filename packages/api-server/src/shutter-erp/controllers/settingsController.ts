@@ -117,3 +117,43 @@ export const testMailBranding = async (req: Request, res: Response) => {
     res.status(500).json({ success: false, error: error.message || 'Failed to send test email' });
   }
 };
+
+export const createErpTables = async (req: Request, res: Response) => {
+  try {
+    await prisma.$executeRawUnsafe(`
+      CREATE TABLE IF NOT EXISTS "InviteToken" (
+        "id" TEXT NOT NULL,
+        "token" TEXT NOT NULL,
+        "email" TEXT NOT NULL,
+        "role" "Role" NOT NULL DEFAULT 'STAFF',
+        "invitedBy" TEXT NOT NULL,
+        "usedAt" TIMESTAMP(3),
+        "expiresAt" TIMESTAMP(3) NOT NULL,
+        "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        CONSTRAINT "InviteToken_pkey" PRIMARY KEY ("id")
+      );
+    `);
+    await prisma.$executeRawUnsafe(`
+      CREATE UNIQUE INDEX IF NOT EXISTS "InviteToken_token_key" ON "InviteToken"("token");
+    `);
+    
+    await prisma.$executeRawUnsafe(`
+      CREATE TABLE IF NOT EXISTS "PasswordResetToken" (
+        "id" TEXT NOT NULL,
+        "token" TEXT NOT NULL,
+        "email" TEXT NOT NULL,
+        "expiresAt" TIMESTAMP(3) NOT NULL,
+        "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        CONSTRAINT "PasswordResetToken_pkey" PRIMARY KEY ("id")
+      );
+    `);
+    await prisma.$executeRawUnsafe(`
+      CREATE UNIQUE INDEX IF NOT EXISTS "PasswordResetToken_token_key" ON "PasswordResetToken"("token");
+    `);
+    
+    res.json({ success: true, message: 'ERP tables created successfully on the database' });
+  } catch (error: any) {
+    console.error('Failed to create ERP tables:', error);
+    res.status(500).json({ success: false, error: error.message || 'Failed to create tables' });
+  }
+};
