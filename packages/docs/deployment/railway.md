@@ -43,16 +43,16 @@ Shutter 是一個包含多個模組的大型系統。在您的架構中，包含
 
 因為我們使用的是 Monorepo (單一儲存庫)，您需要**重複 4 次**從 GitHub 匯入同一個儲存庫，並為每個服務設定不同的「根目錄 (Root Directory)」。
 
-1. 點擊 **Create** -> **GitHub Repo**，選擇您的 `shutter` 儲存庫。（請重複此動作 4 次，建立 4 個 App 服務）
-2. 針對這 4 個卡片，分別點擊進入 **Settings** 分頁，往下找到 **Root Directory**。
-3. 依照下方對應表，更改 Root Directory，並在上方更改卡片名稱：
+4. 因為我們專案使用了 **Dockerfile** 來打包各個模組，所以這 4 個卡片的 **Root Directory (根目錄) 必須留空 (或設定為 `/`)**，也就是說**要在專案根目錄下進行構建**！
+5. 針對這 4 個卡片，分別點擊進入 **Settings** 分頁，往下找到 **Deploy** 區塊的 **Dockerfile Path**：
+6. 依照下方對應表，更改 Dockerfile Path，並在上方更改卡片名稱：
 
-| 服務名稱 (建議命名) | Root Directory | 用途 |
-|-----------------|----------------|------|
-| `api-server` | `/packages/api-server` | 後端 API |
-| `adminfront` | `/packages/adminfront` | 管理員後台 |
-| `storefront` | `/packages/storefront` | 顧客點餐前台 |
-| `erpfront` | `/packages/erpfront` | ERP 前台系統 |
+| 服務名稱 (建議命名) | Dockerfile Path (注意 Root Directory 必須為空) | 用途 |
+|-----------------|---------------------------------------------|------|
+| `api-server` | `packages/api-server/Dockerfile` | 後端 API |
+| `adminfront` | `packages/adminfront/Dockerfile` | 管理員後台 |
+| `storefront` | `packages/storefront/Dockerfile` | 顧客點餐前台 |
+| `erpfront` | `packages/erpfront/Dockerfile` | ERP 前台系統 |
 
 4. **綁定網域名稱 (Domains)**：
    - 分別進入這 4 個服務的 **Settings** -> **Public Networking**。
