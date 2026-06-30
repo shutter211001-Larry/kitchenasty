@@ -131,6 +131,7 @@ interface EmailOptions {
   html: string;
   text?: string;
   locationId?: string | null;
+  system?: string;
 }
 
 /**
@@ -148,8 +149,28 @@ export async function sendEmail(options: EmailOptions): Promise<void> {
 
       // Load custom branding details and process HTML template
       let finalHtml = options.html;
+      let erpBranding: any = null;
       try {
-        const branding = await getMailBranding();
+        let branding;
+        if (options.system === 'ERP') {
+          const { prisma: shutterErpPrisma } = await import('../shutter-erp/lib/prisma.js');
+          const setting = await shutterErpPrisma.systemSetting.findUnique({ where: { key: 'mailBranding' } });
+          erpBranding = setting?.value || {
+            senderName: '夏特 ERP 系統',
+            senderEmail: 'noreply@shutterorder.com',
+            emailBrandName: '夏特 ERP 系統',
+            emailHeaderColor: '#3b82f6',
+            emailBgColor: '#f3f4f6'
+          };
+          branding = {
+            emailBrandName: erpBranding.emailBrandName,
+            emailHeaderColor: erpBranding.emailHeaderColor,
+            emailBgColor: erpBranding.emailBgColor
+          };
+        } else {
+          branding = await getMailBranding();
+        }
+        
         finalHtml = finalHtml.replace(/Shutter/g, branding.emailBrandName).replace(/夏特點餐系統/g, branding.emailBrandName);
         finalHtml = finalHtml.replace(/#f97316/g, branding.emailHeaderColor);
         // Wrap with the custom email outer background color
@@ -162,7 +183,10 @@ export async function sendEmail(options: EmailOptions): Promise<void> {
         console.error('[Mail Branding] Failed to apply custom styling properties:', e);
       }
 
-      const brandedOptions = { ...options, html: finalHtml };
+      const brandedOptions = { ...options, html: finalHtml } as EmailOptions & { erpBranding?: any };
+      if (erpBranding) {
+        brandedOptions.erpBranding = erpBranding;
+      }
 
       if (serviceType === 'MAILGUN' && process.env.MAILGUN_API_KEY) {
         await sendMailgunEmail(brandedOptions);
@@ -170,7 +194,10 @@ export async function sendEmail(options: EmailOptions): Promise<void> {
         await sendGmailApiEmail(brandedOptions);
       } else {
         // Fallback to traditional SMTP
-        const { transporter, from } = await getMailConfig(options.locationId);
+        let { transporter, from } = await getMailConfig(options.locationId);
+        if (erpBranding) {
+          from = `${erpBranding.senderName} <${erpBranding.senderEmail}>`;
+        }
         await transporter.sendMail({
           from,
           to: brandedOptions.to,
@@ -185,14 +212,19 @@ export async function sendEmail(options: EmailOptions): Promise<void> {
   })();
 }
 
-async function sendMailgunEmail(options: EmailOptions) {
+async function sendMailgunEmail(options: EmailOptions & { erpBranding?: any }) {
   const domain = process.env.MAILGUN_DOMAIN;
   const apiKey = process.env.MAILGUN_API_KEY;
   if (!domain || !apiKey) throw new Error('Mailgun config missing');
 
   const auth = Buffer.from(`api:${apiKey}`).toString('base64');
+  let from = process.env.EMAIL_FROM || `夏特點餐系統 <noreply@${domain}>`;
+  if (options.erpBranding) {
+    from = `${options.erpBranding.senderName} <${options.erpBranding.senderEmail}>`;
+  }
+
   const body = new URLSearchParams({
-    from: process.env.EMAIL_FROM || `夏特點餐系統 <noreply@${domain}>`,
+    from,
     to: options.to,
     subject: options.subject,
     html: options.html,
@@ -228,7 +260,7 @@ function encodeFromHeader(fromStr: string): string {
   return encodeMimeHeader(fromStr);
 }
 
-async function sendGmailApiEmail(options: EmailOptions) {
+async function sendGmailApiEmail(options: EmailOptions & { erpBranding?: any }) {
   // Get Access Token
   const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
     method: 'POST',
@@ -247,7 +279,10 @@ async function sendGmailApiEmail(options: EmailOptions) {
   const accessToken = tokenData.access_token;
 
   // Construct MIME Message
-  const from = process.env.EMAIL_FROM || '夏特點餐系統 <noreply@shutterorder.com>';
+  let from = process.env.EMAIL_FROM || '夏特點餐系統 <noreply@shutterorder.com>';
+  if (options.erpBranding) {
+    from = `${options.erpBranding.senderName} <${options.erpBranding.senderEmail}>`;
+  }
   const encodedFrom = encodeFromHeader(from);
   const encodedSubject = encodeMimeHeader(options.subject);
 
