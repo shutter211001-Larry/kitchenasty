@@ -143,7 +143,7 @@ export default function AcceptInvite() {
 
           <div className="space-y-1.5">
             <label className="text-[10px] uppercase font-black tracking-widest text-muted-foreground pl-1">
-              {t("erp_846", "姓名")}
+              {t("erp_836", "姓名")}
             </label>
             <input
               type="text"
