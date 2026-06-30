@@ -1,7 +1,7 @@
 import i18n from "../i18n";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { ChefHat, Plus, Search, Utensils, Clock, Trash2, PieChart, TrendingUp, Pizza } from "lucide-react";
+import { ChefHat, Plus, Utensils, Clock, TrendingUp, Pizza } from "lucide-react";
 import CreateRecipeModal from "../components/CreateRecipeModal";
 import RecipeDetailModal from "../components/RecipeDetailModal";
 import { cn } from "../lib/utils";
