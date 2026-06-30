@@ -196,7 +196,7 @@ export const inviteUser = async (req: AuthenticatedRequest, res: Response) => {
     const inviteLink = `${erpUrl.replace(/\/+$/, '')}/accept-invite?token=${token}`;
     
     const emailContent = erpInviteEmail({ email, inviteLink });
-    await sendEmail({ to: email, ...emailContent });
+    await sendEmail({ to: email, ...emailContent, system: 'ERP' });
 
     res.status(200).json({ message: '邀請信已寄出' });
   } catch (error: any) {
@@ -328,7 +328,7 @@ export const requestPasswordReset = async (req: Request, res: Response) => {
     const resetLink = `${erpUrl.replace(/\/+$/, '')}/reset-password?token=${token}`;
     
     const emailContent = passwordResetEmail({ email, resetLink });
-    await sendEmail({ to: email, ...emailContent });
+    await sendEmail({ to: email, ...emailContent, system: 'ERP' });
 
     res.status(200).json({ message: '密碼重置信已寄出。' });
   } catch (error) {
