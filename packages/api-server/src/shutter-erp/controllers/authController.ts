@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import { prisma } from '../lib/prisma.js';
 import { AuthenticatedRequest } from '../middleware/authMiddleware.js';
-import { sendEmail, passwordResetEmail } from '../../lib/email.js';
+import { sendEmail, passwordResetEmail, erpInviteEmail } from '../../lib/email.js';
 const JWT_SECRET = process.env.JWT_SECRET || 'pizza-master-jwt-secret-key-super-secure';
 
 export const register = async (req: Request, res: Response) => {
@@ -160,6 +160,48 @@ export const updateLanguage = async (req: AuthenticatedRequest, res: Response) =
   } catch (error: any) {
     console.error('Update language failed', error);
     res.status(500).json({ error: '更新語言設定失敗' });
+  }
+};
+
+export const inviteUser = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const { email, role } = req.body;
+    if (!req.user || req.user.role !== 'ADMIN') {
+      return res.status(403).json({ error: '權限不足，只有管理員可以發送邀請' });
+    }
+
+    if (!email || !role) {
+      return res.status(400).json({ error: '電子郵件與角色為必填項目' });
+    }
+
+    const existingUser = await prisma.user.findUnique({ where: { email } });
+    if (existingUser) {
+      return res.status(400).json({ error: '此電子郵件已被註冊使用' });
+    }
+
+    const token = crypto.randomBytes(32).toString('hex');
+    const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 7); // 7 days
+
+    await prisma.inviteToken.create({
+      data: {
+        token,
+        email,
+        role: role === 'ADMIN' ? 'ADMIN' : 'STAFF',
+        invitedBy: req.user!.id,
+        expiresAt,
+      },
+    });
+
+    const erpUrl = process.env.ERP_URL_PUBLIC || process.env.ERP_URL || 'http://localhost:3000';
+    const inviteLink = `${erpUrl.replace(/\/+$/, '')}/accept-invite?token=${token}`;
+    
+    const emailContent = erpInviteEmail({ email, inviteLink });
+    await sendEmail({ to: email, ...emailContent });
+
+    res.status(200).json({ message: '邀請信已寄出' });
+  } catch (error: any) {
+    console.error('Invite user failed', error);
+    res.status(500).json({ error: '發送邀請失敗' });
   }
 };
 

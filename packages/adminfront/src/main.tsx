@@ -6,6 +6,7 @@ import { AuthProvider, useAuth } from './context/AuthContext.js';
 import AdminLayout from './components/AdminLayout.js';
 import RequireRole from './components/RequireRole.js';
 import Login from './pages/Login.js';
+import ResetPassword from './pages/ResetPassword.js';
 import Dashboard from './pages/Dashboard.js';
 import LocationList from './pages/LocationList.js';
 import LocationForm from './pages/LocationForm.js';
@@ -77,6 +78,7 @@ function AppRoutes() {
     return (
       <Routes>
         <Route path="/accept-invite" element={<AcceptInvite />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="*" element={<Login onLogin={login} />} />
       </Routes>
     );

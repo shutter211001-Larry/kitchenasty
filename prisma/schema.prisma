@@ -30,6 +30,16 @@ model User {
   @@map("users")
 }
 
+model StaffPasswordResetToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  email     String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@map("staff_password_reset_tokens")
+}
+
 model Customer {
   id                  String               @id @default(cuid())
   email               String?              @unique

@@ -8,8 +8,10 @@ export default function Login({ onLogin }: Props) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [hasSuperAdmin, setHasSuperAdmin] = useState(true);
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
 
   useEffect(() => {
     fetch('/api/auth/staff/setup-status')
@@ -25,6 +27,7 @@ export default function Login({ onLogin }: Props) {
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError('');
+    setMessage('');
     setLoading(true);
 
     try {
@@ -50,6 +53,37 @@ export default function Login({ onLogin }: Props) {
     }
   }
 
+  async function handleForgotPassword(e: FormEvent) {
+    e.preventDefault();
+    if (!email) {
+      setError('請輸入 Email');
+      return;
+    }
+    setError('');
+    setMessage('');
+    setLoading(true);
+
+    try {
+      const res = await fetch('/api/auth/staff/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      
+      let data: any = {};
+      try {
+        data = await res.json();
+      } catch (parseErr) {}
+
+      if (!res.ok) throw new Error(data.error || 'Request failed');
+      setMessage(data.message || '重置信已寄出');
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gray-900 flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
@@ -58,9 +92,14 @@ export default function Login({ onLogin }: Props) {
           <p className="text-gray-400 mt-1 text-sm">Admin Panel</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-lg p-8 space-y-5">
-          <h2 className="text-xl font-semibold text-gray-900 text-center">Sign In</h2>
+        <form onSubmit={isForgotPassword ? handleForgotPassword : handleSubmit} className="bg-white rounded-xl shadow-lg p-8 space-y-5">
+          <h2 className="text-xl font-semibold text-gray-900 text-center">
+            {isForgotPassword ? '忘記密碼' : 'Sign In'}
+          </h2>
 
+          {message && (
+            <div className="bg-green-50 text-green-700 text-sm p-3 rounded-lg">{message}</div>
+          )}
           {error && (
             <div className="bg-red-50 text-red-700 text-sm p-3 rounded-lg">{error}</div>
           )}
@@ -77,33 +116,54 @@ export default function Login({ onLogin }: Props) {
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
-            />
-          </div>
+          {!isForgotPassword && (
+            <div>
+              <div className="flex justify-between items-center mb-1">
+                <label className="block text-sm font-medium text-gray-700">Password</label>
+                <button
+                  type="button"
+                  onClick={() => { setIsForgotPassword(true); setError(''); setMessage(''); }}
+                  className="text-xs text-primary-600 hover:text-primary-700 font-medium cursor-pointer"
+                >
+                  忘記密碼？
+                </button>
+              </div>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required={!isForgotPassword}
+                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+              />
+            </div>
+          )}
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-primary-600 text-white py-3 rounded-lg font-medium hover:bg-primary-700 transition-colors disabled:opacity-50"
+            className="w-full bg-primary-600 text-white py-3 rounded-lg font-medium hover:bg-primary-700 transition-colors disabled:opacity-50 cursor-pointer"
           >
-            {loading ? 'Signing in...' : 'Sign In'}
+            {loading ? (isForgotPassword ? '發送中...' : 'Signing in...') : (isForgotPassword ? '發送重置信' : 'Sign In')}
           </button>
 
-          {!hasSuperAdmin && (
+          {isForgotPassword && (
+            <button
+              type="button"
+              onClick={() => { setIsForgotPassword(false); setError(''); setMessage(''); }}
+              className="w-full text-center text-sm font-medium text-gray-500 hover:text-gray-700 mt-4 cursor-pointer"
+            >
+              返回登入
+            </button>
+          )}
+
+          {!isForgotPassword && !hasSuperAdmin && (
             <button
               type="button"
               onClick={() => {
                 setEmail('admin@shutter.com');
                 setPassword('admin123');
               }}
-              className="w-full bg-gray-50 text-gray-600 py-2 rounded-lg text-sm font-medium hover:bg-gray-100 transition-colors border border-gray-200 flex items-center justify-center gap-2 mt-3"
+              className="w-full bg-gray-50 text-gray-600 py-2 rounded-lg text-sm font-medium hover:bg-gray-100 transition-colors border border-gray-200 flex items-center justify-center gap-2 mt-3 cursor-pointer"
             >
               <span>✨</span>
               <span>一鍵帶入預設管理員</span>
