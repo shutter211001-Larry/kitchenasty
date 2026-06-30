@@ -1,7 +1,9 @@
 import { Response } from 'express';
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 import { prisma } from '../lib/prisma.js';
 import { AuthenticatedRequest } from '../middleware/authMiddleware.js';
+import { sendEmail, staffInvitationEmail } from '../../lib/email.js';
 
 export const getUsers = async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -24,12 +26,12 @@ export const getUsers = async (req: AuthenticatedRequest, res: Response) => {
   }
 };
 
-export const createUser = async (req: AuthenticatedRequest, res: Response) => {
+export const inviteUser = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const { email, password, name, role } = req.body;
+    const { email, role } = req.body;
 
-    if (!email || !password || !name) {
-      return res.status(400).json({ error: '姓名、電子郵件與密碼為必填欄位' });
+    if (!email) {
+      return res.status(400).json({ error: '電子郵件為必填欄位' });
     }
 
     const existingUser = await prisma.user.findUnique({ where: { email } });
@@ -37,27 +39,34 @@ export const createUser = async (req: AuthenticatedRequest, res: Response) => {
       return res.status(400).json({ error: '此電子郵件已被註冊使用' });
     }
 
-    const passwordHash = await bcrypt.hash(password, 10);
-    const user = await prisma.user.create({
+    const token = crypto.randomBytes(32).toString('hex');
+    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
+
+    const invite = await prisma.inviteToken.create({
       data: {
+        token,
         email,
-        name,
-        passwordHash,
-        role: role === 'ADMIN' ? 'ADMIN' : 'STAFF'
+        role: role === 'ADMIN' ? 'ADMIN' : 'STAFF',
+        invitedBy: req.user!.id,
+        expiresAt,
       },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        role: true,
-        createdAt: true
-      }
     });
 
-    res.status(201).json(user);
+    const erpUrl = process.env.ERP_URL_PUBLIC || process.env.ERP_URL || 'http://localhost:3000';
+    const inviteLink = `${erpUrl.replace(/\/+$/, '')}/accept-invite?token=${token}`;
+    
+    const emailContent = staffInvitationEmail({ email, role: invite.role, inviteLink });
+    await sendEmail({ to: email, ...emailContent });
+
+    res.status(201).json({
+      id: invite.id,
+      email: invite.email,
+      role: invite.role,
+      expiresAt: invite.expiresAt,
+    });
   } catch (error: any) {
-    console.error('Failed to create user', error);
-    res.status(500).json({ error: '建立帳號失敗', details: error.message });
+    console.error('Failed to invite user', error);
+    res.status(500).json({ error: '發送邀請失敗', details: error.message });
   }
 };
 

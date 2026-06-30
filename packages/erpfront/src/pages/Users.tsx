@@ -90,11 +90,11 @@ const Users: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     const { t } = useTranslation();
     e.preventDefault();
-    if (!name || !role) {
+    if (modalMode === "edit" && (!name || !role)) {
       setSubmitError(t("erp_746"));
       return;
     }
-    if (modalMode === "create" && (!email || !password)) {
+    if (modalMode === "create" && !email) {
       setSubmitError(t("erp_825"));
       return;
     }
@@ -103,11 +103,10 @@ const Users: React.FC = () => {
       setSubmitError(null);
       if (modalMode === "create") {
         await axios.post("http://localhost:3000/api/users", {
-          name,
           email,
-          password,
           role,
         });
+        alert(t("erp_invite_sent", "Invite Sent Successfully!"));
       } else {
         await axios.put(`http://localhost:3000/api/users/${selectedUser.id}`, {
           name,
@@ -368,19 +367,21 @@ const Users: React.FC = () => {
                 )}
 
                 {/* Name */}
-                <div className="space-y-1.5">
-                  <label className="text-[10px] uppercase font-black tracking-widest text-muted-foreground pl-1">
-                    {t("erp_836")}
-                  </label>
-                  <input
-                    type="text"
-                    placeholder={t("erp_847")}
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="w-full bg-muted/20 border border-border focus:border-primary/50 text-gray-800 rounded-2xl py-3.5 px-5 text-sm font-bold placeholder:text-muted-foreground/60 outline-none transition-all focus:ring-4 focus:ring-primary/5 focus:bg-white"
-                    required
-                  />
-                </div>
+                {modalMode === "edit" && (
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] uppercase font-black tracking-widest text-muted-foreground pl-1">
+                      {t("erp_836")}
+                    </label>
+                    <input
+                      type="text"
+                      placeholder={t("erp_847")}
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      className="w-full bg-muted/20 border border-border focus:border-primary/50 text-gray-800 rounded-2xl py-3.5 px-5 text-sm font-bold placeholder:text-muted-foreground/60 outline-none transition-all focus:ring-4 focus:ring-primary/5 focus:bg-white"
+                      required={modalMode === "edit"}
+                    />
+                  </div>
+                )}
 
                 {/* Email */}
                 <div className="space-y-1.5">
@@ -399,29 +400,26 @@ const Users: React.FC = () => {
                 </div>
 
                 {/* Password */}
-                <div className="space-y-1.5 relative">
-                  <label className="text-[10px] uppercase font-black tracking-widest text-muted-foreground pl-1 flex items-center justify-between">
-                    <span>{t("erp_850")}</span>
-                    {modalMode === "edit" && (
+                {modalMode === "edit" && (
+                  <div className="space-y-1.5 relative">
+                    <label className="text-[10px] uppercase font-black tracking-widest text-muted-foreground pl-1 flex items-center justify-between">
+                      <span>{t("erp_850")}</span>
                       <span className="text-[9px] text-primary lowercase font-black">
                         {t("erp_851")}
                       </span>
-                    )}
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="password"
-                      placeholder={
-                        modalMode === "edit" ? t("erp_852") : t("erp_853")
-                      }
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className="w-full bg-muted/20 border border-border focus:border-primary/50 text-gray-800 rounded-2xl py-3.5 pl-11 pr-5 text-sm font-bold placeholder:text-muted-foreground/60 outline-none transition-all focus:ring-4 focus:ring-primary/5 focus:bg-white"
-                      required={modalMode === "create"}
-                    />
-                    <Key className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="password"
+                        placeholder={t("erp_852")}
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="w-full bg-muted/20 border border-border focus:border-primary/50 text-gray-800 rounded-2xl py-3.5 pl-11 pr-5 text-sm font-bold placeholder:text-muted-foreground/60 outline-none transition-all focus:ring-4 focus:ring-primary/5 focus:bg-white"
+                      />
+                      <Key className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+                    </div>
                   </div>
-                </div>
+                )}
 
                 {/* Role selection */}
                 <div className="space-y-2">

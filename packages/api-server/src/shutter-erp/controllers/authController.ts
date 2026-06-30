@@ -161,3 +161,98 @@ export const updateLanguage = async (req: AuthenticatedRequest, res: Response) =
     res.status(500).json({ error: '更新語言設定失敗' });
   }
 };
+
+export const validateInviteToken = async (req: Request<{ token: string }>, res: Response) => {
+  try {
+    const invite = await prisma.inviteToken.findUnique({
+      where: { token: req.params.token },
+    });
+
+    if (!invite) {
+      return res.status(404).json({ error: '無效的邀請連結' });
+    }
+
+    if (invite.usedAt) {
+      return res.status(400).json({ error: '此邀請連結已被使用' });
+    }
+
+    if (invite.expiresAt < new Date()) {
+      return res.status(400).json({ error: '此邀請連結已過期' });
+    }
+
+    res.json({
+      success: true,
+      data: {
+        email: invite.email,
+        role: invite.role,
+      },
+    });
+  } catch (error: any) {
+    console.error('Validate invite failed', error);
+    res.status(500).json({ error: '驗證邀請失敗' });
+  }
+};
+
+export const acceptInvite = async (req: Request, res: Response) => {
+  try {
+    const { token, name, password } = req.body;
+
+    if (!token || !name || !password) {
+      return res.status(400).json({ error: '名稱與密碼為必填欄位' });
+    }
+
+    const invite = await prisma.inviteToken.findUnique({ where: { token } });
+    if (!invite) {
+      return res.status(404).json({ error: '無效的邀請連結' });
+    }
+
+    if (invite.usedAt) {
+      return res.status(400).json({ error: '此邀請連結已被使用' });
+    }
+
+    if (invite.expiresAt < new Date()) {
+      return res.status(400).json({ error: '此邀請連結已過期' });
+    }
+
+    const existingUser = await prisma.user.findUnique({ where: { email: invite.email } });
+    if (existingUser) {
+      return res.status(400).json({ error: '此電子郵件已被註冊使用' });
+    }
+
+    const passwordHash = await bcrypt.hash(password, 10);
+
+    const [user] = await prisma.$transaction([
+      prisma.user.create({
+        data: {
+          email: invite.email,
+          name,
+          passwordHash,
+          role: invite.role === 'ADMIN' ? 'ADMIN' : 'STAFF',
+        },
+      }),
+      prisma.inviteToken.update({
+        where: { id: invite.id },
+        data: { usedAt: new Date() },
+      }),
+    ]);
+
+    const jwtToken = jwt.sign(
+      { id: user.id, email: user.email, role: user.role },
+      JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    res.status(201).json({
+      token: jwtToken,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+      },
+    });
+  } catch (error: any) {
+    console.error('Accept invite failed', error);
+    res.status(500).json({ error: '接受邀請失敗' });
+  }
+};
