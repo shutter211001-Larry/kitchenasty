@@ -14,6 +14,8 @@ const Login: React.FC = () => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [hasSuperAdmin, setHasSuperAdmin] = useState(true); // default true for security, check dynamically upon mount
 
   useEffect(() => {
@@ -39,6 +41,26 @@ const Login: React.FC = () => {
       setLoading(false);
     }
   };
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email) {
+      setError('請輸入電子郵件');
+      return;
+    }
+    try {
+      setError(null);
+      setMessage(null);
+      setLoading(true);
+      const res = await axios.post("http://localhost:3000/api/auth/forgot-password", { email });
+      setMessage(res.data.message || '重置信已寄出');
+    } catch (err: any) {
+      setError(err.response?.data?.error || '發送失敗');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleQuickFill = () => {
     setEmail("admin@shutter.com");
     setPassword("admin123");
@@ -65,12 +87,17 @@ const Login: React.FC = () => {
           {t("erp_748")}
         </p>
 
+        {message && <div className="w-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 p-4 rounded-2xl flex items-start gap-3 mb-6 animate-in slide-in-from-top-2 duration-300">
+            <ShieldCheck className="w-5 h-5 shrink-0 mt-0.5" />
+            <div className="text-xs font-bold leading-normal">{message}</div>
+          </div>}
+
         {error && <div className="w-full bg-red-500/10 border border-red-500/20 text-red-400 p-4 rounded-2xl flex items-start gap-3 mb-6 animate-in slide-in-from-top-2 duration-300">
             <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
             <div className="text-xs font-bold leading-normal">{error}</div>
           </div>}
 
-        <form onSubmit={handleSubmit} className="w-full space-y-5">
+        <form onSubmit={isForgotPassword ? handleForgotPassword : handleSubmit} className="w-full space-y-5">
           {/* Email input field */}
           <div className="space-y-1.5 relative group">
             <label className="text-[10px] uppercase font-black tracking-wider text-slate-400 pl-1 group-focus-within:text-primary transition-colors">
@@ -84,26 +111,38 @@ const Login: React.FC = () => {
             </div>
           </div>
 
-          {/* Password input field */}
-          <div className="space-y-1.5 relative group">
-            <label className="text-[10px] uppercase font-black tracking-wider text-slate-400 pl-1 group-focus-within:text-primary transition-colors">
-              {t("erp_751")}
-            </label>
-            <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-primary transition-colors">
-                <Lock className="w-5 h-5" />
-              </span>
-              <input type="password" placeholder={t("erp_752")} value={password} onChange={e => setPassword(e.target.value)} className="w-full bg-white/[0.04] border border-white/[0.08] focus:border-primary/50 text-white rounded-2xl py-3.5 pl-12 pr-4 text-sm font-semibold placeholder:text-slate-600 outline-none transition-all focus:ring-4 focus:ring-primary/10" required />
+          {!isForgotPassword && (
+            <div className="space-y-1.5 relative group">
+              <div className="flex justify-between items-center pl-1">
+                <label className="text-[10px] uppercase font-black tracking-wider text-slate-400 group-focus-within:text-primary transition-colors">
+                  {t("erp_751")}
+                </label>
+                <button type="button" onClick={() => { setIsForgotPassword(true); setError(null); setMessage(null); }} className="text-[10px] font-bold text-primary hover:text-orange-400 transition-colors cursor-pointer">
+                  忘記密碼？
+                </button>
+              </div>
+              <div className="relative">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-primary transition-colors">
+                  <Lock className="w-5 h-5" />
+                </span>
+                <input type="password" placeholder={t("erp_752")} value={password} onChange={e => setPassword(e.target.value)} className="w-full bg-white/[0.04] border border-white/[0.08] focus:border-primary/50 text-white rounded-2xl py-3.5 pl-12 pr-4 text-sm font-semibold placeholder:text-slate-600 outline-none transition-all focus:ring-4 focus:ring-primary/10" required={!isForgotPassword} />
+              </div>
             </div>
-          </div>
+          )}
 
-          {/* Login submit button */}
+          {/* Submit button */}
           <button type="submit" disabled={loading} className="w-full bg-gradient-to-r from-primary to-orange-500 text-white py-4 rounded-2xl font-black text-sm shadow-xl shadow-primary/25 hover:shadow-2xl hover:shadow-primary/35 flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:scale-100 disabled:pointer-events-none mt-2 cursor-pointer">
-            {loading ? <span>{t("erp_753")}</span> : <>
-                <span>{t("erp_754")}</span>
+            {loading ? <span>{isForgotPassword ? '發送中...' : t("erp_753")}</span> : <>
+                <span>{isForgotPassword ? '發送重置信' : t("erp_754")}</span>
                 <ArrowRight className="w-4 h-4" />
               </>}
           </button>
+          
+          {isForgotPassword && (
+            <button type="button" onClick={() => { setIsForgotPassword(false); setError(null); setMessage(null); }} className="w-full text-center text-xs font-bold text-slate-400 hover:text-white transition-colors mt-4 cursor-pointer">
+              返回登入
+            </button>
+          )}
         </form>
 
         {!hasSuperAdmin && <>

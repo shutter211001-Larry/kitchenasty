@@ -12,6 +12,7 @@ import Login from "./pages/Login";
 import Users from "./pages/Users";
 import Integration from "./pages/Integration";
 import AcceptInvite from "./pages/AcceptInvite";
+import ResetPassword from "./pages/ResetPassword";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { useTranslation } from "react-i18next";
 function AppContent() {
@@ -33,6 +34,13 @@ function AppContent() {
       return (
         <Routes>
           <Route path="/accept-invite" element={<AcceptInvite />} />
+        </Routes>
+      );
+    }
+    if (location.pathname === "/reset-password") {
+      return (
+        <Routes>
+          <Route path="/reset-password" element={<ResetPassword />} />
         </Routes>
       );
     }

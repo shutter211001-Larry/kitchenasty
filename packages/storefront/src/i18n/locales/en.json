@@ -15,7 +15,8 @@
     "close": "Close",
     "none": "None",
     "guest": "Guest",
-    "confirmCancel": "Are you sure you want to cancel this order?"
+    "confirmCancel": "Are you sure you want to cancel this order?",
+    "success": "Success"
   },
   "nav": {
     "home": "Home",
@@ -249,7 +250,8 @@
     "scheduledFor": "You have scheduled for",
     "noAvailableSlots": "No available time slots",
     "discountsAndRewards": "Discounts & Rewards",
-    "locationNotAcceptingOrders": "This location is currently not accepting orders."
+    "locationNotAcceptingOrders": "This location is currently not accepting orders.",
+    "roundingAdjustment": "Rounding Adjustment"
   },
   "orderConfirmation": {
     "title": "Order Placed!",
@@ -304,7 +306,9 @@
     "offlineCacheDesc": "Due to high server load, we are showing the last known status of your order.",
     "offlineCacheTitle": "Offline Preview Mode",
     "lookupPhone": "Phone Number",
-    "lookupEmailOrPhoneRequired": "Please enter an email address or phone number to retrieve the order."
+    "lookupEmailOrPhoneRequired": "Please enter an email address or phone number to retrieve the order.",
+    "roundingAdjustment": "Rounding Adjustment",
+    "errorLoadingDesc": "An error occurred while loading orders"
   },
   "orderStatus": {
     "placed": "Placed",
@@ -374,5 +378,14 @@
     "join": "Join",
     "orEnterCodeToJoin": "Or enter code to join",
     "enterCodeToJoinTogether": "Enter code to order together"
-  }
+  },
+  "cookie": {
+    "title": "Cookie Settings",
+    "description": "We use cookies to enhance your browsing experience. You can customize your settings below.",
+    "showDetails": "Show Details",
+    "hideDetails": "Hide Details",
+    "savePreferences": "Save Preferences",
+    "acceptAll": "Accept All"
+  },
+  "recent_orders_updated": "Recent orders updated"
 }

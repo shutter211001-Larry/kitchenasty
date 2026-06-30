@@ -1,9 +1,10 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 import { prisma } from '../lib/prisma.js';
 import { AuthenticatedRequest } from '../middleware/authMiddleware.js';
-
+import { sendEmail, passwordResetEmail } from '../../lib/email.js';
 const JWT_SECRET = process.env.JWT_SECRET || 'pizza-master-jwt-secret-key-super-secure';
 
 export const register = async (req: Request, res: Response) => {
@@ -254,5 +255,77 @@ export const acceptInvite = async (req: Request, res: Response) => {
   } catch (error: any) {
     console.error('Accept invite failed', error);
     res.status(500).json({ error: '接受邀請失敗' });
+  }
+};
+
+export const requestPasswordReset = async (req: Request, res: Response) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ error: '電子郵件為必填項目' });
+    }
+
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) {
+      // 為了安全性，我們不告訴使用者此信箱是否存在，都回傳成功
+      return res.status(200).json({ message: '如果信箱存在，密碼重置信已寄出。' });
+    }
+
+    const token = crypto.randomBytes(32).toString('hex');
+    const expiresAt = new Date(Date.now() + 1000 * 60 * 60); // 1 hour
+
+    await prisma.passwordResetToken.create({
+      data: {
+        token,
+        email: user.email,
+        expiresAt
+      }
+    });
+
+    const erpUrl = process.env.ERP_URL_PUBLIC || process.env.ERP_URL || 'http://localhost:3000';
+    const resetLink = `${erpUrl.replace(/\/+$/, '')}/reset-password?token=${token}`;
+    
+    const emailContent = passwordResetEmail({ email, resetLink });
+    await sendEmail({ to: email, ...emailContent });
+
+    res.status(200).json({ message: '密碼重置信已寄出。' });
+  } catch (error) {
+    console.error('Password reset request failed', error);
+    res.status(500).json({ error: '發送密碼重置信件失敗' });
+  }
+};
+
+export const resetPassword = async (req: Request, res: Response) => {
+  try {
+    const { token, newPassword } = req.body;
+    if (!token || !newPassword) {
+      return res.status(400).json({ error: '無效的請求：缺少必要參數' });
+    }
+
+    const resetToken = await prisma.passwordResetToken.findUnique({ where: { token } });
+    if (!resetToken) {
+      return res.status(400).json({ error: '無效的重置連結' });
+    }
+
+    if (resetToken.expiresAt < new Date()) {
+      return res.status(400).json({ error: '重置連結已過期' });
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+    
+    await prisma.$transaction([
+      prisma.user.update({
+        where: { email: resetToken.email },
+        data: { passwordHash }
+      }),
+      prisma.passwordResetToken.delete({
+        where: { id: resetToken.id }
+      })
+    ]);
+
+    res.status(200).json({ message: '密碼重置成功' });
+  } catch (error) {
+    console.error('Password reset failed', error);
+    res.status(500).json({ error: '密碼重置失敗' });
   }
 };
