@@ -1,9 +1,11 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import { z } from 'zod';
+import crypto from 'crypto';
 import prisma from '../lib/db.js';
 import { generateToken } from '../middleware/auth.js';
 import { grantRegistrationBonus } from '../lib/registrationBonus.js';
+import { sendEmail, staffPasswordResetEmail } from '../lib/email.js';
 
 // ============================================================
 // STAFF AUTH
@@ -138,6 +140,83 @@ export async function staffRegister(req: Request, res: Response): Promise<void> 
 // ============================================================
 // CUSTOMER AUTH
 // ============================================================
+
+export async function requestStaffPasswordReset(req: Request, res: Response): Promise<void> {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      res.status(400).json({ error: '電子郵件為必填項目' });
+      return;
+    }
+
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) {
+      // 為了安全性，不透露信箱是否存在
+      res.status(200).json({ message: '如果信箱存在，密碼重置信已寄出。' });
+      return;
+    }
+
+    const token = crypto.randomBytes(32).toString('hex');
+    const expiresAt = new Date(Date.now() + 1000 * 60 * 60); // 1 hour
+
+    await prisma.staffPasswordResetToken.create({
+      data: {
+        token,
+        email: user.email,
+        expiresAt
+      }
+    });
+
+    const adminUrl = process.env.ADMIN_URL_PUBLIC || process.env.ADMIN_URL || 'http://localhost:5173';
+    const resetLink = `${adminUrl.replace(/\/+$/, '')}/reset-password?token=${token}`;
+    
+    const emailContent = staffPasswordResetEmail({ email, resetLink });
+    await sendEmail({ to: email, ...emailContent });
+
+    res.status(200).json({ message: '密碼重置信已寄出。' });
+  } catch (error) {
+    console.error('Staff password reset request failed', error);
+    res.status(500).json({ error: '發送密碼重置信件失敗' });
+  }
+}
+
+export async function resetStaffPassword(req: Request, res: Response): Promise<void> {
+  try {
+    const { token, newPassword } = req.body;
+    if (!token || !newPassword) {
+      res.status(400).json({ error: '無效的請求：缺少必要參數' });
+      return;
+    }
+
+    const resetToken = await prisma.staffPasswordResetToken.findUnique({ where: { token } });
+    if (!resetToken) {
+      res.status(400).json({ error: '無效的重置連結' });
+      return;
+    }
+
+    if (resetToken.expiresAt < new Date()) {
+      res.status(400).json({ error: '重置連結已過期' });
+      return;
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+    
+    await prisma.$transaction([
+      prisma.user.update({
+        where: { email: resetToken.email },
+        data: { password: passwordHash }
+      }),
+      prisma.staffPasswordResetToken.delete({
+        where: { id: resetToken.id }
+      })
+    ]);
+
+    res.status(200).json({ message: '密碼重置成功' });
+  } catch (error) {
+    console.error('Staff password reset failed', error);
+    res.status(500).json({ error: '密碼重置失敗' });
+  }
+}
 
 const customerRegisterSchema = z.object({
   email: z.string().email(),

@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { register, login, getMe, getSetupStatus, updateLanguage, validateInviteToken, acceptInvite, requestPasswordReset, resetPassword } from '../controllers/authController.js';
+import { register, login, getMe, getSetupStatus, updateLanguage, validateInviteToken, acceptInvite, requestPasswordReset, resetPassword, inviteUser } from '../controllers/authController.js';
 import { authMiddleware } from '../middleware/authMiddleware.js';
 
 const router = Router();
@@ -10,6 +10,7 @@ router.get('/me', authMiddleware as any, getMe as any);
 router.get('/setup-status', getSetupStatus);
 router.patch('/me/language', authMiddleware as any, updateLanguage as any);
 
+router.post('/invite', authMiddleware as any, inviteUser as any);
 router.get('/invite/:token', validateInviteToken as any);
 router.post('/accept-invite', acceptInvite as any);
 

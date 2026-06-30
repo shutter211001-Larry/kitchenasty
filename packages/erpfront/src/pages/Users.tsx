@@ -92,7 +92,7 @@ const Users: React.FC = () => {
       setSubmitting(true);
       setSubmitError(null);
       if (modalMode === "create") {
-        await axios.post("http://localhost:3000/api/users", {
+        await axios.post("http://localhost:3000/api/auth/invite", {
           email,
           role
         });
