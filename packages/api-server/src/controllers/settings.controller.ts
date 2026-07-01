@@ -343,7 +343,6 @@ const generalSettingsSchema = z.object({
   currencySymbol: z.string().max(5).optional(),
   currencyPosition: z.enum(['before', 'after']).optional(),
   currencyDecimals: z.number().min(0).max(4).optional(),
-  googleMapsApiKey: z.string().optional(),
   navShowHome: z.boolean().optional(),
   navShowLocations: z.boolean().optional(),
   navShowMenu: z.boolean().optional(),

@@ -43,7 +43,6 @@ export default function SettingsGeneral() {
   const [currencySymbol, setCurrencySymbol] = useState('$');
   const [currencyPosition, setCurrencyPosition] = useState<'before' | 'after'>('before');
   const [currencyDecimals, setCurrencyDecimals] = useState<number>(2);
-  const [googleMapsApiKey, setGoogleMapsApiKey] = useState('');
   const [navShowHome, setNavShowHome] = useState(true);
   const [navShowLocations, setNavShowLocations] = useState(true);
   const [navShowMenu, setNavShowMenu] = useState(true);
@@ -71,7 +70,6 @@ export default function SettingsGeneral() {
           if (d.currencySymbol) setCurrencySymbol(d.currencySymbol);
           if (d.currencyPosition) setCurrencyPosition(d.currencyPosition);
           if (d.currencyDecimals !== undefined) setCurrencyDecimals(d.currencyDecimals);
-          if (d.googleMapsApiKey) setGoogleMapsApiKey(d.googleMapsApiKey);
           if (d.navShowHome !== undefined) setNavShowHome(d.navShowHome);
           if (d.navShowLocations !== undefined) setNavShowLocations(d.navShowLocations);
           if (d.navShowMenu !== undefined) setNavShowMenu(d.navShowMenu);
@@ -94,7 +92,7 @@ export default function SettingsGeneral() {
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({
           contactEmail, contactPhone, timezone, distanceUnit, defaultCurrency,
-          currencySymbol, currencyPosition, currencyDecimals, googleMapsApiKey,
+          currencySymbol, currencyPosition, currencyDecimals,
           navShowHome, navShowLocations, navShowMenu, navShowReservations, showMembership, showLanguageEmoji
         }),
       });
@@ -278,14 +276,6 @@ export default function SettingsGeneral() {
           </div>
         </div>
 
-        {/* Advanced */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-4">
-          <h2 className="text-lg font-semibold text-gray-900">進階設定</h2>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Google Maps API 金鑰</label>
-            <input type="password" value={googleMapsApiKey} onChange={(e) => setGoogleMapsApiKey(e.target.value)} className="w-full max-w-md px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500" placeholder="輸入 API 金鑰" />
-          </div>
-        </div>
         </div>
 
         <div className="flex justify-end pt-4">
