@@ -58,6 +58,7 @@ import SettingsReviews from './pages/SettingsReviews.js';
 import SettingsAdvanced from './pages/SettingsAdvanced.js';
 import SettingsPermissions from './pages/SettingsPermissions.js';
 import SettingsLine from './pages/SettingsLine.js';
+import SettingsGoogle from './pages/SettingsGoogle.js';
 import SettingsNotifications from './pages/SettingsNotifications.js';
 import SettingsFranchise from './pages/SettingsFranchise.js';
 import SettingsInvoice from './pages/SettingsInvoice.js';
@@ -153,6 +154,7 @@ function AppRoutes() {
         <Route path="/settings/advanced" element={<RequireRole roles={['SUPER_ADMIN']}><SettingsAdvanced /></RequireRole>} />
         <Route path="/settings/permissions" element={<RequireRole roles={['SUPER_ADMIN']}><SettingsPermissions /></RequireRole>} />
         <Route path="/settings/line" element={<RequireRole roles={['SUPER_ADMIN']}><SettingsLine /></RequireRole>} />
+        <Route path="/settings/google" element={<RequireRole roles={['SUPER_ADMIN']}><SettingsGoogle /></RequireRole>} />
         <Route path="/settings/invoice" element={<RequireRole roles={['SUPER_ADMIN']}><SettingsInvoice /></RequireRole>} />
         <Route path="/settings/notifications" element={<RequireRole roles={['SUPER_ADMIN', 'MANAGER']}><SettingsNotifications /></RequireRole>} />
         <Route path="/settings/franchise" element={<RequireRole roles={['SUPER_ADMIN']}><SettingsFranchise /></RequireRole>} />
