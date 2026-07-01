@@ -85,7 +85,7 @@ const Integration = () => {
     text: string;
   } | null>(null);
 
-  // Inventory logs (deduction logs fetched from PizzaMaster backend)
+  // Inventory logs (deduction logs fetched from ShutterERP backend)
   const [deductionLogs, setDeductionLogs] = useState<any[]>([]);
   const triggerAlert = (type: "success" | "error", text: string) => {
     setAlertMessage({
@@ -98,15 +98,15 @@ const Integration = () => {
     try {
       if (!silent) setLoading(true);else setRefreshing(true);
 
-      // 1. Fetch Recipes from PizzaMaster
+      // 1. Fetch Recipes from ShutterERP
       const recipesRes = await axios.get("http://localhost:3000/api/recipes");
       setRecipes(recipesRes.data);
 
-      // 2. Fetch Mappings from PizzaMaster
+      // 2. Fetch Mappings from ShutterERP
       const mappingsRes = await axios.get("http://localhost:3000/api/integration/mappings");
       setMappings(mappingsRes.data.data || []);
 
-      // 3. Fetch Sync Data (Orders, MenuItems, Reservations) via PizzaMaster Integration Controller Proxy
+      // 3. Fetch Sync Data (Orders, MenuItems, Reservations) via ShutterERP Integration Controller Proxy
       const proxyRes = await axios.get("http://localhost:3000/api/integration/shutter-data");
       const proxyData = proxyRes.data.data;
       setConnectionOk(proxyData.connectionOk);
@@ -114,7 +114,7 @@ const Integration = () => {
       setOrders(proxyData.orders || []);
       setReservations(proxyData.reservations || []);
 
-      // 4. Fetch Forecast from PizzaMaster if connected
+      // 4. Fetch Forecast from ShutterERP if connected
       if (proxyData.connectionOk) {
         const forecastRes = await axios.get("http://localhost:3000/api/integration/forecast");
         setForecastedIngredients(forecastRes.data.forecastedIngredients || []);
@@ -674,7 +674,7 @@ const Integration = () => {
                   </div>}
               </div>
 
-              {/* Stock Deduction Logs from PizzaMaster */}
+              {/* Stock Deduction Logs from ShutterERP */}
               <div className="bg-white p-6 rounded-3xl border border-border shadow-sm lg:col-span-2">
                 <div className="flex items-center gap-2 mb-6">
                   <Database className="w-5 h-5 text-primary" />

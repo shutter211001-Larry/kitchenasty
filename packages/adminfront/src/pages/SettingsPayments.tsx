@@ -25,6 +25,8 @@ export default function SettingsPayments() {
 
   // LINE Pay
   const [linePayEnabled, setLinePayEnabled] = useState(false);
+  const [linePayChannelId, setLinePayChannelId] = useState('');
+  const [linePayChannelSecret, setLinePayChannelSecret] = useState('');
 
   useEffect(() => {
     fetch('/api/settings/payment', { headers: { Authorization: `Bearer ${token}` } })
@@ -42,6 +44,8 @@ export default function SettingsPayments() {
           if (d.paypalSandbox !== undefined) setPaypalSandbox(d.paypalSandbox);
           if (d.cashEnabled !== undefined) setCashEnabled(d.cashEnabled);
           if (d.linePayEnabled !== undefined) setLinePayEnabled(d.linePayEnabled);
+          if (d.linePayChannelId) setLinePayChannelId(d.linePayChannelId);
+          if (d.linePayChannelSecret) setLinePayChannelSecret(d.linePayChannelSecret);
         }
       })
       .catch(() => {})
@@ -59,7 +63,7 @@ export default function SettingsPayments() {
         body: JSON.stringify({
           stripeEnabled, stripePublishableKey, stripeSecretKey, stripeWebhookSecret,
           paypalEnabled, paypalClientId, paypalClientSecret, paypalSandbox,
-          cashEnabled, linePayEnabled
+          cashEnabled, linePayEnabled, linePayChannelId, linePayChannelSecret
         }),
       });
       const data = await res.json();
@@ -68,6 +72,7 @@ export default function SettingsPayments() {
           if (data.data.stripeSecretKey) setStripeSecretKey(data.data.stripeSecretKey);
           if (data.data.stripeWebhookSecret) setStripeWebhookSecret(data.data.stripeWebhookSecret);
           if (data.data.paypalClientSecret) setPaypalClientSecret(data.data.paypalClientSecret);
+          if (data.data.linePayChannelSecret) setLinePayChannelSecret(data.data.linePayChannelSecret);
         }
         setSuccess('支付設定已更新');
         setTimeout(() => setSuccess(''), 3000);
@@ -162,16 +167,29 @@ export default function SettingsPayments() {
 
       {/* LINE Pay */}
       <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-gray-900">LINE Pay</h2>
-          <label className="flex items-center gap-2">
-            <input type="checkbox" checked={linePayEnabled} onChange={(e) => setLinePayEnabled(e.target.checked)} className="w-4 h-4 text-primary-600 rounded" />
+          <label className={`flex items-center gap-2 ${(linePayChannelId.trim() === '' || linePayChannelSecret.trim() === '') ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}>
+            <input 
+              type="checkbox" 
+              checked={linePayEnabled && linePayChannelId.trim() !== '' && linePayChannelSecret.trim() !== ''} 
+              onChange={(e) => setLinePayEnabled(e.target.checked)} 
+              disabled={linePayChannelId.trim() === '' || linePayChannelSecret.trim() === ''}
+              className="w-4 h-4 text-primary-600 rounded disabled:opacity-50 disabled:cursor-not-allowed" 
+            />
             <span className="text-sm text-gray-700">啟用</span>
           </label>
         </div>
-        <p className="text-xs text-gray-500 mt-2">
-          注意：LINE Pay 的 Channel ID 與 Secret 請在環境變數 (.env) 中設定。
-        </p>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Channel ID</label>
+            <input type="text" value={linePayChannelId} onChange={(e) => setLinePayChannelId(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Channel Secret</label>
+            <input type="password" value={linePayChannelSecret} onChange={(e) => setLinePayChannelSecret(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500" />
+          </div>
+        </div>
       </div>
 
       {/* Cash */}

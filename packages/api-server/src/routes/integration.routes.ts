@@ -6,7 +6,7 @@ const router = Router();
 // Middleware to check integration key
 const authenticateIntegration = (req: any, res: any, next: any) => {
   const authKey = req.headers['x-integration-key'];
-  const expectedKey = process.env.INTEGRATION_KEY || 'pizzamaster-integration-secret-key';
+  const expectedKey = process.env.INTEGRATION_KEY || 'shutter-erp-integration-secret-key';
   
   if (!authKey || authKey !== expectedKey) {
     return res.status(401).json({ success: false, error: 'Unauthorized integration request' });

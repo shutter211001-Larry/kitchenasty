@@ -60,6 +60,7 @@ import SettingsPermissions from './pages/SettingsPermissions.js';
 import SettingsLine from './pages/SettingsLine.js';
 import SettingsNotifications from './pages/SettingsNotifications.js';
 import SettingsFranchise from './pages/SettingsFranchise.js';
+import SettingsInvoice from './pages/SettingsInvoice.js';
 import Attendance from './pages/Attendance.js';
 import AttendanceRecords from './pages/AttendanceRecords.js';
 import AttendanceQRGenerator from './pages/AttendanceQRGenerator.js';
@@ -152,9 +153,9 @@ function AppRoutes() {
         <Route path="/settings/advanced" element={<RequireRole roles={['SUPER_ADMIN']}><SettingsAdvanced /></RequireRole>} />
         <Route path="/settings/permissions" element={<RequireRole roles={['SUPER_ADMIN']}><SettingsPermissions /></RequireRole>} />
         <Route path="/settings/line" element={<RequireRole roles={['SUPER_ADMIN']}><SettingsLine /></RequireRole>} />
+        <Route path="/settings/invoice" element={<RequireRole roles={['SUPER_ADMIN']}><SettingsInvoice /></RequireRole>} />
         <Route path="/settings/notifications" element={<RequireRole roles={['SUPER_ADMIN', 'MANAGER']}><SettingsNotifications /></RequireRole>} />
         <Route path="/settings/franchise" element={<RequireRole roles={['SUPER_ADMIN']}><SettingsFranchise /></RequireRole>} />
-
 
         {/* Developer — MANAGER+ for metrics, SUPER_ADMIN for audit */}
         <Route path="/developer" element={<RequireRole roles={['SUPER_ADMIN', 'MANAGER']}><Navigate to="/developer/metrics" replace /></RequireRole>} />
