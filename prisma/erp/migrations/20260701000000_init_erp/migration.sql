@@ -1,4 +1,4 @@
--- CreateEnum
+﻿-- CreateEnum
 CREATE TYPE "Role" AS ENUM ('ADMIN', 'STAFF');
 
 -- CreateEnum
@@ -11,6 +11,7 @@ CREATE TABLE "User" (
     "name" TEXT,
     "passwordHash" TEXT NOT NULL,
     "role" "Role" NOT NULL DEFAULT 'STAFF',
+    "preferredLanguage" TEXT NOT NULL DEFAULT 'zh-TW',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -175,6 +176,19 @@ CREATE TABLE "InventoryLog" (
 );
 
 -- CreateTable
+CREATE TABLE "expenses" (
+    "id" TEXT NOT NULL,
+    "amount" DOUBLE PRECISION NOT NULL,
+    "description" TEXT,
+    "inventoryLogId" TEXT,
+    "status" TEXT NOT NULL DEFAULT 'PENDING',
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "expenses_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "ActionGroup" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
@@ -239,6 +253,31 @@ CREATE TABLE "SystemSetting" (
 );
 
 -- CreateTable
+CREATE TABLE "InviteToken" (
+    "id" TEXT NOT NULL,
+    "token" TEXT NOT NULL,
+    "email" TEXT NOT NULL,
+    "role" "Role" NOT NULL DEFAULT 'STAFF',
+    "invitedBy" TEXT NOT NULL,
+    "usedAt" TIMESTAMP(3),
+    "expiresAt" TIMESTAMP(3) NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "InviteToken_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "PasswordResetToken" (
+    "id" TEXT NOT NULL,
+    "token" TEXT NOT NULL,
+    "email" TEXT NOT NULL,
+    "expiresAt" TIMESTAMP(3) NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "PasswordResetToken_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "_AllergenToIngredient" (
     "A" TEXT NOT NULL,
     "B" TEXT NOT NULL
@@ -263,10 +302,19 @@ CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 CREATE UNIQUE INDEX "Allergen_name_key" ON "Allergen"("name");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "expenses_inventoryLogId_key" ON "expenses"("inventoryLogId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "ActionGroup_name_key" ON "ActionGroup"("name");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "UnitGroup_name_key" ON "UnitGroup"("name");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "InviteToken_token_key" ON "InviteToken"("token");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "PasswordResetToken_token_key" ON "PasswordResetToken"("token");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "_AllergenToIngredient_AB_unique" ON "_AllergenToIngredient"("A", "B");
@@ -324,6 +372,9 @@ ALTER TABLE "ItemParameter" ADD CONSTRAINT "ItemParameter_itemId_fkey" FOREIGN K
 
 -- AddForeignKey
 ALTER TABLE "InventoryLog" ADD CONSTRAINT "InventoryLog_ingredientId_fkey" FOREIGN KEY ("ingredientId") REFERENCES "Ingredient"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "expenses" ADD CONSTRAINT "expenses_inventoryLogId_fkey" FOREIGN KEY ("inventoryLogId") REFERENCES "InventoryLog"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Action" ADD CONSTRAINT "Action_groupId_fkey" FOREIGN KEY ("groupId") REFERENCES "ActionGroup"("id") ON DELETE CASCADE ON UPDATE CASCADE;
