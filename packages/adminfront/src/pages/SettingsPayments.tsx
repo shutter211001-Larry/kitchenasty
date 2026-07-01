@@ -27,6 +27,10 @@ export default function SettingsPayments() {
   const [linePayEnabled, setLinePayEnabled] = useState(false);
   const [linePayChannelId, setLinePayChannelId] = useState('');
   const [linePayChannelSecret, setLinePayChannelSecret] = useState('');
+  const [linePaySandbox, setLinePaySandbox] = useState(true);
+  const [linePayApiUrl, setLinePayApiUrl] = useState('');
+  const [linePayProxyUrl, setLinePayProxyUrl] = useState('');
+  const [linePayReturnUrl, setLinePayReturnUrl] = useState('');
 
   useEffect(() => {
     fetch('/api/settings/payment', { headers: { Authorization: `Bearer ${token}` } })
@@ -46,6 +50,10 @@ export default function SettingsPayments() {
           if (d.linePayEnabled !== undefined) setLinePayEnabled(d.linePayEnabled);
           if (d.linePayChannelId) setLinePayChannelId(d.linePayChannelId);
           if (d.linePayChannelSecret) setLinePayChannelSecret(d.linePayChannelSecret);
+          if (d.linePaySandbox !== undefined) setLinePaySandbox(d.linePaySandbox);
+          if (d.linePayApiUrl) setLinePayApiUrl(d.linePayApiUrl);
+          if (d.linePayProxyUrl) setLinePayProxyUrl(d.linePayProxyUrl);
+          if (d.linePayReturnUrl) setLinePayReturnUrl(d.linePayReturnUrl);
         }
       })
       .catch(() => {})
@@ -63,7 +71,8 @@ export default function SettingsPayments() {
         body: JSON.stringify({
           stripeEnabled, stripePublishableKey, stripeSecretKey, stripeWebhookSecret,
           paypalEnabled, paypalClientId, paypalClientSecret, paypalSandbox,
-          cashEnabled, linePayEnabled, linePayChannelId, linePayChannelSecret
+          cashEnabled, linePayEnabled, linePayChannelId, linePayChannelSecret, linePaySandbox,
+          linePayApiUrl, linePayProxyUrl, linePayReturnUrl
         }),
       });
       const data = await res.json();
@@ -188,6 +197,22 @@ export default function SettingsPayments() {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Channel Secret</label>
             <input type="password" value={linePayChannelSecret} onChange={(e) => setLinePayChannelSecret(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500" />
+          </div>
+          <label className="flex items-center gap-3">
+            <input type="checkbox" checked={linePaySandbox} onChange={(e) => setLinePaySandbox(e.target.checked)} className="w-4 h-4 text-primary-600 rounded" />
+            <span className="text-sm font-medium text-gray-700">沙盒測試模式 (Sandbox mode)</span>
+          </label>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">API URL (選填，通常根據沙盒模式自動切換)</label>
+            <input type="text" value={linePayApiUrl} onChange={(e) => setLinePayApiUrl(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500" placeholder="例如: https://sandbox-api-pay.line.me" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Proxy URL (選填，若有代理伺服器需求)</label>
+            <input type="text" value={linePayProxyUrl} onChange={(e) => setLinePayProxyUrl(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500" placeholder="例如: http://your-proxy.com" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Return URL (選填，覆寫預設回傳網址)</label>
+            <input type="text" value={linePayReturnUrl} onChange={(e) => setLinePayReturnUrl(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500" placeholder="例如: https://yourstore.com/checkout/linepay/confirm" />
           </div>
         </div>
       </div>

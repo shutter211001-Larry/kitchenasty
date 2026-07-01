@@ -32,15 +32,24 @@ export interface LinePayConfirmPayload {
   currency: 'TWD';
 }
 
+export interface LinePayOptions {
+  channelId?: string;
+  channelSecret?: string;
+  apiUrl?: string;
+  proxyUrl?: string;
+}
+
 export class LinePayClient {
   private channelId: string;
   private channelSecret: string;
   private apiUrl: string;
+  private proxyUrl?: string;
 
-  constructor() {
-    this.channelId = process.env.LINE_PAY_CHANNEL_ID || '';
-    this.channelSecret = process.env.LINE_PAY_CHANNEL_SECRET || '';
-    this.apiUrl = process.env.LINE_PAY_API_URL || 'https://sandbox-api-pay.line.me';
+  constructor(options?: LinePayOptions) {
+    this.channelId = options?.channelId || process.env.LINE_PAY_CHANNEL_ID || '';
+    this.channelSecret = options?.channelSecret || process.env.LINE_PAY_CHANNEL_SECRET || '';
+    this.apiUrl = options?.apiUrl || process.env.LINE_PAY_API_URL || 'https://sandbox-api-pay.line.me';
+    this.proxyUrl = options?.proxyUrl || process.env.LINE_PAY_PROXY_URL;
 
     if (!this.channelId || !this.channelSecret) {
       console.warn('[LINE Pay] Warning: LINE_PAY_CHANNEL_ID or LINE_PAY_CHANNEL_SECRET is not configured.');
@@ -73,8 +82,8 @@ export class LinePayClient {
       }],
     };
 
-    if (process.env.LINE_PAY_PROXY_URL) {
-      config.httpsAgent = new HttpsProxyAgent(process.env.LINE_PAY_PROXY_URL);
+    if (this.proxyUrl) {
+      config.httpsAgent = new HttpsProxyAgent(this.proxyUrl);
     }
 
     try {
@@ -110,8 +119,8 @@ export class LinePayClient {
       }],
     };
 
-    if (process.env.LINE_PAY_PROXY_URL) {
-      config.httpsAgent = new HttpsProxyAgent(process.env.LINE_PAY_PROXY_URL);
+    if (this.proxyUrl) {
+      config.httpsAgent = new HttpsProxyAgent(this.proxyUrl);
     }
 
     try {
