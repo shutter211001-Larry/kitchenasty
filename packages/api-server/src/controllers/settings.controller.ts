@@ -40,6 +40,8 @@ const updateSettingsSchema = z.object({
   lineSettings: z.object({
     liffId: z.string().optional(),
     officialAccountUrl: z.string().optional(),
+    channelAccessToken: z.string().optional(),
+    channelSecret: z.string().optional(),
     notifications: z.record(z.object({
       enabled: z.boolean().optional(),
       message: z.string().optional(),
@@ -310,7 +312,8 @@ type SettingsField =
   | 'paymentSettings'
   | 'reviewSettings'
   | 'advancedSettings'
-  | 'invoiceSettings';
+  | 'invoiceSettings'
+  | 'lineSettings';
 
 async function getSettingsGroup(field: SettingsField): Promise<Record<string, any>> {
   const settings = await getOrCreateSettings();
@@ -398,6 +401,21 @@ const mailSettingsSchema = z.object({
   emailBrandName: z.string().optional(),
   emailHeaderColor: z.string().optional(),
   emailBgColor: z.string().optional(),
+  mailServiceType: z.enum(['SMTP', 'GMAIL_API']).optional(),
+  gmailClientId: z.string().optional(),
+  gmailClientSecret: z.string().optional(),
+  gmailRefreshToken: z.string().optional(),
+});
+
+const lineSettingsSchema = z.object({
+  liffId: z.string().optional(),
+  officialAccountUrl: z.string().optional(),
+  channelAccessToken: z.string().optional(),
+  channelSecret: z.string().optional(),
+  notifications: z.record(z.object({
+    enabled: z.boolean().optional(),
+    message: z.string().optional(),
+  })).optional(),
 });
 
 const paymentSettingsSchema = z.object({
@@ -411,6 +429,8 @@ const paymentSettingsSchema = z.object({
   paypalSandbox: z.boolean().optional(),
   cashEnabled: z.boolean().optional(),
   linePayEnabled: z.boolean().optional(),
+  linePayChannelId: z.string().optional(),
+  linePayChannelSecret: z.string().optional(),
 });
 
 const reviewSettingsSchema = z.object({
@@ -429,6 +449,7 @@ const advancedSettingsSchema = z.object({
     isRedeemable: z.boolean(),
     maxRedemptionAmount: z.number(),
   })).optional(),
+  geminiApiKey: z.string().optional(),
 });
 
 const invoiceSettingsSchema = z.object({
@@ -523,6 +544,8 @@ export async function getMailSettings(req: Request, res: Response): Promise<void
     data: {
       ...data,
       smtpPass: maskSecret(data.smtpPass),
+      gmailClientSecret: maskSecret(data.gmailClientSecret),
+      gmailRefreshToken: maskSecret(data.gmailRefreshToken),
     },
   });
 }
@@ -535,19 +558,23 @@ export async function updateMailSettings(req: Request, res: Response): Promise<v
   }
 
   const locationId = req.query.locationId as string | undefined;
+
   if (locationId) {
+    // Handling location overrides
     const advanced = await getSettingsGroup('advancedSettings');
-    const overrides = { ...(advanced.locationOverrides || {}) };
-    const locationOverride = overrides[locationId] || {};
-    const existing = locationOverride.mailSettings || {};
+    const overrides = advanced.locationOverrides || {};
+    const existingMail = overrides[locationId]?.mailSettings || {};
+
     const mergedData = {
-      ...existing,
+      ...existingMail,
       ...parsed.data,
-      smtpPass: preserveIfMasked(parsed.data.smtpPass, existing.smtpPass),
+      smtpPass: preserveIfMasked(parsed.data.smtpPass, existingMail.smtpPass),
+      gmailClientSecret: preserveIfMasked(parsed.data.gmailClientSecret, existingMail.gmailClientSecret),
+      gmailRefreshToken: preserveIfMasked(parsed.data.gmailRefreshToken, existingMail.gmailRefreshToken),
     };
 
     overrides[locationId] = {
-      ...locationOverride,
+      ...overrides[locationId],
       mailSettings: mergedData,
     };
 
@@ -741,6 +768,7 @@ export async function getPaymentSettings(_req: Request, res: Response): Promise<
       stripeSecretKey: maskSecret(data.stripeSecretKey),
       stripeWebhookSecret: maskSecret(data.stripeWebhookSecret),
       paypalClientSecret: maskSecret(data.paypalClientSecret),
+      linePayChannelSecret: maskSecret(data.linePayChannelSecret),
     },
   });
 }
@@ -758,6 +786,7 @@ export async function updatePaymentSettings(req: Request, res: Response): Promis
     stripeSecretKey: preserveIfMasked(parsed.data.stripeSecretKey, existing.stripeSecretKey),
     stripeWebhookSecret: preserveIfMasked(parsed.data.stripeWebhookSecret, existing.stripeWebhookSecret),
     paypalClientSecret: preserveIfMasked(parsed.data.paypalClientSecret, existing.paypalClientSecret),
+    linePayChannelSecret: preserveIfMasked(parsed.data.linePayChannelSecret, existing.linePayChannelSecret),
   };
 
   const data = await updateSettingsGroup('paymentSettings', mergedData);
@@ -768,6 +797,7 @@ export async function updatePaymentSettings(req: Request, res: Response): Promis
       stripeSecretKey: maskSecret(data.stripeSecretKey),
       stripeWebhookSecret: maskSecret(data.stripeWebhookSecret),
       paypalClientSecret: maskSecret(data.paypalClientSecret),
+      linePayChannelSecret: maskSecret(data.linePayChannelSecret),
     },
   });
 }
@@ -797,7 +827,13 @@ export async function updateReviewSettings(req: Request, res: Response): Promise
 
 export async function getAdvancedSettings(_req: Request, res: Response): Promise<void> {
   const data = await getSettingsGroup('advancedSettings');
-  res.json({ success: true, data });
+  res.json({
+    success: true,
+    data: {
+      ...data,
+      geminiApiKey: maskSecret(data.geminiApiKey),
+    },
+  });
 }
 
 export async function updateAdvancedSettings(req: Request, res: Response): Promise<void> {
@@ -810,13 +846,107 @@ export async function updateAdvancedSettings(req: Request, res: Response): Promi
   const mergedData = {
     ...existing,
     ...parsed.data,
+    geminiApiKey: preserveIfMasked(parsed.data.geminiApiKey, existing.geminiApiKey),
     loyaltyRedemptionRules: {
       ...(existing.loyaltyRedemptionRules || {}),
       ...(parsed.data.loyaltyRedemptionRules || {}),
     },
   };
   const data = await updateSettingsGroup('advancedSettings', mergedData);
-  res.json({ success: true, data });
+  res.json({
+    success: true,
+    data: {
+      ...data,
+      geminiApiKey: maskSecret(data.geminiApiKey),
+    },
+  });
+}
+
+// ============================================================
+// LINE SETTINGS
+// ============================================================
+
+export async function getLineSettings(req: Request, res: Response): Promise<void> {
+  const locationId = req.query.locationId as string | undefined;
+  let data = await getSettingsGroup('lineSettings');
+  
+  if (locationId) {
+    const advanced = await getSettingsGroup('advancedSettings');
+    const overrides = advanced.locationOverrides || {};
+    if (overrides[locationId]?.lineSettings) {
+      data = { ...data, ...overrides[locationId].lineSettings };
+    }
+  }
+
+  res.json({
+    success: true,
+    data: {
+      ...data,
+      channelAccessToken: maskSecret(data.channelAccessToken),
+      channelSecret: maskSecret(data.channelSecret),
+    },
+  });
+}
+
+export async function updateLineSettings(req: Request, res: Response): Promise<void> {
+  const parsed = lineSettingsSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ success: false, error: parsed.error.errors });
+    return;
+  }
+
+  const locationId = req.query.locationId as string | undefined;
+
+  if (locationId) {
+    const advanced = await getSettingsGroup('advancedSettings');
+    const overrides = advanced.locationOverrides || {};
+    const existingLine = overrides[locationId]?.lineSettings || {};
+
+    const mergedData = {
+      ...existingLine,
+      ...parsed.data,
+      channelAccessToken: preserveIfMasked(parsed.data.channelAccessToken, existingLine.channelAccessToken),
+      channelSecret: preserveIfMasked(parsed.data.channelSecret, existingLine.channelSecret),
+    };
+
+    overrides[locationId] = {
+      ...overrides[locationId],
+      lineSettings: mergedData,
+    };
+
+    await updateSettingsGroup('advancedSettings', {
+      ...advanced,
+      locationOverrides: overrides,
+    });
+
+    res.json({
+      success: true,
+      data: {
+        ...mergedData,
+        channelAccessToken: maskSecret(mergedData.channelAccessToken),
+        channelSecret: maskSecret(mergedData.channelSecret),
+      },
+    });
+    return;
+  }
+
+  const existing = await getSettingsGroup('lineSettings');
+  const mergedData = {
+    ...existing,
+    ...parsed.data,
+    channelAccessToken: preserveIfMasked(parsed.data.channelAccessToken, existing.channelAccessToken),
+    channelSecret: preserveIfMasked(parsed.data.channelSecret, existing.channelSecret),
+  };
+
+  const data = await updateSettingsGroup('lineSettings', mergedData);
+  res.json({
+    success: true,
+    data: {
+      ...data,
+      channelAccessToken: maskSecret(data.channelAccessToken),
+      channelSecret: maskSecret(data.channelSecret),
+    },
+  });
 }
 
 // ============================================================

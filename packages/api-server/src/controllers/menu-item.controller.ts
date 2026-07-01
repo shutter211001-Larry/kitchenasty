@@ -147,7 +147,7 @@ export async function getMenuItem(req: Request<{ id: string }>, res: Response): 
     const url = process.env.API_URL_PUBLIC || 'http://localhost:3000';
     const response = await fetch(`${getErpUrl(url)}/api/integration/mappings`, {
       headers: {
-        'x-integration-key': process.env.INTEGRATION_KEY || 'pizzamaster-integration-secret-key'
+        'x-integration-key': process.env.INTEGRATION_KEY || 'shutter-erp-integration-secret-key'
       }
     });
     if (response.ok) {
@@ -242,7 +242,7 @@ export async function createMenuItem(req: Request, res: Response): Promise<void>
 
   auditLog(req, { action: 'create', entity: 'MenuItem', entityId: item.id, details: { name: item.name } });
 
-  // If a recipeId is provided, automatically link it with PizzaMaster ERP
+  // If a recipeId is provided, automatically link it with Shutter ERP
   if (recipeId) {
     try {
       const url = process.env.API_URL_PUBLIC || 'http://localhost:3000';
@@ -250,7 +250,7 @@ export async function createMenuItem(req: Request, res: Response): Promise<void>
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-integration-key': process.env.INTEGRATION_KEY || 'pizzamaster-integration-secret-key'
+          'x-integration-key': process.env.INTEGRATION_KEY || 'shutter-erp-integration-secret-key'
         },
         body: JSON.stringify({
           menuItemId: item.id,
@@ -354,7 +354,7 @@ export async function updateMenuItem(req: Request<{ id: string }>, res: Response
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'x-integration-key': process.env.INTEGRATION_KEY || 'pizzamaster-integration-secret-key'
+            'x-integration-key': process.env.INTEGRATION_KEY || 'shutter-erp-integration-secret-key'
           },
           body: JSON.stringify({
             menuItemId: id,
@@ -374,7 +374,7 @@ export async function updateMenuItem(req: Request<{ id: string }>, res: Response
         const response = await fetch(`${getErpUrl(url)}/api/integration/mappings/${id}`, {
           method: 'DELETE',
           headers: {
-            'x-integration-key': process.env.INTEGRATION_KEY || 'pizzamaster-integration-secret-key'
+            'x-integration-key': process.env.INTEGRATION_KEY || 'shutter-erp-integration-secret-key'
           }
         });
         if (!response.ok) {
@@ -466,7 +466,7 @@ export async function getErpProductRecipes(req: Request, res: Response): Promise
     const url = process.env.API_URL_PUBLIC || 'http://localhost:3000';
     const response = await fetch(`${getErpUrl(url)}/api/integration/product-recipes`, {
       headers: {
-        'x-integration-key': process.env.INTEGRATION_KEY || 'pizzamaster-integration-secret-key'
+        'x-integration-key': process.env.INTEGRATION_KEY || 'shutter-erp-integration-secret-key'
       }
     });
 

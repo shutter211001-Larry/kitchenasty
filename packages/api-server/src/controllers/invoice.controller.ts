@@ -3,7 +3,7 @@ import prisma from '../lib/db.js';
 import { getInvoiceProvider } from '../lib/invoice.js';
 
 export async function issueOrderInvoice(req: Request, res: Response): Promise<void> {
-  const { orderId } = req.params;
+  const orderId = req.params.orderId as string;
 
   try {
     const provider = await getInvoiceProvider();

@@ -106,6 +106,7 @@ export default function SettingsAdvanced() {
   const [maintenanceMessage, setMaintenanceMessage] = useState('');
   const [enableRateLimiting, setEnableRateLimiting] = useState(false);
   const [inventorySyncFrequency, setInventorySyncFrequency] = useState('6h');
+  const [geminiApiKey, setGeminiApiKey] = useState('');
 
   useEffect(() => {
     fetch('/api/settings/advanced', { headers: { Authorization: `Bearer ${token}` } })
@@ -117,6 +118,7 @@ export default function SettingsAdvanced() {
           if (d.maintenanceMessage) setMaintenanceMessage(d.maintenanceMessage);
           if (d.enableRateLimiting !== undefined) setEnableRateLimiting(d.enableRateLimiting);
           if (d.inventorySyncFrequency) setInventorySyncFrequency(d.inventorySyncFrequency);
+          if (d.geminiApiKey) setGeminiApiKey(d.geminiApiKey);
         }
       })
       .catch(() => {})
@@ -136,10 +138,12 @@ export default function SettingsAdvanced() {
           maintenanceMessage,
           enableRateLimiting,
           inventorySyncFrequency,
+          geminiApiKey,
         }),
       });
       const data = await res.json();
       if (data.success) {
+        if (data.data?.geminiApiKey) setGeminiApiKey(data.data.geminiApiKey);
         setSuccess('進階設定已更新');
         setTimeout(() => setSuccess(''), 3000);
       } else {
@@ -273,6 +277,27 @@ export default function SettingsAdvanced() {
           </div>
         </div>
 
+        {/* Section 1.5: AI Integration */}
+        <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm space-y-4 relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500 to-pink-500"></div>
+          <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+            ✨ AI 與進階整合
+          </h2>
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-1.5">Gemini API Key</label>
+            <input
+              type="password"
+              value={geminiApiKey}
+              onChange={(e) => setGeminiApiKey(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+              placeholder="已設定 (留白保持不變)"
+            />
+            <p className="text-xs text-gray-500 mt-2">
+              Google Gemini 的 API 憑證，用於驅動系統內的各項 AI 助理功能（例如：食譜產生、數據洞察等）。
+            </p>
+          </div>
+        </div>
+
         {/* Section 2: Performance Sync Frequency (The Gorgeous Slider!) */}
         <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm relative overflow-hidden">
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-500 to-teal-500"></div>
@@ -282,7 +307,7 @@ export default function SettingsAdvanced() {
                 📈 總部食譜配方與庫存對帳同步設定 (Sync Frequency)
               </h2>
               <p className="text-xs text-gray-400 mt-0.5">
-                設定點單系統（加盟店端）的銷貨日誌，每隔多久同步扣減總部配方管理系統（PizzaMaster）的原料庫存。
+                設定點單系統（加盟店端）的銷貨日誌，每隔多久同步扣減總部配方管理系統（ShutterERP）的原料庫存。
               </p>
             </div>
             <span className="px-3 py-1 bg-emerald-50 border border-emerald-100 text-emerald-800 font-bold text-xs rounded-full shadow-sm">

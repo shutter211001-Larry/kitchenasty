@@ -14,7 +14,7 @@ import expenseRoutes from './routes/expenseRoutes.js';
 
 const router = Router();
 
-// Mount PizzaMaster API routes under /api
+// Mount ShutterERP API routes under /api
 router.use('/api/ingredients', ingredientRoutes);
 router.use('/api/suppliers', supplierRoutes);
 router.use('/api/recipes', recipeRoutes);

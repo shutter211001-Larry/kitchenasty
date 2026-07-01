@@ -10,15 +10,16 @@ export default function SettingsLine() {
   const [success, setSuccess] = useState('');
 
   const [status, setStatus] = useState({
-    isConfigured: false,
-    hasSecret: false,
-    hasToken: false,
     liffId: '',
-    officialAccountUrl: ''
+    officialAccountUrl: '',
+    channelAccessToken: '',
+    channelSecret: ''
   });
 
   const [liffId, setLiffId] = useState('');
   const [officialAccountUrl, setOfficialAccountUrl] = useState('');
+  const [channelAccessToken, setChannelAccessToken] = useState('');
+  const [channelSecret, setChannelSecret] = useState('');
 
   const [locations, setLocations] = useState<{ id: string; name: string }[]>([]);
   const [selectedLocationId, setSelectedLocationId] = useState('');
@@ -43,15 +44,17 @@ export default function SettingsLine() {
   async function fetchStatus() {
     setLoading(true);
     try {
-      const url = selectedLocationId ? `/line/status?locationId=${selectedLocationId}` : '/line/status';
+      const url = selectedLocationId ? `/settings/line?locationId=${selectedLocationId}` : '/settings/line';
       const res = await api.get<{ success: boolean; data: any }>(url);
       if (res.success && res.data) {
         setStatus(res.data);
         setLiffId(res.data.liffId || '');
         setOfficialAccountUrl(res.data.officialAccountUrl || '');
+        setChannelAccessToken(res.data.channelAccessToken || '');
+        setChannelSecret(res.data.channelSecret || '');
       }
     } catch (err) {
-      console.error('Failed to fetch LINE status');
+      console.error('Failed to fetch LINE settings');
     } finally {
       setLoading(false);
     }
@@ -62,10 +65,9 @@ export default function SettingsLine() {
     setError('');
     setSuccess('');
     try {
-      // Save LIFF ID and Account URL to database
-      const url = selectedLocationId ? `/settings?locationId=${selectedLocationId}` : '/settings';
+      const url = selectedLocationId ? `/settings/line?locationId=${selectedLocationId}` : '/settings/line';
       await api.put(url, { 
-        lineSettings: { liffId, officialAccountUrl } 
+        liffId, officialAccountUrl, channelAccessToken, channelSecret 
       });
       setSuccess('設定已儲存');
       fetchStatus();
@@ -150,32 +152,32 @@ export default function SettingsLine() {
         </div>
 
         <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">系統環境變數狀態</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className={`p-4 rounded-lg border ${status.hasSecret ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">LINE_CHANNEL_SECRET</span>
-                {status.hasSecret ? (
-                  <span className="text-xs text-green-600 font-bold px-2 py-1 bg-white rounded border border-green-200">已設定</span>
-                ) : (
-                  <span className="text-xs text-red-600 font-bold px-2 py-1 bg-white rounded border border-red-200">未設定</span>
-                )}
-              </div>
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">系統整合金鑰 (Channel Secret & Token)</h2>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Channel Secret</label>
+              <input
+                type="password"
+                value={channelSecret}
+                onChange={(e) => setChannelSecret(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500"
+                placeholder={status.channelSecret ? "已設定 (留白保持不變)" : "請輸入 Channel Secret"}
+              />
             </div>
-            <div className={`p-4 rounded-lg border ${status.hasToken ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">LINE_CHANNEL_ACCESS_TOKEN</span>
-                {status.hasToken ? (
-                  <span className="text-xs text-green-600 font-bold px-2 py-1 bg-white rounded border border-green-200">已設定</span>
-                ) : (
-                  <span className="text-xs text-red-600 font-bold px-2 py-1 bg-white rounded border border-red-200">未設定</span>
-                )}
-              </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Channel Access Token</label>
+              <input
+                type="password"
+                value={channelAccessToken}
+                onChange={(e) => setChannelAccessToken(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500"
+                placeholder={status.channelAccessToken ? "已設定 (留白保持不變)" : "請輸入 Channel Access Token"}
+              />
             </div>
+            <p className="text-xs text-gray-500 mt-2">
+              請至 LINE Developers Console 取得對應的金鑰，此為後端串接所需之重要憑證。
+            </p>
           </div>
-          <p className="text-xs text-gray-400 mt-4 italic">
-            * 密鑰類型的環境變數需在 Railway 介面設定後重啟服務方可生效。
-          </p>
         </div>
 
         <div className="bg-white rounded-lg border border-gray-200 p-6">

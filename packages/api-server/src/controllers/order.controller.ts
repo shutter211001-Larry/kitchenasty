@@ -1374,20 +1374,20 @@ export async function listCustomerOrders(req: Request, res: Response): Promise<v
   });
 }
 
-// ERP Integration: Background call to deduct inventory in PizzaMaster
-async function notifyPizzaMasterOfDeduction(order: any) {
+// ERP Integration: Background call to deduct inventory in ShutterERP
+async function notifyShutterErpOfDeduction(order: any) {
   try {
     let url = (process.env.API_URL_PUBLIC || 'http://localhost:3000').trim();
     if (url && !url.startsWith('http://') && !url.startsWith('https://')) {
       url = `https://${url}`;
     }
     const erpUrl = url.includes('/shutter-erp') ? url : (url.endsWith('/') ? `${url}shutter-erp` : `${url}/shutter-erp`);
-    console.log(`[ERP Integration] Notifying PizzaMaster for stock deduction. Order: #${order.orderNumber}`);
+    console.log(`[ERP Integration] Notifying ShutterERP for stock deduction. Order: #${order.orderNumber}`);
     const response = await fetch(`${erpUrl}/api/integration/deduct-inventory`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-integration-key': process.env.INTEGRATION_KEY || 'pizzamaster-integration-secret-key'
+        'x-integration-key': process.env.INTEGRATION_KEY || 'shutter-erp-integration-secret-key'
       },
       body: JSON.stringify({
         orderId: order.id,
@@ -1402,12 +1402,12 @@ async function notifyPizzaMasterOfDeduction(order: any) {
     
     const result = await response.json().catch(() => ({ success: false, error: 'Non-JSON response' }));
     if (!response.ok || !result.success) {
-      console.error(`[ERP Integration] Failed to deduct inventory on PizzaMaster:`, result.error || response.statusText);
+      console.error(`[ERP Integration] Failed to deduct inventory on ShutterERP:`, result.error || response.statusText);
     } else {
-      console.log(`[ERP Integration] Successfully deducted inventory on PizzaMaster for Order #${order.orderNumber}`);
+      console.log(`[ERP Integration] Successfully deducted inventory on ShutterERP for Order #${order.orderNumber}`);
     }
   } catch (err) {
-    console.error(`[ERP Integration] Error sending stock deduction to PizzaMaster:`, err);
+    console.error(`[ERP Integration] Error sending stock deduction to ShutterERP:`, err);
   }
 }
 
@@ -1446,9 +1446,9 @@ export async function updateOrderStatus(req: Request<{ id: string }>, res: Respo
     },
   });
 
-  // Trigger ERP stock deduction in PizzaMaster when confirmed
+  // Trigger ERP stock deduction in ShutterERP when confirmed
   if (status === 'CONFIRMED' || status === 'PREPARING') {
-    notifyPizzaMasterOfDeduction(updated).catch(err => 
+    notifyShutterErpOfDeduction(updated).catch(err => 
       console.error('[ERP Integration] Async inventory deduction call failed:', err)
     );
   }

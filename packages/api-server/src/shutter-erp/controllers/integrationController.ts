@@ -50,7 +50,7 @@ const getShutterUrl = () => {
 };
 
 const getIntegrationKey = () => {
-  return process.env.INTEGRATION_KEY || 'pizzamaster-integration-secret-key';
+  return process.env.INTEGRATION_KEY || 'shutter-erp-integration-secret-key';
 };
 
 // Helper to make API calls to Shutter

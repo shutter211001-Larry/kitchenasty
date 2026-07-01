@@ -23,6 +23,10 @@ import {
   updateReviewSettings,
   getAdvancedSettings,
   updateAdvancedSettings,
+  getLineSettings,
+  updateLineSettings,
+  getInvoiceSettings,
+  updateInvoiceSettings,
   debugSettings,
 } from '../controllers/settings.controller.js';
 
@@ -75,6 +79,14 @@ router.put('/review', authenticate, requireRole('SUPER_ADMIN', 'MANAGER'), updat
 // Advanced — SUPER_ADMIN only
 router.get('/advanced', authenticate, requireRole('SUPER_ADMIN'), getAdvancedSettings);
 router.put('/advanced', authenticate, requireRole('SUPER_ADMIN'), updateAdvancedSettings);
+
+// Line — SUPER_ADMIN only
+router.get('/line', authenticate, requireRole('SUPER_ADMIN'), getLineSettings);
+router.put('/line', authenticate, requireRole('SUPER_ADMIN'), updateLineSettings);
+
+// Invoice — SUPER_ADMIN only
+router.get('/invoice', authenticate, requireRole('SUPER_ADMIN'), getInvoiceSettings);
+router.put('/invoice', authenticate, requireRole('SUPER_ADMIN'), updateInvoiceSettings);
 router.get('/ip-blacklist', authenticate, requireRole('SUPER_ADMIN'), async (req, res) => {
   const list = await prisma.iPBlacklist.findMany({ orderBy: { createdAt: 'desc' } });
   res.json({ success: true, data: list });
