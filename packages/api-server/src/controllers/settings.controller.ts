@@ -133,7 +133,7 @@ function toPublicSettings(settings: Awaited<ReturnType<typeof getOrCreateSetting
       cashEnabled: isTrue(payment.cashEnabled, true),
       stripeEnabled: isTrue(payment.stripeEnabled, false) && !!payment.stripePublishableKey && !!payment.stripeSecretKey,
       paypalEnabled: isTrue(payment.paypalEnabled, false) && !!payment.paypalClientId && !!payment.paypalClientSecret,
-      linePayEnabled: isTrue(payment.linePayEnabled, false) && !!process.env.LINE_PAY_CHANNEL_ID && !!process.env.LINE_PAY_CHANNEL_SECRET,
+      linePayEnabled: isTrue(payment.linePayEnabled, false) && !!(payment.linePayChannelId || process.env.LINE_PAY_CHANNEL_ID) && !!(payment.linePayChannelSecret || process.env.LINE_PAY_CHANNEL_SECRET),
     },
     reservationSettings: settings.reservationSettings ? {
       enabled: isTrue(reservation.enabled, true),
@@ -431,6 +431,10 @@ const paymentSettingsSchema = z.object({
   linePayEnabled: z.boolean().optional(),
   linePayChannelId: z.string().optional(),
   linePayChannelSecret: z.string().optional(),
+  linePaySandbox: z.boolean().optional(),
+  linePayApiUrl: z.string().optional(),
+  linePayProxyUrl: z.string().optional(),
+  linePayReturnUrl: z.string().optional(),
 });
 
 const reviewSettingsSchema = z.object({

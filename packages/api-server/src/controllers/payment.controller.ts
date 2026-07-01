@@ -260,9 +260,16 @@ export async function createLinePayPayment(req: Request, res: Response): Promise
   }
 
   try {
-    const linePay = new LinePayClient();
-    
     const siteSettings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
+    const paymentSettings = siteSettings?.paymentSettings ? (typeof siteSettings.paymentSettings === 'string' ? JSON.parse(siteSettings.paymentSettings) : siteSettings.paymentSettings) : {};
+
+    const linePay = new LinePayClient({
+      channelId: paymentSettings.linePayChannelId,
+      channelSecret: paymentSettings.linePayChannelSecret,
+      apiUrl: paymentSettings.linePayApiUrl,
+      proxyUrl: paymentSettings.linePayProxyUrl,
+    });
+    
     const storefrontBaseUrl = process.env.VITE_STORE_URL_PUBLIC || process.env.STORE_URL_PUBLIC || 'http://localhost:5174';
     const baseUrl = storefrontBaseUrl.replace(/\/$/, '');
     
@@ -271,7 +278,9 @@ export async function createLinePayPayment(req: Request, res: Response): Promise
     if (order.groupId) queryParams.set('groupSessionId', order.groupId);
     
     const queryString = queryParams.toString() ? `?${queryParams.toString()}` : '';
-    const returnUrl = `${baseUrl}/checkout/linepay/confirm${queryString}`;
+    const defaultReturnUrl = `${baseUrl}/checkout/linepay/confirm`;
+    const baseReturnUrl = paymentSettings.linePayReturnUrl || defaultReturnUrl;
+    const returnUrl = `${baseReturnUrl.replace(/\/$/, '')}${queryString}`;
 
     let currencyDecimals = 0;
     if (siteSettings && siteSettings.generalSettings) {
@@ -387,7 +396,15 @@ export async function confirmLinePayPayment(req: Request, res: Response): Promis
        return;
     }
 
-    const linePay = new LinePayClient();
+    const siteSettings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
+    const paymentSettings = siteSettings?.paymentSettings ? (typeof siteSettings.paymentSettings === 'string' ? JSON.parse(siteSettings.paymentSettings) : siteSettings.paymentSettings) : {};
+
+    const linePay = new LinePayClient({
+      channelId: paymentSettings.linePayChannelId,
+      channelSecret: paymentSettings.linePayChannelSecret,
+      apiUrl: paymentSettings.linePayApiUrl,
+      proxyUrl: paymentSettings.linePayProxyUrl,
+    });
     const payload = {
       amount: payment.amount,
       currency: 'TWD' as const,
