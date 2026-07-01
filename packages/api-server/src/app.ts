@@ -52,6 +52,7 @@ import integrationRoutes from './routes/integration.routes.js';
 import chatRoutes from './routes/chat.routes.js';
 import groupOrderRoutes from './routes/group-order.routes.js';
 import i18nRoutes from './routes/i18n.routes.js';
+import invoiceRoutes from './routes/invoice.routes.js';
 import shutterErpRouter from './shutter-erp/index.js';
 import { openApiSpec } from './lib/openapi.js';
 import { initPassport } from './lib/passport.js';
@@ -217,6 +218,7 @@ export function createApp() {
   app.use('/api/chat', chatRoutes);
   app.use('/api/group-orders', groupOrderRoutes);
   app.use('/api/i18n', i18nRoutes);
+  app.use('/api/invoices', invoiceRoutes);
   app.use('/shutter-erp', shutterErpRouter);
 
   // 404 handler

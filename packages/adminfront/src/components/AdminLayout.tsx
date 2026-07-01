@@ -81,6 +81,7 @@ const navItems: NavItem[] = [
       { path: '/attendance', label: 'nav.checkIn' },
       { path: '/attendance/records', label: 'nav.attendanceRecords' },
       { path: '/attendance/qr-generator', label: '產生 QR Code' },
+      { path: '/attendance/payroll', label: '薪資結算' },
     ],
   },
 ];

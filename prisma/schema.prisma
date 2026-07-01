@@ -23,6 +23,7 @@ model User {
   locationId      String?
   lineDisplayName String?
   lineUserId      String?   @unique
+  hourlyWage      Float     @default(0)
   assignedOrders  Order[]       @relation("AssignedStaff")
   sentMessages    ChatMessage[] @relation("SentMessages")
   location        Location?     @relation(fields: [locationId], references: [id])
@@ -570,6 +571,7 @@ model SiteSettings {
   storefrontTemplate  String   @default("classic")
   lineSettings        Json?
   menuSection         Json?
+  invoiceSettings     Json?
 
   @@map("site_settings")
 }

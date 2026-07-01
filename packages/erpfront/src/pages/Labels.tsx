@@ -721,7 +721,7 @@ export const Labels = () => {
     fetchIngredients();
 
     // Load saved label settings if they exist
-    const saved = localStorage.getItem("pizzamaster_label_settings");
+    const saved = localStorage.getItem("shuttererp_label_settings");
     if (saved) {
       try {
         const settings = JSON.parse(saved);
@@ -1271,7 +1271,7 @@ export const Labels = () => {
     setExpandedIngredients({});
     setEnableDualLanguage(false);
     setPrintLanguage("en");
-    localStorage.removeItem("pizzamaster_label_settings");
+    localStorage.removeItem("shuttererp_label_settings");
   };
   const handleSaveSettings = () => {
     const settings = {
@@ -1328,7 +1328,7 @@ export const Labels = () => {
       enableDualLanguage,
       printLanguage
     };
-    localStorage.setItem("pizzamaster_label_settings", JSON.stringify(settings));
+    localStorage.setItem("shuttererp_label_settings", JSON.stringify(settings));
     alert(t("erp_504"));
   };
   const renderLabelLogo = () => {

@@ -309,7 +309,8 @@ type SettingsField =
   | 'mailSettings'
   | 'paymentSettings'
   | 'reviewSettings'
-  | 'advancedSettings';
+  | 'advancedSettings'
+  | 'invoiceSettings';
 
 async function getSettingsGroup(field: SettingsField): Promise<Record<string, any>> {
   const settings = await getOrCreateSettings();
@@ -428,6 +429,15 @@ const advancedSettingsSchema = z.object({
     isRedeemable: z.boolean(),
     maxRedemptionAmount: z.number(),
   })).optional(),
+});
+
+const invoiceSettingsSchema = z.object({
+  enabled: z.boolean().optional(),
+  provider: z.string().optional(),
+  merchantId: z.string().optional(),
+  hashKey: z.string().optional(),
+  hashIv: z.string().optional(),
+  vatNumber: z.string().optional(),
 });
 
 // ============================================================
@@ -807,4 +817,45 @@ export async function updateAdvancedSettings(req: Request, res: Response): Promi
   };
   const data = await updateSettingsGroup('advancedSettings', mergedData);
   res.json({ success: true, data });
+}
+
+// ============================================================
+// INVOICE SETTINGS
+// ============================================================
+
+export async function getInvoiceSettings(_req: Request, res: Response): Promise<void> {
+  const data = await getSettingsGroup('invoiceSettings');
+  res.json({
+    success: true,
+    data: {
+      ...data,
+      hashKey: maskSecret(data.hashKey),
+      hashIv: maskSecret(data.hashIv),
+    },
+  });
+}
+
+export async function updateInvoiceSettings(req: Request, res: Response): Promise<void> {
+  const parsed = invoiceSettingsSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ success: false, error: parsed.error.errors });
+    return;
+  }
+
+  const existing = await getSettingsGroup('invoiceSettings');
+  const mergedData = {
+    ...parsed.data,
+    hashKey: preserveIfMasked(parsed.data.hashKey, existing.hashKey),
+    hashIv: preserveIfMasked(parsed.data.hashIv, existing.hashIv),
+  };
+
+  const data = await updateSettingsGroup('invoiceSettings', mergedData);
+  res.json({
+    success: true,
+    data: {
+      ...data,
+      hashKey: maskSecret(data.hashKey),
+      hashIv: maskSecret(data.hashIv),
+    },
+  });
 }

@@ -100,14 +100,14 @@
 
 ---
 
-## 🏢 Shutter ERP / PizzaMaster ERP Integration (ERP 系統整合)
+## 🏢 Shutter ERP Integration (ERP 系統整合)
 
 如果您有搭配整合的 ERP 系統，請設定以下變數。
 
 | 變數名稱 | 說明 | 預設值 | 是否必填 |
 |----------|------------|---------|----------|
 | `SHUTTER_ERP_DATABASE_URL`| ERP 專用的獨立 PostgreSQL 連線字串 | `DATABASE_URL` | 否 |
-| `INTEGRATION_KEY` | Shutter 主系統與 ERP 之間共用的內部驗證金鑰 | `pizzamaster...`| 否 |
+| `INTEGRATION_KEY` | Shutter 主系統與 ERP 之間共用的內部驗證金鑰 | `shutter-erp...`| 否 |
 
 ---
 

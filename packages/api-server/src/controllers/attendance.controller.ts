@@ -187,3 +187,55 @@ export const getRecords = async (req: Request, res: Response) => {
 
   res.json({ success: true, data: records });
 };
+
+export const getPayroll = async (req: Request, res: Response) => {
+  const { year, month } = req.query;
+
+  if (!year || !month) {
+    return res.status(400).json({ success: false, error: 'Missing year or month' });
+  }
+
+  const startDate = new Date(Number(year), Number(month) - 1, 1);
+  const endDate = new Date(Number(year), Number(month), 0, 23, 59, 59, 999);
+
+  const records = await prisma.staffAttendance.findMany({
+    where: {
+      checkIn: { gte: startDate, lte: endDate },
+      checkOut: { not: null }
+    },
+    include: {
+      user: { select: { id: true, name: true, hourlyWage: true } }
+    }
+  });
+
+  // Aggregate hours and salary by user
+  const payrollMap: Record<string, any> = {};
+
+  records.forEach(record => {
+    if (!record.checkOut || !record.user) return;
+    const userId = record.user.id;
+    if (!payrollMap[userId]) {
+      payrollMap[userId] = {
+        userId,
+        name: record.user.name,
+        hourlyWage: record.user.hourlyWage,
+        totalHours: 0,
+        totalSalary: 0
+      };
+    }
+
+    const durationMs = record.checkOut.getTime() - record.checkIn.getTime();
+    const durationHours = durationMs / (1000 * 60 * 60);
+
+    payrollMap[userId].totalHours += durationHours;
+  });
+
+  // Calculate salary and format
+  const payrollData = Object.values(payrollMap).map(p => {
+    p.totalHours = Number(p.totalHours.toFixed(2));
+    p.totalSalary = Math.round(p.totalHours * p.hourlyWage);
+    return p;
+  });
+
+  res.json({ success: true, data: payrollData });
+};

@@ -43,6 +43,7 @@ export async function listStaff(req: Request, res: Response): Promise<void> {
         phone: true,
         isActive: true,
         locationId: true,
+        hourlyWage: true,
         location: { select: { id: true, name: true } },
         createdAt: true,
       },
@@ -80,6 +81,7 @@ export async function getStaff(req: Request<{ id: string }>, res: Response): Pro
       phone: true,
       isActive: true,
       locationId: true,
+      hourlyWage: true,
       location: { select: { id: true, name: true } },
       createdAt: true,
       updatedAt: true,
@@ -103,6 +105,7 @@ const updateStaffSchema = z.object({
   role: z.enum(['SUPER_ADMIN', 'MANAGER', 'STAFF']).optional(),
   phone: z.string().nullable().optional(),
   locationId: z.string().nullable().optional(),
+  hourlyWage: z.number().min(0).optional(),
   isActive: z.boolean().optional(),
 });
 
@@ -144,6 +147,7 @@ export async function updateStaff(req: Request<{ id: string }>, res: Response): 
       phone: true,
       isActive: true,
       locationId: true,
+      hourlyWage: true,
       location: { select: { id: true, name: true } },
     },
   });
