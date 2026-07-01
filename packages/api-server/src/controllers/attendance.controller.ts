@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import prisma from '../lib/db.js';
+import jwt from 'jsonwebtoken';
 
 // Haversine formula to calculate distance in meters
 function getDistanceFromLatLonInM(lat1: number, lon1: number, lat2: number, lon2: number) {
@@ -19,24 +20,65 @@ function deg2rad(deg: number) {
   return deg * (Math.PI / 180);
 }
 
+export const getQrToken = async (req: Request, res: Response) => {
+  const { locationId } = req.query;
+  if (!locationId) {
+    return res.status(400).json({ success: false, error: 'Missing locationId' });
+  }
+
+  try {
+    const token = jwt.sign(
+      { locationId, type: 'attendance_qr' },
+      process.env.JWT_SECRET || 'super-secret',
+      { expiresIn: '30s' }
+    );
+    res.json({ success: true, data: { token } });
+  } catch (error) {
+    console.error('Error generating QR token:', error);
+    res.status(500).json({ success: false, error: 'Failed to generate token' });
+  }
+};
+
 export const checkIn = async (req: Request, res: Response) => {
   const userId = req.user?.id;
-  const { locationId, lat, lng, device } = req.body;
+  const { locationId, lat, lng, device, qrToken } = req.body;
 
-  if (!userId || !locationId || lat === undefined || lng === undefined) {
+  let finalLocationId = locationId;
+  let isOutOfRange = false;
+  let isQR = false;
+
+  if (qrToken) {
+    try {
+      const decoded = jwt.verify(qrToken, process.env.JWT_SECRET || 'super-secret') as any;
+      if (decoded.type === 'attendance_qr' && decoded.locationId) {
+        finalLocationId = decoded.locationId;
+        isOutOfRange = false;
+        isQR = true;
+      } else {
+        return res.status(400).json({ success: false, error: 'Invalid QR token' });
+      }
+    } catch (err) {
+      return res.status(400).json({ success: false, error: 'Invalid or expired QR token' });
+    }
+  }
+
+  if (!userId || !finalLocationId) {
     return res.status(400).json({ success: false, error: 'Missing required fields' });
   }
 
+  if (!qrToken && (lat === undefined || lng === undefined)) {
+    return res.status(400).json({ success: false, error: 'Missing location data for GPS check-in' });
+  }
+
   const location = await prisma.location.findUnique({
-    where: { id: locationId }
+    where: { id: finalLocationId }
   });
 
   if (!location) {
     return res.status(404).json({ success: false, error: 'Location not found' });
   }
 
-  let isOutOfRange = false;
-  if (location.lat && location.lng) {
+  if (!qrToken && location.lat && location.lng && lat !== undefined && lng !== undefined) {
     const distance = getDistanceFromLatLonInM(lat, lng, location.lat, location.lng);
     if (distance > 100) {
       isOutOfRange = true;
@@ -49,7 +91,7 @@ export const checkIn = async (req: Request, res: Response) => {
   const existing = await prisma.staffAttendance.findFirst({
     where: {
       userId,
-      locationId,
+      locationId: finalLocationId,
       checkIn: { gte: startOfDay },
       checkOut: null
     }
@@ -62,10 +104,10 @@ export const checkIn = async (req: Request, res: Response) => {
   const record = await prisma.staffAttendance.create({
     data: {
       userId,
-      locationId,
-      lat,
-      lng,
-      device,
+      locationId: finalLocationId,
+      lat: lat ?? null,
+      lng: lng ?? null,
+      device: isQR ? `${device || 'Unknown'} (QR Scan)` : device,
       isOutOfRange
     }
   });

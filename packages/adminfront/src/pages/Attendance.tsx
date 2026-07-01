@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext.js';
 import toast from 'react-hot-toast';
+import { Html5QrcodeScanner } from 'html5-qrcode';
 
 export default function Attendance() {
   const { t } = useTranslation();
@@ -15,6 +16,30 @@ export default function Attendance() {
   const [currentLat, setCurrentLat] = useState<number | null>(null);
   const [currentLng, setCurrentLng] = useState<number | null>(null);
   const [geoError, setGeoError] = useState<string | null>(null);
+  
+  const [showScanner, setShowScanner] = useState(false);
+
+  useEffect(() => {
+    if (showScanner) {
+      const scanner = new Html5QrcodeScanner(
+        "reader",
+        { fps: 10, qrbox: { width: 250, height: 250 } },
+        false
+      );
+      
+      scanner.render((decodedText) => {
+        scanner.clear();
+        setShowScanner(false);
+        handleCheckIn(decodedText);
+      }, (err) => {
+        // ignore scan errors
+      });
+
+      return () => {
+        scanner.clear().catch(console.error);
+      };
+    }
+  }, [showScanner]);
 
   useEffect(() => {
     fetchLocations();
@@ -73,14 +98,14 @@ export default function Attendance() {
     }
   }
 
-  const handleCheckIn = async () => {
-    if (!selectedLocation) {
+  const handleCheckIn = async (qrToken?: string) => {
+    if (!qrToken && !selectedLocation) {
       toast.error('請選擇打卡門市');
       return;
     }
     
-    if (currentLat === null || currentLng === null) {
-      toast.error('無法取得定位，無法打卡');
+    if (!qrToken && (currentLat === null || currentLng === null)) {
+      toast.error('無法取得定位，無法使用 GPS 打卡');
       return;
     }
 
@@ -93,10 +118,11 @@ export default function Attendance() {
           Authorization: `Bearer ${token}`
         },
         body: JSON.stringify({
-          locationId: selectedLocation,
+          locationId: selectedLocation || 'scan',
           lat: currentLat,
           lng: currentLng,
-          device: navigator.userAgent
+          device: navigator.userAgent,
+          qrToken
         })
       });
       const data = await res.json();
@@ -185,15 +211,38 @@ export default function Attendance() {
               </button>
             </div>
           ) : (
-            <button
-              onClick={handleCheckIn}
-              disabled={loading || currentLat === null}
-              className="bg-blue-600 text-white px-6 py-2 rounded font-bold hover:bg-blue-700 disabled:opacity-50"
-            >
-              上班打卡
-            </button>
+            <div className="flex gap-4">
+              <button
+                onClick={() => handleCheckIn()}
+                disabled={loading || currentLat === null}
+                className="flex-1 bg-blue-600 text-white px-6 py-2 rounded font-bold hover:bg-blue-700 disabled:opacity-50"
+              >
+                GPS 上班打卡
+              </button>
+              <button
+                onClick={() => setShowScanner(true)}
+                disabled={loading}
+                className="flex-1 bg-indigo-600 text-white px-6 py-2 rounded font-bold hover:bg-indigo-700 disabled:opacity-50"
+              >
+                掃描 QR Code
+              </button>
+            </div>
           )}
         </div>
+
+        {showScanner && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75">
+            <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md mx-4">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-xl font-bold">掃描門市 QR Code</h3>
+                <button onClick={() => setShowScanner(false)} className="text-gray-500 hover:text-gray-800">
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+              </div>
+              <div id="reader" className="w-full"></div>
+            </div>
+          </div>
+        )}
 
         <div className="bg-white p-6 rounded shadow">
           <h3 className="text-xl font-bold mb-4">{t('nav.attendanceRecords')}</h3>

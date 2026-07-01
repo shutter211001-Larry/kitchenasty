@@ -62,6 +62,7 @@ import SettingsNotifications from './pages/SettingsNotifications.js';
 import SettingsFranchise from './pages/SettingsFranchise.js';
 import Attendance from './pages/Attendance.js';
 import AttendanceRecords from './pages/AttendanceRecords.js';
+import AttendanceQRGenerator from './pages/AttendanceQRGenerator.js';
 
 import './index.css';
 
@@ -167,6 +168,7 @@ function AppRoutes() {
         {/* Attendance */}
         <Route path="/attendance" element={<Attendance />} />
         <Route path="/attendance/records" element={<RequireRole roles={['SUPER_ADMIN', 'MANAGER']}><AttendanceRecords /></RequireRole>} />
+        <Route path="/attendance/qr-generator" element={<RequireRole roles={['SUPER_ADMIN', 'MANAGER']}><AttendanceQRGenerator /></RequireRole>} />
       </Routes>
     </AdminLayout>
   );
