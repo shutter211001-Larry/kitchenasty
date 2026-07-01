@@ -60,6 +60,8 @@ import SettingsPermissions from './pages/SettingsPermissions.js';
 import SettingsLine from './pages/SettingsLine.js';
 import SettingsNotifications from './pages/SettingsNotifications.js';
 import SettingsFranchise from './pages/SettingsFranchise.js';
+import Attendance from './pages/Attendance.js';
+import AttendanceRecords from './pages/AttendanceRecords.js';
 
 import './index.css';
 
@@ -161,6 +163,10 @@ function AppRoutes() {
         <Route path="/staff" element={<RequireRole roles={['SUPER_ADMIN']}><StaffList /></RequireRole>} />
         <Route path="/staff/invite" element={<RequireRole roles={['SUPER_ADMIN']}><StaffInvite /></RequireRole>} />
         <Route path="/staff/:id" element={<RequireRole roles={['SUPER_ADMIN']}><StaffEdit /></RequireRole>} />
+
+        {/* Attendance */}
+        <Route path="/attendance" element={<Attendance />} />
+        <Route path="/attendance/records" element={<RequireRole roles={['SUPER_ADMIN', 'MANAGER']}><AttendanceRecords /></RequireRole>} />
       </Routes>
     </AdminLayout>
   );

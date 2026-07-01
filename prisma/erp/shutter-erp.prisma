@@ -197,6 +197,20 @@ model InventoryLog {
   amount       Float
   reason       String?
   createdAt    DateTime   @default(now())
+  expense      Expense?
+}
+
+model Expense {
+  id             String    @id @default(uuid())
+  amount         Float     
+  description    String?   
+  inventoryLogId String?   @unique 
+  inventoryLog   InventoryLog? @relation(fields: [inventoryLogId], references: [id])
+  status         String    @default("PENDING") // PENDING, PAID
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@map("expenses")
 }
 
 model ActionGroup {

@@ -72,6 +72,16 @@ const navItems: NavItem[] = [
     ],
   },
   { path: '/staff', label: 'nav.staff', icon: '\uD83D\uDC65', roles: ['SUPER_ADMIN'] },
+  {
+    path: '/attendance',
+    label: 'nav.attendance',
+    icon: '⏱️',
+    roles: ['SUPER_ADMIN', 'MANAGER', 'STAFF'],
+    children: [
+      { path: '/attendance', label: 'nav.checkIn' },
+      { path: '/attendance/records', label: 'nav.attendanceRecords' },
+    ],
+  },
 ];
 
 const ROLE_COLORS: Record<Role, string> = {
