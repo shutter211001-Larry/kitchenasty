@@ -1,2 +1,0 @@
-[phases.start]
-cmds = ["npm run start -w packages/api-server"]

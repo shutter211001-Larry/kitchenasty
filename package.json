@@ -6,7 +6,6 @@
     "packages/*"
   ],
   "scripts": {
-    "start": "npm run start -w packages/api-server",
     "dev:api-server": "npm run dev -w packages/api-server",
     "dev:adminfront": "npm run dev -w packages/adminfront",
     "dev:storefront": "npm run dev -w packages/storefront",
