@@ -94,7 +94,7 @@ export default function SettingsLine() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">LINE 整合設定</h1>
-          <p className="text-sm text-gray-500 mt-1">配置您的 LINE 官方帳號與一鍵登入功能</p>
+          <p className="text-sm text-gray-500 mt-1">配置您的 LINE 官方帳號 (Messaging API) 與一鍵登入功能 (LINE Login)</p>
         </div>
         <button
           onClick={handleSave}
@@ -152,7 +152,7 @@ export default function SettingsLine() {
         </div>
 
         <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">系統整合金鑰 (Channel Secret & Token)</h2>
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">系統整合金鑰 (Messaging API)</h2>
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Channel Secret</label>
@@ -175,13 +175,13 @@ export default function SettingsLine() {
               />
             </div>
             <p className="text-xs text-gray-500 mt-2">
-              請至 LINE Developers Console 取得對應的金鑰，此為後端串接所需之重要憑證。
+              請至 LINE Developers Console 的 <strong>Messaging API Channel</strong> 取得對應的金鑰，此為後端自動回覆與傳送訊息所需之重要憑證。
             </p>
           </div>
         </div>
 
         <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Webhook 設定</h2>
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Webhook 設定 (Messaging API)</h2>
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Webhook URL</label>
@@ -203,7 +203,7 @@ export default function SettingsLine() {
                 </button>
               </div>
               <p className="text-xs text-gray-500 mt-2">
-                請將此 URL 貼回 LINE Developers Console 的 Webhook URL 欄位，並開啟 「Use webhook」 選項。
+                請將此 URL 貼回 LINE Developers Console 中 <strong>Messaging API Channel</strong> 的 Webhook URL 欄位，並開啟 「Use webhook」 選項。
               </p>
             </div>
           </div>
@@ -211,7 +211,7 @@ export default function SettingsLine() {
 
         <div className="bg-white rounded-lg border border-gray-200 p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900">進階設定 (LIFF)</h2>
+            <h2 className="text-lg font-semibold text-gray-900">一鍵登入設定 (LINE Login / LIFF)</h2>
           </div>
           <div className="space-y-4">
             <div>
@@ -224,7 +224,7 @@ export default function SettingsLine() {
                 placeholder="例如 2000000000-XXXXXXXX"
               />
               <p className="text-xs text-gray-500 mt-2">
-                填寫此 ID 後，前台將會開啟「一鍵自動綁定」與「一鍵登入」功能，大幅提升轉換率。
+                請至 LINE Developers Console 的 <strong>LINE Login Channel</strong> 中建立 LIFF 應用程式以取得 LIFF ID。填寫此 ID 後，前台將會開啟「一鍵自動綁定」與「一鍵登入」功能。
               </p>
             </div>
           </div>
