@@ -153,7 +153,24 @@ export async function sendEmail(options: EmailOptions): Promise<void> {
   // Run in a self-contained async block to avoid blocking the caller's thread
   (async () => {
     try {
-      const serviceType = process.env.MAIL_SERVICE_TYPE || 'GMAIL_API';
+      // Load Settings from DB
+      let mailSettings: any = {};
+      let googleSettings: any = {};
+      try {
+        const { prisma } = await import('./db.js');
+        const settings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
+        if (settings) {
+          mailSettings = settings.mailSettings || {};
+          if (typeof mailSettings === 'string') mailSettings = JSON.parse(mailSettings);
+          googleSettings = settings.googleSettings || {};
+          if (typeof googleSettings === 'string') googleSettings = JSON.parse(googleSettings);
+        }
+      } catch (e) {
+        console.error('[Email] Failed to load settings from DB:', e);
+      }
+
+      const serviceType = mailSettings.mailServiceType || process.env.MAIL_SERVICE_TYPE || 'SMTP';
+      const gmailClientId = googleSettings.gmailClientId || process.env.GOOGLE_CLIENT_ID;
 
       // Load custom branding details and process HTML template
       let finalHtml = options.html;
@@ -198,7 +215,7 @@ export async function sendEmail(options: EmailOptions): Promise<void> {
 
       if (serviceType === 'MAILGUN' && process.env.MAILGUN_API_KEY) {
         await sendMailgunEmail(brandedOptions);
-      } else if (serviceType === 'GMAIL_API' && process.env.GOOGLE_CLIENT_ID) {
+      } else if (serviceType === 'GMAIL_API' && gmailClientId) {
         await sendGmailApiEmail(brandedOptions);
       } else {
         // Fallback to traditional SMTP

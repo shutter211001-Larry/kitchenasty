@@ -649,7 +649,7 @@ export async function sendTestEmail(req: Request, res: Response): Promise<void> 
   const googleSettings = await getSettingsGroup('googleSettings');
 
   // Use environment variables for sensitive OAuth2 data if available
-  const serviceType = process.env.MAIL_SERVICE_TYPE || 'SMTP';
+  const serviceType = mail.mailServiceType || process.env.MAIL_SERVICE_TYPE || 'SMTP';
   const oauth2Config = {
     user: mail.smtpUser || process.env.SMTP_USER,
     clientId: googleSettings.gmailClientId || process.env.GOOGLE_CLIENT_ID,
