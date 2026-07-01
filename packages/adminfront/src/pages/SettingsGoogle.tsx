@@ -66,12 +66,12 @@ export default function SettingsGoogle() {
         if (data.data?.gmailClientSecret) setGmailClientSecret(data.data.gmailClientSecret);
         if (data.data?.gmailRefreshToken) setGmailRefreshToken(data.data.gmailRefreshToken);
         if (data.data?.googleMapsApiKey) setGoogleMapsApiKey(data.data.googleMapsApiKey);
-        toast.success(t('autoGen.admin.key1334'));
+        toast.success(t('settingsGoogle.googleSettingsSaved'));
       } else {
-        toast.error(typeof data.error === 'string' ? data.error : t('autoGen.admin.key1335'));
+        toast.error(typeof data.error === 'string' ? data.error : t('settingsGoogle.saveFailed'));
       }
     } catch {
-      toast.error(t('autoGen.admin.key1336'));
+      toast.error(t('settingsGoogle.networkConnectionError'));
     } finally {
       setSaving(false);
     }
@@ -89,9 +89,9 @@ export default function SettingsGoogle() {
     <div className="space-y-6 max-w-4xl">
       <div className="flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
         <div>
-          <h1 className="text-xl font-extrabold text-gray-900">{t('autoGen.admin.key1337')}</h1>
+          <h1 className="text-xl font-extrabold text-gray-900">{t('settingsGoogle.googleIntegrationSettings')}</h1>
           <p className="text-sm text-gray-500 mt-1">
-            {t('autoGen.admin.key1338')}
+            {t('settingsGoogle.googleServicesDescription')}
           </p>
         </div>
         <button
@@ -99,7 +99,7 @@ export default function SettingsGoogle() {
           disabled={saving}
           className="px-6 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold rounded-xl shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50"
         >
-          {saving ? t('autoGen.admin.key1339') : t('autoGen.admin.key1340')}
+          {saving ? t('settingsGoogle.savingInProgress') : t('settingsGoogle.saveChanges')}
         </button>
       </div>
 
@@ -107,7 +107,7 @@ export default function SettingsGoogle() {
         {/* Gemini AI Settings */}
         <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm space-y-4">
           <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-            {t('autoGen.admin.key1341')}
+            {t('settingsGoogle.geminiAiIntegration')}
           </h2>
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1.5">Gemini API Key</label>
@@ -116,10 +116,10 @@ export default function SettingsGoogle() {
               value={geminiApiKey}
               onChange={(e) => setGeminiApiKey(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 transition-all"
-              placeholder={t('autoGen.admin.key1342')}
+              placeholder={t('settingsGoogle.configuredLeaveBlank')}
             />
             <p className="text-xs text-gray-500 mt-2">
-              {t('autoGen.admin.key1343')}
+              {t('settingsGoogle.geminiApiKeyDescription')}
             </p>
           </div>
         </div>
@@ -127,7 +127,7 @@ export default function SettingsGoogle() {
         {/* Google SSO Settings */}
         <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm space-y-4">
           <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-            {t('autoGen.admin.key1344')}
+            {t('settingsGoogle.googleSsoIntegration')}
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -137,7 +137,7 @@ export default function SettingsGoogle() {
                 value={googleLoginClientId}
                 onChange={(e) => setGoogleLoginClientId(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 transition-all"
-                placeholder={t('autoGen.admin.key1345')}
+                placeholder={t('settingsGoogle.exampleClientId')}
               />
             </div>
             <div>
@@ -147,22 +147,22 @@ export default function SettingsGoogle() {
                 value={googleLoginClientSecret}
                 onChange={(e) => setGoogleLoginClientSecret(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 transition-all"
-                placeholder={t('autoGen.admin.key1346')}
+                placeholder={t('settingsGoogle.configuredLeaveBlankSso')}
               />
             </div>
           </div>
           <p className="text-xs text-blue-600 mt-2 bg-blue-50 p-2 rounded-lg border border-blue-100">
-            {t('autoGen.admin.key1347')}
+            {t('settingsGoogle.restartApiServerDescription')}
           </p>
         </div>
 
         {/* Gmail API Settings */}
         <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm space-y-4">
           <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-            {t('autoGen.admin.key1348')}
+            {t('settingsGoogle.gmailApiIntegration')}
           </h2>
           <p className="text-sm text-gray-500 mb-4">
-            {t('autoGen.admin.key1349')}
+            {t('settingsGoogle.gmailApiDescription')}
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
@@ -181,7 +181,7 @@ export default function SettingsGoogle() {
                 value={gmailClientSecret}
                 onChange={(e) => setGmailClientSecret(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 transition-all"
-                placeholder={t('autoGen.admin.key1350')}
+                placeholder={t('settingsGoogle.configuredLeaveBlankGmail')}
               />
             </div>
             <div>
@@ -191,7 +191,7 @@ export default function SettingsGoogle() {
                 value={gmailRefreshToken}
                 onChange={(e) => setGmailRefreshToken(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 transition-all"
-                placeholder={t('autoGen.admin.key1351')}
+                placeholder={t('settingsGoogle.configuredLeaveBlankMaps')}
               />
             </div>
           </div>
@@ -200,7 +200,7 @@ export default function SettingsGoogle() {
         {/* Google Maps Settings */}
         <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm space-y-4">
           <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-            {t('autoGen.admin.key1352')}
+            {t('settingsGoogle.googleMapsIntegration')}
           </h2>
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1.5">Google Maps API Key</label>
@@ -209,7 +209,7 @@ export default function SettingsGoogle() {
               value={googleMapsApiKey}
               onChange={(e) => setGoogleMapsApiKey(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 transition-all"
-              placeholder={t('autoGen.admin.key1353')}
+              placeholder={t('settingsGoogle.configuredKeepBlank')}
             />
           </div>
         </div>

@@ -48,7 +48,7 @@ export default function AttendancePayroll() {
     if (payrollData.length === 0) return;
     
     let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
-    csvContent += t('autoGen.admin.key85');
+    csvContent += t('attendancePayroll.payrollCsvHeader');
     
     payrollData.forEach(row => {
       csvContent += `${row.name},${row.hourlyWage},${row.totalHours},${row.totalSalary}\n`;
@@ -71,39 +71,39 @@ export default function AttendancePayroll() {
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">{t('autoGen.admin.key86')}</h2>
+        <h2 className="text-2xl font-bold text-gray-900">{t('attendancePayroll.payrollReport')}</h2>
         <button
           onClick={handleExportCSV}
           disabled={payrollData.length === 0}
           className="bg-green-600 text-white px-4 py-2 rounded shadow hover:bg-green-700 disabled:opacity-50"
         >
-          {t('autoGen.admin.key87')}
+          {t('attendancePayroll.exportCsv')}
         </button>
       </div>
 
       <div className="bg-white p-6 rounded shadow mb-6 flex items-end gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key88')}</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">{t('attendancePayroll.year')}</label>
           <select
             value={year}
             onChange={(e) => setYear(Number(e.target.value))}
             className="rounded border-gray-300 border p-2"
           >
-            {years.map(y => <option key={y} value={y}>{y} {t('autoGen.admin.key89')}</option>)}
+            {years.map(y => <option key={y} value={y}>{y} {t('attendancePayroll.yearUnit')}</option>)}
           </select>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key90')}</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">{t('attendancePayroll.month')}</label>
           <select
             value={month}
             onChange={(e) => setMonth(Number(e.target.value))}
             className="rounded border-gray-300 border p-2 min-w-[100px]"
           >
-            {months.map(m => <option key={m} value={m}>{m} {t('autoGen.admin.key91')}</option>)}
+            {months.map(m => <option key={m} value={m}>{m} {t('attendancePayroll.monthUnit')}</option>)}
           </select>
         </div>
         <div>
-          <div className="text-sm text-gray-500 mb-1">{t('autoGen.admin.key92')}</div>
+          <div className="text-sm text-gray-500 mb-1">{t('attendancePayroll.totalMonthlyPayroll')}</div>
           <div className="text-2xl font-bold text-blue-600">
             NT$ {totalStorePayroll.toLocaleString()}
           </div>
@@ -115,10 +115,10 @@ export default function AttendancePayroll() {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('autoGen.admin.key93')}</th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{t('autoGen.admin.key94')}</th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{t('autoGen.admin.key95')}</th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{t('autoGen.admin.key96')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('attendancePayroll.employeeName')}</th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{t('attendancePayroll.hourlyWage')}</th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{t('attendancePayroll.totalHours')}</th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{t('attendancePayroll.salaryPayable')}</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -150,7 +150,7 @@ export default function AttendancePayroll() {
               ) : (
                 <tr>
                   <td colSpan={4} className="px-6 py-12 text-center text-gray-500">
-                    {t('autoGen.admin.key97')}
+                    {t('attendancePayroll.noPayrollRecords')}
                   </td>
                 </tr>
               )}

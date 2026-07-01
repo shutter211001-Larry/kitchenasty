@@ -105,7 +105,7 @@ export default function CartDrawer() {const { t, i18n } = useTranslation();
                     {/* Price */}
                     <div className="text-sm font-medium text-main">
                       {item.redeemedWithPoints ? (
-                        <span className="text-orange-600 font-bold">{item.rewardPointsPrice ? item.rewardPointsPrice * item.quantity : 0} {t('autoGen.store.key1')}</span>
+                        <span className="text-orange-600 font-bold">{item.rewardPointsPrice ? item.rewardPointsPrice * item.quantity : 0} {t('cartDrawer.points')}</span>
                       ) : (
                         `$${lineTotal.toFixed(2)}`
                       )}

@@ -143,7 +143,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         data = await res.json();
       } catch (parseErr) {
-        throw new Error(t('autoGen.store.key12'));
+        throw new Error(t('authContext.serverConnectionFailed'));
       }
 
       if (!res.ok) {
@@ -184,7 +184,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       data = await res.json();
     } catch (parseErr) {
-      throw new Error(t('autoGen.store.key13'));
+      throw new Error(t('authContext.serverMaintenanceOrFailed'));
     }
 
     if (!res.ok) throw new Error(data.error || 'Registration failed');

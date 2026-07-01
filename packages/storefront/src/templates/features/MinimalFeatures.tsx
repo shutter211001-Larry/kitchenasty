@@ -17,8 +17,8 @@ const defaultIcons: Record<string, React.ReactNode> = {
 export default function MinimalFeatures({ features, t, lang = 'zh-TW' }: FeaturesProps) {const { settings } = useTheme();
 
   const items = features?.length ? features.filter(f => {
-              if (!settings.navShowLocations && (f.title.includes(t('autoGen.store.key117')) || f.title.includes(t('autoGen.store.key118')) || f.title.includes(t('autoGen.store.key119')))) return false;
-              if ((!settings.navShowReservations || !settings.reservationSettings?.enabled) && f.title.includes(t('autoGen.store.key120'))) return false;
+              if (!settings.navShowLocations && (f.title.includes(t('minimalFeatures.branch')) || f.title.includes(t('minimalFeatures.location')) || f.title.includes(t('minimalFeatures.reservation')))) return false;
+              if ((!settings.navShowReservations || !settings.reservationSettings?.enabled) && f.title.includes(t('minimalFeatures.booking'))) return false;
               return true;
             }) : [
     settings.orderSettings?.deliveryEnabled && { icon: 'clock', title: t('home.fastDelivery'), description: t('home.fastDeliveryDesc') },

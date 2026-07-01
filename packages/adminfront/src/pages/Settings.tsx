@@ -20,12 +20,12 @@ export default function Settings() {
   const { t } = useTranslation();
     const groups: SettingsGroup[] = [
       {
-        categoryName: t('autoGen.admin.key1173'),
-        description: t('autoGen.admin.key1174'),
+        categoryName: t('settings.coreOperationsManagement'),
+        description: t('settings.manageBrandAndFranchise'),
         cards: [
           {
-            title: t('autoGen.admin.key1175'),
-            description: t('autoGen.admin.key1176'),
+            title: t('settings.generalSettings'),
+            description: t('settings.restaurantBasicInfo'),
             link: '/settings/general',
             roles: ['SUPER_ADMIN', 'MANAGER'],
             icon: (
@@ -35,8 +35,8 @@ export default function Settings() {
             ),
           },
           {
-            title: t('autoGen.admin.key1177'),
-            description: t('autoGen.admin.key1178'),
+            title: t('settings.headquartersBranchManagement'),
+            description: t('settings.manageFranchiseAndDiagnostics'),
             link: '/settings/franchise',
             roles: ['SUPER_ADMIN'],
             icon: (
@@ -46,8 +46,8 @@ export default function Settings() {
             ),
           },
           {
-            title: t('autoGen.admin.key1179'),
-            description: t('autoGen.admin.key1180'),
+            title: t('settings.advancedSettings'),
+            description: t('settings.maintenanceAndRateLimits'),
             link: '/settings/advanced',
             roles: ['SUPER_ADMIN'],
             icon: (
@@ -59,12 +59,12 @@ export default function Settings() {
         ]
       },
       {
-        categoryName: t('autoGen.admin.key1181'),
-        description: t('autoGen.admin.key1182'),
+        categoryName: t('settings.customerServiceOrdering'),
+        description: t('settings.configureOrderingAndFeedback'),
         cards: [
           {
-            title: t('autoGen.admin.key1183'),
-            description: t('autoGen.admin.key1184'),
+            title: t('settings.ordersAndDelivery'),
+            description: t('settings.deliveryAndTaxSettings'),
             link: '/settings/order',
             roles: ['SUPER_ADMIN', 'MANAGER'],
             icon: (
@@ -74,8 +74,8 @@ export default function Settings() {
             ),
           },
           {
-            title: t('autoGen.admin.key1185'),
-            description: t('autoGen.admin.key1186'),
+            title: t('settings.reservationService'),
+            description: t('settings.reservationTimeSettings'),
             link: '/settings/reservation',
             roles: ['SUPER_ADMIN', 'MANAGER'],
             icon: (
@@ -85,8 +85,8 @@ export default function Settings() {
             ),
           },
           {
-            title: t('autoGen.admin.key1187'),
-            description: t('autoGen.admin.key1188'),
+            title: t('settings.customerReviewsSettings'),
+            description: t('settings.reviewApprovalSettings'),
             link: '/settings/review',
             roles: ['SUPER_ADMIN', 'MANAGER'],
             icon: (
@@ -98,12 +98,12 @@ export default function Settings() {
         ]
       },
       {
-        categoryName: t('autoGen.admin.key1189'),
-        description: t('autoGen.admin.key1190'),
+        categoryName: t('settings.paymentAndCommunication'),
+        description: t('settings.configurePaymentAndNotifications'),
         cards: [
           {
-            title: t('autoGen.admin.key1191'),
-            description: t('autoGen.admin.key1192'),
+            title: t('settings.paymentMethods'),
+            description: t('settings.paymentGatewayConfig'),
             link: '/settings/payment',
             roles: ['SUPER_ADMIN'],
             icon: (
@@ -113,8 +113,8 @@ export default function Settings() {
             ),
           },
           {
-            title: t('autoGen.admin.key1193'),
-            description: t('autoGen.admin.key1194'),
+            title: t('settings.eInvoice'),
+            description: t('settings.ecpayInvoiceSettings'),
             link: '/settings/invoice',
             roles: ['SUPER_ADMIN'],
             icon: (
@@ -124,8 +124,8 @@ export default function Settings() {
             ),
           },
           {
-            title: t('autoGen.admin.key1195'),
-            description: t('autoGen.admin.key1196'),
+            title: t('settings.sendNotifications'),
+            description: t('settings.notificationTriggerSettings'),
             link: '/settings/notifications',
             roles: ['SUPER_ADMIN', 'MANAGER'],
             icon: (
@@ -135,8 +135,8 @@ export default function Settings() {
             ),
           },
           {
-            title: t('autoGen.admin.key1197'),
-            description: t('autoGen.admin.key1198'),
+            title: t('settings.lineIntegration'),
+            description: t('settings.lineAccountSettings'),
             link: '/settings/line',
             roles: ['SUPER_ADMIN'],
             icon: (
@@ -146,8 +146,8 @@ export default function Settings() {
             ),
           },
           {
-            title: t('autoGen.admin.key1199'),
-            description: t('autoGen.admin.key1200'),
+            title: t('settings.googleIntegration'),
+            description: t('settings.googleServicesConfig'),
             link: '/settings/google',
             roles: ['SUPER_ADMIN'],
             icon: (
@@ -157,8 +157,8 @@ export default function Settings() {
             ),
           },
           {
-            title: t('autoGen.admin.key1201'),
-            description: t('autoGen.admin.key1202'),
+            title: t('settings.emailSettings'),
+            description: t('settings.smtpServerConfig'),
             link: '/settings/mail',
             roles: ['SUPER_ADMIN'],
             icon: (
@@ -170,12 +170,12 @@ export default function Settings() {
         ]
       },
       {
-        categoryName: t('autoGen.admin.key1203'),
-        description: t('autoGen.admin.key1204'),
+        categoryName: t('settings.securityComplianceAndPermissions'),
+        description: t('settings.manageAccountPermissions'),
         cards: [
           {
-            title: t('autoGen.admin.key1205'),
-            description: t('autoGen.admin.key1206'),
+            title: t('settings.rolePermissions'),
+            description: t('settings.fineTuneStaffPermissions'),
             link: '/settings/permissions',
             roles: ['SUPER_ADMIN'],
             icon: (
@@ -193,8 +193,8 @@ export default function Settings() {
   return (
     <div className="space-y-10 max-w-6xl mx-auto px-4 py-2">
       <div>
-        <h1 className="text-2xl font-black text-gray-900 tracking-tight">{t('autoGen.admin.key1207')}</h1>
-        <p className="text-xs text-gray-500 font-semibold mt-1">{t('autoGen.admin.key1208')}</p>
+        <h1 className="text-2xl font-black text-gray-900 tracking-tight">{t('settings.systemSettingsCenter')}</h1>
+        <p className="text-xs text-gray-500 font-semibold mt-1">{t('settings.manageBrandOperationsSettings')}</p>
       </div>
 
       <div className="space-y-12">

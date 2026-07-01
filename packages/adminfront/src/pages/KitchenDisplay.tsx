@@ -53,15 +53,15 @@ const getAudioContext = (): AudioContext | null => {
 export default function KitchenDisplay() {
   const { t } = useTranslation();
     const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; next: string | null }> = {
-      PENDING: { label: t('autoGen.admin.key707'), color: 'text-yellow-800', bg: 'bg-yellow-50 border-yellow-300', next: 'CONFIRMED' },
-      CONFIRMED: { label: t('autoGen.admin.key708'), color: 'text-blue-800', bg: 'bg-blue-50 border-blue-300', next: 'PREPARING' },
-      PREPARING: { label: t('autoGen.admin.key709'), color: 'text-purple-800', bg: 'bg-purple-50 border-purple-300', next: 'READY' },
-      READY: { label: t('autoGen.admin.key710'), color: 'text-green-800', bg: 'bg-green-50 border-green-300', next: null },
+      PENDING: { label: t('kitchenDisplay.newOrder'), color: 'text-yellow-800', bg: 'bg-yellow-50 border-yellow-300', next: 'CONFIRMED' },
+      CONFIRMED: { label: t('kitchenDisplay.confirmed'), color: 'text-blue-800', bg: 'bg-blue-50 border-blue-300', next: 'PREPARING' },
+      PREPARING: { label: t('kitchenDisplay.preparing'), color: 'text-purple-800', bg: 'bg-purple-50 border-purple-300', next: 'READY' },
+      READY: { label: t('kitchenDisplay.readyForPickup'), color: 'text-green-800', bg: 'bg-green-50 border-green-300', next: null },
     };
     const NEXT_ACTION: Record<string, string> = {
-      PENDING: t('autoGen.admin.key711'),
-      CONFIRMED: t('autoGen.admin.key712'),
-      PREPARING: t('autoGen.admin.key713'),
+      PENDING: t('kitchenDisplay.confirmOrder'),
+      CONFIRMED: t('kitchenDisplay.startPreparing'),
+      PREPARING: t('kitchenDisplay.preparationCompleted'),
     };
     const playNotificationSound = () => {
       try {
@@ -215,7 +215,7 @@ export default function KitchenDisplay() {
       })
       .catch((err) => {
         setIsConnected(false);
-        setSocketError(err.message || t('autoGen.admin.key714'));
+        setSocketError(err.message || t('kitchenDisplay.connectionError'));
       })
       .finally(() => setLoading(false));
   }, [selectedLocationId]);
@@ -243,7 +243,7 @@ export default function KitchenDisplay() {
 
     socket.on('connect_error', (err) => {
       setIsConnected(false);
-      setSocketError(t('autoGen.admin.key715'));
+      setSocketError(t('kitchenDisplay.connectionError'));
       console.error('Socket connect error:', err);
     });
 
@@ -295,7 +295,7 @@ export default function KitchenDisplay() {
         return prev.map((o) => o.id === orderId ? { ...o, status: newStatus } : o);
       });
     } catch (err: any) {
-      setActionError(err.response?.data?.error || err.message || t('autoGen.admin.key716'));
+      setActionError(err.response?.data?.error || err.message || t('kitchenDisplay.updateOrderStatusFailed'));
       setTimeout(() => setActionError(null), 5000);
       fetchOrders();
     } finally {
@@ -310,7 +310,7 @@ export default function KitchenDisplay() {
       await api.patch(`/orders/${orderId}/status`, { status: completedStatus });
       setOrders((prev) => prev.filter((o) => o.id !== orderId));
     } catch (err: any) {
-      setActionError(err.response?.data?.error || err.message || t('autoGen.admin.key717'));
+      setActionError(err.response?.data?.error || err.message || t('kitchenDisplay.completeOrderFailed'));
       setTimeout(() => setActionError(null), 5000);
       fetchOrders();
     } finally {
@@ -320,9 +320,9 @@ export default function KitchenDisplay() {
 
   const getTimeSince = (dateStr: string) => {
     const mins = Math.floor((Date.now() - new Date(dateStr).getTime()) / 60000);
-    if (mins < 1) return t('kitchen.justNow') || t('autoGen.admin.key718');
-    if (mins < 60) return `${mins}m ${t('kitchen.ago') || t('autoGen.admin.key719')}`;
-    return `${Math.floor(mins / 60)}h ${mins % 60}m ${t('kitchen.ago') || t('autoGen.admin.key720')}`;
+    if (mins < 1) return t('kitchen.justNow') || t('kitchenDisplay.justNow');
+    if (mins < 60) return `${mins}m ${t('kitchen.ago') || t('kitchenDisplay.ago')}`;
+    return `${Math.floor(mins / 60)}h ${mins % 60}m ${t('kitchen.ago') || t('kitchenDisplay.ago')}`;
   };
 
   // Separate scheduled vs immediate orders
@@ -377,7 +377,7 @@ export default function KitchenDisplay() {
               }}
               className="bg-gray-800 text-xs text-white border border-gray-700 rounded px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-primary-500 font-semibold"
             >
-              <option value="">{t('autoGen.admin.key721')}</option>
+              <option value="">{t('kitchenDisplay.allLocations')}</option>
               {locations.map((loc) => (
                 <option key={loc.id} value={loc.id}>
                   {loc.name}
@@ -389,13 +389,13 @@ export default function KitchenDisplay() {
           <div className="flex items-center gap-2" role="status">
             <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-400' : 'bg-red-400'}`} />
             <span className="text-xs text-gray-400">
-              {isConnected ? t('autoGen.admin.key722') : socketError ? `連線中斷 (${socketError})` : t('autoGen.admin.key723')}
+              {isConnected ? t('kitchenDisplay.realTimeConnected') : socketError ? `連線中斷 (${socketError})` : t('kitchenDisplay.connectionDisconnected')}
             </span>
           </div>
         </div>
         <div className="flex items-center gap-4">
           <span className="text-xs text-gray-400">
-            {orders.length} {t('autoGen.admin.key724')} {lastRefresh.toLocaleTimeString()}
+            {orders.length} {t('kitchenDisplay.activeOrdersUpdatedAt')} {lastRefresh.toLocaleTimeString()}
           </span>
           <button
             onClick={() => {
@@ -407,21 +407,21 @@ export default function KitchenDisplay() {
             className="text-xs bg-gray-800 hover:bg-gray-700 border border-gray-700 px-3 py-1.5 rounded transition-colors flex items-center gap-1.5 font-semibold"
             aria-label="Toggle sound notifications"
           >
-            <span>{enableSound ? t('autoGen.admin.key725') : t('autoGen.admin.key726')}</span>
+            <span>{enableSound ? t('kitchenDisplay.soundOn') : t('kitchenDisplay.soundOff')}</span>
           </button>
           <button
             onClick={() => fetchOrders()}
             className="text-xs bg-gray-700 hover:bg-gray-600 px-3 py-1.5 rounded transition-colors"
             aria-label="Refresh orders"
           >
-            {t('common.refresh') || t('autoGen.admin.key727')}
+            {t('common.refresh') || t('kitchenDisplay.refresh')}
           </button>
         </div>
       </div>
 
       {loading ? (
         <div className="flex justify-center py-20">
-          <div className="w-8 h-8 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin" role="status" aria-label={t('autoGen.admin.key728')} />
+          <div className="w-8 h-8 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin" role="status" aria-label={t('kitchenDisplay.loading')} />
         </div>
       ) : (
         <>
@@ -466,7 +466,7 @@ export default function KitchenDisplay() {
                             </span>
                             {order.table && (
                               <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded font-bold bg-amber-100 text-amber-800 border border-amber-200">
-                                {t('autoGen.admin.key729')} {order.table.name}
+                                {t('kitchenDisplay.tableNumber')} {order.table.name}
                               </span>
                             )}
                             <span className="ml-2 text-indigo-600 font-medium">
@@ -580,11 +580,11 @@ export default function KitchenDisplay() {
                               ? 'bg-blue-100 text-blue-700'
                               : 'bg-green-100 text-green-700'
                             }`}>
-                            {order.orderType === 'DELIVERY' ? t('autoGen.admin.key730') : t('autoGen.admin.key731')}
+                            {order.orderType === 'DELIVERY' ? t('kitchenDisplay.delivery') : t('kitchenDisplay.pickup')}
                           </span>
                           {order.table && (
                             <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200">
-                              {t('autoGen.admin.key732')} {order.table.name}
+                              {t('kitchenDisplay.tableNumber')} {order.table.name}
                             </span>
                           )}
                           {order.isRemote !== undefined && (
@@ -597,7 +597,7 @@ export default function KitchenDisplay() {
                               ? 'bg-emerald-100 text-emerald-800'
                               : 'bg-gray-100 text-gray-600'
                           }`}>
-                            {order.paymentStatus === 'PAID' ? t('autoGen.admin.key733') : t('autoGen.admin.key734')}
+                            {order.paymentStatus === 'PAID' ? t('kitchenDisplay.paid') : t('kitchenDisplay.unpaid')}
                           </span>
                         </div>
                         <div className="flex items-center gap-1.5 text-xs text-gray-400">
@@ -616,8 +616,8 @@ export default function KitchenDisplay() {
                             <span className="text-sm">🕒</span>
                             <span>
                               {order.orderType === 'DELIVERY' 
-                                ? t('kitchen.deliveryTime') || t('autoGen.admin.key735') 
-                                : t('kitchen.pickupTime') || t('autoGen.admin.key736')
+                                ? t('kitchen.deliveryTime') || t('kitchenDisplay.scheduledDelivery') 
+                                : t('kitchen.pickupTime') || t('kitchenDisplay.scheduledPickup')
                               }
                             </span>
                           </span>
@@ -642,7 +642,7 @@ export default function KitchenDisplay() {
                           <div className="space-y-0.5">
                             <div className="flex items-center gap-2">
                               <span className="text-xs font-bold text-gray-700">
-                                {order.customer?.name || order.guestName || t('autoGen.admin.key737')}
+                                {order.customer?.name || order.guestName || t('kitchenDisplay.customer')}
                               </span>
                               <span className="text-[10px] text-blue-600 font-bold">
                                 {order.customer?.phone || order.guestPhone}
@@ -691,35 +691,35 @@ export default function KitchenDisplay() {
                       {expandedOrders[order.id] && (
                         <div className="border-t border-gray-100 pt-3 mt-3 mb-3 text-xs text-gray-600 space-y-1.5 bg-gray-50/50 p-2.5 rounded-lg" onClick={(e) => e.stopPropagation()}>
                           <div className="flex justify-between">
-                            <span>{t('autoGen.admin.key738')}</span>
+                            <span>{t('kitchenDisplay.subtotal')}</span>
                             <span>${order.subtotal?.toFixed(2) || '0.00'}</span>
                           </div>
                           {order.discount > 0 && (
                             <div className="flex justify-between text-red-600">
-                              <span>{t('autoGen.admin.key739')}</span>
+                              <span>{t('kitchenDisplay.discount')}</span>
                               <span>-${order.discount.toFixed(2)}</span>
                             </div>
                           )}
                           {order.tax > 0 && (
                             <div className="flex justify-between">
-                              <span>{t('autoGen.admin.key740')}</span>
+                              <span>{t('kitchenDisplay.tax')}</span>
                               <span>${order.tax.toFixed(2)}</span>
                             </div>
                           )}
                           {order.deliveryFee > 0 && (
                             <div className="flex justify-between">
-                              <span>{t('autoGen.admin.key741')}</span>
+                              <span>{t('kitchenDisplay.deliveryFee')}</span>
                               <span>${order.deliveryFee.toFixed(2)}</span>
                             </div>
                           )}
                           {order.tip > 0 && (
                             <div className="flex justify-between">
-                              <span>{t('autoGen.admin.key742')}</span>
+                              <span>{t('kitchenDisplay.tip')}</span>
                               <span>${order.tip.toFixed(2)}</span>
                             </div>
                           )}
                           <div className="flex justify-between font-bold text-gray-900 text-sm pt-1.5 border-t border-dashed border-gray-200">
-                            <span>{t('autoGen.admin.key743')}</span>
+                            <span>{t('kitchenDisplay.orderTotal')}</span>
                             <span className="text-primary-600">${order.total?.toFixed(2) || '0.00'}</span>
                           </div>
                         </div>
@@ -750,19 +750,19 @@ export default function KitchenDisplay() {
                             className="flex-1 bg-green-600 text-white text-xs font-medium py-2 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
                             aria-label={`Mark order ${order.orderNumber} as ${order.orderType === 'DELIVERY' ? 'out for delivery' : 'picked up'}`}
                           >
-                            {order.orderType === 'DELIVERY' ? t('autoGen.admin.key744') : t('autoGen.admin.key745')}
+                            {order.orderType === 'DELIVERY' ? t('kitchenDisplay.startDelivery') : t('kitchenDisplay.completePickup')}
                           </button>
                         )}
                         <button
                           onClick={async (e) => {
                             e.stopPropagation();
-                            if (window.confirm(t('autoGen.admin.key746'))) {
+                            if (window.confirm(t('kitchenDisplay.confirmCancelOrder'))) {
                               handleStatusUpdate(order.id, 'CANCELLED');
                             }
                           }}
                           disabled={updating === order.id}
                           className="px-2 bg-red-50 text-red-600 text-xs font-bold py-2 rounded-lg hover:bg-red-100 disabled:opacity-50 transition-all"
-                          title={t('autoGen.admin.key747')}
+                          title={t('kitchenDisplay.cancelOrder')}
                         >
                           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

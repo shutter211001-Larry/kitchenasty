@@ -51,7 +51,7 @@ export default function SettingsFranchise() {
           return {
             id: loc.id,
             name: loc.name,
-            owner: loc.owner || t('autoGen.admin.key1209'),
+            owner: loc.owner || t('settingsFranchise.unassigned'),
             status: loc.isActive ? 'active' : 'suspended',
             royaltyRate: loc.royaltyRate !== undefined && loc.royaltyRate !== null ? loc.royaltyRate : 5.0,
             apiEndpoint: loc.apiEndpoint || `https://${loc.slug}.shutterorder.tw/api/v1`,
@@ -74,10 +74,10 @@ export default function SettingsFranchise() {
   useEffect(() => {
     if (stores.length === 0) return;
     const mockIngredients = [
-      { name: t('autoGen.admin.key1210'), min: 15.0, current: 4.2, status: 'critical', suggested: 20.0 },
-      { name: t('autoGen.admin.key1211'), min: 8.0, current: 3.1, status: 'critical', suggested: 10.0 },
-      { name: t('autoGen.admin.key1212'), min: 50.0, current: 22.0, status: 'warning', suggested: 60.0 },
-      { name: t('autoGen.admin.key1213'), min: 20.0, current: 12.5, status: 'warning', suggested: 15.0 },
+      { name: t('settingsFranchise.mozzarellaCheese'), min: 15.0, current: 4.2, status: 'critical', suggested: 20.0 },
+      { name: t('settingsFranchise.pepperoni'), min: 8.0, current: 3.1, status: 'critical', suggested: 10.0 },
+      { name: t('settingsFranchise.highProteinFlour'), min: 50.0, current: 22.0, status: 'warning', suggested: 60.0 },
+      { name: t('settingsFranchise.tomatoSauce'), min: 20.0, current: 12.5, status: 'warning', suggested: 15.0 },
     ];
 
     const newWarnings: IngredientWarning[] = [];
@@ -112,7 +112,7 @@ export default function SettingsFranchise() {
 
   const handleSaveStore = async () => {
     if (!editStore.name || !editStore.owner) {
-      alert(t('autoGen.admin.key1214'));
+      alert(t('settingsFranchise.fillBranchAndFranchiseeName'));
       return;
     }
     
@@ -150,7 +150,7 @@ export default function SettingsFranchise() {
       } : s));
       
       setIsEditing(false);
-      setSuccess(t('autoGen.admin.key1215'));
+      setSuccess(t('settingsFranchise.franchiseSyncSuccess'));
       setTimeout(() => setSuccess(''), 3000);
     } catch (err: any) {
       alert(`同步更新失敗: ${err.message}`);
@@ -187,7 +187,7 @@ export default function SettingsFranchise() {
       setDiagnosticLogs(prev => [...prev, `[${new Date().toLocaleTimeString()}] ${msg}`]);
     };
 
-    addLog(t('autoGen.admin.key1216'));
+    addLog(t('settingsFranchise.startApiHealthDiagnostic'));
     await new Promise(r => setTimeout(r, 600));
 
     addLog(`🔍 正在解析 ${stores.length} 家加盟店之遠端資料庫與 API 連線點...`);
@@ -213,7 +213,7 @@ export default function SettingsFranchise() {
     }
 
     await new Promise(r => setTimeout(r, 400));
-    addLog(t('autoGen.admin.key1217'));
+    addLog(t('settingsFranchise.healthCheckCompleted'));
     setIsDiagnosing(false);
   };
 
@@ -225,7 +225,7 @@ export default function SettingsFranchise() {
     return (
       <div className="max-w-6xl mx-auto px-4 py-12 flex flex-col items-center justify-center min-h-[400px]">
         <div className="w-10 h-10 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin mb-4" />
-        <p className="text-gray-500 font-bold text-sm">{t('autoGen.admin.key1218')}</p>
+        <p className="text-gray-500 font-bold text-sm">{t('settingsFranchise.loadingFranchiseData')}</p>
       </div>
     );
   }
@@ -236,10 +236,10 @@ export default function SettingsFranchise() {
       <div className="flex items-center justify-between mb-6 border-b border-gray-100 pb-4">
         <div>
           <Link to="/settings" className="text-xs font-semibold text-primary-600 hover:text-primary-700 transition-colors flex items-center gap-1.5 mb-1">
-            <span>&larr;</span> {t('autoGen.admin.key1219')}
+            <span>&larr;</span> {t('settingsFranchise.returnToSystemSettings')}
           </Link>
           <h1 className="text-2xl font-black text-gray-900 tracking-tight flex items-center gap-2">
-            {t('autoGen.admin.key1220')}
+            {t('settingsFranchise.franchiseManagement')}
             <span className="bg-primary-50 text-primary-700 text-[10px] font-black uppercase px-2 py-0.5 rounded-full border border-primary-100">HQ Control</span>
           </h1>
         </div>
@@ -249,7 +249,7 @@ export default function SettingsFranchise() {
             onClick={startCreate}
             className="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-xs font-black rounded-xl shadow-lg shadow-primary-200 transition-all active:scale-95 cursor-pointer"
           >
-            {t('autoGen.admin.key1221')}
+            {t('settingsFranchise.addNewFranchiseBranch')}
           </button>
         )}
       </div>
@@ -263,9 +263,9 @@ export default function SettingsFranchise() {
       {/* Tabs Layout */}
       <div className="flex border-b border-gray-200 mb-8 space-x-8">
         {[
-          { id: 'stores', label: t('autoGen.admin.key1222') },
-          { id: 'diagnostics', label: t('autoGen.admin.key1223') },
-          { id: 'inventory', label: t('autoGen.admin.key1224') }
+          { id: 'stores', label: t('settingsFranchise.franchiseContractAndInfo') },
+          { id: 'diagnostics', label: t('settingsFranchise.apiConnectionDiagnostics') },
+          { id: 'inventory', label: t('settingsFranchise.ingredientWarningMonitoring') }
         ].map(tab => (
           <button
             key={tab.id}
@@ -287,34 +287,34 @@ export default function SettingsFranchise() {
           {isEditing ? (
             <div className="bg-white border border-gray-200 rounded-3xl p-6 shadow-sm animate-fade-in">
               <h2 className="text-base font-black text-gray-900 mb-6 flex items-center gap-1.5 pb-3 border-b border-gray-100">
-                ✏️ {editStore.id?.includes('store-') && isNaN(Number(editStore.id?.split('-')[1])) ? t('autoGen.admin.key1225') : t('autoGen.admin.key1226')}
+                ✏️ {editStore.id?.includes('store-') && isNaN(Number(editStore.id?.split('-')[1])) ? t('settingsFranchise.createFranchiseContract') : t('settingsFranchise.editBranchContractSettings')}
               </h2>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-[10px] font-black uppercase tracking-wider text-gray-500 mb-1.5">{t('autoGen.admin.key1227')}</label>
+                  <label className="block text-[10px] font-black uppercase tracking-wider text-gray-500 mb-1.5">{t('settingsFranchise.branchName')}</label>
                   <input
                     type="text"
                     className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl font-bold text-xs outline-none focus:ring-4 focus:ring-primary-100 focus:bg-white transition-all"
-                    placeholder={t('autoGen.admin.key1228')}
+                    placeholder={t('settingsFranchise.exampleBranchName')}
                     value={editStore.name || ''}
                     onChange={e => setEditStore({ ...editStore, name: e.target.value })}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-black uppercase tracking-wider text-gray-500 mb-1.5">{t('autoGen.admin.key1229')}</label>
+                  <label className="block text-[10px] font-black uppercase tracking-wider text-gray-500 mb-1.5">{t('settingsFranchise.franchiseeName')}</label>
                   <input
                     type="text"
                     className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl font-bold text-xs outline-none focus:ring-4 focus:ring-primary-100 focus:bg-white transition-all"
-                    placeholder={t('autoGen.admin.key1230')}
+                    placeholder={t('settingsFranchise.exampleFranchiseeName')}
                     value={editStore.owner || ''}
                     onChange={e => setEditStore({ ...editStore, owner: e.target.value })}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-black uppercase tracking-wider text-gray-500 mb-1.5">{t('autoGen.admin.key1231')}</label>
+                  <label className="block text-[10px] font-black uppercase tracking-wider text-gray-500 mb-1.5">{t('settingsFranchise.remoteErpApiUrl')}</label>
                   <input
                     type="text"
                     className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl font-bold text-xs outline-none focus:ring-4 focus:ring-primary-100 focus:bg-white transition-all font-mono"
@@ -325,7 +325,7 @@ export default function SettingsFranchise() {
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-black uppercase tracking-wider text-gray-500 mb-1.5">{t('autoGen.admin.key1232')}</label>
+                  <label className="block text-[10px] font-black uppercase tracking-wider text-gray-500 mb-1.5">{t('settingsFranchise.royaltyRatePercentage')}</label>
                   <input
                     type="number"
                     step="0.1"
@@ -337,7 +337,7 @@ export default function SettingsFranchise() {
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-black uppercase tracking-wider text-gray-500 mb-1.5">{t('autoGen.admin.key1233')}</label>
+                  <label className="block text-[10px] font-black uppercase tracking-wider text-gray-500 mb-1.5">{t('settingsFranchise.contractStartDate')}</label>
                   <input
                     type="date"
                     className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl font-bold text-xs outline-none focus:ring-4 focus:ring-primary-100 focus:bg-white transition-all"
@@ -347,7 +347,7 @@ export default function SettingsFranchise() {
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-black uppercase tracking-wider text-gray-500 mb-1.5">{t('autoGen.admin.key1234')}</label>
+                  <label className="block text-[10px] font-black uppercase tracking-wider text-gray-500 mb-1.5">{t('settingsFranchise.contractEndDate')}</label>
                   <input
                     type="date"
                     className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl font-bold text-xs outline-none focus:ring-4 focus:ring-primary-100 focus:bg-white transition-all"
@@ -357,15 +357,15 @@ export default function SettingsFranchise() {
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-black uppercase tracking-wider text-gray-500 mb-1.5">{t('autoGen.admin.key1235')}</label>
+                  <label className="block text-[10px] font-black uppercase tracking-wider text-gray-500 mb-1.5">{t('settingsFranchise.contractStatus')}</label>
                   <select
                     className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl font-bold text-xs outline-none focus:ring-4 focus:ring-primary-100 focus:bg-white transition-all"
                     value={editStore.status}
                     onChange={e => setEditStore({ ...editStore, status: e.target.value as any })}
                   >
-                    <option value="active">{t('autoGen.admin.key1236')}</option>
-                    <option value="suspended">{t('autoGen.admin.key1237')}</option>
-                    <option value="expired">{t('autoGen.admin.key1238')}</option>
+                    <option value="active">{t('settingsFranchise.statusActive')}</option>
+                    <option value="suspended">{t('settingsFranchise.statusSuspended')}</option>
+                    <option value="expired">{t('settingsFranchise.statusExpired')}</option>
                   </select>
                 </div>
               </div>
@@ -376,14 +376,14 @@ export default function SettingsFranchise() {
                   onClick={() => setIsEditing(false)}
                   className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold rounded-xl transition-all cursor-pointer"
                 >
-                  {t('autoGen.admin.key1239')}
+                  {t('settingsFranchise.cancelChanges')}
                 </button>
                 <button
                   type="button"
                   onClick={handleSaveStore}
                   className="px-6 py-2 bg-primary-600 hover:bg-primary-700 text-white text-xs font-black rounded-xl shadow-md transition-all cursor-pointer"
                 >
-                  {t('autoGen.admin.key1240')}
+                  {t('settingsFranchise.saveContract')}
                 </button>
               </div>
             </div>
@@ -394,29 +394,29 @@ export default function SettingsFranchise() {
                   <div className="flex justify-between items-start mb-4">
                     <div>
                       <h3 className="text-base font-black text-gray-900 tracking-tight">{store.name}</h3>
-                      <p className="text-[10px] text-gray-500 font-semibold mt-0.5">{t('autoGen.admin.key1241')} {store.owner}</p>
+                      <p className="text-[10px] text-gray-500 font-semibold mt-0.5">{t('settingsFranchise.franchiseeLabel')} {store.owner}</p>
                     </div>
                     <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full border ${
                       store.status === 'active' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
                       store.status === 'suspended' ? 'bg-amber-50 text-amber-700 border-amber-100' :
                       'bg-red-50 text-red-700 border-red-100'
                     }`}>
-                      {store.status === 'active' ? t('autoGen.admin.key1242') :
-                       store.status === 'suspended' ? t('autoGen.admin.key1243') : t('autoGen.admin.key1244')}
+                      {store.status === 'active' ? t('settingsFranchise.activeOperation') :
+                       store.status === 'suspended' ? t('settingsFranchise.suspendedOperation') : t('settingsFranchise.contractExpired')}
                     </span>
                   </div>
 
                   <div className="space-y-2.5 bg-gray-50/50 p-3.5 rounded-2xl border border-gray-100 text-[11px] font-bold text-gray-700">
                     <div className="flex justify-between">
-                      <span className="text-gray-400 font-semibold">{t('autoGen.admin.key1245')}</span>
+                      <span className="text-gray-400 font-semibold">{t('settingsFranchise.apiEndpointLabel')}</span>
                       <span className="font-mono text-gray-800 text-[10px] truncate max-w-[200px]">{store.apiEndpoint}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-400 font-semibold">{t('autoGen.admin.key1246')}</span>
-                      <span className="text-gray-800">{store.royaltyRate}{t('autoGen.admin.key1247')}</span>
+                      <span className="text-gray-400 font-semibold">{t('settingsFranchise.royaltyRateLabel')}</span>
+                      <span className="text-gray-800">{store.royaltyRate}{t('settingsFranchise.revenuePercentage')}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-400 font-semibold">{t('autoGen.admin.key1248')}</span>
+                      <span className="text-gray-400 font-semibold">{t('settingsFranchise.contractPeriodLabel')}</span>
                       <span className="text-gray-800">{store.contractStart} ~ {store.contractEnd}</span>
                     </div>
                   </div>
@@ -426,7 +426,7 @@ export default function SettingsFranchise() {
                       onClick={() => startEdit(store)}
                       className="px-3.5 py-1.5 bg-gray-50 hover:bg-gray-100 text-gray-700 text-[10px] font-black rounded-lg border border-gray-200 transition-all cursor-pointer"
                     >
-                      {t('autoGen.admin.key1249')}
+                      {t('settingsFranchise.editContractSettings')}
                     </button>
                     <button
                       onClick={() => toggleStoreStatus(store)}
@@ -436,7 +436,7 @@ export default function SettingsFranchise() {
                           : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-emerald-200'
                       }`}
                     >
-                      {store.status === 'active' ? t('autoGen.admin.key1250') : t('autoGen.admin.key1251')}
+                      {store.status === 'active' ? t('settingsFranchise.suspendAuthorization') : t('settingsFranchise.enableAuthorization')}
                     </button>
                   </div>
                 </div>
@@ -452,9 +452,9 @@ export default function SettingsFranchise() {
           <div className="bg-white border border-gray-200 rounded-3xl p-6 shadow-sm">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 pb-4 border-b border-gray-100">
               <div>
-                <h2 className="text-base font-black text-gray-900 tracking-tight">{t('autoGen.admin.key1252')}</h2>
+                <h2 className="text-base font-black text-gray-900 tracking-tight">{t('settingsFranchise.remoteApiHealthPanel')}</h2>
                 <p className="text-[10px] text-gray-500 font-semibold mt-0.5">
-                  {t('autoGen.admin.key1253')}
+                  {t('settingsFranchise.autoDetectEndpointHealthDescription')}
                 </p>
               </div>
               <button
@@ -465,11 +465,11 @@ export default function SettingsFranchise() {
                 {isDiagnosing ? (
                   <>
                     <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    <span>{t('autoGen.admin.key1254')}</span>
+                    <span>{t('settingsFranchise.diagnosticScanning')}</span>
                   </>
                 ) : (
                   <>
-                    <span>{t('autoGen.admin.key1255')}</span>
+                    <span>{t('settingsFranchise.startOneClickDiagnosis')}</span>
                   </>
                 )}
               </button>
@@ -513,7 +513,7 @@ export default function SettingsFranchise() {
 
                   <div className="flex items-center gap-6 self-end sm:self-auto text-xs font-bold">
                     <div className="text-right">
-                      <span className="text-[10px] text-gray-400 block font-semibold leading-none mb-0.5">{t('autoGen.admin.key1256')}</span>
+                      <span className="text-[10px] text-gray-400 block font-semibold leading-none mb-0.5">{t('settingsFranchise.networkLatency')}</span>
                       <span className={`font-mono text-xs ${
                         store.ping === null ? 'text-gray-400' :
                         store.ping < 30 ? 'text-emerald-600' :
@@ -524,22 +524,22 @@ export default function SettingsFranchise() {
                     </div>
 
                     <div className="text-right">
-                      <span className="text-[10px] text-gray-400 block font-semibold leading-none mb-0.5">{t('autoGen.admin.key1257')}</span>
+                      <span className="text-[10px] text-gray-400 block font-semibold leading-none mb-0.5">{t('settingsFranchise.secureConnectionSsl')}</span>
                       <span className={store.health === 'error' ? 'text-red-500' : 'text-emerald-600'}>
-                        {store.health === 'error' ? t('autoGen.admin.key1258') : '✓ 256-bit TLS'}
+                        {store.health === 'error' ? t('settingsFranchise.unauthorizedOrClosed') : '✓ 256-bit TLS'}
                       </span>
                     </div>
 
                     <div className="text-right">
-                      <span className="text-[10px] text-gray-400 block font-semibold leading-none mb-0.5">{t('autoGen.admin.key1259')}</span>
+                      <span className="text-[10px] text-gray-400 block font-semibold leading-none mb-0.5">{t('settingsFranchise.connectionStatus')}</span>
                       <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase ${
                         store.health === 'good' ? 'bg-emerald-50 text-emerald-700' :
                         store.health === 'warning' ? 'bg-amber-50 text-amber-700' :
                         store.health === 'error' ? 'bg-red-50 text-red-700' : 'bg-gray-100 text-gray-600'
                       }`}>
-                        {store.health === 'good' ? t('autoGen.admin.key1260') :
-                         store.health === 'warning' ? t('autoGen.admin.key1261') :
-                         store.health === 'error' ? t('autoGen.admin.key1262') : t('autoGen.admin.key1263')}
+                        {store.health === 'good' ? t('settingsFranchise.statusActive') :
+                         store.health === 'warning' ? t('settingsFranchise.slightFluctuation') :
+                         store.health === 'error' ? t('settingsFranchise.outageOrDisconnected') : t('settingsFranchise.pendingDiagnosis')}
                       </span>
                     </div>
                   </div>
@@ -551,11 +551,11 @@ export default function SettingsFranchise() {
           {/* Diagnostic Log Output */}
           <div className="bg-gray-900 rounded-3xl p-6 shadow-xl border border-gray-800 text-gray-200">
             <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-1.5">
-              {t('autoGen.admin.key1264')}
+              {t('settingsFranchise.autoDiagnosticTerminalLogs')}
             </h3>
             <div className="font-mono text-[10px] leading-relaxed p-4 bg-black/40 rounded-2xl border border-gray-800/80 max-h-48 overflow-y-auto space-y-1.5">
               {diagnosticLogs.length === 0 ? (
-                <span className="text-slate-500 italic block">{t('autoGen.admin.key1265')}</span>
+                <span className="text-slate-500 italic block">{t('settingsFranchise.clickToOutputLogsDescription')}</span>
               ) : (
                 diagnosticLogs.map((log, idx) => (
                   <div key={idx} className={
@@ -577,9 +577,9 @@ export default function SettingsFranchise() {
         <div className="space-y-6">
           <div className="bg-white border border-gray-200 rounded-3xl p-6 shadow-sm">
             <div className="pb-4 border-b border-gray-100 mb-6">
-              <h2 className="text-base font-black text-gray-900 tracking-tight">{t('autoGen.admin.key1266')}</h2>
+              <h2 className="text-base font-black text-gray-900 tracking-tight">{t('settingsFranchise.franchiseStockShortageDashboard')}</h2>
               <p className="text-[10px] text-gray-500 font-semibold mt-0.5">
-                {t('autoGen.admin.key1267')}
+                {t('settingsFranchise.stockShortageCalculationDescription')}
               </p>
             </div>
 
@@ -602,8 +602,8 @@ export default function SettingsFranchise() {
                           warning.status === 'warning' ? 'bg-amber-50 text-amber-700 border-amber-100' :
                           'bg-emerald-50 text-emerald-700 border-emerald-100'
                         }`}>
-                          {warning.status === 'critical' ? t('autoGen.admin.key1268') :
-                           warning.status === 'warning' ? t('autoGen.admin.key1269') : t('autoGen.admin.key1270')}
+                          {warning.status === 'critical' ? t('settingsFranchise.criticalShortage') :
+                           warning.status === 'warning' ? t('settingsFranchise.belowSafetyLevel') : t('settingsFranchise.sufficientStock')}
                         </span>
 
                         {warning.status !== 'normal' && (
@@ -611,7 +611,7 @@ export default function SettingsFranchise() {
                             onClick={() => triggerSupplierAlert(warning)}
                             className="px-3 py-1.5 bg-primary-600 hover:bg-primary-700 text-white text-[10px] font-black rounded-lg shadow-sm active:scale-95 transition-all cursor-pointer"
                           >
-                            {t('autoGen.admin.key1271')}
+                            {t('settingsFranchise.sendOrderNotification')}
                           </button>
                         )}
                       </div>
@@ -620,8 +620,8 @@ export default function SettingsFranchise() {
                     {/* Progress Bar with Vibrant HSL/RGB colors */}
                     <div className="space-y-1.5">
                       <div className="flex justify-between text-[10px] font-bold text-gray-500">
-                        <span>{t('autoGen.admin.key1272')} <strong className="text-gray-800">{warning.currentStock} kg</strong></span>
-                        <span>{t('autoGen.admin.key1273')} <strong className="text-gray-600">{warning.minRequired} kg</strong></span>
+                        <span>{t('settingsFranchise.estimatedRemainingStock')} <strong className="text-gray-800">{warning.currentStock} kg</strong></span>
+                        <span>{t('settingsFranchise.minimumSafetyLevel')} <strong className="text-gray-600">{warning.minRequired} kg</strong></span>
                       </div>
                       <div className="w-full bg-gray-200/70 h-2.5 rounded-full overflow-hidden">
                         <div
@@ -634,11 +634,11 @@ export default function SettingsFranchise() {
                       </div>
                       <div className="flex justify-between items-center text-[9px] font-bold">
                         <span className={warning.status === 'critical' ? 'text-red-500 font-extrabold' : 'text-gray-400'}>
-                          {t('autoGen.admin.key1274')} {percentage}%
+                          {t('settingsFranchise.stockRatio')} {percentage}%
                         </span>
                         {warning.suggestedOrder > 0 && (
                           <span className="text-primary-600">
-                            {t('autoGen.admin.key1275')} {warning.suggestedOrder} kg
+                            {t('settingsFranchise.recommendedHqAllocation')} {warning.suggestedOrder} kg
                           </span>
                         )}
                       </div>

@@ -28,21 +28,21 @@ export default function LegalPageList() {
       .finally(() => setLoading(false));
   }, [token]);
 
-  if (loading) return <div className="p-6 text-gray-500">{t('autoGen.admin.key748')}</div>;
+  if (loading) return <div className="p-6 text-gray-500">{t('legalPageList.loadingEllipsis')}</div>;
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">{t('autoGen.admin.key749')}</h1>
+      <h1 className="text-2xl font-bold text-gray-900 mb-6">{t('legalPageList.legalPagesManagement')}</h1>
 
       {pages.length === 0 ? (
         <div className="bg-white rounded-lg border border-gray-200 p-8 text-center text-gray-500">
-          <p>{t('autoGen.admin.key750')}</p>
+          <p>{t('legalPageList.noLegalPagesYet')}</p>
           <div className="mt-4 flex gap-3 justify-center">
             <Link to="/legal/pages/privacy-policy" className="text-primary-600 hover:underline">
-              {t('autoGen.admin.key751')}
+              {t('legalPageList.createPrivacyPolicy')}
             </Link>
             <Link to="/legal/pages/terms-of-service" className="text-primary-600 hover:underline">
-              {t('autoGen.admin.key752')}
+              {t('legalPageList.createTermsOfService')}
             </Link>
           </div>
         </div>
@@ -51,10 +51,10 @@ export default function LegalPageList() {
           <table className="w-full text-sm">
             <thead className="bg-gray-50 text-gray-500 uppercase text-xs">
               <tr>
-                <th className="px-6 py-3 text-left">{t('autoGen.admin.key753')}</th>
-                <th className="px-6 py-3 text-left">{t('autoGen.admin.key754')}</th>
-                <th className="px-6 py-3 text-left">{t('autoGen.admin.key755')}</th>
-                <th className="px-6 py-3 text-right">{t('autoGen.admin.key756')}</th>
+                <th className="px-6 py-3 text-left">{t('legalPageList.title')}</th>
+                <th className="px-6 py-3 text-left">{t('legalPageList.slug')}</th>
+                <th className="px-6 py-3 text-left">{t('legalPageList.lastUpdated')}</th>
+                <th className="px-6 py-3 text-right">{t('legalPageList.actions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -70,7 +70,7 @@ export default function LegalPageList() {
                       to={`/legal/pages/${page.slug}`}
                       className="text-primary-600 hover:text-primary-700 font-medium"
                     >
-                      {t('autoGen.admin.key757')}
+                      {t('legalPageList.edit')}
                     </Link>
                   </td>
                 </tr>

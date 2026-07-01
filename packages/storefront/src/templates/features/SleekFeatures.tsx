@@ -17,8 +17,8 @@ const defaultIcons: Record<string, React.ReactNode> = {
 export default function SleekFeatures({ features, t, lang = 'zh-TW' }: FeaturesProps) {const { settings } = useTheme();
 
   const items = features?.length ? features.filter(f => {
-              if (!settings.navShowLocations && (f.title.includes(t('autoGen.store.key133')) || f.title.includes(t('autoGen.store.key134')) || f.title.includes(t('autoGen.store.key135')))) return false;
-              if ((!settings.navShowReservations || !settings.reservationSettings?.enabled) && f.title.includes(t('autoGen.store.key136'))) return false;
+              if (!settings.navShowLocations && (f.title.includes(t('sleekFeatures.branch')) || f.title.includes(t('sleekFeatures.location')) || f.title.includes(t('sleekFeatures.reservation')))) return false;
+              if ((!settings.navShowReservations || !settings.reservationSettings?.enabled) && f.title.includes(t('sleekFeatures.booking'))) return false;
               return true;
             }) : [
     settings.orderSettings?.deliveryEnabled && { icon: 'clock', title: t('home.fastDelivery'), description: t('home.fastDeliveryDesc') },

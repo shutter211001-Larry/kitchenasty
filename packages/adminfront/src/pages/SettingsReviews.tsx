@@ -44,29 +44,29 @@ export default function SettingsReviews() {
       });
       const data = await res.json();
       if (data.success) {
-        setSuccess(t('autoGen.admin.key1532'));
+        setSuccess(t('settingsReviews.reviewSettingsUpdated'));
         setTimeout(() => setSuccess(''), 3000);
       } else {
-        setError(typeof data.error === 'string' ? data.error : t('autoGen.admin.key1533'));
+        setError(typeof data.error === 'string' ? data.error : t('settingsReviews.saveFailed'));
       }
     } catch {
-      setError(t('autoGen.admin.key1534'));
+      setError(t('settingsReviews.networkConnectionError'));
     } finally {
       setSaving(false);
     }
   }
 
-  if (loading) return <div className="p-6 text-gray-500">{t('autoGen.admin.key1535')}</div>;
+  if (loading) return <div className="p-6 text-gray-500">{t('settingsReviews.loading')}</div>;
 
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <Link to="/settings" className="text-sm text-primary-600 hover:text-primary-700">{t('autoGen.admin.key1536')}</Link>
-          <h1 className="text-2xl font-bold text-gray-900 mt-1">{t('autoGen.admin.key1537')}</h1>
+          <Link to="/settings" className="text-sm text-primary-600 hover:text-primary-700">{t('settingsReviews.backToSettings')}</Link>
+          <h1 className="text-2xl font-bold text-gray-900 mt-1">{t('settingsReviews.reviewSettings')}</h1>
         </div>
         <button onClick={handleSave} disabled={saving} className="px-6 py-2 bg-primary-600 text-white rounded-lg font-bold hover:bg-primary-700 transition-colors shadow-sm disabled:opacity-50">
-          {saving ? t('autoGen.admin.key1538') : t('autoGen.admin.key1539')}
+          {saving ? t('settingsReviews.saving') : t('settingsReviews.saveChanges')}
         </button>
       </div>
 
@@ -76,23 +76,23 @@ export default function SettingsReviews() {
       <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-6">
         <label className="flex items-center gap-3 cursor-pointer">
           <input type="checkbox" checked={enabled} onChange={(e) => setEnabled(e.target.checked)} className="w-4 h-4 text-primary-600 rounded" />
-          <span className="text-sm font-medium text-gray-700">{t('autoGen.admin.key1540')}</span>
+          <span className="text-sm font-medium text-gray-700">{t('settingsReviews.enableCustomerReviews')}</span>
         </label>
 
         <label className="flex items-center gap-3 cursor-pointer">
           <input type="checkbox" checked={requireOrder} onChange={(e) => setRequireOrder(e.target.checked)} className="w-4 h-4 text-primary-600 rounded" />
-          <span className="text-sm font-medium text-gray-700">{t('autoGen.admin.key1541')}</span>
+          <span className="text-sm font-medium text-gray-700">{t('settingsReviews.onlyCompletedOrdersCanReview')}</span>
         </label>
 
         <label className="flex items-center gap-3 cursor-pointer">
           <input type="checkbox" checked={autoApprove} onChange={(e) => setAutoApprove(e.target.checked)} className="w-4 h-4 text-primary-600 rounded" />
-          <span className="text-sm font-medium text-gray-700">{t('autoGen.admin.key1542')}</span>
+          <span className="text-sm font-medium text-gray-700">{t('settingsReviews.autoApproveReviews')}</span>
         </label>
 
         <div className="pt-2">
-          <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key1543')}</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">{t('settingsReviews.minRatingToReview')}</label>
           <input type="number" min={1} max={5} value={minimumRating} onChange={(e) => setMinimumRating(parseInt(e.target.value) || 1)} className="w-full max-w-xs px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500" />
-          <p className="mt-1 text-xs text-gray-500">{t('autoGen.admin.key1544')}</p>
+          <p className="mt-1 text-xs text-gray-500">{t('settingsReviews.minStarsRequiredToReview')}</p>
         </div>
       </div>
 
@@ -102,7 +102,7 @@ export default function SettingsReviews() {
           disabled={saving}
           className="px-10 py-3 bg-primary-600 text-white rounded-xl font-bold hover:bg-primary-700 transition-all shadow-lg disabled:opacity-50"
         >
-          {saving ? t('autoGen.admin.key1545') : t('autoGen.admin.key1546')}
+          {saving ? t('settingsReviews.saving') : t('settingsReviews.saveAllChanges')}
         </button>
       </div>
     </div>

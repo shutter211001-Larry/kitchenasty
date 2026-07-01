@@ -97,11 +97,11 @@ export default function SettingsLine() {
         linePayEnabled, linePayChannelId, linePayChannelSecret, linePaySandbox,
         linePayApiUrl, linePayProxyUrl, linePayReturnUrl
       });
-      setSuccess(t('autoGen.admin.key1370'));
+      setSuccess(t('settingsLine.settingsSaved'));
       fetchStatus();
       setTimeout(() => setSuccess(''), 3000);
     } catch (err: any) {
-      setError(err.message || t('autoGen.admin.key1371'));
+      setError(err.message || t('settingsLine.saveFailed'));
     } finally {
       setSaving(false);
     }
@@ -121,15 +121,15 @@ export default function SettingsLine() {
     <div className="max-w-4xl">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">{t('autoGen.admin.key1372')}</h1>
-          <p className="text-sm text-gray-500 mt-1">{t('autoGen.admin.key1373')}</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t('settingsLine.lineIntegrationSettings')}</h1>
+          <p className="text-sm text-gray-500 mt-1">{t('settingsLine.configureLineOfficialAndLogin')}</p>
         </div>
         <button
           onClick={handleSave}
           disabled={saving}
           className="px-6 py-2 bg-primary-600 text-white rounded-lg font-bold hover:bg-primary-700 transition-colors shadow-sm disabled:opacity-50"
         >
-          {saving ? t('autoGen.admin.key1374') : t('autoGen.admin.key1375')}
+          {saving ? t('settingsLine.saving') : t('settingsLine.saveSettings')}
         </button>
       </div>
 
@@ -138,8 +138,8 @@ export default function SettingsLine() {
         <div className="flex items-center gap-3">
           <span className="text-2xl">🏬</span>
           <div>
-            <h3 className="text-sm font-bold text-gray-900 font-sans">{t('autoGen.admin.key1376')}</h3>
-            <p className="text-xs text-gray-500 font-sans">{t('autoGen.admin.key1377')}</p>
+            <h3 className="text-sm font-bold text-gray-900 font-sans">{t('settingsLine.branchLineSettings')}</h3>
+            <p className="text-xs text-gray-500 font-sans">{t('settingsLine.branchLineOverrideDescription')}</p>
           </div>
         </div>
         <select
@@ -147,7 +147,7 @@ export default function SettingsLine() {
           onChange={(e) => setSelectedLocationId(e.target.value)}
           className="px-3.5 py-2 border border-gray-300 rounded-xl text-sm font-medium focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all cursor-pointer bg-gray-50 hover:bg-gray-100 font-sans"
         >
-          <option value="">{t('autoGen.admin.key1378')}</option>
+          <option value="">{t('settingsLine.globalSystemDefaultSettings')}</option>
           {locations.map((loc) => (
             <option key={loc.id} value={loc.id}>
               📍 {loc.name}
@@ -161,26 +161,26 @@ export default function SettingsLine() {
 
       <div className="space-y-6">
         <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('autoGen.admin.key1379')}</h2>
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('settingsLine.officialAccountLink')}</h2>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key1380')}</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('settingsLine.addFriendUrl')}</label>
               <input
                 type="text"
                 value={officialAccountUrl}
                 onChange={(e) => setOfficialAccountUrl(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500"
-                placeholder={t('autoGen.admin.key1381')}
+                placeholder={t('settingsLine.exampleAddFriendUrl')}
               />
               <p className="text-xs text-gray-500 mt-2">
-                {t('autoGen.admin.key1382')}
+                {t('settingsLine.getAddFriendLinkDescription')}
               </p>
             </div>
           </div>
         </div>
 
         <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('autoGen.admin.key1383')}</h2>
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('settingsLine.messagingApiIntegrationKey')}</h2>
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Channel Secret</label>
@@ -189,7 +189,7 @@ export default function SettingsLine() {
                 value={channelSecret}
                 onChange={(e) => setChannelSecret(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500"
-                placeholder={status.channelSecret ? t('autoGen.admin.key1384') : t('autoGen.admin.key1385')}
+                placeholder={status.channelSecret ? t('settingsLine.configuredKeepBlank') : t('settingsLine.enterChannelSecret')}
               />
             </div>
             <div>
@@ -199,17 +199,17 @@ export default function SettingsLine() {
                 value={channelAccessToken}
                 onChange={(e) => setChannelAccessToken(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500"
-                placeholder={status.channelAccessToken ? t('autoGen.admin.key1386') : t('autoGen.admin.key1387')}
+                placeholder={status.channelAccessToken ? t('settingsLine.configuredKeepBlank') : t('settingsLine.enterChannelAccessToken')}
               />
             </div>
             <p className="text-xs text-gray-500 mt-2">
-              {t('autoGen.admin.key1388')} <strong>Messaging API Channel</strong> {t('autoGen.admin.key1389')}
+              {t('settingsLine.goToLineDevelopersConsole')} <strong>Messaging API Channel</strong> {t('settingsLine.getCorrespondingKeyDescription')}
             </p>
           </div>
         </div>
 
         <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('autoGen.admin.key1390')}</h2>
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('settingsLine.webhookSettingsMessagingApi')}</h2>
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Webhook URL</label>
@@ -223,15 +223,15 @@ export default function SettingsLine() {
                 <button
                   onClick={() => {
                     navigator.clipboard.writeText(webhookUrl);
-                    alert(t('autoGen.admin.key1391'));
+                    alert(t('settingsLine.copiedToClipboard'));
                   }}
                   className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50"
                 >
-                  {t('autoGen.admin.key1392')}
+                  {t('settingsLine.copy')}
                 </button>
               </div>
               <p className="text-xs text-gray-500 mt-2">
-                {t('autoGen.admin.key1393')} <strong>Messaging API Channel</strong> {t('autoGen.admin.key1394')}
+                {t('settingsLine.pasteUrlToLineConsole')} <strong>Messaging API Channel</strong> {t('settingsLine.webhookUrlFieldDescription')}
               </p>
             </div>
           </div>
@@ -239,20 +239,20 @@ export default function SettingsLine() {
 
         <div className="bg-white rounded-lg border border-gray-200 p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900">{t('autoGen.admin.key1395')}</h2>
+            <h2 className="text-lg font-semibold text-gray-900">{t('settingsLine.oneClickLoginSettings')}</h2>
           </div>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key1396')}</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('settingsLine.liffIdRecommended')}</label>
               <input
                 type="text"
                 value={liffId}
                 onChange={(e) => setLiffId(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500"
-                placeholder={t('autoGen.admin.key1397')}
+                placeholder={t('settingsLine.exampleLiffId')}
               />
               <p className="text-xs text-gray-500 mt-2">
-                {t('autoGen.admin.key1398')} <strong>LINE Login Channel</strong> {t('autoGen.admin.key1399')}
+                {t('settingsLine.goToLineDevelopersConsole')} <strong>LINE Login Channel</strong> {t('settingsLine.createLiffAppDescription')}
               </p>
             </div>
           </div>
@@ -275,23 +275,23 @@ export default function SettingsLine() {
                   value={lineLoginChannelSecret}
                   onChange={(e) => setLineLoginChannelSecret(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500"
-                  placeholder={t('autoGen.admin.key1400')}
+                  placeholder={t('settingsLine.configuredKeepBlank')}
                 />
               </div>
             </div>
             <p className="text-xs text-gray-500">
-              {t('autoGen.admin.key1401')}
+              {t('settingsLine.ssoVerificationDescription')}
             </p>
           </div>
         </div>
 
         <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900">{t('autoGen.admin.key1402')}</h2>
+            <h2 className="text-lg font-semibold text-gray-900">{t('settingsLine.linePayIntegrationSettings')}</h2>
             <label className="relative inline-flex items-center cursor-pointer">
               <input type="checkbox" className="sr-only peer" checked={linePayEnabled} onChange={(e) => setLinePayEnabled(e.target.checked)} />
               <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#00B900]"></div>
-              <span className="ml-3 text-sm font-medium text-gray-700">{t('autoGen.admin.key1403')}</span>
+              <span className="ml-3 text-sm font-medium text-gray-700">{t('settingsLine.enableLinePay')}</span>
             </label>
           </div>
           <div className="space-y-4">
@@ -312,13 +312,13 @@ export default function SettingsLine() {
                   value={linePayChannelSecret}
                   onChange={(e) => setLinePayChannelSecret(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#00B900]"
-                  placeholder={t('autoGen.admin.key1404')}
+                  placeholder={t('settingsLine.configuredLeaveBlank')}
                 />
               </div>
             </div>
             
             <div className="pt-4 border-t border-gray-100">
-              <h3 className="text-sm font-semibold text-gray-800 mb-3">{t('autoGen.admin.key1405')}</h3>
+              <h3 className="text-sm font-semibold text-gray-800 mb-3">{t('settingsLine.advancedRoutingSettings')}</h3>
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">LINE Pay API URL</label>
@@ -327,33 +327,33 @@ export default function SettingsLine() {
                     value={linePayApiUrl}
                     onChange={(e) => setLinePayApiUrl(e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-[#00B900]"
-                    placeholder={t('autoGen.admin.key1406')}
+                    placeholder={t('settingsLine.defaultLinePayApiUrl')}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key1407')}</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('settingsLine.forwardProxyUrl')}</label>
                   <input
                     type="text"
                     value={linePayProxyUrl}
                     onChange={(e) => setLinePayProxyUrl(e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-[#00B900]"
-                    placeholder={t('autoGen.admin.key1408')}
+                    placeholder={t('settingsLine.proxyUrlExample')}
                   />
                   <p className="text-xs text-gray-500 mt-1">
-                    {t('autoGen.admin.key1409')}
+                    {t('settingsLine.linePayProxyInfo')}
                   </p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key1410')}</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('settingsLine.customReturnUrl')}</label>
                   <input
                     type="text"
                     value={linePayReturnUrl}
                     onChange={(e) => setLinePayReturnUrl(e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-[#00B900]"
-                    placeholder={t('autoGen.admin.key1411')}
+                    placeholder={t('settingsLine.leaveBlankForDefaultUrl')}
                   />
                   <p className="text-xs text-gray-500 mt-1">
-                    {t('autoGen.admin.key1412')}
+                    {t('settingsLine.returnUrlTip')}
                   </p>
                 </div>
               </div>
@@ -367,7 +367,7 @@ export default function SettingsLine() {
                 onChange={(e) => setLinePaySandbox(e.target.checked)}
                 className="w-4 h-4 text-[#00B900] border-gray-300 rounded focus:ring-[#00B900]"
               />
-              <label htmlFor="linePaySandbox" className="text-sm text-gray-700">{t('autoGen.admin.key1413')}</label>
+              <label htmlFor="linePaySandbox" className="text-sm text-gray-700">{t('settingsLine.enableSandboxMode')}</label>
             </div>
           </div>
         </div>
@@ -378,7 +378,7 @@ export default function SettingsLine() {
             disabled={saving}
             className="px-10 py-3 bg-primary-600 text-white rounded-xl font-bold hover:bg-primary-700 transition-all shadow-lg disabled:opacity-50"
           >
-            {saving ? t('autoGen.admin.key1414') : t('autoGen.admin.key1415')}
+            {saving ? t('settingsLine.saving') : t('settingsLine.saveAllSettings')}
           </button>
         </div>
       </div>

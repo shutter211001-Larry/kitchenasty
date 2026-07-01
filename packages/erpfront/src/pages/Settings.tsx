@@ -57,9 +57,7 @@ export default function Settings() {
         axios.get(`${API}/actions`), 
         axios.get(`${API}/units`), 
         axios.get("http://localhost:3000/api/settings"),
-        axios.get("http://localhost:3000/api/settings/mail-branding", {
-          headers: { Authorization: `Bearer ${localStorage.getItem('erp_token')}` }
-        }).catch(() => ({ data: {} }))
+        axios.get("http://localhost:3000/api/settings/mail-branding").catch(() => ({ data: {} }))
       ]);
       setActionGroups(actRes.data);
       setUnitGroups(ugRes.data);
@@ -151,9 +149,7 @@ export default function Settings() {
   const handleSaveMailBranding = async () => {
     try {
       setLoading(true);
-      await axios.put("http://localhost:3000/api/settings/mail-branding", mailBranding, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('erp_token')}` }
-      });
+      await axios.put("http://localhost:3000/api/settings/mail-branding", mailBranding);
       alert(t("erp_785", "設定儲存成功"));
     } catch (e) {
       console.error("Failed to save mail branding:", e);
@@ -167,9 +163,7 @@ export default function Settings() {
     if (!testEmail) return alert("請輸入測試信箱");
     try {
       setLoading(true);
-      const res = await axios.post("http://localhost:3000/api/settings/mail-branding/test", { to: testEmail }, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('erp_token')}` }
-      });
+      const res = await axios.post("http://localhost:3000/api/settings/mail-branding/test", { to: testEmail });
       alert(res.data.message || "測試信件寄出成功");
     } catch (e: any) {
       console.error("Failed to send test email:", e);

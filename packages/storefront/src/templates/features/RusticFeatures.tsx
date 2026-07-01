@@ -17,8 +17,8 @@ const defaultIcons: Record<string, React.ReactNode> = {
 export default function RusticFeatures({ features, t, lang = 'zh-TW' }: FeaturesProps) {const { settings } = useTheme();
 
   const items = features?.length ? features.filter(f => {
-              if (!settings.navShowLocations && (f.title.includes(t('autoGen.store.key129')) || f.title.includes(t('autoGen.store.key130')) || f.title.includes(t('autoGen.store.key131')))) return false;
-              if ((!settings.navShowReservations || !settings.reservationSettings?.enabled) && f.title.includes(t('autoGen.store.key132'))) return false;
+              if (!settings.navShowLocations && (f.title.includes(t('rusticFeatures.branch')) || f.title.includes(t('rusticFeatures.location')) || f.title.includes(t('rusticFeatures.reservation')))) return false;
+              if ((!settings.navShowReservations || !settings.reservationSettings?.enabled) && f.title.includes(t('rusticFeatures.booking'))) return false;
               return true;
             }) : [
     settings.orderSettings?.deliveryEnabled && { icon: 'clock', title: t('home.fastDelivery'), description: t('home.fastDeliveryDesc') },

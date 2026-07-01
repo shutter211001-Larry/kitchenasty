@@ -26,8 +26,8 @@ const gradients = [
 export default function VibrantFeatures({ features, t, lang = 'zh-TW' }: FeaturesProps) {const { settings } = useTheme();
 
   const items = features?.length ? features.filter(f => {
-              if (!settings.navShowLocations && (f.title.includes(t('autoGen.store.key137')) || f.title.includes(t('autoGen.store.key138')) || f.title.includes(t('autoGen.store.key139')))) return false;
-              if ((!settings.navShowReservations || !settings.reservationSettings?.enabled) && f.title.includes(t('autoGen.store.key140'))) return false;
+              if (!settings.navShowLocations && (f.title.includes(t('vibrantFeatures.branch')) || f.title.includes(t('vibrantFeatures.location')) || f.title.includes(t('vibrantFeatures.reservation')))) return false;
+              if ((!settings.navShowReservations || !settings.reservationSettings?.enabled) && f.title.includes(t('vibrantFeatures.booking'))) return false;
               return true;
             }) : [
     settings.orderSettings?.deliveryEnabled && { icon: 'clock', title: t('home.fastDelivery'), description: t('home.fastDeliveryDesc') },

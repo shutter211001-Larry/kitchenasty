@@ -68,7 +68,7 @@ export default function CookieCategoryList() {
   }
 
   async function handleDelete(id: string) {
-    if (!confirm(t('autoGen.admin.key250'))) return;
+    if (!confirm(t('cookieCategoryList.confirmDeleteCookieCategory'))) return;
     try {
       const res = await fetch(`/api/legal/cookie-categories/${id}`, {
         method: 'DELETE',
@@ -92,17 +92,17 @@ export default function CookieCategoryList() {
     setShowForm(true);
   }
 
-  if (loading) return <div className="p-6 text-gray-500">{t('autoGen.admin.key251')}</div>;
+  if (loading) return <div className="p-6 text-gray-500">{t('cookieCategoryList.loadingInProgress')}</div>;
 
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">{t('autoGen.admin.key252')}</h1>
+        <h1 className="text-2xl font-bold text-gray-900">{t('cookieCategoryList.cookieCategoryManagement')}</h1>
         <button
           onClick={() => { setForm(emptyForm); setEditingId(null); setShowForm(!showForm); }}
           className="px-4 py-2 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700"
         >
-          {showForm ? t('autoGen.admin.key253') : t('autoGen.admin.key254')}
+          {showForm ? t('cookieCategoryList.cancel') : t('cookieCategoryList.addCategory')}
         </button>
       </div>
 
@@ -113,30 +113,30 @@ export default function CookieCategoryList() {
           )}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key255')}</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('cookieCategoryList.nameSlugId')}</label>
               <input
                 type="text"
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                 required
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                placeholder={t('autoGen.admin.key256')}
+                placeholder={t('cookieCategoryList.exampleAnalytics')}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key257')}</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('cookieCategoryList.displayLabel')}</label>
               <input
                 type="text"
                 value={form.label}
                 onChange={(e) => setForm({ ...form, label: e.target.value })}
                 required
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                placeholder={t('autoGen.admin.key258')}
+                placeholder={t('cookieCategoryList.exampleAnalyticsCookie')}
               />
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key259')}</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t('cookieCategoryList.description')}</label>
             <textarea
               value={form.description}
               onChange={(e) => setForm({ ...form, description: e.target.value })}
@@ -153,7 +153,7 @@ export default function CookieCategoryList() {
                 onChange={(e) => setForm({ ...form, isRequired: e.target.checked })}
                 className="h-4 w-4 rounded border-gray-300 text-primary-600"
               />
-              {t('autoGen.admin.key260')}
+              {t('cookieCategoryList.requiredCannotDisable')}
             </label>
             <label className="flex items-center gap-2 text-sm">
               <input
@@ -162,10 +162,10 @@ export default function CookieCategoryList() {
                 onChange={(e) => setForm({ ...form, isActive: e.target.checked })}
                 className="h-4 w-4 rounded border-gray-300 text-primary-600"
               />
-              {t('autoGen.admin.key261')}
+              {t('cookieCategoryList.enabled')}
             </label>
             <div className="flex items-center gap-2">
-              <label className="text-sm font-medium text-gray-700">{t('autoGen.admin.key262')}</label>
+              <label className="text-sm font-medium text-gray-700">{t('cookieCategoryList.sortOrder')}</label>
               <input
                 type="number"
                 value={form.sortOrder}
@@ -179,7 +179,7 @@ export default function CookieCategoryList() {
               type="submit"
               className="px-4 py-2 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700"
             >
-              {editingId ? t('autoGen.admin.key263') : t('autoGen.admin.key264')}
+              {editingId ? t('cookieCategoryList.update') : t('cookieCategoryList.create')}
             </button>
           </div>
         </form>
@@ -189,12 +189,12 @@ export default function CookieCategoryList() {
         <table className="w-full text-sm">
           <thead className="bg-gray-50 text-gray-500 uppercase text-xs">
             <tr>
-              <th className="px-6 py-3 text-left">{t('autoGen.admin.key265')}</th>
-              <th className="px-6 py-3 text-left">{t('autoGen.admin.key266')}</th>
-              <th className="px-6 py-3 text-left">{t('autoGen.admin.key267')}</th>
-              <th className="px-6 py-3 text-center">{t('autoGen.admin.key268')}</th>
-              <th className="px-6 py-3 text-center">{t('autoGen.admin.key269')}</th>
-              <th className="px-6 py-3 text-right">{t('autoGen.admin.key270')}</th>
+              <th className="px-6 py-3 text-left">{t('cookieCategoryList.name')}</th>
+              <th className="px-6 py-3 text-left">{t('cookieCategoryList.label')}</th>
+              <th className="px-6 py-3 text-left">{t('cookieCategoryList.description')}</th>
+              <th className="px-6 py-3 text-center">{t('cookieCategoryList.required')}</th>
+              <th className="px-6 py-3 text-center">{t('cookieCategoryList.status')}</th>
+              <th className="px-6 py-3 text-right">{t('cookieCategoryList.actions')}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
@@ -205,16 +205,16 @@ export default function CookieCategoryList() {
                 <td className="px-6 py-4 text-gray-500 max-w-xs truncate">{cat.description}</td>
                 <td className="px-6 py-4 text-center">
                   {cat.isRequired ? (
-                    <span className="text-green-600 font-medium">{t('autoGen.admin.key271')}</span>
+                    <span className="text-green-600 font-medium">{t('cookieCategoryList.yes')}</span>
                   ) : (
-                    <span className="text-gray-400">{t('autoGen.admin.key272')}</span>
+                    <span className="text-gray-400">{t('cookieCategoryList.no')}</span>
                   )}
                 </td>
                 <td className="px-6 py-4 text-center">
                   {cat.isActive ? (
-                    <span className="text-green-600 font-medium">{t('autoGen.admin.key273')}</span>
+                    <span className="text-green-600 font-medium">{t('cookieCategoryList.enable')}</span>
                   ) : (
-                    <span className="text-red-500">{t('autoGen.admin.key274')}</span>
+                    <span className="text-red-500">{t('cookieCategoryList.disable')}</span>
                   )}
                 </td>
                 <td className="px-6 py-4 text-right space-x-3">
@@ -222,13 +222,13 @@ export default function CookieCategoryList() {
                     onClick={() => startEdit(cat)}
                     className="text-primary-600 hover:text-primary-700 font-medium"
                   >
-                    {t('autoGen.admin.key275')}
+                    {t('cookieCategoryList.edit')}
                   </button>
                   <button
                     onClick={() => handleDelete(cat.id)}
                     className="text-red-500 hover:text-red-600 font-medium"
                   >
-                    {t('autoGen.admin.key276')}
+                    {t('cookieCategoryList.delete')}
                   </button>
                 </td>
               </tr>
@@ -236,7 +236,7 @@ export default function CookieCategoryList() {
             {categories.length === 0 && (
               <tr>
                 <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
-                  {t('autoGen.admin.key277')}
+                  {t('cookieCategoryList.noCookieCategories')}
                 </td>
               </tr>
             )}

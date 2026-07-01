@@ -285,16 +285,16 @@ const previewComponents: Record<string, React.FC> = {
 export default function DesignTemplates() {
   const { t } = useTranslation();
     const templates: TemplateDef[] = [
-      { id: 'classic', name: t('autoGen.admin.key628'), description: t('autoGen.admin.key629') },
-      { id: 'elegant', name: t('autoGen.admin.key630'), description: t('autoGen.admin.key631') },
-      { id: 'bold', name: t('autoGen.admin.key632'), description: t('autoGen.admin.key633') },
-      { id: 'minimal', name: t('autoGen.admin.key634'), description: t('autoGen.admin.key635') },
-      { id: 'cozy', name: t('autoGen.admin.key636'), description: t('autoGen.admin.key637') },
-      { id: 'modern', name: t('autoGen.admin.key638'), description: t('autoGen.admin.key639') },
-      { id: 'rustic', name: t('autoGen.admin.key640'), description: t('autoGen.admin.key641') },
-      { id: 'vibrant', name: t('autoGen.admin.key642'), description: t('autoGen.admin.key643') },
-      { id: 'sleek', name: t('autoGen.admin.key644'), description: t('autoGen.admin.key645') },
-      { id: 'retro', name: t('autoGen.admin.key646'), description: t('autoGen.admin.key647') },
+      { id: 'classic', name: t('designTemplates.classic'), description: t('designTemplates.classicDescription') },
+      { id: 'elegant', name: t('designTemplates.elegant'), description: t('designTemplates.elegantDescription') },
+      { id: 'bold', name: t('designTemplates.bold'), description: t('designTemplates.boldDescription') },
+      { id: 'minimal', name: t('designTemplates.minimal'), description: t('designTemplates.minimalDescription') },
+      { id: 'cozy', name: t('designTemplates.cozy'), description: t('designTemplates.cozyDescription') },
+      { id: 'modern', name: t('designTemplates.modern'), description: t('designTemplates.modernDescription') },
+      { id: 'rustic', name: t('designTemplates.rustic'), description: t('designTemplates.rusticDescription') },
+      { id: 'vibrant', name: t('designTemplates.vibrant'), description: t('designTemplates.vibrantDescription') },
+      { id: 'sleek', name: t('designTemplates.sleek'), description: t('designTemplates.sleekDescription') },
+      { id: 'retro', name: t('designTemplates.retro'), description: t('designTemplates.retroDescription') },
     ];
 
   const token = localStorage.getItem('token') || '';
@@ -332,23 +332,23 @@ export default function DesignTemplates() {
         setSuccess(`模板 "${templates.find((t) => t.id === id)?.name}" 已成功套用`);
         setTimeout(() => setSuccess(''), 3000);
       } else {
-        setError(typeof data.error === 'string' ? data.error : t('autoGen.admin.key648'));
+        setError(typeof data.error === 'string' ? data.error : t('designTemplates.cannotApplyTemplate'));
       }
     } catch {
-      setError(t('autoGen.admin.key649'));
+      setError(t('designTemplates.networkConnectionError'));
     } finally {
       setSaving(null);
     }
   }
 
-  if (loading) return <div className="p-6 text-gray-500">{t('autoGen.admin.key650')}</div>;
+  if (loading) return <div className="p-6 text-gray-500">{t('designTemplates.loading')}</div>;
 
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">{t('autoGen.admin.key651')}</h1>
-          <p className="text-sm text-gray-500 mt-1">{t('autoGen.admin.key652')}</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t('designTemplates.templateSettings')}</h1>
+          <p className="text-sm text-gray-500 mt-1">{t('designTemplates.templateSettingsDescription')}</p>
         </div>
       </div>
 
@@ -393,7 +393,7 @@ export default function DesignTemplates() {
                 <div className="flex items-center justify-between mb-1">
                   <h3 className="text-sm font-semibold text-gray-900">{tpl.name}</h3>
                   {isActive && (
-                    <span className="text-[10px] font-medium text-primary-600 bg-primary-50 px-1.5 py-0.5 rounded-full">{t('autoGen.admin.key653')}</span>
+                    <span className="text-[10px] font-medium text-primary-600 bg-primary-50 px-1.5 py-0.5 rounded-full">{t('designTemplates.inUse')}</span>
                   )}
                 </div>
                 <p className="text-xs text-gray-500 leading-relaxed mb-3">{tpl.description}</p>
@@ -406,7 +406,7 @@ export default function DesignTemplates() {
                       : 'bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50'
                   }`}
                 >
-                  {isSaving ? t('autoGen.admin.key654') : isActive ? t('autoGen.admin.key655') : t('autoGen.admin.key656')}
+                  {isSaving ? t('designTemplates.applying') : isActive ? t('designTemplates.currentTemplate') : t('designTemplates.applyThisTemplate')}
                 </button>
               </div>
             </div>

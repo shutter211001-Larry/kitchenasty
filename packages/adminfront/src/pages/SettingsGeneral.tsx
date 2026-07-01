@@ -7,24 +7,24 @@ import { useAuth } from '../context/AuthContext.js';
 export default function SettingsGeneral() {
   const { t } = useTranslation();
     const TIMEZONES = [
-      { value: 'Asia/Taipei', label: t('autoGen.admin.key1276') },
-      { value: 'UTC', label: t('autoGen.admin.key1277') },
-      { value: 'Asia/Tokyo', label: t('autoGen.admin.key1278') },
-      { value: 'Asia/Shanghai', label: t('autoGen.admin.key1279') },
-      { value: 'Asia/Hong_Kong', label: t('autoGen.admin.key1280') },
-      { value: 'Asia/Singapore', label: t('autoGen.admin.key1281') },
-      { value: 'Asia/Dubai', label: t('autoGen.admin.key1282') },
-      { value: 'Asia/Kolkata', label: t('autoGen.admin.key1283') },
-      { value: 'Europe/London', label: t('autoGen.admin.key1284') },
-      { value: 'Europe/Berlin', label: t('autoGen.admin.key1285') },
-      { value: 'Europe/Paris', label: t('autoGen.admin.key1286') },
-      { value: 'Europe/Rome', label: t('autoGen.admin.key1287') },
-      { value: 'America/New_York', label: t('autoGen.admin.key1288') },
-      { value: 'America/Chicago', label: t('autoGen.admin.key1289') },
-      { value: 'America/Denver', label: t('autoGen.admin.key1290') },
-      { value: 'America/Los_Angeles', label: t('autoGen.admin.key1291') },
-      { value: 'Australia/Sydney', label: t('autoGen.admin.key1292') },
-      { value: 'Pacific/Auckland', label: t('autoGen.admin.key1293') },
+      { value: 'Asia/Taipei', label: t('settingsGeneral.timezoneTaipei') },
+      { value: 'UTC', label: t('settingsGeneral.timezoneUtc') },
+      { value: 'Asia/Tokyo', label: t('settingsGeneral.timezoneTokyo') },
+      { value: 'Asia/Shanghai', label: t('settingsGeneral.timezoneShanghaiBeijing') },
+      { value: 'Asia/Hong_Kong', label: t('settingsGeneral.timezoneHongKong') },
+      { value: 'Asia/Singapore', label: t('settingsGeneral.timezoneSingapore') },
+      { value: 'Asia/Dubai', label: t('settingsGeneral.timezoneDubai') },
+      { value: 'Asia/Kolkata', label: t('settingsGeneral.timezoneIndia') },
+      { value: 'Europe/London', label: t('settingsGeneral.timezoneLondon') },
+      { value: 'Europe/Berlin', label: t('settingsGeneral.timezoneBerlin') },
+      { value: 'Europe/Paris', label: t('settingsGeneral.timezoneParis') },
+      { value: 'Europe/Rome', label: t('settingsGeneral.timezoneRome') },
+      { value: 'America/New_York', label: t('settingsGeneral.timezoneNewYork') },
+      { value: 'America/Chicago', label: t('settingsGeneral.timezoneChicago') },
+      { value: 'America/Denver', label: t('settingsGeneral.timezoneDenver') },
+      { value: 'America/Los_Angeles', label: t('settingsGeneral.timezoneLosAngeles') },
+      { value: 'Australia/Sydney', label: t('settingsGeneral.timezoneSydney') },
+      { value: 'Pacific/Auckland', label: t('settingsGeneral.timezoneAuckland') },
     ];
 
   const { user, refreshUser } = useAuth();
@@ -112,28 +112,28 @@ export default function SettingsGeneral() {
           i18n.changeLanguage(language);
           if (refreshUser) refreshUser();
         }
-        setSuccess(t('autoGen.admin.key1294'));
+        setSuccess(t('settingsGeneral.settingsUpdatedSuccessfully'));
         setTimeout(() => setSuccess(''), 3000);
       } else {
-        setError(typeof data.error === 'string' ? data.error : t('autoGen.admin.key1295'));
+        setError(typeof data.error === 'string' ? data.error : t('settingsGeneral.saveFailed'));
       }
     } catch {
-      setError(t('autoGen.admin.key1296'));
+      setError(t('settingsGeneral.networkConnectionError'));
     } finally {
       setSaving(false);
     }
   }
 
-  if (loading) return <div className="p-6 text-gray-500">{t('autoGen.admin.key1297')}</div>;
+  if (loading) return <div className="p-6 text-gray-500">{t('settingsGeneral.loading')}</div>;
   return (
     <div className="pb-12">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <Link to="/settings" className="text-sm text-primary-600 hover:text-primary-700">{t('autoGen.admin.key1298')}</Link>
-          <h1 className="text-2xl font-bold text-gray-900 mt-1">{t('autoGen.admin.key1299')}</h1>
+          <Link to="/settings" className="text-sm text-primary-600 hover:text-primary-700">{t('settingsGeneral.backToSettings')}</Link>
+          <h1 className="text-2xl font-bold text-gray-900 mt-1">{t('settingsGeneral.generalSettings')}</h1>
         </div>
         <button onClick={handleSave} disabled={saving} className="px-6 py-2 bg-primary-600 text-white rounded-lg font-bold hover:bg-primary-700 transition-colors shadow-sm disabled:opacity-50">
-          {saving ? t('autoGen.admin.key1300') : t('autoGen.admin.key1301')}
+          {saving ? t('settingsGeneral.saving') : t('settingsGeneral.saveChanges')}
         </button>
       </div>
 
@@ -143,10 +143,10 @@ export default function SettingsGeneral() {
       <div className="space-y-6">
         {/* Personal Preference */}
         <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-4">
-          <h2 className="text-lg font-semibold text-gray-900">{t('autoGen.admin.key1302')}</h2>
+          <h2 className="text-lg font-semibold text-gray-900">{t('settingsGeneral.personalizationSettings')}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key1303')}</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('settingsGeneral.systemDisplayLanguage')}</label>
               <select value={language} onChange={(e) => setLanguage(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
                 {SUPPORTED_LANGUAGES.map((l) => (
                   <option key={l.code} value={l.code}>
@@ -160,14 +160,14 @@ export default function SettingsGeneral() {
 
         {/* Contact Info */}
         <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-4">
-          <h2 className="text-lg font-semibold text-gray-900">{t('autoGen.admin.key1304')}</h2>
+          <h2 className="text-lg font-semibold text-gray-900">{t('settingsGeneral.contactInfo')}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key1305')}</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('settingsGeneral.contactEmail')}</label>
               <input type="email" value={contactEmail} onChange={(e) => setContactEmail(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key1306')}</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('settingsGeneral.contactPhone')}</label>
               <input type="text" value={contactPhone} onChange={(e) => setContactPhone(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500" />
             </div>
           </div>
@@ -175,42 +175,42 @@ export default function SettingsGeneral() {
 
         {/* Site Navigation & Membership */}
         <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-4">
-          <h2 className="text-lg font-semibold text-gray-900">{t('autoGen.admin.key1307')}</h2>
-          <p className="text-sm text-gray-500">{t('autoGen.admin.key1308')}</p>
+          <h2 className="text-lg font-semibold text-gray-900">{t('settingsGeneral.navigationPortalDisplay')}</h2>
+          <p className="text-sm text-gray-500">{t('settingsGeneral.portalDisplayDescription')}</p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-3">
-              <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider">{t('autoGen.admin.key1309')}</h3>
+              <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider">{t('settingsGeneral.showNavigationLinks')}</h3>
               <label className="flex items-center gap-3 cursor-pointer">
                 <input type="checkbox" checked={navShowHome} onChange={(e) => setNavShowHome(e.target.checked)} className="w-4 h-4 text-primary-600 rounded" />
-                <span className="text-sm text-gray-700">{t('autoGen.admin.key1310')}</span>
+                <span className="text-sm text-gray-700">{t('settingsGeneral.showHomePage')}</span>
               </label>
               <label className="flex items-center gap-3 cursor-pointer">
                 <input type="checkbox" checked={navShowLocations} onChange={(e) => setNavShowLocations(e.target.checked)} className="w-4 h-4 text-primary-600 rounded" />
-                <span className="text-sm text-gray-700">{t('autoGen.admin.key1311')}</span>
+                <span className="text-sm text-gray-700">{t('settingsGeneral.showBranchInfo')}</span>
               </label>
               <label className="flex items-center gap-3 cursor-pointer">
                 <input type="checkbox" checked={navShowMenu} onChange={(e) => setNavShowMenu(e.target.checked)} className="w-4 h-4 text-primary-600 rounded" />
-                <span className="text-sm text-gray-700">{t('autoGen.admin.key1312')}</span>
+                <span className="text-sm text-gray-700">{t('settingsGeneral.showOnlineOrdering')}</span>
               </label>
               <label className="flex items-center gap-3 cursor-pointer">
                 <input type="checkbox" checked={navShowReservations} onChange={(e) => setNavShowReservations(e.target.checked)} className="w-4 h-4 text-primary-600 rounded" />
-                <span className="text-sm text-gray-700">{t('autoGen.admin.key1313')}</span>
+                <span className="text-sm text-gray-700">{t('settingsGeneral.showBookingService')}</span>
               </label>
             </div>
             <div className="space-y-3">
-              <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider">{t('autoGen.admin.key1314')}</h3>
+              <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider">{t('settingsGeneral.systemFeatures')}</h3>
               <label className="flex items-center gap-3 cursor-pointer p-3 bg-gray-50 rounded-lg border border-gray-200">
                 <input type="checkbox" checked={showMembership} onChange={(e) => setShowMembership(e.target.checked)} className="w-4 h-4 text-primary-600 rounded" />
                 <div>
-                  <p className="text-sm font-bold text-gray-900">{t('autoGen.admin.key1315')}</p>
-                  <p className="text-xs text-gray-500">{t('autoGen.admin.key1316')}</p>
+                  <p className="text-sm font-bold text-gray-900">{t('settingsGeneral.enableMemberSystem')}</p>
+                  <p className="text-xs text-gray-500">{t('settingsGeneral.hideLoginRegisterDescription')}</p>
                 </div>
               </label>
               <label className="flex items-center gap-3 cursor-pointer p-3 bg-gray-50 rounded-lg border border-gray-200">
                 <input type="checkbox" checked={showLanguageEmoji} onChange={(e) => setShowLanguageEmoji(e.target.checked)} className="w-4 h-4 text-primary-600 rounded" />
                 <div>
-                  <p className="text-sm font-bold text-gray-900">{t('autoGen.admin.key1317')}</p>
-                  <p className="text-xs text-gray-500">{t('autoGen.admin.key1318')}</p>
+                  <p className="text-sm font-bold text-gray-900">{t('settingsGeneral.showLanguageFlagEmoji')}</p>
+                  <p className="text-xs text-gray-500">{t('settingsGeneral.showFlagIconDescription')}</p>
                 </div>
               </label>
             </div>
@@ -219,24 +219,24 @@ export default function SettingsGeneral() {
 
         {/* Localization & Currency */}
         <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-4">
-          <h2 className="text-lg font-semibold text-gray-900">{t('autoGen.admin.key1319')}</h2>
+          <h2 className="text-lg font-semibold text-gray-900">{t('settingsGeneral.regionAndCurrency')}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key1320')}</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('settingsGeneral.timezone')}</label>
               <select value={timezone} onChange={(e) => setTimezone(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
                 {TIMEZONES.map((tz) => <option key={tz.value} value={tz.value}>{tz.label}</option>)}
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key1321')}</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('settingsGeneral.distanceUnit')}</label>
               <div className="flex gap-4 mt-2">
                 <label className="flex items-center gap-2 text-sm">
                   <input type="radio" name="distanceUnit" value="km" checked={distanceUnit === 'km'} onChange={() => setDistanceUnit('km')} className="text-primary-600" />
-                  {t('autoGen.admin.key1322')}
+                  {t('settingsGeneral.kilometers')}
                 </label>
                 <label className="flex items-center gap-2 text-sm">
                   <input type="radio" name="distanceUnit" value="mi" checked={distanceUnit === 'mi'} onChange={() => setDistanceUnit('mi')} className="text-primary-600" />
-                  {t('autoGen.admin.key1323')}
+                  {t('settingsGeneral.miles')}
                 </label>
               </div>
             </div>
@@ -244,32 +244,32 @@ export default function SettingsGeneral() {
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key1324')}</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('settingsGeneral.defaultCurrency')}</label>
               <input type="text" maxLength={3} value={defaultCurrency} onChange={(e) => setDefaultCurrency(e.target.value.toUpperCase())} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500" placeholder="TWD" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key1325')}</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('settingsGeneral.currencySymbol')}</label>
               <input type="text" maxLength={5} value={currencySymbol} onChange={(e) => setCurrencySymbol(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500" placeholder="$" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key1326')}</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('settingsGeneral.symbolPosition')}</label>
               <div className="flex gap-4 mt-2">
                 <label className="flex items-center gap-2 text-sm">
                   <input type="radio" name="currencyPosition" value="before" checked={currencyPosition === 'before'} onChange={() => setCurrencyPosition('before')} className="text-primary-600" />
-                  {t('autoGen.admin.key1327')}
+                  {t('settingsGeneral.prefixSymbol')}
                 </label>
                 <label className="flex items-center gap-2 text-sm">
                   <input type="radio" name="currencyPosition" value="after" checked={currencyPosition === 'after'} onChange={() => setCurrencyPosition('after')} className="text-primary-600" />
-                  {t('autoGen.admin.key1328')}
+                  {t('settingsGeneral.suffixSymbol')}
                 </label>
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key1329')}</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('settingsGeneral.checkoutDecimalPlaces')}</label>
               <select value={currencyDecimals} onChange={(e) => setCurrencyDecimals(Number(e.target.value))} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                <option value={0}>{t('autoGen.admin.key1330')}</option>
+                <option value={0}>{t('settingsGeneral.decimalPlacesZero')}</option>
                 <option value={1}>1</option>
-                <option value={2}>{t('autoGen.admin.key1331')}</option>
+                <option value={2}>{t('settingsGeneral.decimalPlacesTwo')}</option>
                 <option value={3}>3</option>
                 <option value={4}>4</option>
               </select>
@@ -285,7 +285,7 @@ export default function SettingsGeneral() {
             disabled={saving}
             className="px-10 py-3 bg-primary-600 text-white rounded-xl font-bold hover:bg-primary-700 transition-all shadow-lg disabled:opacity-50"
           >
-            {saving ? t('autoGen.admin.key1332') : t('autoGen.admin.key1333')}
+            {saving ? t('settingsGeneral.saving') : t('settingsGeneral.saveAllChanges')}
           </button>
       </div>
     </div>

@@ -132,7 +132,7 @@ export default function OrderDetailPage() {
   async function handleUpdateDiscount() {
     const val = Number(adjustedTotalInput);
     if (isNaN(val) || val < 0) {
-      alert(t('autoGen.admin.key1007'));
+      alert(t('orderDetail.enterValidDiscountedPrice'));
       return;
     }
     setUpdating(true);
@@ -146,12 +146,12 @@ export default function OrderDetailPage() {
         body: JSON.stringify({ adjustedTotal: val }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || t('autoGen.admin.key1008'));
+      if (!res.ok) throw new Error(data.error || t('orderDetail.adjustDiscountFailed'));
       setOrder((prev) => prev ? { ...prev, ...data.data } : data.data);
       const unrounded = data.data.subtotal + data.data.tax + data.data.deliveryFee - data.data.discount;
       const roundedTotal = Number(unrounded.toFixed(currencyDecimals));
       setAdjustedTotalInput(roundedTotal.toString());
-      alert(t('autoGen.admin.key1009'));
+      alert(t('orderDetail.discountAppliedSuccessfully'));
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -160,14 +160,14 @@ export default function OrderDetailPage() {
   }
 
   async function handleDelete() {
-    if (!window.confirm(t('autoGen.admin.key1010'))) return;
+    if (!window.confirm(t('orderDetail.confirmDeleteOrder'))) return;
     try {
       setUpdating(true);
       const res = await fetch(`/api/orders/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (!res.ok) throw new Error(t('autoGen.admin.key1011'));
+      if (!res.ok) throw new Error(t('orderDetail.deleteFailed'));
       window.location.href = '/orders';
     } catch (err: any) {
       setError(err.message);
@@ -178,7 +178,7 @@ export default function OrderDetailPage() {
   if (loading) {
     return (
       <div className="flex justify-center py-12">
-        <div className="w-8 h-8 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin" role="status" aria-label={t('autoGen.admin.key1012')} />
+        <div className="w-8 h-8 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin" role="status" aria-label={t('orderDetail.loading')} />
       </div>
     );
   }
@@ -197,26 +197,26 @@ export default function OrderDetailPage() {
   return (
     <div>
       <div className="flex items-center gap-4 mb-6">
-        <Link to="/orders" className="text-gray-400 hover:text-gray-600" aria-label={t('autoGen.admin.key1013')}>
+        <Link to="/orders" className="text-gray-400 hover:text-gray-600" aria-label={t('orderDetail.backToOrderList')}>
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">{t('autoGen.admin.key1014')}{order.orderNumber}</h1>
+          <h1 className="text-2xl font-bold text-gray-900">{t('orderDetail.orderDetails')}{order.orderNumber}</h1>
           <p className="text-sm text-gray-500">
-            {t('autoGen.admin.key1015')}{new Date(order.createdAt).toLocaleString()}
+            {t('orderDetail.orderTime')}{new Date(order.createdAt).toLocaleString()}
           </p>
         </div>
         <span className={`ml-auto text-sm px-3 py-1 rounded-full font-medium ${STATUS_COLORS[order.status] || 'bg-gray-100'}`}>
-          {order.status === 'PENDING' && t('autoGen.admin.key1016')}
-          {order.status === 'CONFIRMED' && t('autoGen.admin.key1017')}
-          {order.status === 'PREPARING' && t('autoGen.admin.key1018')}
-          {order.status === 'READY' && t('autoGen.admin.key1019')}
-          {order.status === 'OUT_FOR_DELIVERY' && t('autoGen.admin.key1020')}
-          {order.status === 'DELIVERED' && t('autoGen.admin.key1021')}
-          {order.status === 'PICKED_UP' && t('autoGen.admin.key1022')}
-          {order.status === 'CANCELLED' && t('autoGen.admin.key1023')}
+          {order.status === 'PENDING' && t('orderDetail.pending')}
+          {order.status === 'CONFIRMED' && t('orderDetail.confirmed')}
+          {order.status === 'PREPARING' && t('orderDetail.preparing')}
+          {order.status === 'READY' && t('orderDetail.readyForPickup')}
+          {order.status === 'OUT_FOR_DELIVERY' && t('orderDetail.outForDelivery')}
+          {order.status === 'DELIVERED' && t('orderDetail.delivered')}
+          {order.status === 'PICKED_UP' && t('orderDetail.pickedUp')}
+          {order.status === 'CANCELLED' && t('orderDetail.cancelled')}
           {!['PENDING', 'CONFIRMED', 'PREPARING', 'READY', 'OUT_FOR_DELIVERY', 'DELIVERED', 'PICKED_UP', 'CANCELLED'].includes(order.status) && order.status.replace(/_/g, ' ')}
         </span>
       </div>
@@ -241,7 +241,7 @@ export default function OrderDetailPage() {
                       </div>
                     )}
                     {item.comment && (
-                      <div className="text-xs text-gray-400 mt-0.5 italic">{t('autoGen.admin.key1024')} {item.comment}</div>
+                      <div className="text-xs text-gray-400 mt-0.5 italic">{t('orderDetail.notes')} {item.comment}</div>
                     )}
                   </div>
                   <span className="font-medium text-gray-900">${item.subtotal.toFixed(2)}</span>
@@ -264,7 +264,7 @@ export default function OrderDetailPage() {
                 <div className="flex justify-between">
                   <span className="text-gray-600">{t('orders.deliveryFee')}</span>
                   <span className={order.deliveryFee === 0 ? "text-green-600 font-medium" : ""}>
-                    {order.deliveryFee === 0 ? (t('orders.free') || t('autoGen.admin.key1025')) : `$${order.deliveryFee.toFixed(2)}`}
+                    {order.deliveryFee === 0 ? (t('orders.free') || t('orderDetail.freeShipping')) : `$${order.deliveryFee.toFixed(2)}`}
                   </span>
                 </div>
               )}
@@ -280,7 +280,7 @@ export default function OrderDetailPage() {
                 if (Math.abs(diff) > 0.001) {
                   return (
                     <div className="flex justify-between text-gray-500">
-                      <span>{t('autoGen.admin.key1026')}</span>
+                      <span>{t('orderDetail.roundingAdjustment')}</span>
                       <span>{diff > 0 ? '+' : ''}${diff.toFixed(2)}</span>
                     </div>
                   );
@@ -296,7 +296,7 @@ export default function OrderDetailPage() {
                 <div className="mt-4 pt-4 border-t border-gray-200">
                   <div className="flex flex-col gap-2">
                     <label htmlFor="adjustedPriceInput" className="text-xs font-semibold text-gray-500">
-                      {t('autoGen.admin.key1027')}
+                      {t('orderDetail.setDiscountedPrice')}
                     </label>
                     <div className="flex gap-2">
                       <div className="relative flex-1">
@@ -306,7 +306,7 @@ export default function OrderDetailPage() {
                           type="number"
                           step="0.01"
                           min="0"
-                          placeholder={t('autoGen.admin.key1028')}
+                          placeholder={t('orderDetail.enterDiscountedPrice')}
                           value={adjustedTotalInput}
                           onChange={(e) => setAdjustedTotalInput(e.target.value)}
                           className="w-full pl-7 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
@@ -317,12 +317,12 @@ export default function OrderDetailPage() {
                         disabled={updating}
                         className="px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-lg hover:bg-primary-700 transition-colors disabled:opacity-50 flex items-center gap-1"
                       >
-                        {t('autoGen.admin.key1029')}
+                        {t('orderDetail.apply')}
                       </button>
                     </div>
                     {adjustedTotalInput && !isNaN(Number(adjustedTotalInput)) && (
                       <span className="text-xs text-gray-400 mt-1">
-                        {t('autoGen.admin.key1030')}{(Math.max(0, (order.subtotal + order.tax + order.deliveryFee) - Number(adjustedTotalInput))).toFixed(2)}
+                        {t('orderDetail.estimatedDiscountAmount')}{(Math.max(0, (order.subtotal + order.tax + order.deliveryFee) - Number(adjustedTotalInput))).toFixed(2)}
                       </span>
                     )}
                   </div>
@@ -334,7 +334,7 @@ export default function OrderDetailPage() {
           {/* Notes */}
           {order.comment && (
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-2">{t('checkout.orderNotes') || t('autoGen.admin.key1031')}</h2>
+              <h2 className="text-lg font-semibold text-gray-900 mb-2">{t('checkout.orderNotes') || t('orderDetail.orderNotes')}</h2>
               <p className="text-gray-600 text-sm">{order.comment}</p>
             </div>
           )}
@@ -344,7 +344,7 @@ export default function OrderDetailPage() {
         <div className="space-y-6">
           {/* Status update */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('autoGen.admin.key1032')}</h2>
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('orderDetail.updateOrderStatus')}</h2>
             <div className="space-y-2">
               {STATUSES.map((status) => (
                 <button
@@ -357,14 +357,14 @@ export default function OrderDetailPage() {
                     }`}
                   aria-label={`將狀態設為 ${status.replace(/_/g, ' ')}`}
                 >
-                  {status === 'PENDING' && t('autoGen.admin.key1033')}
-                  {status === 'CONFIRMED' && t('autoGen.admin.key1034')}
-                  {status === 'PREPARING' && t('autoGen.admin.key1035')}
-                  {status === 'READY' && t('autoGen.admin.key1036')}
-                  {status === 'OUT_FOR_DELIVERY' && t('autoGen.admin.key1037')}
-                  {status === 'DELIVERED' && t('autoGen.admin.key1038')}
-                  {status === 'PICKED_UP' && t('autoGen.admin.key1039')}
-                  {status === 'CANCELLED' && t('autoGen.admin.key1040')}
+                  {status === 'PENDING' && t('orderDetail.statusPending')}
+                  {status === 'CONFIRMED' && t('orderDetail.statusConfirmed')}
+                  {status === 'PREPARING' && t('orderDetail.statusPreparing')}
+                  {status === 'READY' && t('orderDetail.statusReady')}
+                  {status === 'OUT_FOR_DELIVERY' && t('orderDetail.statusOutForDelivery')}
+                  {status === 'DELIVERED' && t('orderDetail.statusDelivered')}
+                  {status === 'PICKED_UP' && t('orderDetail.statusPickedUp')}
+                  {status === 'CANCELLED' && t('orderDetail.statusCancelled')}
                   {!['PENDING', 'CONFIRMED', 'PREPARING', 'READY', 'OUT_FOR_DELIVERY', 'DELIVERED', 'PICKED_UP', 'CANCELLED'].includes(status) && status.replace(/_/g, ' ')}
                 </button>
               ))}
@@ -373,7 +373,7 @@ export default function OrderDetailPage() {
 
           {/* Payment status update */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4 font-sans">{t('autoGen.admin.key1041')}</h2>
+            <h2 className="text-lg font-semibold text-gray-900 mb-4 font-sans">{t('orderDetail.updatePaymentStatus')}</h2>
             <div className="flex gap-2">
               <button
                 disabled={updating || order.paymentStatus === 'PAID'}
@@ -384,7 +384,7 @@ export default function OrderDetailPage() {
                     : 'bg-gray-50 border-gray-250 text-gray-600 hover:bg-gray-100 active:scale-95'
                 }`}
               >
-                {t('autoGen.admin.key1042')}
+                {t('orderDetail.paid')}
               </button>
               <button
                 disabled={updating || (!order.paymentStatus || order.paymentStatus === 'UNPAID')}
@@ -395,7 +395,7 @@ export default function OrderDetailPage() {
                     : 'bg-gray-50 border-gray-250 text-gray-600 hover:bg-gray-100 active:scale-95'
                 }`}
               >
-                {t('autoGen.admin.key1043')}
+                {t('orderDetail.unpaid')}
               </button>
             </div>
           </div>
@@ -403,14 +403,14 @@ export default function OrderDetailPage() {
           {/* Delete Action */}
           {canManage && (
             <div className="bg-red-50 rounded-xl border border-red-100 p-4 sm:p-6">
-              <h2 className="text-lg font-semibold text-red-900 mb-2">{t('autoGen.admin.key1044')}</h2>
-              <p className="text-xs text-red-600 mb-4">{t('autoGen.admin.key1045')}</p>
+              <h2 className="text-lg font-semibold text-red-900 mb-2">{t('orderDetail.dangerZone')}</h2>
+              <p className="text-xs text-red-600 mb-4">{t('orderDetail.deleteOrderWarning')}</p>
               <button
                 disabled={updating}
                 onClick={handleDelete}
                 className="w-full bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-700 transition-colors disabled:opacity-40"
               >
-                {t('autoGen.admin.key1046')}
+                {t('orderDetail.deleteOrder')}
               </button>
             </div>
           )}
@@ -425,14 +425,14 @@ export default function OrderDetailPage() {
                   <span>{order.orderType}</span>
                   {order.table && (
                     <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-amber-100 text-amber-800 border border-amber-200">
-                      {t('autoGen.admin.key1047')} {order.table.name}
+                      {t('orderDetail.tableNumber')} {order.table.name}
                     </span>
                   )}
                 </dd>
               </div>
               {order.isRemote !== undefined && (
                 <div>
-                  <dt className="text-gray-500">{t('orders.remote') || t('autoGen.admin.key1048')}</dt>
+                  <dt className="text-gray-500">{t('orders.remote') || t('orderDetail.remoteOrOnSite')}</dt>
                   <dd className="font-medium">
                     <span className={`px-2 py-0.5 rounded text-xs font-bold ${order.isRemote ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
                       {order.isRemote ? t('orders.remote') : t('orders.onSite')}
@@ -442,7 +442,7 @@ export default function OrderDetailPage() {
                 </div>
               )}
               <div>
-                <dt className="text-gray-500">{t('reservations.location') || t('autoGen.admin.key1049')}</dt>
+                <dt className="text-gray-500">{t('reservations.location') || t('orderDetail.location')}</dt>
                 <dd className="font-medium text-gray-900">{order.location.name}</dd>
               </div>
               <div>
@@ -457,13 +457,13 @@ export default function OrderDetailPage() {
                       )}
                     </>
                   ) : (
-                    <span className="text-gray-400">{t('common.guest') || t('autoGen.admin.key1050')}</span>
+                    <span className="text-gray-400">{t('common.guest') || t('orderDetail.guest')}</span>
                   )}
                 </dd>
               </div>
               {order.scheduledAt && (
                 <div>
-                  <dt className="text-gray-500">{t('autoGen.admin.key1051')}</dt>
+                  <dt className="text-gray-500">{t('orderDetail.scheduledTime')}</dt>
                   <dd className="font-medium text-gray-900">
                     {new Date(order.scheduledAt).toLocaleString()}
                   </dd>

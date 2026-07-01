@@ -68,13 +68,13 @@ export default function ConsentLog() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">{t('autoGen.admin.key230')}</h1>
+      <h1 className="text-2xl font-bold text-gray-900 mb-6">{t('consentLog.cookieConsentLog')}</h1>
 
       {/* Stats cards */}
       {stats && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <div className="bg-white rounded-lg border border-gray-200 p-4">
-            <p className="text-xs text-gray-500 uppercase">{t('autoGen.admin.key231')}</p>
+            <p className="text-xs text-gray-500 uppercase">{t('consentLog.totalConsents')}</p>
             <p className="text-2xl font-bold text-gray-900 mt-1">{stats.totalConsents}</p>
           </div>
           {stats.categories.map((cat) => (
@@ -82,7 +82,7 @@ export default function ConsentLog() {
               <p className="text-xs text-gray-500 uppercase">{cat.categoryName}</p>
               <p className="text-2xl font-bold text-gray-900 mt-1">{cat.acceptanceRate}%</p>
               <p className="text-xs text-gray-400 mt-1">
-                {cat.accepted} {t('autoGen.admin.key232')} {cat.rejected} {t('autoGen.admin.key233')}
+                {cat.accepted} {t('consentLog.accepted')} {cat.rejected} {t('consentLog.rejected')}
               </p>
             </div>
           ))}
@@ -96,7 +96,7 @@ export default function ConsentLog() {
           onChange={(e) => { setCategoryFilter(e.target.value); setPage(1); }}
           className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
         >
-          <option value="">{t('autoGen.admin.key234')}</option>
+          <option value="">{t('consentLog.allCookieCategories')}</option>
           {stats?.categories.map((cat) => (
             <option key={cat.categoryId} value={cat.categoryId}>
               {cat.categoryName}
@@ -110,21 +110,21 @@ export default function ConsentLog() {
         <table className="w-full text-sm">
           <thead className="bg-gray-50 text-gray-500 uppercase text-xs">
             <tr>
-              <th className="px-6 py-3 text-left">{t('autoGen.admin.key235')}</th>
-              <th className="px-6 py-3 text-left">{t('autoGen.admin.key236')}</th>
-              <th className="px-6 py-3 text-center">{t('autoGen.admin.key237')}</th>
-              <th className="px-6 py-3 text-left">{t('autoGen.admin.key238')}</th>
-              <th className="px-6 py-3 text-left">{t('autoGen.admin.key239')}</th>
+              <th className="px-6 py-3 text-left">{t('consentLog.customer')}</th>
+              <th className="px-6 py-3 text-left">{t('consentLog.category')}</th>
+              <th className="px-6 py-3 text-center">{t('consentLog.acceptedStatus')}</th>
+              <th className="px-6 py-3 text-left">{t('consentLog.ipAddress')}</th>
+              <th className="px-6 py-3 text-left">{t('consentLog.date')}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
             {loading ? (
               <tr>
-                <td colSpan={5} className="px-6 py-8 text-center text-gray-500">{t('autoGen.admin.key240')}</td>
+                <td colSpan={5} className="px-6 py-8 text-center text-gray-500">{t('consentLog.loading')}</td>
               </tr>
             ) : consents.length === 0 ? (
               <tr>
-                <td colSpan={5} className="px-6 py-8 text-center text-gray-500">{t('autoGen.admin.key241')}</td>
+                <td colSpan={5} className="px-6 py-8 text-center text-gray-500">{t('consentLog.noRecords')}</td>
               </tr>
             ) : (
               consents.map((c) => (
@@ -136,18 +136,18 @@ export default function ConsentLog() {
                         <span className="block text-xs text-gray-400">{c.customer.email}</span>
                       </div>
                     ) : (
-                      <span className="text-gray-400">{t('autoGen.admin.key242')}</span>
+                      <span className="text-gray-400">{t('consentLog.anonymousVisitor')}</span>
                     )}
                   </td>
                   <td className="px-6 py-4 text-gray-700">{c.cookieCategory.label}</td>
                   <td className="px-6 py-4 text-center">
                     {c.accepted ? (
                       <span className="inline-block px-2 py-0.5 bg-green-100 text-green-700 rounded text-xs font-medium">
-                        {t('autoGen.admin.key243')}
+                        {t('consentLog.yes')}
                       </span>
                     ) : (
                       <span className="inline-block px-2 py-0.5 bg-red-100 text-red-700 rounded text-xs font-medium">
-                        {t('autoGen.admin.key244')}
+                        {t('consentLog.no')}
                       </span>
                     )}
                   </td>
@@ -170,17 +170,17 @@ export default function ConsentLog() {
             disabled={page === 1}
             className="px-3 py-1 border border-gray-300 rounded text-sm disabled:opacity-50"
           >
-            {t('autoGen.admin.key245')}
+            {t('consentLog.previousPage')}
           </button>
           <span className="px-3 py-1 text-sm text-gray-600">
-            {t('autoGen.admin.key246')} {page} {t('autoGen.admin.key247')} {totalPages} {t('autoGen.admin.key248')}
+            {t('consentLog.pagePrefix')} {page} {t('consentLog.pageSeparator')} {totalPages} {t('consentLog.pageSuffix')}
           </span>
           <button
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page === totalPages}
             className="px-3 py-1 border border-gray-300 rounded text-sm disabled:opacity-50"
           >
-            {t('autoGen.admin.key249')}
+            {t('consentLog.nextPage')}
           </button>
         </div>
       )}

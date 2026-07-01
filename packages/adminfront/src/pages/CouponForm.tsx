@@ -115,7 +115,7 @@ export default function CouponForm() {
 
   const validateStep = (step: number) => {
   if (step === 1 && !code.trim() && !isAutomatic) {
-      setError(t('autoGen.admin.key351'));
+      setError(t('couponForm.pleaseEnterPromoCode'));
       return false;
     }
     setError('');
@@ -194,10 +194,10 @@ export default function CouponForm() {
   }
 
   const stepTitles = [
-    t('autoGen.admin.key352'),
-    t('autoGen.admin.key353'),
-    t('autoGen.admin.key354'),
-    t('autoGen.admin.key355')
+    t('couponForm.basicSettings'),
+    t('couponForm.triggerThreshold'),
+    t('couponForm.discountMethod'),
+    t('couponForm.applicableItems')
   ];
 
   return (
@@ -209,7 +209,7 @@ export default function CouponForm() {
           </svg>
         </Link>
         <h1 className="text-2xl font-bold text-gray-900">
-          {isEdit ? t('autoGen.admin.key356') : t('autoGen.admin.key357')}
+          {isEdit ? t('couponForm.editPromotion') : t('couponForm.addPromotion')}
         </h1>
       </div>
 
@@ -257,15 +257,15 @@ export default function CouponForm() {
         {/* Step 1: Basic Info */}
         {currentStep === 1 && (
           <div className="space-y-6 animate-fadeIn">
-            <h2 className="text-xl font-bold text-gray-900 mb-6">{t('autoGen.admin.key358')}</h2>
+            <h2 className="text-xl font-bold text-gray-900 mb-6">{t('couponForm.basicAndTimeSettings')}</h2>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key359')}</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('couponForm.promoCode')}</label>
                 <input
                   value={code}
                   onChange={(e) => setCode(e.target.value.toUpperCase().replace(/\s/g, ''))}
-                  placeholder={isAutomatic ? t('autoGen.admin.key360') : "SAVE20"}
+                  placeholder={isAutomatic ? t('couponForm.autoGenerateIfEmpty') : "SAVE20"}
                   required={!isAutomatic}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none font-mono"
                 />
@@ -278,7 +278,7 @@ export default function CouponForm() {
                     onChange={(e) => setIsActive(e.target.checked)}
                     className="rounded border-gray-300 w-4 h-4 text-primary-600 focus:ring-primary-500"
                   />
-                  <span className="text-sm font-medium text-gray-700">{t('autoGen.admin.key361')}</span>
+                  <span className="text-sm font-medium text-gray-700">{t('couponForm.isActive')}</span>
                 </label>
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
@@ -287,14 +287,14 @@ export default function CouponForm() {
                     onChange={(e) => setIsAutomatic(e.target.checked)}
                     className="rounded border-gray-300 w-4 h-4 text-primary-600 focus:ring-primary-500"
                   />
-                  <span className="text-sm font-bold text-indigo-700">{t('autoGen.admin.key362')}</span>
+                  <span className="text-sm font-bold text-indigo-700">{t('couponForm.autoApplyDiscount')}</span>
                 </label>
               </div>
             </div>
 
             <div className="border-t border-gray-100 pt-6 mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key363')}</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('couponForm.startDate')}</label>
                 <input
                   type="date"
                   value={startsAt}
@@ -303,7 +303,7 @@ export default function CouponForm() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key364')}</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('couponForm.endDate')}</label>
                 <input
                   type="date"
                   value={expiresAt}
@@ -315,7 +315,7 @@ export default function CouponForm() {
 
             <div className="border-t border-gray-100 pt-6 mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key365')}</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('couponForm.maxUsagePerCustomer')}</label>
                 <div className="flex items-center gap-3">
                   <input
                     type="number"
@@ -336,12 +336,12 @@ export default function CouponForm() {
                       }}
                       className="rounded border-gray-300 w-4 h-4 text-primary-600 focus:ring-primary-500"
                     />
-                    <span className="text-sm font-medium text-gray-700">{t('autoGen.admin.key366')}</span>
+                    <span className="text-sm font-medium text-gray-700">{t('couponForm.unlimitedUsage')}</span>
                   </label>
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key367')}</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('couponForm.maxTotalUsage')}</label>
                 <div className="flex items-center gap-3">
                   <input
                     type="number"
@@ -361,7 +361,7 @@ export default function CouponForm() {
                       }}
                       className="rounded border-gray-300 w-4 h-4 text-primary-600 focus:ring-primary-500"
                     />
-                    <span className="text-sm font-medium text-gray-700">{t('autoGen.admin.key368')}</span>
+                    <span className="text-sm font-medium text-gray-700">{t('couponForm.unlimitedTimes')}</span>
                   </label>
                 </div>
               </div>
@@ -372,34 +372,34 @@ export default function CouponForm() {
         {/* Step 2: Thresholds */}
         {currentStep === 2 && (
           <div className="space-y-6 animate-fadeIn">
-            <h2 className="text-xl font-bold text-gray-900 mb-2">{t('autoGen.admin.key369')}</h2>
-            <p className="text-sm text-gray-500 mb-6">{t('autoGen.admin.key370')}</p>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">{t('couponForm.triggerThresholds')}</h2>
+            <p className="text-sm text-gray-500 mb-6">{t('couponForm.thresholdRequirementDescription')}</p>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="bg-gray-50 p-5 rounded-xl border border-gray-200">
-                <label className="block text-sm font-bold text-gray-800 mb-2">{t('autoGen.admin.key371')}</label>
+                <label className="block text-sm font-bold text-gray-800 mb-2">{t('couponForm.minSpendAmount')}</label>
                 <input
                   type="number"
                   step="0.01"
                   min="0"
                   value={minOrder}
                   onChange={(e) => setMinOrder(parseFloat(e.target.value) || 0)}
-                  placeholder={t('autoGen.admin.key372')}
+                  placeholder={t('couponForm.zeroForNoLimit')}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:ring-2 focus:ring-primary-500 outline-none bg-white shadow-sm"
                 />
-                <p className="text-xs text-gray-500 mt-2">{t('autoGen.admin.key373')}</p>
+                <p className="text-xs text-gray-500 mt-2">{t('couponForm.minSpendExample')}</p>
               </div>
               <div className="bg-gray-50 p-5 rounded-xl border border-gray-200">
-                <label className="block text-sm font-bold text-gray-800 mb-2">{t('autoGen.admin.key374')}</label>
+                <label className="block text-sm font-bold text-gray-800 mb-2">{t('couponForm.minPurchaseQuantity')}</label>
                 <input
                   type="number"
                   min="0"
                   value={minItemCount}
                   onChange={(e) => setMinItemCount(parseInt(e.target.value) || 0)}
-                  placeholder={t('autoGen.admin.key375')}
+                  placeholder={t('couponForm.zeroForNoQuantityLimit')}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:ring-2 focus:ring-primary-500 outline-none bg-white shadow-sm"
                 />
-                <p className="text-xs text-gray-500 mt-2">{t('autoGen.admin.key376')}</p>
+                <p className="text-xs text-gray-500 mt-2">{t('couponForm.minQuantityExample')}</p>
               </div>
             </div>
           </div>
@@ -408,20 +408,20 @@ export default function CouponForm() {
         {/* Step 3: Discount Method */}
         {currentStep === 3 && (
           <div className="space-y-6 animate-fadeIn">
-            <h2 className="text-xl font-bold text-gray-900 mb-2">{t('autoGen.admin.key377')}</h2>
-            <p className="text-sm text-gray-500 mb-6">{t('autoGen.admin.key378')}</p>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">{t('couponForm.discountSetup')}</h2>
+            <p className="text-sm text-gray-500 mb-6">{t('couponForm.discountSetupDescription')}</p>
             
             <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">{t('autoGen.admin.key379')}</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t('couponForm.discountType')}</label>
               <select
                 value={type}
                 onChange={(e) => setType(e.target.value)}
                 className="w-full md:w-1/2 px-4 py-3 border border-gray-300 rounded-xl text-base focus:ring-2 focus:ring-primary-500 outline-none shadow-sm font-medium text-gray-800"
               >
-                <option value="PERCENTAGE">{t('autoGen.admin.key380')}</option>
-                <option value="FIXED">{t('autoGen.admin.key381')}</option>
-                <option value="BOGO">{t('autoGen.admin.key382')}</option>
-                <option value="FREE_DELIVERY">{t('autoGen.admin.key383')}</option>
+                <option value="PERCENTAGE">{t('couponForm.percentageOff')}</option>
+                <option value="FIXED">{t('couponForm.fixedAmountOff')}</option>
+                <option value="BOGO">{t('couponForm.buyXGetY')}</option>
+                <option value="FREE_DELIVERY">{t('couponForm.freeDelivery')}</option>
               </select>
             </div>
 
@@ -430,7 +430,7 @@ export default function CouponForm() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-green-50 rounded-xl border border-green-100">
                 <div>
                   <label className="block text-sm font-bold text-green-900 mb-2">
-                    {t('autoGen.admin.key384')} {type === 'PERCENTAGE' ? '(%)' : '($)'}
+                    {t('couponForm.discountValue')} {type === 'PERCENTAGE' ? '(%)' : '($)'}
                   </label>
                   <input
                     type="number"
@@ -440,18 +440,18 @@ export default function CouponForm() {
                     onChange={(e) => setValue(parseFloat(e.target.value) || 0)}
                     className="w-full px-4 py-3 border border-green-200 rounded-lg text-base focus:ring-2 focus:ring-green-500 outline-none"
                   />
-                  {type === 'PERCENTAGE' && <p className="text-xs text-green-700 mt-2">{t('autoGen.admin.key385')}</p>}
+                  {type === 'PERCENTAGE' && <p className="text-xs text-green-700 mt-2">{t('couponForm.discountValueExample')}</p>}
                 </div>
                 {type === 'PERCENTAGE' && (
                   <div>
-                    <label className="block text-sm font-bold text-green-900 mb-2">{t('autoGen.admin.key386')}</label>
+                    <label className="block text-sm font-bold text-green-900 mb-2">{t('couponForm.maxDiscountAmount')}</label>
                     <input
                       type="number"
                       step="0.01"
                       min="0"
                       value={maxDiscount}
                       onChange={(e) => setMaxDiscount(e.target.value)}
-                      placeholder={t('autoGen.admin.key387')}
+                      placeholder={t('couponForm.noLimit')}
                       className="w-full px-4 py-3 border border-green-200 rounded-lg text-base focus:ring-2 focus:ring-green-500 outline-none"
                     />
                   </div>
@@ -463,7 +463,7 @@ export default function CouponForm() {
             {type === 'BOGO' && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-blue-50 rounded-xl border border-blue-100">
                 <div>
-                  <label className="block text-sm font-bold text-blue-900 mb-2">{t('autoGen.admin.key388')}</label>
+                  <label className="block text-sm font-bold text-blue-900 mb-2">{t('couponForm.getNItems')}</label>
                   <input
                     type="number"
                     min="1"
@@ -471,25 +471,25 @@ export default function CouponForm() {
                     onChange={(e) => setGetQuantity(parseInt(e.target.value) || 1)}
                     className="w-full px-4 py-3 border border-blue-200 rounded-lg text-base focus:ring-2 focus:ring-blue-500 outline-none"
                   />
-                  <p className="text-xs text-blue-700 mt-2">{t('autoGen.admin.key389')}</p>
+                  <p className="text-xs text-blue-700 mt-2">{t('couponForm.getNItemsDescription')}</p>
                 </div>
                 
                 <div className="grid grid-cols-1 gap-4">
                   <div>
-                    <label className="block text-sm font-bold text-blue-900 mb-2">{t('autoGen.admin.key390')}</label>
+                    <label className="block text-sm font-bold text-blue-900 mb-2">{t('couponForm.giftDiscountMethod')}</label>
                     <select
                       value={getDiscountType}
                       onChange={(e) => setGetDiscountType(e.target.value as any)}
                       className="w-full px-4 py-3 border border-blue-200 rounded-lg text-base focus:ring-2 focus:ring-blue-500 outline-none"
                     >
-                      <option value="FREE">{t('autoGen.admin.key391')}</option>
-                      <option value="PERCENTAGE">{t('autoGen.admin.key392')}</option>
-                      <option value="FIXED">{t('autoGen.admin.key393')}</option>
+                      <option value="FREE">{t('couponForm.freeGift')}</option>
+                      <option value="PERCENTAGE">{t('couponForm.secondItemDiscount')}</option>
+                      <option value="FIXED">{t('couponForm.secondItemFixedPrice')}</option>
                     </select>
                   </div>
                   {getDiscountType !== 'FREE' && (
                     <div>
-                      <label className="block text-sm font-bold text-blue-900 mb-2">{t('autoGen.admin.key394')}</label>
+                      <label className="block text-sm font-bold text-blue-900 mb-2">{t('couponForm.value')}</label>
                       <input
                         type="number"
                         min="0"
@@ -509,12 +509,12 @@ export default function CouponForm() {
         {/* Step 4: Applicable Items */}
         {currentStep === 4 && (
           <div className="space-y-6 animate-fadeIn">
-            <h2 className="text-xl font-bold text-gray-900 mb-2">{t('autoGen.admin.key395')}</h2>
-            <p className="text-sm text-gray-500 mb-6">{t('autoGen.admin.key396')}</p>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">{t('couponForm.applicableItemsSetup')}</h2>
+            <p className="text-sm text-gray-500 mb-6">{t('couponForm.applicableItemsDescription')}</p>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="bg-gray-50 p-5 rounded-xl border border-gray-200">
-                <label className="block text-sm font-bold text-gray-800 mb-3">{t('autoGen.admin.key397')}</label>
+                <label className="block text-sm font-bold text-gray-800 mb-3">{t('couponForm.selectApplicableCategories')}</label>
                 <div className="h-64 overflow-y-auto space-y-2 pr-2 custom-scrollbar">
                   {categories.map((cat) => (
                     <label key={cat.id} className="flex items-center gap-3 p-2 hover:bg-gray-100 rounded-lg cursor-pointer transition-colors border border-transparent hover:border-gray-200">
@@ -531,11 +531,11 @@ export default function CouponForm() {
                     </label>
                   ))}
                 </div>
-                <p className="text-xs text-gray-500 mt-3 font-medium bg-white p-2 rounded border border-gray-100">{t('autoGen.admin.key398')}</p>
+                <p className="text-xs text-gray-500 mt-3 font-medium bg-white p-2 rounded border border-gray-100">{t('couponForm.allItemsApplyIfEmpty')}</p>
               </div>
 
               <div className="bg-gray-50 p-5 rounded-xl border border-gray-200">
-                <label className="block text-sm font-bold text-gray-800 mb-3">{t('autoGen.admin.key399')}</label>
+                <label className="block text-sm font-bold text-gray-800 mb-3">{t('couponForm.selectApplicableItems')}</label>
                 <div className="h-64 overflow-y-auto space-y-2 pr-2 custom-scrollbar">
                   {menuItems.map((item) => (
                     <label key={item.id} className="flex items-center gap-3 p-2 hover:bg-gray-100 rounded-lg cursor-pointer transition-colors border border-transparent hover:border-gray-200">
@@ -559,7 +559,7 @@ export default function CouponForm() {
             {type === 'BOGO' && (
               <div className="mt-8 p-6 bg-blue-50 border border-blue-200 rounded-xl">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-bold text-blue-900">{t('autoGen.admin.key400')}</h3>
+                  <h3 className="text-lg font-bold text-blue-900">{t('couponForm.selectGiftGroup')}</h3>
                   <label className="flex items-center gap-2 cursor-pointer bg-white px-3 py-1.5 rounded-lg border border-blue-200 shadow-sm">
                     <input
                       type="checkbox"
@@ -567,14 +567,14 @@ export default function CouponForm() {
                       onChange={(e) => setIsGetGroupDifferent(e.target.checked)}
                       className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                     />
-                    <span className="text-sm font-bold text-blue-800">{t('autoGen.admin.key401')}</span>
+                    <span className="text-sm font-bold text-blue-800">{t('couponForm.giftDiffersFromItems')}</span>
                   </label>
                 </div>
 
                 {isGetGroupDifferent ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
                     <div className="bg-white p-4 rounded-lg border border-blue-100 shadow-sm">
-                      <label className="block text-sm font-bold text-gray-700 mb-2">{t('autoGen.admin.key402')}</label>
+                      <label className="block text-sm font-bold text-gray-700 mb-2">{t('couponForm.selectGiftCategories')}</label>
                       <div className="max-h-48 overflow-y-auto space-y-1 custom-scrollbar">
                         {categories.map((cat) => (
                           <label key={cat.id} className="flex items-center gap-2 text-sm text-gray-700 p-1.5 hover:bg-gray-50 rounded cursor-pointer">
@@ -593,7 +593,7 @@ export default function CouponForm() {
                       </div>
                     </div>
                     <div className="bg-white p-4 rounded-lg border border-blue-100 shadow-sm">
-                      <label className="block text-sm font-bold text-gray-700 mb-2">{t('autoGen.admin.key403')}</label>
+                      <label className="block text-sm font-bold text-gray-700 mb-2">{t('couponForm.selectGiftItem')}</label>
                       <div className="max-h-48 overflow-y-auto space-y-1 custom-scrollbar">
                         {menuItems.map((item) => (
                           <label key={item.id} className="flex items-center gap-2 text-sm text-gray-700 p-1.5 hover:bg-gray-50 rounded cursor-pointer">
@@ -613,7 +613,7 @@ export default function CouponForm() {
                     </div>
                   </div>
                 ) : (
-                  <p className="text-sm text-blue-700">{t('autoGen.admin.key404')}</p>
+                  <p className="text-sm text-blue-700">{t('couponForm.currentSettingGiftDiscount')}</p>
                 )}
               </div>
             )}
@@ -629,7 +629,7 @@ export default function CouponForm() {
           disabled={currentStep === 1 || saving}
           className="px-6 py-2.5 rounded-lg text-sm font-bold transition-colors disabled:opacity-50 border border-gray-300 text-gray-700 hover:bg-gray-50 bg-white shadow-sm"
         >
-          {t('autoGen.admin.key405')}
+          {t('couponForm.previousStep')}
         </button>
 
         <div className="flex gap-3">
@@ -637,7 +637,7 @@ export default function CouponForm() {
             to="/promotions"
             className="px-6 py-2.5 rounded-lg text-sm font-bold text-gray-500 hover:text-gray-700 transition-colors"
           >
-            {t('autoGen.admin.key406')}
+            {t('couponForm.cancel')}
           </Link>
           
           {currentStep < totalSteps ? (
@@ -646,7 +646,7 @@ export default function CouponForm() {
               onClick={nextStep}
               className="px-8 py-2.5 rounded-lg text-sm font-bold transition-colors bg-primary-600 text-white hover:bg-primary-700 shadow-sm"
             >
-              {t('autoGen.admin.key407')}
+              {t('couponForm.nextStep')}
             </button>
           ) : (
             <button
@@ -655,7 +655,7 @@ export default function CouponForm() {
               className="px-8 py-2.5 rounded-lg text-sm font-bold transition-colors bg-green-600 text-white hover:bg-green-700 shadow-sm disabled:opacity-50 flex items-center gap-2"
             >
               {saving && <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />}
-              {saving ? t('autoGen.admin.key408') : isEdit ? t('autoGen.admin.key409') : t('autoGen.admin.key410')}
+              {saving ? t('couponForm.saving') : isEdit ? t('couponForm.updatePromotion') : t('couponForm.createPromotion')}
             </button>
           )}
         </div>

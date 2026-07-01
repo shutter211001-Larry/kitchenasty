@@ -121,7 +121,7 @@ export default function StaffList() {
 
       {loading && (
         <div className="flex justify-center py-12">
-          <div className="w-8 h-8 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin" role="status" aria-label={t('autoGen.admin.key1548')} />
+          <div className="w-8 h-8 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin" role="status" aria-label={t('staffList.loading')} />
         </div>
       )}
 
@@ -169,7 +169,7 @@ export default function StaffList() {
                               ? 'bg-green-100 text-green-700'
                               : 'bg-gray-100 text-gray-500'
                           }`}
-                        aria-label={`${member.isActive ? t('autoGen.admin.key1549') : t('autoGen.admin.key1550')} ${member.name}`}
+                        aria-label={`${member.isActive ? t('staffList.disable') : t('staffList.enable')} ${member.name}`}
                       >
                         {member.isActive ? t('staff.isActive') : t('staff.isInactive')}
                       </button>
@@ -195,17 +195,17 @@ export default function StaffList() {
                 onClick={() => setPage((p) => p - 1)}
                 className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg disabled:opacity-40 hover:bg-gray-50"
               >
-                {t('autoGen.admin.key1551')}
+                {t('staffList.previousPage')}
               </button>
               <span className="text-sm text-gray-600">
-                {t('autoGen.admin.key1552')} {pagination.page} {t('autoGen.admin.key1553')} {pagination.totalPages} {t('autoGen.admin.key1554')}
+                {t('staffList.pagePrefix')} {pagination.page} {t('staffList.pageOfTotal')} {pagination.totalPages} {t('staffList.page')}
               </span>
               <button
                 disabled={page >= pagination.totalPages}
                 onClick={() => setPage((p) => p + 1)}
                 className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg disabled:opacity-40 hover:bg-gray-50"
               >
-                {t('autoGen.admin.key1555')}
+                {t('staffList.nextPage')}
               </button>
             </div>
           )}
