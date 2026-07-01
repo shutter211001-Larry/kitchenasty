@@ -1,9 +1,12 @@
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import LanguageSwitcher from '../../components/LanguageSwitcher.js';
 import { useHeaderProps } from './useHeaderProps.js';
 
 export default function RetroHeader() {
   const { t, user, logout, itemCount, openCart, settings, navLinks, isActive, mobileOpen, setMobileOpen , isLoading, recentOrders } = useHeaderProps();
+
+  const { t } = useTranslation();
 
   return (
     <header className="bg-amber-100 dark:bg-gray-900 border-b-4 border-primary-600 sticky top-0 z-50">

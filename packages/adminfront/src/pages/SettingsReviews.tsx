@@ -1,7 +1,10 @@
+import { useTranslation } from 'react-i18next';
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
 export default function SettingsReviews() {
+  const { t } = useTranslation();
+
   const token = localStorage.getItem('token') || '';
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -41,29 +44,29 @@ export default function SettingsReviews() {
       });
       const data = await res.json();
       if (data.success) {
-        setSuccess('評價設定已更新');
+        setSuccess(t('autoGen.admin.key1532'));
         setTimeout(() => setSuccess(''), 3000);
       } else {
-        setError(typeof data.error === 'string' ? data.error : '儲存失敗');
+        setError(typeof data.error === 'string' ? data.error : t('autoGen.admin.key1533'));
       }
     } catch {
-      setError('網路連線錯誤');
+      setError(t('autoGen.admin.key1534'));
     } finally {
       setSaving(false);
     }
   }
 
-  if (loading) return <div className="p-6 text-gray-500">載入中...</div>;
+  if (loading) return <div className="p-6 text-gray-500">{t('autoGen.admin.key1535')}</div>;
 
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <Link to="/settings" className="text-sm text-primary-600 hover:text-primary-700">&larr; 返回設定</Link>
-          <h1 className="text-2xl font-bold text-gray-900 mt-1">評價設定</h1>
+          <Link to="/settings" className="text-sm text-primary-600 hover:text-primary-700">{t('autoGen.admin.key1536')}</Link>
+          <h1 className="text-2xl font-bold text-gray-900 mt-1">{t('autoGen.admin.key1537')}</h1>
         </div>
         <button onClick={handleSave} disabled={saving} className="px-6 py-2 bg-primary-600 text-white rounded-lg font-bold hover:bg-primary-700 transition-colors shadow-sm disabled:opacity-50">
-          {saving ? '儲存中...' : '儲存變更'}
+          {saving ? t('autoGen.admin.key1538') : t('autoGen.admin.key1539')}
         </button>
       </div>
 
@@ -73,23 +76,23 @@ export default function SettingsReviews() {
       <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-6">
         <label className="flex items-center gap-3 cursor-pointer">
           <input type="checkbox" checked={enabled} onChange={(e) => setEnabled(e.target.checked)} className="w-4 h-4 text-primary-600 rounded" />
-          <span className="text-sm font-medium text-gray-700">啟用顧客評價功能</span>
+          <span className="text-sm font-medium text-gray-700">{t('autoGen.admin.key1540')}</span>
         </label>
 
         <label className="flex items-center gap-3 cursor-pointer">
           <input type="checkbox" checked={requireOrder} onChange={(e) => setRequireOrder(e.target.checked)} className="w-4 h-4 text-primary-600 rounded" />
-          <span className="text-sm font-medium text-gray-700">僅限完成訂單的顧客可留言</span>
+          <span className="text-sm font-medium text-gray-700">{t('autoGen.admin.key1541')}</span>
         </label>
 
         <label className="flex items-center gap-3 cursor-pointer">
           <input type="checkbox" checked={autoApprove} onChange={(e) => setAutoApprove(e.target.checked)} className="w-4 h-4 text-primary-600 rounded" />
-          <span className="text-sm font-medium text-gray-700">自動核准新評價 (不需人工審核即可顯示)</span>
+          <span className="text-sm font-medium text-gray-700">{t('autoGen.admin.key1542')}</span>
         </label>
 
         <div className="pt-2">
-          <label className="block text-sm font-medium text-gray-700 mb-1">最低可留言星等 (1-5)</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key1543')}</label>
           <input type="number" min={1} max={5} value={minimumRating} onChange={(e) => setMinimumRating(parseInt(e.target.value) || 1)} className="w-full max-w-xs px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500" />
-          <p className="mt-1 text-xs text-gray-500">限制顧客必須給予幾顆星以上才能提交評論</p>
+          <p className="mt-1 text-xs text-gray-500">{t('autoGen.admin.key1544')}</p>
         </div>
       </div>
 
@@ -99,7 +102,7 @@ export default function SettingsReviews() {
           disabled={saving}
           className="px-10 py-3 bg-primary-600 text-white rounded-xl font-bold hover:bg-primary-700 transition-all shadow-lg disabled:opacity-50"
         >
-          {saving ? '儲存中...' : '儲存所有變更'}
+          {saving ? t('autoGen.admin.key1545') : t('autoGen.admin.key1546')}
         </button>
       </div>
     </div>

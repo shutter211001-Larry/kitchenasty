@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../lib/api.js';
@@ -49,7 +50,7 @@ export default function SettingsFranchise() {
           return {
             id: loc.id,
             name: loc.name,
-            owner: loc.owner || '未指派',
+            owner: loc.owner || t('autoGen.admin.key1209'),
             status: loc.isActive ? 'active' : 'suspended',
             royaltyRate: loc.royaltyRate !== undefined && loc.royaltyRate !== null ? loc.royaltyRate : 5.0,
             apiEndpoint: loc.apiEndpoint || `https://${loc.slug}.shutterorder.tw/api/v1`,
@@ -72,10 +73,10 @@ export default function SettingsFranchise() {
   useEffect(() => {
     if (stores.length === 0) return;
     const mockIngredients = [
-      { name: '莫札瑞拉起司 (Mozzarella)', min: 15.0, current: 4.2, status: 'critical', suggested: 20.0 },
-      { name: '美式臘腸片 (Pepperoni)', min: 8.0, current: 3.1, status: 'critical', suggested: 10.0 },
-      { name: '高筋小麥麵粉 (High-Protein Flour)', min: 50.0, current: 22.0, status: 'warning', suggested: 60.0 },
-      { name: '秘製番茄披薩醬 (Tomato Sauce)', min: 20.0, current: 12.5, status: 'warning', suggested: 15.0 },
+      { name: t('autoGen.admin.key1210'), min: 15.0, current: 4.2, status: 'critical', suggested: 20.0 },
+      { name: t('autoGen.admin.key1211'), min: 8.0, current: 3.1, status: 'critical', suggested: 10.0 },
+      { name: t('autoGen.admin.key1212'), min: 50.0, current: 22.0, status: 'warning', suggested: 60.0 },
+      { name: t('autoGen.admin.key1213'), min: 20.0, current: 12.5, status: 'warning', suggested: 15.0 },
     ];
 
     const newWarnings: IngredientWarning[] = [];
@@ -100,6 +101,8 @@ export default function SettingsFranchise() {
   const [editStore, setEditStore] = useState<Partial<FranchiseStore>>({});
 
   const startEdit = (store: FranchiseStore) => {
+  const { t } = useTranslation();
+
     setEditStore(store);
     setIsEditing(true);
   };
@@ -110,7 +113,7 @@ export default function SettingsFranchise() {
 
   const handleSaveStore = async () => {
     if (!editStore.name || !editStore.owner) {
-      alert('請填寫完整分店名稱與加盟主姓名！');
+      alert(t('autoGen.admin.key1214'));
       return;
     }
     
@@ -148,7 +151,7 @@ export default function SettingsFranchise() {
       } : s));
       
       setIsEditing(false);
-      setSuccess('✓ 加盟分店合約資料與實體分店已成功同步！');
+      setSuccess(t('autoGen.admin.key1215'));
       setTimeout(() => setSuccess(''), 3000);
     } catch (err: any) {
       alert(`同步更新失敗: ${err.message}`);
@@ -185,7 +188,7 @@ export default function SettingsFranchise() {
       setDiagnosticLogs(prev => [...prev, `[${new Date().toLocaleTimeString()}] ${msg}`]);
     };
 
-    addLog('🚀 啟動連鎖加盟分店 API 健康診斷監控引擎...');
+    addLog(t('autoGen.admin.key1216'));
     await new Promise(r => setTimeout(r, 600));
 
     addLog(`🔍 正在解析 ${stores.length} 家加盟店之遠端資料庫與 API 連線點...`);
@@ -211,7 +214,7 @@ export default function SettingsFranchise() {
     }
 
     await new Promise(r => setTimeout(r, 400));
-    addLog('🏁 健康檢測完成！100% 診斷完畢。');
+    addLog(t('autoGen.admin.key1217'));
     setIsDiagnosing(false);
   };
 
@@ -223,7 +226,7 @@ export default function SettingsFranchise() {
     return (
       <div className="max-w-6xl mx-auto px-4 py-12 flex flex-col items-center justify-center min-h-[400px]">
         <div className="w-10 h-10 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin mb-4" />
-        <p className="text-gray-500 font-bold text-sm">載入加盟分店與實體合約資料中...</p>
+        <p className="text-gray-500 font-bold text-sm">{t('autoGen.admin.key1218')}</p>
       </div>
     );
   }
@@ -234,10 +237,10 @@ export default function SettingsFranchise() {
       <div className="flex items-center justify-between mb-6 border-b border-gray-100 pb-4">
         <div>
           <Link to="/settings" className="text-xs font-semibold text-primary-600 hover:text-primary-700 transition-colors flex items-center gap-1.5 mb-1">
-            <span>&larr;</span> 返回系統設定
+            <span>&larr;</span> {t('autoGen.admin.key1219')}
           </Link>
           <h1 className="text-2xl font-black text-gray-900 tracking-tight flex items-center gap-2">
-            🏢 連鎖加盟總部與分店管理
+            {t('autoGen.admin.key1220')}
             <span className="bg-primary-50 text-primary-700 text-[10px] font-black uppercase px-2 py-0.5 rounded-full border border-primary-100">HQ Control</span>
           </h1>
         </div>
@@ -247,7 +250,7 @@ export default function SettingsFranchise() {
             onClick={startCreate}
             className="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-xs font-black rounded-xl shadow-lg shadow-primary-200 transition-all active:scale-95 cursor-pointer"
           >
-            + 新增加盟分店
+            {t('autoGen.admin.key1221')}
           </button>
         )}
       </div>
@@ -261,9 +264,9 @@ export default function SettingsFranchise() {
       {/* Tabs Layout */}
       <div className="flex border-b border-gray-200 mb-8 space-x-8">
         {[
-          { id: 'stores', label: '🏬 加盟分店合約與資訊' },
-          { id: 'diagnostics', label: '📡 API 連線與遠端診斷' },
-          { id: 'inventory', label: '⚖️ 加盟店原料預警監控' }
+          { id: 'stores', label: t('autoGen.admin.key1222') },
+          { id: 'diagnostics', label: t('autoGen.admin.key1223') },
+          { id: 'inventory', label: t('autoGen.admin.key1224') }
         ].map(tab => (
           <button
             key={tab.id}
@@ -285,34 +288,34 @@ export default function SettingsFranchise() {
           {isEditing ? (
             <div className="bg-white border border-gray-200 rounded-3xl p-6 shadow-sm animate-fade-in">
               <h2 className="text-base font-black text-gray-900 mb-6 flex items-center gap-1.5 pb-3 border-b border-gray-100">
-                ✏️ {editStore.id?.includes('store-') && isNaN(Number(editStore.id?.split('-')[1])) ? '建立全新加盟店合約' : '編輯分店合約與設定'}
+                ✏️ {editStore.id?.includes('store-') && isNaN(Number(editStore.id?.split('-')[1])) ? t('autoGen.admin.key1225') : t('autoGen.admin.key1226')}
               </h2>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-[10px] font-black uppercase tracking-wider text-gray-500 mb-1.5">分店名稱</label>
+                  <label className="block text-[10px] font-black uppercase tracking-wider text-gray-500 mb-1.5">{t('autoGen.admin.key1227')}</label>
                   <input
                     type="text"
                     className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl font-bold text-xs outline-none focus:ring-4 focus:ring-primary-100 focus:bg-white transition-all"
-                    placeholder="例如: 台南南紡購物店"
+                    placeholder={t('autoGen.admin.key1228')}
                     value={editStore.name || ''}
                     onChange={e => setEditStore({ ...editStore, name: e.target.value })}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-black uppercase tracking-wider text-gray-500 mb-1.5">加盟業主姓名</label>
+                  <label className="block text-[10px] font-black uppercase tracking-wider text-gray-500 mb-1.5">{t('autoGen.admin.key1229')}</label>
                   <input
                     type="text"
                     className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl font-bold text-xs outline-none focus:ring-4 focus:ring-primary-100 focus:bg-white transition-all"
-                    placeholder="例如: 李小飛"
+                    placeholder={t('autoGen.admin.key1230')}
                     value={editStore.owner || ''}
                     onChange={e => setEditStore({ ...editStore, owner: e.target.value })}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-black uppercase tracking-wider text-gray-500 mb-1.5">遠端 ERP API 端點 URL</label>
+                  <label className="block text-[10px] font-black uppercase tracking-wider text-gray-500 mb-1.5">{t('autoGen.admin.key1231')}</label>
                   <input
                     type="text"
                     className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl font-bold text-xs outline-none focus:ring-4 focus:ring-primary-100 focus:bg-white transition-all font-mono"
@@ -323,7 +326,7 @@ export default function SettingsFranchise() {
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-black uppercase tracking-wider text-gray-500 mb-1.5">總部抽成比率 (Royalty Rate %)</label>
+                  <label className="block text-[10px] font-black uppercase tracking-wider text-gray-500 mb-1.5">{t('autoGen.admin.key1232')}</label>
                   <input
                     type="number"
                     step="0.1"
@@ -335,7 +338,7 @@ export default function SettingsFranchise() {
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-black uppercase tracking-wider text-gray-500 mb-1.5">合約起始日期</label>
+                  <label className="block text-[10px] font-black uppercase tracking-wider text-gray-500 mb-1.5">{t('autoGen.admin.key1233')}</label>
                   <input
                     type="date"
                     className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl font-bold text-xs outline-none focus:ring-4 focus:ring-primary-100 focus:bg-white transition-all"
@@ -345,7 +348,7 @@ export default function SettingsFranchise() {
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-black uppercase tracking-wider text-gray-500 mb-1.5">合約結束日期</label>
+                  <label className="block text-[10px] font-black uppercase tracking-wider text-gray-500 mb-1.5">{t('autoGen.admin.key1234')}</label>
                   <input
                     type="date"
                     className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl font-bold text-xs outline-none focus:ring-4 focus:ring-primary-100 focus:bg-white transition-all"
@@ -355,15 +358,15 @@ export default function SettingsFranchise() {
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-black uppercase tracking-wider text-gray-500 mb-1.5">合約授權狀態</label>
+                  <label className="block text-[10px] font-black uppercase tracking-wider text-gray-500 mb-1.5">{t('autoGen.admin.key1235')}</label>
                   <select
                     className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl font-bold text-xs outline-none focus:ring-4 focus:ring-primary-100 focus:bg-white transition-all"
                     value={editStore.status}
                     onChange={e => setEditStore({ ...editStore, status: e.target.value as any })}
                   >
-                    <option value="active">🟢 營運授權中 (Active)</option>
-                    <option value="suspended">🟡 暫時停權中 (Suspended)</option>
-                    <option value="expired">🔴 合約已到期 (Expired)</option>
+                    <option value="active">{t('autoGen.admin.key1236')}</option>
+                    <option value="suspended">{t('autoGen.admin.key1237')}</option>
+                    <option value="expired">{t('autoGen.admin.key1238')}</option>
                   </select>
                 </div>
               </div>
@@ -374,14 +377,14 @@ export default function SettingsFranchise() {
                   onClick={() => setIsEditing(false)}
                   className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold rounded-xl transition-all cursor-pointer"
                 >
-                  取消變更
+                  {t('autoGen.admin.key1239')}
                 </button>
                 <button
                   type="button"
                   onClick={handleSaveStore}
                   className="px-6 py-2 bg-primary-600 hover:bg-primary-700 text-white text-xs font-black rounded-xl shadow-md transition-all cursor-pointer"
                 >
-                  儲存合約
+                  {t('autoGen.admin.key1240')}
                 </button>
               </div>
             </div>
@@ -392,29 +395,29 @@ export default function SettingsFranchise() {
                   <div className="flex justify-between items-start mb-4">
                     <div>
                       <h3 className="text-base font-black text-gray-900 tracking-tight">{store.name}</h3>
-                      <p className="text-[10px] text-gray-500 font-semibold mt-0.5">加盟業主: {store.owner}</p>
+                      <p className="text-[10px] text-gray-500 font-semibold mt-0.5">{t('autoGen.admin.key1241')} {store.owner}</p>
                     </div>
                     <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full border ${
                       store.status === 'active' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
                       store.status === 'suspended' ? 'bg-amber-50 text-amber-700 border-amber-100' :
                       'bg-red-50 text-red-700 border-red-100'
                     }`}>
-                      {store.status === 'active' ? '授權營運中' :
-                       store.status === 'suspended' ? '暫時停權中' : '合約已到期'}
+                      {store.status === 'active' ? t('autoGen.admin.key1242') :
+                       store.status === 'suspended' ? t('autoGen.admin.key1243') : t('autoGen.admin.key1244')}
                     </span>
                   </div>
 
                   <div className="space-y-2.5 bg-gray-50/50 p-3.5 rounded-2xl border border-gray-100 text-[11px] font-bold text-gray-700">
                     <div className="flex justify-between">
-                      <span className="text-gray-400 font-semibold">API 端點:</span>
+                      <span className="text-gray-400 font-semibold">{t('autoGen.admin.key1245')}</span>
                       <span className="font-mono text-gray-800 text-[10px] truncate max-w-[200px]">{store.apiEndpoint}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-400 font-semibold">總部抽成比:</span>
-                      <span className="text-gray-800">{store.royaltyRate}% 營業額</span>
+                      <span className="text-gray-400 font-semibold">{t('autoGen.admin.key1246')}</span>
+                      <span className="text-gray-800">{store.royaltyRate}{t('autoGen.admin.key1247')}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-400 font-semibold">合約期限:</span>
+                      <span className="text-gray-400 font-semibold">{t('autoGen.admin.key1248')}</span>
                       <span className="text-gray-800">{store.contractStart} ~ {store.contractEnd}</span>
                     </div>
                   </div>
@@ -424,7 +427,7 @@ export default function SettingsFranchise() {
                       onClick={() => startEdit(store)}
                       className="px-3.5 py-1.5 bg-gray-50 hover:bg-gray-100 text-gray-700 text-[10px] font-black rounded-lg border border-gray-200 transition-all cursor-pointer"
                     >
-                      ✏️ 編輯合約設定
+                      {t('autoGen.admin.key1249')}
                     </button>
                     <button
                       onClick={() => toggleStoreStatus(store)}
@@ -434,7 +437,7 @@ export default function SettingsFranchise() {
                           : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-emerald-200'
                       }`}
                     >
-                      {store.status === 'active' ? '⚠️ 暫停授權' : '🟢 啟用授權'}
+                      {store.status === 'active' ? t('autoGen.admin.key1250') : t('autoGen.admin.key1251')}
                     </button>
                   </div>
                 </div>
@@ -450,9 +453,9 @@ export default function SettingsFranchise() {
           <div className="bg-white border border-gray-200 rounded-3xl p-6 shadow-sm">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 pb-4 border-b border-gray-100">
               <div>
-                <h2 className="text-base font-black text-gray-900 tracking-tight">📡 遠端加盟分店 API 健康連線診斷面板</h2>
+                <h2 className="text-base font-black text-gray-900 tracking-tight">{t('autoGen.admin.key1252')}</h2>
                 <p className="text-[10px] text-gray-500 font-semibold mt-0.5">
-                  自動檢測各店 POS/ERP 端點的連線延遲、SSL 安全防護與資料同步健康度。
+                  {t('autoGen.admin.key1253')}
                 </p>
               </div>
               <button
@@ -463,11 +466,11 @@ export default function SettingsFranchise() {
                 {isDiagnosing ? (
                   <>
                     <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    <span>診斷掃描中...</span>
+                    <span>{t('autoGen.admin.key1254')}</span>
                   </>
                 ) : (
                   <>
-                    <span>🚀 開始一鍵健康連線診斷</span>
+                    <span>{t('autoGen.admin.key1255')}</span>
                   </>
                 )}
               </button>
@@ -511,7 +514,7 @@ export default function SettingsFranchise() {
 
                   <div className="flex items-center gap-6 self-end sm:self-auto text-xs font-bold">
                     <div className="text-right">
-                      <span className="text-[10px] text-gray-400 block font-semibold leading-none mb-0.5">網路延遲</span>
+                      <span className="text-[10px] text-gray-400 block font-semibold leading-none mb-0.5">{t('autoGen.admin.key1256')}</span>
                       <span className={`font-mono text-xs ${
                         store.ping === null ? 'text-gray-400' :
                         store.ping < 30 ? 'text-emerald-600' :
@@ -522,22 +525,22 @@ export default function SettingsFranchise() {
                     </div>
 
                     <div className="text-right">
-                      <span className="text-[10px] text-gray-400 block font-semibold leading-none mb-0.5">安全連線 (SSL)</span>
+                      <span className="text-[10px] text-gray-400 block font-semibold leading-none mb-0.5">{t('autoGen.admin.key1257')}</span>
                       <span className={store.health === 'error' ? 'text-red-500' : 'text-emerald-600'}>
-                        {store.health === 'error' ? '未授權/關閉' : '✓ 256-bit TLS'}
+                        {store.health === 'error' ? t('autoGen.admin.key1258') : '✓ 256-bit TLS'}
                       </span>
                     </div>
 
                     <div className="text-right">
-                      <span className="text-[10px] text-gray-400 block font-semibold leading-none mb-0.5">連線狀態</span>
+                      <span className="text-[10px] text-gray-400 block font-semibold leading-none mb-0.5">{t('autoGen.admin.key1259')}</span>
                       <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase ${
                         store.health === 'good' ? 'bg-emerald-50 text-emerald-700' :
                         store.health === 'warning' ? 'bg-amber-50 text-amber-700' :
                         store.health === 'error' ? 'bg-red-50 text-red-700' : 'bg-gray-100 text-gray-600'
                       }`}>
-                        {store.health === 'good' ? '正常 (Active)' :
-                         store.health === 'warning' ? '微幅波動' :
-                         store.health === 'error' ? '故障中斷' : '待診斷'}
+                        {store.health === 'good' ? t('autoGen.admin.key1260') :
+                         store.health === 'warning' ? t('autoGen.admin.key1261') :
+                         store.health === 'error' ? t('autoGen.admin.key1262') : t('autoGen.admin.key1263')}
                       </span>
                     </div>
                   </div>
@@ -549,11 +552,11 @@ export default function SettingsFranchise() {
           {/* Diagnostic Log Output */}
           <div className="bg-gray-900 rounded-3xl p-6 shadow-xl border border-gray-800 text-gray-200">
             <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-1.5">
-              📟 系統自動化連線診斷終端日誌 (Auto diagnostic outputs)
+              {t('autoGen.admin.key1264')}
             </h3>
             <div className="font-mono text-[10px] leading-relaxed p-4 bg-black/40 rounded-2xl border border-gray-800/80 max-h-48 overflow-y-auto space-y-1.5">
               {diagnosticLogs.length === 0 ? (
-                <span className="text-slate-500 italic block">點擊上方「開始一鍵健康連線診斷」即可輸出遠端日誌。</span>
+                <span className="text-slate-500 italic block">{t('autoGen.admin.key1265')}</span>
               ) : (
                 diagnosticLogs.map((log, idx) => (
                   <div key={idx} className={
@@ -575,9 +578,9 @@ export default function SettingsFranchise() {
         <div className="space-y-6">
           <div className="bg-white border border-gray-200 rounded-3xl p-6 shadow-sm">
             <div className="pb-4 border-b border-gray-100 mb-6">
-              <h2 className="text-base font-black text-gray-900 tracking-tight">⚖️ 加盟店預估庫存短缺預警看板</h2>
+              <h2 className="text-base font-black text-gray-900 tracking-tight">{t('autoGen.admin.key1266')}</h2>
               <p className="text-[10px] text-gray-500 font-semibold mt-0.5">
-                依據各加盟店每日回傳的訂單銷貨量（扣減食譜配方中對應原料重量），自動計算預估剩餘量。低於安全值即亮起警示紅燈。
+                {t('autoGen.admin.key1267')}
               </p>
             </div>
 
@@ -600,8 +603,8 @@ export default function SettingsFranchise() {
                           warning.status === 'warning' ? 'bg-amber-50 text-amber-700 border-amber-100' :
                           'bg-emerald-50 text-emerald-700 border-emerald-100'
                         }`}>
-                          {warning.status === 'critical' ? '❌ 極度短缺' :
-                           warning.status === 'warning' ? '⚠️ 低於安全水位' : '🟢 存量充沛'}
+                          {warning.status === 'critical' ? t('autoGen.admin.key1268') :
+                           warning.status === 'warning' ? t('autoGen.admin.key1269') : t('autoGen.admin.key1270')}
                         </span>
 
                         {warning.status !== 'normal' && (
@@ -609,7 +612,7 @@ export default function SettingsFranchise() {
                             onClick={() => triggerSupplierAlert(warning)}
                             className="px-3 py-1.5 bg-primary-600 hover:bg-primary-700 text-white text-[10px] font-black rounded-lg shadow-sm active:scale-95 transition-all cursor-pointer"
                           >
-                            🔔 發出叫貨通知
+                            {t('autoGen.admin.key1271')}
                           </button>
                         )}
                       </div>
@@ -618,8 +621,8 @@ export default function SettingsFranchise() {
                     {/* Progress Bar with Vibrant HSL/RGB colors */}
                     <div className="space-y-1.5">
                       <div className="flex justify-between text-[10px] font-bold text-gray-500">
-                        <span>預估剩餘存量: <strong className="text-gray-800">{warning.currentStock} kg</strong></span>
-                        <span>最低安全水位: <strong className="text-gray-600">{warning.minRequired} kg</strong></span>
+                        <span>{t('autoGen.admin.key1272')} <strong className="text-gray-800">{warning.currentStock} kg</strong></span>
+                        <span>{t('autoGen.admin.key1273')} <strong className="text-gray-600">{warning.minRequired} kg</strong></span>
                       </div>
                       <div className="w-full bg-gray-200/70 h-2.5 rounded-full overflow-hidden">
                         <div
@@ -632,11 +635,11 @@ export default function SettingsFranchise() {
                       </div>
                       <div className="flex justify-between items-center text-[9px] font-bold">
                         <span className={warning.status === 'critical' ? 'text-red-500 font-extrabold' : 'text-gray-400'}>
-                          存量比例: {percentage}%
+                          {t('autoGen.admin.key1274')} {percentage}%
                         </span>
                         {warning.suggestedOrder > 0 && (
                           <span className="text-primary-600">
-                            💡 建議總部配發量: {warning.suggestedOrder} kg
+                            {t('autoGen.admin.key1275')} {warning.suggestedOrder} kg
                           </span>
                         )}
                       </div>

@@ -66,7 +66,7 @@ export default function OrderList() {
         },
         body: JSON.stringify({ paymentStatus: nextStatus })
       });
-      if (!res.ok) throw new Error('更新結帳狀態失敗');
+      if (!res.ok) throw new Error(t('autoGen.admin.key1052'));
       setOrders(orders.map(o => o.id === id ? { ...o, paymentStatus: nextStatus } : o));
     } catch (err: any) {
       setError(err.message);
@@ -117,7 +117,7 @@ export default function OrderList() {
           method: 'DELETE',
           headers: { Authorization: `Bearer ${token}` },
         });
-        if (!res.ok) throw new Error('刪除失敗');
+        if (!res.ok) throw new Error(t('autoGen.admin.key1053'));
         setOrders(orders.filter(o => o.id !== id));
       } catch (err: any) {
         setError(err.message);
@@ -137,8 +137,8 @@ export default function OrderList() {
   }
 
   async function handleExport() {
-    const startDate = prompt('請輸入起始日期 (YYYY-MM-DD)', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
-    const endDate = prompt('請輸入結束日期 (YYYY-MM-DD)', new Date().toISOString().split('T')[0]);
+    const startDate = prompt(t('autoGen.admin.key1054'), new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
+    const endDate = prompt(t('autoGen.admin.key1055'), new Date().toISOString().split('T')[0]);
 
     if (!startDate || !endDate) return;
 
@@ -147,7 +147,7 @@ export default function OrderList() {
       const res = await fetch(`/api/orders/export?startDate=${startDate}&endDate=${endDate}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (!res.ok) throw new Error('匯出失敗');
+      if (!res.ok) throw new Error(t('autoGen.admin.key1056'));
       const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -192,7 +192,7 @@ export default function OrderList() {
       const res = await fetch('/api/orders/template', {
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (!res.ok) throw new Error('下載失敗');
+      if (!res.ok) throw new Error(t('autoGen.admin.key1057'));
       const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -238,7 +238,7 @@ export default function OrderList() {
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
-            + 新增訂單
+            {t('autoGen.admin.key1058')}
           </Link>
 
           {/* Secondary Actions on mobile: 2x2 Grid */}
@@ -251,7 +251,7 @@ export default function OrderList() {
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
-                匯出報表
+                {t('autoGen.admin.key1059')}
               </button>
             )}
             {canManage && (
@@ -259,7 +259,7 @@ export default function OrderList() {
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                 </svg>
-                匯入報表
+                {t('autoGen.admin.key1060')}
                 <input type="file" className="hidden" accept=".xlsx, .xls, .csv" onChange={handleImport} />
               </label>
             )}
@@ -268,14 +268,14 @@ export default function OrderList() {
                 onClick={handleDownloadTemplate}
                 className="text-primary-600 hover:text-primary-705 text-xs font-semibold py-2 px-4 rounded-lg bg-gray-100 hover:bg-gray-200 border border-gray-200 w-full sm:w-auto text-center sm:bg-transparent sm:border-none sm:p-0"
               >
-                下載範本
+                {t('autoGen.admin.key1061')}
               </button>
             )}
             <button
               onClick={handleCheckReminders}
               className="bg-orange-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-orange-600 transition-colors flex items-center justify-center gap-2 w-full sm:w-auto text-center"
             >
-              🔔 狀態提醒
+              {t('autoGen.admin.key1062')}
             </button>
           </div>
         </div>
@@ -287,33 +287,33 @@ export default function OrderList() {
           value={statusFilter}
           onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
           className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none"
-          aria-label="依狀態篩選"
+          aria-label={t('autoGen.admin.key1063')}
         >
-          <option value="">所有狀態</option>
-          <option value="PENDING">待處理 (Pending)</option>
-          <option value="CONFIRMED">已確認 (Confirmed)</option>
-          <option value="PREPARING">製作中 (Preparing)</option>
-          <option value="READY">可取餐 (Ready)</option>
-          <option value="OUT_FOR_DELIVERY">外送中 (Out for Delivery)</option>
-          <option value="DELIVERED">已送達 (Delivered)</option>
-          <option value="PICKED_UP">已取餐 (Picked Up)</option>
-          <option value="CANCELLED">已取消 (Cancelled)</option>
+          <option value="">{t('autoGen.admin.key1064')}</option>
+          <option value="PENDING">{t('autoGen.admin.key1065')}</option>
+          <option value="CONFIRMED">{t('autoGen.admin.key1066')}</option>
+          <option value="PREPARING">{t('autoGen.admin.key1067')}</option>
+          <option value="READY">{t('autoGen.admin.key1068')}</option>
+          <option value="OUT_FOR_DELIVERY">{t('autoGen.admin.key1069')}</option>
+          <option value="DELIVERED">{t('autoGen.admin.key1070')}</option>
+          <option value="PICKED_UP">{t('autoGen.admin.key1071')}</option>
+          <option value="CANCELLED">{t('autoGen.admin.key1072')}</option>
         </select>
         <select
           value={typeFilter}
           onChange={(e) => { setTypeFilter(e.target.value); setPage(1); }}
           className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none"
-          aria-label="依訂單類型篩選"
+          aria-label={t('autoGen.admin.key1073')}
         >
-          <option value="">所有類型</option>
-          <option value="DELIVERY">外送 (Delivery)</option>
-          <option value="PICKUP">自取 (Pickup)</option>
+          <option value="">{t('autoGen.admin.key1074')}</option>
+          <option value="DELIVERY">{t('autoGen.admin.key1075')}</option>
+          <option value="PICKUP">{t('autoGen.admin.key1076')}</option>
         </select>
       </div>
 
       {loading && (
         <div className="flex justify-center py-12">
-          <div className="w-8 h-8 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin" role="status" aria-label="載入中" />
+          <div className="w-8 h-8 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin" role="status" aria-label={t('autoGen.admin.key1077')} />
         </div>
       )}
 
@@ -336,7 +336,7 @@ export default function OrderList() {
                   <th className="text-left px-4 py-3 font-medium text-gray-600">{t('orders.customer')}</th>
                   <th className="text-left px-4 py-3 font-medium text-gray-600">{t('orders.type')}</th>
                   <th className="text-left px-4 py-3 font-medium text-gray-600">{t('common.status')}</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">結帳狀態</th>
+                  <th className="text-left px-4 py-3 font-medium text-gray-600">{t('autoGen.admin.key1078')}</th>
                   <th className="text-left px-4 py-3 font-medium text-gray-600">{t('orders.items')}</th>
                   <th className="text-right px-4 py-3 font-medium text-gray-600">{t('orders.total')}</th>
                   <th className="text-left px-4 py-3 font-medium text-gray-600">{t('common.createdAt')}</th>
@@ -351,7 +351,7 @@ export default function OrderList() {
                         <span>{order.orderNumber}</span>
                         {order.table && (
                           <span className="inline-flex items-center w-fit px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200">
-                            🍽️ 內用桌號: {order.table.name}
+                            {t('autoGen.admin.key1079')} {order.table.name}
                           </span>
                         )}
                         {order.isRemote !== undefined && (
@@ -368,24 +368,24 @@ export default function OrderList() {
                       )}
                     </td>
                     <td className="px-4 py-3">
-                      {order.customer ? order.customer.name : <span className="text-gray-400">{t('common.guest') || '訪客'}</span>}
+                      {order.customer ? order.customer.name : <span className="text-gray-400">{t('common.guest') || t('autoGen.admin.key1080')}</span>}
                     </td>
                     <td className="px-4 py-3">
                       <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${order.orderType === 'DELIVERY' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'
                         }`}>
-                        {order.orderType === 'DELIVERY' ? '外送' : '自取'}
+                        {order.orderType === 'DELIVERY' ? t('autoGen.admin.key1081') : t('autoGen.admin.key1082')}
                       </span>
                     </td>
                     <td className="px-4 py-3">
                       <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_COLORS[order.status] || 'bg-gray-100 text-gray-700'}`}>
-                        {order.status === 'PENDING' && '待處理'}
-                        {order.status === 'CONFIRMED' && '已確認'}
-                        {order.status === 'PREPARING' && '製作中'}
-                        {order.status === 'READY' && '可取餐'}
-                        {order.status === 'OUT_FOR_DELIVERY' && '外送中'}
-                        {order.status === 'DELIVERED' && '已送達'}
-                        {order.status === 'PICKED_UP' && '已取餐'}
-                        {order.status === 'CANCELLED' && '已取消'}
+                        {order.status === 'PENDING' && t('autoGen.admin.key1083')}
+                        {order.status === 'CONFIRMED' && t('autoGen.admin.key1084')}
+                        {order.status === 'PREPARING' && t('autoGen.admin.key1085')}
+                        {order.status === 'READY' && t('autoGen.admin.key1086')}
+                        {order.status === 'OUT_FOR_DELIVERY' && t('autoGen.admin.key1087')}
+                        {order.status === 'DELIVERED' && t('autoGen.admin.key1088')}
+                        {order.status === 'PICKED_UP' && t('autoGen.admin.key1089')}
+                        {order.status === 'CANCELLED' && t('autoGen.admin.key1090')}
                         {!['PENDING', 'CONFIRMED', 'PREPARING', 'READY', 'OUT_FOR_DELIVERY', 'DELIVERED', 'PICKED_UP', 'CANCELLED'].includes(order.status) && order.status.replace(/_/g, ' ')}
                       </span>
                     </td>
@@ -397,9 +397,9 @@ export default function OrderList() {
                             ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200 border border-emerald-200'
                             : 'bg-rose-100 text-rose-800 hover:bg-rose-200 border border-rose-200'
                         }`}
-                        title="點擊切換結帳狀態"
+                        title={t('autoGen.admin.key1091')}
                       >
-                        {order.paymentStatus === 'PAID' ? '已結帳 💰' : '未結帳 🔄'}
+                        {order.paymentStatus === 'PAID' ? t('autoGen.admin.key1092') : t('autoGen.admin.key1093')}
                       </button>
                     </td>
                     <td className="px-4 py-3 text-gray-600">{order._count.items}</td>
@@ -413,7 +413,7 @@ export default function OrderList() {
                           to={`/orders/${order.id}`}
                           className="text-primary-600 hover:text-primary-700 text-xs font-medium"
                         >
-                          {t('common.view') || '查看'}
+                          {t('common.view') || t('autoGen.admin.key1094')}
                         </Link>
                         {canManage && (
                           <button
@@ -424,7 +424,7 @@ export default function OrderList() {
                                 : 'text-red-600 hover:text-red-700'
                             }`}
                           >
-                            {deleteConfirmId === order.id ? '確定刪除？' : (t('common.delete') || '刪除')}
+                            {deleteConfirmId === order.id ? t('autoGen.admin.key1095') : (t('common.delete') || t('autoGen.admin.key1096'))}
                           </button>
                         )}
                       </div>
@@ -445,12 +445,12 @@ export default function OrderList() {
                       #{order.orderNumber}
                       {order.table && (
                         <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200">
-                          🍽️ 桌號: {order.table.name}
+                          {t('autoGen.admin.key1097')} {order.table.name}
                         </span>
                       )}
                     </span>
                     <span className="text-sm font-bold text-gray-900">
-                      {order.customer ? order.customer.name : <span className="text-gray-400 font-normal">{t('common.guest') || '訪客'}</span>}
+                      {order.customer ? order.customer.name : <span className="text-gray-400 font-normal">{t('common.guest') || t('autoGen.admin.key1098')}</span>}
                     </span>
                     {order.scheduledAt && (
                       <span className="text-[10px] text-indigo-600 font-semibold flex items-center gap-1">
@@ -459,21 +459,21 @@ export default function OrderList() {
                     )}
                   </div>
                   <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_COLORS[order.status] || 'bg-gray-100 text-gray-700'}`}>
-                    {order.status === 'PENDING' && '待處理'}
-                    {order.status === 'CONFIRMED' && '已確認'}
-                    {order.status === 'PREPARING' && '製作中'}
-                    {order.status === 'READY' && '可取餐'}
-                    {order.status === 'OUT_FOR_DELIVERY' && '外送中'}
-                    {order.status === 'DELIVERED' && '已送達'}
-                    {order.status === 'PICKED_UP' && '已取餐'}
-                    {order.status === 'CANCELLED' && '已取消'}
+                    {order.status === 'PENDING' && t('autoGen.admin.key1099')}
+                    {order.status === 'CONFIRMED' && t('autoGen.admin.key1100')}
+                    {order.status === 'PREPARING' && t('autoGen.admin.key1101')}
+                    {order.status === 'READY' && t('autoGen.admin.key1102')}
+                    {order.status === 'OUT_FOR_DELIVERY' && t('autoGen.admin.key1103')}
+                    {order.status === 'DELIVERED' && t('autoGen.admin.key1104')}
+                    {order.status === 'PICKED_UP' && t('autoGen.admin.key1105')}
+                    {order.status === 'CANCELLED' && t('autoGen.admin.key1106')}
                     {!['PENDING', 'CONFIRMED', 'PREPARING', 'READY', 'OUT_FOR_DELIVERY', 'DELIVERED', 'PICKED_UP', 'CANCELLED'].includes(order.status) && order.status.replace(/_/g, ' ')}
                   </span>
                 </div>
 
                 <div className="flex justify-between items-center text-xs text-gray-500 pt-2.5 border-t border-gray-100">
                   <span className={`px-2 py-0.5 rounded-full font-bold ${order.orderType === 'DELIVERY' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'}`}>
-                    {order.orderType === 'DELIVERY' ? '外送' : '自取'}
+                    {order.orderType === 'DELIVERY' ? t('autoGen.admin.key1107') : t('autoGen.admin.key1108')}
                   </span>
                   <span className="font-extrabold text-primary-600 text-sm">${order.total}</span>
                 </div>
@@ -487,7 +487,7 @@ export default function OrderList() {
                         : 'bg-rose-100 text-rose-800 border-rose-200'
                     }`}
                   >
-                    {order.paymentStatus === 'PAID' ? '已結帳 💰' : '未結帳 🔄'}
+                    {order.paymentStatus === 'PAID' ? t('autoGen.admin.key1109') : t('autoGen.admin.key1110')}
                   </button>
 
                   <div className="flex items-center gap-2">
@@ -495,7 +495,7 @@ export default function OrderList() {
                       to={`/orders/${order.id}`}
                       className="text-xs bg-gray-50 border border-gray-200 text-gray-600 px-3 py-1.5 rounded-lg font-bold hover:bg-gray-100 transition-all"
                     >
-                      {t('common.view') || '查看'}
+                      {t('common.view') || t('autoGen.admin.key1111')}
                     </Link>
                     {canManage && (
                       <button
@@ -506,7 +506,7 @@ export default function OrderList() {
                             : 'bg-red-50 text-red-600 border-red-200 hover:bg-red-100'
                         }`}
                       >
-                        {deleteConfirmId === order.id ? '⚠️ 確定刪除？' : (t('common.delete') || '刪除')}
+                        {deleteConfirmId === order.id ? t('autoGen.admin.key1112') : (t('common.delete') || t('autoGen.admin.key1113'))}
                       </button>
                     )}
                   </div>
@@ -523,17 +523,17 @@ export default function OrderList() {
                 onClick={() => setPage((p) => p - 1)}
                 className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg disabled:opacity-40 hover:bg-gray-50"
               >
-                上一頁
+                {t('autoGen.admin.key1114')}
               </button>
               <span className="text-sm text-gray-600">
-                第 {pagination.page} 頁，共 {pagination.totalPages} 頁
+                {t('autoGen.admin.key1115')} {pagination.page} {t('autoGen.admin.key1116')} {pagination.totalPages} {t('autoGen.admin.key1117')}
               </span>
               <button
                 disabled={page >= pagination.totalPages}
                 onClick={() => setPage((p) => p + 1)}
                 className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg disabled:opacity-40 hover:bg-gray-50"
               >
-                下一頁
+                {t('autoGen.admin.key1118')}
               </button>
             </div>
           )}

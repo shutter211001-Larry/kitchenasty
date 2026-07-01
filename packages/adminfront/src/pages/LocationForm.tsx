@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { api } from '../lib/api.js';
@@ -40,8 +41,6 @@ interface LocationData {
   lng?: number;
 }
 
-const DAYS = ['星期日 (Sunday)', '星期一 (Monday)', '星期二 (Tuesday)', '星期三 (Wednesday)', '星期四 (Thursday)', '星期五 (Friday)', '星期六 (Saturday)'];
-
 const defaultHours: OperatingHour[] = DAYS.map((_, i) => ({
   dayOfWeek: i,
   openTime: '10:00',
@@ -72,6 +71,8 @@ const emptyLocation: LocationData = {
 };
 
 export default function LocationForm() {
+    const DAYS = [t('autoGen.admin.key758'), t('autoGen.admin.key759'), t('autoGen.admin.key760'), t('autoGen.admin.key761'), t('autoGen.admin.key762'), t('autoGen.admin.key763'), t('autoGen.admin.key764')];
+
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -87,7 +88,7 @@ export default function LocationForm() {
   const [error, setError] = useState<string | null>(null);
 
   const handleDelete = async () => {
-    if (!window.confirm('您確定要永久刪除此分店嗎？此操作將無法復原。')) {
+    if (!window.confirm(t('autoGen.admin.key765'))) {
       return;
     }
     setDeleting(true);
@@ -96,7 +97,7 @@ export default function LocationForm() {
       await api.delete(`/locations/${id}`);
       navigate('/locations');
     } catch (err: any) {
-      setError(err.message || '刪除失敗');
+      setError(err.message || t('autoGen.admin.key766'));
       setDeleting(false);
     }
   };
@@ -147,6 +148,8 @@ export default function LocationForm() {
   }, [id, isEdit]);
 
   const updateField = (field: keyof LocationData, value: any) => {
+  const { t } = useTranslation();
+
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -230,13 +233,13 @@ export default function LocationForm() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-semibold text-gray-800">
-          {isEdit ? '編輯門市' : '新增門市'}
+          {isEdit ? t('autoGen.admin.key767') : t('autoGen.admin.key768')}
         </h2>
         <button
           onClick={() => navigate('/locations')}
           className="text-gray-500 hover:text-gray-700 text-sm"
         >
-          返回門市列表
+          {t('autoGen.admin.key769')}
         </button>
       </div>
 
@@ -249,10 +252,10 @@ export default function LocationForm() {
       <form onSubmit={handleSubmit} className="space-y-8">
         {/* Basic Info */}
         <section className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">基本資訊</h3>
+          <h3 className="text-lg font-medium text-gray-900 mb-4">{t('autoGen.admin.key770')}</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">名稱 *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key771')}</label>
               <input
                 type="text"
                 value={form.name}
@@ -262,7 +265,7 @@ export default function LocationForm() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">網址代稱 (Slug) *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key772')}</label>
               <input
                 type="text"
                 value={form.slug}
@@ -273,7 +276,7 @@ export default function LocationForm() {
               />
             </div>
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">描述 (Description)</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key773')}</label>
               <textarea
                 value={form.description}
                 onChange={(e) => updateField('description', e.target.value)}
@@ -282,7 +285,7 @@ export default function LocationForm() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">電話</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key774')}</label>
               <input
                 type="text"
                 value={form.phone}
@@ -304,10 +307,10 @@ export default function LocationForm() {
 
         {/* Address */}
         <section className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">地址資訊</h3>
+          <h3 className="text-lg font-medium text-gray-900 mb-4">{t('autoGen.admin.key775')}</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">詳細地址 *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key776')}</label>
               <input
                 type="text"
                 value={form.address}
@@ -317,7 +320,7 @@ export default function LocationForm() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">城市 *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key777')}</label>
               <input
                 type="text"
                 value={form.city}
@@ -327,7 +330,7 @@ export default function LocationForm() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">省份/區域</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key778')}</label>
               <input
                 type="text"
                 value={form.state}
@@ -336,7 +339,7 @@ export default function LocationForm() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">郵遞區號 *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key779')}</label>
               <input
                 type="text"
                 value={form.postalCode}
@@ -346,7 +349,7 @@ export default function LocationForm() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">國家 (Country Code)</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key780')}</label>
               <input
                 type="text"
                 value={form.country}
@@ -355,16 +358,16 @@ export default function LocationForm() {
               />
             </div>
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Google Maps 網址或經緯度 (自動解析)</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key781')}</label>
               <input
                 type="text"
                 value={mapInput}
                 onChange={handleMapInputChange}
-                placeholder="請貼上 Google Maps 分店網址，或直接輸入「緯度, 經度」"
+                placeholder={t('autoGen.admin.key782')}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
               />
               {!!(form.lat || form.lng) && (
-                 <p className="text-xs text-gray-500 mt-1">目前解析結果：緯度 {form.lat}, 經度 {form.lng}</p>
+                 <p className="text-xs text-gray-500 mt-1">{t('autoGen.admin.key783')} {form.lat}{t('autoGen.admin.key784')} {form.lng}</p>
               )}
             </div>
           </div>
@@ -372,8 +375,8 @@ export default function LocationForm() {
 
         {/* Service Settings */}
         <section className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-1">此門市服務設定</h3>
-          <p className="text-sm text-gray-500 mb-4">這些設定只影響目前門市，會覆寫全站點餐設定中的預設外送/自取值。</p>
+          <h3 className="text-lg font-medium text-gray-900 mb-1">{t('autoGen.admin.key785')}</h3>
+          <p className="text-sm text-gray-500 mb-4">{t('autoGen.admin.key786')}</p>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <label className="flex items-center gap-2">
               <input
@@ -382,7 +385,7 @@ export default function LocationForm() {
                 onChange={(e) => updateField('isActive', e.target.checked)}
                 className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
               />
-              <span className="text-sm text-gray-700">營運中 (Active)</span>
+              <span className="text-sm text-gray-700">{t('autoGen.admin.key787')}</span>
             </label>
             <label className="flex items-center gap-2">
               <input
@@ -391,7 +394,7 @@ export default function LocationForm() {
                 onChange={(e) => updateField('deliveryEnabled', e.target.checked)}
                 className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
               />
-              <span className="text-sm text-gray-700">此門市提供外送 (Delivery)</span>
+              <span className="text-sm text-gray-700">{t('autoGen.admin.key788')}</span>
             </label>
             <label className="flex items-center gap-2">
               <input
@@ -400,10 +403,10 @@ export default function LocationForm() {
                 onChange={(e) => updateField('pickupEnabled', e.target.checked)}
                 className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
               />
-              <span className="text-sm text-gray-700">此門市提供自取 (Pickup)</span>
+              <span className="text-sm text-gray-700">{t('autoGen.admin.key789')}</span>
             </label>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">此門市外送最低消 ($)</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key790')}</label>
               <input
                 type="number"
                 value={form.minOrderDelivery}
@@ -414,7 +417,7 @@ export default function LocationForm() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">此門市外送預計時間 (分鐘)</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key791')}</label>
               <input
                 type="number"
                 value={form.deliveryLeadTime}
@@ -424,7 +427,7 @@ export default function LocationForm() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">此門市自取預計時間 (分鐘)</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key792')}</label>
               <input
                 type="number"
                 value={form.pickupLeadTime}
@@ -440,8 +443,8 @@ export default function LocationForm() {
         <section className="bg-white rounded-xl shadow-sm border p-6">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h3 className="text-lg font-bold text-gray-900">營業時間設定</h3>
-              <p className="text-sm text-gray-500">設定每週的營業時段，支援跨午夜與多段營業。</p>
+              <h3 className="text-lg font-bold text-gray-900">{t('autoGen.admin.key793')}</h3>
+              <p className="text-sm text-gray-500">{t('autoGen.admin.key794')}</p>
             </div>
             <button
               type="button"
@@ -461,7 +464,7 @@ export default function LocationForm() {
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
               </svg>
-              以週一為準套用全週
+              {t('autoGen.admin.key795')}
             </button>
           </div>
 
@@ -476,7 +479,7 @@ export default function LocationForm() {
                     <div className="flex items-center gap-3">
                       <div className={`w-2 h-2 rounded-full ${isClosed ? 'bg-gray-300' : 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]'}`}></div>
                       <span className="text-sm font-bold text-gray-700">{dayName.split(' ')[0]}</span>
-                      {isClosed && <span className="text-[10px] bg-gray-200 text-gray-600 px-1.5 py-0.5 rounded font-bold">店休</span>}
+                      {isClosed && <span className="text-[10px] bg-gray-200 text-gray-600 px-1.5 py-0.5 rounded font-bold">{t('autoGen.admin.key796')}</span>}
                     </div>
                     <button
                       type="button"
@@ -488,7 +491,7 @@ export default function LocationForm() {
                       <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                       </svg>
-                      新增時段
+                      {t('autoGen.admin.key797')}
                     </button>
                   </div>
 
@@ -510,7 +513,7 @@ export default function LocationForm() {
                               }}
                               className="bg-transparent border-none focus:ring-0 text-sm font-medium text-gray-900 px-2 py-1 cursor-pointer"
                             />
-                            <span className="text-gray-400 text-xs px-1">至</span>
+                            <span className="text-gray-400 text-xs px-1">{t('autoGen.admin.key798')}</span>
                             <input
                               type="time"
                               value={session.closeTime}
@@ -525,7 +528,7 @@ export default function LocationForm() {
 
                           {isOvernight && (
                             <span className="flex items-center gap-1 px-2 py-1 bg-purple-50 text-purple-700 rounded text-[10px] font-bold border border-purple-100">
-                              跨午夜 (+1天)
+                              {t('autoGen.admin.key799')}
                             </span>
                           )}
 
@@ -566,24 +569,24 @@ export default function LocationForm() {
         {/* Delivery Zones */}
         <section className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-medium text-gray-900">外送區域</h3>
+            <h3 className="text-lg font-medium text-gray-900">{t('autoGen.admin.key800')}</h3>
             <button
               type="button"
               onClick={addZone}
               className="text-primary-600 hover:text-primary-700 text-sm font-medium"
             >
-              + 新增區域
+              {t('autoGen.admin.key801')}
             </button>
           </div>
           {zones.length === 0 && (
-            <p className="text-sm text-gray-400">尚未設定外送區域。</p>
+            <p className="text-sm text-gray-400">{t('autoGen.admin.key802')}</p>
           )}
           <div className="space-y-3">
             {zones.map((zone, index) => (
               <div key={index} className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg">
                 <input
                   type="text"
-                  placeholder="區域名稱"
+                  placeholder={t('autoGen.admin.key803')}
                   value={zone.name}
                   onChange={(e) => {
                     const updated = [...zones];
@@ -596,7 +599,7 @@ export default function LocationForm() {
                   <span className="text-xs text-gray-500">$</span>
                   <input
                     type="number"
-                    placeholder="運費"
+                    placeholder={t('autoGen.admin.key804')}
                     value={zone.charge}
                     onChange={(e) => {
                       const updated = [...zones];
@@ -612,7 +615,7 @@ export default function LocationForm() {
                   <span className="text-xs text-gray-500">Min $</span>
                   <input
                     type="number"
-                    placeholder="最低消費"
+                    placeholder={t('autoGen.admin.key805')}
                     value={zone.minOrder}
                     onChange={(e) => {
                       const updated = [...zones];
@@ -643,11 +646,10 @@ export default function LocationForm() {
               <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
-              危險區域 (Danger Zone)
+              {t('autoGen.admin.key806')}
             </h3>
             <p className="text-sm text-red-800 mb-4 font-semibold">
-              此操作無法復原。刪除此分店將會永久移除其相關配置，如桌位及外送區域。
-              如果此分店已包含交易訂單，系統基於審計數據考量將會拒絕刪除，屆時請改以「停用 (Inactive)」此分店。
+              {t('autoGen.admin.key807')}
             </p>
             <div className="flex items-center">
               <button
@@ -659,10 +661,10 @@ export default function LocationForm() {
                 {deleting ? (
                   <>
                     <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    正在刪除...
+                    {t('autoGen.admin.key808')}
                   </>
                 ) : (
-                  '永久刪除此分店'
+                  t('autoGen.admin.key809')
                 )}
               </button>
             </div>
@@ -676,14 +678,14 @@ export default function LocationForm() {
             onClick={() => navigate('/locations')}
             className="px-6 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50"
           >
-            取消
+            {t('autoGen.admin.key810')}
           </button>
           <button
             type="submit"
             disabled={saving}
             className="px-6 py-2 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700 disabled:opacity-50 transition-colors"
           >
-            {saving ? '儲存中...' : isEdit ? '更新門市資訊' : '建立門市'}
+            {saving ? t('autoGen.admin.key811') : isEdit ? t('autoGen.admin.key812') : t('autoGen.admin.key813')}
           </button>
         </div>
       </form>

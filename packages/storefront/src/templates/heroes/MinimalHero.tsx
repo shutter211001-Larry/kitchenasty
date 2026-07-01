@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { getTranslated } from '../../utils/translation.js';
 
@@ -8,6 +9,7 @@ interface HeroProps {
 }
 
 export default function MinimalHero({ hero, t, lang = 'zh-TW' }: HeroProps) {
+  const { t } = useTranslation();
   return (
     <section className="bg-white dark:bg-gray-950">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-28 lg:py-40 text-center">

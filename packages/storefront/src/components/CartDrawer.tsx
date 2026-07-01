@@ -5,6 +5,8 @@ import { useCart } from '../context/CartContext.js';
 import { getTranslated } from '../utils/translation.js';
 
 export default function CartDrawer() {
+  const { t } = useTranslation();
+
   const { t, i18n } = useTranslation();
   const { items, isOpen, setIsOpen, updateQuantity, removeItem, clear, subtotal } = useCart();
 
@@ -106,7 +108,7 @@ export default function CartDrawer() {
                     {/* Price */}
                     <div className="text-sm font-medium text-main">
                       {item.redeemedWithPoints ? (
-                        <span className="text-orange-600 font-bold">{item.rewardPointsPrice ? item.rewardPointsPrice * item.quantity : 0} 點</span>
+                        <span className="text-orange-600 font-bold">{item.rewardPointsPrice ? item.rewardPointsPrice * item.quantity : 0} {t('autoGen.store.key1')}</span>
                       ) : (
                         `$${lineTotal.toFixed(2)}`
                       )}

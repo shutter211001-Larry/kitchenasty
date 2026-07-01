@@ -45,6 +45,8 @@ interface MenuResponse {
 }
 
 export default function Menu() {
+  const { t } = useTranslation();
+
   const { t, i18n } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   
@@ -289,7 +291,7 @@ export default function Menu() {
                           </span>
                           {item.isRewardItem && (
                             <span className="text-xs text-orange-600 font-extrabold mt-0.5">
-                              {item.rewardPointsPrice} 點
+                              {item.rewardPointsPrice} {t('autoGen.store.key94')}
                             </span>
                           )}
                         </div>

@@ -40,20 +40,6 @@ interface CounterOrder {
 }
 
 const COUNTER_STATUSES = ['PENDING', 'CONFIRMED', 'PREPARING', 'READY'];
-
-const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; next: string | null }> = {
-  PENDING: { label: '新訂單 (New)', color: 'text-yellow-800', bg: 'bg-yellow-50 border-yellow-300', next: 'CONFIRMED' },
-  CONFIRMED: { label: '已確認 (Confirmed)', color: 'text-blue-800', bg: 'bg-blue-50 border-blue-300', next: 'PREPARING' },
-  PREPARING: { label: '製作中 (Preparing)', color: 'text-purple-800', bg: 'bg-purple-50 border-purple-300', next: 'READY' },
-  READY: { label: '待取餐 (Ready)', color: 'text-green-800', bg: 'bg-green-50 border-green-300', next: null },
-};
-
-const NEXT_ACTION: Record<string, string> = {
-  PENDING: '確認訂單',
-  CONFIRMED: '開始製作',
-  PREPARING: '製作完成',
-};
-
 let sharedAudioCtx: AudioContext | null = null;
 
 const getAudioContext = (): AudioContext | null => {
@@ -67,43 +53,53 @@ const getAudioContext = (): AudioContext | null => {
   return sharedAudioCtx;
 };
 
-const playNotificationSound = () => {
-  try {
-    const context = getAudioContext();
-    if (!context) return;
-    if (context.state === 'suspended') {
-      context.resume().catch((err) => {
-        console.warn('Failed to resume AudioContext during play:', err);
-      });
-    }
-    
-    const playNote = (frequency: number, startTime: number, duration: number) => {
-      const osc = context.createOscillator();
-      const gainNode = context.createGain();
-      
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(frequency, startTime);
-      
-      gainNode.gain.setValueAtTime(0.3, startTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
-      
-      osc.connect(gainNode);
-      gainNode.connect(context.destination);
-      
-      osc.start(startTime);
-      osc.stop(startTime + duration);
-    };
-    
-    const now = context.currentTime;
-    playNote(783.99, now, 0.25);
-    playNote(1046.50, now + 0.12, 0.35);
-  } catch (err) {
-    console.warn('Audio playback failed or was blocked by browser policy:', err);
-  }
-};
-
 export default function CounterDisplay() {
   const { t } = useTranslation();
+    const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; next: string | null }> = {
+      PENDING: { label: t('autoGen.admin.key278'), color: 'text-yellow-800', bg: 'bg-yellow-50 border-yellow-300', next: 'CONFIRMED' },
+      CONFIRMED: { label: t('autoGen.admin.key279'), color: 'text-blue-800', bg: 'bg-blue-50 border-blue-300', next: 'PREPARING' },
+      PREPARING: { label: t('autoGen.admin.key280'), color: 'text-purple-800', bg: 'bg-purple-50 border-purple-300', next: 'READY' },
+      READY: { label: t('autoGen.admin.key281'), color: 'text-green-800', bg: 'bg-green-50 border-green-300', next: null },
+    };
+    const NEXT_ACTION: Record<string, string> = {
+      PENDING: t('autoGen.admin.key282'),
+      CONFIRMED: t('autoGen.admin.key283'),
+      PREPARING: t('autoGen.admin.key284'),
+    };
+    const playNotificationSound = () => {
+      try {
+        const context = getAudioContext();
+        if (!context) return;
+        if (context.state === 'suspended') {
+          context.resume().catch((err) => {
+            console.warn('Failed to resume AudioContext during play:', err);
+          });
+        }
+        
+        const playNote = (frequency: number, startTime: number, duration: number) => {
+          const osc = context.createOscillator();
+          const gainNode = context.createGain();
+          
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(frequency, startTime);
+          
+          gainNode.gain.setValueAtTime(0.3, startTime);
+          gainNode.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+          
+          osc.connect(gainNode);
+          gainNode.connect(context.destination);
+          
+          osc.start(startTime);
+          osc.stop(startTime + duration);
+        };
+        
+        const now = context.currentTime;
+        playNote(783.99, now, 0.25);
+        playNote(1046.50, now + 0.12, 0.35);
+      } catch (err) {
+        console.warn('Audio playback failed or was blocked by browser policy:', err);
+      }
+    };
   const [orders, setOrders] = useState<CounterOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [socket, setSocket] = useState<Socket | null>(null);
@@ -242,7 +238,7 @@ export default function CounterDisplay() {
       })
       .catch((err) => {
         setIsConnected(false);
-        setSocketError(err.message || '連線錯誤');
+        setSocketError(err.message || t('autoGen.admin.key285'));
       })
       .finally(() => setLoading(false));
   }, [selectedLocationId]);
@@ -286,7 +282,7 @@ export default function CounterDisplay() {
 
     socket.on('connect_error', (err) => {
       setIsConnected(false);
-      setSocketError('連線錯誤');
+      setSocketError(t('autoGen.admin.key286'));
       console.error('Socket connect error:', err);
     });
 
@@ -337,7 +333,7 @@ export default function CounterDisplay() {
         return prev.map((o) => o.id === orderId ? { ...o, status: newStatus } : o);
       });
     } catch (err: any) {
-      setActionError(err.response?.data?.error || err.message || '更新失敗');
+      setActionError(err.response?.data?.error || err.message || t('autoGen.admin.key287'));
       setTimeout(() => setActionError(null), 5000);
       fetchOrders();
     } finally {
@@ -353,7 +349,7 @@ export default function CounterDisplay() {
       fetchOrders();
       setCashReceivedInputs((prev) => ({ ...prev, [orderId]: '' }));
     } catch (err: any) {
-      setActionError(err.response?.data?.error || err.message || '付款失敗');
+      setActionError(err.response?.data?.error || err.message || t('autoGen.admin.key288'));
       setTimeout(() => setActionError(null), 5000);
     } finally {
       setUpdating(null);
@@ -365,7 +361,7 @@ export default function CounterDisplay() {
     try {
       const amount = parseFloat(groupCashInput);
       if (isNaN(amount) || amount <= 0) {
-        setActionError('請輸入有效的金額');
+        setActionError(t('autoGen.admin.key289'));
         setTimeout(() => setActionError(null), 3000);
         return;
       }
@@ -390,7 +386,7 @@ export default function CounterDisplay() {
       setGroupCashInput('');
       setIsGroupCheckoutMode(false);
     } catch (err: any) {
-      setActionError(err.response?.data?.error || err.message || '併單結帳失敗');
+      setActionError(err.response?.data?.error || err.message || t('autoGen.admin.key290'));
       setTimeout(() => setActionError(null), 5000);
     }
   };
@@ -402,7 +398,7 @@ export default function CounterDisplay() {
       await api.patch(`/orders/${orderId}/status`, { status: completedStatus });
       setOrders((prev) => prev.filter((o) => o.id !== orderId));
     } catch (err: any) {
-      setActionError(err.response?.data?.error || err.message || '結單失敗');
+      setActionError(err.response?.data?.error || err.message || t('autoGen.admin.key291'));
       setTimeout(() => setActionError(null), 5000);
       fetchOrders();
     } finally {
@@ -412,7 +408,7 @@ export default function CounterDisplay() {
 
   const getTimeSince = (dateStr: string) => {
     const mins = Math.floor((Date.now() - new Date(dateStr).getTime()) / 60000);
-    if (mins < 1) return '剛剛';
+    if (mins < 1) return t('autoGen.admin.key292');
     if (mins < 60) return `${mins}m 前`;
     return `${Math.floor(mins / 60)}h ${mins % 60}m 前`;
   };
@@ -452,7 +448,7 @@ export default function CounterDisplay() {
       
       <div className="bg-purple-900 text-white px-6 py-3 flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <h1 className="text-lg font-bold text-purple-300 font-sans">櫃台看板 (Counter Display)</h1>
+          <h1 className="text-lg font-bold text-purple-300 font-sans">{t('autoGen.admin.key293')}</h1>
           
           {/* Location Selector */}
           <div className="flex items-center gap-1">
@@ -466,7 +462,7 @@ export default function CounterDisplay() {
               }}
               className="bg-purple-800 text-xs text-white border border-purple-700 rounded px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-purple-500 font-semibold font-sans cursor-pointer"
             >
-              <option value="">全部門市 (All Locations)</option>
+              <option value="">{t('autoGen.admin.key294')}</option>
               {locations.map((loc) => (
                 <option key={loc.id} value={loc.id}>
                   {loc.name}
@@ -478,12 +474,12 @@ export default function CounterDisplay() {
           <div className="flex items-center gap-2">
             <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-400' : 'bg-red-400'}`} />
             <span className="text-xs text-purple-200">
-              {isConnected ? '即時連線中' : '連線中斷'}
+              {isConnected ? t('autoGen.admin.key295') : t('autoGen.admin.key296')}
             </span>
           </div>
         </div>
         <div className="flex items-center gap-4 text-xs text-purple-200">
-          <span>{orders.length} 張進行中 | 更新於 {lastRefresh.toLocaleTimeString()}</span>
+          <span>{orders.length} {t('autoGen.admin.key297')} {lastRefresh.toLocaleTimeString()}</span>
           <button
             onClick={() => {
               setIsGroupCheckoutMode(!isGroupCheckoutMode);
@@ -494,7 +490,7 @@ export default function CounterDisplay() {
             }}
             className={`px-3 py-1.5 rounded transition-all flex items-center gap-1.5 font-bold border ${isGroupCheckoutMode ? 'bg-indigo-600 text-white border-indigo-500 shadow-md ring-2 ring-indigo-400' : 'bg-purple-800 hover:bg-purple-700 border-purple-700/50'}`}
           >
-            <span>🔗 {isGroupCheckoutMode ? '退出併單模式' : '併單收銀模式'}</span>
+            <span>🔗 {isGroupCheckoutMode ? t('autoGen.admin.key298') : t('autoGen.admin.key299')}</span>
           </button>
           <button
             onClick={() => {
@@ -506,10 +502,10 @@ export default function CounterDisplay() {
             className="bg-purple-800 hover:bg-purple-700 border border-purple-700/50 px-3 py-1.5 rounded transition-all flex items-center gap-1.5"
             aria-label="Toggle sound notifications"
           >
-            <span>{enableSound ? '🔊 聲音開啟' : '🔇 聲音關閉'}</span>
+            <span>{enableSound ? t('autoGen.admin.key300') : t('autoGen.admin.key301')}</span>
           </button>
           <button onClick={() => fetchOrders()} className="bg-purple-800 hover:bg-purple-700 px-3 py-1.5 rounded transition-colors">
-            重新整理
+            {t('autoGen.admin.key302')}
           </button>
         </div>
       </div>
@@ -525,7 +521,7 @@ export default function CounterDisplay() {
             <div className="mx-4 mt-4 space-y-2">
               <div className="flex items-center justify-between mb-1 px-1">
                 <h3 className="text-sm font-bold text-indigo-800">
-                  預約訂單 (Scheduled Orders: {scheduledOrders.length})
+                  {t('autoGen.admin.key303')} {scheduledOrders.length})
                 </h3>
               </div>
               {Object.entries(scheduledGroups).map(([date, groupOrders]) => (
@@ -669,12 +665,12 @@ export default function CounterDisplay() {
                                 ? 'bg-emerald-100 text-emerald-800'
                                 : 'bg-gray-100 text-gray-600'
                             }`}>
-                              {order.paymentStatus === 'PAID' ? '已結帳 💰' : '未結帳 🔄'}
+                              {order.paymentStatus === 'PAID' ? t('autoGen.admin.key304') : t('autoGen.admin.key305')}
                             </span>
                           </div>
                           {order.table && (
                             <span className="font-bold text-xs text-indigo-700 bg-indigo-50 px-1 py-0.5 rounded border border-indigo-200 w-max mt-1">
-                              🍽️ 桌號: {order.table.name}
+                              {t('autoGen.admin.key306')} {order.table.name}
                             </span>
                           )}
                         </div>
@@ -712,8 +708,8 @@ export default function CounterDisplay() {
                           <span className="text-sm">🕒</span>
                           <span>
                             {order.orderType === 'DELIVERY' 
-                              ? t('kitchen.deliveryTime') || '預約外送' 
-                              : t('kitchen.pickupTime') || '預約取餐'
+                              ? t('kitchen.deliveryTime') || t('autoGen.admin.key307') 
+                              : t('kitchen.pickupTime') || t('autoGen.admin.key308')
                             }
                           </span>
                         </span>
@@ -772,7 +768,7 @@ export default function CounterDisplay() {
                               handleItemClick(order, item);
                             }
                           }}
-                          title={expandedOrders[order.id] ? "點擊將此餐點加入結帳金額" : undefined}
+                          title={expandedOrders[order.id] ? t('autoGen.admin.key309') : undefined}
                         >
                           <div className="flex items-start gap-2">
                             <span className="font-bold text-gray-400 text-xs mt-0.5">{item.quantity}x</span>
@@ -805,35 +801,35 @@ export default function CounterDisplay() {
                         {/* Financial breakdown */}
                         <div className="text-xs text-gray-600 space-y-1.5 bg-gray-50/50 p-2.5 rounded-lg border border-gray-100">
                           <div className="flex justify-between">
-                            <span>小計 (Subtotal)</span>
+                            <span>{t('autoGen.admin.key310')}</span>
                             <span>${order.subtotal?.toFixed(2) || '0.00'}</span>
                           </div>
                           {order.discount > 0 && (
                             <div className="flex justify-between text-red-600 font-medium">
-                              <span>折扣 (Discount)</span>
+                              <span>{t('autoGen.admin.key311')}</span>
                               <span>-${order.discount.toFixed(2)}</span>
                             </div>
                           )}
                           {order.tax > 0 && (
                             <div className="flex justify-between">
-                              <span>稅金 (Tax)</span>
+                              <span>{t('autoGen.admin.key312')}</span>
                               <span>${order.tax.toFixed(2)}</span>
                             </div>
                           )}
                           {order.deliveryFee > 0 && (
                             <div className="flex justify-between">
-                              <span>外送費 (Delivery)</span>
+                              <span>{t('autoGen.admin.key313')}</span>
                               <span>${order.deliveryFee.toFixed(2)}</span>
                             </div>
                           )}
                           {order.tip > 0 && (
                             <div className="flex justify-between">
-                              <span>小費 (Tip)</span>
+                              <span>{t('autoGen.admin.key314')}</span>
                               <span>${order.tip.toFixed(2)}</span>
                             </div>
                           )}
                           <div className="flex justify-between font-extrabold text-gray-900 text-sm pt-2 border-t border-dashed border-gray-200">
-                            <span>訂單金額 (Total)</span>
+                            <span>{t('autoGen.admin.key315')}</span>
                             <span className="text-purple-600">${order.total?.toFixed(2) || '0.00'}</span>
                           </div>
                         </div>
@@ -847,15 +843,15 @@ export default function CounterDisplay() {
                             }}
                             className="w-full bg-purple-600 text-white text-xs font-bold py-2.5 rounded-lg hover:bg-purple-700 shadow-sm active:scale-95 transition-all text-center"
                           >
-                            💳 收銀結帳 (POS Calculator)
+                            {t('autoGen.admin.key316')}
                           </button>
                         </div>
 
                         {/* Interactive POS Checkout Calculator */}
                         <div className="hidden md:block bg-purple-50/50 border border-purple-100 rounded-xl p-3 space-y-3">
                           <div className="flex justify-between items-center">
-                            <h4 className="text-[11px] font-black text-purple-700 uppercase tracking-wider">簡易結帳計算器</h4>
-                            <label className="flex items-center gap-1.5 text-[10px] font-bold text-purple-600 cursor-pointer bg-white px-2 py-1 rounded-md border border-purple-200 hover:bg-purple-50 transition-colors" title="開啟時，點擊餐點會自動按比例分攤折扣與附加費">
+                            <h4 className="text-[11px] font-black text-purple-700 uppercase tracking-wider">{t('autoGen.admin.key317')}</h4>
+                            <label className="flex items-center gap-1.5 text-[10px] font-bold text-purple-600 cursor-pointer bg-white px-2 py-1 rounded-md border border-purple-200 hover:bg-purple-50 transition-colors" title={t('autoGen.admin.key318')}>
                               <input 
                                 type="checkbox" 
                                 checked={autoProrateDiscounts} 
@@ -866,14 +862,14 @@ export default function CounterDisplay() {
                                 }}
                                 className="w-3 h-3 text-purple-600 rounded focus:ring-0 cursor-pointer"
                               />
-                              智慧比例分攤
+                              {t('autoGen.admin.key319')}
                             </label>
                           </div>
                           
                           {/* Cash Input & Change Display */}
                           <div className="flex flex-col gap-1.5 bg-white p-2.5 rounded-lg border border-purple-100">
                             <div className="flex justify-between items-center gap-2 flex-wrap">
-                              <span className="text-xs font-bold text-gray-500 min-w-max">實收金額</span>
+                              <span className="text-xs font-bold text-gray-500 min-w-max">{t('autoGen.admin.key320')}</span>
                               <div className="flex items-center gap-1 bg-gray-50 px-2 py-0.5 rounded border border-gray-200">
                                 <span className="text-gray-400 font-mono text-xs font-semibold">$</span>
                                 <input
@@ -897,23 +893,23 @@ export default function CounterDisplay() {
                                 <div className="space-y-1.5 pt-1.5 border-t border-dashed border-gray-200">
                                   {totalPaid > 0 && (
                                     <div className="flex justify-between items-center text-[10px] text-gray-500 font-medium">
-                                      <span>已付 (Paid)</span>
+                                      <span>{t('autoGen.admin.key321')}</span>
                                       <span className="font-mono">${totalPaid.toFixed(2)}</span>
                                     </div>
                                   )}
                                   {diff > 0 ? (
                                     <div className="flex justify-between items-center text-xs text-green-600 font-extrabold flex-wrap gap-1">
-                                      <span>找零 (Change)</span>
+                                      <span>{t('autoGen.admin.key322')}</span>
                                       <span className="font-mono text-sm">${diff.toFixed(2)}</span>
                                     </div>
                                   ) : diff < 0 ? (
                                     <div className="flex justify-between items-center text-xs text-red-600 font-bold flex-wrap gap-1">
-                                      <span>尚欠 (Remaining)</span>
+                                      <span>{t('autoGen.admin.key323')}</span>
                                       <span className="font-mono text-sm">${Math.abs(diff).toFixed(2)}</span>
                                     </div>
                                   ) : (
                                     <div className="flex justify-between items-center text-xs text-green-700 font-extrabold flex-wrap gap-1">
-                                      <span>金額剛好 (Exact)</span>
+                                      <span>{t('autoGen.admin.key324')}</span>
                                       <span className="font-mono text-sm">$0.00</span>
                                     </div>
                                   )}
@@ -927,9 +923,9 @@ export default function CounterDisplay() {
                             <button
                               onClick={() => handleQuickAmount(order.id, order.total.toFixed(2))}
                               className="bg-purple-600 text-white rounded py-1 px-1 text-center hover:bg-purple-700 active:scale-95 transition-all shadow-sm truncate touch-manipulation select-none"
-                              title="剛好"
+                              title={t('autoGen.admin.key325')}
                             >
-                              剛好
+                              {t('autoGen.admin.key326')}
                             </button>
                             <button
                               onClick={() => handleQuickAmount(order.id, '100')}
@@ -953,7 +949,7 @@ export default function CounterDisplay() {
                               onClick={() => handleClearAmount(order.id)}
                               className="bg-red-50 text-red-600 border border-red-200 rounded py-1 hover:bg-red-100 active:scale-95 transition-all shadow-sm text-center touch-manipulation select-none"
                             >
-                              清除
+                              {t('autoGen.admin.key327')}
                             </button>
                           </div>
 
@@ -987,7 +983,7 @@ export default function CounterDisplay() {
                                   await api.patch(`/orders/${order.id}/payment-status`, { paymentStatus: nextStatus });
                                   setOrders((prev) => prev.map((o) => o.id === order.id ? { ...o, paymentStatus: nextStatus } : o));
                                 } catch (err: any) {
-                                  setActionError(err.response?.data?.error || err.message || '更新結帳狀態失敗');
+                                  setActionError(err.response?.data?.error || err.message || t('autoGen.admin.key328'));
                                   setTimeout(() => setActionError(null), 5000);
                                 }
                               }
@@ -1002,7 +998,7 @@ export default function CounterDisplay() {
                           >
                             {parseFloat(cashReceivedInputs[order.id] || '0') > 0
                               ? `💵 確認收現 $${cashReceivedInputs[order.id]}`
-                              : order.paymentStatus === 'PAID' ? '🔄 標記為未結帳' : '💰 標記為已結帳'}
+                              : order.paymentStatus === 'PAID' ? t('autoGen.admin.key329') : t('autoGen.admin.key330')}
                           </button>
                         </div>
                       </div>
@@ -1016,19 +1012,19 @@ export default function CounterDisplay() {
                       )}
                       {status === 'READY' && (
                         <button onClick={(e) => { e.stopPropagation(); handleComplete(order.id, order.orderType); }} disabled={updating === order.id} className="flex-1 bg-green-600 text-white text-xs font-bold py-2.5 rounded-lg hover:bg-green-700 disabled:opacity-50 shadow-sm transition-all active:scale-95">
-                          {order.orderType === 'DELIVERY' ? '開始外送' : '完成取餐'}
+                          {order.orderType === 'DELIVERY' ? t('autoGen.admin.key331') : t('autoGen.admin.key332')}
                         </button>
                       )}
                       <button
                         onClick={async (e) => {
                           e.stopPropagation();
-                          if (window.confirm('確定要取消此訂單嗎？')) {
+                          if (window.confirm(t('autoGen.admin.key333'))) {
                             handleStatusUpdate(order.id, 'CANCELLED');
                           }
                         }}
                         disabled={updating === order.id}
                         className="px-3 bg-red-50 text-red-600 text-xs font-bold py-2.5 rounded-lg hover:bg-red-100 disabled:opacity-50 transition-all"
-                        title="取消訂單"
+                        title={t('autoGen.admin.key334')}
                       >
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -1057,7 +1053,7 @@ export default function CounterDisplay() {
                     {order.pickupNumber || '---'}
                   </span>
                   <div>
-                    <h3 className="font-bold text-gray-900 text-sm">訂單收銀結帳</h3>
+                    <h3 className="font-bold text-gray-900 text-sm">{t('autoGen.admin.key335')}</h3>
                     <p className="font-mono text-[10px] text-gray-400">#{order.orderNumber}</p>
                   </div>
                 </div>
@@ -1072,14 +1068,14 @@ export default function CounterDisplay() {
 
               {/* Order total info */}
               <div className="flex justify-between items-center bg-purple-50 border border-purple-100/50 p-3 rounded-xl">
-                <span className="text-xs font-extrabold text-purple-750">應收總計 (Total Due)</span>
+                <span className="text-xs font-extrabold text-purple-750">{t('autoGen.admin.key336')}</span>
                 <span className="text-lg font-black text-purple-600">${order.total?.toFixed(2) || '0.00'}</span>
               </div>
 
               {/* Cash Input & Change Display */}
               <div className="flex flex-col gap-1.5 bg-gray-50/50 p-3 rounded-xl border border-gray-150">
                 <div className="flex justify-between items-center gap-2 flex-wrap">
-                  <span className="text-xs font-bold text-gray-600">實收金額</span>
+                  <span className="text-xs font-bold text-gray-600">{t('autoGen.admin.key337')}</span>
                   <div className="flex items-center gap-1 bg-white px-3 py-1 rounded border border-gray-200 shadow-sm">
                     <span className="text-gray-400 font-mono text-sm font-semibold">$</span>
                     <input
@@ -1103,23 +1099,23 @@ export default function CounterDisplay() {
                     <div className="space-y-1.5 pt-2 border-t border-dashed border-gray-200">
                       {totalPaid > 0 && (
                         <div className="flex justify-between items-center text-xs text-gray-500 font-medium">
-                          <span>已付 (Paid)</span>
+                          <span>{t('autoGen.admin.key338')}</span>
                           <span className="font-mono">${totalPaid.toFixed(2)}</span>
                         </div>
                       )}
                       {diff > 0 ? (
                         <div className="flex justify-between items-center text-xs text-green-600 font-extrabold flex-wrap gap-1">
-                          <span>找零 (Change)</span>
+                          <span>{t('autoGen.admin.key339')}</span>
                           <span className="font-mono text-base">${diff.toFixed(2)}</span>
                         </div>
                       ) : diff < 0 ? (
                         <div className="flex justify-between items-center text-xs text-red-600 font-bold flex-wrap gap-1">
-                          <span>尚欠 (Remaining)</span>
+                          <span>{t('autoGen.admin.key340')}</span>
                           <span className="font-mono text-base">${Math.abs(diff).toFixed(2)}</span>
                         </div>
                       ) : (
                         <div className="flex justify-between items-center text-xs text-green-700 font-extrabold flex-wrap gap-1">
-                          <span>金額剛好 (Exact)</span>
+                          <span>{t('autoGen.admin.key341')}</span>
                           <span className="font-mono text-base">$0.00</span>
                         </div>
                       )}
@@ -1133,7 +1129,7 @@ export default function CounterDisplay() {
                   onClick={() => handleQuickAmount(order.id, order.total.toFixed(2))}
                   className="bg-purple-600 text-white rounded-lg py-2.5 text-center hover:bg-purple-700 active:scale-95 transition-all shadow-sm truncate touch-manipulation select-none"
                 >
-                  剛好
+                  {t('autoGen.admin.key342')}
                 </button>
                 <button
                   onClick={() => handleQuickAmount(order.id, '100')}
@@ -1157,7 +1153,7 @@ export default function CounterDisplay() {
                   onClick={() => handleClearAmount(order.id)}
                   className="bg-red-50 text-red-600 border border-red-200 rounded-lg py-2.5 hover:bg-red-100 active:scale-95 transition-all shadow-sm text-center touch-manipulation select-none"
                 >
-                  清除
+                  {t('autoGen.admin.key343')}
                 </button>
               </div>
 
@@ -1193,7 +1189,7 @@ export default function CounterDisplay() {
                       setOrders((prev) => prev.map((o) => o.id === order.id ? { ...o, paymentStatus: nextStatus } : o));
                       setMobileCheckoutOrderId(null); // auto close on success
                     } catch (err: any) {
-                      setActionError(err.response?.data?.error || err.message || '更新結帳狀態失敗');
+                      setActionError(err.response?.data?.error || err.message || t('autoGen.admin.key344'));
                       setTimeout(() => setActionError(null), 5000);
                     }
                   }
@@ -1208,7 +1204,7 @@ export default function CounterDisplay() {
               >
                 {parseFloat(cashReceivedInputs[order.id] || '0') > 0
                   ? `💵 確認收現 $${cashReceivedInputs[order.id]}`
-                  : order.paymentStatus === 'PAID' ? '🔄 標記為未結帳' : '💰 標記為已結帳'}
+                  : order.paymentStatus === 'PAID' ? t('autoGen.admin.key345') : t('autoGen.admin.key346')}
               </button>
             </div>
           </div>
@@ -1218,14 +1214,14 @@ export default function CounterDisplay() {
       {isGroupCheckoutMode && selectedOrders.size > 0 && (
         <div className="fixed bottom-0 left-0 right-0 bg-white border-t-2 border-indigo-500 shadow-[0_-10px_20px_-5px_rgba(0,0,0,0.1)] p-4 z-40 flex flex-col md:flex-row items-center justify-between gap-4 animate-in slide-in-from-bottom-4">
           <div className="flex flex-col">
-            <span className="text-sm font-bold text-gray-500">併單結帳 (Selected: {selectedOrders.size})</span>
+            <span className="text-sm font-bold text-gray-500">{t('autoGen.admin.key347')} {selectedOrders.size})</span>
             {(() => {
               const selectedOrdersList = orders.filter(o => selectedOrders.has(o.id));
               const totalAmount = selectedOrdersList.reduce((s, o) => {
                 const paid = (o.payments || []).reduce((ps, p) => ps + p.amount, 0);
                 return s + Math.max(0, o.total - paid);
               }, 0);
-              return <span className="text-2xl font-black text-indigo-700">總欠款: ${totalAmount.toFixed(2)}</span>;
+              return <span className="text-2xl font-black text-indigo-700">{t('autoGen.admin.key348')}{totalAmount.toFixed(2)}</span>;
             })()}
           </div>
           <div className="flex items-center gap-3 w-full md:w-auto">
@@ -1235,7 +1231,7 @@ export default function CounterDisplay() {
                 type="number"
                 value={groupCashInput}
                 onChange={(e) => setGroupCashInput(e.target.value)}
-                placeholder="輸入實收金額"
+                placeholder={t('autoGen.admin.key349')}
                 className="w-full text-right font-mono font-bold text-gray-900 text-lg bg-transparent border-none outline-none focus:ring-0 p-0"
               />
             </div>
@@ -1244,7 +1240,7 @@ export default function CounterDisplay() {
               disabled={!groupCashInput || parseFloat(groupCashInput) <= 0}
               className="bg-indigo-600 text-white font-bold px-6 py-3 rounded-lg shadow hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
             >
-              💳 合併收現
+              {t('autoGen.admin.key350')}
             </button>
           </div>
         </div>

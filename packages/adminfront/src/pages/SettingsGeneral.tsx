@@ -4,28 +4,29 @@ import { useTranslation } from 'react-i18next';
 import { SUPPORTED_LANGUAGES } from '../i18n/index.js';
 import { useAuth } from '../context/AuthContext.js';
 
-const TIMEZONES = [
-  { value: 'Asia/Taipei', label: '台北 (GMT+8) - 台灣標準時間' },
-  { value: 'UTC', label: 'UTC (格林威治標準時間)' },
-  { value: 'Asia/Tokyo', label: '東京 (GMT+9)' },
-  { value: 'Asia/Shanghai', label: '上海/北京 (GMT+8)' },
-  { value: 'Asia/Hong_Kong', label: '香港 (GMT+8)' },
-  { value: 'Asia/Singapore', label: '新加坡 (GMT+8)' },
-  { value: 'Asia/Dubai', label: '杜拜 (GMT+4)' },
-  { value: 'Asia/Kolkata', label: '印度 (GMT+5:30)' },
-  { value: 'Europe/London', label: '倫敦 (GMT+0)' },
-  { value: 'Europe/Berlin', label: '柏林 (GMT+1)' },
-  { value: 'Europe/Paris', label: '巴黎 (GMT+1)' },
-  { value: 'Europe/Rome', label: '羅馬 (GMT+1)' },
-  { value: 'America/New_York', label: '紐約 (GMT-5)' },
-  { value: 'America/Chicago', label: '芝加哥 (GMT-6)' },
-  { value: 'America/Denver', label: '丹佛 (GMT-7)' },
-  { value: 'America/Los_Angeles', label: '洛杉磯 (GMT-8)' },
-  { value: 'Australia/Sydney', label: '雪梨 (GMT+11)' },
-  { value: 'Pacific/Auckland', label: '奧克蘭 (GMT+13)' },
-];
-
 export default function SettingsGeneral() {
+  const { t } = useTranslation();
+    const TIMEZONES = [
+      { value: 'Asia/Taipei', label: t('autoGen.admin.key1276') },
+      { value: 'UTC', label: t('autoGen.admin.key1277') },
+      { value: 'Asia/Tokyo', label: t('autoGen.admin.key1278') },
+      { value: 'Asia/Shanghai', label: t('autoGen.admin.key1279') },
+      { value: 'Asia/Hong_Kong', label: t('autoGen.admin.key1280') },
+      { value: 'Asia/Singapore', label: t('autoGen.admin.key1281') },
+      { value: 'Asia/Dubai', label: t('autoGen.admin.key1282') },
+      { value: 'Asia/Kolkata', label: t('autoGen.admin.key1283') },
+      { value: 'Europe/London', label: t('autoGen.admin.key1284') },
+      { value: 'Europe/Berlin', label: t('autoGen.admin.key1285') },
+      { value: 'Europe/Paris', label: t('autoGen.admin.key1286') },
+      { value: 'Europe/Rome', label: t('autoGen.admin.key1287') },
+      { value: 'America/New_York', label: t('autoGen.admin.key1288') },
+      { value: 'America/Chicago', label: t('autoGen.admin.key1289') },
+      { value: 'America/Denver', label: t('autoGen.admin.key1290') },
+      { value: 'America/Los_Angeles', label: t('autoGen.admin.key1291') },
+      { value: 'Australia/Sydney', label: t('autoGen.admin.key1292') },
+      { value: 'Pacific/Auckland', label: t('autoGen.admin.key1293') },
+    ];
+
   const { user, refreshUser } = useAuth();
   const { i18n } = useTranslation();
   const token = localStorage.getItem('token') || '';
@@ -111,28 +112,28 @@ export default function SettingsGeneral() {
           i18n.changeLanguage(language);
           if (refreshUser) refreshUser();
         }
-        setSuccess('一般設定與個人化設定已更新');
+        setSuccess(t('autoGen.admin.key1294'));
         setTimeout(() => setSuccess(''), 3000);
       } else {
-        setError(typeof data.error === 'string' ? data.error : '儲存失敗');
+        setError(typeof data.error === 'string' ? data.error : t('autoGen.admin.key1295'));
       }
     } catch {
-      setError('網路連線錯誤');
+      setError(t('autoGen.admin.key1296'));
     } finally {
       setSaving(false);
     }
   }
 
-  if (loading) return <div className="p-6 text-gray-500">載入中...</div>;
+  if (loading) return <div className="p-6 text-gray-500">{t('autoGen.admin.key1297')}</div>;
   return (
     <div className="pb-12">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <Link to="/settings" className="text-sm text-primary-600 hover:text-primary-700">&larr; 返回設定</Link>
-          <h1 className="text-2xl font-bold text-gray-900 mt-1">一般設定</h1>
+          <Link to="/settings" className="text-sm text-primary-600 hover:text-primary-700">{t('autoGen.admin.key1298')}</Link>
+          <h1 className="text-2xl font-bold text-gray-900 mt-1">{t('autoGen.admin.key1299')}</h1>
         </div>
         <button onClick={handleSave} disabled={saving} className="px-6 py-2 bg-primary-600 text-white rounded-lg font-bold hover:bg-primary-700 transition-colors shadow-sm disabled:opacity-50">
-          {saving ? '儲存中...' : '儲存變更'}
+          {saving ? t('autoGen.admin.key1300') : t('autoGen.admin.key1301')}
         </button>
       </div>
 
@@ -142,10 +143,10 @@ export default function SettingsGeneral() {
       <div className="space-y-6">
         {/* Personal Preference */}
         <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-4">
-          <h2 className="text-lg font-semibold text-gray-900">個人化設定</h2>
+          <h2 className="text-lg font-semibold text-gray-900">{t('autoGen.admin.key1302')}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">系統顯示語言</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key1303')}</label>
               <select value={language} onChange={(e) => setLanguage(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
                 {SUPPORTED_LANGUAGES.map((l) => (
                   <option key={l.code} value={l.code}>
@@ -159,14 +160,14 @@ export default function SettingsGeneral() {
 
         {/* Contact Info */}
         <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-4">
-          <h2 className="text-lg font-semibold text-gray-900">聯絡資訊</h2>
+          <h2 className="text-lg font-semibold text-gray-900">{t('autoGen.admin.key1304')}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">聯絡電子郵件</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key1305')}</label>
               <input type="email" value={contactEmail} onChange={(e) => setContactEmail(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">聯絡電話</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key1306')}</label>
               <input type="text" value={contactPhone} onChange={(e) => setContactPhone(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500" />
             </div>
           </div>
@@ -174,42 +175,42 @@ export default function SettingsGeneral() {
 
         {/* Site Navigation & Membership */}
         <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-4">
-          <h2 className="text-lg font-semibold text-gray-900">網站導覽與入口顯示</h2>
-          <p className="text-sm text-gray-500">這裡只控制前台是否顯示入口連結；實際功能開關請到點餐、訂位等各設定頁調整。</p>
+          <h2 className="text-lg font-semibold text-gray-900">{t('autoGen.admin.key1307')}</h2>
+          <p className="text-sm text-gray-500">{t('autoGen.admin.key1308')}</p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-3">
-              <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider">顯示導覽連結</h3>
+              <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider">{t('autoGen.admin.key1309')}</h3>
               <label className="flex items-center gap-3 cursor-pointer">
                 <input type="checkbox" checked={navShowHome} onChange={(e) => setNavShowHome(e.target.checked)} className="w-4 h-4 text-primary-600 rounded" />
-                <span className="text-sm text-gray-700">顯示「首頁」</span>
+                <span className="text-sm text-gray-700">{t('autoGen.admin.key1310')}</span>
               </label>
               <label className="flex items-center gap-3 cursor-pointer">
                 <input type="checkbox" checked={navShowLocations} onChange={(e) => setNavShowLocations(e.target.checked)} className="w-4 h-4 text-primary-600 rounded" />
-                <span className="text-sm text-gray-700">顯示「分店資訊」</span>
+                <span className="text-sm text-gray-700">{t('autoGen.admin.key1311')}</span>
               </label>
               <label className="flex items-center gap-3 cursor-pointer">
                 <input type="checkbox" checked={navShowMenu} onChange={(e) => setNavShowMenu(e.target.checked)} className="w-4 h-4 text-primary-600 rounded" />
-                <span className="text-sm text-gray-700">顯示「線上點餐」</span>
+                <span className="text-sm text-gray-700">{t('autoGen.admin.key1312')}</span>
               </label>
               <label className="flex items-center gap-3 cursor-pointer">
                 <input type="checkbox" checked={navShowReservations} onChange={(e) => setNavShowReservations(e.target.checked)} className="w-4 h-4 text-primary-600 rounded" />
-                <span className="text-sm text-gray-700">顯示「訂位服務」</span>
+                <span className="text-sm text-gray-700">{t('autoGen.admin.key1313')}</span>
               </label>
             </div>
             <div className="space-y-3">
-              <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider">系統功能</h3>
+              <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider">{t('autoGen.admin.key1314')}</h3>
               <label className="flex items-center gap-3 cursor-pointer p-3 bg-gray-50 rounded-lg border border-gray-200">
                 <input type="checkbox" checked={showMembership} onChange={(e) => setShowMembership(e.target.checked)} className="w-4 h-4 text-primary-600 rounded" />
                 <div>
-                  <p className="text-sm font-bold text-gray-900">啟用會員系統</p>
-                  <p className="text-xs text-gray-500">關閉後將隱藏登入/註冊按鈕</p>
+                  <p className="text-sm font-bold text-gray-900">{t('autoGen.admin.key1315')}</p>
+                  <p className="text-xs text-gray-500">{t('autoGen.admin.key1316')}</p>
                 </div>
               </label>
               <label className="flex items-center gap-3 cursor-pointer p-3 bg-gray-50 rounded-lg border border-gray-200">
                 <input type="checkbox" checked={showLanguageEmoji} onChange={(e) => setShowLanguageEmoji(e.target.checked)} className="w-4 h-4 text-primary-600 rounded" />
                 <div>
-                  <p className="text-sm font-bold text-gray-900">顯示語言選單國旗/Emoji</p>
-                  <p className="text-xs text-gray-500">開啟後將在語言選單顯示國旗圖示</p>
+                  <p className="text-sm font-bold text-gray-900">{t('autoGen.admin.key1317')}</p>
+                  <p className="text-xs text-gray-500">{t('autoGen.admin.key1318')}</p>
                 </div>
               </label>
             </div>
@@ -218,24 +219,24 @@ export default function SettingsGeneral() {
 
         {/* Localization & Currency */}
         <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-4">
-          <h2 className="text-lg font-semibold text-gray-900">區域與貨幣</h2>
+          <h2 className="text-lg font-semibold text-gray-900">{t('autoGen.admin.key1319')}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">時區</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key1320')}</label>
               <select value={timezone} onChange={(e) => setTimezone(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
                 {TIMEZONES.map((tz) => <option key={tz.value} value={tz.value}>{tz.label}</option>)}
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">距離單位</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key1321')}</label>
               <div className="flex gap-4 mt-2">
                 <label className="flex items-center gap-2 text-sm">
                   <input type="radio" name="distanceUnit" value="km" checked={distanceUnit === 'km'} onChange={() => setDistanceUnit('km')} className="text-primary-600" />
-                  公里 (km)
+                  {t('autoGen.admin.key1322')}
                 </label>
                 <label className="flex items-center gap-2 text-sm">
                   <input type="radio" name="distanceUnit" value="mi" checked={distanceUnit === 'mi'} onChange={() => setDistanceUnit('mi')} className="text-primary-600" />
-                  英里 (mi)
+                  {t('autoGen.admin.key1323')}
                 </label>
               </div>
             </div>
@@ -243,32 +244,32 @@ export default function SettingsGeneral() {
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">預設幣別</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key1324')}</label>
               <input type="text" maxLength={3} value={defaultCurrency} onChange={(e) => setDefaultCurrency(e.target.value.toUpperCase())} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500" placeholder="TWD" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">貨幣符號</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key1325')}</label>
               <input type="text" maxLength={5} value={currencySymbol} onChange={(e) => setCurrencySymbol(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500" placeholder="$" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">符號位置</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key1326')}</label>
               <div className="flex gap-4 mt-2">
                 <label className="flex items-center gap-2 text-sm">
                   <input type="radio" name="currencyPosition" value="before" checked={currencyPosition === 'before'} onChange={() => setCurrencyPosition('before')} className="text-primary-600" />
-                  前方 ($10)
+                  {t('autoGen.admin.key1327')}
                 </label>
                 <label className="flex items-center gap-2 text-sm">
                   <input type="radio" name="currencyPosition" value="after" checked={currencyPosition === 'after'} onChange={() => setCurrencyPosition('after')} className="text-primary-600" />
-                  後方 (10$)
+                  {t('autoGen.admin.key1328')}
                 </label>
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">結帳金額小數點位數</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key1329')}</label>
               <select value={currencyDecimals} onChange={(e) => setCurrencyDecimals(Number(e.target.value))} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                <option value={0}>0 (整數，如台幣/日圓)</option>
+                <option value={0}>{t('autoGen.admin.key1330')}</option>
                 <option value={1}>1</option>
-                <option value={2}>2 (兩位小數，如美金)</option>
+                <option value={2}>{t('autoGen.admin.key1331')}</option>
                 <option value={3}>3</option>
                 <option value={4}>4</option>
               </select>
@@ -284,7 +285,7 @@ export default function SettingsGeneral() {
             disabled={saving}
             className="px-10 py-3 bg-primary-600 text-white rounded-xl font-bold hover:bg-primary-700 transition-all shadow-lg disabled:opacity-50"
           >
-            {saving ? '儲存中...' : '儲存所有變更'}
+            {saving ? t('autoGen.admin.key1332') : t('autoGen.admin.key1333')}
           </button>
       </div>
     </div>

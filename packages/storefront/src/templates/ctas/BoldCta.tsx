@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { useTheme } from '../../context/ThemeContext.js';
 import { useAuth } from '../../context/AuthContext.js';
@@ -20,6 +21,8 @@ export default function BoldCta({ cta, t, lang = 'zh-TW' }: CtaProps) {
   if (user || (!settings.showMembership && (!cta?.buttonLink || cta.buttonLink === '/register'))) {
     return null;
   }
+
+  const { t } = useTranslation();
 
   return (
     <section className="bg-gray-950 py-20 md:py-28">

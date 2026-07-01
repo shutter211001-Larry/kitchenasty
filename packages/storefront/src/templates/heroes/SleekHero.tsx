@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { useTheme } from '../../context/ThemeContext.js';
 import { getTranslated } from '../../utils/translation.js';
@@ -10,7 +11,6 @@ interface HeroProps {
 
 export default function SleekHero({ hero, t, lang = 'zh-TW' }: HeroProps) {
   const { settings } = useTheme();
-
   return (
     <section className="relative bg-gray-950 overflow-hidden min-h-[70vh] flex items-center">
       {/* Subtle glow effects */}
@@ -60,6 +60,7 @@ export default function SleekHero({ hero, t, lang = 'zh-TW' }: HeroProps) {
             const link = hero?.ctaSecondaryLink || '/locations';
             if (link === '/locations' && !settings.navShowLocations) return null;
             if (link === '/reservations' && (!settings.navShowReservations || !settings.reservationSettings?.enabled)) return null;
+            const { t } = useTranslation();
             return (
               <Link
                 to={link}

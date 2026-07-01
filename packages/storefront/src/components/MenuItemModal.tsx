@@ -64,6 +64,8 @@ interface Props {
 }
 
 export default function MenuItemModal({ itemId, onClose }: Props) {
+  const { t } = useTranslation();
+
   const { t, i18n } = useTranslation();
   const { addItem } = useCart();
   const { token } = useAuth();
@@ -232,7 +234,7 @@ export default function MenuItemModal({ itemId, onClose }: Props) {
                 <h2 className="text-xl font-bold text-main">{getTranslated(item.name, item.nameTranslations, i18n.language)}</h2>
                 <div className="flex flex-col items-end">
                   <span className="text-xl font-bold text-primary-600">${item.price.toFixed(2)}</span>
-                  <span className="text-[10px] text-hint">/ {getTranslated(item.unit || '份', item.unitTranslations || {}, i18n.language)}</span>
+                  <span className="text-[10px] text-hint">/ {getTranslated(item.unit || t('autoGen.store.key5'), item.unitTranslations || {}, i18n.language)}</span>
                 </div>
               </div>
               {item.description && (
@@ -298,7 +300,7 @@ export default function MenuItemModal({ itemId, onClose }: Props) {
                               <option key={val.id} value={val.id} disabled={isSoldOut}>
                                 {getTranslated(val.name, val.nameTranslations, i18n.language)}
                                 {val.priceModifier !== 0 && ` (+$${val.priceModifier.toFixed(2)})`}
-                                {isSoldOut ? ' (已售完)' : ''}
+                                {isSoldOut ? t('autoGen.store.key6') : ''}
                               </option>
                             );
                           })}
@@ -329,7 +331,7 @@ export default function MenuItemModal({ itemId, onClose }: Props) {
                                 />
                                 <span className="text-sm text-main flex-1">
                                   {getTranslated(val.name, val.nameTranslations, i18n.language)}
-                                  {isSoldOut && <span className="text-xs text-red-500 ml-2 font-semibold">已售完</span>}
+                                  {isSoldOut && <span className="text-xs text-red-500 ml-2 font-semibold">{t('autoGen.store.key7')}</span>}
                                 </span>
                                 {val.priceModifier !== 0 && (
                                   <span className="text-xs text-gray-500">
@@ -350,7 +352,7 @@ export default function MenuItemModal({ itemId, onClose }: Props) {
               <div className="mt-6 pt-4 border-t border-gray-200">
                 {item.isRewardItem && token && (
                   <div className="mb-4 bg-orange-50/50 border border-orange-100 p-3 rounded-lg flex items-center justify-between">
-                    <span className="text-sm font-semibold text-orange-950">兌換方式：</span>
+                    <span className="text-sm font-semibold text-orange-950">{t('autoGen.store.key8')}</span>
                     <div className="flex gap-2">
                       <button
                         type="button"
@@ -361,7 +363,7 @@ export default function MenuItemModal({ itemId, onClose }: Props) {
                             : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'
                         }`}
                       >
-                        現金付款
+                        {t('autoGen.store.key9')}
                       </button>
                       <button
                         type="button"
@@ -372,7 +374,7 @@ export default function MenuItemModal({ itemId, onClose }: Props) {
                             : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'
                         }`}
                       >
-                        紅利兌換 ({item.rewardPointsPrice} 點)
+                        {t('autoGen.store.key10')}{item.rewardPointsPrice} {t('autoGen.store.key11')}
                       </button>
                     </div>
                   </div>

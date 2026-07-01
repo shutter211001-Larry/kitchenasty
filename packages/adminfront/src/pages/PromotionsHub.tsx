@@ -1,8 +1,11 @@
+import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
 import CouponList from './CouponList.js';
 import CustomerLoyalty from './CustomerLoyalty.js';
 
 export default function PromotionsHub() {
+  const { t } = useTranslation();
+
   const [activeTab, setActiveTab] = useState<'coupons' | 'loyalty'>('coupons');
 
   return (
@@ -20,7 +23,7 @@ export default function PromotionsHub() {
               }
             `}
           >
-            🏷️ 優惠券與活動 (Coupons)
+            {t('autoGen.admin.key1119')}
           </button>
 
           <button
@@ -34,7 +37,7 @@ export default function PromotionsHub() {
               }
             `}
           >
-            🎁 會員紅利設定 (Loyalty & Rewards)
+            {t('autoGen.admin.key1120')}
           </button>
         </nav>
       </div>

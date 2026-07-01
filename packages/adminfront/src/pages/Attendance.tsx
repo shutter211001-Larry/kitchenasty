@@ -100,12 +100,12 @@ export default function Attendance() {
 
   const handleCheckIn = async (qrToken?: string) => {
     if (!qrToken && !selectedLocation) {
-      toast.error('請選擇打卡門市');
+      toast.error(t('autoGen.admin.key56'));
       return;
     }
     
     if (!qrToken && (currentLat === null || currentLng === null)) {
-      toast.error('無法取得定位，無法使用 GPS 打卡');
+      toast.error(t('autoGen.admin.key57'));
       return;
     }
 
@@ -128,16 +128,16 @@ export default function Attendance() {
       const data = await res.json();
       if (data.success) {
         if (data.data.isOutOfRange) {
-           toast.success('打卡成功 (距離過遠標記為異常)', { icon: '⚠️' });
+           toast.success(t('autoGen.admin.key58'), { icon: '⚠️' });
         } else {
-           toast.success('打卡成功');
+           toast.success(t('autoGen.admin.key59'));
         }
         fetchMyRecords();
       } else {
-        toast.error(data.error || '打卡失敗');
+        toast.error(data.error || t('autoGen.admin.key60'));
       }
     } catch (err) {
-      toast.error('系統錯誤');
+      toast.error(t('autoGen.admin.key61'));
     } finally {
       setLoading(false);
     }
@@ -154,13 +154,13 @@ export default function Attendance() {
       });
       const data = await res.json();
       if (data.success) {
-        toast.success('下班打卡成功');
+        toast.success(t('autoGen.admin.key62'));
         fetchMyRecords();
       } else {
-        toast.error(data.error || '打卡失敗');
+        toast.error(data.error || t('autoGen.admin.key63'));
       }
     } catch (err) {
-      toast.error('系統錯誤');
+      toast.error(t('autoGen.admin.key64'));
     } finally {
       setLoading(false);
     }
@@ -175,17 +175,17 @@ export default function Attendance() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="bg-white p-6 rounded shadow">
-          <h3 className="text-xl font-bold mb-4">目前狀態</h3>
+          <h3 className="text-xl font-bold mb-4">{t('autoGen.admin.key65')}</h3>
           
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">打卡門市</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key66')}</label>
             <select
               value={selectedLocation}
               onChange={(e) => setSelectedLocation(e.target.value)}
               className="w-full rounded border-gray-300"
               disabled={!!todayRecord}
             >
-              <option value="">請選擇</option>
+              <option value="">{t('autoGen.admin.key67')}</option>
               {locations.map(loc => (
                 <option key={loc.id} value={loc.id}>{loc.name}</option>
               ))}
@@ -194,20 +194,20 @@ export default function Attendance() {
 
           <div className="mb-4">
             <p className="text-sm text-gray-600">
-              定位狀態: {currentLat !== null ? '已取得' : (geoError || '定位中...')}
+              {t('autoGen.admin.key68')} {currentLat !== null ? t('autoGen.admin.key69') : (geoError || t('autoGen.admin.key70'))}
             </p>
           </div>
 
           {todayRecord ? (
             <div>
-              <p className="text-green-600 font-bold mb-4">您已經打卡上班</p>
-              <p className="mb-4">上班時間: {new Date(todayRecord.checkIn).toLocaleString()}</p>
+              <p className="text-green-600 font-bold mb-4">{t('autoGen.admin.key71')}</p>
+              <p className="mb-4">{t('autoGen.admin.key72')} {new Date(todayRecord.checkIn).toLocaleString()}</p>
               <button
                 onClick={() => handleCheckOut(todayRecord.id)}
                 disabled={loading}
                 className="bg-red-600 text-white px-6 py-2 rounded font-bold hover:bg-red-700 disabled:opacity-50"
               >
-                下班打卡
+                {t('autoGen.admin.key73')}
               </button>
             </div>
           ) : (
@@ -217,14 +217,14 @@ export default function Attendance() {
                 disabled={loading || currentLat === null}
                 className="flex-1 bg-blue-600 text-white px-6 py-2 rounded font-bold hover:bg-blue-700 disabled:opacity-50"
               >
-                GPS 上班打卡
+                {t('autoGen.admin.key74')}
               </button>
               <button
                 onClick={() => setShowScanner(true)}
                 disabled={loading}
                 className="flex-1 bg-indigo-600 text-white px-6 py-2 rounded font-bold hover:bg-indigo-700 disabled:opacity-50"
               >
-                掃描 QR Code
+                {t('autoGen.admin.key75')}
               </button>
             </div>
           )}
@@ -234,7 +234,7 @@ export default function Attendance() {
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75">
             <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md mx-4">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-xl font-bold">掃描門市 QR Code</h3>
+                <h3 className="text-xl font-bold">{t('autoGen.admin.key76')}</h3>
                 <button onClick={() => setShowScanner(false)} className="text-gray-500 hover:text-gray-800">
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
@@ -250,11 +250,11 @@ export default function Attendance() {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50 sticky top-0">
                 <tr>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">日期</th>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">上班時間</th>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">下班時間</th>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">門市</th>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">狀態</th>
+                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">{t('autoGen.admin.key77')}</th>
+                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">{t('autoGen.admin.key78')}</th>
+                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">{t('autoGen.admin.key79')}</th>
+                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">{t('autoGen.admin.key80')}</th>
+                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">{t('autoGen.admin.key81')}</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200 text-sm">
@@ -266,16 +266,16 @@ export default function Attendance() {
                     <td className="px-4 py-2">{record.location?.name}</td>
                     <td className="px-4 py-2">
                       {record.isOutOfRange ? (
-                        <span className="text-red-500 font-medium">距離異常</span>
+                        <span className="text-red-500 font-medium">{t('autoGen.admin.key82')}</span>
                       ) : (
-                        <span className="text-green-500 font-medium">正常</span>
+                        <span className="text-green-500 font-medium">{t('autoGen.admin.key83')}</span>
                       )}
                     </td>
                   </tr>
                 ))}
                 {myRecords.length === 0 && (
                   <tr>
-                    <td colSpan={5} className="px-4 py-4 text-center text-gray-500">尚無紀錄</td>
+                    <td colSpan={5} className="px-4 py-4 text-center text-gray-500">{t('autoGen.admin.key84')}</td>
                   </tr>
                 )}
               </tbody>

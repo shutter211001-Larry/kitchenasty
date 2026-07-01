@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { API_BASE, API_URL } from '../lib/api.js';
@@ -51,6 +52,8 @@ interface CartContextType {
 const CartContext = createContext<CartContextType | null>(null);
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
+  const { t } = useTranslation();
+
   // Generate or retrieve a persistent client ID for this browser session
   const [clientId] = useState(() => {
     let id = sessionStorage.getItem('shutter-client-id');
@@ -152,7 +155,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const addItem = useCallback((item: Omit<CartItem, 'id' | 'clientId'>) => {
     const randomId = Math.random().toString(36).substring(2, 9);
-    const guestName = sessionStorage.getItem('shutter-guest-name') || '顧客';
+    const guestName = sessionStorage.getItem('shutter-guest-name') || t('autoGen.store.key14');
     const newItem = { ...item, id: randomId, clientId, guestName };
     setItems((prev) => {
       const updated = [...prev, newItem];

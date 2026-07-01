@@ -1,7 +1,10 @@
+import { useTranslation } from 'react-i18next';
 import { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 
 export default function SettingsGoogle() {
+  const { t } = useTranslation();
+
   const token = localStorage.getItem('token') || '';
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -63,12 +66,12 @@ export default function SettingsGoogle() {
         if (data.data?.gmailClientSecret) setGmailClientSecret(data.data.gmailClientSecret);
         if (data.data?.gmailRefreshToken) setGmailRefreshToken(data.data.gmailRefreshToken);
         if (data.data?.googleMapsApiKey) setGoogleMapsApiKey(data.data.googleMapsApiKey);
-        toast.success('Google 設定已儲存');
+        toast.success(t('autoGen.admin.key1334'));
       } else {
-        toast.error(typeof data.error === 'string' ? data.error : '儲存失敗');
+        toast.error(typeof data.error === 'string' ? data.error : t('autoGen.admin.key1335'));
       }
     } catch {
-      toast.error('網路連線錯誤');
+      toast.error(t('autoGen.admin.key1336'));
     } finally {
       setSaving(false);
     }
@@ -86,9 +89,9 @@ export default function SettingsGoogle() {
     <div className="space-y-6 max-w-4xl">
       <div className="flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
         <div>
-          <h1 className="text-xl font-extrabold text-gray-900">Google 整合設定</h1>
+          <h1 className="text-xl font-extrabold text-gray-900">{t('autoGen.admin.key1337')}</h1>
           <p className="text-sm text-gray-500 mt-1">
-            在此設定您的 Google 相關服務，包含 AI、登入、郵件與地圖。
+            {t('autoGen.admin.key1338')}
           </p>
         </div>
         <button
@@ -96,7 +99,7 @@ export default function SettingsGoogle() {
           disabled={saving}
           className="px-6 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold rounded-xl shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50"
         >
-          {saving ? '儲存中...' : '儲存變更'}
+          {saving ? t('autoGen.admin.key1339') : t('autoGen.admin.key1340')}
         </button>
       </div>
 
@@ -104,7 +107,7 @@ export default function SettingsGoogle() {
         {/* Gemini AI Settings */}
         <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm space-y-4">
           <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-            ✨ Gemini AI 整合 (Gemini 1.5 Flash / Pro)
+            {t('autoGen.admin.key1341')}
           </h2>
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1.5">Gemini API Key</label>
@@ -113,10 +116,10 @@ export default function SettingsGoogle() {
               value={geminiApiKey}
               onChange={(e) => setGeminiApiKey(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 transition-all"
-              placeholder="已設定 (留白保持不變)"
+              placeholder={t('autoGen.admin.key1342')}
             />
             <p className="text-xs text-gray-500 mt-2">
-              取得金鑰請至 Google AI Studio。用於多語系自動翻譯與智能推薦。
+              {t('autoGen.admin.key1343')}
             </p>
           </div>
         </div>
@@ -124,7 +127,7 @@ export default function SettingsGoogle() {
         {/* Google SSO Settings */}
         <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm space-y-4">
           <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-            🔑 第三方登入整合 (Google SSO)
+            {t('autoGen.admin.key1344')}
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -134,7 +137,7 @@ export default function SettingsGoogle() {
                 value={googleLoginClientId}
                 onChange={(e) => setGoogleLoginClientId(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 transition-all"
-                placeholder="例如 12345-abcde.apps.googleusercontent.com"
+                placeholder={t('autoGen.admin.key1345')}
               />
             </div>
             <div>
@@ -144,22 +147,22 @@ export default function SettingsGoogle() {
                 value={googleLoginClientSecret}
                 onChange={(e) => setGoogleLoginClientSecret(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 transition-all"
-                placeholder="已設定 (留白保持不變)"
+                placeholder={t('autoGen.admin.key1346')}
               />
             </div>
           </div>
           <p className="text-xs text-blue-600 mt-2 bg-blue-50 p-2 rounded-lg border border-blue-100">
-            💡 設定完成後請重啟 API Server 以使 Passport 驗證策略生效。
+            {t('autoGen.admin.key1347')}
           </p>
         </div>
 
         {/* Gmail API Settings */}
         <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm space-y-4">
           <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-            ✉️ Gmail API 整合
+            {t('autoGen.admin.key1348')}
           </h2>
           <p className="text-sm text-gray-500 mb-4">
-            要使用 Gmail API 寄信，請在「郵件設定」選擇「GMAIL_API」，並在此處設定憑證。
+            {t('autoGen.admin.key1349')}
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
@@ -178,7 +181,7 @@ export default function SettingsGoogle() {
                 value={gmailClientSecret}
                 onChange={(e) => setGmailClientSecret(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 transition-all"
-                placeholder="已設定 (留白保持不變)"
+                placeholder={t('autoGen.admin.key1350')}
               />
             </div>
             <div>
@@ -188,7 +191,7 @@ export default function SettingsGoogle() {
                 value={gmailRefreshToken}
                 onChange={(e) => setGmailRefreshToken(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 transition-all"
-                placeholder="已設定 (留白保持不變)"
+                placeholder={t('autoGen.admin.key1351')}
               />
             </div>
           </div>
@@ -197,7 +200,7 @@ export default function SettingsGoogle() {
         {/* Google Maps Settings */}
         <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm space-y-4">
           <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-            🗺️ Google Maps 整合
+            {t('autoGen.admin.key1352')}
           </h2>
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1.5">Google Maps API Key</label>
@@ -206,7 +209,7 @@ export default function SettingsGoogle() {
               value={googleMapsApiKey}
               onChange={(e) => setGoogleMapsApiKey(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 transition-all"
-              placeholder="已設定 (留白保持不變)"
+              placeholder={t('autoGen.admin.key1353')}
             />
           </div>
         </div>

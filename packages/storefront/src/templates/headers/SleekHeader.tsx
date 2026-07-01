@@ -1,9 +1,12 @@
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import LanguageSwitcher from '../../components/LanguageSwitcher.js';
 import { useHeaderProps } from './useHeaderProps.js';
 
 export default function SleekHeader() {
   const { t, user, logout, itemCount, openCart, settings, navLinks, isActive, mobileOpen, setMobileOpen , isLoading, recentOrders } = useHeaderProps();
+
+  const { t } = useTranslation();
 
   return (
     <header className="bg-gray-950 border-b border-gray-800 sticky top-0 z-50">

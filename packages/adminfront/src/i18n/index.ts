@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import en from './locales/en.json';
@@ -15,9 +16,9 @@ import ja from './locales/ja.json';
 import ko from './locales/ko.json';
 
 export const SUPPORTED_LANGUAGES = [
-  { code: 'zh-TW', name: '繁體中文', flag: '🇹🇼' },
+  { code: 'zh-TW', name: t('autoGen.admin.key30'), flag: '🇹🇼' },
   { code: 'en', name: 'English', flag: '🇺🇸' },
-  { code: 'ja', name: '日本語', flag: '🇯🇵' },
+  { code: 'ja', name: t('autoGen.admin.key31'), flag: '🇯🇵' },
   { code: 'ko', name: '한국어', flag: '🇰🇷' },
   { code: 'th', name: 'ภาษาไทย', flag: '🇹🇭' },
   { code: 'id', name: 'Bahasa Indonesia', flag: '🇮🇩' },

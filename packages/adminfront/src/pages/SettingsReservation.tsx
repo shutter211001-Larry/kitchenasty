@@ -1,7 +1,10 @@
+import { useTranslation } from 'react-i18next';
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
 export default function SettingsReservation() {
+  const { t } = useTranslation();
+
   const token = localStorage.getItem('token') || '';
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -57,17 +60,17 @@ export default function SettingsReservation() {
     }
   }
 
-  if (loading) return <div className="p-6 text-gray-500">載入中...</div>;
+  if (loading) return <div className="p-6 text-gray-500">{t('autoGen.admin.key1517')}</div>;
 
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <Link to="/settings" className="text-sm text-primary-600 hover:text-primary-700">&larr; 返回設定</Link>
-          <h1 className="text-2xl font-bold text-gray-900 mt-1">訂位設定</h1>
+          <Link to="/settings" className="text-sm text-primary-600 hover:text-primary-700">{t('autoGen.admin.key1518')}</Link>
+          <h1 className="text-2xl font-bold text-gray-900 mt-1">{t('autoGen.admin.key1519')}</h1>
         </div>
         <button onClick={handleSave} disabled={saving} className="px-6 py-2 bg-primary-600 text-white rounded-lg font-bold hover:bg-primary-700 transition-colors shadow-sm disabled:opacity-50">
-          {saving ? '儲存中...' : '儲存變更'}
+          {saving ? t('autoGen.admin.key1520') : t('autoGen.admin.key1521')}
         </button>
       </div>
 
@@ -77,36 +80,36 @@ export default function SettingsReservation() {
       <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-4">
         <label className="flex items-center gap-3">
           <input type="checkbox" checked={enabled} onChange={(e) => setEnabled(e.target.checked)} className="w-4 h-4 text-primary-600 rounded" />
-          <span className="text-sm font-medium text-gray-700">啟用線上訂位功能</span>
+          <span className="text-sm font-medium text-gray-700">{t('autoGen.admin.key1522')}</span>
         </label>
 
         <div className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${!enabled ? 'opacity-50 pointer-events-none' : ''}`}>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">訂位間隔 (分鐘)</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key1523')}</label>
             <input type="number" min={1} value={timeInterval} onChange={(e) => setTimeInterval(parseInt(e.target.value) || 1)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500" />
-            <p className="mt-1 text-xs text-gray-500">開放訂位的時段間隔</p>
+            <p className="mt-1 text-xs text-gray-500">{t('autoGen.admin.key1524')}</p>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">用餐時間 (分鐘)</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key1525')}</label>
             <input type="number" min={1} value={stayTime} onChange={(e) => setStayTime(parseInt(e.target.value) || 1)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500" />
-            <p className="mt-1 text-xs text-gray-500">每組客人的平均用餐時間</p>
+            <p className="mt-1 text-xs text-gray-500">{t('autoGen.admin.key1526')}</p>
           </div>
         </div>
 
         <div className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${!enabled ? 'opacity-50 pointer-events-none' : ''}`}>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">最遠可預約天數 (天)</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key1527')}</label>
             <input type="number" min={1} value={maxAdvanceBookingDays} onChange={(e) => setMaxAdvanceBookingDays(parseInt(e.target.value) || 1)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">最晚取消通知 (小時)</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key1528')}</label>
             <input type="number" min={0} value={minCancellationNoticeHours} onChange={(e) => setMinCancellationNoticeHours(parseInt(e.target.value) || 0)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500" />
           </div>
         </div>
 
         <label className={`flex items-center gap-3 ${!enabled ? 'opacity-50 pointer-events-none' : ''}`}>
           <input type="checkbox" checked={autoConfirm} onChange={(e) => setAutoConfirm(e.target.checked)} className="w-4 h-4 text-primary-600 rounded" />
-          <span className="text-sm font-medium text-gray-700">自動確認訂位</span>
+          <span className="text-sm font-medium text-gray-700">{t('autoGen.admin.key1529')}</span>
         </label>
       </div>
 
@@ -116,7 +119,7 @@ export default function SettingsReservation() {
           disabled={saving}
           className="px-10 py-3 bg-primary-600 text-white rounded-xl font-bold hover:bg-primary-700 transition-all shadow-lg disabled:opacity-50"
         >
-          {saving ? '儲存中...' : '儲存所有變更'}
+          {saving ? t('autoGen.admin.key1530') : t('autoGen.admin.key1531')}
         </button>
       </div>
     </div>

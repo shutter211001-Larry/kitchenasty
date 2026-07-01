@@ -1,7 +1,10 @@
+import { useTranslation } from 'react-i18next';
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
 export default function SettingsOrder() {
+  const { t } = useTranslation();
+
   const token = localStorage.getItem('token') || '';
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -118,30 +121,30 @@ export default function SettingsOrder() {
       });
       const data = await res.json();
       if (data.success) {
-        setSuccess('訂單設定已更新');
+        setSuccess(t('autoGen.admin.key1416'));
         setTimeout(() => setSuccess(''), 3000);
       } else {
-        setError(typeof data.error === 'string' ? data.error : '儲存失敗');
+        setError(typeof data.error === 'string' ? data.error : t('autoGen.admin.key1417'));
       }
     } catch {
-      setError('網路錯誤');
+      setError(t('autoGen.admin.key1418'));
     } finally {
       setSaving(false);
     }
   }
 
-  if (loading) return <div className="p-6 text-gray-500">載入中...</div>;
+  if (loading) return <div className="p-6 text-gray-500">{t('autoGen.admin.key1419')}</div>;
 
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <Link to="/settings" className="text-sm text-primary-600 hover:text-primary-700">&larr; 返回設定</Link>
-          <h1 className="text-2xl font-bold text-gray-900 mt-1">線上點餐總設定</h1>
-          <p className="text-sm text-gray-500 mt-1">這裡控制全站點餐功能與預設值；各門市仍可在門市設定中覆寫外送、自取、最低消與準備時間。</p>
+          <Link to="/settings" className="text-sm text-primary-600 hover:text-primary-700">{t('autoGen.admin.key1420')}</Link>
+          <h1 className="text-2xl font-bold text-gray-900 mt-1">{t('autoGen.admin.key1421')}</h1>
+          <p className="text-sm text-gray-500 mt-1">{t('autoGen.admin.key1422')}</p>
         </div>
         <button onClick={handleSave} disabled={saving} className="px-6 py-2 bg-primary-600 text-white rounded-lg font-bold hover:bg-primary-700 transition-colors shadow-sm disabled:opacity-50">
-          {saving ? '儲存中...' : '儲存變更'}
+          {saving ? t('autoGen.admin.key1423') : t('autoGen.admin.key1424')}
         </button>
       </div>
 
@@ -152,49 +155,49 @@ export default function SettingsOrder() {
         <div className="space-y-4">
           <label className="flex items-center gap-3">
             <input type="checkbox" checked={enabled} onChange={(e) => setEnabled(e.target.checked)} className="w-4 h-4 text-primary-600 rounded" />
-            <span className="text-sm font-medium text-gray-700">開啟全站線上點餐功能</span>
+            <span className="text-sm font-medium text-gray-700">{t('autoGen.admin.key1425')}</span>
           </label>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-4 bg-gray-50 rounded-lg">
             <div className="space-y-4">
               <label className="flex items-center gap-3">
                 <input type="checkbox" checked={deliveryEnabled} onChange={(e) => setDeliveryEnabled(e.target.checked)} className="w-4 h-4 text-primary-600 rounded" />
-                <span className="text-sm font-bold text-gray-900">全站允許「外送」服務</span>
+                <span className="text-sm font-bold text-gray-900">{t('autoGen.admin.key1426')}</span>
               </label>
               <div className={!deliveryEnabled ? 'opacity-50 pointer-events-none' : ''}>
-                <label className="block text-xs text-gray-500 mb-1">預設外送最低消費金額 ($)</label>
+                <label className="block text-xs text-gray-500 mb-1">{t('autoGen.admin.key1427')}</label>
                 <input type="number" min={0} step={0.01} value={minOrderDelivery} onChange={(e) => setMinOrderDelivery(parseFloat(e.target.value) || 0)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500" />
-                <label className="block text-xs text-gray-500 mt-3 mb-1">預設外送預估時間 (分鐘)</label>
+                <label className="block text-xs text-gray-500 mt-3 mb-1">{t('autoGen.admin.key1428')}</label>
                 <input type="number" min={0} value={deliveryLeadTime} onChange={(e) => setDeliveryLeadTime(parseInt(e.target.value) || 0)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500" />
-                <p className="text-[10px] text-gray-500 mt-2">門市或外送區域有設定時，會優先使用更細的設定。</p>
+                <p className="text-[10px] text-gray-500 mt-2">{t('autoGen.admin.key1429')}</p>
               </div>
             </div>
 
             <div className="space-y-4 border-l border-gray-200 pl-6">
               <label className="flex items-center gap-3">
                 <input type="checkbox" checked={pickupEnabled} onChange={(e) => setPickupEnabled(e.target.checked)} className="w-4 h-4 text-primary-600 rounded" />
-                <span className="text-sm font-bold text-gray-900">全站允許「自取」服務</span>
+                <span className="text-sm font-bold text-gray-900">{t('autoGen.admin.key1430')}</span>
               </label>
               <div className={!pickupEnabled ? 'opacity-50 pointer-events-none' : ''}>
-                <label className="block text-xs text-gray-500 mb-1">預設自取最低消費金額 ($)</label>
+                <label className="block text-xs text-gray-500 mb-1">{t('autoGen.admin.key1431')}</label>
                 <input type="number" min={0} step={0.01} value={minOrderPickup} onChange={(e) => setMinOrderPickup(parseFloat(e.target.value) || 0)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500" />
-                <label className="block text-xs text-gray-500 mt-3 mb-1">預設自取準備時間 (分鐘)</label>
+                <label className="block text-xs text-gray-500 mt-3 mb-1">{t('autoGen.admin.key1432')}</label>
                 <input type="number" min={0} value={pickupLeadTime} onChange={(e) => setPickupLeadTime(parseInt(e.target.value) || 0)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500" />
-                <p className="text-[10px] text-gray-500 mt-2">門市有設定時，會優先使用門市準備時間。</p>
+                <p className="text-[10px] text-gray-500 mt-2">{t('autoGen.admin.key1433')}</p>
               </div>
             </div>
 
             <div className="space-y-4 border-l border-gray-200 pl-6">
               <label className="flex items-center gap-3">
                 <input type="checkbox" checked={frozenDeliveryEnabled} onChange={(e) => setFrozenDeliveryEnabled(e.target.checked)} className="w-4 h-4 text-primary-600 rounded" />
-                <span className="text-sm font-bold text-gray-900">全站允許「冷凍宅配」服務</span>
+                <span className="text-sm font-bold text-gray-900">{t('autoGen.admin.key1434')}</span>
               </label>
               <div className={!frozenDeliveryEnabled ? 'opacity-50 pointer-events-none' : ''}>
-                <label className="block text-xs text-gray-500 mb-1">預設冷凍宅配最低消費金額 ($)</label>
+                <label className="block text-xs text-gray-500 mb-1">{t('autoGen.admin.key1435')}</label>
                 <input type="number" min={0} step={0.01} value={minOrderFrozen} onChange={(e) => setMinOrderFrozen(parseFloat(e.target.value) || 0)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500" />
-                <label className="block text-xs text-gray-500 mt-3 mb-1">預設冷凍宅配準備時間 (分鐘)</label>
+                <label className="block text-xs text-gray-500 mt-3 mb-1">{t('autoGen.admin.key1436')}</label>
                 <input type="number" min={0} value={frozenLeadTime} onChange={(e) => setFrozenLeadTime(parseInt(e.target.value) || 0)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500" />
-                <label className="block text-xs text-gray-500 mt-3 mb-1">冷凍宅配基本運費 ($)</label>
+                <label className="block text-xs text-gray-500 mt-3 mb-1">{t('autoGen.admin.key1437')}</label>
                 <input type="number" min={0} step={0.01} value={frozenDeliveryFee} onChange={(e) => setFrozenDeliveryFee(parseFloat(e.target.value) || 0)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500" />
               </div>
             </div>
@@ -205,28 +208,28 @@ export default function SettingsOrder() {
           <label className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg border border-blue-100 cursor-pointer">
             <input type="checkbox" checked={allowGuestCheckout} onChange={(e) => setAllowGuestCheckout(e.target.checked)} className="w-4 h-4 text-primary-600 rounded" />
             <div>
-              <p className="text-sm font-bold text-gray-900">允許訪客結帳 (不強制加入會員)</p>
-              <p className="text-xs text-gray-500">開啟後，客人不需要登入帳號即可直接點餐結帳</p>
+              <p className="text-sm font-bold text-gray-900">{t('autoGen.admin.key1438')}</p>
+              <p className="text-xs text-gray-500">{t('autoGen.admin.key1439')}</p>
             </div>
           </label>
 
           <label className="flex items-center gap-3 p-3 bg-purple-50 rounded-lg border border-purple-100 cursor-pointer">
             <input type="checkbox" checked={enableCounterDisplay} onChange={(e) => setEnableCounterDisplay(e.target.checked)} className="w-4 h-4 text-primary-600 rounded" />
             <div>
-              <p className="text-sm font-bold text-gray-900">啟用「櫃台看板」功能</p>
-              <p className="text-xs text-gray-500">在側邊欄開啟櫃台專用的看板，可顯示顧客姓名與聯絡電話以利配餐</p>
+              <p className="text-sm font-bold text-gray-900">{t('autoGen.admin.key1440')}</p>
+              <p className="text-xs text-gray-500">{t('autoGen.admin.key1441')}</p>
             </div>
           </label>
 
           <label className="flex items-center gap-3">
             <input type="checkbox" checked={enableFutureOrdering} onChange={(e) => setEnableFutureOrdering(e.target.checked)} className="w-4 h-4 text-primary-600 rounded" />
-            <span className="text-sm font-medium text-gray-700">允許預約未來訂單 (Scheduled orders)</span>
+            <span className="text-sm font-medium text-gray-700">{t('autoGen.admin.key1442')}</span>
           </label>
 
           {enableFutureOrdering && (
             <div className="ml-7 p-4 bg-blue-50/50 rounded-lg border border-blue-100 grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="block text-xs font-bold text-blue-800 mb-1">開店後緩衝 (分鐘)</label>
+                <label className="block text-xs font-bold text-blue-800 mb-1">{t('autoGen.admin.key1443')}</label>
                 <input 
                   type="number" 
                   value={preOpeningBuffer} 
@@ -234,10 +237,10 @@ export default function SettingsOrder() {
                   className="w-full px-3 py-2 border border-blue-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500"
                   placeholder="30"
                 />
-                <p className="text-[10px] text-blue-600 mt-1">例如：11:00開門，設30則11:30才準取餐</p>
+                <p className="text-[10px] text-blue-600 mt-1">{t('autoGen.admin.key1444')}</p>
               </div>
               <div>
-                <label className="block text-xs font-bold text-blue-800 mb-1">打烊前緩衝 (分鐘)</label>
+                <label className="block text-xs font-bold text-blue-800 mb-1">{t('autoGen.admin.key1445')}</label>
                 <input 
                   type="number" 
                   value={postClosingBuffer} 
@@ -245,49 +248,49 @@ export default function SettingsOrder() {
                   className="w-full px-3 py-2 border border-blue-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500"
                   placeholder="30"
                 />
-                <p className="text-[10px] text-blue-600 mt-1">例如：21:00打烊，設30則20:30後不準預約</p>
+                <p className="text-[10px] text-blue-600 mt-1">{t('autoGen.admin.key1446')}</p>
               </div>
               <div>
-                <label className="block text-xs font-bold text-blue-800 mb-1">預約時段間隔 (分鐘)</label>
+                <label className="block text-xs font-bold text-blue-800 mb-1">{t('autoGen.admin.key1447')}</label>
                 <select 
                   value={timeSlotInterval} 
                   onChange={(e) => setTimeSlotInterval(parseInt(e.target.value))}
                   className="w-full px-3 py-2 border border-blue-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500"
                 >
-                  <option value={5}>5 分鐘</option>
-                  <option value={10}>10 分鐘</option>
-                  <option value={15}>15 分鐘</option>
-                  <option value={20}>20 分鐘</option>
-                  <option value={30}>30 分鐘</option>
-                  <option value={60}>60 分鐘</option>
+                  <option value={5}>{t('autoGen.admin.key1448')}</option>
+                  <option value={10}>{t('autoGen.admin.key1449')}</option>
+                  <option value={15}>{t('autoGen.admin.key1450')}</option>
+                  <option value={20}>{t('autoGen.admin.key1451')}</option>
+                  <option value={30}>{t('autoGen.admin.key1452')}</option>
+                  <option value={60}>{t('autoGen.admin.key1453')}</option>
                 </select>
-                <p className="text-[10px] text-blue-600 mt-1">客人選時間的跳動間隔</p>
+                <p className="text-[10px] text-blue-600 mt-1">{t('autoGen.admin.key1454')}</p>
               </div>
             </div>
           )}
 
           <label className="flex items-center gap-3">
             <input type="checkbox" checked={enableTipping} onChange={(e) => setEnableTipping(e.target.checked)} className="w-4 h-4 text-primary-600 rounded" />
-            <span className="text-sm font-medium text-gray-700">啟用小費功能</span>
+            <span className="text-sm font-medium text-gray-700">{t('autoGen.admin.key1455')}</span>
           </label>
 
           <div className={!enableTipping ? 'opacity-50 pointer-events-none' : ''}>
-            <label className="block text-sm font-medium text-gray-700 mb-1">小費選項 (百分比，以逗號分隔)</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key1456')}</label>
             <input type="text" value={tipOptionsStr} onChange={(e) => setTipOptionsStr(e.target.value)} className="w-full max-w-md px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500" placeholder="10,15,20,25" />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">稅率 (%)</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key1457')}</label>
             <input type="number" min={0} max={100} step={0.01} value={taxRate} onChange={(e) => setTaxRate(parseFloat(e.target.value) || 0)} className="w-full max-w-xs px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500" />
           </div>
 
           <div className="p-5 bg-orange-50/30 rounded-xl border border-orange-100/50 space-y-4">
             <h3 className="text-sm font-bold text-orange-950 flex items-center gap-1.5">
-              <span>🎁 會員紅利點數設定 (Loyalty Program)</span>
+              <span>{t('autoGen.admin.key1458')}</span>
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-semibold text-orange-900 mb-1">消費點數回饋率</label>
+                <label className="block text-xs font-semibold text-orange-900 mb-1">{t('autoGen.admin.key1459')}</label>
                 <input 
                   type="number" 
                   min={0} 
@@ -298,11 +301,11 @@ export default function SettingsOrder() {
                   placeholder="1.0"
                 />
                 <p className="text-[10px] text-orange-750 mt-1">
-                  每消費 $1 元可獲得的紅利點數。例如：設定 1 代表消費 $100 得 100 點；設定 0.1 代表消費 $100 得 10 點。
+                  {t('autoGen.admin.key1460')}
                 </p>
               </div>
               <div>
-                <label className="block text-xs font-semibold text-orange-900 mb-1">紅利折抵現金率</label>
+                <label className="block text-xs font-semibold text-orange-900 mb-1">{t('autoGen.admin.key1461')}</label>
                 <input 
                   type="number" 
                   min={1} 
@@ -313,14 +316,14 @@ export default function SettingsOrder() {
                   placeholder="100"
                 />
                 <p className="text-[10px] text-orange-750 mt-1">
-                  折抵 $1 元現金所需的紅利點數。例如：預設 100 代表 100 點折抵 $1 元。
+                  {t('autoGen.admin.key1462')}
                 </p>
               </div>
             </div>
           </div>
 
           <div className="p-4 bg-orange-50 rounded-lg border border-orange-100">
-            <label className="block text-sm font-bold text-orange-800 mb-1">看板顯示提前量 (分鐘)</label>
+            <label className="block text-sm font-bold text-orange-800 mb-1">{t('autoGen.admin.key1463')}</label>
             <input 
               type="number" 
               min={0} 
@@ -330,9 +333,9 @@ export default function SettingsOrder() {
               className="w-full max-w-xs px-3 py-2 border border-orange-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500" 
             />
             <p className="text-xs text-orange-600 mt-2">
-              設定預約訂單在取餐前多久會自動出現在看板的狀態欄位（待處理/製作中）中。
+              {t('autoGen.admin.key1464')}
               <br />
-              例如：設定 60 分鐘，則 12:00 取餐的訂單會在 11:00 出現在看板上。
+              {t('autoGen.admin.key1465')}
             </p>
           </div>
         </div>
@@ -344,7 +347,7 @@ export default function SettingsOrder() {
             disabled={saving}
             className="px-10 py-3 bg-primary-600 text-white rounded-xl font-bold hover:bg-primary-700 transition-all shadow-lg disabled:opacity-50"
           >
-            {saving ? '儲存中...' : '儲存所有變更'}
+            {saving ? t('autoGen.admin.key1466') : t('autoGen.admin.key1467')}
           </button>
         </div>
     </div>

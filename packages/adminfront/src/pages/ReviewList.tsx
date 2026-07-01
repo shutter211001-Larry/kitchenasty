@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useState, useEffect } from 'react';
 
 interface Review {
@@ -28,6 +29,8 @@ function StarRating({ rating }: { rating: number }) {
 }
 
 export default function ReviewList() {
+  const { t } = useTranslation();
+
   const [reviews, setReviews] = useState<Review[]>([]);
   const [pagination, setPagination] = useState<Pagination | null>(null);
   const [loading, setLoading] = useState(true);
@@ -87,7 +90,7 @@ export default function ReviewList() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">顧客評價 (Reviews)</h1>
+        <h1 className="text-2xl font-bold text-gray-900">{t('autoGen.admin.key1156')}</h1>
       </div>
 
       <div className="flex gap-3 mb-6">
@@ -95,24 +98,24 @@ export default function ReviewList() {
           value={filter}
           onChange={(e) => { setFilter(e.target.value); setPage(1); }}
           className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none"
-          aria-label="依審核狀態篩選"
+          aria-label={t('autoGen.admin.key1157')}
         >
-          <option value="">所有評價</option>
-          <option value="true">已核准</option>
-          <option value="false">待審核</option>
+          <option value="">{t('autoGen.admin.key1158')}</option>
+          <option value="true">{t('autoGen.admin.key1159')}</option>
+          <option value="false">{t('autoGen.admin.key1160')}</option>
         </select>
       </div>
 
       {loading && (
         <div className="flex justify-center py-12">
-          <div className="w-8 h-8 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin" role="status" aria-label="載入中" />
+          <div className="w-8 h-8 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin" role="status" aria-label={t('autoGen.admin.key1161')} />
         </div>
       )}
 
       {error && <div className="bg-red-50 text-red-700 p-4 rounded-lg mb-4">{error}</div>}
 
       {!loading && !error && reviews.length === 0 && (
-        <p className="text-gray-500 text-center py-12">找不到任何評價。</p>
+        <p className="text-gray-500 text-center py-12">{t('autoGen.admin.key1162')}</p>
       )}
 
       {!loading && reviews.length > 0 && (
@@ -132,7 +135,7 @@ export default function ReviewList() {
                   </div>
                   <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${review.isApproved ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
                     }`}>
-                    {review.isApproved ? '已核准' : '待審核'}
+                    {review.isApproved ? t('autoGen.admin.key1163') : t('autoGen.admin.key1164')}
                   </span>
                 </div>
                 {review.comment && (
@@ -145,7 +148,7 @@ export default function ReviewList() {
                       className="text-xs px-3 py-1 bg-green-50 text-green-700 rounded hover:bg-green-100"
                       aria-label={`核准 ${review.customer.name} 的評價`}
                     >
-                      核准 (Approve)
+                      {t('autoGen.admin.key1165')}
                     </button>
                   )}
                   {review.isApproved && (
@@ -154,7 +157,7 @@ export default function ReviewList() {
                       className="text-xs px-3 py-1 bg-yellow-50 text-yellow-700 rounded hover:bg-yellow-100"
                       aria-label={`取消核准 ${review.customer.name} 的評價`}
                     >
-                      撤銷核准 (Unapprove)
+                      {t('autoGen.admin.key1166')}
                     </button>
                   )}
                   <button
@@ -162,7 +165,7 @@ export default function ReviewList() {
                     className="text-xs px-3 py-1 bg-red-50 text-red-700 rounded hover:bg-red-100"
                     aria-label={`刪除 ${review.customer.name} 的評價`}
                   >
-                    刪除 (Delete)
+                    {t('autoGen.admin.key1167')}
                   </button>
                 </div>
               </div>
@@ -176,17 +179,17 @@ export default function ReviewList() {
                 onClick={() => setPage((p) => p - 1)}
                 className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg disabled:opacity-40 hover:bg-gray-50"
               >
-                上一頁
+                {t('autoGen.admin.key1168')}
               </button>
               <span className="text-sm text-gray-600">
-                第 {pagination.page} 頁，共 {pagination.totalPages} 頁
+                {t('autoGen.admin.key1169')} {pagination.page} {t('autoGen.admin.key1170')} {pagination.totalPages} {t('autoGen.admin.key1171')}
               </span>
               <button
                 disabled={page >= pagination.totalPages}
                 onClick={() => setPage((p) => p + 1)}
                 className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg disabled:opacity-40 hover:bg-gray-50"
               >
-                下一頁
+                {t('autoGen.admin.key1172')}
               </button>
             </div>
           )}

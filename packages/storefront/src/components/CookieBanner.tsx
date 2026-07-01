@@ -70,42 +70,9 @@ export default function CookieBanner() {
   }, [preferences, saveConsent]);
 
   // Allow reopening via custom event (used by Footer "Cookie Settings" link)
-  useEffect(() => {
-    function handleOpen() {
-      if (categories.length === 0) {
-        fetch(`${API_BASE}/legal/cookie-categories`)
-          .then((r) => r.json())
-          .then((res) => {
-            if (res.success) {
-              setCategories(res.data);
-              const stored = localStorage.getItem(STORAGE_KEY);
-              const prefs: Record<string, boolean> = stored ? JSON.parse(stored) : {};
-              const merged: Record<string, boolean> = {};
-              for (const cat of res.data) {
-                merged[cat.id] = cat.isRequired ? true : (prefs[cat.id] ?? false);
-              }
-              setPreferences(merged);
-              setVisible(true);
-            }
-          })
-          .catch(() => {});
-      } else {
-        const stored = localStorage.getItem(STORAGE_KEY);
-        const prefs: Record<string, boolean> = stored ? JSON.parse(stored) : {};
-        const merged: Record<string, boolean> = {};
-        for (const cat of categories) {
-          merged[cat.id] = cat.isRequired ? true : (prefs[cat.id] ?? false);
-        }
-        setPreferences(merged);
-        setVisible(true);
-      }
-    }
-
-    window.addEventListener('open-cookie-settings', handleOpen);
-    return () => window.removeEventListener('open-cookie-settings', handleOpen);
-  }, [categories]);
-
   if (!visible) return null;
+
+  const { t } = useTranslation();
 
   return (
     <div className="fixed bottom-0 inset-x-0 z-50 bg-white border-t border-gray-200 shadow-lg">

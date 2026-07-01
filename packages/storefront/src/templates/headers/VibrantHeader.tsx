@@ -1,9 +1,12 @@
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import LanguageSwitcher from '../../components/LanguageSwitcher.js';
 import { useHeaderProps } from './useHeaderProps.js';
 
 export default function VibrantHeader() {
   const { t, user, logout, itemCount, openCart, settings, navLinks, isActive, mobileOpen, setMobileOpen , isLoading, recentOrders } = useHeaderProps();
+
+  const { t } = useTranslation();
 
   return (
     <header className="bg-gradient-to-r from-primary-600 via-secondary-600 to-primary-600 text-white sticky top-0 z-50">

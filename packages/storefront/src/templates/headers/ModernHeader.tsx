@@ -1,9 +1,12 @@
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import LanguageSwitcher from '../../components/LanguageSwitcher.js';
 import { useHeaderProps } from './useHeaderProps.js';
 
 export default function ModernHeader() {
   const { t, user, logout, isLoading, itemCount, openCart, settings, navLinks, isActive, mobileOpen, setMobileOpen, headerRef , recentOrders } = useHeaderProps();
+
+  const { t } = useTranslation();
 
   return (
     <header ref={headerRef} className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-b border-gray-200/50 dark:border-gray-700/50 sticky top-0 z-50">

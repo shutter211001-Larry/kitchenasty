@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { useTheme } from '../../context/ThemeContext.js';
 import { getTranslated } from '../../utils/translation.js';
@@ -13,7 +14,6 @@ export default function RusticHero({ hero, t, lang = 'zh-TW' }: HeroProps) {
   const bgStyle = hero?.backgroundImage
     ? { backgroundImage: `url(${hero.backgroundImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }
     : undefined;
-
   return (
     <section
       className="relative bg-stone-100 dark:bg-stone-900 min-h-[70vh] flex items-center"
@@ -60,6 +60,7 @@ export default function RusticHero({ hero, t, lang = 'zh-TW' }: HeroProps) {
             const link = hero?.ctaSecondaryLink || '/locations';
             if (link === '/locations' && !settings.navShowLocations) return null;
             if (link === '/reservations' && (!settings.navShowReservations || !settings.reservationSettings?.enabled)) return null;
+            const { t } = useTranslation();
             return (
               <Link
                 to={link}

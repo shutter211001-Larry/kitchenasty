@@ -1,8 +1,11 @@
+import { useTranslation } from 'react-i18next';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext.js';
 import { api } from '../lib/api.js';
 
 export default function SettingsLine() {
+  const { t } = useTranslation();
+
   const { token } = useAuth();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -94,11 +97,11 @@ export default function SettingsLine() {
         linePayEnabled, linePayChannelId, linePayChannelSecret, linePaySandbox,
         linePayApiUrl, linePayProxyUrl, linePayReturnUrl
       });
-      setSuccess('設定已儲存');
+      setSuccess(t('autoGen.admin.key1370'));
       fetchStatus();
       setTimeout(() => setSuccess(''), 3000);
     } catch (err: any) {
-      setError(err.message || '儲存失敗');
+      setError(err.message || t('autoGen.admin.key1371'));
     } finally {
       setSaving(false);
     }
@@ -118,15 +121,15 @@ export default function SettingsLine() {
     <div className="max-w-4xl">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">LINE 整合設定</h1>
-          <p className="text-sm text-gray-500 mt-1">配置您的 LINE 官方帳號 (Messaging API) 與一鍵登入功能 (LINE Login)</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t('autoGen.admin.key1372')}</h1>
+          <p className="text-sm text-gray-500 mt-1">{t('autoGen.admin.key1373')}</p>
         </div>
         <button
           onClick={handleSave}
           disabled={saving}
           className="px-6 py-2 bg-primary-600 text-white rounded-lg font-bold hover:bg-primary-700 transition-colors shadow-sm disabled:opacity-50"
         >
-          {saving ? '儲存中...' : '儲存設定'}
+          {saving ? t('autoGen.admin.key1374') : t('autoGen.admin.key1375')}
         </button>
       </div>
 
@@ -135,8 +138,8 @@ export default function SettingsLine() {
         <div className="flex items-center gap-3">
           <span className="text-2xl">🏬</span>
           <div>
-            <h3 className="text-sm font-bold text-gray-900 font-sans">分店獨立 LINE 設定 (Branch LINE Settings)</h3>
-            <p className="text-xs text-gray-500 font-sans">切換分店以進行專屬的 LINE 參數覆寫，未設定之分店將繼承全域 LINE 官方帳號與 LIFF 設定。</p>
+            <h3 className="text-sm font-bold text-gray-900 font-sans">{t('autoGen.admin.key1376')}</h3>
+            <p className="text-xs text-gray-500 font-sans">{t('autoGen.admin.key1377')}</p>
           </div>
         </div>
         <select
@@ -144,7 +147,7 @@ export default function SettingsLine() {
           onChange={(e) => setSelectedLocationId(e.target.value)}
           className="px-3.5 py-2 border border-gray-300 rounded-xl text-sm font-medium focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all cursor-pointer bg-gray-50 hover:bg-gray-100 font-sans"
         >
-          <option value="">🌐 全域系統預設設定 (System Default)</option>
+          <option value="">{t('autoGen.admin.key1378')}</option>
           {locations.map((loc) => (
             <option key={loc.id} value={loc.id}>
               📍 {loc.name}
@@ -158,26 +161,26 @@ export default function SettingsLine() {
 
       <div className="space-y-6">
         <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">官方帳號連結</h2>
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('autoGen.admin.key1379')}</h2>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">加入好友網址</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key1380')}</label>
               <input
                 type="text"
                 value={officialAccountUrl}
                 onChange={(e) => setOfficialAccountUrl(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500"
-                placeholder="例如 https://line.me/R/ti/p/@yourid"
+                placeholder={t('autoGen.admin.key1381')}
               />
               <p className="text-xs text-gray-500 mt-2">
-                請在 LINE Official Account Manager 取得您的「加入好友」連結。前台將會使用此連結導引顧客。
+                {t('autoGen.admin.key1382')}
               </p>
             </div>
           </div>
         </div>
 
         <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">系統整合金鑰 (Messaging API)</h2>
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('autoGen.admin.key1383')}</h2>
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Channel Secret</label>
@@ -186,7 +189,7 @@ export default function SettingsLine() {
                 value={channelSecret}
                 onChange={(e) => setChannelSecret(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500"
-                placeholder={status.channelSecret ? "已設定 (留白保持不變)" : "請輸入 Channel Secret"}
+                placeholder={status.channelSecret ? t('autoGen.admin.key1384') : t('autoGen.admin.key1385')}
               />
             </div>
             <div>
@@ -196,17 +199,17 @@ export default function SettingsLine() {
                 value={channelAccessToken}
                 onChange={(e) => setChannelAccessToken(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500"
-                placeholder={status.channelAccessToken ? "已設定 (留白保持不變)" : "請輸入 Channel Access Token"}
+                placeholder={status.channelAccessToken ? t('autoGen.admin.key1386') : t('autoGen.admin.key1387')}
               />
             </div>
             <p className="text-xs text-gray-500 mt-2">
-              請至 LINE Developers Console 的 <strong>Messaging API Channel</strong> 取得對應的金鑰，此為後端自動回覆與傳送訊息所需之重要憑證。
+              {t('autoGen.admin.key1388')} <strong>Messaging API Channel</strong> {t('autoGen.admin.key1389')}
             </p>
           </div>
         </div>
 
         <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Webhook 設定 (Messaging API)</h2>
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('autoGen.admin.key1390')}</h2>
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Webhook URL</label>
@@ -220,15 +223,15 @@ export default function SettingsLine() {
                 <button
                   onClick={() => {
                     navigator.clipboard.writeText(webhookUrl);
-                    alert('已複製到剪貼簿');
+                    alert(t('autoGen.admin.key1391'));
                   }}
                   className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50"
                 >
-                  複製
+                  {t('autoGen.admin.key1392')}
                 </button>
               </div>
               <p className="text-xs text-gray-500 mt-2">
-                請將此 URL 貼回 LINE Developers Console 中 <strong>Messaging API Channel</strong> 的 Webhook URL 欄位，並開啟 「Use webhook」 選項。
+                {t('autoGen.admin.key1393')} <strong>Messaging API Channel</strong> {t('autoGen.admin.key1394')}
               </p>
             </div>
           </div>
@@ -236,20 +239,20 @@ export default function SettingsLine() {
 
         <div className="bg-white rounded-lg border border-gray-200 p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900">一鍵登入設定 (LINE Login / LIFF)</h2>
+            <h2 className="text-lg font-semibold text-gray-900">{t('autoGen.admin.key1395')}</h2>
           </div>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">LIFF ID (建議填寫)</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key1396')}</label>
               <input
                 type="text"
                 value={liffId}
                 onChange={(e) => setLiffId(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500"
-                placeholder="例如 2000000000-XXXXXXXX"
+                placeholder={t('autoGen.admin.key1397')}
               />
               <p className="text-xs text-gray-500 mt-2">
-                請至 LINE Developers Console 的 <strong>LINE Login Channel</strong> 中建立 LIFF 應用程式以取得 LIFF ID。填寫此 ID 後，前台將會開啟「一鍵自動綁定」與「一鍵登入」功能。
+                {t('autoGen.admin.key1398')} <strong>LINE Login Channel</strong> {t('autoGen.admin.key1399')}
               </p>
             </div>
           </div>
@@ -272,23 +275,23 @@ export default function SettingsLine() {
                   value={lineLoginChannelSecret}
                   onChange={(e) => setLineLoginChannelSecret(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500"
-                  placeholder="已設定 (留白保持不變)"
+                  placeholder={t('autoGen.admin.key1400')}
                 />
               </div>
             </div>
             <p className="text-xs text-gray-500">
-              若需要完整的 SSO (一鍵登入) 流程，除了 LIFF 外也可以填寫 LINE Login Channel ID 與 Secret 供後端驗證。
+              {t('autoGen.admin.key1401')}
             </p>
           </div>
         </div>
 
         <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900">LINE Pay 整合設定</h2>
+            <h2 className="text-lg font-semibold text-gray-900">{t('autoGen.admin.key1402')}</h2>
             <label className="relative inline-flex items-center cursor-pointer">
               <input type="checkbox" className="sr-only peer" checked={linePayEnabled} onChange={(e) => setLinePayEnabled(e.target.checked)} />
               <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#00B900]"></div>
-              <span className="ml-3 text-sm font-medium text-gray-700">啟用 LINE Pay</span>
+              <span className="ml-3 text-sm font-medium text-gray-700">{t('autoGen.admin.key1403')}</span>
             </label>
           </div>
           <div className="space-y-4">
@@ -309,13 +312,13 @@ export default function SettingsLine() {
                   value={linePayChannelSecret}
                   onChange={(e) => setLinePayChannelSecret(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#00B900]"
-                  placeholder="已設定 (留白保持不變)"
+                  placeholder={t('autoGen.admin.key1404')}
                 />
               </div>
             </div>
             
             <div className="pt-4 border-t border-gray-100">
-              <h3 className="text-sm font-semibold text-gray-800 mb-3">進階網址設定 (Advanced Routing)</h3>
+              <h3 className="text-sm font-semibold text-gray-800 mb-3">{t('autoGen.admin.key1405')}</h3>
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">LINE Pay API URL</label>
@@ -324,33 +327,33 @@ export default function SettingsLine() {
                     value={linePayApiUrl}
                     onChange={(e) => setLinePayApiUrl(e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-[#00B900]"
-                    placeholder="預設: https://api-pay.line.me"
+                    placeholder={t('autoGen.admin.key1406')}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Forward Proxy URL (Railway/固定IP代理用)</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key1407')}</label>
                   <input
                     type="text"
                     value={linePayProxyUrl}
                     onChange={(e) => setLinePayProxyUrl(e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-[#00B900]"
-                    placeholder="例如: http://proxy-user:pass@proxy-host:port (若不需要請留白)"
+                    placeholder={t('autoGen.admin.key1408')}
                   />
                   <p className="text-xs text-gray-500 mt-1">
-                    由於 LINE Pay 需要綁定固定 IP (White-listed IP)，在 Railway 或 Vercel 環境中，您可以透過設定 Forward Proxy 來解決 IP 變動的問題。
+                    {t('autoGen.admin.key1409')}
                   </p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Return URL (自訂跳轉網址)</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key1410')}</label>
                   <input
                     type="text"
                     value={linePayReturnUrl}
                     onChange={(e) => setLinePayReturnUrl(e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-[#00B900]"
-                    placeholder="請留白以使用系統動態產生的 Return URL"
+                    placeholder={t('autoGen.admin.key1411')}
                   />
                   <p className="text-xs text-gray-500 mt-1">
-                    建議留白，系統會自動處理結帳後的跳轉。僅在特定架構 (例如獨立的前後端分離跨域跳轉) 之下才需要強制指定。
+                    {t('autoGen.admin.key1412')}
                   </p>
                 </div>
               </div>
@@ -364,7 +367,7 @@ export default function SettingsLine() {
                 onChange={(e) => setLinePaySandbox(e.target.checked)}
                 className="w-4 h-4 text-[#00B900] border-gray-300 rounded focus:ring-[#00B900]"
               />
-              <label htmlFor="linePaySandbox" className="text-sm text-gray-700">啟用 Sandbox 測試模式</label>
+              <label htmlFor="linePaySandbox" className="text-sm text-gray-700">{t('autoGen.admin.key1413')}</label>
             </div>
           </div>
         </div>
@@ -375,7 +378,7 @@ export default function SettingsLine() {
             disabled={saving}
             className="px-10 py-3 bg-primary-600 text-white rounded-xl font-bold hover:bg-primary-700 transition-all shadow-lg disabled:opacity-50"
           >
-            {saving ? '儲存中...' : '儲存所有設定'}
+            {saving ? t('autoGen.admin.key1414') : t('autoGen.admin.key1415')}
           </button>
         </div>
       </div>

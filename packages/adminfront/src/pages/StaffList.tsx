@@ -121,7 +121,7 @@ export default function StaffList() {
 
       {loading && (
         <div className="flex justify-center py-12">
-          <div className="w-8 h-8 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin" role="status" aria-label="載入中" />
+          <div className="w-8 h-8 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin" role="status" aria-label={t('autoGen.admin.key1548')} />
         </div>
       )}
 
@@ -169,7 +169,7 @@ export default function StaffList() {
                               ? 'bg-green-100 text-green-700'
                               : 'bg-gray-100 text-gray-500'
                           }`}
-                        aria-label={`${member.isActive ? '停用' : '啟用'} ${member.name}`}
+                        aria-label={`${member.isActive ? t('autoGen.admin.key1549') : t('autoGen.admin.key1550')} ${member.name}`}
                       >
                         {member.isActive ? t('staff.isActive') : t('staff.isInactive')}
                       </button>
@@ -195,17 +195,17 @@ export default function StaffList() {
                 onClick={() => setPage((p) => p - 1)}
                 className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg disabled:opacity-40 hover:bg-gray-50"
               >
-                上一頁
+                {t('autoGen.admin.key1551')}
               </button>
               <span className="text-sm text-gray-600">
-                第 {pagination.page} 頁，共 {pagination.totalPages} 頁
+                {t('autoGen.admin.key1552')} {pagination.page} {t('autoGen.admin.key1553')} {pagination.totalPages} {t('autoGen.admin.key1554')}
               </span>
               <button
                 disabled={page >= pagination.totalPages}
                 onClick={() => setPage((p) => p + 1)}
                 className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg disabled:opacity-40 hover:bg-gray-50"
               >
-                下一頁
+                {t('autoGen.admin.key1555')}
               </button>
             </div>
           )}

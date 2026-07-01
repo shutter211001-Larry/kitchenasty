@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useEffect, useState } from 'react';
 import { api } from '../lib/api.js';
 
@@ -62,6 +63,8 @@ interface Mapping {
 }
 
 export default function StockManagement() {
+  const { t } = useTranslation();
+
   const [categories, setCategories] = useState<Category[]>([]);
   const [items, setItems] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -103,7 +106,7 @@ export default function StockManagement() {
       setMappings(mappingsRes.data || []);
       setError(null);
     } catch (err: any) {
-      setError(err.message || '無法載入庫存資料');
+      setError(err.message || t('autoGen.admin.key1556'));
     } finally {
       setLoading(false);
     }
@@ -205,7 +208,7 @@ export default function StockManagement() {
   // Save recipe mapping
   const handleSaveBinding = async (menuItem: MenuItem, recipeId: string) => {
     if (!recipeId) {
-      alert('請先選擇一個食譜再進行綁定！');
+      alert(t('autoGen.admin.key1557'));
       return;
     }
 
@@ -316,7 +319,7 @@ export default function StockManagement() {
     return (
       <div className="flex flex-col items-center justify-center py-12">
         <div className="w-12 h-12 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin mb-4" />
-        <p className="text-gray-500 font-medium">載入商品與庫存關聯中...</p>
+        <p className="text-gray-500 font-medium">{t('autoGen.admin.key1558')}</p>
       </div>
     );
   }
@@ -326,9 +329,9 @@ export default function StockManagement() {
       {/* Title Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-gray-800">📦 雙重庫存關係面板 (Double-Stock Matrix)</h2>
+          <h2 className="text-2xl font-bold text-gray-800">{t('autoGen.admin.key1559')}</h2>
           <p className="text-sm text-gray-500 mt-1">
-            視覺化觀察「分類共用庫存 (如：當日麵團顆數)」與「商品獨立庫存」的關聯。您可在本頁面直接修改，系統會即時存檔。
+            {t('autoGen.admin.key1560')}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2 self-start md:self-auto">
@@ -349,20 +352,20 @@ export default function StockManagement() {
               }
 
               if (!url) {
-                alert('系統 (前端與後端) 均未設定 ERP_URL_PUBLIC 環境變數，無法自動跳轉！');
+                alert(t('autoGen.admin.key1561'));
                 return;
               }
               window.open(url, '_blank');
             }}
             className="px-4 py-2 bg-indigo-600 border border-transparent rounded-lg text-sm font-medium text-white hover:bg-indigo-700 shadow-sm transition-colors inline-flex items-center gap-1.5"
           >
-            🏢 前往 ERP 管理
+            {t('autoGen.admin.key1562')}
           </button>
           <button
             onClick={fetchData}
             className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 shadow-sm transition-colors inline-flex items-center gap-1.5"
           >
-            🔄 重新整理
+            {t('autoGen.admin.key1563')}
           </button>
         </div>
       </div>
@@ -371,27 +374,27 @@ export default function StockManagement() {
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center justify-between">
           <span>{error}</span>
-          <button onClick={fetchData} className="underline font-medium hover:text-red-900">重試</button>
+          <button onClick={fetchData} className="underline font-medium hover:text-red-900">{t('autoGen.admin.key1564')}</button>
         </div>
       )}
 
       {/* Overall Stats Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white rounded-xl shadow-sm border border-gray-150 p-4 transition-all hover:shadow-md">
-          <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider">總商品品項</div>
-          <div className="text-2xl font-bold text-gray-800 mt-1">{totalItems} <span className="text-xs text-gray-400 font-normal">個</span></div>
+          <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider">{t('autoGen.admin.key1565')}</div>
+          <div className="text-2xl font-bold text-gray-800 mt-1">{totalItems} <span className="text-xs text-gray-400 font-normal">{t('autoGen.admin.key1566')}</span></div>
         </div>
         <div className="bg-white rounded-xl shadow-sm border border-gray-150 p-4 transition-all hover:shadow-md">
-          <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider">獨立追蹤庫存</div>
-          <div className="text-2xl font-bold text-indigo-600 mt-1">{trackedItems} <span className="text-xs text-gray-400 font-normal">品項</span></div>
+          <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider">{t('autoGen.admin.key1567')}</div>
+          <div className="text-2xl font-bold text-indigo-600 mt-1">{trackedItems} <span className="text-xs text-gray-400 font-normal">{t('autoGen.admin.key1568')}</span></div>
         </div>
         <div className="bg-white rounded-xl shadow-sm border border-gray-150 p-4 transition-all hover:shadow-md">
-          <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider">⚠️ 庫存預警 / 低庫存</div>
-          <div className="text-2xl font-bold text-amber-600 mt-1">{warningItemsCount} <span className="text-xs text-gray-400 font-normal">品項</span></div>
+          <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider">{t('autoGen.admin.key1569')}</div>
+          <div className="text-2xl font-bold text-amber-600 mt-1">{warningItemsCount} <span className="text-xs text-gray-400 font-normal">{t('autoGen.admin.key1570')}</span></div>
         </div>
         <div className="bg-white rounded-xl shadow-sm border border-gray-150 p-4 transition-all hover:shadow-md">
-          <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider">🚫 已售完 / 缺貨中</div>
-          <div className="text-2xl font-bold text-red-600 mt-1">{soldOutItemsCount} <span className="text-xs text-gray-400 font-normal">品項</span></div>
+          <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider">{t('autoGen.admin.key1571')}</div>
+          <div className="text-2xl font-bold text-red-600 mt-1">{soldOutItemsCount} <span className="text-xs text-gray-400 font-normal">{t('autoGen.admin.key1572')}</span></div>
         </div>
       </div>
 
@@ -399,10 +402,10 @@ export default function StockManagement() {
       <div className="bg-white rounded-xl shadow-sm border border-gray-150 p-4 grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
         {/* Search */}
         <div>
-          <label className="block text-xs font-bold text-gray-400 uppercase mb-1">搜尋商品</label>
+          <label className="block text-xs font-bold text-gray-400 uppercase mb-1">{t('autoGen.admin.key1573')}</label>
           <input
             type="text"
-            placeholder="搜尋商品名稱，例如：瑪格麗特..."
+            placeholder={t('autoGen.admin.key1574')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
@@ -411,46 +414,46 @@ export default function StockManagement() {
 
         {/* Category select */}
         <div>
-          <label className="block text-xs font-bold text-gray-400 uppercase mb-1">按商品分類篩選</label>
+          <label className="block text-xs font-bold text-gray-400 uppercase mb-1">{t('autoGen.admin.key1575')}</label>
           <select
             value={selectedCategoryId}
             onChange={(e) => setSelectedCategoryId(e.target.value)}
             className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
           >
-            <option value="">全部分類</option>
+            <option value="">{t('autoGen.admin.key1576')}</option>
             {categories.map((c) => (
-              <option key={c.id} value={c.id}>{c.name} {c.trackSharedStock ? ' (共用庫存)' : ''}</option>
+              <option key={c.id} value={c.id}>{c.name} {c.trackSharedStock ? t('autoGen.admin.key1577') : ''}</option>
             ))}
           </select>
         </div>
 
         {/* Filter type buttons */}
         <div>
-          <label className="block text-xs font-bold text-gray-400 uppercase mb-1">快速狀態過濾</label>
+          <label className="block text-xs font-bold text-gray-400 uppercase mb-1">{t('autoGen.admin.key1578')}</label>
           <div className="flex rounded-lg border border-gray-200 p-0.5 bg-gray-50">
             <button
               onClick={() => setFilterType('ALL')}
               className={`flex-1 text-center py-1.5 text-xs font-semibold rounded-md transition-colors ${filterType === 'ALL' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}
             >
-              全部
+              {t('autoGen.admin.key1579')}
             </button>
             <button
               onClick={() => setFilterType('WARNING')}
               className={`flex-1 text-center py-1.5 text-xs font-semibold rounded-md transition-colors ${filterType === 'WARNING' ? 'bg-amber-600 text-white shadow-sm' : 'text-gray-500 hover:text-amber-600'}`}
             >
-              預警/缺貨
+              {t('autoGen.admin.key1580')}
             </button>
             <button
               onClick={() => setFilterType('SHARED')}
               className={`flex-1 text-center py-1.5 text-xs font-semibold rounded-md transition-colors ${filterType === 'SHARED' ? 'bg-indigo-600 text-white shadow-sm' : 'text-gray-500 hover:text-indigo-600'}`}
             >
-              共用分類
+              {t('autoGen.admin.key1581')}
             </button>
             <button
               onClick={() => setFilterType('INDEPENDENT')}
               className={`flex-1 text-center py-1.5 text-xs font-semibold rounded-md transition-colors ${filterType === 'INDEPENDENT' ? 'bg-gray-800 text-white shadow-sm' : 'text-gray-500 hover:text-gray-800'}`}
             >
-              獨立追蹤
+              {t('autoGen.admin.key1582')}
             </button>
           </div>
         </div>
@@ -471,7 +474,7 @@ export default function StockManagement() {
                   <div>
                     <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
                       🏷️ {cat.name}
-                      <span className="text-xs text-gray-400 font-normal">({catItems.length} 個品項)</span>
+                      <span className="text-xs text-gray-400 font-normal">({catItems.length} {t('autoGen.admin.key1583')}</span>
                     </h3>
                   </div>
 
@@ -484,13 +487,13 @@ export default function StockManagement() {
                         onChange={(e) => handleCategoryUpdate(cat.id, { trackSharedStock: e.target.checked })}
                         className="rounded border-gray-300 text-primary-600 focus:ring-primary-500 w-4 h-4"
                       />
-                      <span className="text-xs font-bold text-gray-700">分類當日共用庫存</span>
+                      <span className="text-xs font-bold text-gray-700">{t('autoGen.admin.key1584')}</span>
                     </label>
 
                     {cat.trackSharedStock && (
                       <div className="flex items-center gap-4 border-l border-gray-200 pl-3">
                         <div className="flex items-center gap-1.5">
-                          <span className="text-xs text-gray-500 font-medium">總庫存:</span>
+                          <span className="text-xs text-gray-500 font-medium">{t('autoGen.admin.key1585')}</span>
                           <div className="flex items-center">
                             <button
                               onClick={() => handleCategoryUpdate(cat.id, { sharedStockQty: Math.max(0, cat.sharedStockQty - 1) })}
@@ -514,7 +517,7 @@ export default function StockManagement() {
                         </div>
 
                         <div className="flex items-center gap-1.5">
-                          <span className="text-xs text-gray-500 font-medium">預警提示門檻:</span>
+                          <span className="text-xs text-gray-500 font-medium">{t('autoGen.admin.key1586')}</span>
                           <input
                             type="number"
                             value={cat.sharedStockThreshold}
@@ -526,15 +529,15 @@ export default function StockManagement() {
                         {/* Category Shared Badge */}
                         {cat.sharedStockQty === 0 ? (
                           <span className="text-red-700 bg-red-50 border border-red-200 px-2 py-0.5 rounded text-[10px] font-extrabold">
-                            🚫 分類售完
+                            {t('autoGen.admin.key1587')}
                           </span>
                         ) : cat.sharedStockQty <= cat.sharedStockThreshold ? (
                           <span className="text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded text-[10px] font-bold animate-pulse">
-                            ⚠️ 分類低庫存
+                            {t('autoGen.admin.key1588')}
                           </span>
                         ) : (
                           <span className="text-indigo-700 bg-indigo-50 border border-indigo-150 px-2 py-0.5 rounded text-[10px] font-bold">
-                            📦 共用充足
+                            {t('autoGen.admin.key1589')}
                           </span>
                         )}
                       </div>
@@ -542,10 +545,10 @@ export default function StockManagement() {
 
                     {/* Loading/Saved feedback indicator for Category */}
                     {savingId === cat.id && (
-                      <span className="text-[10px] text-gray-400 animate-pulse pl-1">儲存中...</span>
+                      <span className="text-[10px] text-gray-400 animate-pulse pl-1">{t('autoGen.admin.key1590')}</span>
                     )}
                     {savedFeedbackId === cat.id && (
-                      <span className="text-[10px] text-green-600 font-bold pl-1 animate-bounce">✓ 已同步</span>
+                      <span className="text-[10px] text-green-600 font-bold pl-1 animate-bounce">{t('autoGen.admin.key1591')}</span>
                     )}
                   </div>
                 </div>
@@ -553,18 +556,18 @@ export default function StockManagement() {
                 {/* Products Table */}
                 {catItems.length === 0 ? (
                   <div className="px-6 py-4 text-center text-sm text-gray-400 italic">
-                    此分類下尚無匹配的商品品項。
+                    {t('autoGen.admin.key1592')}
                   </div>
                 ) : (
                   <table className="min-w-full divide-y divide-gray-150">
                     <thead className="bg-gray-50/50">
                       <tr>
-                        <th className="px-6 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">商品名稱</th>
-                        <th className="px-6 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">連結研發食譜</th>
-                        <th className="px-6 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">獨立庫存追蹤</th>
-                        <th className="px-6 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">獨立庫存數量</th>
-                        <th className="px-6 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">有效實際庫存 (Effective Stock)</th>
-                        <th className="px-6 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">庫存狀態關係</th>
+                        <th className="px-6 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">{t('autoGen.admin.key1593')}</th>
+                        <th className="px-6 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">{t('autoGen.admin.key1594')}</th>
+                        <th className="px-6 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">{t('autoGen.admin.key1595')}</th>
+                        <th className="px-6 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">{t('autoGen.admin.key1596')}</th>
+                        <th className="px-6 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">{t('autoGen.admin.key1597')}</th>
+                        <th className="px-6 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">{t('autoGen.admin.key1598')}</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-150 bg-white">
@@ -578,7 +581,7 @@ export default function StockManagement() {
                         // 2. If item trackStock is also enabled, it is MIN(category, item).
                         // 3. If item trackStock is NOT enabled, it is bounded ONLY by category sharedStockQty.
                         // 4. If neither are enabled, it is unlimited.
-                        let effectiveStock: number | string = '無限制';
+                        let effectiveStock: number | string = t('autoGen.admin.key1599');
                         let isWarning = false;
                         let isSoldOut = false;
                         
@@ -628,7 +631,7 @@ export default function StockManagement() {
                                       : 'border-gray-200 bg-white text-gray-700 focus:ring-primary-100 focus:border-primary-500'
                                   }`}
                                 >
-                                  <option value="" className="bg-white text-gray-500 font-medium">-- 未連結食譜 --</option>
+                                  <option value="" className="bg-white text-gray-500 font-medium">{t('autoGen.admin.key1600')}</option>
                                   {recipes.filter(r => r.isProduct !== false).map(r => (
                                     <option key={r.id} value={r.id} className="bg-white text-gray-800 font-medium">
                                       {r.name}
@@ -638,13 +641,13 @@ export default function StockManagement() {
                                 
                                 {/* Dynamic visual feedback next to select */}
                                 {savingId === item.id && (
-                                  <span className="text-[10px] text-gray-400 animate-pulse font-medium shrink-0">存...</span>
+                                  <span className="text-[10px] text-gray-400 animate-pulse font-medium shrink-0">{t('autoGen.admin.key1601')}</span>
                                 )}
                                 {savedFeedbackId === item.id && (
                                   <span className="text-xs text-emerald-600 font-black animate-bounce shrink-0">✓</span>
                                 )}
                                 {mappings.some(m => m.menuItemId === item.id) && savingId !== item.id && (
-                                  <span className="relative flex h-1.5 w-1.5 shrink-0" title="已連結中央廚房配方">
+                                  <span className="relative flex h-1.5 w-1.5 shrink-0" title={t('autoGen.admin.key1602')}>
                                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                                     <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
                                   </span>
@@ -661,7 +664,7 @@ export default function StockManagement() {
                                   onChange={(e) => handleItemUpdate(item.id, { trackStock: e.target.checked })}
                                   className="rounded border-gray-300 text-primary-600 focus:ring-primary-500 w-4 h-4"
                                 />
-                                <span className="text-xs font-medium text-gray-600">啟用獨立庫存</span>
+                                <span className="text-xs font-medium text-gray-600">{t('autoGen.admin.key1603')}</span>
                               </label>
                             </td>
 
@@ -680,7 +683,7 @@ export default function StockManagement() {
                                   type="number"
                                   disabled={!item.trackStock}
                                   value={item.trackStock ? item.stockQty : ''}
-                                  placeholder="無限制"
+                                  placeholder={t('autoGen.admin.key1604')}
                                   onChange={(e) => handleItemUpdate(item.id, { stockQty: Math.max(0, parseInt(e.target.value) || 0) })}
                                   className="w-16 h-7 border-y border-gray-200 text-center text-xs font-bold focus:ring-0 focus:outline-none disabled:bg-gray-100 disabled:text-gray-400"
                                 />
@@ -695,7 +698,7 @@ export default function StockManagement() {
 
                                 {/* Item specific feedback indicators */}
                                 {savingId === item.id && (
-                                  <span className="text-[10px] text-gray-400 animate-pulse ml-2">存...</span>
+                                  <span className="text-[10px] text-gray-400 animate-pulse ml-2">{t('autoGen.admin.key1605')}</span>
                                 )}
                                 {savedFeedbackId === item.id && (
                                   <span className="text-[10px] text-green-600 font-bold ml-2 animate-bounce">✓</span>
@@ -707,10 +710,10 @@ export default function StockManagement() {
                             <td className="px-6 py-3 whitespace-nowrap">
                               {typeof effectiveStock === 'number' ? (
                                 <span className={`text-sm font-extrabold ${isSoldOut ? 'text-red-700' : isWarning ? 'text-amber-700 animate-pulse' : 'text-indigo-600'}`}>
-                                  {effectiveStock} <span className="text-xs font-normal text-gray-400">份</span>
+                                  {effectiveStock} <span className="text-xs font-normal text-gray-400">{t('autoGen.admin.key1606')}</span>
                                 </span>
                               ) : (
-                                <span className="text-sm text-gray-400">∞ (無限制)</span>
+                                <span className="text-sm text-gray-400">{t('autoGen.admin.key1607')}</span>
                               )}
                             </td>
 
@@ -719,32 +722,32 @@ export default function StockManagement() {
                               {hasCategoryStock && hasIndependentStock ? (
                                 <div className="flex flex-col gap-1">
                                   <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200 max-w-max">
-                                    🔗 雙重限制模式
+                                    {t('autoGen.admin.key1608')}
                                   </span>
                                   <span className="text-[10px] text-gray-400 leading-normal">
-                                    取較小值：分類({cat.sharedStockQty}) 與 獨立({item.stockQty})
+                                    {t('autoGen.admin.key1609')}{cat.sharedStockQty}{t('autoGen.admin.key1610')}{item.stockQty})
                                   </span>
                                 </div>
                               ) : hasCategoryStock && !hasIndependentStock ? (
                                 <div className="flex flex-col gap-1">
                                   <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-50 text-indigo-800 border border-indigo-200 max-w-max">
-                                    🍩 僅分類限制
+                                    {t('autoGen.admin.key1611')}
                                   </span>
                                   <span className="text-[10px] text-gray-400 leading-normal">
-                                    僅受分類當日共用庫存 ({cat.sharedStockQty}) 限制
+                                    {t('autoGen.admin.key1612')}{cat.sharedStockQty}{t('autoGen.admin.key1613')}
                                   </span>
                                 </div>
                               ) : !hasCategoryStock && hasIndependentStock ? (
                                 <div className="flex flex-col gap-1">
                                   <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-800 border border-slate-200 max-w-max">
-                                    📦 僅商品獨立
+                                    {t('autoGen.admin.key1614')}
                                   </span>
                                   <span className="text-[10px] text-gray-400 leading-normal">
-                                    僅追蹤此商品獨立庫存數量 ({item.stockQty})
+                                    {t('autoGen.admin.key1615')}{item.stockQty})
                                   </span>
                                 </div>
                               ) : (
-                                <span className="text-xs text-gray-400 italic">無庫存限制 (可無限下單)</span>
+                                <span className="text-xs text-gray-400 italic">{t('autoGen.admin.key1616')}</span>
                               )}
                             </td>
                           </tr>
@@ -776,7 +779,7 @@ export default function StockManagement() {
                                         onChange={(e) => handleOptionValueUpdate(item.id, opt.id, v.id, { trackStock: e.target.checked })}
                                         className="rounded border-gray-300 text-indigo-500 focus:ring-indigo-400 w-3.5 h-3.5"
                                       />
-                                      <span className="text-xs font-medium text-gray-500">選項庫存</span>
+                                      <span className="text-xs font-medium text-gray-500">{t('autoGen.admin.key1617')}</span>
                                     </label>
                                   </td>
                                   <td className="px-6 py-2.5 whitespace-nowrap border-l-4 border-l-slate-200">
@@ -793,7 +796,7 @@ export default function StockManagement() {
                                         type="number"
                                         disabled={!v.trackStock}
                                         value={v.trackStock ? v.stockQty : ''}
-                                        placeholder="跟隨主商品"
+                                        placeholder={t('autoGen.admin.key1618')}
                                         onChange={(e) => handleOptionValueUpdate(item.id, opt.id, v.id, { stockQty: Math.max(0, parseInt(e.target.value) || 0) })}
                                         className="w-16 h-6 border-y border-gray-200 text-center text-xs font-bold focus:ring-0 focus:outline-none disabled:bg-gray-100 disabled:text-gray-400"
                                       />
@@ -806,7 +809,7 @@ export default function StockManagement() {
                                         +
                                       </button>
                                       {savingId === v.id && (
-                                        <span className="text-[10px] text-gray-400 animate-pulse ml-2">存...</span>
+                                        <span className="text-[10px] text-gray-400 animate-pulse ml-2">{t('autoGen.admin.key1619')}</span>
                                       )}
                                       {savedFeedbackId === v.id && (
                                         <span className="text-[10px] text-green-600 font-bold ml-2 animate-bounce">✓</span>
@@ -816,16 +819,16 @@ export default function StockManagement() {
                                   <td className="px-6 py-2.5 whitespace-nowrap border-l-4 border-l-slate-200">
                                     {v.trackStock ? (
                                       <span className={`text-sm font-extrabold ${vIsSoldOut ? 'text-red-700' : vIsWarning ? 'text-amber-700 animate-pulse' : 'text-indigo-600'}`}>
-                                        {v.stockQty} <span className="text-xs font-normal text-gray-400">份</span>
+                                        {v.stockQty} <span className="text-xs font-normal text-gray-400">{t('autoGen.admin.key1620')}</span>
                                       </span>
                                     ) : (
-                                      <span className="text-xs text-gray-400 italic">同上</span>
+                                      <span className="text-xs text-gray-400 italic">{t('autoGen.admin.key1621')}</span>
                                     )}
                                   </td>
                                   <td className="px-6 py-2.5 whitespace-nowrap border-l-4 border-l-slate-200">
                                     {v.trackStock ? (
                                       <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-50 text-indigo-800 border border-indigo-200 max-w-max">
-                                        🎯 選項獨立
+                                        {t('autoGen.admin.key1622')}
                                       </span>
                                     ) : (
                                       <span className="text-xs text-gray-400 italic">-</span>

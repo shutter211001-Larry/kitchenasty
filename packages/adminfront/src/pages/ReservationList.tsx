@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
@@ -29,6 +30,8 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 export default function ReservationList() {
+  const { t } = useTranslation();
+
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [pagination, setPagination] = useState<Pagination | null>(null);
   const [loading, setLoading] = useState(true);
@@ -82,7 +85,7 @@ export default function ReservationList() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">預約管理 (Reservations)</h1>
+        <h1 className="text-2xl font-bold text-gray-900">{t('autoGen.admin.key1121')}</h1>
       </div>
 
       {/* Filters */}
@@ -91,14 +94,14 @@ export default function ReservationList() {
           value={statusFilter}
           onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
           className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none"
-          aria-label="依狀態篩選"
+          aria-label={t('autoGen.admin.key1122')}
         >
-          <option value="">所有狀態</option>
-          <option value="PENDING">待確認 (Pending)</option>
-          <option value="CONFIRMED">已確認 (Confirmed)</option>
-          <option value="SEATED">已入座 (Seated)</option>
-          <option value="COMPLETED">已完成 (Completed)</option>
-          <option value="CANCELLED">已取消 (Cancelled)</option>
+          <option value="">{t('autoGen.admin.key1123')}</option>
+          <option value="PENDING">{t('autoGen.admin.key1124')}</option>
+          <option value="CONFIRMED">{t('autoGen.admin.key1125')}</option>
+          <option value="SEATED">{t('autoGen.admin.key1126')}</option>
+          <option value="COMPLETED">{t('autoGen.admin.key1127')}</option>
+          <option value="CANCELLED">{t('autoGen.admin.key1128')}</option>
         </select>
         <input
           type="date"
@@ -112,14 +115,14 @@ export default function ReservationList() {
             onClick={() => { setDateFilter(''); setPage(1); }}
             className="px-3 py-2 text-sm text-gray-500 hover:text-gray-700"
           >
-            清除日期
+            {t('autoGen.admin.key1129')}
           </button>
         )}
       </div>
 
       {loading && (
         <div className="flex justify-center py-12">
-          <div className="w-8 h-8 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin" role="status" aria-label="載入中" />
+          <div className="w-8 h-8 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin" role="status" aria-label={t('autoGen.admin.key1130')} />
         </div>
       )}
 
@@ -128,7 +131,7 @@ export default function ReservationList() {
       )}
 
       {!loading && !error && reservations.length === 0 && (
-        <p className="text-gray-500 text-center py-12">找不到任何預約。</p>
+        <p className="text-gray-500 text-center py-12">{t('autoGen.admin.key1131')}</p>
       )}
 
       {!loading && reservations.length > 0 && (
@@ -137,12 +140,12 @@ export default function ReservationList() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-200 bg-gray-50">
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">預約時間 (Date & Time)</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">顧客 (Customer)</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">人數 (Party Size)</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">桌號 (Table)</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">狀態 (Status)</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">操作 (Actions)</th>
+                  <th className="text-left px-4 py-3 font-medium text-gray-600">{t('autoGen.admin.key1132')}</th>
+                  <th className="text-left px-4 py-3 font-medium text-gray-600">{t('autoGen.admin.key1133')}</th>
+                  <th className="text-left px-4 py-3 font-medium text-gray-600">{t('autoGen.admin.key1134')}</th>
+                  <th className="text-left px-4 py-3 font-medium text-gray-600">{t('autoGen.admin.key1135')}</th>
+                  <th className="text-left px-4 py-3 font-medium text-gray-600">{t('autoGen.admin.key1136')}</th>
+                  <th className="text-left px-4 py-3 font-medium text-gray-600">{t('autoGen.admin.key1137')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -158,17 +161,17 @@ export default function ReservationList() {
                       <div className="text-gray-900">{r.customer.name}</div>
                       <div className="text-xs text-gray-500">{r.customer.email}</div>
                     </td>
-                    <td className="px-4 py-3 text-gray-600">{r.partySize} 人</td>
+                    <td className="px-4 py-3 text-gray-600">{r.partySize} {t('autoGen.admin.key1138')}</td>
                     <td className="px-4 py-3">
                       {r.table ? (
-                        <span className="text-gray-900">{r.table.name} ({r.table.capacity} 人座)</span>
+                        <span className="text-gray-900">{r.table.name} ({r.table.capacity} {t('autoGen.admin.key1139')}</span>
                       ) : (
-                        <span className="text-gray-400">未分配</span>
+                        <span className="text-gray-400">{t('autoGen.admin.key1140')}</span>
                       )}
                     </td>
                     <td className="px-4 py-3">
                       <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_COLORS[r.status] || 'bg-gray-100'}`}>
-                        {r.status === 'PENDING' ? '待確認' : r.status === 'CONFIRMED' ? '已確認' : r.status === 'SEATED' ? '已入座' : r.status === 'COMPLETED' ? '已完成' : r.status === 'CANCELLED' ? '已取消' : r.status}
+                        {r.status === 'PENDING' ? t('autoGen.admin.key1141') : r.status === 'CONFIRMED' ? t('autoGen.admin.key1142') : r.status === 'SEATED' ? t('autoGen.admin.key1143') : r.status === 'COMPLETED' ? t('autoGen.admin.key1144') : r.status === 'CANCELLED' ? t('autoGen.admin.key1145') : r.status}
                       </span>
                     </td>
                     <td className="px-4 py-3">
@@ -179,7 +182,7 @@ export default function ReservationList() {
                             className="text-xs px-2 py-1 bg-blue-50 text-blue-700 rounded hover:bg-blue-100"
                             aria-label={`確認 ${r.customer.name} 的預約`}
                           >
-                            確認
+                            {t('autoGen.admin.key1146')}
                           </button>
                         )}
                         {r.status === 'CONFIRMED' && (
@@ -188,7 +191,7 @@ export default function ReservationList() {
                             className="text-xs px-2 py-1 bg-purple-50 text-purple-700 rounded hover:bg-purple-100"
                             aria-label={`安排 ${r.customer.name} 入座`}
                           >
-                            入座
+                            {t('autoGen.admin.key1147')}
                           </button>
                         )}
                         {r.status === 'SEATED' && (
@@ -197,7 +200,7 @@ export default function ReservationList() {
                             className="text-xs px-2 py-1 bg-green-50 text-green-700 rounded hover:bg-green-100"
                             aria-label={`完成 ${r.customer.name} 的預約`}
                           >
-                            完成
+                            {t('autoGen.admin.key1148')}
                           </button>
                         )}
                         {!['COMPLETED', 'CANCELLED'].includes(r.status) && (
@@ -206,14 +209,14 @@ export default function ReservationList() {
                             className="text-xs px-2 py-1 bg-red-50 text-red-700 rounded hover:bg-red-100"
                             aria-label={`取消 ${r.customer.name} 的預約`}
                           >
-                            取消
+                            {t('autoGen.admin.key1149')}
                           </button>
                         )}
                         <Link
                           to={`/reservations/${r.id}`}
                           className="text-xs px-2 py-1 text-primary-600 hover:text-primary-700"
                         >
-                          詳情
+                          {t('autoGen.admin.key1150')}
                         </Link>
                       </div>
                     </td>
@@ -230,17 +233,17 @@ export default function ReservationList() {
                 onClick={() => setPage((p) => p - 1)}
                 className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg disabled:opacity-40 hover:bg-gray-50"
               >
-                上一頁
+                {t('autoGen.admin.key1151')}
               </button>
               <span className="text-sm text-gray-600">
-                第 {pagination.page} 頁，共 {pagination.totalPages} 頁
+                {t('autoGen.admin.key1152')} {pagination.page} {t('autoGen.admin.key1153')} {pagination.totalPages} {t('autoGen.admin.key1154')}
               </span>
               <button
                 disabled={page >= pagination.totalPages}
                 onClick={() => setPage((p) => p + 1)}
                 className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg disabled:opacity-40 hover:bg-gray-50"
               >
-                下一頁
+                {t('autoGen.admin.key1155')}
               </button>
             </div>
           )}

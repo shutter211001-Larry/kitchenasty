@@ -10,6 +10,8 @@ import type { TemplateId } from '../templates/index.js';
 import { getTranslated } from '../utils/translation.js';
 
 export default function Home() {
+  const { t } = useTranslation();
+
   const { t, i18n } = useTranslation();
   const { settings } = useTheme();
   const { user } = useAuth();
@@ -218,8 +220,8 @@ function ClassicFeatures({ features, t, lang }: { features: FeatureItem[] | null
         {features && features.length > 0 ? (
           features
             .filter(f => {
-              if (!settings.navShowLocations && (f.title.includes('分店') || f.title.includes('定位') || f.title.includes('預約'))) return false;
-              if ((!settings.navShowReservations || !settings.reservationSettings?.enabled) && f.title.includes('預約')) return false;
+              if (!settings.navShowLocations && (f.title.includes(t('autoGen.store.key83')) || f.title.includes(t('autoGen.store.key84')) || f.title.includes(t('autoGen.store.key85')))) return false;
+              if ((!settings.navShowReservations || !settings.reservationSettings?.enabled) && f.title.includes(t('autoGen.store.key86'))) return false;
               return true;
             })
             .map((feature, i) => (

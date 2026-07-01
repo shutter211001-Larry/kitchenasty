@@ -86,7 +86,7 @@ export default function GroupOrderDialog() {
               🍽️
             </div>
             <div className="font-bold text-gray-900 dark:text-gray-100 flex flex-col">
-              <span className="text-[10px] text-gray-500 dark:text-gray-400 font-medium">內用桌號</span>
+              <span className="text-[10px] text-gray-500 dark:text-gray-400 font-medium">{t('autoGen.store.key2')}</span>
               <span className="text-lg leading-none">{tableName}</span>
             </div>
           </div>

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { api } from '../lib/api';
@@ -112,8 +113,10 @@ export default function CouponForm() {
   }, [id, token]);
 
   const validateStep = (step: number) => {
+  const { t } = useTranslation();
+
     if (step === 1 && !code.trim() && !isAutomatic) {
-      setError('請填寫優惠碼');
+      setError(t('autoGen.admin.key351'));
       return false;
     }
     setError('');
@@ -192,10 +195,10 @@ export default function CouponForm() {
   }
 
   const stepTitles = [
-    '基本設定',
-    '觸發門檻',
-    '優惠方式',
-    '套用商品'
+    t('autoGen.admin.key352'),
+    t('autoGen.admin.key353'),
+    t('autoGen.admin.key354'),
+    t('autoGen.admin.key355')
   ];
 
   return (
@@ -207,7 +210,7 @@ export default function CouponForm() {
           </svg>
         </Link>
         <h1 className="text-2xl font-bold text-gray-900">
-          {isEdit ? '編輯優惠活動' : '新增優惠活動'}
+          {isEdit ? t('autoGen.admin.key356') : t('autoGen.admin.key357')}
         </h1>
       </div>
 
@@ -255,15 +258,15 @@ export default function CouponForm() {
         {/* Step 1: Basic Info */}
         {currentStep === 1 && (
           <div className="space-y-6 animate-fadeIn">
-            <h2 className="text-xl font-bold text-gray-900 mb-6">1. 基本與時間設定</h2>
+            <h2 className="text-xl font-bold text-gray-900 mb-6">{t('autoGen.admin.key358')}</h2>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">優惠碼 / 活動代碼 (Code)</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key359')}</label>
                 <input
                   value={code}
                   onChange={(e) => setCode(e.target.value.toUpperCase().replace(/\s/g, ''))}
-                  placeholder={isAutomatic ? "留空系統將自動產生" : "SAVE20"}
+                  placeholder={isAutomatic ? t('autoGen.admin.key360') : "SAVE20"}
                   required={!isAutomatic}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none font-mono"
                 />
@@ -276,7 +279,7 @@ export default function CouponForm() {
                     onChange={(e) => setIsActive(e.target.checked)}
                     className="rounded border-gray-300 w-4 h-4 text-primary-600 focus:ring-primary-500"
                   />
-                  <span className="text-sm font-medium text-gray-700">啟用 (Active)</span>
+                  <span className="text-sm font-medium text-gray-700">{t('autoGen.admin.key361')}</span>
                 </label>
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
@@ -285,14 +288,14 @@ export default function CouponForm() {
                     onChange={(e) => setIsAutomatic(e.target.checked)}
                     className="rounded border-gray-300 w-4 h-4 text-primary-600 focus:ring-primary-500"
                   />
-                  <span className="text-sm font-bold text-indigo-700">自動套用優惠 (無需輸入代碼)</span>
+                  <span className="text-sm font-bold text-indigo-700">{t('autoGen.admin.key362')}</span>
                 </label>
               </div>
             </div>
 
             <div className="border-t border-gray-100 pt-6 mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">生效日期</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key363')}</label>
                 <input
                   type="date"
                   value={startsAt}
@@ -301,7 +304,7 @@ export default function CouponForm() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">截止日期</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key364')}</label>
                 <input
                   type="date"
                   value={expiresAt}
@@ -313,7 +316,7 @@ export default function CouponForm() {
 
             <div className="border-t border-gray-100 pt-6 mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">每位顧客使用次數上限</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key365')}</label>
                 <div className="flex items-center gap-3">
                   <input
                     type="number"
@@ -334,12 +337,12 @@ export default function CouponForm() {
                       }}
                       className="rounded border-gray-300 w-4 h-4 text-primary-600 focus:ring-primary-500"
                     />
-                    <span className="text-sm font-medium text-gray-700">無限次數</span>
+                    <span className="text-sm font-medium text-gray-700">{t('autoGen.admin.key366')}</span>
                   </label>
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">總發行/套用數量上限</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key367')}</label>
                 <div className="flex items-center gap-3">
                   <input
                     type="number"
@@ -359,7 +362,7 @@ export default function CouponForm() {
                       }}
                       className="rounded border-gray-300 w-4 h-4 text-primary-600 focus:ring-primary-500"
                     />
-                    <span className="text-sm font-medium text-gray-700">無限次數</span>
+                    <span className="text-sm font-medium text-gray-700">{t('autoGen.admin.key368')}</span>
                   </label>
                 </div>
               </div>
@@ -370,34 +373,34 @@ export default function CouponForm() {
         {/* Step 2: Thresholds */}
         {currentStep === 2 && (
           <div className="space-y-6 animate-fadeIn">
-            <h2 className="text-xl font-bold text-gray-900 mb-2">2. 觸發門檻 (Thresholds)</h2>
-            <p className="text-sm text-gray-500 mb-6">顧客購物車內的「參與商品」必須達到以下門檻，才會獲得折扣。</p>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">{t('autoGen.admin.key369')}</h2>
+            <p className="text-sm text-gray-500 mb-6">{t('autoGen.admin.key370')}</p>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="bg-gray-50 p-5 rounded-xl border border-gray-200">
-                <label className="block text-sm font-bold text-gray-800 mb-2">最低消費金額 (滿額 $)</label>
+                <label className="block text-sm font-bold text-gray-800 mb-2">{t('autoGen.admin.key371')}</label>
                 <input
                   type="number"
                   step="0.01"
                   min="0"
                   value={minOrder}
                   onChange={(e) => setMinOrder(parseFloat(e.target.value) || 0)}
-                  placeholder="0 為無金額限制"
+                  placeholder={t('autoGen.admin.key372')}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:ring-2 focus:ring-primary-500 outline-none bg-white shadow-sm"
                 />
-                <p className="text-xs text-gray-500 mt-2">例如：滿 $500 才可打折。</p>
+                <p className="text-xs text-gray-500 mt-2">{t('autoGen.admin.key373')}</p>
               </div>
               <div className="bg-gray-50 p-5 rounded-xl border border-gray-200">
-                <label className="block text-sm font-bold text-gray-800 mb-2">最低購買件數 (滿件)</label>
+                <label className="block text-sm font-bold text-gray-800 mb-2">{t('autoGen.admin.key374')}</label>
                 <input
                   type="number"
                   min="0"
                   value={minItemCount}
                   onChange={(e) => setMinItemCount(parseInt(e.target.value) || 0)}
-                  placeholder="0 為無件數限制"
+                  placeholder={t('autoGen.admin.key375')}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:ring-2 focus:ring-primary-500 outline-none bg-white shadow-sm"
                 />
-                <p className="text-xs text-gray-500 mt-2">例如：買滿 3 件才可打折。</p>
+                <p className="text-xs text-gray-500 mt-2">{t('autoGen.admin.key376')}</p>
               </div>
             </div>
           </div>
@@ -406,20 +409,20 @@ export default function CouponForm() {
         {/* Step 3: Discount Method */}
         {currentStep === 3 && (
           <div className="space-y-6 animate-fadeIn">
-            <h2 className="text-xl font-bold text-gray-900 mb-2">3. 優惠方式 (Discount Setup)</h2>
-            <p className="text-sm text-gray-500 mb-6">設定達成門檻後，顧客可以獲得什麼折扣。</p>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">{t('autoGen.admin.key377')}</h2>
+            <p className="text-sm text-gray-500 mb-6">{t('autoGen.admin.key378')}</p>
             
             <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">優惠類型</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t('autoGen.admin.key379')}</label>
               <select
                 value={type}
                 onChange={(e) => setType(e.target.value)}
                 className="w-full md:w-1/2 px-4 py-3 border border-gray-300 rounded-xl text-base focus:ring-2 focus:ring-primary-500 outline-none shadow-sm font-medium text-gray-800"
               >
-                <option value="PERCENTAGE">🎁 打折 (Percentage Off)</option>
-                <option value="FIXED">💰 直接折抵金額 (Fixed Amount Off)</option>
-                <option value="BOGO">📦 送 N 件商品 (Buy X Get Y)</option>
-                <option value="FREE_DELIVERY">🚚 免運費 (Free Delivery)</option>
+                <option value="PERCENTAGE">{t('autoGen.admin.key380')}</option>
+                <option value="FIXED">{t('autoGen.admin.key381')}</option>
+                <option value="BOGO">{t('autoGen.admin.key382')}</option>
+                <option value="FREE_DELIVERY">{t('autoGen.admin.key383')}</option>
               </select>
             </div>
 
@@ -428,7 +431,7 @@ export default function CouponForm() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-green-50 rounded-xl border border-green-100">
                 <div>
                   <label className="block text-sm font-bold text-green-900 mb-2">
-                    折扣數值 {type === 'PERCENTAGE' ? '(%)' : '($)'}
+                    {t('autoGen.admin.key384')} {type === 'PERCENTAGE' ? '(%)' : '($)'}
                   </label>
                   <input
                     type="number"
@@ -438,18 +441,18 @@ export default function CouponForm() {
                     onChange={(e) => setValue(parseFloat(e.target.value) || 0)}
                     className="w-full px-4 py-3 border border-green-200 rounded-lg text-base focus:ring-2 focus:ring-green-500 outline-none"
                   />
-                  {type === 'PERCENTAGE' && <p className="text-xs text-green-700 mt-2">填寫 20 代表打 8 折 (20% off)。</p>}
+                  {type === 'PERCENTAGE' && <p className="text-xs text-green-700 mt-2">{t('autoGen.admin.key385')}</p>}
                 </div>
                 {type === 'PERCENTAGE' && (
                   <div>
-                    <label className="block text-sm font-bold text-green-900 mb-2">最高折扣金額上限 ($)</label>
+                    <label className="block text-sm font-bold text-green-900 mb-2">{t('autoGen.admin.key386')}</label>
                     <input
                       type="number"
                       step="0.01"
                       min="0"
                       value={maxDiscount}
                       onChange={(e) => setMaxDiscount(e.target.value)}
-                      placeholder="無上限"
+                      placeholder={t('autoGen.admin.key387')}
                       className="w-full px-4 py-3 border border-green-200 rounded-lg text-base focus:ring-2 focus:ring-green-500 outline-none"
                     />
                   </div>
@@ -461,7 +464,7 @@ export default function CouponForm() {
             {type === 'BOGO' && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-blue-50 rounded-xl border border-blue-100">
                 <div>
-                  <label className="block text-sm font-bold text-blue-900 mb-2">獲得/贈送件數 (Get N items)</label>
+                  <label className="block text-sm font-bold text-blue-900 mb-2">{t('autoGen.admin.key388')}</label>
                   <input
                     type="number"
                     min="1"
@@ -469,25 +472,25 @@ export default function CouponForm() {
                     onChange={(e) => setGetQuantity(parseInt(e.target.value) || 1)}
                     className="w-full px-4 py-3 border border-blue-200 rounded-lg text-base focus:ring-2 focus:ring-blue-500 outline-none"
                   />
-                  <p className="text-xs text-blue-700 mt-2">每次達成門檻時，可獲得 N 件商品折扣。</p>
+                  <p className="text-xs text-blue-700 mt-2">{t('autoGen.admin.key389')}</p>
                 </div>
                 
                 <div className="grid grid-cols-1 gap-4">
                   <div>
-                    <label className="block text-sm font-bold text-blue-900 mb-2">贈品折扣方式</label>
+                    <label className="block text-sm font-bold text-blue-900 mb-2">{t('autoGen.admin.key390')}</label>
                     <select
                       value={getDiscountType}
                       onChange={(e) => setGetDiscountType(e.target.value as any)}
                       className="w-full px-4 py-3 border border-blue-200 rounded-lg text-base focus:ring-2 focus:ring-blue-500 outline-none"
                     >
-                      <option value="FREE">免費送 (Free)</option>
-                      <option value="PERCENTAGE">第二件打折 (%)</option>
-                      <option value="FIXED">第二件固定特價 ($)</option>
+                      <option value="FREE">{t('autoGen.admin.key391')}</option>
+                      <option value="PERCENTAGE">{t('autoGen.admin.key392')}</option>
+                      <option value="FIXED">{t('autoGen.admin.key393')}</option>
                     </select>
                   </div>
                   {getDiscountType !== 'FREE' && (
                     <div>
-                      <label className="block text-sm font-bold text-blue-900 mb-2">數值</label>
+                      <label className="block text-sm font-bold text-blue-900 mb-2">{t('autoGen.admin.key394')}</label>
                       <input
                         type="number"
                         min="0"
@@ -507,12 +510,12 @@ export default function CouponForm() {
         {/* Step 4: Applicable Items */}
         {currentStep === 4 && (
           <div className="space-y-6 animate-fadeIn">
-            <h2 className="text-xl font-bold text-gray-900 mb-2">4. 套用商品 (Applicable Items)</h2>
-            <p className="text-sm text-gray-500 mb-6">決定哪些商品會被計入門檻，並且可被折扣。</p>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">{t('autoGen.admin.key395')}</h2>
+            <p className="text-sm text-gray-500 mb-6">{t('autoGen.admin.key396')}</p>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="bg-gray-50 p-5 rounded-xl border border-gray-200">
-                <label className="block text-sm font-bold text-gray-800 mb-3">勾選適用分類 (Categories)</label>
+                <label className="block text-sm font-bold text-gray-800 mb-3">{t('autoGen.admin.key397')}</label>
                 <div className="h-64 overflow-y-auto space-y-2 pr-2 custom-scrollbar">
                   {categories.map((cat) => (
                     <label key={cat.id} className="flex items-center gap-3 p-2 hover:bg-gray-100 rounded-lg cursor-pointer transition-colors border border-transparent hover:border-gray-200">
@@ -529,11 +532,11 @@ export default function CouponForm() {
                     </label>
                   ))}
                 </div>
-                <p className="text-xs text-gray-500 mt-3 font-medium bg-white p-2 rounded border border-gray-100">* 若皆未勾選，表示全館商品皆參與。</p>
+                <p className="text-xs text-gray-500 mt-3 font-medium bg-white p-2 rounded border border-gray-100">{t('autoGen.admin.key398')}</p>
               </div>
 
               <div className="bg-gray-50 p-5 rounded-xl border border-gray-200">
-                <label className="block text-sm font-bold text-gray-800 mb-3">勾選適用單品 (Menu Items)</label>
+                <label className="block text-sm font-bold text-gray-800 mb-3">{t('autoGen.admin.key399')}</label>
                 <div className="h-64 overflow-y-auto space-y-2 pr-2 custom-scrollbar">
                   {menuItems.map((item) => (
                     <label key={item.id} className="flex items-center gap-3 p-2 hover:bg-gray-100 rounded-lg cursor-pointer transition-colors border border-transparent hover:border-gray-200">
@@ -557,7 +560,7 @@ export default function CouponForm() {
             {type === 'BOGO' && (
               <div className="mt-8 p-6 bg-blue-50 border border-blue-200 rounded-xl">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-bold text-blue-900">🎁 贈品區選擇 (Get Group)</h3>
+                  <h3 className="text-lg font-bold text-blue-900">{t('autoGen.admin.key400')}</h3>
                   <label className="flex items-center gap-2 cursor-pointer bg-white px-3 py-1.5 rounded-lg border border-blue-200 shadow-sm">
                     <input
                       type="checkbox"
@@ -565,14 +568,14 @@ export default function CouponForm() {
                       onChange={(e) => setIsGetGroupDifferent(e.target.checked)}
                       className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                     />
-                    <span className="text-sm font-bold text-blue-800">贈品與參與商品不同</span>
+                    <span className="text-sm font-bold text-blue-800">{t('autoGen.admin.key401')}</span>
                   </label>
                 </div>
 
                 {isGetGroupDifferent ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
                     <div className="bg-white p-4 rounded-lg border border-blue-100 shadow-sm">
-                      <label className="block text-sm font-bold text-gray-700 mb-2">選擇贈品分類</label>
+                      <label className="block text-sm font-bold text-gray-700 mb-2">{t('autoGen.admin.key402')}</label>
                       <div className="max-h-48 overflow-y-auto space-y-1 custom-scrollbar">
                         {categories.map((cat) => (
                           <label key={cat.id} className="flex items-center gap-2 text-sm text-gray-700 p-1.5 hover:bg-gray-50 rounded cursor-pointer">
@@ -591,7 +594,7 @@ export default function CouponForm() {
                       </div>
                     </div>
                     <div className="bg-white p-4 rounded-lg border border-blue-100 shadow-sm">
-                      <label className="block text-sm font-bold text-gray-700 mb-2">選擇贈品單品</label>
+                      <label className="block text-sm font-bold text-gray-700 mb-2">{t('autoGen.admin.key403')}</label>
                       <div className="max-h-48 overflow-y-auto space-y-1 custom-scrollbar">
                         {menuItems.map((item) => (
                           <label key={item.id} className="flex items-center gap-2 text-sm text-gray-700 p-1.5 hover:bg-gray-50 rounded cursor-pointer">
@@ -611,7 +614,7 @@ export default function CouponForm() {
                     </div>
                   </div>
                 ) : (
-                  <p className="text-sm text-blue-700">目前設定：顧客選購的「參與商品」本身即可作為贈品折抵。</p>
+                  <p className="text-sm text-blue-700">{t('autoGen.admin.key404')}</p>
                 )}
               </div>
             )}
@@ -627,7 +630,7 @@ export default function CouponForm() {
           disabled={currentStep === 1 || saving}
           className="px-6 py-2.5 rounded-lg text-sm font-bold transition-colors disabled:opacity-50 border border-gray-300 text-gray-700 hover:bg-gray-50 bg-white shadow-sm"
         >
-          上一步 (Previous)
+          {t('autoGen.admin.key405')}
         </button>
 
         <div className="flex gap-3">
@@ -635,7 +638,7 @@ export default function CouponForm() {
             to="/promotions"
             className="px-6 py-2.5 rounded-lg text-sm font-bold text-gray-500 hover:text-gray-700 transition-colors"
           >
-            取消
+            {t('autoGen.admin.key406')}
           </Link>
           
           {currentStep < totalSteps ? (
@@ -644,7 +647,7 @@ export default function CouponForm() {
               onClick={nextStep}
               className="px-8 py-2.5 rounded-lg text-sm font-bold transition-colors bg-primary-600 text-white hover:bg-primary-700 shadow-sm"
             >
-              下一步 (Next)
+              {t('autoGen.admin.key407')}
             </button>
           ) : (
             <button
@@ -653,7 +656,7 @@ export default function CouponForm() {
               className="px-8 py-2.5 rounded-lg text-sm font-bold transition-colors bg-green-600 text-white hover:bg-green-700 shadow-sm disabled:opacity-50 flex items-center gap-2"
             >
               {saving && <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />}
-              {saving ? '儲存中...' : isEdit ? '更新優惠活動 (Update)' : '建立優惠活動 (Create)'}
+              {saving ? t('autoGen.admin.key408') : isEdit ? t('autoGen.admin.key409') : t('autoGen.admin.key410')}
             </button>
           )}
         </div>

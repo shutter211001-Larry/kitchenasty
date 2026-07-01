@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { getTranslated } from '../../utils/translation.js';
 
@@ -52,6 +53,7 @@ export default function VibrantHero({ hero, t, lang = 'zh-TW' }: HeroProps) {
             const link = hero?.ctaSecondaryLink || '/locations';
             // Assume we can't easily access settings here, but actually we missed useTheme in this rewrite script for VibrantHero?
             // Actually VibrantHero used settings originally? No, it just used Link directly. Let's keep it simple.
+            const { t } = useTranslation();
             return (
               <Link
                 to={link}

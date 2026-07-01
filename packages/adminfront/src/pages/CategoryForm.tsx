@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { api } from '../lib/api.js';
@@ -21,22 +22,6 @@ interface CategoryData {
   sharedStockQty: number;
   sharedStockThreshold: number;
 }
-
-const LANGUAGES = [
-  { code: 'zh-TW', label: '繁體中文 (Traditional Chinese)' },
-  { code: 'en', label: '英文 (English)' },
-  { code: 'ja', label: '日文 (Japanese)' },
-  { code: 'ko', label: '韓文 (Korean)' },
-  { code: 'th', label: '泰文 (Thai)' },
-  { code: 'tl', label: '菲律賓文 (Filipino)' },
-  { code: 'vi', label: '越南文 (Vietnamese)' },
-  { code: 'id', label: '印尼文 (Indonesian)' },
-  { code: 'es', label: '西班牙文 (Spanish)' },
-  { code: 'fr', label: '法文 (French)' },
-  { code: 'de', label: '德文 (German)' },
-  { code: 'it', label: '義大利文 (Italian)' },
-  { code: 'pt', label: '葡萄牙文 (Portuguese)' },
-];
 
 interface CategoryOption {
   id: string;
@@ -66,6 +51,22 @@ const emptyCategory: CategoryData = {
 };
 
 export default function CategoryForm() {
+    const LANGUAGES = [
+      { code: 'zh-TW', label: t('autoGen.admin.key148') },
+      { code: 'en', label: t('autoGen.admin.key149') },
+      { code: 'ja', label: t('autoGen.admin.key150') },
+      { code: 'ko', label: t('autoGen.admin.key151') },
+      { code: 'th', label: t('autoGen.admin.key152') },
+      { code: 'tl', label: t('autoGen.admin.key153') },
+      { code: 'vi', label: t('autoGen.admin.key154') },
+      { code: 'id', label: t('autoGen.admin.key155') },
+      { code: 'es', label: t('autoGen.admin.key156') },
+      { code: 'fr', label: t('autoGen.admin.key157') },
+      { code: 'de', label: t('autoGen.admin.key158') },
+      { code: 'it', label: t('autoGen.admin.key159') },
+      { code: 'pt', label: t('autoGen.admin.key160') },
+    ];
+
   const { id } = useParams();
   const navigate = useNavigate();
   const isEdit = !!id;
@@ -127,6 +128,8 @@ export default function CategoryForm() {
   }, [id, isEdit]);
 
   const updateField = (field: keyof CategoryData, value: any) => {
+  const { t } = useTranslation();
+
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -220,10 +223,10 @@ export default function CategoryForm() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-semibold text-gray-800">
-          {isEdit ? '編輯分類' : '新增分類'}
+          {isEdit ? t('autoGen.admin.key161') : t('autoGen.admin.key162')}
         </h2>
         <button onClick={() => navigate('/menu/categories')} className="text-gray-500 hover:text-gray-700 text-sm">
-          返回分類列表
+          {t('autoGen.admin.key163')}
         </button>
       </div>
 
@@ -233,10 +236,10 @@ export default function CategoryForm() {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <section className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">分類基本資料 (Category Details)</h3>
+          <h3 className="text-lg font-medium text-gray-900 mb-4">{t('autoGen.admin.key164')}</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">名稱 *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key165')}</label>
               <input
                 type="text"
                 value={form.name}
@@ -246,7 +249,7 @@ export default function CategoryForm() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">網址代稱 (Slug) *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key166')}</label>
               <input
                 type="text"
                 value={form.slug}
@@ -258,18 +261,18 @@ export default function CategoryForm() {
             </div>
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                描述 (Description)
-                <span className="ml-2 text-xs text-orange-500 font-normal">· 會顯示在 LINE 點餐卡片</span>
+                {t('autoGen.admin.key167')}
+                <span className="ml-2 text-xs text-orange-500 font-normal">{t('autoGen.admin.key168')}</span>
               </label>
               <textarea
                 value={form.description}
                 onChange={(e) => updateField('description', e.target.value)}
                 rows={2}
-                placeholder="探索新鮮美味的主題餐點..."
+                placeholder={t('autoGen.admin.key169')}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
               />
               <p className="text-xs text-gray-400 mt-1 leading-normal">
-                <span className="text-orange-500 font-medium">💡 LINE 推薦規格：此描述會顯示在 LINE 點餐的微型卡片 (Micro Bubble) 中，建議控制在 15-20 字以內，排版最為精緻。</span>
+                <span className="text-orange-500 font-medium">{t('autoGen.admin.key170')}</span>
               </p>
             </div>
             {/* Image Section */}
@@ -277,8 +280,8 @@ export default function CategoryForm() {
               {isEdit ? (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    🖼️ 分類圖片 (Category Image)
-                    <span className="ml-2 text-xs text-primary-600 font-normal">· 顯示於 LINE 輪播選單與 LIFF 介面</span>
+                    {t('autoGen.admin.key171')}
+                    <span className="ml-2 text-xs text-primary-600 font-normal">{t('autoGen.admin.key172')}</span>
                   </label>
                   <div className="flex items-start gap-6 bg-slate-50/50 p-4 rounded-xl border border-gray-100">
                     {imageUrl ? (
@@ -293,19 +296,19 @@ export default function CategoryForm() {
                           onClick={handleImageRemove}
                           disabled={uploading}
                           className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600 disabled:opacity-50 shadow-md transition-all active:scale-90"
-                          aria-label="移除圖片"
+                          aria-label={t('autoGen.admin.key173')}
                         >
                           ✕
                         </button>
                       </div>
                     ) : (
                       <div className="w-32 h-24 bg-white rounded-lg border-2 border-dashed border-gray-300 flex flex-col items-center justify-center shrink-0">
-                        <span className="text-[10px] text-gray-400">尚未上傳</span>
+                        <span className="text-[10px] text-gray-400">{t('autoGen.admin.key174')}</span>
                       </div>
                     )}
                     <div className="space-y-2">
                       <label className="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-xs font-semibold cursor-pointer disabled:opacity-50 transition-colors shadow-sm">
-                        {uploading ? '上傳中...' : '上傳與裁切圖片'}
+                        {uploading ? t('autoGen.admin.key175') : t('autoGen.admin.key176')}
                         <input
                           type="file"
                           accept="image/jpeg,image/png,image/webp,image/gif"
@@ -315,8 +318,8 @@ export default function CategoryForm() {
                         />
                       </label>
                       <p className="text-[11px] text-gray-400 leading-relaxed">
-                        支援格式：JPEG, PNG, WebP。檔案上限 5MB。<br />
-                        <span className="text-orange-500 font-medium">💡 LINE 推薦規格：建議裁切為 20:13 比例（800×520 px）。</span>
+                        {t('autoGen.admin.key177')}<br />
+                        <span className="text-orange-500 font-medium">{t('autoGen.admin.key178')}</span>
                       </p>
                     </div>
                   </div>
@@ -324,8 +327,8 @@ export default function CategoryForm() {
               ) : (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    🖼️ 分類圖片網址 (Image URL)
-                    <span className="ml-2 text-xs text-orange-500 font-normal">· 顯示於 LINE 點餐選單卡片</span>
+                    {t('autoGen.admin.key179')}
+                    <span className="ml-2 text-xs text-orange-500 font-normal">{t('autoGen.admin.key180')}</span>
                   </label>
                   <div className="flex gap-3 items-start">
                     <div className="flex-1">
@@ -337,15 +340,15 @@ export default function CategoryForm() {
                         className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                       />
                       <p className="text-xs text-gray-400 mt-1 leading-normal">
-                        建議尺寸：800×520 px（20:13 橫幅）。<br />
-                        <span className="text-primary-600">💡 提示：建立分類後，點擊編輯該分類即可解鎖「本地拖曳上傳與 20:13 LINE 完美裁切」功能！</span>
+                        {t('autoGen.admin.key181')}<br />
+                        <span className="text-primary-600">{t('autoGen.admin.key182')}</span>
                       </p>
                     </div>
                     {form.image && (
                       <div className="relative shrink-0">
                         <img
                           src={form.image}
-                          alt="分類預覽"
+                          alt={t('autoGen.admin.key183')}
                           className="w-24 h-16 object-cover rounded-lg border border-gray-200 shadow-sm"
                           onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                         />
@@ -363,39 +366,39 @@ export default function CategoryForm() {
               )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">父分類 (Parent Category)</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key184')}</label>
               <select
                 value={form.parentId}
                 onChange={(e) => updateField('parentId', e.target.value)}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
               >
-                <option value="">無 (頂層分類)</option>
+                <option value="">{t('autoGen.admin.key185')}</option>
                 {categories.map((c) => (
                   <option key={c.id} value={c.id}>{c.name}</option>
                 ))}
               </select>
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-750 mb-1">上架範圍 / 關聯分店 (Branch Availability)</label>
+              <label className="block text-sm font-semibold text-gray-750 mb-1">{t('autoGen.admin.key186')}</label>
               {user?.role === 'SUPER_ADMIN' ? (
                 <select
                   value={form.locationId}
                   onChange={(e) => updateField('locationId', e.target.value)}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 font-medium"
                 >
-                  <option value="">中央總部 (全分店上架 - 預設)</option>
+                  <option value="">{t('autoGen.admin.key187')}</option>
                   {locations.map((loc) => (
                     <option key={loc.id} value={loc.id}>{loc.name}</option>
                   ))}
                 </select>
               ) : (
                 <div className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm font-medium text-gray-600">
-                  {locations.find((l) => l.id === form.locationId)?.name || '指定所屬分店'} (店長限製)
+                  {locations.find((l) => l.id === form.locationId)?.name || t('autoGen.admin.key188')} {t('autoGen.admin.key189')}
                 </div>
               )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">排序 (Sort Order)</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key190')}</label>
               <input
                 type="number"
                 value={form.sortOrder}
@@ -412,7 +415,7 @@ export default function CategoryForm() {
                   onChange={(e) => updateField('isActive', e.target.checked)}
                   className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
                 />
-                <span className="text-sm text-gray-700">啟用 (Active)</span>
+                <span className="text-sm text-gray-700">{t('autoGen.admin.key191')}</span>
               </label>
             </div>
             <div>
@@ -423,7 +426,7 @@ export default function CategoryForm() {
                   onChange={(e) => updateField('isFrozenDelivery', e.target.checked)}
                   className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
                 />
-                <span className="text-sm text-gray-755 font-bold text-blue-600">❄️ 冷凍宅配商品 (Frozen Delivery)</span>
+                <span className="text-sm text-gray-755 font-bold text-blue-600">{t('autoGen.admin.key192')}</span>
               </label>
             </div>
 
@@ -431,10 +434,10 @@ export default function CategoryForm() {
             <div className="md:col-span-2 border-t border-gray-100 pt-6 mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="md:col-span-2">
                 <h4 className="text-sm font-semibold text-gray-800 flex items-center gap-1.5">
-                  📦 分類共用庫存設定 (Shared Category Inventory)
+                  {t('autoGen.admin.key193')}
                 </h4>
                 <p className="text-xs text-gray-400 mt-0.5">
-                  啟用後，此分類下的所有商品在下單時，會共同扣除此處設定的當日總庫存（如：12 吋披薩共用 20 顆麵團限制）。
+                  {t('autoGen.admin.key194')}
                 </p>
               </div>
               <div className="flex items-center">
@@ -451,13 +454,13 @@ export default function CategoryForm() {
                     }}
                     className="rounded border-gray-300 text-primary-600 focus:ring-primary-500 w-4 h-4"
                   />
-                  <span className="text-sm font-medium text-gray-700">啟用分類當日共用庫存</span>
+                  <span className="text-sm font-medium text-gray-700">{t('autoGen.admin.key195')}</span>
                 </label>
               </div>
               {form.trackSharedStock && (
                 <>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">當日共用庫存總數 *</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key196')}</label>
                     <input
                       type="number"
                       value={form.sharedStockQty}
@@ -468,7 +471,7 @@ export default function CategoryForm() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">庫存預警提示門檻 (預設 5) *</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key197')}</label>
                     <input
                       type="number"
                       value={form.sharedStockThreshold}
@@ -486,7 +489,7 @@ export default function CategoryForm() {
 
         {/* Translations */}
         <section className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">多語言翻譯 (Translations)</h3>
+          <h3 className="text-lg font-medium text-gray-900 mb-4">{t('autoGen.admin.key198')}</h3>
           <div className="space-y-6">
             {LANGUAGES.map((lang) => (
               <div key={lang.code} className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border border-gray-100 rounded-lg">
@@ -494,7 +497,7 @@ export default function CategoryForm() {
                   <span className="text-sm font-bold text-primary-600">{lang.label} ({lang.code})</span>
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-500 mb-1">名稱 ({lang.code})</label>
+                  <label className="block text-xs text-gray-500 mb-1">{t('autoGen.admin.key199')}{lang.code})</label>
                   <input
                     type="text"
                     value={form.nameTranslations[lang.code] || ''}
@@ -506,7 +509,7 @@ export default function CategoryForm() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-500 mb-1">描述 ({lang.code})</label>
+                  <label className="block text-xs text-gray-500 mb-1">{t('autoGen.admin.key200')}{lang.code})</label>
                   <textarea
                     value={form.descriptionTranslations[lang.code] || ''}
                     onChange={(e) => {
@@ -524,10 +527,10 @@ export default function CategoryForm() {
 
         <div className="flex justify-end gap-3">
           <button type="button" onClick={() => navigate('/menu/categories')} className="px-6 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50">
-            取消
+            {t('autoGen.admin.key201')}
           </button>
           <button type="submit" disabled={saving} className="px-6 py-2 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700 disabled:opacity-50 transition-colors">
-            {saving ? '儲存中...' : isEdit ? '更新分類' : '建立分類'}
+            {saving ? t('autoGen.admin.key202') : isEdit ? t('autoGen.admin.key203') : t('autoGen.admin.key204')}
           </button>
         </div>
       </form>

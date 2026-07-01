@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { API_BASE } from '../lib/api.js';
 import { useTheme } from './ThemeContext.js';
@@ -27,6 +28,8 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const { t } = useTranslation();
+
   const { settings } = useTheme();
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(() => localStorage.getItem('token'));
@@ -140,7 +143,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         data = await res.json();
       } catch (parseErr) {
-        throw new Error('伺服器連線失敗或正在維護中，請稍後再試。 (Server connection failed)');
+        throw new Error(t('autoGen.store.key12'));
       }
 
       if (!res.ok) {
@@ -181,7 +184,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       data = await res.json();
     } catch (parseErr) {
-      throw new Error('伺服器連線失敗或正在維護中，請稍後再試。 (Server connection failed)');
+      throw new Error(t('autoGen.store.key13'));
     }
 
     if (!res.ok) throw new Error(data.error || 'Registration failed');

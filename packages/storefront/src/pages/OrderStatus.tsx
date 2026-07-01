@@ -42,6 +42,8 @@ import { getTranslated } from '../utils/translation.js';
 import { useRecentOrders } from '../hooks/useRecentOrders.js';
 
 export default function OrderStatus() {
+  const { t } = useTranslation();
+
   const { t, i18n } = useTranslation();
   const { id } = useParams();
   const { token, user, logout } = useAuth();
@@ -86,7 +88,7 @@ export default function OrderStatus() {
         const taiwanTomorrowStr = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Taipei' }).format(tomorrow);
         
         if (taiwanScheduledStr === taiwanTomorrowStr) {
-          setTimeLeftStr(t('orderStatus.tomorrow') || '明天');
+          setTimeLeftStr(t('orderStatus.tomorrow') || t('autoGen.store.key95'));
         } else {
           setTimeLeftStr(''); // Non-today/tomorrow doesn't show countdown
         }
@@ -99,7 +101,7 @@ export default function OrderStatus() {
   }, [order?.scheduledAt, t]);
 
   async function handleCancel() {
-    if (!window.confirm(t('common.confirmCancel') || '確定要取消這筆訂單嗎？')) return;
+    if (!window.confirm(t('common.confirmCancel') || t('autoGen.store.key96'))) return;
     
     setCancelling(true);
     try {
@@ -114,10 +116,10 @@ export default function OrderStatus() {
       if (data.success) {
         setOrder({ ...order, status: 'CANCELLED' });
       } else {
-        alert(data.error || '取消失敗');
+        alert(data.error || t('autoGen.store.key97'));
       }
     } catch (e) {
-      alert('取消失敗，請稍後再試');
+      alert(t('autoGen.store.key98'));
     } finally {
       setCancelling(false);
     }
@@ -364,7 +366,7 @@ export default function OrderStatus() {
             <div className="flex-1 space-y-1">
               <div className="flex items-center gap-2 flex-wrap">
                 <h3 className="font-bold text-main text-base leading-tight">
-                  {t('orderStatus.scheduledOrderTitle') || '📅 預約預訂單已確認成立'}
+                  {t('orderStatus.scheduledOrderTitle') || t('autoGen.store.key99')}
                 </h3>
                 <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-primary-100 text-primary-800 border border-primary-200">
                   {order.orderType === 'DELIVERY' ? t('checkout.delivery') : t('checkout.pickup')}
@@ -372,7 +374,7 @@ export default function OrderStatus() {
               </div>
               
               <p className="text-sm font-semibold text-primary-700">
-                {t('orderStatus.scheduledForTime') || '預計取餐/送達時間：'}
+                {t('orderStatus.scheduledForTime') || t('autoGen.store.key100')}
                 <span className="text-base font-extrabold text-gray-900 underline underline-offset-4 decoration-primary-300 decoration-2">
                   {formatToFullDateTime(order.scheduledAt, i18n.language)}
                 </span>
@@ -388,7 +390,7 @@ export default function OrderStatus() {
                 </p>
               ) : (
                 <p className="text-xs text-sub leading-normal pt-0.5">
-                  {t('orderStatus.scheduledTips') || '這是您的預訂訂單。店家將於預約時間前開始為您新鮮製作。請在預訂時間留意您的外送動態或前往分店取餐！'}
+                  {t('orderStatus.scheduledTips') || t('autoGen.store.key101')}
                 </p>
               )}
             </div>
@@ -483,7 +485,7 @@ export default function OrderStatus() {
           </div>
           {order.tax > 0 && (
             <div className="flex justify-between text-sm text-sub">
-              <span>{t('checkout.tax') || '稅金 (Tax)'}</span>
+              <span>{t('checkout.tax') || t('autoGen.store.key102')}</span>
               <span>${order.tax.toFixed(2)}</span>
             </div>
           )}
@@ -491,7 +493,7 @@ export default function OrderStatus() {
             <div className="flex justify-between text-sm text-sub">
               <span className="text-sub">{t('checkout.deliveryFee')}</span>
               <span className={order.deliveryFee === 0 ? "text-green-600 font-medium" : "text-main"}>
-                {order.deliveryFee === 0 ? (t('checkout.free') || '免運費') : `$${order.deliveryFee.toFixed(2)}`}
+                {order.deliveryFee === 0 ? (t('checkout.free') || t('autoGen.store.key103')) : `$${order.deliveryFee.toFixed(2)}`}
               </span>
             </div>
           )}
@@ -507,7 +509,7 @@ export default function OrderStatus() {
             if (Math.abs(diff) > 0.001) {
               return (
                 <div className="flex justify-between text-sm text-sub">
-                  <span>{t('checkout.roundingAdjustment') || '結算調整 (Rounding)'}</span>
+                  <span>{t('checkout.roundingAdjustment') || t('autoGen.store.key104')}</span>
                   <span>{diff > 0 ? '+' : ''}${diff.toFixed(2)}</span>
                 </div>
               );

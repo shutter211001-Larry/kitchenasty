@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useState, useEffect, useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useAuth } from '../context/AuthContext';
@@ -117,6 +118,8 @@ export default function AdminChatWidget() {
   }, [isOpen, messages]);
 
   const scrollToBottom = () => {
+  const { t } = useTranslation();
+
     setTimeout(() => {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, 100);
@@ -160,21 +163,21 @@ export default function AdminChatWidget() {
           {/* Header */}
           <div className="bg-primary-600 text-white px-4 py-3 flex justify-between items-center">
             <div className="flex flex-col">
-              <h3 className="font-semibold text-sm">內部管理員聊天室</h3>
+              <h3 className="font-semibold text-sm">{t('autoGen.admin.key1')}</h3>
               {(user.role === 'SUPER_ADMIN' || user.role === 'MANAGER') && (
                 <select
                   value={activeLocationId}
                   onChange={(e) => setActiveLocationId(e.target.value)}
                   className="mt-1 text-xs bg-primary-700 text-white border-transparent rounded px-1 py-0.5 focus:ring-0 cursor-pointer max-w-[150px]"
                 >
-                  <option value="global">全域廣播</option>
+                  <option value="global">{t('autoGen.admin.key2')}</option>
                   {locations.map(loc => (
                     <option key={loc.id} value={loc.id}>{loc.name}</option>
                   ))}
                 </select>
               )}
               {user.role === 'STAFF' && user.locationId && (
-                <span className="text-xs text-primary-200 mt-0.5">專屬分店頻道</span>
+                <span className="text-xs text-primary-200 mt-0.5">{t('autoGen.admin.key3')}</span>
               )}
             </div>
             <button onClick={() => setIsOpen(false)} className="text-primary-100 hover:text-white">
@@ -210,7 +213,7 @@ export default function AdminChatWidget() {
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="輸入訊息..."
+              placeholder={t('autoGen.admin.key4')}
               className="flex-1 bg-gray-100 border-transparent rounded-full px-4 py-2 text-sm focus:border-primary-500 focus:bg-white focus:ring-0 transition-colors"
             />
             <button

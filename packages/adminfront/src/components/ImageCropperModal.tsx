@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useState, useRef, useEffect } from 'react';
 
 interface ImageCropperModalProps {
@@ -26,6 +27,8 @@ export default function ImageCropperModal({ src, onCrop, onClose }: ImageCropper
 
   // Initialize crop coordinates based on image natural aspect ratio and selected target ratio
   const initializeCrop = (naturalWidth: number, naturalHeight: number, preset: AspectRatioPreset) => {
+  const { t } = useTranslation();
+
     if (preset === 'free') {
       setCrop({ x: 10, y: 10, width: 80, height: 80 });
       return;
@@ -356,23 +359,23 @@ export default function ImageCropperModal({ src, onCrop, onClose }: ImageCropper
         <div className="md:w-80 border-t md:border-t-0 md:border-l border-gray-100 flex flex-col justify-between bg-gray-50/50 p-6">
           <div className="space-y-6">
             <div>
-              <h3 className="text-lg font-bold text-gray-900">裁切產品圖片</h3>
-              <p className="text-xs text-gray-500 mt-1">調整並確認圖片顯示範圍，讓前台點餐畫面更精緻。</p>
+              <h3 className="text-lg font-bold text-gray-900">{t('autoGen.admin.key5')}</h3>
+              <p className="text-xs text-gray-500 mt-1">{t('autoGen.admin.key6')}</p>
             </div>
 
             {/* Aspect Ratio Buttons */}
             <div className="space-y-2">
               <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wide">
-                選擇裁切比例 (Aspect Ratio)
+                {t('autoGen.admin.key7')}
               </label>
               <div className="grid grid-cols-2 gap-2">
                 {(['4:3', '16:9', '1:1', '20:13', 'free'] as AspectRatioPreset[]).map((preset) => {
                   let label = '';
-                  if (preset === '4:3') label = '4:3 平衡比例';
-                  else if (preset === '16:9') label = '16:9 寬螢幕';
-                  else if (preset === '1:1') label = '1:1 正方形';
-                  else if (preset === '20:13') label = '20:13 LINE 比例';
-                  else label = '自由比例';
+                  if (preset === '4:3') label = t('autoGen.admin.key8');
+                  else if (preset === '16:9') label = t('autoGen.admin.key9');
+                  else if (preset === '1:1') label = t('autoGen.admin.key10');
+                  else if (preset === '20:13') label = t('autoGen.admin.key11');
+                  else label = t('autoGen.admin.key12');
 
                   return (
                     <button
@@ -396,24 +399,24 @@ export default function ImageCropperModal({ src, onCrop, onClose }: ImageCropper
             <div className="bg-primary-50 border border-primary-100 rounded-xl p-4 text-xs text-primary-900 space-y-2">
               <div className="flex items-center gap-1.5 font-bold text-primary-800">
                 <span className="text-sm">💡</span>
-                <span>電腦與手機顯示範圍提醒</span>
+                <span>{t('autoGen.admin.key13')}</span>
               </div>
               <div className="space-y-1 text-primary-700 leading-relaxed">
                 <p>
-                  <strong>💬 LINE 點餐卡片</strong>：採用輪播 Flex 橫幅，最完美的比例為 <strong>20:13</strong> (約 800×520 px)。
+                  <strong>{t('autoGen.admin.key14')}</strong>{t('autoGen.admin.key15')} <strong>20:13</strong> {t('autoGen.admin.key16')}
                 </p>
                 <p>
-                  <strong>📱 手機 App 畫面</strong>：採用雙排網格，圖片視覺顯示比例約為 <strong>4:3</strong>。
+                  <strong>{t('autoGen.admin.key17')}</strong>{t('autoGen.admin.key18')} <strong>4:3</strong>。
                 </p>
                 <p>
-                  <strong>💻 電腦瀏覽器</strong>：多以寬卡片呈現，顯示比例約為 <strong>16:9</strong>。
+                  <strong>{t('autoGen.admin.key19')}</strong>{t('autoGen.admin.key20')} <strong>16:9</strong>。
                 </p>
                 <div className="border-t border-primary-200/60 my-1.5" />
                 <p className="font-semibold text-primary-800">
-                  ⭐️ 推薦指南：
+                  {t('autoGen.admin.key21')}
                 </p>
                 <p>
-                  若為<strong>分類圖片</strong>，強烈建議使用 <strong>20:13</strong> 比例以保證在 LINE 官方帳號中有最完美的滿版效果！若為一般商品，則推薦 <strong>4:3</strong> 比例。
+                  {t('autoGen.admin.key22')}<strong>{t('autoGen.admin.key23')}</strong>{t('autoGen.admin.key24')} <strong>20:13</strong> {t('autoGen.admin.key25')} <strong>4:3</strong> {t('autoGen.admin.key26')}
                 </p>
               </div>
             </div>
@@ -426,14 +429,14 @@ export default function ImageCropperModal({ src, onCrop, onClose }: ImageCropper
               onClick={onClose}
               className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 bg-white rounded-lg text-sm font-medium hover:bg-gray-50 active:scale-95 transition-all text-center cursor-pointer"
             >
-              取消
+              {t('autoGen.admin.key27')}
             </button>
             <button
               type="button"
               onClick={handleConfirm}
               className="flex-1 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm font-medium active:scale-95 transition-all text-center cursor-pointer"
             >
-              確認裁切
+              {t('autoGen.admin.key28')}
             </button>
           </div>
         </div>
@@ -447,7 +450,7 @@ export default function ImageCropperModal({ src, onCrop, onClose }: ImageCropper
     return (
       <div className="absolute inset-0 flex items-center justify-center bg-slate-900 text-slate-400 gap-2">
         <div className="w-5 h-5 border-2 border-slate-600 border-t-white rounded-full animate-spin" />
-        <span className="text-sm">圖片載入中...</span>
+        <span className="text-sm">{t('autoGen.admin.key29')}</span>
       </div>
     );
   }

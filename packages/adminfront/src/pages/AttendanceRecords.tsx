@@ -52,7 +52,7 @@ export default function AttendanceRecords() {
       if (data.success) {
         setRecords(data.data);
       } else {
-        toast.error('無法載入紀錄');
+        toast.error(t('autoGen.admin.key105'));
       }
     } catch (err) {
       console.error(err);
@@ -73,20 +73,20 @@ export default function AttendanceRecords() {
       <div className="bg-white p-6 rounded shadow mb-6">
         <form onSubmit={handleFilter} className="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">分店</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key106')}</label>
             <select
               value={locationId}
               onChange={(e) => setLocationId(e.target.value)}
               className="w-full rounded border-gray-300 text-sm"
             >
-              <option value="">全部</option>
+              <option value="">{t('autoGen.admin.key107')}</option>
               {locations.map(loc => (
                 <option key={loc.id} value={loc.id}>{loc.name}</option>
               ))}
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">開始日期</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key108')}</label>
             <input
               type="date"
               value={startDate}
@@ -95,7 +95,7 @@ export default function AttendanceRecords() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">結束日期</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key109')}</label>
             <input
               type="date"
               value={endDate}
@@ -111,7 +111,7 @@ export default function AttendanceRecords() {
                 onChange={(e) => setIsOutOfRange(e.target.checked)}
                 className="mr-2 rounded text-primary-600 border-gray-300 focus:ring-primary-500"
               />
-              僅顯示距離異常
+              {t('autoGen.admin.key110')}
             </label>
           </div>
           <div>
@@ -120,7 +120,7 @@ export default function AttendanceRecords() {
               disabled={loading}
               className="w-full bg-primary-600 text-white py-2 rounded text-sm font-medium hover:bg-primary-700 disabled:opacity-50"
             >
-              篩選
+              {t('autoGen.admin.key111')}
             </button>
           </div>
         </form>
@@ -130,12 +130,12 @@ export default function AttendanceRecords() {
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">日期</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">員工</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">門市</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">上班時間</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">下班時間</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">狀態</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('autoGen.admin.key112')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('autoGen.admin.key113')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('autoGen.admin.key114')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('autoGen.admin.key115')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('autoGen.admin.key116')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('autoGen.admin.key117')}</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -160,11 +160,11 @@ export default function AttendanceRecords() {
                 <td className="px-6 py-4 whitespace-nowrap text-sm">
                   {record.isOutOfRange ? (
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                      距離異常
+                      {t('autoGen.admin.key118')}
                     </span>
                   ) : (
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                      正常
+                      {t('autoGen.admin.key119')}
                     </span>
                   )}
                 </td>
@@ -173,7 +173,7 @@ export default function AttendanceRecords() {
             {records.length === 0 && (
               <tr>
                 <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
-                  找不到符合的紀錄
+                  {t('autoGen.admin.key120')}
                 </td>
               </tr>
             )}

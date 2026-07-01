@@ -193,7 +193,7 @@ export default function StaffEdit() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">時薪 (Hourly Wage)</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key1547')}</label>
           <input
             type="number"
             min="0"

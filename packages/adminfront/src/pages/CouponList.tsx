@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
@@ -24,14 +25,15 @@ interface Pagination {
   totalPages: number;
 }
 
-const TYPE_LABELS: Record<string, string> = {
-  PERCENTAGE: '% 折扣 (Percentage)',
-  FIXED: '固定金額 (Fixed Amount)',
-  FREE_DELIVERY: '免運費 (Free Delivery)',
-  BOGO: '組合優惠 (BOGO)',
-};
-
 export default function CouponList() {
+  const { t } = useTranslation();
+    const TYPE_LABELS: Record<string, string> = {
+      PERCENTAGE: t('autoGen.admin.key411'),
+      FIXED: t('autoGen.admin.key412'),
+      FREE_DELIVERY: t('autoGen.admin.key413'),
+      BOGO: t('autoGen.admin.key414'),
+    };
+
   const [coupons, setCoupons] = useState<Coupon[]>([]);
   const [pagination, setPagination] = useState<Pagination | null>(null);
   const [loading, setLoading] = useState(true);
@@ -79,7 +81,7 @@ export default function CouponList() {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || '刪除失敗');
+      if (!res.ok) throw new Error(data.error || t('autoGen.admin.key415'));
       setCoupons((prev) => prev.filter((c) => c.id !== id));
     } catch (err: any) {
       alert(err.message);
@@ -89,25 +91,25 @@ export default function CouponList() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">優惠券管理 (Coupons)</h1>
+        <h1 className="text-2xl font-bold text-gray-900">{t('autoGen.admin.key416')}</h1>
         <Link
           to="/promotions/coupons/new"
           className="bg-primary-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary-700 transition-colors"
         >
-          + 新增優惠券
+          {t('autoGen.admin.key417')}
         </Link>
       </div>
 
       {loading && (
         <div className="flex justify-center py-12">
-          <div className="w-8 h-8 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin" role="status" aria-label="載入中" />
+          <div className="w-8 h-8 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin" role="status" aria-label={t('autoGen.admin.key418')} />
         </div>
       )}
 
       {error && <div className="bg-red-50 text-red-700 p-4 rounded-lg mb-4">{error}</div>}
 
       {!loading && !error && coupons.length === 0 && (
-        <p className="text-gray-500 text-center py-12">目前尚無優惠券。</p>
+        <p className="text-gray-500 text-center py-12">{t('autoGen.admin.key419')}</p>
       )}
 
       {!loading && coupons.length > 0 && (
@@ -116,13 +118,13 @@ export default function CouponList() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-200 bg-gray-50">
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">代碼 (Code)</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">類型 (Type)</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">數值 (Value)</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">最低消費</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">使用次數</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">狀態 (Status)</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">操作 (Actions)</th>
+                  <th className="text-left px-4 py-3 font-medium text-gray-600">{t('autoGen.admin.key420')}</th>
+                  <th className="text-left px-4 py-3 font-medium text-gray-600">{t('autoGen.admin.key421')}</th>
+                  <th className="text-left px-4 py-3 font-medium text-gray-600">{t('autoGen.admin.key422')}</th>
+                  <th className="text-left px-4 py-3 font-medium text-gray-600">{t('autoGen.admin.key423')}</th>
+                  <th className="text-left px-4 py-3 font-medium text-gray-600">{t('autoGen.admin.key424')}</th>
+                  <th className="text-left px-4 py-3 font-medium text-gray-600">{t('autoGen.admin.key425')}</th>
+                  <th className="text-left px-4 py-3 font-medium text-gray-600">{t('autoGen.admin.key426')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -140,7 +142,7 @@ export default function CouponList() {
                         : coupon.type === 'FIXED'
                           ? `$${coupon.value.toFixed(2)}`
                           : coupon.type === 'BOGO'
-                            ? '依條件折抵'
+                            ? t('autoGen.admin.key427')
                             : '—'}
                     </td>
                     <td className="px-4 py-3 text-gray-600">
@@ -171,7 +173,7 @@ export default function CouponList() {
                           }`}
                         aria-label={`${coupon.isActive ? 'Deactivate' : 'Activate'} coupon ${coupon.code}`}
                       >
-                        {coupon.isActive ? '啟用中' : '已停用'}
+                        {coupon.isActive ? t('autoGen.admin.key428') : t('autoGen.admin.key429')}
                       </button>
                     </td>
                     <td className="px-4 py-3">
@@ -181,14 +183,14 @@ export default function CouponList() {
                           className="text-primary-600 hover:text-primary-700 text-xs font-medium"
                           aria-label={`編輯優惠券 ${coupon.code}`}
                         >
-                          編輯
+                          {t('autoGen.admin.key430')}
                         </Link>
                         <button
                           onClick={() => handleDelete(coupon.id, coupon.code)}
                           className="text-red-500 hover:text-red-700 text-xs font-medium"
                           aria-label={`刪除優惠券 ${coupon.code}`}
                         >
-                          刪除
+                          {t('autoGen.admin.key431')}
                         </button>
                       </div>
                     </td>
@@ -205,17 +207,17 @@ export default function CouponList() {
                 onClick={() => setPage((p) => p - 1)}
                 className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg disabled:opacity-40 hover:bg-gray-50"
               >
-                上一頁
+                {t('autoGen.admin.key432')}
               </button>
               <span className="text-sm text-gray-600">
-                第 {pagination.page} 頁，共 {pagination.totalPages} 頁
+                {t('autoGen.admin.key433')} {pagination.page} {t('autoGen.admin.key434')} {pagination.totalPages} {t('autoGen.admin.key435')}
               </span>
               <button
                 disabled={page >= pagination.totalPages}
                 onClick={() => setPage((p) => p + 1)}
                 className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg disabled:opacity-40 hover:bg-gray-50"
               >
-                下一頁
+                {t('autoGen.admin.key436')}
               </button>
             </div>
           )}

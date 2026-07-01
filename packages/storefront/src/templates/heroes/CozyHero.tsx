@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { useTheme } from '../../context/ThemeContext.js';
 import { getTranslated } from '../../utils/translation.js';
@@ -10,7 +11,6 @@ interface HeroProps {
 
 export default function CozyHero({ hero, t, lang = 'zh-TW' }: HeroProps) {
   const { settings } = useTheme();
-
   return (
     <section className="bg-amber-50 dark:bg-gray-900 py-12 lg:py-20">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -58,6 +58,7 @@ export default function CozyHero({ hero, t, lang = 'zh-TW' }: HeroProps) {
                 const link = hero?.ctaSecondaryLink || '/locations';
                 if (link === '/locations' && !settings.navShowLocations) return null;
                 if (link === '/reservations' && (!settings.navShowReservations || !settings.reservationSettings?.enabled)) return null;
+                const { t } = useTranslation();
                 return (
                   <Link
                     to={link}

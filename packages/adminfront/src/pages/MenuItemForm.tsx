@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { api } from '../lib/api.js';
@@ -81,41 +82,6 @@ interface ErpRecipe {
   allergens?: string[];
 }
 
-const emptyItem: MenuItemData = {
-  name: '',
-  nameTranslations: {},
-  slug: '',
-  description: '',
-  descriptionTranslations: {},
-  price: 0,
-  isActive: true,
-  sortOrder: 0,
-  trackStock: false,
-  stockQty: 0,
-  categoryId: '',
-  unit: '份',
-  unitTranslations: {},
-  locationId: '',
-  isRewardItem: false,
-  rewardPointsPrice: 0,
-};
-
-const LANGUAGES = [
-  { code: 'zh-TW', label: '繁體中文 (Traditional Chinese)' },
-  { code: 'en', label: '英文 (English)' },
-  { code: 'ja', label: '日文 (Japanese)' },
-  { code: 'ko', label: '韓文 (Korean)' },
-  { code: 'th', label: '泰文 (Thai)' },
-  { code: 'tl', label: '菲律賓文 (Filipino)' },
-  { code: 'vi', label: '越南文 (Vietnamese)' },
-  { code: 'id', label: '印尼文 (Indonesian)' },
-  { code: 'es', label: '西班牙文 (Spanish)' },
-  { code: 'fr', label: '法文 (French)' },
-  { code: 'de', label: '德文 (German)' },
-  { code: 'it', label: '義大利文 (Italian)' },
-  { code: 'pt', label: '葡萄牙文 (Portuguese)' },
-];
-
 const emptyOptionValue: OptionValue = { name: '', priceModifier: 0, isDefault: false, sortOrder: 0, trackStock: false, stockQty: 0 };
 const emptyOption: MenuOption = {
   name: '',
@@ -128,6 +94,40 @@ const emptyOption: MenuOption = {
 };
 
 export default function MenuItemForm() {
+    const emptyItem: MenuItemData = {
+      name: '',
+      nameTranslations: {},
+      slug: '',
+      description: '',
+      descriptionTranslations: {},
+      price: 0,
+      isActive: true,
+      sortOrder: 0,
+      trackStock: false,
+      stockQty: 0,
+      categoryId: '',
+      unit: t('autoGen.admin.key864'),
+      unitTranslations: {},
+      locationId: '',
+      isRewardItem: false,
+      rewardPointsPrice: 0,
+    };
+    const LANGUAGES = [
+      { code: 'zh-TW', label: t('autoGen.admin.key865') },
+      { code: 'en', label: t('autoGen.admin.key866') },
+      { code: 'ja', label: t('autoGen.admin.key867') },
+      { code: 'ko', label: t('autoGen.admin.key868') },
+      { code: 'th', label: t('autoGen.admin.key869') },
+      { code: 'tl', label: t('autoGen.admin.key870') },
+      { code: 'vi', label: t('autoGen.admin.key871') },
+      { code: 'id', label: t('autoGen.admin.key872') },
+      { code: 'es', label: t('autoGen.admin.key873') },
+      { code: 'fr', label: t('autoGen.admin.key874') },
+      { code: 'de', label: t('autoGen.admin.key875') },
+      { code: 'it', label: t('autoGen.admin.key876') },
+      { code: 'pt', label: t('autoGen.admin.key877') },
+    ];
+
   const { id } = useParams();
   const navigate = useNavigate();
   const isEdit = !!id;
@@ -199,7 +199,7 @@ export default function MenuItemForm() {
           trackStock: item.trackStock,
           stockQty: item.stockQty,
           categoryId: item.categoryId,
-          unit: item.unit || '份',
+          unit: item.unit || t('autoGen.admin.key878'),
           unitTranslations: item.unitTranslations || {},
           locationId: item.locationId || '',
           isRewardItem: item.isRewardItem || false,
@@ -244,6 +244,8 @@ export default function MenuItemForm() {
   }, [id, isEdit]);
 
   const updateField = (field: keyof MenuItemData, value: any) => {
+  const { t } = useTranslation();
+
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -395,16 +397,16 @@ export default function MenuItemForm() {
     }
   };
 
-  if (loading) return <p className="text-gray-500">載入中...</p>;
+  if (loading) return <p className="text-gray-500">{t('autoGen.admin.key879')}</p>;
 
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-semibold text-gray-800">
-          {isEdit ? '編輯產品' : '新增產品'}
+          {isEdit ? t('autoGen.admin.key880') : t('autoGen.admin.key881')}
         </h2>
         <button onClick={() => navigate('/menu/items')} className="text-gray-500 hover:text-gray-700 text-sm">
-          返回產品列表
+          {t('autoGen.admin.key882')}
         </button>
       </div>
 
@@ -418,11 +420,11 @@ export default function MenuItemForm() {
         {/* 基本資訊 */}
         <section className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-medium text-gray-900">基本資訊 (Basic Information)</h3>
+            <h3 className="text-lg font-medium text-gray-900">{t('autoGen.admin.key883')}</h3>
             {erpRecipes.length > 0 && (
               <div className="flex items-center gap-2">
                 <span className="text-xs text-primary-600 font-bold bg-primary-50 px-2 py-1 rounded">
-                  {isEdit ? '關聯 ERP 食譜' : '從 ERP 產品配方匯入'}
+                  {isEdit ? t('autoGen.admin.key884') : t('autoGen.admin.key885')}
                 </span>
                 <select
                   value={selectedErpRecipeId}
@@ -436,7 +438,7 @@ export default function MenuItemForm() {
                           updateField('name', recipe.name);
                           autoSlug(recipe.name);
                           updateField('description', recipe.description || '');
-                          updateField('unit', recipe.yieldUnit || '份');
+                          updateField('unit', recipe.yieldUnit || t('autoGen.admin.key886'));
                           
                           // Auto-fill allergens by matching names
                           if (recipe.allergens && recipe.allergens.length > 0) {
@@ -456,7 +458,7 @@ export default function MenuItemForm() {
                   }}
                   className="border border-primary-200 text-sm rounded-lg px-2 py-1 focus:ring-primary-500 outline-none"
                 >
-                  <option value="">-- {isEdit ? '選擇 ERP 食譜 (自動更新綁定)' : '選擇 ERP 食譜 (建立後自動綁定)'} --</option>
+                  <option value="">-- {isEdit ? t('autoGen.admin.key887') : t('autoGen.admin.key888')} --</option>
                   {erpRecipes.map(r => (
                     <option key={r.id} value={r.id}>{r.name}</option>
                   ))}
@@ -466,7 +468,7 @@ export default function MenuItemForm() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">名稱 (Name) *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key889')}</label>
               <input
                 type="text"
                 value={form.name}
@@ -476,7 +478,7 @@ export default function MenuItemForm() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">網址別名 (Slug) *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key890')}</label>
               <input
                 type="text"
                 value={form.slug}
@@ -487,7 +489,7 @@ export default function MenuItemForm() {
               />
             </div>
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">描述 (Description)</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key891')}</label>
               <textarea
                 value={form.description}
                 onChange={(e) => updateField('description', e.target.value)}
@@ -496,40 +498,40 @@ export default function MenuItemForm() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">分類 (Category) *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key892')}</label>
               <select
                 value={form.categoryId}
                 onChange={(e) => updateField('categoryId', e.target.value)}
                 required
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
               >
-                <option value="">請選擇分類</option>
+                <option value="">{t('autoGen.admin.key893')}</option>
                 {categories.map((c) => (
                   <option key={c.id} value={c.id}>{c.name}</option>
                 ))}
               </select>
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-750 mb-1">上架範圍 / 關聯分店 (Branch Availability)</label>
+              <label className="block text-sm font-semibold text-gray-750 mb-1">{t('autoGen.admin.key894')}</label>
               {user?.role === 'SUPER_ADMIN' ? (
                 <select
                   value={form.locationId}
                   onChange={(e) => updateField('locationId', e.target.value)}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 font-medium"
                 >
-                  <option value="">中央總部 (全分店上架 - 預設)</option>
+                  <option value="">{t('autoGen.admin.key895')}</option>
                   {locations.map((loc) => (
                     <option key={loc.id} value={loc.id}>{loc.name}</option>
                   ))}
                 </select>
               ) : (
                 <div className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm font-medium text-gray-600">
-                  {locations.find((l) => l.id === form.locationId)?.name || '指定所屬分店'} (店長限製)
+                  {locations.find((l) => l.id === form.locationId)?.name || t('autoGen.admin.key896')} {t('autoGen.admin.key897')}
                 </div>
               )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">價格 (Price) *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key898')}</label>
               <input
                 type="number"
                 value={form.price}
@@ -541,17 +543,17 @@ export default function MenuItemForm() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">單位 (如：杯、份)</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key899')}</label>
               <input
                 type="text"
                 value={form.unit}
                 onChange={(e) => updateField('unit', e.target.value)}
-                placeholder="預設單位"
+                placeholder={t('autoGen.admin.key900')}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">排序 (Sort Order)</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key901')}</label>
               <input
                 type="number"
                 value={form.sortOrder}
@@ -568,7 +570,7 @@ export default function MenuItemForm() {
                   onChange={(e) => updateField('isActive', e.target.checked)}
                   className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
                 />
-                <span className="text-sm text-gray-700">上架 (Active)</span>
+                <span className="text-sm text-gray-700">{t('autoGen.admin.key902')}</span>
               </label>
               <label className="flex items-center gap-2">
                 <input
@@ -577,11 +579,11 @@ export default function MenuItemForm() {
                   onChange={(e) => updateField('trackStock', e.target.checked)}
                   className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
                 />
-                <span className="text-sm text-gray-700">追蹤庫存 (Track Stock)</span>
+                <span className="text-sm text-gray-700">{t('autoGen.admin.key903')}</span>
               </label>
               {form.trackStock && (
                 <div className="flex items-center gap-2">
-                  <label className="text-sm text-gray-700">庫存數量:</label>
+                  <label className="text-sm text-gray-700">{t('autoGen.admin.key904')}</label>
                   <input
                     type="number"
                     value={form.stockQty}
@@ -605,14 +607,14 @@ export default function MenuItemForm() {
                   className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
                 />
                 <div>
-                  <span className="text-sm font-bold text-orange-950">設為紅利商品 (Reward Item)</span>
-                  <p className="text-[10px] text-orange-750 mt-0.5">顧客可以使用紅利點數直接兌換此商品</p>
+                  <span className="text-sm font-bold text-orange-950">{t('autoGen.admin.key905')}</span>
+                  <p className="text-[10px] text-orange-750 mt-0.5">{t('autoGen.admin.key906')}</p>
                 </div>
               </label>
               
               {form.isRewardItem && (
                 <div className="flex items-center gap-2 animate-fadeIn">
-                  <label className="text-sm font-semibold text-orange-950">所需紅利點數:</label>
+                  <label className="text-sm font-semibold text-orange-950">{t('autoGen.admin.key907')}</label>
                   <input
                     type="number"
                     value={form.rewardPointsPrice || 0}
@@ -627,7 +629,7 @@ export default function MenuItemForm() {
 
             {/* Unit Translations */}
             <div className="mt-4 bg-gray-50 p-3 rounded-lg border border-gray-100">
-              <p className="text-[10px] font-bold text-gray-400 uppercase mb-2 tracking-wider">單位翻譯 (Unit Translations)</p>
+              <p className="text-[10px] font-bold text-gray-400 uppercase mb-2 tracking-wider">{t('autoGen.admin.key908')}</p>
               <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-2">
                 {LANGUAGES.map((lang) => (
                   <div key={lang.code}>
@@ -651,7 +653,7 @@ export default function MenuItemForm() {
 
         {/* Translations */}
         <section className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">多語言翻譯 (Translations)</h3>
+          <h3 className="text-lg font-medium text-gray-900 mb-4">{t('autoGen.admin.key909')}</h3>
           <div className="space-y-6">
             {LANGUAGES.map((lang) => (
               <div key={lang.code} className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border border-gray-100 rounded-lg">
@@ -659,7 +661,7 @@ export default function MenuItemForm() {
                   <span className="text-sm font-bold text-primary-600">{lang.label} ({lang.code})</span>
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-500 mb-1">名稱 ({lang.code})</label>
+                  <label className="block text-xs text-gray-500 mb-1">{t('autoGen.admin.key910')}{lang.code})</label>
                   <input
                     type="text"
                     value={form.nameTranslations[lang.code] || ''}
@@ -671,7 +673,7 @@ export default function MenuItemForm() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-500 mb-1">描述 ({lang.code})</label>
+                  <label className="block text-xs text-gray-500 mb-1">{t('autoGen.admin.key911')}{lang.code})</label>
                   <textarea
                     value={form.descriptionTranslations[lang.code] || ''}
                     onChange={(e) => {
@@ -690,7 +692,7 @@ export default function MenuItemForm() {
         {/* Image Upload */}
         {isEdit && (
           <section className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">產品圖片 (Image)</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-4">{t('autoGen.admin.key912')}</h3>
             <div className="flex items-start gap-6">
               {imageUrl ? (
                 <div className="relative">
@@ -704,19 +706,19 @@ export default function MenuItemForm() {
                     onClick={handleImageRemove}
                     disabled={uploading}
                     className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600 disabled:opacity-50"
-                    aria-label="移除圖片"
+                    aria-label={t('autoGen.admin.key913')}
                   >
                     X
                   </button>
                 </div>
               ) : (
                 <div className="w-40 h-40 bg-gray-100 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center">
-                  <span className="text-sm text-gray-400">尚未上傳圖片</span>
+                  <span className="text-sm text-gray-400">{t('autoGen.admin.key914')}</span>
                 </div>
               )}
               <div>
                 <label className="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700 cursor-pointer disabled:opacity-50 transition-colors">
-                  {uploading ? '上傳中...' : '上傳圖片'}
+                  {uploading ? t('autoGen.admin.key915') : t('autoGen.admin.key916')}
                   <input
                     type="file"
                     accept="image/jpeg,image/png,image/webp,image/gif"
@@ -725,7 +727,7 @@ export default function MenuItemForm() {
                     className="hidden"
                   />
                 </label>
-                <p className="text-xs text-gray-400 mt-2">支援格式：JPEG, PNG, WebP, GIF。檔案大小上限 5MB。</p>
+                <p className="text-xs text-gray-400 mt-2">{t('autoGen.admin.key917')}</p>
               </div>
             </div>
           </section>
@@ -734,45 +736,45 @@ export default function MenuItemForm() {
         {/* 產品選項 */}
         <section className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-medium text-gray-900">產品選項 (Menu Options)</h3>
+            <h3 className="text-lg font-medium text-gray-900">{t('autoGen.admin.key918')}</h3>
             <button type="button" onClick={addOption} className="text-primary-600 hover:text-primary-700 text-sm font-medium">
-              + 新增選項組
+              {t('autoGen.admin.key919')}
             </button>
           </div>
           {options.length === 0 && (
-            <p className="text-sm text-gray-400">尚未設定選項。可以新增如「尺寸」、「甜度」、「配料」等選項組。</p>
+            <p className="text-sm text-gray-400">{t('autoGen.admin.key920')}</p>
           )}
           <div className="space-y-6">
             {options.map((opt, optIdx) => (
               <div key={optIdx} className="border border-gray-200 rounded-lg p-4">
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-sm font-medium text-gray-700">選項組 #{optIdx + 1}</span>
+                  <span className="text-sm font-medium text-gray-700">{t('autoGen.admin.key921')}{optIdx + 1}</span>
                   <button type="button" onClick={() => removeOption(optIdx)} className="text-red-500 hover:text-red-700 text-sm">
-                    刪除此組
+                    {t('autoGen.admin.key922')}
                   </button>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
                   <div>
-                    <label className="block text-xs text-gray-500 mb-1">名稱 *</label>
+                    <label className="block text-xs text-gray-500 mb-1">{t('autoGen.admin.key923')}</label>
                     <input
                       type="text"
                       value={opt.name}
                       onChange={(e) => updateOption(optIdx, 'name', e.target.value)}
-                      placeholder="例如：尺寸、甜度"
+                      placeholder={t('autoGen.admin.key924')}
                       className="w-full border border-gray-300 rounded px-2 py-1 text-sm"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs text-gray-500 mb-1">顯示類型</label>
+                    <label className="block text-xs text-gray-500 mb-1">{t('autoGen.admin.key925')}</label>
                     <select
                       value={opt.displayType}
                       onChange={(e) => updateOption(optIdx, 'displayType', e.target.value)}
                       className="w-full border border-gray-300 rounded px-2 py-1 text-sm"
                     >
-                      <option value="SELECT">下拉選單 (Select)</option>
-                      <option value="RADIO">單選按鈕 (Radio)</option>
-                      <option value="CHECKBOX">複選框 (Checkbox)</option>
-                      <option value="QUANTITY">數量選擇 (Quantity)</option>
+                      <option value="SELECT">{t('autoGen.admin.key926')}</option>
+                      <option value="RADIO">{t('autoGen.admin.key927')}</option>
+                      <option value="CHECKBOX">{t('autoGen.admin.key928')}</option>
+                      <option value="QUANTITY">{t('autoGen.admin.key929')}</option>
                     </select>
                   </div>
                   <div className="flex items-center gap-4 mt-4">
@@ -783,7 +785,7 @@ export default function MenuItemForm() {
                         onChange={(e) => updateOption(optIdx, 'isRequired', e.target.checked)}
                         className="rounded border-gray-300 text-primary-600"
                       />
-                      <span className="text-xs text-gray-700">必填 (Required)</span>
+                      <span className="text-xs text-gray-700">{t('autoGen.admin.key930')}</span>
                     </label>
                   </div>
                 </div>
@@ -810,9 +812,9 @@ export default function MenuItemForm() {
                 {/* 選項值 */}
                 <div className="ml-4 space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-medium text-gray-500">選項內容 (Values)</span>
+                    <span className="text-xs font-medium text-gray-500">{t('autoGen.admin.key931')}</span>
                     <button type="button" onClick={() => addOptionValue(optIdx)} className="text-primary-600 text-xs font-medium">
-                      + 新增選項內容
+                      {t('autoGen.admin.key932')}
                     </button>
                   </div>
                   {opt.values.map((val, valIdx) => (
@@ -822,7 +824,7 @@ export default function MenuItemForm() {
                         type="text"
                         value={val.name}
                         onChange={(e) => updateOptionValue(optIdx, valIdx, 'name', e.target.value)}
-                        placeholder="選項名稱 (如：大杯、半糖)"
+                        placeholder={t('autoGen.admin.key933')}
                         className="flex-1 border border-gray-300 rounded px-2 py-1 text-sm"
                       />
                       <div className="flex items-center gap-1">
@@ -842,7 +844,7 @@ export default function MenuItemForm() {
                           onChange={(e) => updateOptionValue(optIdx, valIdx, 'isDefault', e.target.checked)}
                           className="rounded border-gray-300 text-primary-600"
                         />
-                        <span className="text-xs text-gray-500">預設值</span>
+                        <span className="text-xs text-gray-500">{t('autoGen.admin.key934')}</span>
                       </label>
                       <label className="flex items-center gap-1 ml-2">
                         <input
@@ -851,11 +853,11 @@ export default function MenuItemForm() {
                           onChange={(e) => updateOptionValue(optIdx, valIdx, 'trackStock', e.target.checked)}
                           className="rounded border-gray-300 text-primary-600"
                         />
-                        <span className="text-xs text-gray-500">追蹤庫存</span>
+                        <span className="text-xs text-gray-500">{t('autoGen.admin.key935')}</span>
                       </label>
                       {val.trackStock && (
                         <div className="flex items-center gap-1 ml-1">
-                          <span className="text-xs text-gray-500">數量:</span>
+                          <span className="text-xs text-gray-500">{t('autoGen.admin.key936')}</span>
                           <input
                             type="number"
                             value={val.stockQty || 0}
@@ -901,9 +903,9 @@ export default function MenuItemForm() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* 過敏原 (Allergens) */}
             <div>
-              <h3 className="text-lg font-medium text-gray-900 mb-3">過敏原 (Allergens)</h3>
+              <h3 className="text-lg font-medium text-gray-900 mb-3">{t('autoGen.admin.key937')}</h3>
               {allergens.length === 0 ? (
-                <p className="text-sm text-gray-400">尚未設定過敏原。</p>
+                <p className="text-sm text-gray-400">{t('autoGen.admin.key938')}</p>
               ) : (
                 <div className="space-y-2">
                   {allergens.map((a) => (
@@ -929,9 +931,9 @@ export default function MenuItemForm() {
 
             {/* 忌口項目 (Dietary Preferences) */}
             <div>
-              <h3 className="text-lg font-medium text-gray-900 mb-3">忌口項目 (Dietary)</h3>
+              <h3 className="text-lg font-medium text-gray-900 mb-3">{t('autoGen.admin.key939')}</h3>
               {dietary.length === 0 ? (
-                <p className="text-sm text-gray-400">尚未設定忌口項目。</p>
+                <p className="text-sm text-gray-400">{t('autoGen.admin.key940')}</p>
               ) : (
                 <div className="space-y-2">
                   {dietary.map((d) => (
@@ -957,9 +959,9 @@ export default function MenuItemForm() {
 
             {/* 用餐時段 (Mealtimes) */}
             <div>
-              <h3 className="text-lg font-medium text-gray-900 mb-3">用餐時段 (Mealtimes)</h3>
+              <h3 className="text-lg font-medium text-gray-900 mb-3">{t('autoGen.admin.key941')}</h3>
               {mealtimes.length === 0 ? (
-                <p className="text-sm text-gray-400">尚未設定用餐時段。</p>
+                <p className="text-sm text-gray-400">{t('autoGen.admin.key942')}</p>
               ) : (
                 <div className="space-y-2">
                   {mealtimes.map((m) => (
@@ -988,10 +990,10 @@ export default function MenuItemForm() {
         {/* Submit */}
         <div className="flex justify-end gap-3">
           <button type="button" onClick={() => navigate('/menu/items')} className="px-6 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50">
-            取消
+            {t('autoGen.admin.key943')}
           </button>
           <button type="submit" disabled={saving} className="px-6 py-2 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700 disabled:opacity-50 transition-colors">
-            {saving ? '儲存中...' : isEdit ? '更新產品資料' : '建立新產品'}
+            {saving ? t('autoGen.admin.key944') : isEdit ? t('autoGen.admin.key945') : t('autoGen.admin.key946')}
           </button>
         </div>
       </form>

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../lib/api.js';
@@ -24,6 +25,8 @@ interface LocationResponse {
 }
 
 export default function LocationList() {
+  const { t } = useTranslation();
+
   const [locations, setLocations] = useState<Location[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -58,26 +61,26 @@ export default function LocationList() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-semibold text-gray-800">分店管理 (Locations)</h2>
+        <h2 className="text-2xl font-semibold text-gray-800">{t('autoGen.admin.key814')}</h2>
         <Link
           to="/locations/new"
           className="bg-primary-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary-700 transition-colors"
         >
-          新增分店
+          {t('autoGen.admin.key815')}
         </Link>
       </div>
 
-      {loading && <p className="text-gray-500">載入分店資料中...</p>}
-      {error && <p className="text-red-600">錯誤: {error}</p>}
+      {loading && <p className="text-gray-500">{t('autoGen.admin.key816')}</p>}
+      {error && <p className="text-red-600">{t('autoGen.admin.key817')} {error}</p>}
 
       {!loading && !error && locations.length === 0 && (
         <div className="bg-white rounded-lg shadow p-8 text-center">
-          <p className="text-gray-500 mb-4">目前尚無分店資料。</p>
+          <p className="text-gray-500 mb-4">{t('autoGen.admin.key818')}</p>
           <Link
             to="/locations/new"
             className="text-primary-600 hover:text-primary-700 font-medium"
           >
-            建立您的第一間分店
+            {t('autoGen.admin.key819')}
           </Link>
         </div>
       )}
@@ -88,22 +91,22 @@ export default function LocationList() {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  名稱
+                  {t('autoGen.admin.key820')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  地址
+                  {t('autoGen.admin.key821')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  服務項目
+                  {t('autoGen.admin.key822')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  狀態
+                  {t('autoGen.admin.key823')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  數據統計
+                  {t('autoGen.admin.key824')}
                 </th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  操作
+                  {t('autoGen.admin.key825')}
                 </th>
               </tr>
             </thead>
@@ -121,12 +124,12 @@ export default function LocationList() {
                     <div className="flex gap-2">
                       {loc.deliveryEnabled && (
                         <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
-                          外送 (Delivery)
+                          {t('autoGen.admin.key826')}
                         </span>
                       )}
                       {loc.pickupEnabled && (
                         <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
-                          自取 (Pickup)
+                          {t('autoGen.admin.key827')}
                         </span>
                       )}
                     </div>
@@ -138,12 +141,12 @@ export default function LocationList() {
                           : 'bg-red-100 text-red-800'
                         }`}
                     >
-                      {loc.isActive ? '啟用中 (Active)' : '停用中 (Inactive)'}
+                      {loc.isActive ? t('autoGen.admin.key828') : t('autoGen.admin.key829')}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-xs text-gray-500">
-                    {loc._count.orders} 筆訂單 &middot; {loc._count.tables} 桌位 &middot;{' '}
-                    {loc._count.deliveryZones} 個區域
+                    {loc._count.orders} {t('autoGen.admin.key830')} {loc._count.tables} {t('autoGen.admin.key831')}{' '}
+                    {loc._count.deliveryZones} {t('autoGen.admin.key832')}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm space-x-3">
                     <button
@@ -155,21 +158,21 @@ export default function LocationList() {
                         } disabled:opacity-50`}
                       aria-label={`${loc.isBusy ? 'Turn off' : 'Turn on'} busy mode for ${loc.name}`}
                     >
-                      {loc.isBusy ? '忙碌中 (ON)' : '接單中 (OFF)'}
+                      {loc.isBusy ? t('autoGen.admin.key833') : t('autoGen.admin.key834')}
                     </button>
                     <Link
                       to={`/locations/${loc.id}/tables`}
                       className="text-gray-600 hover:text-gray-900 font-medium"
                       aria-label={`View tables for ${loc.name}`}
                     >
-                      桌位管理
+                      {t('autoGen.admin.key835')}
                     </Link>
                     <Link
                       to={`/locations/${loc.id}`}
                       className="text-primary-600 hover:text-primary-900 font-medium"
                       aria-label={`Edit ${loc.name}`}
                     >
-                      編輯
+                      {t('autoGen.admin.key836')}
                     </Link>
                   </td>
                 </tr>

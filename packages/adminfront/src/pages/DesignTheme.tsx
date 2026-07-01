@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useState, useEffect } from 'react';
 
 function hexToHsl(hex: string): [number, number, number] {
@@ -24,6 +25,8 @@ function hslToHex(h: number, s: number, l: number): string {
   l /= 100;
   const a = s * Math.min(l, 1 - l);
   const f = (n: number) => {
+  const { t } = useTranslation();
+
     const k = (n + h / 30) % 12;
     const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
     return Math.round(255 * color).toString(16).padStart(2, '0');
@@ -45,6 +48,8 @@ function generatePalette(hex: string): Record<string, string> {
 }
 
 export default function DesignTheme() {
+  const { t } = useTranslation();
+
   const token = localStorage.getItem('token') || '';
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -81,13 +86,13 @@ export default function DesignTheme() {
       });
       const data = await res.json();
       if (data.success) {
-        setSuccess('主題設定已更新');
+        setSuccess(t('autoGen.admin.key657'));
         setTimeout(() => setSuccess(''), 3000);
       } else {
-        setError(typeof data.error === 'string' ? data.error : '儲存失敗');
+        setError(typeof data.error === 'string' ? data.error : t('autoGen.admin.key658'));
       }
     } catch {
-      setError('網路連線錯誤');
+      setError(t('autoGen.admin.key659'));
     } finally {
       setSaving(false);
     }
@@ -96,18 +101,18 @@ export default function DesignTheme() {
   const primaryPalette = generatePalette(colorPrimary);
   const secondaryPalette = generatePalette(colorSecondary);
 
-  if (loading) return <div className="p-6 text-gray-500">載入中...</div>;
+  if (loading) return <div className="p-6 text-gray-500">{t('autoGen.admin.key660')}</div>;
 
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">主題設定 (Theme)</h1>
+        <h1 className="text-2xl font-bold text-gray-900">{t('autoGen.admin.key661')}</h1>
         <button
           onClick={handleSave}
           disabled={saving}
           className="px-4 py-2 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700 disabled:opacity-50"
         >
-          {saving ? '儲存中...' : '儲存變更'}
+          {saving ? t('autoGen.admin.key662') : t('autoGen.admin.key663')}
         </button>
       </div>
 
@@ -120,10 +125,10 @@ export default function DesignTheme() {
 
       {/* Colors */}
       <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">色彩設定 (Colors)</h2>
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('autoGen.admin.key664')}</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">主色調 (Primary Color)</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">{t('autoGen.admin.key665')}</label>
             <div className="flex items-center gap-3">
               <input
                 type="color"
@@ -150,7 +155,7 @@ export default function DesignTheme() {
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">輔助色 (Secondary Color)</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">{t('autoGen.admin.key666')}</label>
             <div className="flex items-center gap-3">
               <input
                 type="color"
@@ -181,7 +186,7 @@ export default function DesignTheme() {
 
       {/* Dark Mode */}
       <div className="bg-white rounded-lg border border-gray-200 p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">深色模式 (Dark Mode)</h2>
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('autoGen.admin.key667')}</h2>
         <div className="flex gap-4">
           {(['light', 'dark', 'system'] as const).map((mode) => (
             <label
@@ -204,13 +209,13 @@ export default function DesignTheme() {
                 {mode === 'light' ? '☀️' : mode === 'dark' ? '🌙' : '💻'}
               </span>
               <span className="text-sm font-medium text-gray-700">
-                {mode === 'light' ? '淺色 (Light)' : mode === 'dark' ? '深色 (Dark)' : '跟隨系統 (System)'}
+                {mode === 'light' ? t('autoGen.admin.key668') : mode === 'dark' ? t('autoGen.admin.key669') : t('autoGen.admin.key670')}
               </span>
             </label>
           ))}
         </div>
         <p className="mt-3 text-xs text-gray-500">
-          控制前台商店的預設外觀。「跟隨系統」將自動匹配訪客的作業系統偏好。
+          {t('autoGen.admin.key671')}
         </p>
       </div>
     </div>

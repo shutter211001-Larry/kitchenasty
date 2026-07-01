@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { api } from '../lib/api.js';
@@ -31,6 +32,8 @@ export default function TableList() {
   const [storefrontUrl, setStorefrontUrl] = useState('');
 
   const fetchTables = () => {
+  const { t } = useTranslation();
+
     setLoading(true);
     Promise.all([
       api.get<{ data: LocationInfo }>(`/locations/${locationId}`),
@@ -100,11 +103,11 @@ export default function TableList() {
     const url = `${baseUrl}/?table=${encodeURIComponent(tableName)}`;
     navigator.clipboard.writeText(url)
       .then(() => alert(`已複製桌號 ${tableName} 的專屬網址：\n${url}`))
-      .catch(() => alert('複製失敗，請手動複製網址：\n' + url));
+      .catch(() => alert(t('autoGen.admin.key1623') + url));
   };
 
-  if (loading) return <p className="text-gray-500">載入桌位資料中...</p>;
-  if (error) return <p className="text-red-600">錯誤: {error}</p>;
+  if (loading) return <p className="text-gray-500">{t('autoGen.admin.key1624')}</p>;
+  if (error) return <p className="text-red-600">{t('autoGen.admin.key1625')} {error}</p>;
 
   const activeCount = tables.filter((t) => t.isActive).length;
   const totalCapacity = tables.reduce((sum, t) => sum + (t.isActive ? t.capacity : 0), 0);
@@ -113,7 +116,7 @@ export default function TableList() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-2xl font-semibold text-gray-800">桌位管理 (Tables)</h2>
+          <h2 className="text-2xl font-semibold text-gray-800">{t('autoGen.admin.key1626')}</h2>
           {location && (
             <p className="text-sm text-gray-500 mt-1">{location.name}</p>
           )}
@@ -123,13 +126,13 @@ export default function TableList() {
             onClick={() => navigate(`/locations/${locationId}`)}
             className="text-gray-500 hover:text-gray-700 text-sm"
           >
-            返回分店資料
+            {t('autoGen.admin.key1627')}
           </button>
           <button
             onClick={openCreateForm}
             className="bg-primary-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary-700 transition-colors"
           >
-            + 新增桌位
+            {t('autoGen.admin.key1628')}
           </button>
         </div>
       </div>
@@ -137,15 +140,15 @@ export default function TableList() {
       {/* Stats */}
       <div className="grid grid-cols-3 gap-4 mb-6">
         <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-sm text-gray-500">總桌數</p>
+          <p className="text-sm text-gray-500">{t('autoGen.admin.key1629')}</p>
           <p className="text-2xl font-bold text-gray-900">{tables.length}</p>
         </div>
         <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-sm text-gray-500">使用中桌數</p>
+          <p className="text-sm text-gray-500">{t('autoGen.admin.key1630')}</p>
           <p className="text-2xl font-bold text-green-600">{activeCount}</p>
         </div>
         <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-sm text-gray-500">總容納人數</p>
+          <p className="text-sm text-gray-500">{t('autoGen.admin.key1631')}</p>
           <p className="text-2xl font-bold text-blue-600">{totalCapacity}</p>
         </div>
       </div>
@@ -154,22 +157,22 @@ export default function TableList() {
       {showForm && (
         <div className="bg-white rounded-lg shadow p-6 mb-6 border-2 border-primary-200">
           <h3 className="text-lg font-medium text-gray-900 mb-4">
-            {editingTable ? '編輯桌位' : '新增桌位'}
+            {editingTable ? t('autoGen.admin.key1632') : t('autoGen.admin.key1633')}
           </h3>
           <form onSubmit={handleSubmit} className="flex items-end gap-4">
             <div className="flex-1">
-              <label className="block text-sm font-medium text-gray-700 mb-1">名稱 (如：1號桌) *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key1634')}</label>
               <input
                 type="text"
                 value={formName}
                 onChange={(e) => setFormName(e.target.value)}
                 required
-                placeholder="例如：1號桌、露台 A"
+                placeholder={t('autoGen.admin.key1635')}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
               />
             </div>
             <div className="w-32">
-              <label className="block text-sm font-medium text-gray-700 mb-1">人數上限 *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key1636')}</label>
               <input
                 type="number"
                 value={formCapacity}
@@ -186,21 +189,21 @@ export default function TableList() {
                 onChange={(e) => setFormActive(e.target.checked)}
                 className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
               />
-              <span className="text-sm text-gray-700">啟用</span>
+              <span className="text-sm text-gray-700">{t('autoGen.admin.key1637')}</span>
             </label>
             <button
               type="submit"
               disabled={saving}
               className="px-4 py-2 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700 disabled:opacity-50"
             >
-              {saving ? '儲存中...' : editingTable ? '更新' : '建立'}
+              {saving ? t('autoGen.admin.key1638') : editingTable ? t('autoGen.admin.key1639') : t('autoGen.admin.key1640')}
             </button>
             <button
               type="button"
               onClick={() => setShowForm(false)}
               className="px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50"
             >
-              取消
+              {t('autoGen.admin.key1641')}
             </button>
           </form>
         </div>
@@ -209,9 +212,9 @@ export default function TableList() {
       {/* Table List */}
       {tables.length === 0 ? (
         <div className="bg-white rounded-lg shadow p-8 text-center">
-          <p className="text-gray-500 mb-4">此分店目前尚無桌位。</p>
+          <p className="text-gray-500 mb-4">{t('autoGen.admin.key1642')}</p>
           <button onClick={openCreateForm} className="text-primary-600 hover:text-primary-700 font-medium">
-            建立您的第一個桌位
+            {t('autoGen.admin.key1643')}
           </button>
         </div>
       ) : (
@@ -219,11 +222,11 @@ export default function TableList() {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">名稱</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">人數上限</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">狀態</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">預約紀錄</th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('autoGen.admin.key1644')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('autoGen.admin.key1645')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('autoGen.admin.key1646')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('autoGen.admin.key1647')}</th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{t('autoGen.admin.key1648')}</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -233,12 +236,12 @@ export default function TableList() {
                     {table.name}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {table.capacity} 人座
+                    {table.capacity} {t('autoGen.admin.key1649')}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${table.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                       }`}>
-                      {table.isActive ? '啟用中' : '已停用'}
+                      {table.isActive ? t('autoGen.admin.key1650') : t('autoGen.admin.key1651')}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -246,13 +249,13 @@ export default function TableList() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm space-x-3">
                     <button onClick={() => copyTableUrl(table.name)} className="text-green-600 hover:text-green-900 font-medium" aria-label={`複製網址 ${table.name}`}>
-                      複製網址
+                      {t('autoGen.admin.key1652')}
                     </button>
                     <button onClick={() => openEditForm(table)} className="text-primary-600 hover:text-primary-900 font-medium" aria-label={`編輯桌位 ${table.name}`}>
-                      編輯
+                      {t('autoGen.admin.key1653')}
                     </button>
                     <button onClick={() => handleDelete(table.id, table.name)} className="text-red-600 hover:text-red-900 font-medium" aria-label={`刪除桌位 ${table.name}`}>
-                      刪除
+                      {t('autoGen.admin.key1654')}
                     </button>
                   </td>
                 </tr>

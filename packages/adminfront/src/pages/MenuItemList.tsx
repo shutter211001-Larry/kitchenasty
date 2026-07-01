@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../lib/api.js';
@@ -38,6 +39,8 @@ export default function MenuItemList() {
   const [pagination, setPagination] = useState({ page: 1, totalPages: 1, total: 0 });
 
   const fetchItems = (page = 1) => {
+  const { t } = useTranslation();
+
     setLoading(true);
     const params = new URLSearchParams({ page: String(page), limit: '20' });
     if (search) params.set('search', search);
@@ -75,12 +78,12 @@ export default function MenuItemList() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-semibold text-gray-800">產品管理 (Menu Items)</h2>
+        <h2 className="text-2xl font-semibold text-gray-800">{t('autoGen.admin.key947')}</h2>
         <Link
           to="/menu/items/new"
           className="bg-primary-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary-700 transition-colors"
         >
-          + 新增產品
+          {t('autoGen.admin.key948')}
         </Link>
       </div>
 
@@ -88,37 +91,37 @@ export default function MenuItemList() {
       <div className="bg-white rounded-lg shadow p-4 mb-6 flex gap-4">
         <input
           type="text"
-          placeholder="搜尋產品名稱..."
+          placeholder={t('autoGen.admin.key949')}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-          aria-label="搜尋產品"
+          aria-label={t('autoGen.admin.key950')}
         />
         <select
           value={categoryFilter}
           onChange={(e) => setCategoryFilter(e.target.value)}
           className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-          aria-label="依分類篩選"
+          aria-label={t('autoGen.admin.key951')}
         >
-          <option value="">所有分類</option>
+          <option value="">{t('autoGen.admin.key952')}</option>
           {categories.map((c) => (
             <option key={c.id} value={c.id}>{c.name}</option>
           ))}
         </select>
       </div>
 
-      {error && <p className="text-red-600 mb-4">錯誤: {error}</p>}
+      {error && <p className="text-red-600 mb-4">{t('autoGen.admin.key953')} {error}</p>}
 
       {!loading && items.length === 0 && (
         <div className="bg-white rounded-lg shadow p-8 text-center">
-          <p className="text-gray-500 mb-4">找不到任何產品。</p>
+          <p className="text-gray-500 mb-4">{t('autoGen.admin.key954')}</p>
           <Link to="/menu/items/new" className="text-primary-600 hover:text-primary-700 font-medium">
-            建立您的第一個產品
+            {t('autoGen.admin.key955')}
           </Link>
         </div>
       )}
 
-      {loading && <p className="text-gray-500">載入產品中...</p>}
+      {loading && <p className="text-gray-500">{t('autoGen.admin.key956')}</p>}
 
       {!loading && items.length > 0 && (
         <>
@@ -126,12 +129,12 @@ export default function MenuItemList() {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">產品 (Item)</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">分類 (Category)</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">價格 (Price)</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">狀態 (Status)</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">內容/屬性</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('autoGen.admin.key957')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('autoGen.admin.key958')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('autoGen.admin.key959')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('autoGen.admin.key960')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('autoGen.admin.key961')}</th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{t('autoGen.admin.key962')}</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -164,25 +167,25 @@ export default function MenuItemList() {
                       <div className="flex gap-1">
                         <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${item.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                           }`}>
-                          {item.isActive ? '銷售中' : '已停售'}
+                          {item.isActive ? t('autoGen.admin.key963') : t('autoGen.admin.key964')}
                         </span>
                         {item.trackStock && (
                           <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${item.stockQty > 0 ? 'bg-blue-100 text-blue-800' : 'bg-yellow-100 text-yellow-800'
                             }`}>
-                            庫存: {item.stockQty}
+                            {t('autoGen.admin.key965')} {item.stockQty}
                           </span>
                         )}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-xs text-gray-500">
-                      {item._count.options} 選項 &middot; {item._count.allergens} 過敏原 &middot; {item._count.dietaryPreferences} 忌口
+                      {item._count.options} {t('autoGen.admin.key966')} {item._count.allergens} {t('autoGen.admin.key967')} {item._count.dietaryPreferences} {t('autoGen.admin.key968')}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm space-x-3">
                       <Link to={`/menu/items/${item.id}`} className="text-primary-600 hover:text-primary-900 font-medium" aria-label={`編輯 ${item.name}`}>
-                        編輯
+                        {t('autoGen.admin.key969')}
                       </Link>
                       <button onClick={() => handleDelete(item.id, item.name)} className="text-red-600 hover:text-red-900 font-medium" aria-label={`刪除 ${item.name}`}>
-                        刪除
+                        {t('autoGen.admin.key970')}
                       </button>
                     </td>
                   </tr>
@@ -194,24 +197,24 @@ export default function MenuItemList() {
           {/* Pagination */}
           {pagination.totalPages > 1 && (
             <div className="flex items-center justify-between mt-4">
-              <p className="text-sm text-gray-500">共 {pagination.total} 項產品</p>
+              <p className="text-sm text-gray-500">{t('autoGen.admin.key971')} {pagination.total} {t('autoGen.admin.key972')}</p>
               <div className="flex gap-2">
                 <button
                   onClick={() => fetchItems(pagination.page - 1)}
                   disabled={pagination.page <= 1}
                   className="px-3 py-1 border rounded text-sm disabled:opacity-50"
                 >
-                  上一頁
+                  {t('autoGen.admin.key973')}
                 </button>
                 <span className="px-3 py-1 text-sm text-gray-600">
-                  第 {pagination.page} 頁，共 {pagination.totalPages} 頁
+                  {t('autoGen.admin.key974')} {pagination.page} {t('autoGen.admin.key975')} {pagination.totalPages} {t('autoGen.admin.key976')}
                 </span>
                 <button
                   onClick={() => fetchItems(pagination.page + 1)}
                   disabled={pagination.page >= pagination.totalPages}
                   className="px-3 py-1 border rounded text-sm disabled:opacity-50"
                 >
-                  下一頁
+                  {t('autoGen.admin.key977')}
                 </button>
               </div>
             </div>

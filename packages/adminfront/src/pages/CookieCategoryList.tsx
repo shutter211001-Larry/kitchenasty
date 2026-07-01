@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useState, useEffect } from 'react';
 
 interface CookieCategory {
@@ -13,6 +14,8 @@ interface CookieCategory {
 const emptyForm = { name: '', label: '', description: '', isRequired: false, isActive: true, sortOrder: 0 };
 
 export default function CookieCategoryList() {
+  const { t } = useTranslation();
+
   const [categories, setCategories] = useState<CookieCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [form, setForm] = useState(emptyForm);
@@ -65,7 +68,7 @@ export default function CookieCategoryList() {
   }
 
   async function handleDelete(id: string) {
-    if (!confirm('確定要刪除此 Cookie 類別嗎？')) return;
+    if (!confirm(t('autoGen.admin.key250'))) return;
     try {
       const res = await fetch(`/api/legal/cookie-categories/${id}`, {
         method: 'DELETE',
@@ -89,17 +92,17 @@ export default function CookieCategoryList() {
     setShowForm(true);
   }
 
-  if (loading) return <div className="p-6 text-gray-500">載入中...</div>;
+  if (loading) return <div className="p-6 text-gray-500">{t('autoGen.admin.key251')}</div>;
 
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Cookie 類別管理</h1>
+        <h1 className="text-2xl font-bold text-gray-900">{t('autoGen.admin.key252')}</h1>
         <button
           onClick={() => { setForm(emptyForm); setEditingId(null); setShowForm(!showForm); }}
           className="px-4 py-2 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700"
         >
-          {showForm ? '取消' : '新增類別'}
+          {showForm ? t('autoGen.admin.key253') : t('autoGen.admin.key254')}
         </button>
       </div>
 
@@ -110,30 +113,30 @@ export default function CookieCategoryList() {
           )}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">名稱 (Slug/ID)</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key255')}</label>
               <input
                 type="text"
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                 required
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                placeholder="例如：analytics"
+                placeholder={t('autoGen.admin.key256')}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">顯示標籤 (Label)</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key257')}</label>
               <input
                 type="text"
                 value={form.label}
                 onChange={(e) => setForm({ ...form, label: e.target.value })}
                 required
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                placeholder="例如：分析型 Cookie"
+                placeholder={t('autoGen.admin.key258')}
               />
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">描述 (Description)</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key259')}</label>
             <textarea
               value={form.description}
               onChange={(e) => setForm({ ...form, description: e.target.value })}
@@ -150,7 +153,7 @@ export default function CookieCategoryList() {
                 onChange={(e) => setForm({ ...form, isRequired: e.target.checked })}
                 className="h-4 w-4 rounded border-gray-300 text-primary-600"
               />
-              必要 (使用者不可停用)
+              {t('autoGen.admin.key260')}
             </label>
             <label className="flex items-center gap-2 text-sm">
               <input
@@ -159,10 +162,10 @@ export default function CookieCategoryList() {
                 onChange={(e) => setForm({ ...form, isActive: e.target.checked })}
                 className="h-4 w-4 rounded border-gray-300 text-primary-600"
               />
-              啟用中
+              {t('autoGen.admin.key261')}
             </label>
             <div className="flex items-center gap-2">
-              <label className="text-sm font-medium text-gray-700">排序</label>
+              <label className="text-sm font-medium text-gray-700">{t('autoGen.admin.key262')}</label>
               <input
                 type="number"
                 value={form.sortOrder}
@@ -176,7 +179,7 @@ export default function CookieCategoryList() {
               type="submit"
               className="px-4 py-2 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700"
             >
-              {editingId ? '更新 (Update)' : '建立 (Create)'}
+              {editingId ? t('autoGen.admin.key263') : t('autoGen.admin.key264')}
             </button>
           </div>
         </form>
@@ -186,12 +189,12 @@ export default function CookieCategoryList() {
         <table className="w-full text-sm">
           <thead className="bg-gray-50 text-gray-500 uppercase text-xs">
             <tr>
-              <th className="px-6 py-3 text-left">名稱 (Name)</th>
-              <th className="px-6 py-3 text-left">標籤 (Label)</th>
-              <th className="px-6 py-3 text-left">描述 (Description)</th>
-              <th className="px-6 py-3 text-center">必要</th>
-              <th className="px-6 py-3 text-center">狀態</th>
-              <th className="px-6 py-3 text-right">操作</th>
+              <th className="px-6 py-3 text-left">{t('autoGen.admin.key265')}</th>
+              <th className="px-6 py-3 text-left">{t('autoGen.admin.key266')}</th>
+              <th className="px-6 py-3 text-left">{t('autoGen.admin.key267')}</th>
+              <th className="px-6 py-3 text-center">{t('autoGen.admin.key268')}</th>
+              <th className="px-6 py-3 text-center">{t('autoGen.admin.key269')}</th>
+              <th className="px-6 py-3 text-right">{t('autoGen.admin.key270')}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
@@ -202,16 +205,16 @@ export default function CookieCategoryList() {
                 <td className="px-6 py-4 text-gray-500 max-w-xs truncate">{cat.description}</td>
                 <td className="px-6 py-4 text-center">
                   {cat.isRequired ? (
-                    <span className="text-green-600 font-medium">是</span>
+                    <span className="text-green-600 font-medium">{t('autoGen.admin.key271')}</span>
                   ) : (
-                    <span className="text-gray-400">否</span>
+                    <span className="text-gray-400">{t('autoGen.admin.key272')}</span>
                   )}
                 </td>
                 <td className="px-6 py-4 text-center">
                   {cat.isActive ? (
-                    <span className="text-green-600 font-medium">啟用</span>
+                    <span className="text-green-600 font-medium">{t('autoGen.admin.key273')}</span>
                   ) : (
-                    <span className="text-red-500">停用</span>
+                    <span className="text-red-500">{t('autoGen.admin.key274')}</span>
                   )}
                 </td>
                 <td className="px-6 py-4 text-right space-x-3">
@@ -219,13 +222,13 @@ export default function CookieCategoryList() {
                     onClick={() => startEdit(cat)}
                     className="text-primary-600 hover:text-primary-700 font-medium"
                   >
-                    編輯
+                    {t('autoGen.admin.key275')}
                   </button>
                   <button
                     onClick={() => handleDelete(cat.id)}
                     className="text-red-500 hover:text-red-600 font-medium"
                   >
-                    刪除
+                    {t('autoGen.admin.key276')}
                   </button>
                 </td>
               </tr>
@@ -233,7 +236,7 @@ export default function CookieCategoryList() {
             {categories.length === 0 && (
               <tr>
                 <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
-                  目前尚無 Cookie 類別。
+                  {t('autoGen.admin.key277')}
                 </td>
               </tr>
             )}

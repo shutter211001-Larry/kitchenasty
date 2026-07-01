@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext.js';
 import { getTranslated } from '../../utils/translation.js';
 
@@ -23,11 +24,13 @@ const gradients = [
 ];
 
 export default function VibrantFeatures({ features, t, lang = 'zh-TW' }: FeaturesProps) {
+  const { t } = useTranslation();
+
   const { settings } = useTheme();
 
   const items = features?.length ? features.filter(f => {
-              if (!settings.navShowLocations && (f.title.includes('分店') || f.title.includes('定位') || f.title.includes('預約'))) return false;
-              if ((!settings.navShowReservations || !settings.reservationSettings?.enabled) && f.title.includes('預約')) return false;
+              if (!settings.navShowLocations && (f.title.includes(t('autoGen.store.key137')) || f.title.includes(t('autoGen.store.key138')) || f.title.includes(t('autoGen.store.key139')))) return false;
+              if ((!settings.navShowReservations || !settings.reservationSettings?.enabled) && f.title.includes(t('autoGen.store.key140'))) return false;
               return true;
             }) : [
     settings.orderSettings?.deliveryEnabled && { icon: 'clock', title: t('home.fastDelivery'), description: t('home.fastDeliveryDesc') },

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useState, useEffect } from 'react';
 import {
   AreaChart, Area, BarChart, Bar,
@@ -79,6 +80,8 @@ export default function DeveloperMetrics() {
   }, [hours, token]);
 
   const formatHour = (iso: any) => {
+  const { t } = useTranslation();
+
     const d = new Date(iso);
     return `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:00`;
   };
@@ -90,7 +93,7 @@ export default function DeveloperMetrics() {
         <div className="flex gap-2">
           <button
             onClick={async () => {
-              if (!confirm('確定要同步資料庫欄位嗎？這將會執行 prisma db push。')) return;
+              if (!confirm(t('autoGen.admin.key672'))) return;
               try {
                 const res = await fetch('/api/developer/sync-db', {
                   method: 'POST',
@@ -98,12 +101,12 @@ export default function DeveloperMetrics() {
                 });
                 const data = await res.json();
                 if (data.success) {
-                  alert('資料庫同步成功！');
+                  alert(t('autoGen.admin.key673'));
                 } else {
                   alert(`同步失敗: ${data.error}`);
                 }
               } catch (err) {
-                alert('發生錯誤，請查看控制台。');
+                alert(t('autoGen.admin.key674'));
               }
             }}
             className="px-4 py-1.5 text-sm font-medium bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-2"
@@ -111,12 +114,12 @@ export default function DeveloperMetrics() {
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
             </svg>
-            同步資料庫
+            {t('autoGen.admin.key675')}
           </button>
           
           <button
             onClick={async () => {
-              if (!confirm('確定要執行 AI 翻譯並補齊所有語系檔嗎？這可能需要幾十秒鐘的時間。')) return;
+              if (!confirm(t('autoGen.admin.key676'))) return;
               setSyncingLocales(true);
               try {
                 const res = await fetch('/api/developer/sync-locales', {
@@ -130,7 +133,7 @@ export default function DeveloperMetrics() {
                   alert(`同步失敗: ${data.error}`);
                 }
               } catch (err) {
-                alert('發生錯誤，請查看控制台。');
+                alert(t('autoGen.admin.key677'));
               } finally {
                 setSyncingLocales(false);
               }
@@ -145,7 +148,7 @@ export default function DeveloperMetrics() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
               </svg>
             )}
-            {syncingLocales ? 'AI 翻譯中...' : '補齊語系檔'}
+            {syncingLocales ? t('autoGen.admin.key678') : t('autoGen.admin.key679')}
           </button>
           <div className="h-8 w-px bg-gray-200 mx-1" />
           <div className="flex gap-1">

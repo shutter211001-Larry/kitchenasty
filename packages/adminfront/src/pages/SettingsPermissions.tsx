@@ -1,15 +1,16 @@
+import { useTranslation } from 'react-i18next';
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
-const PERMISSION_KEYS = [
-  { key: 'UPDATE_GENERAL_SETTINGS', label: '修改一般設定', desc: '可更改網站名稱、設計風格等' },
-  { key: 'UPDATE_ORDER_SETTINGS', label: '修改訂單設定', desc: '可更改運費、稅率、自動訊息等' },
-  { key: 'EXPORT_DATA', label: '匯出資料', desc: '可下載訂單 CSV 報表' },
-  { key: 'MANAGE_ORDERS', label: '訂單處理', desc: '可更改訂單狀態（接單、出餐等）' },
-  { key: 'CANCEL_ORDERS', label: '取消訂單', desc: '可手動取消顧客的訂單' },
-];
-
 export default function SettingsPermissions() {
+    const PERMISSION_KEYS = [
+      { key: 'UPDATE_GENERAL_SETTINGS', label: t('autoGen.admin.key1492'), desc: t('autoGen.admin.key1493') },
+      { key: 'UPDATE_ORDER_SETTINGS', label: t('autoGen.admin.key1494'), desc: t('autoGen.admin.key1495') },
+      { key: 'EXPORT_DATA', label: t('autoGen.admin.key1496'), desc: t('autoGen.admin.key1497') },
+      { key: 'MANAGE_ORDERS', label: t('autoGen.admin.key1498'), desc: t('autoGen.admin.key1499') },
+      { key: 'CANCEL_ORDERS', label: t('autoGen.admin.key1500'), desc: t('autoGen.admin.key1501') },
+    ];
+
   const token = localStorage.getItem('token') || '';
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -47,19 +48,21 @@ export default function SettingsPermissions() {
       });
       const data = await res.json();
       if (data.success) {
-        setSuccess('權限設定已更新');
+        setSuccess(t('autoGen.admin.key1502'));
         setTimeout(() => setSuccess(''), 3000);
       } else {
-        setError(data.error || '儲存失敗');
+        setError(data.error || t('autoGen.admin.key1503'));
       }
     } catch {
-      setError('網路錯誤');
+      setError(t('autoGen.admin.key1504'));
     } finally {
       setSaving(false);
     }
   }
 
   const togglePermission = (role: string, key: string) => {
+  const { t } = useTranslation();
+
     setPermissions(prev => ({
       ...prev,
       [role]: {
@@ -69,18 +72,18 @@ export default function SettingsPermissions() {
     }));
   };
 
-  if (loading) return <div className="p-6 text-gray-500">載入中...</div>;
+  if (loading) return <div className="p-6 text-gray-500">{t('autoGen.admin.key1505')}</div>;
 
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <Link to="/settings" className="text-sm text-primary-600 hover:text-primary-700">&larr; 返回設定</Link>
-          <h1 className="text-2xl font-bold text-gray-900 mt-1">角色權限微調</h1>
-          <p className="text-sm text-gray-500">超級管理員 (SUPER_ADMIN) 擁有所有權限，不可修改。</p>
+          <Link to="/settings" className="text-sm text-primary-600 hover:text-primary-700">{t('autoGen.admin.key1506')}</Link>
+          <h1 className="text-2xl font-bold text-gray-900 mt-1">{t('autoGen.admin.key1507')}</h1>
+          <p className="text-sm text-gray-500">{t('autoGen.admin.key1508')}</p>
         </div>
         <button onClick={handleSave} disabled={saving} className="px-6 py-2 bg-primary-600 text-white rounded-lg font-bold hover:bg-primary-700 transition-colors shadow-sm disabled:opacity-50">
-          {saving ? '儲存中...' : '儲存變更'}
+          {saving ? t('autoGen.admin.key1509') : t('autoGen.admin.key1510')}
         </button>
       </div>
 
@@ -93,9 +96,9 @@ export default function SettingsPermissions() {
           <div className="bg-gray-50 p-4 border-b border-gray-200">
             <h2 className="font-bold text-gray-900 flex items-center gap-2">
               <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
-              店長 (MANAGER)
+              {t('autoGen.admin.key1511')}
             </h2>
-            <p className="text-xs text-gray-500 mt-1">管理店內日常營運與部分設定</p>
+            <p className="text-xs text-gray-500 mt-1">{t('autoGen.admin.key1512')}</p>
           </div>
           <div className="p-4 space-y-4">
             {PERMISSION_KEYS.map(p => (
@@ -120,9 +123,9 @@ export default function SettingsPermissions() {
           <div className="bg-gray-50 p-4 border-b border-gray-200">
             <h2 className="font-bold text-gray-900 flex items-center gap-2">
               <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-              店員 (STAFF)
+              {t('autoGen.admin.key1513')}
             </h2>
-            <p className="text-xs text-gray-500 mt-1">主要負責訂單處理與外場操作</p>
+            <p className="text-xs text-gray-500 mt-1">{t('autoGen.admin.key1514')}</p>
           </div>
           <div className="p-4 space-y-4">
             {PERMISSION_KEYS.map(p => (
@@ -149,7 +152,7 @@ export default function SettingsPermissions() {
           disabled={saving}
           className="px-10 py-3 bg-primary-600 text-white rounded-xl font-bold hover:bg-primary-700 transition-all shadow-lg disabled:opacity-50"
         >
-          {saving ? '儲存中...' : '儲存所有權限設定'}
+          {saving ? t('autoGen.admin.key1515') : t('autoGen.admin.key1516')}
         </button>
       </div>
     </div>

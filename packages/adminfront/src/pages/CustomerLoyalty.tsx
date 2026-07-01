@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useState, useEffect } from 'react';
 import { api } from '../lib/api.js';
 
@@ -58,7 +59,7 @@ export default function CustomerLoyalty() {
       setRedemptionRules(advanced.loyaltyRedemptionRules || {});
     } catch (err: any) {
       console.error('Failed to load menu or advanced settings:', err);
-      setError('無法載入商品或紅利設定資訊');
+      setError(t('autoGen.admin.key496'));
     } finally {
       setRulesLoading(false);
     }
@@ -71,7 +72,7 @@ export default function CustomerLoyalty() {
     try {
       const res = await api.get<{ data: Customer[] }>(`/dashboard/customers?email=${encodeURIComponent(searchEmail)}`);
       if (res.data.length === 0) {
-        setError('找不到該顧客');
+        setError(t('autoGen.admin.key497'));
         setCustomer(null);
         return;
       }
@@ -88,7 +89,7 @@ export default function CustomerLoyalty() {
     if (!customer) return;
     const points = parseInt(adjustPoints);
     if (isNaN(points) || points === 0) {
-      setError('請輸入有效的點數值');
+      setError(t('autoGen.admin.key498'));
       return;
     }
 
@@ -109,6 +110,8 @@ export default function CustomerLoyalty() {
   };
 
   const handleToggleRedeemable = (itemId: string) => {
+  const { t } = useTranslation();
+
     const current = redemptionRules[itemId] || { isRedeemable: false, maxRedemptionAmount: 0 };
     setRedemptionRules({
       ...redemptionRules,
@@ -139,10 +142,10 @@ export default function CustomerLoyalty() {
       await api.put('/settings/advanced', {
         loyaltyRedemptionRules: redemptionRules
       });
-      setSuccess('商品紅利折抵設定已成功更新！');
+      setSuccess(t('autoGen.admin.key499'));
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err: any) {
-      setError(err.message || '更新失敗');
+      setError(err.message || t('autoGen.admin.key500'));
     } finally {
       setRulesSaving(false);
     }
@@ -156,20 +159,20 @@ export default function CustomerLoyalty() {
     <div className="max-w-5xl mx-auto px-4 py-6">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">💎 門市會員與商品紅利折抵控制中心</h1>
-          <p className="mt-1 text-sm text-gray-500">在此管理顧客會員點數，並精細控制個別商品點數折抵上限以守護門市利潤毛利。</p>
+          <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">{t('autoGen.admin.key501')}</h1>
+          <p className="mt-1 text-sm text-gray-500">{t('autoGen.admin.key502')}</p>
         </div>
       </div>
 
       {error && (
         <div className="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded-r-xl mb-6 shadow-sm transition-all duration-300">
-          <p className="font-semibold">錯誤提示</p>
+          <p className="font-semibold">{t('autoGen.admin.key503')}</p>
           <p className="text-sm">{error}</p>
         </div>
       )}
       {success && (
         <div className="bg-green-50 border-l-4 border-green-500 text-green-700 p-4 rounded-r-xl mb-6 shadow-sm transition-all duration-300">
-          <p className="font-semibold">操作成功</p>
+          <p className="font-semibold">{t('autoGen.admin.key504')}</p>
           <p className="text-sm">{success}</p>
         </div>
       )}
@@ -180,24 +183,24 @@ export default function CustomerLoyalty() {
           {/* Find Customer */}
           <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
             <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-              <span>👤 尋找顧客 (Find Customer)</span>
+              <span>{t('autoGen.admin.key505')}</span>
             </h2>
             <div className="flex gap-2">
               <input
                 type="email"
-                placeholder="輸入顧客電子郵件..."
+                placeholder={t('autoGen.admin.key506')}
                 value={searchEmail}
                 onChange={(e) => setSearchEmail(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && searchCustomer()}
                 className="flex-1 px-3.5 py-2.5 border border-gray-300 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
-                aria-label="依電子郵件搜尋顧客"
+                aria-label={t('autoGen.admin.key507')}
               />
               <button
                 onClick={searchCustomer}
                 disabled={loading || !searchEmail}
                 className="px-5 py-2.5 bg-primary-600 hover:bg-primary-700 text-white rounded-xl text-sm font-semibold transition-all disabled:opacity-50 shadow-sm"
               >
-                {loading ? '搜尋中...' : '搜尋'}
+                {loading ? t('autoGen.admin.key508') : t('autoGen.admin.key509')}
               </button>
             </div>
           </div>
@@ -208,49 +211,49 @@ export default function CustomerLoyalty() {
               <div className="bg-gradient-to-br from-primary-600 to-orange-500 rounded-2xl shadow-md text-white p-6">
                 <div className="flex items-start justify-between">
                   <div>
-                    <span className="bg-white/20 text-xs px-2.5 py-1 rounded-full font-medium">門市金卡會員</span>
+                    <span className="bg-white/20 text-xs px-2.5 py-1 rounded-full font-medium">{t('autoGen.admin.key510')}</span>
                     <h3 className="text-xl font-bold mt-3">{customer.name}</h3>
                     <p className="text-sm text-white/80 mt-1">{customer.email}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm text-white/70">可用紅利點數</p>
+                    <p className="text-sm text-white/70">{t('autoGen.admin.key511')}</p>
                     <p className="text-4xl font-extrabold mt-1">{customer.loyaltyPoints}</p>
-                    <p className="text-xs text-white/80 mt-1">約合 NT$ {(customer.loyaltyPoints / 100).toFixed(1)} 元價值</p>
+                    <p className="text-xs text-white/80 mt-1">{t('autoGen.admin.key512')} {(customer.loyaltyPoints / 100).toFixed(1)} {t('autoGen.admin.key513')}</p>
                   </div>
                 </div>
               </div>
 
               {/* Adjust Points Card */}
               <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-                <h2 className="text-lg font-bold text-gray-900 mb-4">⚙️ 點數異動與調整 (Adjust Points)</h2>
+                <h2 className="text-lg font-bold text-gray-900 mb-4">{t('autoGen.admin.key514')}</h2>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">增減點數 (正數增加，負數減少)</label>
+                    <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">{t('autoGen.admin.key515')}</label>
                     <input
                       type="number"
-                      placeholder="例如: 100 或 -50"
+                      placeholder={t('autoGen.admin.key516')}
                       value={adjustPoints}
                       onChange={(e) => setAdjustPoints(e.target.value)}
                       className="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
-                      aria-label="調整點數"
+                      aria-label={t('autoGen.admin.key517')}
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">異動事由 (備註)</label>
+                    <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">{t('autoGen.admin.key518')}</label>
                     <input
                       type="text"
-                      placeholder="備註說明 (如: 活動手動補點、客訴點數退還)"
+                      placeholder={t('autoGen.admin.key519')}
                       value={adjustDesc}
                       onChange={(e) => setAdjustDesc(e.target.value)}
                       className="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
-                      aria-label="調整原因"
+                      aria-label={t('autoGen.admin.key520')}
                     />
                   </div>
                   <button
                     onClick={handleAdjust}
                     className="w-full py-2.5 bg-primary-600 hover:bg-primary-700 text-white rounded-xl text-sm font-semibold transition-all shadow-sm"
                   >
-                    確定調整點數
+                    {t('autoGen.admin.key521')}
                   </button>
                 </div>
               </div>
@@ -263,15 +266,15 @@ export default function CustomerLoyalty() {
           <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
               <div>
-                <h2 className="text-xl font-bold text-gray-900">🎨 商品紅利折抵細粒度控制面板</h2>
-                <p className="text-xs text-gray-400 mt-1">開啟商品折抵並設定抵用金額上限，保護低毛利商品利潤。</p>
+                <h2 className="text-xl font-bold text-gray-900">{t('autoGen.admin.key522')}</h2>
+                <p className="text-xs text-gray-400 mt-1">{t('autoGen.admin.key523')}</p>
               </div>
               <button
                 onClick={handleSaveRules}
                 disabled={rulesSaving || rulesLoading}
                 className="px-5 py-2.5 bg-primary-600 hover:bg-primary-700 disabled:opacity-50 text-white rounded-xl text-sm font-semibold transition-all shadow-sm flex items-center justify-center gap-1.5"
               >
-                {rulesSaving ? '儲存中...' : '儲存紅利設定'}
+                {rulesSaving ? t('autoGen.admin.key524') : t('autoGen.admin.key525')}
               </button>
             </div>
 
@@ -279,7 +282,7 @@ export default function CustomerLoyalty() {
             <div className="mb-4 relative">
               <input
                 type="text"
-                placeholder="🔍 搜尋商品名稱 (例如: 披薩、飲料)..."
+                placeholder={t('autoGen.admin.key526')}
                 value={menuSearch}
                 onChange={(e) => setMenuSearch(e.target.value)}
                 className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
@@ -289,12 +292,12 @@ export default function CustomerLoyalty() {
 
             {rulesLoading ? (
               <div className="text-center py-12">
-                <p className="text-gray-500">正在加載門市商品與規則資訊...</p>
+                <p className="text-gray-500">{t('autoGen.admin.key527')}</p>
               </div>
             ) : (
               <div className="border border-gray-100 rounded-xl overflow-hidden divide-y divide-gray-100 max-h-[500px] overflow-y-auto">
                 {filteredMenuItems.length === 0 ? (
-                  <div className="text-center py-12 text-gray-500 text-sm">找不到符合的商品</div>
+                  <div className="text-center py-12 text-gray-500 text-sm">{t('autoGen.admin.key528')}</div>
                 ) : (
                   filteredMenuItems.map((item) => {
                     const rule = redemptionRules[item.id] || { isRedeemable: false, maxRedemptionAmount: 0 };
@@ -303,9 +306,9 @@ export default function CustomerLoyalty() {
                         <div className="flex-1">
                           <h4 className="font-semibold text-gray-900 text-sm sm:text-base">{item.name}</h4>
                           <div className="flex items-center gap-2 mt-1">
-                            <span className="text-xs font-semibold bg-gray-100 text-gray-600 px-2 py-0.5 rounded">門市定價: NT$ {item.price} 元</span>
+                            <span className="text-xs font-semibold bg-gray-100 text-gray-600 px-2 py-0.5 rounded">{t('autoGen.admin.key529')} {item.price} {t('autoGen.admin.key530')}</span>
                             {!item.isActive && (
-                              <span className="text-xs font-semibold bg-red-100 text-red-600 px-2 py-0.5 rounded">已下架</span>
+                              <span className="text-xs font-semibold bg-red-100 text-red-600 px-2 py-0.5 rounded">{t('autoGen.admin.key531')}</span>
                             )}
                           </div>
                         </div>
@@ -314,7 +317,7 @@ export default function CustomerLoyalty() {
                         <div className="flex items-center gap-4 sm:gap-6">
                           {/* Toggle Switch */}
                           <div className="flex items-center gap-2">
-                            <span className="text-xs font-medium text-gray-500">可折抵</span>
+                            <span className="text-xs font-medium text-gray-500">{t('autoGen.admin.key532')}</span>
                             <button
                               type="button"
                               onClick={() => handleToggleRedeemable(item.id)}
@@ -333,7 +336,7 @@ export default function CustomerLoyalty() {
 
                           {/* Max Redemption Amount Input */}
                           <div className="flex items-center gap-2 w-32 sm:w-36">
-                            <span className="text-xs font-medium text-gray-500">上限</span>
+                            <span className="text-xs font-medium text-gray-500">{t('autoGen.admin.key533')}</span>
                             <div className="relative rounded-lg shadow-sm w-full">
                               <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-2">
                                 <span className="text-xs text-gray-400">$</span>
@@ -344,7 +347,7 @@ export default function CustomerLoyalty() {
                                 disabled={!rule.isRedeemable}
                                 value={rule.isRedeemable ? (rule.maxRedemptionAmount || '') : ''}
                                 onChange={(e) => handleAmountChange(item.id, e.target.value)}
-                                placeholder="不限"
+                                placeholder={t('autoGen.admin.key534')}
                                 className="block w-full rounded-lg border border-gray-300 py-1.5 pl-5 pr-2 text-xs sm:text-sm outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 disabled:bg-gray-50 disabled:text-gray-400 disabled:border-gray-200 transition-all text-right font-medium"
                                 aria-label={`${item.name} 折抵上限`}
                               />

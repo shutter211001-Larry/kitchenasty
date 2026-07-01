@@ -1,7 +1,10 @@
+import { useTranslation } from 'react-i18next';
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
 export default function SettingsPayments() {
+  const { t } = useTranslation();
+
   const token = localStorage.getItem('token') || '';
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -65,29 +68,29 @@ export default function SettingsPayments() {
           if (data.data.stripeWebhookSecret) setStripeWebhookSecret(data.data.stripeWebhookSecret);
           if (data.data.paypalClientSecret) setPaypalClientSecret(data.data.paypalClientSecret);
         }
-        setSuccess('支付設定已更新');
+        setSuccess(t('autoGen.admin.key1468'));
         setTimeout(() => setSuccess(''), 3000);
       } else {
-        setError(typeof data.error === 'string' ? data.error : '儲存失敗');
+        setError(typeof data.error === 'string' ? data.error : t('autoGen.admin.key1469'));
       }
     } catch {
-      setError('網路連線錯誤');
+      setError(t('autoGen.admin.key1470'));
     } finally {
       setSaving(false);
     }
   }
 
-  if (loading) return <div className="p-6 text-gray-500">載入中...</div>;
+  if (loading) return <div className="p-6 text-gray-500">{t('autoGen.admin.key1471')}</div>;
 
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <Link to="/settings" className="text-sm text-primary-600 hover:text-primary-700">&larr; 返回設定</Link>
-          <h1 className="text-2xl font-bold text-gray-900 mt-1">支付方式設定</h1>
+          <Link to="/settings" className="text-sm text-primary-600 hover:text-primary-700">{t('autoGen.admin.key1472')}</Link>
+          <h1 className="text-2xl font-bold text-gray-900 mt-1">{t('autoGen.admin.key1473')}</h1>
         </div>
         <button onClick={handleSave} disabled={saving} className="px-6 py-2 bg-primary-600 text-white rounded-lg font-bold hover:bg-primary-700 transition-colors shadow-sm disabled:opacity-50">
-          {saving ? '儲存中...' : '儲存變更'}
+          {saving ? t('autoGen.admin.key1474') : t('autoGen.admin.key1475')}
         </button>
       </div>
 
@@ -97,7 +100,7 @@ export default function SettingsPayments() {
       {/* Stripe */}
       <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-gray-900">Stripe (信用卡)</h2>
+          <h2 className="text-lg font-semibold text-gray-900">{t('autoGen.admin.key1476')}</h2>
           <label className={`flex items-center gap-2 ${(stripePublishableKey.trim() === '' || stripeSecretKey.trim() === '') ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}>
             <input 
               type="checkbox" 
@@ -106,20 +109,20 @@ export default function SettingsPayments() {
               disabled={stripePublishableKey.trim() === '' || stripeSecretKey.trim() === ''}
               className="w-4 h-4 text-primary-600 rounded disabled:opacity-50 disabled:cursor-not-allowed" 
             />
-            <span className="text-sm text-gray-700">啟用</span>
+            <span className="text-sm text-gray-700">{t('autoGen.admin.key1477')}</span>
           </label>
         </div>
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">可發佈金鑰 (Publishable Key)</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key1478')}</label>
             <input type="text" value={stripePublishableKey} onChange={(e) => setStripePublishableKey(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500" placeholder="pk_..." />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">秘密金鑰 (Secret Key)</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key1479')}</label>
             <input type="password" value={stripeSecretKey} onChange={(e) => setStripeSecretKey(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500" placeholder="sk_..." />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Webhook 秘密金鑰</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key1480')}</label>
             <input type="password" value={stripeWebhookSecret} onChange={(e) => setStripeWebhookSecret(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500" placeholder="whsec_..." />
           </div>
         </div>
@@ -137,21 +140,21 @@ export default function SettingsPayments() {
               disabled={paypalClientId.trim() === '' || paypalClientSecret.trim() === ''}
               className="w-4 h-4 text-primary-600 rounded disabled:opacity-50 disabled:cursor-not-allowed" 
             />
-            <span className="text-sm text-gray-700">啟用</span>
+            <span className="text-sm text-gray-700">{t('autoGen.admin.key1481')}</span>
           </label>
         </div>
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">客戶 ID (Client ID)</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key1482')}</label>
             <input type="text" value={paypalClientId} onChange={(e) => setPaypalClientId(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">客戶秘密金鑰 (Client Secret)</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key1483')}</label>
             <input type="password" value={paypalClientSecret} onChange={(e) => setPaypalClientSecret(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500" />
           </div>
           <label className="flex items-center gap-3">
             <input type="checkbox" checked={paypalSandbox} onChange={(e) => setPaypalSandbox(e.target.checked)} className="w-4 h-4 text-primary-600 rounded" />
-            <span className="text-sm font-medium text-gray-700">沙盒測試模式 (Sandbox mode)</span>
+            <span className="text-sm font-medium text-gray-700">{t('autoGen.admin.key1484')}</span>
           </label>
         </div>
       </div>
@@ -160,12 +163,12 @@ export default function SettingsPayments() {
         <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm flex items-start gap-4 mb-6">
           <div className="text-3xl">🟢</div>
           <div>
-            <h2 className="text-lg font-semibold text-gray-900 mb-1">LINE Pay 整合</h2>
+            <h2 className="text-lg font-semibold text-gray-900 mb-1">{t('autoGen.admin.key1485')}</h2>
             <p className="text-sm text-gray-500 mb-3">
-              LINE Pay 的相關金鑰與進階網址設定已經與 LINE Official Account 整合，請前往「LINE 整合設定」進行管理。
+              {t('autoGen.admin.key1486')}
             </p>
             <a href="/settings/line" className="inline-block px-4 py-2 border border-[#00B900] text-[#00B900] text-sm font-bold rounded-lg hover:bg-[#00B900] hover:text-white transition-colors">
-              前往 LINE 整合設定
+              {t('autoGen.admin.key1487')}
             </a>
           </div>
         </div>
@@ -173,10 +176,10 @@ export default function SettingsPayments() {
       {/* Cash */}
       <div className="bg-white rounded-lg border border-gray-200 p-6">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-gray-900">貨到付款 / 店內付現</h2>
+          <h2 className="text-lg font-semibold text-gray-900">{t('autoGen.admin.key1488')}</h2>
           <label className="flex items-center gap-2">
             <input type="checkbox" checked={cashEnabled} onChange={(e) => setCashEnabled(e.target.checked)} className="w-4 h-4 text-primary-600 rounded" />
-            <span className="text-sm text-gray-700">啟用</span>
+            <span className="text-sm text-gray-700">{t('autoGen.admin.key1489')}</span>
           </label>
         </div>
       </div>
@@ -187,7 +190,7 @@ export default function SettingsPayments() {
           disabled={saving}
           className="px-10 py-3 bg-primary-600 text-white rounded-xl font-bold hover:bg-primary-700 transition-all shadow-lg disabled:opacity-50"
         >
-          {saving ? '儲存中...' : '儲存所有變更'}
+          {saving ? t('autoGen.admin.key1490') : t('autoGen.admin.key1491')}
         </button>
       </div>
     </div>

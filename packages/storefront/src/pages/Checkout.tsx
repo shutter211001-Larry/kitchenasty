@@ -289,6 +289,8 @@ export default function Checkout() {
   }, [items.length]);
 
   const scrollToSubmit = () => {
+  const { t } = useTranslation();
+
     if (!paymentMethod) {
       setShowPaymentError(true);
       paymentSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -562,7 +564,7 @@ export default function Checkout() {
               <div>
                 <h2 className="font-bold text-lg flex items-center gap-2">
                   <span>🍽️</span>
-                  <span>{t('checkout.dineInTable') || '內用桌號'} : {tableName}</span>
+                  <span>{t('checkout.dineInTable') || t('autoGen.store.key54')} : {tableName}</span>
                 </h2>
                 {groupSessionId && groupPin ? (
                   <p className="text-sm mt-1 opacity-90 font-medium">
@@ -570,7 +572,7 @@ export default function Checkout() {
                     <span className="block mt-1 text-xs opacity-75">{t('groupOrder.enterCodeToJoinTogether')}</span>
                   </p>
                 ) : (
-                  <p className="text-sm mt-1 opacity-90 font-medium">{t('checkout.dineInTableDesc') || '您的餐點將會為您準備於此桌位'}</p>
+                  <p className="text-sm mt-1 opacity-90 font-medium">{t('checkout.dineInTableDesc') || t('autoGen.store.key55')}</p>
                 )}
               </div>
               {!groupSessionId ? (
@@ -722,7 +724,7 @@ export default function Checkout() {
           {(orderType === 'delivery' || orderType === 'frozen_delivery') && (
             <div className="surface-card rounded-xl shadow-sm border p-6">
               <h2 className="text-lg font-semibold text-main mb-4">
-                {orderType === 'frozen_delivery' ? t('checkout.frozenDeliveryAddress') || '冷凍宅配收件地址' : t('checkout.deliveryAddress')}
+                {orderType === 'frozen_delivery' ? t('checkout.frozenDeliveryAddress') || t('autoGen.store.key56') : t('checkout.deliveryAddress')}
               </h2>
               {zoneError && orderType === 'delivery' && (
                 <div className="bg-red-50 text-red-700 p-3 rounded-lg text-sm mb-3">{zoneError}</div>
@@ -820,7 +822,7 @@ export default function Checkout() {
                     }`}
                   >
                     {isClosedNow 
-                      ? t('checkout.closed') || '今日已打烊' 
+                      ? t('checkout.closed') || t('autoGen.store.key57') 
                       : lastCommonOrderType === 'delivery' ? t('checkout.asap_delivery') : t('checkout.asap_pickup')}
                   </button>
                   <button
@@ -852,7 +854,7 @@ export default function Checkout() {
                           : 'border-input text-sub hover:border-gray-300'
                       }`}
                     >
-                      {t('checkout.frozenDelivery') || '冷凍宅配'}
+                      {t('checkout.frozenDelivery') || t('autoGen.store.key58')}
                     </button>
                   )}
                 </div>
@@ -862,7 +864,7 @@ export default function Checkout() {
                     {/* Elegant Custom Date Dropdown Selector */}
                     <div className="relative">
                       <label className="block text-xs font-bold text-hint uppercase tracking-wider mb-1.5">
-                        {t('checkout.selectDateFirst') || '選擇取餐日期'}
+                        {t('checkout.selectDateFirst') || t('autoGen.store.key59')}
                       </label>
                       <button
                         type="button"
@@ -971,10 +973,10 @@ export default function Checkout() {
                         </svg>
                         <div className="text-xs">
                           <p className="font-bold text-green-900 mb-0.5">
-                            {t('checkout.timeSelectionConfirmed') || '預約時間已選定'}
+                            {t('checkout.timeSelectionConfirmed') || t('autoGen.store.key60')}
                           </p>
                           <p className="opacity-90 font-medium">
-                            {t('checkout.scheduledFor') || '您已預約於'} <span className="font-bold underline underline-offset-2">{formatToFullDateTime(scheduledAt, i18n.language)}</span> {lastCommonOrderType === 'delivery' ? t('checkout.delivery') : t('checkout.pickup')}
+                            {t('checkout.scheduledFor') || t('autoGen.store.key61')} <span className="font-bold underline underline-offset-2">{formatToFullDateTime(scheduledAt, i18n.language)}</span> {lastCommonOrderType === 'delivery' ? t('checkout.delivery') : t('checkout.pickup')}
                           </p>
                         </div>
                       </div>
@@ -983,7 +985,7 @@ export default function Checkout() {
                 )}
                 
                 {scheduledAt && slotsByDay.length === 0 && (
-                  <p className="text-xs text-hint italic">{t('checkout.noAvailableSlots') || '暫無可用預約時段'}</p>
+                  <p className="text-xs text-hint italic">{t('checkout.noAvailableSlots') || t('autoGen.store.key62')}</p>
                 )}
               </div>
             </div>
@@ -1003,7 +1005,7 @@ export default function Checkout() {
           {/* Discounts & Rewards */}
           <div className="surface-card rounded-xl shadow-sm border p-6">
             <h2 className="text-lg font-semibold text-main mb-4">
-              🎁 {t('checkout.discountsAndRewards') || '優惠與紅利'}
+              🎁 {t('checkout.discountsAndRewards') || t('autoGen.store.key63')}
             </h2>
             
             <div className="space-y-6">
@@ -1017,7 +1019,7 @@ export default function Checkout() {
                     type="text"
                     value={couponCode}
                     onChange={(e) => setCouponCode(e.target.value)}
-                    placeholder={t('checkout.enterCouponCode') || '輸入折扣碼'}
+                    placeholder={t('checkout.enterCouponCode') || t('autoGen.store.key64')}
                     className="flex-1 px-3 py-2 bg-surface border border-input rounded-lg focus:ring-2 focus:ring-primary-500 outline-none text-sm text-main"
                   />
                   <button
@@ -1042,7 +1044,7 @@ export default function Checkout() {
                   </label>
                   <p className="text-sm text-sub mb-3">
                     {t('checkout.loyaltyPointsAvailable', { count: loyaltyBalance })}。
-                    <span>({loyaltyRedeemRate} 點 = $1.00)</span>
+                    <span>({loyaltyRedeemRate} {t('autoGen.store.key65')}</span>
                   </p>
                   <div className="flex items-center gap-3">
                     <input
@@ -1126,7 +1128,7 @@ export default function Checkout() {
                     />
                     <div className="flex flex-col">
                       <span className="text-sm font-bold">{t('checkout.creditCard')}</span>
-                      <span className="text-[10px] opacity-70">{t('checkout.creditCardSub') || '使用信用卡安全支付'}</span>
+                      <span className="text-[10px] opacity-70">{t('checkout.creditCardSub') || t('autoGen.store.key66')}</span>
                     </div>
                   </label>
                 )}
@@ -1149,7 +1151,7 @@ export default function Checkout() {
                     />
                     <div className="flex flex-col">
                       <span className="text-sm font-bold">PayPal</span>
-                      <span className="text-[10px] opacity-70">{t('checkout.paypalSub') || '使用 PayPal 帳戶支付'}</span>
+                      <span className="text-[10px] opacity-70">{t('checkout.paypalSub') || t('autoGen.store.key67')}</span>
                     </div>
                   </label>
                 )}
@@ -1173,7 +1175,7 @@ export default function Checkout() {
                   />
                   <div className="flex flex-col">
                     <span className="text-sm font-bold">LINE Pay</span>
-                    <span className="text-[10px] opacity-70">使用 LINE Pay 快速結帳</span>
+                    <span className="text-[10px] opacity-70">{t('autoGen.store.key68')}</span>
                   </div>
                 </label>
                 )}
@@ -1297,7 +1299,7 @@ export default function Checkout() {
                     <svg className="w-5 h-5 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
-                    {t('checkout.contactInfo') || '聯絡資訊'}
+                    {t('checkout.contactInfo') || t('autoGen.store.key69')}
                   </h2>
                   <p className="text-xs text-sub mt-1">
                     {user.name} ({user.email})
@@ -1306,11 +1308,11 @@ export default function Checkout() {
                 <div>
                   {user?.isEmployee ? (
                     <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-primary-100 text-primary-800 border border-primary-200 shadow-sm animate-pulse">
-                      {t('checkout.staffMember') || '員工會員'}
+                      {t('checkout.staffMember') || t('autoGen.store.key70')}
                     </span>
                   ) : (
                     <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800 border border-green-200 shadow-sm">
-                      {t('checkout.loggedIn') || '已登入'}
+                      {t('checkout.loggedIn') || t('autoGen.store.key71')}
                     </span>
                   )}
                 </div>
@@ -1318,14 +1320,14 @@ export default function Checkout() {
               
               <div className="space-y-3">
                 <label htmlFor="member-phone" className="block text-sm font-semibold text-main">
-                  {t('checkout.phone') || '聯絡電話'}
+                  {t('checkout.phone') || t('autoGen.store.key72')}
                 </label>
                 <div className="relative rounded-lg shadow-sm">
                   <input
                     id="member-phone"
                     type="tel"
                     required
-                    placeholder={t('checkout.phonePlaceholder') || '請輸入聯絡電話'}
+                    placeholder={t('checkout.phonePlaceholder') || t('autoGen.store.key73')}
                     value={guestPhone}
                     onChange={(e) => setGuestPhone(e.target.value)}
                     className="w-full pl-3 pr-10 py-2 bg-surface border border-input rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none text-sm text-main transition-all"
@@ -1341,7 +1343,7 @@ export default function Checkout() {
                 
                 {guestPhone && guestPhone === user.phone ? (
                   <div className="flex items-center gap-1.5 text-xs font-semibold text-green-600 animate-in fade-in slide-in-from-left-1 duration-200">
-                    <span>{t('checkout.phoneAutoFilled') || '✓ 已自動帶入您的會員電話號碼'}</span>
+                    <span>{t('checkout.phoneAutoFilled') || t('autoGen.store.key74')}</span>
                   </div>
                 ) : guestPhone && user.phone ? (
                   <div className="flex items-center gap-1.5 text-xs font-semibold text-amber-600 animate-in fade-in slide-in-from-left-1 duration-200">
@@ -1349,11 +1351,11 @@ export default function Checkout() {
                   </div>
                 ) : !guestPhone ? (
                   <div className="flex items-center gap-1.5 text-xs font-semibold text-red-500 animate-in fade-in slide-in-from-left-1 duration-200">
-                    <span>{t('checkout.phoneRequiredTip') || '⚠️ 請填寫您的聯絡電話，以便我們在有需要時聯繫您'}</span>
+                    <span>{t('checkout.phoneRequiredTip') || t('autoGen.store.key75')}</span>
                   </div>
                 ) : (
                   <div className="flex items-center gap-1.5 text-xs font-semibold text-blue-600 animate-in fade-in slide-in-from-left-1 duration-200">
-                    <span>{t('checkout.phoneEntered') || '已輸入聯絡電話 (此號碼將與此筆訂單關聯)'}</span>
+                    <span>{t('checkout.phoneEntered') || t('autoGen.store.key76')}</span>
                   </div>
                 )}
               </div>
@@ -1380,7 +1382,7 @@ export default function Checkout() {
                             checked={isMine} 
                             readOnly 
                             className="accent-primary-600 w-4 h-4 cursor-not-allowed"
-                            title={isMine ? "這是您點的餐點" : `由 ${item.guestName || '同行友人'} 點的餐點`}
+                            title={isMine ? t('autoGen.store.key77') : `由 ${item.guestName || t('autoGen.store.key78')} 點的餐點`}
                           />
                         </div>
                       )}
@@ -1392,7 +1394,7 @@ export default function Checkout() {
                           </span>
                           {!isMine && (
                             <span className="ml-2 text-[10px] font-bold bg-gray-200 text-gray-600 px-1.5 py-0.5 rounded">
-                              {item.guestName || '同行友人'}
+                              {item.guestName || t('autoGen.store.key79')}
                             </span>
                           )}
                         </span>
@@ -1427,7 +1429,7 @@ export default function Checkout() {
                   <span className="text-main font-medium">{t('checkout.deliveryFee')}</span>
                   {freeDelivery ? (
                     <span className="text-green-600 font-medium">
-                      {t('checkout.free') || '免運費'}
+                      {t('checkout.free') || t('autoGen.store.key80')}
                       {appliedPromo && couponDiscount === 0 && (
                         <span className="ml-2 text-[10px] bg-green-100 text-green-700 px-1.5 py-0.5 rounded">
                           {appliedPromo.name}
@@ -1442,7 +1444,7 @@ export default function Checkout() {
               {couponDiscount > 0 && (
                 <div className="flex justify-between text-green-600 font-medium">
                   <span className="flex items-center gap-2">
-                    {t('checkout.discount') || '折扣'}
+                    {t('checkout.discount') || t('autoGen.store.key81')}
                     {appliedPromo && (
                       <span className="text-[10px] bg-green-100 text-green-700 px-1.5 py-0.5 rounded">
                         {appliedPromo.name}
@@ -1466,7 +1468,7 @@ export default function Checkout() {
                 if (Math.abs(diff) > 0.001) {
                   return (
                     <div className="flex justify-between text-sub font-medium">
-                      <span>{t('checkout.roundingAdjustment') || '結算調整 (Rounding)'}</span>
+                      <span>{t('checkout.roundingAdjustment') || t('autoGen.store.key82')}</span>
                       <span>{diff > 0 ? '+' : ''}${diff.toFixed(2)}</span>
                     </div>
                   );

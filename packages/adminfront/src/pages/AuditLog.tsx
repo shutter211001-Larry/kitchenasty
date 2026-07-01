@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useState, useEffect } from 'react';
 
 interface AuditEntry {
@@ -27,6 +28,8 @@ const ACTION_COLORS: Record<string, string> = {
 };
 
 export default function AuditLog() {
+  const { t } = useTranslation();
+
   const [logs, setLogs] = useState<AuditEntry[]>([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -59,7 +62,7 @@ export default function AuditLog() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">稽核紀錄 (Audit Log)</h1>
+      <h1 className="text-2xl font-bold text-gray-900 mb-6">{t('autoGen.admin.key121')}</h1>
 
       {/* Filters */}
       <div className="flex flex-wrap gap-3 mb-4">
@@ -67,9 +70,9 @@ export default function AuditLog() {
           value={entityFilter}
           onChange={(e) => { setEntityFilter(e.target.value); setPage(1); }}
           className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
-          aria-label="依對象篩選"
+          aria-label={t('autoGen.admin.key122')}
         >
-          <option value="">所有對象 (All Entities)</option>
+          <option value="">{t('autoGen.admin.key123')}</option>
           {ENTITIES.map((e) => (
             <option key={e} value={e}>{e}</option>
           ))}
@@ -78,25 +81,25 @@ export default function AuditLog() {
           value={actionFilter}
           onChange={(e) => { setActionFilter(e.target.value); setPage(1); }}
           className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
-          aria-label="依動作篩選"
+          aria-label={t('autoGen.admin.key124')}
         >
-          <option value="">所有動作 (All Actions)</option>
+          <option value="">{t('autoGen.admin.key125')}</option>
           {ACTIONS.map((a) => (
             <option key={a} value={a}>
-              {a === 'create' && '新增 (Create)'}
-              {a === 'update' && '更新 (Update)'}
-              {a === 'delete' && '刪除 (Delete)'}
+              {a === 'create' && t('autoGen.admin.key126')}
+              {a === 'update' && t('autoGen.admin.key127')}
+              {a === 'delete' && t('autoGen.admin.key128')}
               {!['create', 'update', 'delete'].includes(a) && a}
             </option>
           ))}
         </select>
         <input
           type="text"
-          placeholder="搜尋電子郵件或 ID..."
+          placeholder={t('autoGen.admin.key129')}
           value={search}
           onChange={(e) => { setSearch(e.target.value); setPage(1); }}
           className="px-3 py-2 border border-gray-300 rounded-lg text-sm w-64"
-          aria-label="搜尋稽核紀錄"
+          aria-label={t('autoGen.admin.key130')}
         />
       </div>
 
@@ -105,23 +108,23 @@ export default function AuditLog() {
         <table className="w-full text-sm">
           <thead className="bg-gray-50 text-gray-500 uppercase text-xs">
             <tr>
-              <th className="px-6 py-3 text-left">時間</th>
-              <th className="px-6 py-3 text-left">操作者</th>
-              <th className="px-6 py-3 text-left">動作</th>
-              <th className="px-6 py-3 text-left">對象</th>
-              <th className="px-6 py-3 text-left">對象 ID</th>
-              <th className="px-6 py-3 text-left">IP 位址</th>
-              <th className="px-6 py-3 text-left">詳細內容</th>
+              <th className="px-6 py-3 text-left">{t('autoGen.admin.key131')}</th>
+              <th className="px-6 py-3 text-left">{t('autoGen.admin.key132')}</th>
+              <th className="px-6 py-3 text-left">{t('autoGen.admin.key133')}</th>
+              <th className="px-6 py-3 text-left">{t('autoGen.admin.key134')}</th>
+              <th className="px-6 py-3 text-left">{t('autoGen.admin.key135')}</th>
+              <th className="px-6 py-3 text-left">{t('autoGen.admin.key136')}</th>
+              <th className="px-6 py-3 text-left">{t('autoGen.admin.key137')}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
             {loading ? (
               <tr>
-                <td colSpan={7} className="px-6 py-8 text-center text-gray-500">載入中...</td>
+                <td colSpan={7} className="px-6 py-8 text-center text-gray-500">{t('autoGen.admin.key138')}</td>
               </tr>
             ) : logs.length === 0 ? (
               <tr>
-                <td colSpan={7} className="px-6 py-8 text-center text-gray-500">尚無任何稽核紀錄。</td>
+                <td colSpan={7} className="px-6 py-8 text-center text-gray-500">{t('autoGen.admin.key139')}</td>
               </tr>
             ) : (
               logs.map((log) => (
@@ -132,9 +135,9 @@ export default function AuditLog() {
                   <td className="px-6 py-3 text-gray-700">{log.userEmail}</td>
                   <td className="px-6 py-3">
                     <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${ACTION_COLORS[log.action] || 'bg-gray-100 text-gray-700'}`}>
-                      {log.action === 'create' && '新增'}
-                      {log.action === 'update' && '更新'}
-                      {log.action === 'delete' && '刪除'}
+                      {log.action === 'create' && t('autoGen.admin.key140')}
+                      {log.action === 'update' && t('autoGen.admin.key141')}
+                      {log.action === 'delete' && t('autoGen.admin.key142')}
                       {!['create', 'update', 'delete'].includes(log.action) && log.action}
                     </span>
                   </td>
@@ -161,17 +164,17 @@ export default function AuditLog() {
             disabled={page === 1}
             className="px-3 py-1 border border-gray-300 rounded text-sm disabled:opacity-50"
           >
-            上一頁
+            {t('autoGen.admin.key143')}
           </button>
           <span className="px-3 py-1 text-sm text-gray-600">
-            第 {page} 頁，共 {totalPages} 頁
+            {t('autoGen.admin.key144')} {page} {t('autoGen.admin.key145')} {totalPages} {t('autoGen.admin.key146')}
           </span>
           <button
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page === totalPages}
             className="px-3 py-1 border border-gray-300 rounded text-sm disabled:opacity-50"
           >
-            下一頁
+            {t('autoGen.admin.key147')}
           </button>
         </div>
       )}
