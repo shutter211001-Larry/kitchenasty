@@ -62,7 +62,7 @@ export default function AuditLog() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">{t('autoGen.admin.key121')}</h1>
+      <h1 className="text-2xl font-bold text-gray-900 mb-6">{t('auditLog.auditLog')}</h1>
 
       {/* Filters */}
       <div className="flex flex-wrap gap-3 mb-4">
@@ -70,9 +70,9 @@ export default function AuditLog() {
           value={entityFilter}
           onChange={(e) => { setEntityFilter(e.target.value); setPage(1); }}
           className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
-          aria-label={t('autoGen.admin.key122')}
+          aria-label={t('auditLog.filterByEntity')}
         >
-          <option value="">{t('autoGen.admin.key123')}</option>
+          <option value="">{t('auditLog.allEntities')}</option>
           {ENTITIES.map((e) => (
             <option key={e} value={e}>{e}</option>
           ))}
@@ -81,25 +81,25 @@ export default function AuditLog() {
           value={actionFilter}
           onChange={(e) => { setActionFilter(e.target.value); setPage(1); }}
           className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
-          aria-label={t('autoGen.admin.key124')}
+          aria-label={t('auditLog.filterByAction')}
         >
-          <option value="">{t('autoGen.admin.key125')}</option>
+          <option value="">{t('auditLog.allActions')}</option>
           {ACTIONS.map((a) => (
             <option key={a} value={a}>
-              {a === 'create' && t('autoGen.admin.key126')}
-              {a === 'update' && t('autoGen.admin.key127')}
-              {a === 'delete' && t('autoGen.admin.key128')}
+              {a === 'create' && t('auditLog.createAction')}
+              {a === 'update' && t('auditLog.updateAction')}
+              {a === 'delete' && t('auditLog.deleteAction')}
               {!['create', 'update', 'delete'].includes(a) && a}
             </option>
           ))}
         </select>
         <input
           type="text"
-          placeholder={t('autoGen.admin.key129')}
+          placeholder={t('auditLog.searchEmailOrId')}
           value={search}
           onChange={(e) => { setSearch(e.target.value); setPage(1); }}
           className="px-3 py-2 border border-gray-300 rounded-lg text-sm w-64"
-          aria-label={t('autoGen.admin.key130')}
+          aria-label={t('auditLog.searchAuditLogs')}
         />
       </div>
 
@@ -108,23 +108,23 @@ export default function AuditLog() {
         <table className="w-full text-sm">
           <thead className="bg-gray-50 text-gray-500 uppercase text-xs">
             <tr>
-              <th className="px-6 py-3 text-left">{t('autoGen.admin.key131')}</th>
-              <th className="px-6 py-3 text-left">{t('autoGen.admin.key132')}</th>
-              <th className="px-6 py-3 text-left">{t('autoGen.admin.key133')}</th>
-              <th className="px-6 py-3 text-left">{t('autoGen.admin.key134')}</th>
-              <th className="px-6 py-3 text-left">{t('autoGen.admin.key135')}</th>
-              <th className="px-6 py-3 text-left">{t('autoGen.admin.key136')}</th>
-              <th className="px-6 py-3 text-left">{t('autoGen.admin.key137')}</th>
+              <th className="px-6 py-3 text-left">{t('auditLog.time')}</th>
+              <th className="px-6 py-3 text-left">{t('auditLog.operator')}</th>
+              <th className="px-6 py-3 text-left">{t('auditLog.action')}</th>
+              <th className="px-6 py-3 text-left">{t('auditLog.entity')}</th>
+              <th className="px-6 py-3 text-left">{t('auditLog.entityId')}</th>
+              <th className="px-6 py-3 text-left">{t('auditLog.ipAddress')}</th>
+              <th className="px-6 py-3 text-left">{t('auditLog.details')}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
             {loading ? (
               <tr>
-                <td colSpan={7} className="px-6 py-8 text-center text-gray-500">{t('autoGen.admin.key138')}</td>
+                <td colSpan={7} className="px-6 py-8 text-center text-gray-500">{t('auditLog.loading')}</td>
               </tr>
             ) : logs.length === 0 ? (
               <tr>
-                <td colSpan={7} className="px-6 py-8 text-center text-gray-500">{t('autoGen.admin.key139')}</td>
+                <td colSpan={7} className="px-6 py-8 text-center text-gray-500">{t('auditLog.noAuditLogs')}</td>
               </tr>
             ) : (
               logs.map((log) => (
@@ -135,9 +135,9 @@ export default function AuditLog() {
                   <td className="px-6 py-3 text-gray-700">{log.userEmail}</td>
                   <td className="px-6 py-3">
                     <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${ACTION_COLORS[log.action] || 'bg-gray-100 text-gray-700'}`}>
-                      {log.action === 'create' && t('autoGen.admin.key140')}
-                      {log.action === 'update' && t('autoGen.admin.key141')}
-                      {log.action === 'delete' && t('autoGen.admin.key142')}
+                      {log.action === 'create' && t('auditLog.add')}
+                      {log.action === 'update' && t('auditLog.update')}
+                      {log.action === 'delete' && t('auditLog.delete')}
                       {!['create', 'update', 'delete'].includes(log.action) && log.action}
                     </span>
                   </td>
@@ -164,17 +164,17 @@ export default function AuditLog() {
             disabled={page === 1}
             className="px-3 py-1 border border-gray-300 rounded text-sm disabled:opacity-50"
           >
-            {t('autoGen.admin.key143')}
+            {t('auditLog.previousPage')}
           </button>
           <span className="px-3 py-1 text-sm text-gray-600">
-            {t('autoGen.admin.key144')} {page} {t('autoGen.admin.key145')} {totalPages} {t('autoGen.admin.key146')}
+            {t('auditLog.pagePrefix')} {page} {t('auditLog.pageOf')} {totalPages} {t('auditLog.pageSuffix')}
           </span>
           <button
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page === totalPages}
             className="px-3 py-1 border border-gray-300 rounded text-sm disabled:opacity-50"
           >
-            {t('autoGen.admin.key147')}
+            {t('auditLog.nextPage')}
           </button>
         </div>
       )}

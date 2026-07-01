@@ -52,7 +52,7 @@ export default function AttendanceRecords() {
       if (data.success) {
         setRecords(data.data);
       } else {
-        toast.error(t('autoGen.admin.key105'));
+        toast.error(t('attendanceRecords.failedToLoadRecords'));
       }
     } catch (err) {
       console.error(err);
@@ -73,20 +73,20 @@ export default function AttendanceRecords() {
       <div className="bg-white p-6 rounded shadow mb-6">
         <form onSubmit={handleFilter} className="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key106')}</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t('attendanceRecords.branchStore')}</label>
             <select
               value={locationId}
               onChange={(e) => setLocationId(e.target.value)}
               className="w-full rounded border-gray-300 text-sm"
             >
-              <option value="">{t('autoGen.admin.key107')}</option>
+              <option value="">{t('attendanceRecords.all')}</option>
               {locations.map(loc => (
                 <option key={loc.id} value={loc.id}>{loc.name}</option>
               ))}
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key108')}</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t('attendanceRecords.startDate')}</label>
             <input
               type="date"
               value={startDate}
@@ -95,7 +95,7 @@ export default function AttendanceRecords() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key109')}</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t('attendanceRecords.endDate')}</label>
             <input
               type="date"
               value={endDate}
@@ -111,7 +111,7 @@ export default function AttendanceRecords() {
                 onChange={(e) => setIsOutOfRange(e.target.checked)}
                 className="mr-2 rounded text-primary-600 border-gray-300 focus:ring-primary-500"
               />
-              {t('autoGen.admin.key110')}
+              {t('attendanceRecords.showAbnormalDistanceOnly')}
             </label>
           </div>
           <div>
@@ -120,7 +120,7 @@ export default function AttendanceRecords() {
               disabled={loading}
               className="w-full bg-primary-600 text-white py-2 rounded text-sm font-medium hover:bg-primary-700 disabled:opacity-50"
             >
-              {t('autoGen.admin.key111')}
+              {t('attendanceRecords.filter')}
             </button>
           </div>
         </form>
@@ -130,12 +130,12 @@ export default function AttendanceRecords() {
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('autoGen.admin.key112')}</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('autoGen.admin.key113')}</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('autoGen.admin.key114')}</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('autoGen.admin.key115')}</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('autoGen.admin.key116')}</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('autoGen.admin.key117')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('attendanceRecords.date')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('attendanceRecords.employee')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('attendanceRecords.store')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('attendanceRecords.clockInTime')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('attendanceRecords.clockOutTime')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('attendanceRecords.status')}</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -160,11 +160,11 @@ export default function AttendanceRecords() {
                 <td className="px-6 py-4 whitespace-nowrap text-sm">
                   {record.isOutOfRange ? (
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                      {t('autoGen.admin.key118')}
+                      {t('attendanceRecords.abnormalDistance')}
                     </span>
                   ) : (
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                      {t('autoGen.admin.key119')}
+                      {t('attendanceRecords.normal')}
                     </span>
                   )}
                 </td>
@@ -173,7 +173,7 @@ export default function AttendanceRecords() {
             {records.length === 0 && (
               <tr>
                 <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
-                  {t('autoGen.admin.key120')}
+                  {t('attendanceRecords.noMatchingRecordsFound')}
                 </td>
               </tr>
             )}

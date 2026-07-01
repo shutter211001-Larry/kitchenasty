@@ -12,15 +12,15 @@ interface DietaryPreference {
 export default function DietaryPreferenceList() {
   const { t } = useTranslation();
     const LANGUAGES = [
-      { code: 'en', label: t('autoGen.admin.key680') },
-      { code: 'ja', label: t('autoGen.admin.key681') },
-      { code: 'ko', label: t('autoGen.admin.key682') },
-      { code: 'th', label: t('autoGen.admin.key683') },
-      { code: 'tl', label: t('autoGen.admin.key684') },
-      { code: 'vi', label: t('autoGen.admin.key685') },
-      { code: 'id', label: t('autoGen.admin.key686') },
-      { code: 'fr', label: t('autoGen.admin.key687') },
-      { code: 'es', label: t('autoGen.admin.key688') },
+      { code: 'en', label: t('dietaryPreferenceList.english') },
+      { code: 'ja', label: t('dietaryPreferenceList.japanese') },
+      { code: 'ko', label: t('dietaryPreferenceList.korean') },
+      { code: 'th', label: t('dietaryPreferenceList.thai') },
+      { code: 'tl', label: t('dietaryPreferenceList.filipino') },
+      { code: 'vi', label: t('dietaryPreferenceList.vietnamese') },
+      { code: 'id', label: t('dietaryPreferenceList.indonesian') },
+      { code: 'fr', label: t('dietaryPreferenceList.french') },
+      { code: 'es', label: t('dietaryPreferenceList.spanish') },
     ];
   const [preferences, setPreferences] = useState<DietaryPreference[]>([]);
   const [loading, setLoading] = useState(true);
@@ -67,7 +67,7 @@ export default function DietaryPreferenceList() {
   }
 
   async function handleDelete(id: string) {
-    if (!confirm(t('autoGen.admin.key689'))) return;
+    if (!confirm(t('dietaryPreferenceList.confirmDeleteDietary'))) return;
     try {
       await api.delete(`/menu/dietary/${id}`);
       fetchPreferences();
@@ -76,17 +76,17 @@ export default function DietaryPreferenceList() {
     }
   }
 
-  if (loading) return <div className="p-6 text-gray-500 text-center">{t('autoGen.admin.key690')}</div>;
+  if (loading) return <div className="p-6 text-gray-500 text-center">{t('dietaryPreferenceList.loading')}</div>;
 
   return (
     <div className="max-w-4xl mx-auto">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">{t('autoGen.admin.key691')}</h1>
+        <h1 className="text-2xl font-bold text-gray-900">{t('dietaryPreferenceList.dietaryPreferences')}</h1>
         <button
           onClick={() => setIsAdding(!isAdding)}
           className="bg-primary-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary-700 transition-colors"
         >
-          {isAdding ? t('autoGen.admin.key692') : t('autoGen.admin.key693')}
+          {isAdding ? t('dietaryPreferenceList.cancel') : t('dietaryPreferenceList.addDietaryPreference')}
         </button>
       </div>
 
@@ -94,20 +94,20 @@ export default function DietaryPreferenceList() {
         <form onSubmit={handleCreate} className="bg-white border border-gray-200 rounded-lg p-6 mb-6 shadow-sm">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key694')}</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('dietaryPreferenceList.primaryNameDefault')}</label>
               <input
                 type="text"
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
                 required
-                placeholder={t('autoGen.admin.key695')}
+                placeholder={t('dietaryPreferenceList.dietaryPreferenceExample')}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
               />
-              <p className="mt-1 text-xs text-gray-400 italic">{t('autoGen.admin.key696')}</p>
+              <p className="mt-1 text-xs text-gray-400 italic">{t('dietaryPreferenceList.autoTranslationNotice')}</p>
             </div>
 
             <div className="md:col-span-2 grid grid-cols-2 sm:grid-cols-4 gap-3 mt-2 bg-gray-50 p-4 rounded-lg">
-              <p className="col-span-full text-xs font-bold text-gray-400 uppercase tracking-wider">{t('autoGen.admin.key697')}</p>
+              <p className="col-span-full text-xs font-bold text-gray-400 uppercase tracking-wider">{t('dietaryPreferenceList.optionalTranslations')}</p>
               {LANGUAGES.map((lang) => (
                 <div key={lang.code}>
                   <label className="block text-[10px] text-gray-400 font-bold uppercase mb-1">{lang.label}</label>
@@ -128,7 +128,7 @@ export default function DietaryPreferenceList() {
               disabled={isSaving}
               className="bg-primary-600 text-white px-6 py-2 rounded-lg text-sm font-bold hover:bg-primary-700 disabled:opacity-50"
             >
-              {isSaving ? t('autoGen.admin.key698') : t('autoGen.admin.key699')}
+              {isSaving ? t('dietaryPreferenceList.saving') : t('dietaryPreferenceList.saveItem')}
             </button>
           </div>
         </form>
@@ -138,16 +138,16 @@ export default function DietaryPreferenceList() {
         <table className="w-full text-left">
           <thead className="bg-gray-50 text-xs font-bold text-gray-500 uppercase tracking-wider">
             <tr>
-              <th className="px-6 py-3">{t('autoGen.admin.key700')}</th>
-              <th className="px-6 py-3">{t('autoGen.admin.key701')}</th>
-              <th className="px-6 py-3">{t('autoGen.admin.key702')}</th>
-              <th className="px-6 py-3 text-right">{t('autoGen.admin.key703')}</th>
+              <th className="px-6 py-3">{t('dietaryPreferenceList.name')}</th>
+              <th className="px-6 py-3">{t('dietaryPreferenceList.translations')}</th>
+              <th className="px-6 py-3">{t('dietaryPreferenceList.usedIn')}</th>
+              <th className="px-6 py-3 text-right">{t('dietaryPreferenceList.action')}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
             {preferences.length === 0 && (
               <tr>
-                <td colSpan={4} className="px-6 py-8 text-center text-gray-400">{t('autoGen.admin.key704')}</td>
+                <td colSpan={4} className="px-6 py-8 text-center text-gray-400">{t('dietaryPreferenceList.noDietaryRestrictionsCreated')}</td>
               </tr>
             )}
             {preferences.map((p) => (
@@ -167,11 +167,11 @@ export default function DietaryPreferenceList() {
                   </div>
                 </td>
                 <td className="px-6 py-4">
-                  <span className="text-xs text-gray-500">{p._count?.menuItems || 0} {t('autoGen.admin.key705')}</span>
+                  <span className="text-xs text-gray-500">{p._count?.menuItems || 0} {t('dietaryPreferenceList.itemCount')}</span>
                 </td>
                 <td className="px-6 py-4 text-right">
                   <button onClick={() => handleDelete(p.id)} className="text-red-500 hover:text-red-700 text-sm">
-                    {t('autoGen.admin.key706')}
+                    {t('dietaryPreferenceList.delete')}
                   </button>
                 </td>
               </tr>

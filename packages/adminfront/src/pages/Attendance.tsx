@@ -150,12 +150,12 @@ export default function Attendance() {
 
   const handleCheckIn = async (qrToken?: string) => {
     if (!qrToken && !selectedLocation) {
-      toast.error(t('autoGen.admin.key56'));
+      toast.error(t('attendance.selectClockInStore'));
       return;
     }
     
     if (!qrToken && (currentLat === null || currentLng === null)) {
-      toast.error(t('autoGen.admin.key57'));
+      toast.error(t('attendance.gpsLocationError'));
       return;
     }
 
@@ -178,16 +178,16 @@ export default function Attendance() {
       const data = await res.json();
       if (data.success) {
         if (data.data.isOutOfRange) {
-           toast.success(t('autoGen.admin.key58'), { icon: '⚠️' });
+           toast.success(t('attendance.clockInSuccessAbnormalDistance'), { icon: '⚠️' });
         } else {
-           toast.success(t('autoGen.admin.key59'));
+           toast.success(t('attendance.clockInSuccess'));
         }
         fetchMyRecords();
       } else {
-        toast.error(data.error || t('autoGen.admin.key60'));
+        toast.error(data.error || t('attendance.clockInFailed'));
       }
     } catch (err) {
-      toast.error(t('autoGen.admin.key61'));
+      toast.error(t('attendance.systemError'));
     } finally {
       setLoading(false);
     }
@@ -204,13 +204,13 @@ export default function Attendance() {
       });
       const data = await res.json();
       if (data.success) {
-        toast.success(t('autoGen.admin.key62'));
+        toast.success(t('attendance.clockOutSuccess'));
         fetchMyRecords();
       } else {
-        toast.error(data.error || t('autoGen.admin.key63'));
+        toast.error(data.error || t('attendance.clockFailed'));
       }
     } catch (err) {
-      toast.error(t('autoGen.admin.key64'));
+      toast.error(t('attendance.systemError'));
     } finally {
       setLoading(false);
     }
@@ -225,17 +225,17 @@ export default function Attendance() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="bg-white p-6 rounded shadow">
-          <h3 className="text-xl font-bold mb-4">{t('autoGen.admin.key65')}</h3>
+          <h3 className="text-xl font-bold mb-4">{t('attendance.currentStatus')}</h3>
           
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key66')}</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t('attendance.clockInStore')}</label>
             <select
               value={selectedLocation}
               onChange={(e) => setSelectedLocation(e.target.value)}
               className="w-full rounded border-gray-300"
               disabled={!!todayRecord}
             >
-              <option value="">{t('autoGen.admin.key67')}</option>
+              <option value="">{t('attendance.pleaseSelect')}</option>
               {locations.map(loc => (
                 <option key={loc.id} value={loc.id}>{loc.name}</option>
               ))}
@@ -244,20 +244,20 @@ export default function Attendance() {
 
           <div className="mb-4">
             <p className="text-sm text-gray-600">
-              {t('autoGen.admin.key68')} {currentLat !== null ? t('autoGen.admin.key69') : (geoError || t('autoGen.admin.key70'))}
+              {t('attendance.locationStatus')} {currentLat !== null ? t('attendance.locationAcquired') : (geoError || t('attendance.locating'))}
             </p>
           </div>
 
           {todayRecord ? (
             <div>
-              <p className="text-green-600 font-bold mb-4">{t('autoGen.admin.key71')}</p>
-              <p className="mb-4">{t('autoGen.admin.key72')} {new Date(todayRecord.checkIn).toLocaleString()}</p>
+              <p className="text-green-600 font-bold mb-4">{t('attendance.alreadyClockedIn')}</p>
+              <p className="mb-4">{t('attendance.clockInTime')} {new Date(todayRecord.checkIn).toLocaleString()}</p>
               <button
                 onClick={() => handleCheckOut(todayRecord.id)}
                 disabled={loading}
                 className="bg-red-600 text-white px-6 py-2 rounded font-bold hover:bg-red-700 disabled:opacity-50"
               >
-                {t('autoGen.admin.key73')}
+                {t('attendance.clockOut')}
               </button>
             </div>
           ) : (
@@ -267,14 +267,14 @@ export default function Attendance() {
                 disabled={loading || currentLat === null}
                 className="flex-1 bg-blue-600 text-white px-6 py-2 rounded font-bold hover:bg-blue-700 disabled:opacity-50"
               >
-                {t('autoGen.admin.key74')}
+                {t('attendance.gpsClockIn')}
               </button>
               <button
                 onClick={() => setShowScanner(true)}
                 disabled={loading}
                 className="flex-1 bg-indigo-600 text-white px-6 py-2 rounded font-bold hover:bg-indigo-700 disabled:opacity-50"
               >
-                {t('autoGen.admin.key75')}
+                {t('attendance.scanQrCode')}
               </button>
             </div>
           )}
@@ -299,7 +299,7 @@ export default function Attendance() {
               
               {/* Header */}
               <div className="flex justify-between items-center p-5 bg-gradient-to-b from-black/60 to-transparent absolute top-0 w-full z-10">
-                <h3 className="text-white text-lg font-medium tracking-wide drop-shadow-md">{t('autoGen.admin.key76')}</h3>
+                <h3 className="text-white text-lg font-medium tracking-wide drop-shadow-md">{t('attendance.scanStoreQrCode')}</h3>
                 <button onClick={() => setShowScanner(false)} className="text-white/80 hover:text-white bg-white/10 hover:bg-white/20 p-2.5 rounded-full backdrop-blur-md transition-all hover:scale-105 active:scale-95">
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
@@ -356,11 +356,11 @@ export default function Attendance() {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50 sticky top-0">
                 <tr>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">{t('autoGen.admin.key77')}</th>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">{t('autoGen.admin.key78')}</th>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">{t('autoGen.admin.key79')}</th>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">{t('autoGen.admin.key80')}</th>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">{t('autoGen.admin.key81')}</th>
+                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">{t('attendance.date')}</th>
+                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">{t('attendance.clockInTime')}</th>
+                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">{t('attendance.clockOutTime')}</th>
+                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">{t('attendance.store')}</th>
+                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">{t('attendance.status')}</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200 text-sm">
@@ -372,16 +372,16 @@ export default function Attendance() {
                     <td className="px-4 py-2">{record.location?.name}</td>
                     <td className="px-4 py-2">
                       {record.isOutOfRange ? (
-                        <span className="text-red-500 font-medium">{t('autoGen.admin.key82')}</span>
+                        <span className="text-red-500 font-medium">{t('attendance.distanceAbnormal')}</span>
                       ) : (
-                        <span className="text-green-500 font-medium">{t('autoGen.admin.key83')}</span>
+                        <span className="text-green-500 font-medium">{t('attendance.normal')}</span>
                       )}
                     </td>
                   </tr>
                 ))}
                 {myRecords.length === 0 && (
                   <tr>
-                    <td colSpan={5} className="px-4 py-4 text-center text-gray-500">{t('autoGen.admin.key84')}</td>
+                    <td colSpan={5} className="px-4 py-4 text-center text-gray-500">{t('attendance.noRecords')}</td>
                   </tr>
                 )}
               </tbody>

@@ -80,10 +80,10 @@ export default function Account() {
         updateUser(data.data);
         setIsEditing(false);
       } else {
-        alert(data.error || t('autoGen.store.key17'));
+        alert(data.error || t('account.updateFailed'));
       }
     } catch (err) {
-      alert(t('autoGen.store.key18'));
+      alert(t('account.updateFailedCheckNetwork'));
     } finally {
       setIsSaving(false);
     }
@@ -91,7 +91,7 @@ export default function Account() {
 
   const handleChangePassword = async () => {
     if (newPassword.length < 6) {
-      alert(t('auth.passwordTooShort') || t('autoGen.store.key19'));
+      alert(t('auth.passwordTooShort') || t('account.passwordMinLengthRequired'));
       return;
     }
     setIsChangingPassword(true);
@@ -109,7 +109,7 @@ export default function Account() {
       });
       const data = await res.json();
       if (data.success) {
-        alert(t('common.success') || t('autoGen.store.key20'));
+        alert(t('common.success') || t('account.setupSuccess'));
         setShowPasswordModal(false);
         setNewPassword('');
         setOldPassword('');
@@ -120,10 +120,10 @@ export default function Account() {
         const meData = await meRes.json();
         if (meData.success) updateUser(meData.data.customer);
       } else {
-        alert(data.error || t('autoGen.store.key21'));
+        alert(data.error || t('account.setupFailed'));
       }
     } catch (err) {
-      alert(t('autoGen.store.key22'));
+      alert(t('account.operationFailed'));
     } finally {
       setIsChangingPassword(false);
     }
@@ -154,7 +154,7 @@ export default function Account() {
         alert(data.error);
       }
     } catch (err) {
-      alert(t('autoGen.store.key23'));
+      alert(t('account.actionFailed'));
     }
   };
 
@@ -162,7 +162,7 @@ export default function Account() {
     try {
       const liff = (window as any).liff;
       if (!liff) {
-        alert(t('autoGen.store.key24'));
+        alert(t('account.lineSdkNotLoaded'));
         return;
       }
       await liff.init({ liffId: settings.lineSettings!.liffId });
@@ -186,26 +186,26 @@ export default function Account() {
       const data = await res.json();
 
       if (res.ok && data.success) {
-        alert(t('autoGen.store.key25'));
+        alert(t('account.lineLinkSuccess'));
         window.location.reload();
       } else {
         const errorMsg = data.error || '';
-        if (errorMsg.includes(t('autoGen.store.key26')) || errorMsg.includes(t('autoGen.store.key27'))) {
+        if (errorMsg.includes(t('account.linkedByAnotherMember')) || errorMsg.includes(t('account.boundByAnotherMember'))) {
           console.log('Conflict detected, opening merge prompt for:', profile.userId);
           setIsSocialVerified(true);
           setShowMergePrompt({ provider: 'line', id: profile.userId });
         } else {
-          alert(errorMsg || t('autoGen.store.key28'));
+          alert(errorMsg || t('account.linkFailed'));
         }
       }
     } catch (err) {
-      alert(t('autoGen.store.key29'));
+      alert(t('account.executionFailed'));
     }
   };
 
   const handleSetPasswordAndUnbind = async () => {
     if (newPassword.length < 6) {
-      alert(t('autoGen.store.key30'));
+      alert(t('account.passwordMinLengthError'));
       return;
     }
     setIsSettingPassword(true);
@@ -221,14 +221,14 @@ export default function Account() {
       });
       const pData = await pRes.json();
       if (!pData.success) {
-        alert(pData.error || t('autoGen.store.key31'));
+        alert(pData.error || t('account.passwordSetupFailed'));
         setIsSettingPassword(false);
         return;
       }
       // 2. Then unbind
       await handleUnbind();
     } catch (err) {
-      alert(t('autoGen.store.key32'));
+      alert(t('account.systemErrorTryLater'));
       setIsSettingPassword(false);
     }
   };
@@ -251,13 +251,13 @@ export default function Account() {
       });
       const data = await res.json();
       if (data.success) {
-        alert(data.message || t('autoGen.store.key33'));
+        alert(data.message || t('account.accountIntegrationSuccess'));
         window.location.reload();
       } else {
-        alert(data.error || t('autoGen.store.key34'));
+        alert(data.error || t('account.integrationFailed'));
       }
     } catch (err) {
-      alert(t('autoGen.store.key35'));
+      alert(t('account.integrationError'));
     } finally {
       setIsMerging(false);
     }
@@ -318,7 +318,7 @@ export default function Account() {
                   </div>
                 ) : (
                   <div className="p-4 bg-surface-soft rounded-xl border border-dashed border-input">
-                    <p className="text-sm text-sub">{t('autoGen.store.key36')}</p>
+                    <p className="text-sm text-sub">{t('account.passwordNotSetWarning')}</p>
                     <button
                       onClick={() => { setShowMergePrompt(null); setShowPasswordModal(true); }}
                       className="text-sm font-bold text-primary-600 mt-2 hover:text-primary-700 transition-colors"
@@ -547,13 +547,13 @@ export default function Account() {
           <svg className="w-5 h-5 text-hint" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
           </svg>
-          {t('autoGen.store.key37')}
+          {t('account.notificationSettings')}
         </h2>
         <div className="space-y-4">
           <div className="flex items-center justify-between p-4 bg-surface-soft/30 border border-input rounded-2xl">
             <div>
-              <h3 className="font-bold text-main">{t('autoGen.store.key38')}</h3>
-              <p className="text-xs text-sub mt-1">{t('autoGen.store.key39')}</p>
+              <h3 className="font-bold text-main">{t('account.emailNotifications')}</h3>
+              <p className="text-xs text-sub mt-1">{t('account.receiveOrderEmails')}</p>
             </div>
             <button
               onClick={async () => {
@@ -576,9 +576,9 @@ export default function Account() {
 
           <div className="flex items-center justify-between p-4 bg-surface-soft/30 border border-input rounded-2xl">
             <div>
-              <h3 className="font-bold text-main">{t('autoGen.store.key40')}</h3>
-              <p className="text-xs text-sub mt-1">{t('autoGen.store.key41')}</p>
-              {!user.lineUserId && <p className="text-[10px] text-amber-600 mt-1">{t('autoGen.store.key42')}</p>}
+              <h3 className="font-bold text-main">{t('account.lineNotifications')}</h3>
+              <p className="text-xs text-sub mt-1">{t('account.receiveLineNotifications')}</p>
+              {!user.lineUserId && <p className="text-[10px] text-amber-600 mt-1">{t('account.bindLineAccountFirst')}</p>}
             </div>
             <button
               disabled={!user.lineUserId}
@@ -639,7 +639,7 @@ export default function Account() {
             <div>
               <h3 className="font-bold text-main">{t('auth.password')}</h3>
               <p className="text-xs text-sub mt-1">
-                {(user as any).hasPassword ? '••••••••' : t('autoGen.store.key43')}
+                {(user as any).hasPassword ? '••••••••' : t('account.passwordNotYetSet')}
               </p>
             </div>
             <button
@@ -770,8 +770,8 @@ export default function Account() {
                   </div>
                   <p className="text-sm text-sub font-medium">
                     {user.lineUserId
-                      ? user.lineDisplayName || t('autoGen.store.key44')
-                      : t('autoGen.store.key45')}
+                      ? user.lineDisplayName || t('account.authorizedUser')
+                      : t('account.linkForNotifications')}
                   </p>
                 </div>
               </div>
@@ -783,7 +783,7 @@ export default function Account() {
                       setShowPasswordSetup(true);
                       window.scrollTo({ top: 400, behavior: 'smooth' });
                     } else {
-                      if (confirm(t('autoGen.store.key46'))) handleUnbind();
+                      if (confirm(t('account.confirmUnlinkLine'))) handleUnbind();
                     }
                   }}
                   className="px-6 py-2.5 text-sm font-bold text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl border border-red-200 dark:border-red-800 transition-all active:scale-95"
@@ -836,8 +836,8 @@ export default function Account() {
                   </div>
                   <p className="text-sm text-sub font-medium">
                     {(user as any).googleId
-                      ? (user as any).googleEmail || t('autoGen.store.key47')
-                      : t('autoGen.store.key48')}
+                      ? (user as any).googleEmail || t('account.googleAccount')
+                      : t('account.linkGoogleForLogin')}
                   </p>
                 </div>
               </div>
@@ -849,7 +849,7 @@ export default function Account() {
                       setShowPasswordSetup(true);
                       window.scrollTo({ top: 400, behavior: 'smooth' });
                     } else {
-                      if (!confirm(t('autoGen.store.key49'))) return;
+                      if (!confirm(t('account.confirmUnlinkGoogle'))) return;
                       try {
                         const res = await fetch(`${API_BASE}/auth/google/unbind`, {
                           method: 'POST',
@@ -862,7 +862,7 @@ export default function Account() {
                           alert(data.error);
                         }
                       } catch (err) {
-                        alert(t('autoGen.store.key50'));
+                        alert(t('account.processFailed'));
                       }
                     }
                   }}
@@ -912,13 +912,13 @@ export default function Account() {
                       });
                       const data = await res.json();
                       if (data.success) {
-                        alert(t('autoGen.store.key51'));
+                        alert(t('account.accountDeletedSuccessfully'));
                         logout();
                       } else {
-                        alert(data.error || t('autoGen.store.key52'));
+                        alert(data.error || t('account.deleteFailed'));
                       }
                     } catch (err) {
-                      alert(t('autoGen.store.key53'));
+                      alert(t('account.deleteFailedContactSupport'));
                     }
                   }}
                   className="w-full sm:w-auto px-8 py-3 bg-red-600 text-white font-black rounded-xl hover:bg-red-700 shadow-lg shadow-red-500/30 transition-all active:scale-95"

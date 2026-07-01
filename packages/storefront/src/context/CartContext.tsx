@@ -155,7 +155,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const addItem = useCallback((item: Omit<CartItem, 'id' | 'clientId'>) => {
     const randomId = Math.random().toString(36).substring(2, 9);
-    const guestName = sessionStorage.getItem('shutter-guest-name') || t('autoGen.store.key14');
+    const guestName = sessionStorage.getItem('shutter-guest-name') || t('cartContext.customer');
     const newItem = { ...item, id: randomId, clientId, guestName };
     setItems((prev) => {
       const updated = [...prev, newItem];

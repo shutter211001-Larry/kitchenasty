@@ -288,7 +288,7 @@ export default function Menu() {const { t, i18n } = useTranslation();
                           </span>
                           {item.isRewardItem && (
                             <span className="text-xs text-orange-600 font-extrabold mt-0.5">
-                              {item.rewardPointsPrice} {t('autoGen.store.key94')}
+                              {item.rewardPointsPrice} {t('menu.points')}
                             </span>
                           )}
                         </div>

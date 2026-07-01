@@ -15,15 +15,15 @@ interface Mealtime {
 export default function MealtimeList() {
   const { t } = useTranslation();
     const LANGUAGES = [
-      { code: 'en', label: t('autoGen.admin.key837') },
-      { code: 'ja', label: t('autoGen.admin.key838') },
-      { code: 'ko', label: t('autoGen.admin.key839') },
-      { code: 'th', label: t('autoGen.admin.key840') },
-      { code: 'tl', label: t('autoGen.admin.key841') },
-      { code: 'vi', label: t('autoGen.admin.key842') },
-      { code: 'id', label: t('autoGen.admin.key843') },
+      { code: 'en', label: t('mealtimeList.english') },
+      { code: 'ja', label: t('mealtimeList.japanese') },
+      { code: 'ko', label: t('mealtimeList.korean') },
+      { code: 'th', label: t('mealtimeList.thai') },
+      { code: 'tl', label: t('mealtimeList.filipino') },
+      { code: 'vi', label: t('mealtimeList.vietnamese') },
+      { code: 'id', label: t('mealtimeList.indonesian') },
     ];
-    const DAYS = [t('autoGen.admin.key844'), t('autoGen.admin.key845'), t('autoGen.admin.key846'), t('autoGen.admin.key847'), t('autoGen.admin.key848'), t('autoGen.admin.key849'), t('autoGen.admin.key850')];
+    const DAYS = [t('mealtimeList.sundayShort'), t('mealtimeList.mondayShort'), t('mealtimeList.tuesdayShort'), t('mealtimeList.wednesdayShort'), t('mealtimeList.thursdayShort'), t('mealtimeList.fridayShort'), t('mealtimeList.saturdayShort')];
 
   const [mealtimes, setMealtimes] = useState<Mealtime[]>([]);
   const [loading, setLoading] = useState(true);
@@ -78,17 +78,17 @@ export default function MealtimeList() {
     }
   }
 
-  if (loading) return <div className="p-6 text-center text-gray-500">{t('autoGen.admin.key851')}</div>;
+  if (loading) return <div className="p-6 text-center text-gray-500">{t('mealtimeList.loading')}</div>;
 
   return (
     <div className="max-w-5xl mx-auto">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">{t('autoGen.admin.key852')}</h1>
+        <h1 className="text-2xl font-bold text-gray-900">{t('mealtimeList.mealtimeSegmentsManagement')}</h1>
         <button
           onClick={() => setIsAdding(!isAdding)}
           className="bg-primary-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary-700"
         >
-          {isAdding ? t('autoGen.admin.key853') : t('autoGen.admin.key854')}
+          {isAdding ? t('mealtimeList.cancel') : t('mealtimeList.addTimeSlot')}
         </button>
       </div>
 
@@ -96,19 +96,19 @@ export default function MealtimeList() {
         <form onSubmit={handleSubmit} className="bg-white border border-gray-200 rounded-lg p-6 mb-6 shadow-sm space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key855')}</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('mealtimeList.timeSlotName')}</label>
               <input
                 type="text"
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                 required
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500"
-                placeholder={t('autoGen.admin.key856')}
+                placeholder={t('mealtimeList.exampleBreakfastDinner')}
               />
             </div>
             <div className="flex gap-4">
               <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key857')}</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('mealtimeList.startTime')}</label>
                 <input
                   type="time"
                   value={form.startTime}
@@ -117,7 +117,7 @@ export default function MealtimeList() {
                 />
               </div>
               <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key858')}</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('mealtimeList.endTime')}</label>
                 <input
                   type="time"
                   value={form.endTime}
@@ -129,7 +129,7 @@ export default function MealtimeList() {
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-2 bg-gray-50 p-4 rounded-lg">
-            <p className="col-span-full text-xs font-bold text-gray-400 uppercase">{t('autoGen.admin.key859')}</p>
+            <p className="col-span-full text-xs font-bold text-gray-400 uppercase">{t('mealtimeList.translations')}</p>
             {LANGUAGES.map((lang) => (
               <div key={lang.code}>
                 <label className="block text-[10px] text-gray-400 font-bold uppercase mb-1">{lang.code}</label>
@@ -145,7 +145,7 @@ export default function MealtimeList() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">{t('autoGen.admin.key860')}</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">{t('mealtimeList.availableDays')}</label>
             <div className="flex gap-2">
               {DAYS.map((day, i) => (
                 <button
@@ -171,7 +171,7 @@ export default function MealtimeList() {
               disabled={isSaving}
               className="bg-primary-600 text-white px-8 py-2 rounded-lg text-sm font-bold shadow-sm hover:bg-primary-700 disabled:opacity-50"
             >
-              {isSaving ? t('autoGen.admin.key861') : t('autoGen.admin.key862')}
+              {isSaving ? t('mealtimeList.saving') : t('mealtimeList.saveTimeSlotSettings')}
             </button>
           </div>
         </form>
@@ -186,7 +186,7 @@ export default function MealtimeList() {
                 <p className="text-xs text-primary-600 font-medium">{m.startTime} - {m.endTime}</p>
               </div>
               <button onClick={() => handleDelete(m.id)} className="text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
-                {t('autoGen.admin.key863')}
+                {t('mealtimeList.delete')}
               </button>
             </div>
             

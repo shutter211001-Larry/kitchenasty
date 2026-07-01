@@ -17,8 +17,8 @@ const defaultIcons: Record<string, React.ReactNode> = {
 export default function BoldFeatures({ features, t, lang = 'zh-TW' }: FeaturesProps) {const { settings } = useTheme();
 
   const items = features?.length ? features.filter(f => {
-              if (!settings.navShowLocations && (f.title.includes(t('autoGen.store.key105')) || f.title.includes(t('autoGen.store.key106')) || f.title.includes(t('autoGen.store.key107')))) return false;
-              if ((!settings.navShowReservations || !settings.reservationSettings?.enabled) && f.title.includes(t('autoGen.store.key108'))) return false;
+              if (!settings.navShowLocations && (f.title.includes(t('boldFeatures.branch')) || f.title.includes(t('boldFeatures.location')) || f.title.includes(t('boldFeatures.reservation')))) return false;
+              if ((!settings.navShowReservations || !settings.reservationSettings?.enabled) && f.title.includes(t('boldFeatures.booking'))) return false;
               return true;
             }) : [
     settings.orderSettings?.deliveryEnabled && { icon: 'clock', title: t('home.fastDelivery'), description: t('home.fastDeliveryDesc') },

@@ -72,7 +72,7 @@ const emptyLocation: LocationData = {
 
 export default function LocationForm() {
   const { t } = useTranslation();
-    const DAYS = [t('autoGen.admin.key758'), t('autoGen.admin.key759'), t('autoGen.admin.key760'), t('autoGen.admin.key761'), t('autoGen.admin.key762'), t('autoGen.admin.key763'), t('autoGen.admin.key764')];
+    const DAYS = [t('locationForm.sunday'), t('locationForm.monday'), t('locationForm.tuesday'), t('locationForm.wednesday'), t('locationForm.thursday'), t('locationForm.friday'), t('locationForm.saturday')];
 
   const { id } = useParams();
   const navigate = useNavigate();
@@ -89,7 +89,7 @@ export default function LocationForm() {
   const [error, setError] = useState<string | null>(null);
 
   const handleDelete = async () => {
-    if (!window.confirm(t('autoGen.admin.key765'))) {
+    if (!window.confirm(t('locationForm.confirmDeleteStore'))) {
       return;
     }
     setDeleting(true);
@@ -98,7 +98,7 @@ export default function LocationForm() {
       await api.delete(`/locations/${id}`);
       navigate('/locations');
     } catch (err: any) {
-      setError(err.message || t('autoGen.admin.key766'));
+      setError(err.message || t('locationForm.deleteFailed'));
       setDeleting(false);
     }
   };
@@ -232,13 +232,13 @@ export default function LocationForm() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-semibold text-gray-800">
-          {isEdit ? t('autoGen.admin.key767') : t('autoGen.admin.key768')}
+          {isEdit ? t('locationForm.editStore') : t('locationForm.addStore')}
         </h2>
         <button
           onClick={() => navigate('/locations')}
           className="text-gray-500 hover:text-gray-700 text-sm"
         >
-          {t('autoGen.admin.key769')}
+          {t('locationForm.backToStoreList')}
         </button>
       </div>
 
@@ -251,10 +251,10 @@ export default function LocationForm() {
       <form onSubmit={handleSubmit} className="space-y-8">
         {/* Basic Info */}
         <section className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">{t('autoGen.admin.key770')}</h3>
+          <h3 className="text-lg font-medium text-gray-900 mb-4">{t('locationForm.basicInformation')}</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key771')}</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('locationForm.nameRequired')}</label>
               <input
                 type="text"
                 value={form.name}
@@ -264,7 +264,7 @@ export default function LocationForm() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key772')}</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('locationForm.slugRequired')}</label>
               <input
                 type="text"
                 value={form.slug}
@@ -275,7 +275,7 @@ export default function LocationForm() {
               />
             </div>
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key773')}</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('locationForm.description')}</label>
               <textarea
                 value={form.description}
                 onChange={(e) => updateField('description', e.target.value)}
@@ -284,7 +284,7 @@ export default function LocationForm() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key774')}</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('locationForm.phone')}</label>
               <input
                 type="text"
                 value={form.phone}
@@ -306,10 +306,10 @@ export default function LocationForm() {
 
         {/* Address */}
         <section className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">{t('autoGen.admin.key775')}</h3>
+          <h3 className="text-lg font-medium text-gray-900 mb-4">{t('locationForm.addressInformation')}</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key776')}</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('locationForm.detailedAddressRequired')}</label>
               <input
                 type="text"
                 value={form.address}
@@ -319,7 +319,7 @@ export default function LocationForm() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key777')}</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('locationForm.cityRequired')}</label>
               <input
                 type="text"
                 value={form.city}
@@ -329,7 +329,7 @@ export default function LocationForm() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key778')}</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('locationForm.stateOrRegion')}</label>
               <input
                 type="text"
                 value={form.state}
@@ -338,7 +338,7 @@ export default function LocationForm() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key779')}</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('locationForm.postalCodeRequired')}</label>
               <input
                 type="text"
                 value={form.postalCode}
@@ -348,7 +348,7 @@ export default function LocationForm() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key780')}</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('locationForm.countryCode')}</label>
               <input
                 type="text"
                 value={form.country}
@@ -357,16 +357,16 @@ export default function LocationForm() {
               />
             </div>
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key781')}</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('locationForm.googleMapsUrlOrCoordinates')}</label>
               <input
                 type="text"
                 value={mapInput}
                 onChange={handleMapInputChange}
-                placeholder={t('autoGen.admin.key782')}
+                placeholder={t('locationForm.googleMapsInputPlaceholder')}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
               />
               {!!(form.lat || form.lng) && (
-                 <p className="text-xs text-gray-500 mt-1">{t('autoGen.admin.key783')} {form.lat}{t('autoGen.admin.key784')} {form.lng}</p>
+                 <p className="text-xs text-gray-500 mt-1">{t('locationForm.parsedLatitude')} {form.lat}{t('locationForm.parsedLongitude')} {form.lng}</p>
               )}
             </div>
           </div>
@@ -374,8 +374,8 @@ export default function LocationForm() {
 
         {/* Service Settings */}
         <section className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-1">{t('autoGen.admin.key785')}</h3>
-          <p className="text-sm text-gray-500 mb-4">{t('autoGen.admin.key786')}</p>
+          <h3 className="text-lg font-medium text-gray-900 mb-1">{t('locationForm.storeServiceSettings')}</h3>
+          <p className="text-sm text-gray-500 mb-4">{t('locationForm.storeServiceSettingsDescription')}</p>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <label className="flex items-center gap-2">
               <input
@@ -384,7 +384,7 @@ export default function LocationForm() {
                 onChange={(e) => updateField('isActive', e.target.checked)}
                 className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
               />
-              <span className="text-sm text-gray-700">{t('autoGen.admin.key787')}</span>
+              <span className="text-sm text-gray-700">{t('locationForm.isActive')}</span>
             </label>
             <label className="flex items-center gap-2">
               <input
@@ -393,7 +393,7 @@ export default function LocationForm() {
                 onChange={(e) => updateField('deliveryEnabled', e.target.checked)}
                 className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
               />
-              <span className="text-sm text-gray-700">{t('autoGen.admin.key788')}</span>
+              <span className="text-sm text-gray-700">{t('locationForm.storeOffersDelivery')}</span>
             </label>
             <label className="flex items-center gap-2">
               <input
@@ -402,10 +402,10 @@ export default function LocationForm() {
                 onChange={(e) => updateField('pickupEnabled', e.target.checked)}
                 className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
               />
-              <span className="text-sm text-gray-700">{t('autoGen.admin.key789')}</span>
+              <span className="text-sm text-gray-700">{t('locationForm.storeOffersPickup')}</span>
             </label>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key790')}</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('locationForm.storeDeliveryMinimumSpend')}</label>
               <input
                 type="number"
                 value={form.minOrderDelivery}
@@ -416,7 +416,7 @@ export default function LocationForm() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key791')}</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('locationForm.storeDeliveryEstimatedTime')}</label>
               <input
                 type="number"
                 value={form.deliveryLeadTime}
@@ -426,7 +426,7 @@ export default function LocationForm() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key792')}</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('locationForm.storePickupEstimatedTime')}</label>
               <input
                 type="number"
                 value={form.pickupLeadTime}
@@ -442,8 +442,8 @@ export default function LocationForm() {
         <section className="bg-white rounded-xl shadow-sm border p-6">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h3 className="text-lg font-bold text-gray-900">{t('autoGen.admin.key793')}</h3>
-              <p className="text-sm text-gray-500">{t('autoGen.admin.key794')}</p>
+              <h3 className="text-lg font-bold text-gray-900">{t('locationForm.businessHoursSettings')}</h3>
+              <p className="text-sm text-gray-500">{t('locationForm.businessHoursSettingsDescription')}</p>
             </div>
             <button
               type="button"
@@ -463,7 +463,7 @@ export default function LocationForm() {
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
               </svg>
-              {t('autoGen.admin.key795')}
+              {t('locationForm.applyMondayToAllDays')}
             </button>
           </div>
 
@@ -478,7 +478,7 @@ export default function LocationForm() {
                     <div className="flex items-center gap-3">
                       <div className={`w-2 h-2 rounded-full ${isClosed ? 'bg-gray-300' : 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]'}`}></div>
                       <span className="text-sm font-bold text-gray-700">{dayName.split(' ')[0]}</span>
-                      {isClosed && <span className="text-[10px] bg-gray-200 text-gray-600 px-1.5 py-0.5 rounded font-bold">{t('autoGen.admin.key796')}</span>}
+                      {isClosed && <span className="text-[10px] bg-gray-200 text-gray-600 px-1.5 py-0.5 rounded font-bold">{t('locationForm.storeClosed')}</span>}
                     </div>
                     <button
                       type="button"
@@ -490,7 +490,7 @@ export default function LocationForm() {
                       <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                       </svg>
-                      {t('autoGen.admin.key797')}
+                      {t('locationForm.addTimeSlot')}
                     </button>
                   </div>
 
@@ -512,7 +512,7 @@ export default function LocationForm() {
                               }}
                               className="bg-transparent border-none focus:ring-0 text-sm font-medium text-gray-900 px-2 py-1 cursor-pointer"
                             />
-                            <span className="text-gray-400 text-xs px-1">{t('autoGen.admin.key798')}</span>
+                            <span className="text-gray-400 text-xs px-1">{t('locationForm.to')}</span>
                             <input
                               type="time"
                               value={session.closeTime}
@@ -527,7 +527,7 @@ export default function LocationForm() {
 
                           {isOvernight && (
                             <span className="flex items-center gap-1 px-2 py-1 bg-purple-50 text-purple-700 rounded text-[10px] font-bold border border-purple-100">
-                              {t('autoGen.admin.key799')}
+                              {t('locationForm.crossMidnight')}
                             </span>
                           )}
 
@@ -568,24 +568,24 @@ export default function LocationForm() {
         {/* Delivery Zones */}
         <section className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-medium text-gray-900">{t('autoGen.admin.key800')}</h3>
+            <h3 className="text-lg font-medium text-gray-900">{t('locationForm.deliveryArea')}</h3>
             <button
               type="button"
               onClick={addZone}
               className="text-primary-600 hover:text-primary-700 text-sm font-medium"
             >
-              {t('autoGen.admin.key801')}
+              {t('locationForm.addDeliveryArea')}
             </button>
           </div>
           {zones.length === 0 && (
-            <p className="text-sm text-gray-400">{t('autoGen.admin.key802')}</p>
+            <p className="text-sm text-gray-400">{t('locationForm.noDeliveryAreaConfigured')}</p>
           )}
           <div className="space-y-3">
             {zones.map((zone, index) => (
               <div key={index} className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg">
                 <input
                   type="text"
-                  placeholder={t('autoGen.admin.key803')}
+                  placeholder={t('locationForm.areaName')}
                   value={zone.name}
                   onChange={(e) => {
                     const updated = [...zones];
@@ -598,7 +598,7 @@ export default function LocationForm() {
                   <span className="text-xs text-gray-500">$</span>
                   <input
                     type="number"
-                    placeholder={t('autoGen.admin.key804')}
+                    placeholder={t('locationForm.deliveryFee')}
                     value={zone.charge}
                     onChange={(e) => {
                       const updated = [...zones];
@@ -614,7 +614,7 @@ export default function LocationForm() {
                   <span className="text-xs text-gray-500">Min $</span>
                   <input
                     type="number"
-                    placeholder={t('autoGen.admin.key805')}
+                    placeholder={t('locationForm.minimumSpend')}
                     value={zone.minOrder}
                     onChange={(e) => {
                       const updated = [...zones];
@@ -645,10 +645,10 @@ export default function LocationForm() {
               <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
-              {t('autoGen.admin.key806')}
+              {t('locationForm.dangerZone')}
             </h3>
             <p className="text-sm text-red-800 mb-4 font-semibold">
-              {t('autoGen.admin.key807')}
+              {t('locationForm.deleteBranchWarning')}
             </p>
             <div className="flex items-center">
               <button
@@ -660,10 +660,10 @@ export default function LocationForm() {
                 {deleting ? (
                   <>
                     <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    {t('autoGen.admin.key808')}
+                    {t('locationForm.deleting')}
                   </>
                 ) : (
-                  t('autoGen.admin.key809')
+                  t('locationForm.permanentlyDeleteBranch')
                 )}
               </button>
             </div>
@@ -677,14 +677,14 @@ export default function LocationForm() {
             onClick={() => navigate('/locations')}
             className="px-6 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50"
           >
-            {t('autoGen.admin.key810')}
+            {t('locationForm.cancel')}
           </button>
           <button
             type="submit"
             disabled={saving}
             className="px-6 py-2 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700 disabled:opacity-50 transition-colors"
           >
-            {saving ? t('autoGen.admin.key811') : isEdit ? t('autoGen.admin.key812') : t('autoGen.admin.key813')}
+            {saving ? t('locationForm.saving') : isEdit ? t('locationForm.updateStoreInfo') : t('locationForm.createStore')}
           </button>
         </div>
       </form>

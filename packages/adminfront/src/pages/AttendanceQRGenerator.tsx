@@ -82,19 +82,19 @@ export default function AttendanceQRGenerator() {
 
   return (
     <div className="p-6">
-      <h2 className="text-2xl font-bold text-gray-900 mb-6">{t('autoGen.admin.key98')}</h2>
+      <h2 className="text-2xl font-bold text-gray-900 mb-6">{t('attendanceQRGenerator.generateClockInQrCode')}</h2>
       <div className="max-w-xl mx-auto bg-white p-8 rounded-lg shadow-md text-center">
         
         <div className="mb-6">
           <label className="block text-sm font-medium text-gray-700 mb-2 text-left">
-            {t('autoGen.admin.key99')}
+            {t('attendanceQRGenerator.selectClockInStore')}
           </label>
           <select
             value={selectedLocation}
             onChange={(e) => setSelectedLocation(e.target.value)}
             className="w-full rounded border-gray-300 p-2 border"
           >
-            <option value="">{t('autoGen.admin.key100')}</option>
+            <option value="">{t('attendanceQRGenerator.pleaseSelect')}</option>
             {locations.map(loc => (
               <option key={loc.id} value={loc.id}>{loc.name}</option>
             ))}
@@ -113,15 +113,15 @@ export default function AttendanceQRGenerator() {
               />
             </div>
             <p className="text-gray-500 font-medium">
-              {t('autoGen.admin.key101')}
+              {t('attendanceQRGenerator.scanQrToClockIn')}
             </p>
             <p className="text-sm text-gray-400 mt-2">
-              {t('autoGen.admin.key102')} <span className="font-bold text-blue-600">{timeLeft}</span> {t('autoGen.admin.key103')}
+              {t('attendanceQRGenerator.barcodeWillExpire')} <span className="font-bold text-blue-600">{timeLeft}</span> {t('attendanceQRGenerator.refreshInSeconds')}
             </p>
           </div>
         ) : (
           <div className="py-12 text-gray-400">
-            {t('autoGen.admin.key104')}
+            {t('attendanceQRGenerator.selectStoreForQrCode')}
           </div>
         )}
       </div>

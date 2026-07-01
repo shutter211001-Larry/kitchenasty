@@ -91,11 +91,11 @@ export default function OrderCreate() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (cart.length === 0) {
-      setError(t('autoGen.admin.key978'));
+      setError(t('orderCreate.emptyCart'));
       return;
     }
     if (orderType === 'DELIVERY' && !address.line1) {
-      setError(t('autoGen.admin.key979'));
+      setError(t('orderCreate.deliveryAddressRequired'));
       return;
     }
 
@@ -126,12 +126,12 @@ export default function OrderCreate() {
     }
   };
 
-  if (loading) return <div className="p-8 text-center text-gray-500">{t('autoGen.admin.key980')}</div>;
+  if (loading) return <div className="p-8 text-center text-gray-500">{t('orderCreate.loading')}</div>;
 
   return (
     <div className="max-w-6xl mx-auto">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">{t('autoGen.admin.key981')}</h1>
+        <h1 className="text-2xl font-bold text-gray-900">{t('orderCreate.addManualOrder')}</h1>
       </div>
 
       {error && <div className="bg-red-50 text-red-700 p-4 rounded-lg mb-6">{error}</div>}
@@ -140,7 +140,7 @@ export default function OrderCreate() {
         {/* Left: Menu Items */}
         <div className="lg:col-span-2 space-y-6">
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold mb-4">{t('autoGen.admin.key982')}</h2>
+            <h2 className="text-lg font-semibold mb-4">{t('orderCreate.selectProduct')}</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {menuItems.map(item => (
                 <button
@@ -172,72 +172,72 @@ export default function OrderCreate() {
           </div>
 
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold mb-4">{t('autoGen.admin.key983')}</h2>
+            <h2 className="text-lg font-semibold mb-4">{t('orderCreate.customerInfo')}</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key984')}</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('orderCreate.name')}</label>
                 <input
                   type="text"
                   value={guestName}
                   onChange={e => setGuestName(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
-                  placeholder={t('autoGen.admin.key985')}
+                  placeholder={t('orderCreate.customerName')}
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key986')}</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('orderCreate.phone')}</label>
                 <input
                   type="text"
                   value={guestPhone}
                   onChange={e => setGuestPhone(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
-                  placeholder={t('autoGen.admin.key987')}
+                  placeholder={t('orderCreate.phoneNumber')}
                 />
               </div>
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key988')}</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('orderCreate.email')}</label>
                 <input
                   type="email"
                   value={guestEmail}
                   onChange={e => setGuestEmail(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
-                  placeholder={t('autoGen.admin.key989')}
+                  placeholder={t('orderCreate.emailOptional')}
                 />
               </div>
             </div>
 
             {orderType === 'DELIVERY' && (
               <div className="mt-6 space-y-4 pt-6 border-t border-gray-100">
-                <h3 className="font-medium text-gray-900">{t('autoGen.admin.key990')}</h3>
+                <h3 className="font-medium text-gray-900">{t('orderCreate.deliveryAddress')}</h3>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key991')}</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('orderCreate.streetAddress')}</label>
                   <input
                     type="text"
                     value={address.line1}
                     onChange={e => setAddress({ ...address, line1: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
-                    placeholder={t('autoGen.admin.key992')}
+                    placeholder={t('orderCreate.streetAddressPlaceholder')}
                   />
                 </div>
                 <div className="grid grid-cols-3 gap-4">
                   <div className="col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key993')}</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('orderCreate.city')}</label>
                     <input
                       type="text"
                       value={address.city}
                       onChange={e => setAddress({ ...address, city: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
-                      placeholder={t('autoGen.admin.key994')}
+                      placeholder={t('orderCreate.cityLabel')}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key995')}</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('orderCreate.postalCode')}</label>
                     <input
                       type="text"
                       value={address.zip}
                       onChange={e => setAddress({ ...address, zip: e.target.value })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
-                      placeholder={t('autoGen.admin.key996')}
+                      placeholder={t('orderCreate.areaCode')}
                     />
                   </div>
                 </div>
@@ -249,10 +249,10 @@ export default function OrderCreate() {
         {/* Right: Summary & Settings */}
         <div className="space-y-6">
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 sticky top-6">
-            <h2 className="text-lg font-semibold mb-4">{t('autoGen.admin.key997')}</h2>
+            <h2 className="text-lg font-semibold mb-4">{t('orderCreate.orderSettings')}</h2>
             <div className="space-y-4 mb-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key998')}</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('orderCreate.serviceBranch')}</label>
                 <select
                   value={selectedLocationId}
                   onChange={e => setSelectedLocationId(e.target.value)}
@@ -264,28 +264,28 @@ export default function OrderCreate() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key999')}</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('orderCreate.pickupMethod')}</label>
                 <div className="flex bg-gray-100 rounded-lg p-1">
                   <button
                     onClick={() => setOrderType('PICKUP')}
                     className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-colors ${orderType === 'PICKUP' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
                   >
-                    {t('autoGen.admin.key1000')}
+                    {t('orderCreate.selfPickup')}
                   </button>
                   <button
                     onClick={() => setOrderType('DELIVERY')}
                     className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-colors ${orderType === 'DELIVERY' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
                   >
-                    {t('autoGen.admin.key1001')}
+                    {t('orderCreate.delivery')}
                   </button>
                 </div>
               </div>
             </div>
 
             <div className="pt-6 border-t border-gray-100">
-              <h2 className="text-lg font-semibold mb-4">{t('autoGen.admin.key1002')}</h2>
+              <h2 className="text-lg font-semibold mb-4">{t('orderCreate.shoppingCart')}</h2>
               {cart.length === 0 ? (
-                <p className="text-gray-400 text-sm text-center py-4">{t('autoGen.admin.key1003')}</p>
+                <p className="text-gray-400 text-sm text-center py-4">{t('orderCreate.noProductSelected')}</p>
               ) : (
                 <div className="space-y-3 mb-6">
                   {cart.map((item, idx) => (
@@ -310,7 +310,7 @@ export default function OrderCreate() {
 
               <div className="border-t border-gray-100 pt-4 space-y-2">
                 <div className="flex justify-between text-lg font-bold">
-                  <span>{t('autoGen.admin.key1004')}</span>
+                  <span>{t('orderCreate.total')}</span>
                   <span className="text-primary-600">${calculateTotal().toFixed(2)}</span>
                 </div>
               </div>
@@ -320,7 +320,7 @@ export default function OrderCreate() {
                 onClick={handleSubmit}
                 className="w-full mt-6 bg-primary-600 text-white py-3 rounded-xl font-bold hover:bg-primary-700 transition-colors disabled:opacity-50 shadow-lg shadow-primary-200"
               >
-                {submitting ? t('autoGen.admin.key1005') : t('autoGen.admin.key1006')}
+                {submitting ? t('orderCreate.submitting') : t('orderCreate.createOrder')}
               </button>
             </div>
           </div>

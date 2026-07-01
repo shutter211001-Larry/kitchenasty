@@ -85,7 +85,7 @@ export default function OrderStatus() {const { t, i18n } = useTranslation();
         const taiwanTomorrowStr = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Taipei' }).format(tomorrow);
         
         if (taiwanScheduledStr === taiwanTomorrowStr) {
-          setTimeLeftStr(t('orderStatus.tomorrow') || t('autoGen.store.key95'));
+          setTimeLeftStr(t('orderStatus.tomorrow') || t('orderStatus.tomorrow'));
         } else {
           setTimeLeftStr(''); // Non-today/tomorrow doesn't show countdown
         }
@@ -98,7 +98,7 @@ export default function OrderStatus() {const { t, i18n } = useTranslation();
   }, [order?.scheduledAt, t]);
 
   async function handleCancel() {
-    if (!window.confirm(t('common.confirmCancel') || t('autoGen.store.key96'))) return;
+    if (!window.confirm(t('common.confirmCancel') || t('orderStatus.confirmCancelOrder'))) return;
     
     setCancelling(true);
     try {
@@ -113,10 +113,10 @@ export default function OrderStatus() {const { t, i18n } = useTranslation();
       if (data.success) {
         setOrder({ ...order, status: 'CANCELLED' });
       } else {
-        alert(data.error || t('autoGen.store.key97'));
+        alert(data.error || t('orderStatus.cancelFailed'));
       }
     } catch (e) {
-      alert(t('autoGen.store.key98'));
+      alert(t('orderStatus.cancelFailedTryLater'));
     } finally {
       setCancelling(false);
     }
@@ -363,7 +363,7 @@ export default function OrderStatus() {const { t, i18n } = useTranslation();
             <div className="flex-1 space-y-1">
               <div className="flex items-center gap-2 flex-wrap">
                 <h3 className="font-bold text-main text-base leading-tight">
-                  {t('orderStatus.scheduledOrderTitle') || t('autoGen.store.key99')}
+                  {t('orderStatus.scheduledOrderTitle') || t('orderStatus.reservationOrderConfirmed')}
                 </h3>
                 <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-primary-100 text-primary-800 border border-primary-200">
                   {order.orderType === 'DELIVERY' ? t('checkout.delivery') : t('checkout.pickup')}
@@ -371,7 +371,7 @@ export default function OrderStatus() {const { t, i18n } = useTranslation();
               </div>
               
               <p className="text-sm font-semibold text-primary-700">
-                {t('orderStatus.scheduledForTime') || t('autoGen.store.key100')}
+                {t('orderStatus.scheduledForTime') || t('orderStatus.estimatedPickupDeliveryTime')}
                 <span className="text-base font-extrabold text-gray-900 underline underline-offset-4 decoration-primary-300 decoration-2">
                   {formatToFullDateTime(order.scheduledAt, i18n.language)}
                 </span>
@@ -387,7 +387,7 @@ export default function OrderStatus() {const { t, i18n } = useTranslation();
                 </p>
               ) : (
                 <p className="text-xs text-sub leading-normal pt-0.5">
-                  {t('orderStatus.scheduledTips') || t('autoGen.store.key101')}
+                  {t('orderStatus.scheduledTips') || t('orderStatus.preOrderNotice')}
                 </p>
               )}
             </div>
@@ -482,7 +482,7 @@ export default function OrderStatus() {const { t, i18n } = useTranslation();
           </div>
           {order.tax > 0 && (
             <div className="flex justify-between text-sm text-sub">
-              <span>{t('checkout.tax') || t('autoGen.store.key102')}</span>
+              <span>{t('checkout.tax') || t('orderStatus.tax')}</span>
               <span>${order.tax.toFixed(2)}</span>
             </div>
           )}
@@ -490,7 +490,7 @@ export default function OrderStatus() {const { t, i18n } = useTranslation();
             <div className="flex justify-between text-sm text-sub">
               <span className="text-sub">{t('checkout.deliveryFee')}</span>
               <span className={order.deliveryFee === 0 ? "text-green-600 font-medium" : "text-main"}>
-                {order.deliveryFee === 0 ? (t('checkout.free') || t('autoGen.store.key103')) : `$${order.deliveryFee.toFixed(2)}`}
+                {order.deliveryFee === 0 ? (t('checkout.free') || t('orderStatus.freeDelivery')) : `$${order.deliveryFee.toFixed(2)}`}
               </span>
             </div>
           )}
@@ -506,7 +506,7 @@ export default function OrderStatus() {const { t, i18n } = useTranslation();
             if (Math.abs(diff) > 0.001) {
               return (
                 <div className="flex justify-between text-sm text-sub">
-                  <span>{t('checkout.roundingAdjustment') || t('autoGen.store.key104')}</span>
+                  <span>{t('checkout.roundingAdjustment') || t('orderStatus.roundingAdjustment')}</span>
                   <span>{diff > 0 ? '+' : ''}${diff.toFixed(2)}</span>
                 </div>
               );

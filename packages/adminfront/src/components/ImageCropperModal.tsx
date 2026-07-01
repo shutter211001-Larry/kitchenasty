@@ -358,23 +358,23 @@ export default function ImageCropperModal({ src, onCrop, onClose }: ImageCropper
         <div className="md:w-80 border-t md:border-t-0 md:border-l border-gray-100 flex flex-col justify-between bg-gray-50/50 p-6">
           <div className="space-y-6">
             <div>
-              <h3 className="text-lg font-bold text-gray-900">{t('autoGen.admin.key5')}</h3>
-              <p className="text-xs text-gray-500 mt-1">{t('autoGen.admin.key6')}</p>
+              <h3 className="text-lg font-bold text-gray-900">{t('imageCropperModal.cropProductImage')}</h3>
+              <p className="text-xs text-gray-500 mt-1">{t('imageCropperModal.adjustImageDisplayRange')}</p>
             </div>
 
             {/* Aspect Ratio Buttons */}
             <div className="space-y-2">
               <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wide">
-                {t('autoGen.admin.key7')}
+                {t('imageCropperModal.selectAspectRatio')}
               </label>
               <div className="grid grid-cols-2 gap-2">
                 {(['4:3', '16:9', '1:1', '20:13', 'free'] as AspectRatioPreset[]).map((preset) => {
                   let label = '';
-                  if (preset === '4:3') label = t('autoGen.admin.key8');
-                  else if (preset === '16:9') label = t('autoGen.admin.key9');
-                  else if (preset === '1:1') label = t('autoGen.admin.key10');
-                  else if (preset === '20:13') label = t('autoGen.admin.key11');
-                  else label = t('autoGen.admin.key12');
+                  if (preset === '4:3') label = t('imageCropperModal.ratioFourToThree');
+                  else if (preset === '16:9') label = t('imageCropperModal.ratioSixteenToNine');
+                  else if (preset === '1:1') label = t('imageCropperModal.ratioOneToOne');
+                  else if (preset === '20:13') label = t('imageCropperModal.ratioTwentyToThirteen');
+                  else label = t('imageCropperModal.freeRatio');
 
                   return (
                     <button
@@ -398,24 +398,24 @@ export default function ImageCropperModal({ src, onCrop, onClose }: ImageCropper
             <div className="bg-primary-50 border border-primary-100 rounded-xl p-4 text-xs text-primary-900 space-y-2">
               <div className="flex items-center gap-1.5 font-bold text-primary-800">
                 <span className="text-sm">💡</span>
-                <span>{t('autoGen.admin.key13')}</span>
+                <span>{t('imageCropperModal.displayRangeReminder')}</span>
               </div>
               <div className="space-y-1 text-primary-700 leading-relaxed">
                 <p>
-                  <strong>{t('autoGen.admin.key14')}</strong>{t('autoGen.admin.key15')} <strong>20:13</strong> {t('autoGen.admin.key16')}
+                  <strong>{t('imageCropperModal.lineOrderingCard')}</strong>{t('imageCropperModal.carouselFlexBannerRatio')} <strong>20:13</strong> {t('imageCropperModal.approximateDimensions')}
                 </p>
                 <p>
-                  <strong>{t('autoGen.admin.key17')}</strong>{t('autoGen.admin.key18')} <strong>4:3</strong>。
+                  <strong>{t('imageCropperModal.mobileAppScreen')}</strong>{t('imageCropperModal.doubleRowGridRatio')} <strong>4:3</strong>。
                 </p>
                 <p>
-                  <strong>{t('autoGen.admin.key19')}</strong>{t('autoGen.admin.key20')} <strong>16:9</strong>。
+                  <strong>{t('imageCropperModal.desktopBrowser')}</strong>{t('imageCropperModal.wideCardDisplayRatio')} <strong>16:9</strong>。
                 </p>
                 <div className="border-t border-primary-200/60 my-1.5" />
                 <p className="font-semibold text-primary-800">
-                  {t('autoGen.admin.key21')}
+                  {t('imageCropperModal.recommendationGuide')}
                 </p>
                 <p>
-                  {t('autoGen.admin.key22')}<strong>{t('autoGen.admin.key23')}</strong>{t('autoGen.admin.key24')} <strong>20:13</strong> {t('autoGen.admin.key25')} <strong>4:3</strong> {t('autoGen.admin.key26')}
+                  {t('imageCropperModal.ifItIs')}<strong>{t('imageCropperModal.categoryImage')}</strong>{t('imageCropperModal.stronglyRecommendUsing')} <strong>20:13</strong> {t('imageCropperModal.lineFullWidthRecommendation')} <strong>4:3</strong> {t('imageCropperModal.ratioSuffix')}
                 </p>
               </div>
             </div>
@@ -428,14 +428,14 @@ export default function ImageCropperModal({ src, onCrop, onClose }: ImageCropper
               onClick={onClose}
               className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 bg-white rounded-lg text-sm font-medium hover:bg-gray-50 active:scale-95 transition-all text-center cursor-pointer"
             >
-              {t('autoGen.admin.key27')}
+              {t('imageCropperModal.cancel')}
             </button>
             <button
               type="button"
               onClick={handleConfirm}
               className="flex-1 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm font-medium active:scale-95 transition-all text-center cursor-pointer"
             >
-              {t('autoGen.admin.key28')}
+              {t('imageCropperModal.confirmCrop')}
             </button>
           </div>
         </div>
@@ -449,7 +449,7 @@ export default function ImageCropperModal({ src, onCrop, onClose }: ImageCropper
     return (
       <div className="absolute inset-0 flex items-center justify-center bg-slate-900 text-slate-400 gap-2">
         <div className="w-5 h-5 border-2 border-slate-600 border-t-white rounded-full animate-spin" />
-        <span className="text-sm">{t('autoGen.admin.key29')}</span>
+        <span className="text-sm">{t('imageCropperModal.loadingImage')}</span>
       </div>
     );
   }

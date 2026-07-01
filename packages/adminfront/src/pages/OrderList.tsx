@@ -66,7 +66,7 @@ export default function OrderList() {
         },
         body: JSON.stringify({ paymentStatus: nextStatus })
       });
-      if (!res.ok) throw new Error(t('autoGen.admin.key1052'));
+      if (!res.ok) throw new Error(t('orderList.updatePaymentStatusFailed'));
       setOrders(orders.map(o => o.id === id ? { ...o, paymentStatus: nextStatus } : o));
     } catch (err: any) {
       setError(err.message);
@@ -117,7 +117,7 @@ export default function OrderList() {
           method: 'DELETE',
           headers: { Authorization: `Bearer ${token}` },
         });
-        if (!res.ok) throw new Error(t('autoGen.admin.key1053'));
+        if (!res.ok) throw new Error(t('orderList.deleteFailed'));
         setOrders(orders.filter(o => o.id !== id));
       } catch (err: any) {
         setError(err.message);
@@ -137,8 +137,8 @@ export default function OrderList() {
   }
 
   async function handleExport() {
-    const startDate = prompt(t('autoGen.admin.key1054'), new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
-    const endDate = prompt(t('autoGen.admin.key1055'), new Date().toISOString().split('T')[0]);
+    const startDate = prompt(t('orderList.enterStartDate'), new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
+    const endDate = prompt(t('orderList.enterEndDate'), new Date().toISOString().split('T')[0]);
 
     if (!startDate || !endDate) return;
 
@@ -147,7 +147,7 @@ export default function OrderList() {
       const res = await fetch(`/api/orders/export?startDate=${startDate}&endDate=${endDate}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (!res.ok) throw new Error(t('autoGen.admin.key1056'));
+      if (!res.ok) throw new Error(t('orderList.exportFailed'));
       const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -192,7 +192,7 @@ export default function OrderList() {
       const res = await fetch('/api/orders/template', {
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (!res.ok) throw new Error(t('autoGen.admin.key1057'));
+      if (!res.ok) throw new Error(t('orderList.downloadFailed'));
       const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -238,7 +238,7 @@ export default function OrderList() {
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
-            {t('autoGen.admin.key1058')}
+            {t('orderList.addOrder')}
           </Link>
 
           {/* Secondary Actions on mobile: 2x2 Grid */}
@@ -251,7 +251,7 @@ export default function OrderList() {
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
-                {t('autoGen.admin.key1059')}
+                {t('orderList.exportReport')}
               </button>
             )}
             {canManage && (
@@ -259,7 +259,7 @@ export default function OrderList() {
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                 </svg>
-                {t('autoGen.admin.key1060')}
+                {t('orderList.importReport')}
                 <input type="file" className="hidden" accept=".xlsx, .xls, .csv" onChange={handleImport} />
               </label>
             )}
@@ -268,14 +268,14 @@ export default function OrderList() {
                 onClick={handleDownloadTemplate}
                 className="text-primary-600 hover:text-primary-705 text-xs font-semibold py-2 px-4 rounded-lg bg-gray-100 hover:bg-gray-200 border border-gray-200 w-full sm:w-auto text-center sm:bg-transparent sm:border-none sm:p-0"
               >
-                {t('autoGen.admin.key1061')}
+                {t('orderList.downloadTemplate')}
               </button>
             )}
             <button
               onClick={handleCheckReminders}
               className="bg-orange-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-orange-600 transition-colors flex items-center justify-center gap-2 w-full sm:w-auto text-center"
             >
-              {t('autoGen.admin.key1062')}
+              {t('orderList.statusReminder')}
             </button>
           </div>
         </div>
@@ -287,33 +287,33 @@ export default function OrderList() {
           value={statusFilter}
           onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
           className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none"
-          aria-label={t('autoGen.admin.key1063')}
+          aria-label={t('orderList.filterByStatus')}
         >
-          <option value="">{t('autoGen.admin.key1064')}</option>
-          <option value="PENDING">{t('autoGen.admin.key1065')}</option>
-          <option value="CONFIRMED">{t('autoGen.admin.key1066')}</option>
-          <option value="PREPARING">{t('autoGen.admin.key1067')}</option>
-          <option value="READY">{t('autoGen.admin.key1068')}</option>
-          <option value="OUT_FOR_DELIVERY">{t('autoGen.admin.key1069')}</option>
-          <option value="DELIVERED">{t('autoGen.admin.key1070')}</option>
-          <option value="PICKED_UP">{t('autoGen.admin.key1071')}</option>
-          <option value="CANCELLED">{t('autoGen.admin.key1072')}</option>
+          <option value="">{t('orderList.allStatuses')}</option>
+          <option value="PENDING">{t('orderList.statusPending')}</option>
+          <option value="CONFIRMED">{t('orderList.statusConfirmed')}</option>
+          <option value="PREPARING">{t('orderList.statusPreparing')}</option>
+          <option value="READY">{t('orderList.statusReady')}</option>
+          <option value="OUT_FOR_DELIVERY">{t('orderList.statusOutForDelivery')}</option>
+          <option value="DELIVERED">{t('orderList.statusDelivered')}</option>
+          <option value="PICKED_UP">{t('orderList.statusPickedUp')}</option>
+          <option value="CANCELLED">{t('orderList.statusCancelled')}</option>
         </select>
         <select
           value={typeFilter}
           onChange={(e) => { setTypeFilter(e.target.value); setPage(1); }}
           className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none"
-          aria-label={t('autoGen.admin.key1073')}
+          aria-label={t('orderList.filterByOrderType')}
         >
-          <option value="">{t('autoGen.admin.key1074')}</option>
-          <option value="DELIVERY">{t('autoGen.admin.key1075')}</option>
-          <option value="PICKUP">{t('autoGen.admin.key1076')}</option>
+          <option value="">{t('orderList.allTypes')}</option>
+          <option value="DELIVERY">{t('orderList.typeDelivery')}</option>
+          <option value="PICKUP">{t('orderList.typePickup')}</option>
         </select>
       </div>
 
       {loading && (
         <div className="flex justify-center py-12">
-          <div className="w-8 h-8 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin" role="status" aria-label={t('autoGen.admin.key1077')} />
+          <div className="w-8 h-8 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin" role="status" aria-label={t('orderList.loading')} />
         </div>
       )}
 
@@ -336,7 +336,7 @@ export default function OrderList() {
                   <th className="text-left px-4 py-3 font-medium text-gray-600">{t('orders.customer')}</th>
                   <th className="text-left px-4 py-3 font-medium text-gray-600">{t('orders.type')}</th>
                   <th className="text-left px-4 py-3 font-medium text-gray-600">{t('common.status')}</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">{t('autoGen.admin.key1078')}</th>
+                  <th className="text-left px-4 py-3 font-medium text-gray-600">{t('orderList.checkoutStatus')}</th>
                   <th className="text-left px-4 py-3 font-medium text-gray-600">{t('orders.items')}</th>
                   <th className="text-right px-4 py-3 font-medium text-gray-600">{t('orders.total')}</th>
                   <th className="text-left px-4 py-3 font-medium text-gray-600">{t('common.createdAt')}</th>
@@ -351,7 +351,7 @@ export default function OrderList() {
                         <span>{order.orderNumber}</span>
                         {order.table && (
                           <span className="inline-flex items-center w-fit px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200">
-                            {t('autoGen.admin.key1079')} {order.table.name}
+                            {t('orderList.dineInTableNumber')} {order.table.name}
                           </span>
                         )}
                         {order.isRemote !== undefined && (
@@ -368,24 +368,24 @@ export default function OrderList() {
                       )}
                     </td>
                     <td className="px-4 py-3">
-                      {order.customer ? order.customer.name : <span className="text-gray-400">{t('common.guest') || t('autoGen.admin.key1080')}</span>}
+                      {order.customer ? order.customer.name : <span className="text-gray-400">{t('common.guest') || t('orderList.guest')}</span>}
                     </td>
                     <td className="px-4 py-3">
                       <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${order.orderType === 'DELIVERY' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'
                         }`}>
-                        {order.orderType === 'DELIVERY' ? t('autoGen.admin.key1081') : t('autoGen.admin.key1082')}
+                        {order.orderType === 'DELIVERY' ? t('orderList.delivery') : t('orderList.pickup')}
                       </span>
                     </td>
                     <td className="px-4 py-3">
                       <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_COLORS[order.status] || 'bg-gray-100 text-gray-700'}`}>
-                        {order.status === 'PENDING' && t('autoGen.admin.key1083')}
-                        {order.status === 'CONFIRMED' && t('autoGen.admin.key1084')}
-                        {order.status === 'PREPARING' && t('autoGen.admin.key1085')}
-                        {order.status === 'READY' && t('autoGen.admin.key1086')}
-                        {order.status === 'OUT_FOR_DELIVERY' && t('autoGen.admin.key1087')}
-                        {order.status === 'DELIVERED' && t('autoGen.admin.key1088')}
-                        {order.status === 'PICKED_UP' && t('autoGen.admin.key1089')}
-                        {order.status === 'CANCELLED' && t('autoGen.admin.key1090')}
+                        {order.status === 'PENDING' && t('orderList.pending')}
+                        {order.status === 'CONFIRMED' && t('orderList.confirmed')}
+                        {order.status === 'PREPARING' && t('orderList.preparing')}
+                        {order.status === 'READY' && t('orderList.ready')}
+                        {order.status === 'OUT_FOR_DELIVERY' && t('orderList.outForDelivery')}
+                        {order.status === 'DELIVERED' && t('orderList.delivered')}
+                        {order.status === 'PICKED_UP' && t('orderList.pickedUp')}
+                        {order.status === 'CANCELLED' && t('orderList.cancelled')}
                         {!['PENDING', 'CONFIRMED', 'PREPARING', 'READY', 'OUT_FOR_DELIVERY', 'DELIVERED', 'PICKED_UP', 'CANCELLED'].includes(order.status) && order.status.replace(/_/g, ' ')}
                       </span>
                     </td>
@@ -397,9 +397,9 @@ export default function OrderList() {
                             ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200 border border-emerald-200'
                             : 'bg-rose-100 text-rose-800 hover:bg-rose-200 border border-rose-200'
                         }`}
-                        title={t('autoGen.admin.key1091')}
+                        title={t('orderList.clickToToggleCheckout')}
                       >
-                        {order.paymentStatus === 'PAID' ? t('autoGen.admin.key1092') : t('autoGen.admin.key1093')}
+                        {order.paymentStatus === 'PAID' ? t('orderList.checkedOut') : t('orderList.uncheckedOut')}
                       </button>
                     </td>
                     <td className="px-4 py-3 text-gray-600">{order._count.items}</td>
@@ -413,7 +413,7 @@ export default function OrderList() {
                           to={`/orders/${order.id}`}
                           className="text-primary-600 hover:text-primary-700 text-xs font-medium"
                         >
-                          {t('common.view') || t('autoGen.admin.key1094')}
+                          {t('common.view') || t('orderList.view')}
                         </Link>
                         {canManage && (
                           <button
@@ -424,7 +424,7 @@ export default function OrderList() {
                                 : 'text-red-600 hover:text-red-700'
                             }`}
                           >
-                            {deleteConfirmId === order.id ? t('autoGen.admin.key1095') : (t('common.delete') || t('autoGen.admin.key1096'))}
+                            {deleteConfirmId === order.id ? t('orderList.confirmDelete') : (t('common.delete') || t('orderList.delete'))}
                           </button>
                         )}
                       </div>
@@ -445,12 +445,12 @@ export default function OrderList() {
                       #{order.orderNumber}
                       {order.table && (
                         <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200">
-                          {t('autoGen.admin.key1097')} {order.table.name}
+                          {t('orderList.tableNumber')} {order.table.name}
                         </span>
                       )}
                     </span>
                     <span className="text-sm font-bold text-gray-900">
-                      {order.customer ? order.customer.name : <span className="text-gray-400 font-normal">{t('common.guest') || t('autoGen.admin.key1098')}</span>}
+                      {order.customer ? order.customer.name : <span className="text-gray-400 font-normal">{t('common.guest') || t('orderList.guest')}</span>}
                     </span>
                     {order.scheduledAt && (
                       <span className="text-[10px] text-indigo-600 font-semibold flex items-center gap-1">
@@ -459,21 +459,21 @@ export default function OrderList() {
                     )}
                   </div>
                   <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_COLORS[order.status] || 'bg-gray-100 text-gray-700'}`}>
-                    {order.status === 'PENDING' && t('autoGen.admin.key1099')}
-                    {order.status === 'CONFIRMED' && t('autoGen.admin.key1100')}
-                    {order.status === 'PREPARING' && t('autoGen.admin.key1101')}
-                    {order.status === 'READY' && t('autoGen.admin.key1102')}
-                    {order.status === 'OUT_FOR_DELIVERY' && t('autoGen.admin.key1103')}
-                    {order.status === 'DELIVERED' && t('autoGen.admin.key1104')}
-                    {order.status === 'PICKED_UP' && t('autoGen.admin.key1105')}
-                    {order.status === 'CANCELLED' && t('autoGen.admin.key1106')}
+                    {order.status === 'PENDING' && t('orderList.pending')}
+                    {order.status === 'CONFIRMED' && t('orderList.confirmed')}
+                    {order.status === 'PREPARING' && t('orderList.preparing')}
+                    {order.status === 'READY' && t('orderList.ready')}
+                    {order.status === 'OUT_FOR_DELIVERY' && t('orderList.delivering')}
+                    {order.status === 'DELIVERED' && t('orderList.delivered')}
+                    {order.status === 'PICKED_UP' && t('orderList.pickedUp')}
+                    {order.status === 'CANCELLED' && t('orderList.cancelled')}
                     {!['PENDING', 'CONFIRMED', 'PREPARING', 'READY', 'OUT_FOR_DELIVERY', 'DELIVERED', 'PICKED_UP', 'CANCELLED'].includes(order.status) && order.status.replace(/_/g, ' ')}
                   </span>
                 </div>
 
                 <div className="flex justify-between items-center text-xs text-gray-500 pt-2.5 border-t border-gray-100">
                   <span className={`px-2 py-0.5 rounded-full font-bold ${order.orderType === 'DELIVERY' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'}`}>
-                    {order.orderType === 'DELIVERY' ? t('autoGen.admin.key1107') : t('autoGen.admin.key1108')}
+                    {order.orderType === 'DELIVERY' ? t('orderList.delivery') : t('orderList.selfPickup')}
                   </span>
                   <span className="font-extrabold text-primary-600 text-sm">${order.total}</span>
                 </div>
@@ -487,7 +487,7 @@ export default function OrderList() {
                         : 'bg-rose-100 text-rose-800 border-rose-200'
                     }`}
                   >
-                    {order.paymentStatus === 'PAID' ? t('autoGen.admin.key1109') : t('autoGen.admin.key1110')}
+                    {order.paymentStatus === 'PAID' ? t('orderList.paid') : t('orderList.unpaid')}
                   </button>
 
                   <div className="flex items-center gap-2">
@@ -495,7 +495,7 @@ export default function OrderList() {
                       to={`/orders/${order.id}`}
                       className="text-xs bg-gray-50 border border-gray-200 text-gray-600 px-3 py-1.5 rounded-lg font-bold hover:bg-gray-100 transition-all"
                     >
-                      {t('common.view') || t('autoGen.admin.key1111')}
+                      {t('common.view') || t('orderList.view')}
                     </Link>
                     {canManage && (
                       <button
@@ -506,7 +506,7 @@ export default function OrderList() {
                             : 'bg-red-50 text-red-600 border-red-200 hover:bg-red-100'
                         }`}
                       >
-                        {deleteConfirmId === order.id ? t('autoGen.admin.key1112') : (t('common.delete') || t('autoGen.admin.key1113'))}
+                        {deleteConfirmId === order.id ? t('orderList.confirmDelete') : (t('common.delete') || t('orderList.delete'))}
                       </button>
                     )}
                   </div>
@@ -523,17 +523,17 @@ export default function OrderList() {
                 onClick={() => setPage((p) => p - 1)}
                 className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg disabled:opacity-40 hover:bg-gray-50"
               >
-                {t('autoGen.admin.key1114')}
+                {t('orderList.previousPage')}
               </button>
               <span className="text-sm text-gray-600">
-                {t('autoGen.admin.key1115')} {pagination.page} {t('autoGen.admin.key1116')} {pagination.totalPages} {t('autoGen.admin.key1117')}
+                {t('orderList.pagePrefix')} {pagination.page} {t('orderList.pageOfTotal')} {pagination.totalPages} {t('orderList.pageSuffix')}
               </span>
               <button
                 disabled={page >= pagination.totalPages}
                 onClick={() => setPage((p) => p + 1)}
                 className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg disabled:opacity-40 hover:bg-gray-50"
               >
-                {t('autoGen.admin.key1118')}
+                {t('orderList.nextPage')}
               </button>
             </div>
           )}

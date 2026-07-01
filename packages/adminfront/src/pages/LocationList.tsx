@@ -61,26 +61,26 @@ export default function LocationList() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-semibold text-gray-800">{t('autoGen.admin.key814')}</h2>
+        <h2 className="text-2xl font-semibold text-gray-800">{t('locationList.branchManagement')}</h2>
         <Link
           to="/locations/new"
           className="bg-primary-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary-700 transition-colors"
         >
-          {t('autoGen.admin.key815')}
+          {t('locationList.addNewBranch')}
         </Link>
       </div>
 
-      {loading && <p className="text-gray-500">{t('autoGen.admin.key816')}</p>}
-      {error && <p className="text-red-600">{t('autoGen.admin.key817')} {error}</p>}
+      {loading && <p className="text-gray-500">{t('locationList.loadingBranchData')}</p>}
+      {error && <p className="text-red-600">{t('locationList.error')} {error}</p>}
 
       {!loading && !error && locations.length === 0 && (
         <div className="bg-white rounded-lg shadow p-8 text-center">
-          <p className="text-gray-500 mb-4">{t('autoGen.admin.key818')}</p>
+          <p className="text-gray-500 mb-4">{t('locationList.noBranchData')}</p>
           <Link
             to="/locations/new"
             className="text-primary-600 hover:text-primary-700 font-medium"
           >
-            {t('autoGen.admin.key819')}
+            {t('locationList.createFirstBranch')}
           </Link>
         </div>
       )}
@@ -91,22 +91,22 @@ export default function LocationList() {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  {t('autoGen.admin.key820')}
+                  {t('locationList.name')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  {t('autoGen.admin.key821')}
+                  {t('locationList.address')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  {t('autoGen.admin.key822')}
+                  {t('locationList.services')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  {t('autoGen.admin.key823')}
+                  {t('locationList.status')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  {t('autoGen.admin.key824')}
+                  {t('locationList.statistics')}
                 </th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  {t('autoGen.admin.key825')}
+                  {t('locationList.actions')}
                 </th>
               </tr>
             </thead>
@@ -124,12 +124,12 @@ export default function LocationList() {
                     <div className="flex gap-2">
                       {loc.deliveryEnabled && (
                         <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
-                          {t('autoGen.admin.key826')}
+                          {t('locationList.delivery')}
                         </span>
                       )}
                       {loc.pickupEnabled && (
                         <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
-                          {t('autoGen.admin.key827')}
+                          {t('locationList.pickup')}
                         </span>
                       )}
                     </div>
@@ -141,12 +141,12 @@ export default function LocationList() {
                           : 'bg-red-100 text-red-800'
                         }`}
                     >
-                      {loc.isActive ? t('autoGen.admin.key828') : t('autoGen.admin.key829')}
+                      {loc.isActive ? t('locationList.active') : t('locationList.inactive')}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-xs text-gray-500">
-                    {loc._count.orders} {t('autoGen.admin.key830')} {loc._count.tables} {t('autoGen.admin.key831')}{' '}
-                    {loc._count.deliveryZones} {t('autoGen.admin.key832')}
+                    {loc._count.orders} {t('locationList.ordersCount')} {loc._count.tables} {t('locationList.tablesCount')}{' '}
+                    {loc._count.deliveryZones} {t('locationList.areasCount')}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm space-x-3">
                     <button
@@ -158,21 +158,21 @@ export default function LocationList() {
                         } disabled:opacity-50`}
                       aria-label={`${loc.isBusy ? 'Turn off' : 'Turn on'} busy mode for ${loc.name}`}
                     >
-                      {loc.isBusy ? t('autoGen.admin.key833') : t('autoGen.admin.key834')}
+                      {loc.isBusy ? t('locationList.busyModeOn') : t('locationList.acceptingOrdersOff')}
                     </button>
                     <Link
                       to={`/locations/${loc.id}/tables`}
                       className="text-gray-600 hover:text-gray-900 font-medium"
                       aria-label={`View tables for ${loc.name}`}
                     >
-                      {t('autoGen.admin.key835')}
+                      {t('locationList.tableManagement')}
                     </Link>
                     <Link
                       to={`/locations/${loc.id}`}
                       className="text-primary-600 hover:text-primary-900 font-medium"
                       aria-label={`Edit ${loc.name}`}
                     >
-                      {t('autoGen.admin.key836')}
+                      {t('locationList.edit')}
                     </Link>
                   </td>
                 </tr>

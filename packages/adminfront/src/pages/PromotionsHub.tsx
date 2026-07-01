@@ -23,7 +23,7 @@ export default function PromotionsHub() {
               }
             `}
           >
-            {t('autoGen.admin.key1119')}
+            {t('promotionsHub.couponsAndEvents')}
           </button>
 
           <button
@@ -37,7 +37,7 @@ export default function PromotionsHub() {
               }
             `}
           >
-            {t('autoGen.admin.key1120')}
+            {t('promotionsHub.loyaltyAndRewards')}
           </button>
         </nav>
       </div>

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { DollarSign, CheckCircle2, Clock, Search } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import toast from "react-hot-toast";
+import axios from "axios";
 
 interface Expense {
   id: string;
@@ -34,15 +35,8 @@ export default function Expenses() {
   const fetchExpenses = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/shutter-erp/api/expenses", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setExpenses(data);
-      }
+      const res = await axios.get("http://localhost:3000/api/expenses");
+      setExpenses(res.data);
     } catch (error) {
       toast.error("無法載入帳務紀錄");
     } finally {
@@ -52,16 +46,9 @@ export default function Expenses() {
 
   const handleUpdateStatus = async (id: string, newStatus: string) => {
     try {
-      const res = await fetch(`/shutter-erp/api/expenses/${id}/status`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify({ status: newStatus }),
-      });
+      const res = await axios.patch(`http://localhost:3000/api/expenses/${id}/status`, { status: newStatus });
       
-      if (res.ok) {
+      if (res.status === 200 || res.status === 204) {
         toast.success(`狀態已更新為 ${newStatus === 'PAID' ? '已付款' : '未付款'}`);
         fetchExpenses();
       } else {

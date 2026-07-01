@@ -84,8 +84,8 @@ export default function LinePayConfirm() {
               <div className="absolute inset-0 border-4 border-primary-200 rounded-full"></div>
               <div className="absolute inset-0 border-4 border-primary-600 rounded-full border-t-transparent animate-spin"></div>
             </div>
-            <h2 className="text-xl font-bold text-main">{t('autoGen.store.key87')}</h2>
-            <p className="text-sub text-sm">{t('autoGen.store.key88')}</p>
+            <h2 className="text-xl font-bold text-main">{t('linePayConfirm.processingPayment')}</h2>
+            <p className="text-sub text-sm">{t('linePayConfirm.doNotCloseConfirmingPayment')}</p>
           </div>
         )}
         
@@ -96,8 +96,8 @@ export default function LinePayConfirm() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h2 className="text-xl font-bold text-main">{t('autoGen.store.key89')}</h2>
-            <p className="text-sub text-sm">{t('autoGen.store.key90')}</p>
+            <h2 className="text-xl font-bold text-main">{t('linePayConfirm.paymentSuccessful')}</h2>
+            <p className="text-sub text-sm">{t('linePayConfirm.redirectingToOrderPage')}</p>
           </div>
         )}
 
@@ -108,13 +108,13 @@ export default function LinePayConfirm() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </div>
-            <h2 className="text-xl font-bold text-main">{t('autoGen.store.key91')}</h2>
+            <h2 className="text-xl font-bold text-main">{t('linePayConfirm.paymentFailed')}</h2>
             <p className="text-red-500 text-sm">{errorMessage}</p>
             <button 
               onClick={() => navigate('/checkout')}
               className="mt-4 btn-primary w-full"
             >
-              {t('autoGen.store.key92')}
+              {t('linePayConfirm.returnToCheckout')}
             </button>
           </div>
         )}

@@ -53,19 +53,19 @@ const emptyCategory: CategoryData = {
 export default function CategoryForm() {
   const { t } = useTranslation();
     const LANGUAGES = [
-      { code: 'zh-TW', label: t('autoGen.admin.key148') },
-      { code: 'en', label: t('autoGen.admin.key149') },
-      { code: 'ja', label: t('autoGen.admin.key150') },
-      { code: 'ko', label: t('autoGen.admin.key151') },
-      { code: 'th', label: t('autoGen.admin.key152') },
-      { code: 'tl', label: t('autoGen.admin.key153') },
-      { code: 'vi', label: t('autoGen.admin.key154') },
-      { code: 'id', label: t('autoGen.admin.key155') },
-      { code: 'es', label: t('autoGen.admin.key156') },
-      { code: 'fr', label: t('autoGen.admin.key157') },
-      { code: 'de', label: t('autoGen.admin.key158') },
-      { code: 'it', label: t('autoGen.admin.key159') },
-      { code: 'pt', label: t('autoGen.admin.key160') },
+      { code: 'zh-TW', label: t('categoryForm.traditionalChinese') },
+      { code: 'en', label: t('categoryForm.english') },
+      { code: 'ja', label: t('categoryForm.japanese') },
+      { code: 'ko', label: t('categoryForm.korean') },
+      { code: 'th', label: t('categoryForm.thai') },
+      { code: 'tl', label: t('categoryForm.filipino') },
+      { code: 'vi', label: t('categoryForm.vietnamese') },
+      { code: 'id', label: t('categoryForm.indonesian') },
+      { code: 'es', label: t('categoryForm.spanish') },
+      { code: 'fr', label: t('categoryForm.french') },
+      { code: 'de', label: t('categoryForm.german') },
+      { code: 'it', label: t('categoryForm.italian') },
+      { code: 'pt', label: t('categoryForm.portuguese') },
     ];
 
   const { id } = useParams();
@@ -222,10 +222,10 @@ export default function CategoryForm() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-semibold text-gray-800">
-          {isEdit ? t('autoGen.admin.key161') : t('autoGen.admin.key162')}
+          {isEdit ? t('categoryForm.editCategory') : t('categoryForm.addCategory')}
         </h2>
         <button onClick={() => navigate('/menu/categories')} className="text-gray-500 hover:text-gray-700 text-sm">
-          {t('autoGen.admin.key163')}
+          {t('categoryForm.backToCategoryList')}
         </button>
       </div>
 
@@ -235,10 +235,10 @@ export default function CategoryForm() {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <section className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">{t('autoGen.admin.key164')}</h3>
+          <h3 className="text-lg font-medium text-gray-900 mb-4">{t('categoryForm.categoryDetails')}</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key165')}</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('categoryForm.categoryName')}</label>
               <input
                 type="text"
                 value={form.name}
@@ -248,7 +248,7 @@ export default function CategoryForm() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key166')}</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('categoryForm.categorySlug')}</label>
               <input
                 type="text"
                 value={form.slug}
@@ -260,18 +260,18 @@ export default function CategoryForm() {
             </div>
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t('autoGen.admin.key167')}
-                <span className="ml-2 text-xs text-orange-500 font-normal">{t('autoGen.admin.key168')}</span>
+                {t('categoryForm.categoryDescription')}
+                <span className="ml-2 text-xs text-orange-500 font-normal">{t('categoryForm.lineOrderCardDisplay')}</span>
               </label>
               <textarea
                 value={form.description}
                 onChange={(e) => updateField('description', e.target.value)}
                 rows={2}
-                placeholder={t('autoGen.admin.key169')}
+                placeholder={t('categoryForm.exploreFreshMealsPlaceholder')}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
               />
               <p className="text-xs text-gray-400 mt-1 leading-normal">
-                <span className="text-orange-500 font-medium">{t('autoGen.admin.key170')}</span>
+                <span className="text-orange-500 font-medium">{t('categoryForm.lineDescriptionRecommendation')}</span>
               </p>
             </div>
             {/* Image Section */}
@@ -279,8 +279,8 @@ export default function CategoryForm() {
               {isEdit ? (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {t('autoGen.admin.key171')}
-                    <span className="ml-2 text-xs text-primary-600 font-normal">{t('autoGen.admin.key172')}</span>
+                    {t('categoryForm.categoryImage')}
+                    <span className="ml-2 text-xs text-primary-600 font-normal">{t('categoryForm.lineCarouselLiffDisplay')}</span>
                   </label>
                   <div className="flex items-start gap-6 bg-slate-50/50 p-4 rounded-xl border border-gray-100">
                     {imageUrl ? (
@@ -295,19 +295,19 @@ export default function CategoryForm() {
                           onClick={handleImageRemove}
                           disabled={uploading}
                           className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600 disabled:opacity-50 shadow-md transition-all active:scale-90"
-                          aria-label={t('autoGen.admin.key173')}
+                          aria-label={t('categoryForm.removeImage')}
                         >
                           ✕
                         </button>
                       </div>
                     ) : (
                       <div className="w-32 h-24 bg-white rounded-lg border-2 border-dashed border-gray-300 flex flex-col items-center justify-center shrink-0">
-                        <span className="text-[10px] text-gray-400">{t('autoGen.admin.key174')}</span>
+                        <span className="text-[10px] text-gray-400">{t('categoryForm.notYetUploaded')}</span>
                       </div>
                     )}
                     <div className="space-y-2">
                       <label className="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-xs font-semibold cursor-pointer disabled:opacity-50 transition-colors shadow-sm">
-                        {uploading ? t('autoGen.admin.key175') : t('autoGen.admin.key176')}
+                        {uploading ? t('categoryForm.uploading') : t('categoryForm.uploadAndCropImage')}
                         <input
                           type="file"
                           accept="image/jpeg,image/png,image/webp,image/gif"
@@ -317,8 +317,8 @@ export default function CategoryForm() {
                         />
                       </label>
                       <p className="text-[11px] text-gray-400 leading-relaxed">
-                        {t('autoGen.admin.key177')}<br />
-                        <span className="text-orange-500 font-medium">{t('autoGen.admin.key178')}</span>
+                        {t('categoryForm.supportedFormatsAndSizeLimit')}<br />
+                        <span className="text-orange-500 font-medium">{t('categoryForm.lineRecommendedImageRatio')}</span>
                       </p>
                     </div>
                   </div>
@@ -326,8 +326,8 @@ export default function CategoryForm() {
               ) : (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    {t('autoGen.admin.key179')}
-                    <span className="ml-2 text-xs text-orange-500 font-normal">{t('autoGen.admin.key180')}</span>
+                    {t('categoryForm.categoryImageUrl')}
+                    <span className="ml-2 text-xs text-orange-500 font-normal">{t('categoryForm.lineMenuCardDisplay')}</span>
                   </label>
                   <div className="flex gap-3 items-start">
                     <div className="flex-1">
@@ -339,15 +339,15 @@ export default function CategoryForm() {
                         className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                       />
                       <p className="text-xs text-gray-400 mt-1 leading-normal">
-                        {t('autoGen.admin.key181')}<br />
-                        <span className="text-primary-600">{t('autoGen.admin.key182')}</span>
+                        {t('categoryForm.recommendedImageSize')}<br />
+                        <span className="text-primary-600">{t('categoryForm.editCategoryToUnlockUpload')}</span>
                       </p>
                     </div>
                     {form.image && (
                       <div className="relative shrink-0">
                         <img
                           src={form.image}
-                          alt={t('autoGen.admin.key183')}
+                          alt={t('categoryForm.categoryPreview')}
                           className="w-24 h-16 object-cover rounded-lg border border-gray-200 shadow-sm"
                           onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                         />
@@ -365,39 +365,39 @@ export default function CategoryForm() {
               )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key184')}</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('categoryForm.parentCategory')}</label>
               <select
                 value={form.parentId}
                 onChange={(e) => updateField('parentId', e.target.value)}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
               >
-                <option value="">{t('autoGen.admin.key185')}</option>
+                <option value="">{t('categoryForm.noneTopLevelCategory')}</option>
                 {categories.map((c) => (
                   <option key={c.id} value={c.id}>{c.name}</option>
                 ))}
               </select>
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-750 mb-1">{t('autoGen.admin.key186')}</label>
+              <label className="block text-sm font-semibold text-gray-750 mb-1">{t('categoryForm.branchAvailability')}</label>
               {user?.role === 'SUPER_ADMIN' ? (
                 <select
                   value={form.locationId}
                   onChange={(e) => updateField('locationId', e.target.value)}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 font-medium"
                 >
-                  <option value="">{t('autoGen.admin.key187')}</option>
+                  <option value="">{t('categoryForm.headquartersAllBranches')}</option>
                   {locations.map((loc) => (
                     <option key={loc.id} value={loc.id}>{loc.name}</option>
                   ))}
                 </select>
               ) : (
                 <div className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm font-medium text-gray-600">
-                  {locations.find((l) => l.id === form.locationId)?.name || t('autoGen.admin.key188')} {t('autoGen.admin.key189')}
+                  {locations.find((l) => l.id === form.locationId)?.name || t('categoryForm.assignToSpecificBranches')} {t('categoryForm.storeManagerRestriction')}
                 </div>
               )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key190')}</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('categoryForm.sortOrder')}</label>
               <input
                 type="number"
                 value={form.sortOrder}
@@ -414,7 +414,7 @@ export default function CategoryForm() {
                   onChange={(e) => updateField('isActive', e.target.checked)}
                   className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
                 />
-                <span className="text-sm text-gray-700">{t('autoGen.admin.key191')}</span>
+                <span className="text-sm text-gray-700">{t('categoryForm.active')}</span>
               </label>
             </div>
             <div>
@@ -425,7 +425,7 @@ export default function CategoryForm() {
                   onChange={(e) => updateField('isFrozenDelivery', e.target.checked)}
                   className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
                 />
-                <span className="text-sm text-gray-755 font-bold text-blue-600">{t('autoGen.admin.key192')}</span>
+                <span className="text-sm text-gray-755 font-bold text-blue-600">{t('categoryForm.frozenDelivery')}</span>
               </label>
             </div>
 
@@ -433,10 +433,10 @@ export default function CategoryForm() {
             <div className="md:col-span-2 border-t border-gray-100 pt-6 mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="md:col-span-2">
                 <h4 className="text-sm font-semibold text-gray-800 flex items-center gap-1.5">
-                  {t('autoGen.admin.key193')}
+                  {t('categoryForm.sharedCategoryInventory')}
                 </h4>
                 <p className="text-xs text-gray-400 mt-0.5">
-                  {t('autoGen.admin.key194')}
+                  {t('categoryForm.sharedInventoryDescription')}
                 </p>
               </div>
               <div className="flex items-center">
@@ -453,13 +453,13 @@ export default function CategoryForm() {
                     }}
                     className="rounded border-gray-300 text-primary-600 focus:ring-primary-500 w-4 h-4"
                   />
-                  <span className="text-sm font-medium text-gray-700">{t('autoGen.admin.key195')}</span>
+                  <span className="text-sm font-medium text-gray-700">{t('categoryForm.enableDailySharedInventory')}</span>
                 </label>
               </div>
               {form.trackSharedStock && (
                 <>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key196')}</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('categoryForm.dailySharedInventoryTotal')}</label>
                     <input
                       type="number"
                       value={form.sharedStockQty}
@@ -470,7 +470,7 @@ export default function CategoryForm() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key197')}</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('categoryForm.inventoryWarningThreshold')}</label>
                     <input
                       type="number"
                       value={form.sharedStockThreshold}
@@ -488,7 +488,7 @@ export default function CategoryForm() {
 
         {/* Translations */}
         <section className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">{t('autoGen.admin.key198')}</h3>
+          <h3 className="text-lg font-medium text-gray-900 mb-4">{t('categoryForm.translations')}</h3>
           <div className="space-y-6">
             {LANGUAGES.map((lang) => (
               <div key={lang.code} className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border border-gray-100 rounded-lg">
@@ -496,7 +496,7 @@ export default function CategoryForm() {
                   <span className="text-sm font-bold text-primary-600">{lang.label} ({lang.code})</span>
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-500 mb-1">{t('autoGen.admin.key199')}{lang.code})</label>
+                  <label className="block text-xs text-gray-500 mb-1">{t('categoryForm.nameLabelPrefix')}{lang.code})</label>
                   <input
                     type="text"
                     value={form.nameTranslations[lang.code] || ''}
@@ -508,7 +508,7 @@ export default function CategoryForm() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-500 mb-1">{t('autoGen.admin.key200')}{lang.code})</label>
+                  <label className="block text-xs text-gray-500 mb-1">{t('categoryForm.descriptionLabelPrefix')}{lang.code})</label>
                   <textarea
                     value={form.descriptionTranslations[lang.code] || ''}
                     onChange={(e) => {
@@ -526,10 +526,10 @@ export default function CategoryForm() {
 
         <div className="flex justify-end gap-3">
           <button type="button" onClick={() => navigate('/menu/categories')} className="px-6 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50">
-            {t('autoGen.admin.key201')}
+            {t('categoryForm.cancel')}
           </button>
           <button type="submit" disabled={saving} className="px-6 py-2 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700 disabled:opacity-50 transition-colors">
-            {saving ? t('autoGen.admin.key202') : isEdit ? t('autoGen.admin.key203') : t('autoGen.admin.key204')}
+            {saving ? t('categoryForm.saving') : isEdit ? t('categoryForm.updateCategory') : t('categoryForm.createCategory')}
           </button>
         </div>
       </form>

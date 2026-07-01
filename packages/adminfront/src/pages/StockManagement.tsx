@@ -106,7 +106,7 @@ export default function StockManagement() {
       setMappings(mappingsRes.data || []);
       setError(null);
     } catch (err: any) {
-      setError(err.message || t('autoGen.admin.key1556'));
+      setError(err.message || t('stockManagement.failedToLoadStock'));
     } finally {
       setLoading(false);
     }
@@ -208,7 +208,7 @@ export default function StockManagement() {
   // Save recipe mapping
   const handleSaveBinding = async (menuItem: MenuItem, recipeId: string) => {
     if (!recipeId) {
-      alert(t('autoGen.admin.key1557'));
+      alert(t('stockManagement.selectRecipeToBind'));
       return;
     }
 
@@ -319,7 +319,7 @@ export default function StockManagement() {
     return (
       <div className="flex flex-col items-center justify-center py-12">
         <div className="w-12 h-12 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin mb-4" />
-        <p className="text-gray-500 font-medium">{t('autoGen.admin.key1558')}</p>
+        <p className="text-gray-500 font-medium">{t('stockManagement.loadingProductStockRelations')}</p>
       </div>
     );
   }
@@ -329,9 +329,9 @@ export default function StockManagement() {
       {/* Title Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-gray-800">{t('autoGen.admin.key1559')}</h2>
+          <h2 className="text-2xl font-bold text-gray-800">{t('stockManagement.doubleStockMatrixPanel')}</h2>
           <p className="text-sm text-gray-500 mt-1">
-            {t('autoGen.admin.key1560')}
+            {t('stockManagement.stockRelationDescription')}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2 self-start md:self-auto">
@@ -352,20 +352,20 @@ export default function StockManagement() {
               }
 
               if (!url) {
-                alert(t('autoGen.admin.key1561'));
+                alert(t('stockManagement.erpUrlNotConfigured'));
                 return;
               }
               window.open(url, '_blank');
             }}
             className="px-4 py-2 bg-indigo-600 border border-transparent rounded-lg text-sm font-medium text-white hover:bg-indigo-700 shadow-sm transition-colors inline-flex items-center gap-1.5"
           >
-            {t('autoGen.admin.key1562')}
+            {t('stockManagement.goToErpManagement')}
           </button>
           <button
             onClick={fetchData}
             className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 shadow-sm transition-colors inline-flex items-center gap-1.5"
           >
-            {t('autoGen.admin.key1563')}
+            {t('stockManagement.refresh')}
           </button>
         </div>
       </div>
@@ -374,27 +374,27 @@ export default function StockManagement() {
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center justify-between">
           <span>{error}</span>
-          <button onClick={fetchData} className="underline font-medium hover:text-red-900">{t('autoGen.admin.key1564')}</button>
+          <button onClick={fetchData} className="underline font-medium hover:text-red-900">{t('stockManagement.retry')}</button>
         </div>
       )}
 
       {/* Overall Stats Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white rounded-xl shadow-sm border border-gray-150 p-4 transition-all hover:shadow-md">
-          <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider">{t('autoGen.admin.key1565')}</div>
-          <div className="text-2xl font-bold text-gray-800 mt-1">{totalItems} <span className="text-xs text-gray-400 font-normal">{t('autoGen.admin.key1566')}</span></div>
+          <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider">{t('stockManagement.totalProductItems')}</div>
+          <div className="text-2xl font-bold text-gray-800 mt-1">{totalItems} <span className="text-xs text-gray-400 font-normal">{t('stockManagement.unitCount')}</span></div>
         </div>
         <div className="bg-white rounded-xl shadow-sm border border-gray-150 p-4 transition-all hover:shadow-md">
-          <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider">{t('autoGen.admin.key1567')}</div>
-          <div className="text-2xl font-bold text-indigo-600 mt-1">{trackedItems} <span className="text-xs text-gray-400 font-normal">{t('autoGen.admin.key1568')}</span></div>
+          <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider">{t('stockManagement.independentTrackedStock')}</div>
+          <div className="text-2xl font-bold text-indigo-600 mt-1">{trackedItems} <span className="text-xs text-gray-400 font-normal">{t('stockManagement.items')}</span></div>
         </div>
         <div className="bg-white rounded-xl shadow-sm border border-gray-150 p-4 transition-all hover:shadow-md">
-          <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider">{t('autoGen.admin.key1569')}</div>
-          <div className="text-2xl font-bold text-amber-600 mt-1">{warningItemsCount} <span className="text-xs text-gray-400 font-normal">{t('autoGen.admin.key1570')}</span></div>
+          <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider">{t('stockManagement.lowStockWarning')}</div>
+          <div className="text-2xl font-bold text-amber-600 mt-1">{warningItemsCount} <span className="text-xs text-gray-400 font-normal">{t('stockManagement.itemsCount')}</span></div>
         </div>
         <div className="bg-white rounded-xl shadow-sm border border-gray-150 p-4 transition-all hover:shadow-md">
-          <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider">{t('autoGen.admin.key1571')}</div>
-          <div className="text-2xl font-bold text-red-600 mt-1">{soldOutItemsCount} <span className="text-xs text-gray-400 font-normal">{t('autoGen.admin.key1572')}</span></div>
+          <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider">{t('stockManagement.soldOutOrOutOfStock')}</div>
+          <div className="text-2xl font-bold text-red-600 mt-1">{soldOutItemsCount} <span className="text-xs text-gray-400 font-normal">{t('stockManagement.itemsLabel')}</span></div>
         </div>
       </div>
 
@@ -402,10 +402,10 @@ export default function StockManagement() {
       <div className="bg-white rounded-xl shadow-sm border border-gray-150 p-4 grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
         {/* Search */}
         <div>
-          <label className="block text-xs font-bold text-gray-400 uppercase mb-1">{t('autoGen.admin.key1573')}</label>
+          <label className="block text-xs font-bold text-gray-400 uppercase mb-1">{t('stockManagement.searchProduct')}</label>
           <input
             type="text"
-            placeholder={t('autoGen.admin.key1574')}
+            placeholder={t('stockManagement.searchProductPlaceholder')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
@@ -414,46 +414,46 @@ export default function StockManagement() {
 
         {/* Category select */}
         <div>
-          <label className="block text-xs font-bold text-gray-400 uppercase mb-1">{t('autoGen.admin.key1575')}</label>
+          <label className="block text-xs font-bold text-gray-400 uppercase mb-1">{t('stockManagement.filterByProductCategory')}</label>
           <select
             value={selectedCategoryId}
             onChange={(e) => setSelectedCategoryId(e.target.value)}
             className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
           >
-            <option value="">{t('autoGen.admin.key1576')}</option>
+            <option value="">{t('stockManagement.allCategories')}</option>
             {categories.map((c) => (
-              <option key={c.id} value={c.id}>{c.name} {c.trackSharedStock ? t('autoGen.admin.key1577') : ''}</option>
+              <option key={c.id} value={c.id}>{c.name} {c.trackSharedStock ? t('stockManagement.sharedStockLabel') : ''}</option>
             ))}
           </select>
         </div>
 
         {/* Filter type buttons */}
         <div>
-          <label className="block text-xs font-bold text-gray-400 uppercase mb-1">{t('autoGen.admin.key1578')}</label>
+          <label className="block text-xs font-bold text-gray-400 uppercase mb-1">{t('stockManagement.quickStatusFilter')}</label>
           <div className="flex rounded-lg border border-gray-200 p-0.5 bg-gray-50">
             <button
               onClick={() => setFilterType('ALL')}
               className={`flex-1 text-center py-1.5 text-xs font-semibold rounded-md transition-colors ${filterType === 'ALL' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}
             >
-              {t('autoGen.admin.key1579')}
+              {t('stockManagement.all')}
             </button>
             <button
               onClick={() => setFilterType('WARNING')}
               className={`flex-1 text-center py-1.5 text-xs font-semibold rounded-md transition-colors ${filterType === 'WARNING' ? 'bg-amber-600 text-white shadow-sm' : 'text-gray-500 hover:text-amber-600'}`}
             >
-              {t('autoGen.admin.key1580')}
+              {t('stockManagement.warningOrOutOfStock')}
             </button>
             <button
               onClick={() => setFilterType('SHARED')}
               className={`flex-1 text-center py-1.5 text-xs font-semibold rounded-md transition-colors ${filterType === 'SHARED' ? 'bg-indigo-600 text-white shadow-sm' : 'text-gray-500 hover:text-indigo-600'}`}
             >
-              {t('autoGen.admin.key1581')}
+              {t('stockManagement.sharedCategory')}
             </button>
             <button
               onClick={() => setFilterType('INDEPENDENT')}
               className={`flex-1 text-center py-1.5 text-xs font-semibold rounded-md transition-colors ${filterType === 'INDEPENDENT' ? 'bg-gray-800 text-white shadow-sm' : 'text-gray-500 hover:text-gray-800'}`}
             >
-              {t('autoGen.admin.key1582')}
+              {t('stockManagement.independentTracking')}
             </button>
           </div>
         </div>
@@ -474,7 +474,7 @@ export default function StockManagement() {
                   <div>
                     <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
                       🏷️ {cat.name}
-                      <span className="text-xs text-gray-400 font-normal">({catItems.length} {t('autoGen.admin.key1583')}</span>
+                      <span className="text-xs text-gray-400 font-normal">({catItems.length} {t('stockManagement.itemsSuffix')}</span>
                     </h3>
                   </div>
 
@@ -487,13 +487,13 @@ export default function StockManagement() {
                         onChange={(e) => handleCategoryUpdate(cat.id, { trackSharedStock: e.target.checked })}
                         className="rounded border-gray-300 text-primary-600 focus:ring-primary-500 w-4 h-4"
                       />
-                      <span className="text-xs font-bold text-gray-700">{t('autoGen.admin.key1584')}</span>
+                      <span className="text-xs font-bold text-gray-700">{t('stockManagement.categoryDailySharedStock')}</span>
                     </label>
 
                     {cat.trackSharedStock && (
                       <div className="flex items-center gap-4 border-l border-gray-200 pl-3">
                         <div className="flex items-center gap-1.5">
-                          <span className="text-xs text-gray-500 font-medium">{t('autoGen.admin.key1585')}</span>
+                          <span className="text-xs text-gray-500 font-medium">{t('stockManagement.totalStock')}</span>
                           <div className="flex items-center">
                             <button
                               onClick={() => handleCategoryUpdate(cat.id, { sharedStockQty: Math.max(0, cat.sharedStockQty - 1) })}
@@ -517,7 +517,7 @@ export default function StockManagement() {
                         </div>
 
                         <div className="flex items-center gap-1.5">
-                          <span className="text-xs text-gray-500 font-medium">{t('autoGen.admin.key1586')}</span>
+                          <span className="text-xs text-gray-500 font-medium">{t('stockManagement.warningThreshold')}</span>
                           <input
                             type="number"
                             value={cat.sharedStockThreshold}
@@ -529,15 +529,15 @@ export default function StockManagement() {
                         {/* Category Shared Badge */}
                         {cat.sharedStockQty === 0 ? (
                           <span className="text-red-700 bg-red-50 border border-red-200 px-2 py-0.5 rounded text-[10px] font-extrabold">
-                            {t('autoGen.admin.key1587')}
+                            {t('stockManagement.categorySoldOut')}
                           </span>
                         ) : cat.sharedStockQty <= cat.sharedStockThreshold ? (
                           <span className="text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded text-[10px] font-bold animate-pulse">
-                            {t('autoGen.admin.key1588')}
+                            {t('stockManagement.categoryLowStock')}
                           </span>
                         ) : (
                           <span className="text-indigo-700 bg-indigo-50 border border-indigo-150 px-2 py-0.5 rounded text-[10px] font-bold">
-                            {t('autoGen.admin.key1589')}
+                            {t('stockManagement.sharedStockSufficient')}
                           </span>
                         )}
                       </div>
@@ -545,10 +545,10 @@ export default function StockManagement() {
 
                     {/* Loading/Saved feedback indicator for Category */}
                     {savingId === cat.id && (
-                      <span className="text-[10px] text-gray-400 animate-pulse pl-1">{t('autoGen.admin.key1590')}</span>
+                      <span className="text-[10px] text-gray-400 animate-pulse pl-1">{t('stockManagement.saving')}</span>
                     )}
                     {savedFeedbackId === cat.id && (
-                      <span className="text-[10px] text-green-600 font-bold pl-1 animate-bounce">{t('autoGen.admin.key1591')}</span>
+                      <span className="text-[10px] text-green-600 font-bold pl-1 animate-bounce">{t('stockManagement.synced')}</span>
                     )}
                   </div>
                 </div>
@@ -556,18 +556,18 @@ export default function StockManagement() {
                 {/* Products Table */}
                 {catItems.length === 0 ? (
                   <div className="px-6 py-4 text-center text-sm text-gray-400 italic">
-                    {t('autoGen.admin.key1592')}
+                    {t('stockManagement.noMatchingProductsInCategory')}
                   </div>
                 ) : (
                   <table className="min-w-full divide-y divide-gray-150">
                     <thead className="bg-gray-50/50">
                       <tr>
-                        <th className="px-6 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">{t('autoGen.admin.key1593')}</th>
-                        <th className="px-6 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">{t('autoGen.admin.key1594')}</th>
-                        <th className="px-6 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">{t('autoGen.admin.key1595')}</th>
-                        <th className="px-6 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">{t('autoGen.admin.key1596')}</th>
-                        <th className="px-6 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">{t('autoGen.admin.key1597')}</th>
-                        <th className="px-6 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">{t('autoGen.admin.key1598')}</th>
+                        <th className="px-6 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">{t('stockManagement.productName')}</th>
+                        <th className="px-6 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">{t('stockManagement.linkRdRecipe')}</th>
+                        <th className="px-6 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">{t('stockManagement.independentStockTracking')}</th>
+                        <th className="px-6 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">{t('stockManagement.independentStockQuantity')}</th>
+                        <th className="px-6 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">{t('stockManagement.effectiveStock')}</th>
+                        <th className="px-6 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase">{t('stockManagement.stockStatusRelation')}</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-150 bg-white">
@@ -581,7 +581,7 @@ export default function StockManagement() {
                         // 2. If item trackStock is also enabled, it is MIN(category, item).
                         // 3. If item trackStock is NOT enabled, it is bounded ONLY by category sharedStockQty.
                         // 4. If neither are enabled, it is unlimited.
-                        let effectiveStock: number | string = t('autoGen.admin.key1599');
+                        let effectiveStock: number | string = t('stockManagement.unlimited');
                         let isWarning = false;
                         let isSoldOut = false;
                         
@@ -631,7 +631,7 @@ export default function StockManagement() {
                                       : 'border-gray-200 bg-white text-gray-700 focus:ring-primary-100 focus:border-primary-500'
                                   }`}
                                 >
-                                  <option value="" className="bg-white text-gray-500 font-medium">{t('autoGen.admin.key1600')}</option>
+                                  <option value="" className="bg-white text-gray-500 font-medium">{t('stockManagement.recipeNotLinked')}</option>
                                   {recipes.filter(r => r.isProduct !== false).map(r => (
                                     <option key={r.id} value={r.id} className="bg-white text-gray-800 font-medium">
                                       {r.name}
@@ -641,13 +641,13 @@ export default function StockManagement() {
                                 
                                 {/* Dynamic visual feedback next to select */}
                                 {savingId === item.id && (
-                                  <span className="text-[10px] text-gray-400 animate-pulse font-medium shrink-0">{t('autoGen.admin.key1601')}</span>
+                                  <span className="text-[10px] text-gray-400 animate-pulse font-medium shrink-0">{t('stockManagement.savingShort')}</span>
                                 )}
                                 {savedFeedbackId === item.id && (
                                   <span className="text-xs text-emerald-600 font-black animate-bounce shrink-0">✓</span>
                                 )}
                                 {mappings.some(m => m.menuItemId === item.id) && savingId !== item.id && (
-                                  <span className="relative flex h-1.5 w-1.5 shrink-0" title={t('autoGen.admin.key1602')}>
+                                  <span className="relative flex h-1.5 w-1.5 shrink-0" title={t('stockManagement.linkedToCentralKitchenRecipe')}>
                                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                                     <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
                                   </span>
@@ -664,7 +664,7 @@ export default function StockManagement() {
                                   onChange={(e) => handleItemUpdate(item.id, { trackStock: e.target.checked })}
                                   className="rounded border-gray-300 text-primary-600 focus:ring-primary-500 w-4 h-4"
                                 />
-                                <span className="text-xs font-medium text-gray-600">{t('autoGen.admin.key1603')}</span>
+                                <span className="text-xs font-medium text-gray-600">{t('stockManagement.enableIndependentStock')}</span>
                               </label>
                             </td>
 
@@ -683,7 +683,7 @@ export default function StockManagement() {
                                   type="number"
                                   disabled={!item.trackStock}
                                   value={item.trackStock ? item.stockQty : ''}
-                                  placeholder={t('autoGen.admin.key1604')}
+                                  placeholder={t('stockManagement.unlimited')}
                                   onChange={(e) => handleItemUpdate(item.id, { stockQty: Math.max(0, parseInt(e.target.value) || 0) })}
                                   className="w-16 h-7 border-y border-gray-200 text-center text-xs font-bold focus:ring-0 focus:outline-none disabled:bg-gray-100 disabled:text-gray-400"
                                 />
@@ -698,7 +698,7 @@ export default function StockManagement() {
 
                                 {/* Item specific feedback indicators */}
                                 {savingId === item.id && (
-                                  <span className="text-[10px] text-gray-400 animate-pulse ml-2">{t('autoGen.admin.key1605')}</span>
+                                  <span className="text-[10px] text-gray-400 animate-pulse ml-2">{t('stockManagement.savingEllipsis')}</span>
                                 )}
                                 {savedFeedbackId === item.id && (
                                   <span className="text-[10px] text-green-600 font-bold ml-2 animate-bounce">✓</span>
@@ -710,10 +710,10 @@ export default function StockManagement() {
                             <td className="px-6 py-3 whitespace-nowrap">
                               {typeof effectiveStock === 'number' ? (
                                 <span className={`text-sm font-extrabold ${isSoldOut ? 'text-red-700' : isWarning ? 'text-amber-700 animate-pulse' : 'text-indigo-600'}`}>
-                                  {effectiveStock} <span className="text-xs font-normal text-gray-400">{t('autoGen.admin.key1606')}</span>
+                                  {effectiveStock} <span className="text-xs font-normal text-gray-400">{t('stockManagement.portions')}</span>
                                 </span>
                               ) : (
-                                <span className="text-sm text-gray-400">{t('autoGen.admin.key1607')}</span>
+                                <span className="text-sm text-gray-400">{t('stockManagement.unlimitedWithSymbol')}</span>
                               )}
                             </td>
 
@@ -722,32 +722,32 @@ export default function StockManagement() {
                               {hasCategoryStock && hasIndependentStock ? (
                                 <div className="flex flex-col gap-1">
                                   <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200 max-w-max">
-                                    {t('autoGen.admin.key1608')}
+                                    {t('stockManagement.dualLimitMode')}
                                   </span>
                                   <span className="text-[10px] text-gray-400 leading-normal">
-                                    {t('autoGen.admin.key1609')}{cat.sharedStockQty}{t('autoGen.admin.key1610')}{item.stockQty})
+                                    {t('stockManagement.takeSmallerValueCategory')}{cat.sharedStockQty}{t('stockManagement.andIndependent')}{item.stockQty})
                                   </span>
                                 </div>
                               ) : hasCategoryStock && !hasIndependentStock ? (
                                 <div className="flex flex-col gap-1">
                                   <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-50 text-indigo-800 border border-indigo-200 max-w-max">
-                                    {t('autoGen.admin.key1611')}
+                                    {t('stockManagement.categoryLimitOnly')}
                                   </span>
                                   <span className="text-[10px] text-gray-400 leading-normal">
-                                    {t('autoGen.admin.key1612')}{cat.sharedStockQty}{t('autoGen.admin.key1613')}
+                                    {t('stockManagement.limitedByCategoryDailyStock')}{cat.sharedStockQty}{t('stockManagement.limitSuffix')}
                                   </span>
                                 </div>
                               ) : !hasCategoryStock && hasIndependentStock ? (
                                 <div className="flex flex-col gap-1">
                                   <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-800 border border-slate-200 max-w-max">
-                                    {t('autoGen.admin.key1614')}
+                                    {t('stockManagement.productIndependentOnly')}
                                   </span>
                                   <span className="text-[10px] text-gray-400 leading-normal">
-                                    {t('autoGen.admin.key1615')}{item.stockQty})
+                                    {t('stockManagement.trackProductIndependentStock')}{item.stockQty})
                                   </span>
                                 </div>
                               ) : (
-                                <span className="text-xs text-gray-400 italic">{t('autoGen.admin.key1616')}</span>
+                                <span className="text-xs text-gray-400 italic">{t('stockManagement.noStockLimit')}</span>
                               )}
                             </td>
                           </tr>
@@ -779,7 +779,7 @@ export default function StockManagement() {
                                         onChange={(e) => handleOptionValueUpdate(item.id, opt.id, v.id, { trackStock: e.target.checked })}
                                         className="rounded border-gray-300 text-indigo-500 focus:ring-indigo-400 w-3.5 h-3.5"
                                       />
-                                      <span className="text-xs font-medium text-gray-500">{t('autoGen.admin.key1617')}</span>
+                                      <span className="text-xs font-medium text-gray-500">{t('stockManagement.optionStock')}</span>
                                     </label>
                                   </td>
                                   <td className="px-6 py-2.5 whitespace-nowrap border-l-4 border-l-slate-200">
@@ -796,7 +796,7 @@ export default function StockManagement() {
                                         type="number"
                                         disabled={!v.trackStock}
                                         value={v.trackStock ? v.stockQty : ''}
-                                        placeholder={t('autoGen.admin.key1618')}
+                                        placeholder={t('stockManagement.followMainProduct')}
                                         onChange={(e) => handleOptionValueUpdate(item.id, opt.id, v.id, { stockQty: Math.max(0, parseInt(e.target.value) || 0) })}
                                         className="w-16 h-6 border-y border-gray-200 text-center text-xs font-bold focus:ring-0 focus:outline-none disabled:bg-gray-100 disabled:text-gray-400"
                                       />
@@ -809,7 +809,7 @@ export default function StockManagement() {
                                         +
                                       </button>
                                       {savingId === v.id && (
-                                        <span className="text-[10px] text-gray-400 animate-pulse ml-2">{t('autoGen.admin.key1619')}</span>
+                                        <span className="text-[10px] text-gray-400 animate-pulse ml-2">{t('stockManagement.savingEllipsis')}</span>
                                       )}
                                       {savedFeedbackId === v.id && (
                                         <span className="text-[10px] text-green-600 font-bold ml-2 animate-bounce">✓</span>
@@ -819,16 +819,16 @@ export default function StockManagement() {
                                   <td className="px-6 py-2.5 whitespace-nowrap border-l-4 border-l-slate-200">
                                     {v.trackStock ? (
                                       <span className={`text-sm font-extrabold ${vIsSoldOut ? 'text-red-700' : vIsWarning ? 'text-amber-700 animate-pulse' : 'text-indigo-600'}`}>
-                                        {v.stockQty} <span className="text-xs font-normal text-gray-400">{t('autoGen.admin.key1620')}</span>
+                                        {v.stockQty} <span className="text-xs font-normal text-gray-400">{t('stockManagement.portions')}</span>
                                       </span>
                                     ) : (
-                                      <span className="text-xs text-gray-400 italic">{t('autoGen.admin.key1621')}</span>
+                                      <span className="text-xs text-gray-400 italic">{t('stockManagement.sameAsAbove')}</span>
                                     )}
                                   </td>
                                   <td className="px-6 py-2.5 whitespace-nowrap border-l-4 border-l-slate-200">
                                     {v.trackStock ? (
                                       <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-50 text-indigo-800 border border-indigo-200 max-w-max">
-                                        {t('autoGen.admin.key1622')}
+                                        {t('stockManagement.optionIndependent')}
                                       </span>
                                     ) : (
                                       <span className="text-xs text-gray-400 italic">-</span>

@@ -47,7 +47,7 @@ export default function DeliveryZoneList() {
         try {
           boundaries = JSON.parse(boundariesJson);
         } catch {
-          setError(t('autoGen.admin.key535'));
+          setError(t('deliveryZoneList.boundaryDataFormatError'));
           setSaving(false);
           return;
         }
@@ -87,7 +87,7 @@ export default function DeliveryZoneList() {
   };
 
   const deleteZone = async (id: string) => {
-    if (!confirm(t('autoGen.admin.key536'))) return;
+    if (!confirm(t('deliveryZoneList.confirmDeleteDeliveryZone'))) return;
     try {
       await api.delete(`/locations/${locationId}/delivery-zones/${id}`);
       setZones((prev) => prev.filter((z) => z.id !== id));
@@ -99,12 +99,12 @@ export default function DeliveryZoneList() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">{t('autoGen.admin.key537')}</h1>
+        <h1 className="text-2xl font-bold text-gray-900">{t('deliveryZoneList.deliveryZoneManagement')}</h1>
         <button
           onClick={() => setShowForm(!showForm)}
           className="bg-primary-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary-700 transition-colors"
         >
-          {showForm ? t('autoGen.admin.key538') : t('autoGen.admin.key539')}
+          {showForm ? t('deliveryZoneList.cancel') : t('deliveryZoneList.addNewZone')}
         </button>
       </div>
 
@@ -114,18 +114,18 @@ export default function DeliveryZoneList() {
         <form onSubmit={handleCreate} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6 space-y-4">
           <div className="grid grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key540')}</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('deliveryZoneList.zoneNameWithLabel')}</label>
               <input
                 type="text"
                 required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none"
-                placeholder={t('autoGen.admin.key541')}
+                placeholder={t('deliveryZoneList.exampleDowntown')}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key542')}</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('deliveryZoneList.deliveryFeeWithSymbol')}</label>
               <input
                 type="number"
                 step="0.01"
@@ -136,7 +136,7 @@ export default function DeliveryZoneList() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key543')}</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('deliveryZoneList.minimumOrderAmountWithSymbol')}</label>
               <input
                 type="number"
                 step="0.01"
@@ -148,13 +148,13 @@ export default function DeliveryZoneList() {
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">{t('autoGen.admin.key544')}</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t('deliveryZoneList.boundarySettings')}</label>
             <textarea
               value={boundariesJson}
               onChange={(e) => setBoundariesJson(e.target.value)}
               rows={4}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none font-mono"
-              placeholder={t('autoGen.admin.key545')}
+              placeholder={t('deliveryZoneList.coordinatesFormat')}
             />
           </div>
           <button
@@ -162,19 +162,19 @@ export default function DeliveryZoneList() {
             disabled={saving}
             className="bg-primary-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary-700 disabled:opacity-50"
           >
-            {saving ? t('autoGen.admin.key546') : t('autoGen.admin.key547')}
+            {saving ? t('deliveryZoneList.savingInProgress') : t('deliveryZoneList.createZone')}
           </button>
         </form>
       )}
 
       {loading && (
         <div className="flex justify-center py-12">
-          <div className="w-8 h-8 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin" role="status" aria-label={t('autoGen.admin.key548')} />
+          <div className="w-8 h-8 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin" role="status" aria-label={t('deliveryZoneList.loading')} />
         </div>
       )}
 
       {!loading && zones.length === 0 && !showForm && (
-        <p className="text-gray-500 text-center py-12">{t('autoGen.admin.key549')}</p>
+        <p className="text-gray-500 text-center py-12">{t('deliveryZoneList.noDeliveryZonesSet')}</p>
       )}
 
       {!loading && zones.length > 0 && (
@@ -182,11 +182,11 @@ export default function DeliveryZoneList() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-200 bg-gray-50">
-                <th className="text-left px-4 py-3 font-medium text-gray-600">{t('autoGen.admin.key550')}</th>
-                <th className="text-right px-4 py-3 font-medium text-gray-600">{t('autoGen.admin.key551')}</th>
-                <th className="text-right px-4 py-3 font-medium text-gray-600">{t('autoGen.admin.key552')}</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">{t('autoGen.admin.key553')}</th>
-                <th className="text-right px-4 py-3 font-medium text-gray-600">{t('autoGen.admin.key554')}</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">{t('deliveryZoneList.zoneName')}</th>
+                <th className="text-right px-4 py-3 font-medium text-gray-600">{t('deliveryZoneList.deliveryFee')}</th>
+                <th className="text-right px-4 py-3 font-medium text-gray-600">{t('deliveryZoneList.minimumOrderAmount')}</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-600">{t('deliveryZoneList.status')}</th>
+                <th className="text-right px-4 py-3 font-medium text-gray-600">{t('deliveryZoneList.action')}</th>
               </tr>
             </thead>
             <tbody>
@@ -200,9 +200,9 @@ export default function DeliveryZoneList() {
                       onClick={() => toggleActive(zone)}
                       className={`text-xs px-2 py-0.5 rounded-full font-medium ${zone.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'
                          }`}
-                      aria-label={`${zone.isActive ? t('autoGen.admin.key555') : t('autoGen.admin.key556')} 區域 ${zone.name}`}
+                      aria-label={`${zone.isActive ? t('deliveryZoneList.disable') : t('deliveryZoneList.enable')} 區域 ${zone.name}`}
                     >
-                      {zone.isActive ? t('autoGen.admin.key557') : t('autoGen.admin.key558')}
+                      {zone.isActive ? t('deliveryZoneList.enabled') : t('deliveryZoneList.disabled')}
                     </button>
                   </td>
                   <td className="px-4 py-3 text-right">
@@ -211,7 +211,7 @@ export default function DeliveryZoneList() {
                       className="text-red-600 hover:text-red-700 text-xs font-medium"
                       aria-label={`刪除區域 ${zone.name}`}
                     >
-                      {t('autoGen.admin.key559')}
+                      {t('deliveryZoneList.delete')}
                     </button>
                   </td>
                 </tr>

@@ -5,11 +5,11 @@ import { Link } from 'react-router-dom';
 export default function SettingsPermissions() {
   const { t } = useTranslation();
     const PERMISSION_KEYS = [
-      { key: 'UPDATE_GENERAL_SETTINGS', label: t('autoGen.admin.key1492'), desc: t('autoGen.admin.key1493') },
-      { key: 'UPDATE_ORDER_SETTINGS', label: t('autoGen.admin.key1494'), desc: t('autoGen.admin.key1495') },
-      { key: 'EXPORT_DATA', label: t('autoGen.admin.key1496'), desc: t('autoGen.admin.key1497') },
-      { key: 'MANAGE_ORDERS', label: t('autoGen.admin.key1498'), desc: t('autoGen.admin.key1499') },
-      { key: 'CANCEL_ORDERS', label: t('autoGen.admin.key1500'), desc: t('autoGen.admin.key1501') },
+      { key: 'UPDATE_GENERAL_SETTINGS', label: t('settingsPermissions.editGeneralSettings'), desc: t('settingsPermissions.editGeneralSettingsDescription') },
+      { key: 'UPDATE_ORDER_SETTINGS', label: t('settingsPermissions.editOrderSettings'), desc: t('settingsPermissions.editOrderSettingsDescription') },
+      { key: 'EXPORT_DATA', label: t('settingsPermissions.exportData'), desc: t('settingsPermissions.exportDataDescription') },
+      { key: 'MANAGE_ORDERS', label: t('settingsPermissions.orderProcessing'), desc: t('settingsPermissions.orderProcessingDescription') },
+      { key: 'CANCEL_ORDERS', label: t('settingsPermissions.cancelOrder'), desc: t('settingsPermissions.cancelOrderDescription') },
     ];
 
   const token = localStorage.getItem('token') || '';
@@ -49,13 +49,13 @@ export default function SettingsPermissions() {
       });
       const data = await res.json();
       if (data.success) {
-        setSuccess(t('autoGen.admin.key1502'));
+        setSuccess(t('settingsPermissions.permissionsUpdated'));
         setTimeout(() => setSuccess(''), 3000);
       } else {
-        setError(data.error || t('autoGen.admin.key1503'));
+        setError(data.error || t('settingsPermissions.saveFailed'));
       }
     } catch {
-      setError(t('autoGen.admin.key1504'));
+      setError(t('settingsPermissions.networkError'));
     } finally {
       setSaving(false);
     }
@@ -71,18 +71,18 @@ export default function SettingsPermissions() {
     }));
   };
 
-  if (loading) return <div className="p-6 text-gray-500">{t('autoGen.admin.key1505')}</div>;
+  if (loading) return <div className="p-6 text-gray-500">{t('settingsPermissions.loading')}</div>;
 
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <Link to="/settings" className="text-sm text-primary-600 hover:text-primary-700">{t('autoGen.admin.key1506')}</Link>
-          <h1 className="text-2xl font-bold text-gray-900 mt-1">{t('autoGen.admin.key1507')}</h1>
-          <p className="text-sm text-gray-500">{t('autoGen.admin.key1508')}</p>
+          <Link to="/settings" className="text-sm text-primary-600 hover:text-primary-700">{t('settingsPermissions.backToSettings')}</Link>
+          <h1 className="text-2xl font-bold text-gray-900 mt-1">{t('settingsPermissions.rolePermissionFineTuning')}</h1>
+          <p className="text-sm text-gray-500">{t('settingsPermissions.superAdminPermissionsImmutable')}</p>
         </div>
         <button onClick={handleSave} disabled={saving} className="px-6 py-2 bg-primary-600 text-white rounded-lg font-bold hover:bg-primary-700 transition-colors shadow-sm disabled:opacity-50">
-          {saving ? t('autoGen.admin.key1509') : t('autoGen.admin.key1510')}
+          {saving ? t('settingsPermissions.saving') : t('settingsPermissions.saveChanges')}
         </button>
       </div>
 
@@ -95,9 +95,9 @@ export default function SettingsPermissions() {
           <div className="bg-gray-50 p-4 border-b border-gray-200">
             <h2 className="font-bold text-gray-900 flex items-center gap-2">
               <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
-              {t('autoGen.admin.key1511')}
+              {t('settingsPermissions.roleManager')}
             </h2>
-            <p className="text-xs text-gray-500 mt-1">{t('autoGen.admin.key1512')}</p>
+            <p className="text-xs text-gray-500 mt-1">{t('settingsPermissions.manageDailyOperations')}</p>
           </div>
           <div className="p-4 space-y-4">
             {PERMISSION_KEYS.map(p => (
@@ -122,9 +122,9 @@ export default function SettingsPermissions() {
           <div className="bg-gray-50 p-4 border-b border-gray-200">
             <h2 className="font-bold text-gray-900 flex items-center gap-2">
               <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-              {t('autoGen.admin.key1513')}
+              {t('settingsPermissions.roleStaff')}
             </h2>
-            <p className="text-xs text-gray-500 mt-1">{t('autoGen.admin.key1514')}</p>
+            <p className="text-xs text-gray-500 mt-1">{t('settingsPermissions.staffResponsibilities')}</p>
           </div>
           <div className="p-4 space-y-4">
             {PERMISSION_KEYS.map(p => (
@@ -151,7 +151,7 @@ export default function SettingsPermissions() {
           disabled={saving}
           className="px-10 py-3 bg-primary-600 text-white rounded-xl font-bold hover:bg-primary-700 transition-all shadow-lg disabled:opacity-50"
         >
-          {saving ? t('autoGen.admin.key1515') : t('autoGen.admin.key1516')}
+          {saving ? t('settingsPermissions.saving') : t('settingsPermissions.saveAllPermissionSettings')}
         </button>
       </div>
     </div>
