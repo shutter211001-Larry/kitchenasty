@@ -1,7 +1,11 @@
 import logger from './logger.js';
 
-function getApiKey() {
-  return process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY;
+import prisma from './db.js';
+
+async function getApiKey() {
+  const siteSettings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
+  const googleSettings = siteSettings?.googleSettings ? (typeof siteSettings.googleSettings === 'string' ? JSON.parse(siteSettings.googleSettings) : siteSettings.googleSettings) : {};
+  return googleSettings.geminiApiKey || process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY;
 }
 
 let cachedOrderedModels: string[] | null = null;
@@ -107,7 +111,7 @@ export async function translateContent(
   targetLanguages: string[],
   sourceLanguage: string = 'its original language'
 ): Promise<TranslationResult> {
-  const apiKey = getApiKey();
+  const apiKey = await getApiKey();
   if (!apiKey) {
     logger.warn('AI Translation skipped: GEMINI_API_KEY not configured.');
     return {};
@@ -160,7 +164,7 @@ export async function translateFields(
   sourceLanguage: string = 'its original language'
 ): Promise<{ [key: string]: TranslationResult }> {
   try {
-    const apiKey = getApiKey();
+    const apiKey = await getApiKey();
     if (!apiKey) {
       logger.warn('AI Translation skipped: GEMINI_API_KEY not configured.');
       return {};
@@ -207,7 +211,7 @@ export async function translateFields(
  * Generic method to prompt Gemini and return a parsed JSON object
  */
 export async function generateGeminiObject(prompt: string): Promise<any> {
-  const apiKey = getApiKey();
+  const apiKey = await getApiKey();
   if (!apiKey) {
     throw new Error('GEMINI_API_KEY not configured.');
   }

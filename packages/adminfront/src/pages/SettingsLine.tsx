@@ -21,6 +21,19 @@ export default function SettingsLine() {
   const [channelAccessToken, setChannelAccessToken] = useState('');
   const [channelSecret, setChannelSecret] = useState('');
 
+  // LINE Login
+  const [lineLoginChannelId, setLineLoginChannelId] = useState('');
+  const [lineLoginChannelSecret, setLineLoginChannelSecret] = useState('');
+
+  // LINE Pay
+  const [linePayEnabled, setLinePayEnabled] = useState(false);
+  const [linePayChannelId, setLinePayChannelId] = useState('');
+  const [linePayChannelSecret, setLinePayChannelSecret] = useState('');
+  const [linePaySandbox, setLinePaySandbox] = useState(false);
+  const [linePayApiUrl, setLinePayApiUrl] = useState('');
+  const [linePayProxyUrl, setLinePayProxyUrl] = useState('');
+  const [linePayReturnUrl, setLinePayReturnUrl] = useState('');
+
   const [locations, setLocations] = useState<{ id: string; name: string }[]>([]);
   const [selectedLocationId, setSelectedLocationId] = useState('');
 
@@ -52,6 +65,15 @@ export default function SettingsLine() {
         setOfficialAccountUrl(res.data.officialAccountUrl || '');
         setChannelAccessToken(res.data.channelAccessToken || '');
         setChannelSecret(res.data.channelSecret || '');
+        setLineLoginChannelId(res.data.lineLoginChannelId || '');
+        setLineLoginChannelSecret(res.data.lineLoginChannelSecret || '');
+        setLinePayEnabled(res.data.linePayEnabled || false);
+        setLinePayChannelId(res.data.linePayChannelId || '');
+        setLinePayChannelSecret(res.data.linePayChannelSecret || '');
+        setLinePaySandbox(res.data.linePaySandbox || false);
+        setLinePayApiUrl(res.data.linePayApiUrl || '');
+        setLinePayProxyUrl(res.data.linePayProxyUrl || '');
+        setLinePayReturnUrl(res.data.linePayReturnUrl || '');
       }
     } catch (err) {
       console.error('Failed to fetch LINE settings');
@@ -67,7 +89,10 @@ export default function SettingsLine() {
     try {
       const url = selectedLocationId ? `/settings/line?locationId=${selectedLocationId}` : '/settings/line';
       await api.put(url, { 
-        liffId, officialAccountUrl, channelAccessToken, channelSecret 
+        liffId, officialAccountUrl, channelAccessToken, channelSecret,
+        lineLoginChannelId, lineLoginChannelSecret,
+        linePayEnabled, linePayChannelId, linePayChannelSecret, linePaySandbox,
+        linePayApiUrl, linePayProxyUrl, linePayReturnUrl
       });
       setSuccess('設定已儲存');
       fetchStatus();
@@ -226,6 +251,120 @@ export default function SettingsLine() {
               <p className="text-xs text-gray-500 mt-2">
                 請至 LINE Developers Console 的 <strong>LINE Login Channel</strong> 中建立 LIFF 應用程式以取得 LIFF ID。填寫此 ID 後，前台將會開啟「一鍵自動綁定」與「一鍵登入」功能。
               </p>
+            </div>
+          </div>
+          <div className="space-y-4 mt-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Channel ID (Login)</label>
+                <input
+                  type="text"
+                  value={lineLoginChannelId}
+                  onChange={(e) => setLineLoginChannelId(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500"
+                  placeholder="LINE Login Channel ID"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Channel Secret (Login)</label>
+                <input
+                  type="password"
+                  value={lineLoginChannelSecret}
+                  onChange={(e) => setLineLoginChannelSecret(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500"
+                  placeholder="已設定 (留白保持不變)"
+                />
+              </div>
+            </div>
+            <p className="text-xs text-gray-500">
+              若需要完整的 SSO (一鍵登入) 流程，除了 LIFF 外也可以填寫 LINE Login Channel ID 與 Secret 供後端驗證。
+            </p>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-gray-900">LINE Pay 整合設定</h2>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" className="sr-only peer" checked={linePayEnabled} onChange={(e) => setLinePayEnabled(e.target.checked)} />
+              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#00B900]"></div>
+              <span className="ml-3 text-sm font-medium text-gray-700">啟用 LINE Pay</span>
+            </label>
+          </div>
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Channel ID</label>
+                <input
+                  type="text"
+                  value={linePayChannelId}
+                  onChange={(e) => setLinePayChannelId(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#00B900]"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Channel Secret</label>
+                <input
+                  type="password"
+                  value={linePayChannelSecret}
+                  onChange={(e) => setLinePayChannelSecret(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#00B900]"
+                  placeholder="已設定 (留白保持不變)"
+                />
+              </div>
+            </div>
+            
+            <div className="pt-4 border-t border-gray-100">
+              <h3 className="text-sm font-semibold text-gray-800 mb-3">進階網址設定 (Advanced Routing)</h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">LINE Pay API URL</label>
+                  <input
+                    type="text"
+                    value={linePayApiUrl}
+                    onChange={(e) => setLinePayApiUrl(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-[#00B900]"
+                    placeholder="預設: https://api-pay.line.me"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Forward Proxy URL (Railway/固定IP代理用)</label>
+                  <input
+                    type="text"
+                    value={linePayProxyUrl}
+                    onChange={(e) => setLinePayProxyUrl(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-[#00B900]"
+                    placeholder="例如: http://proxy-user:pass@proxy-host:port (若不需要請留白)"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    由於 LINE Pay 需要綁定固定 IP (White-listed IP)，在 Railway 或 Vercel 環境中，您可以透過設定 Forward Proxy 來解決 IP 變動的問題。
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Return URL (自訂跳轉網址)</label>
+                  <input
+                    type="text"
+                    value={linePayReturnUrl}
+                    onChange={(e) => setLinePayReturnUrl(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-[#00B900]"
+                    placeholder="請留白以使用系統動態產生的 Return URL"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    建議留白，系統會自動處理結帳後的跳轉。僅在特定架構 (例如獨立的前後端分離跨域跳轉) 之下才需要強制指定。
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 pt-2">
+              <input
+                type="checkbox"
+                id="linePaySandbox"
+                checked={linePaySandbox}
+                onChange={(e) => setLinePaySandbox(e.target.checked)}
+                className="w-4 h-4 text-[#00B900] border-gray-300 rounded focus:ring-[#00B900]"
+              />
+              <label htmlFor="linePaySandbox" className="text-sm text-gray-700">啟用 Sandbox 測試模式</label>
             </div>
           </div>
         </div>

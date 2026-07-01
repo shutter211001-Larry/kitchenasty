@@ -27,6 +27,8 @@ import {
   updateLineSettings,
   getInvoiceSettings,
   updateInvoiceSettings,
+  getGoogleSettings,
+  updateGoogleSettings,
   debugSettings,
 } from '../controllers/settings.controller.js';
 
@@ -83,6 +85,10 @@ router.put('/advanced', authenticate, requireRole('SUPER_ADMIN'), updateAdvanced
 // Line — SUPER_ADMIN only
 router.get('/line', authenticate, requireRole('SUPER_ADMIN'), getLineSettings);
 router.put('/line', authenticate, requireRole('SUPER_ADMIN'), updateLineSettings);
+
+// Google — SUPER_ADMIN only
+router.get('/google', authenticate, requireRole('SUPER_ADMIN'), getGoogleSettings);
+router.put('/google', authenticate, requireRole('SUPER_ADMIN'), updateGoogleSettings);
 
 // Invoice — SUPER_ADMIN only
 router.get('/invoice', authenticate, requireRole('SUPER_ADMIN'), getInvoiceSettings);

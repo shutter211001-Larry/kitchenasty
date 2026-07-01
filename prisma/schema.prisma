@@ -572,6 +572,7 @@ model SiteSettings {
   lineSettings        Json?
   menuSection         Json?
   invoiceSettings     Json?
+  googleSettings      Json?
 
   @@map("site_settings")
 }

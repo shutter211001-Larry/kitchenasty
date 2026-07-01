@@ -15,10 +15,10 @@ export default function SettingsMail() {
   const [senderName, setSenderName] = useState('');
   const [senderEmail, setSenderEmail] = useState('');
   const [encryption, setEncryption] = useState<'none' | 'tls' | 'ssl'>('none');
+  const [emailBrandName, setEmailBrandName] = useState('');
+  const [emailHeaderColor, setEmailHeaderColor] = useState('#f97316');
+  const [emailBgColor, setEmailBgColor] = useState('#f3f4f6');
   const [mailServiceType, setMailServiceType] = useState<'SMTP' | 'GMAIL_API'>('SMTP');
-  const [gmailClientId, setGmailClientId] = useState('');
-  const [gmailClientSecret, setGmailClientSecret] = useState('');
-  const [gmailRefreshToken, setGmailRefreshToken] = useState('');
 
   const [testEmail, setTestEmail] = useState('');
   const [testSending, setTestSending] = useState(false);
@@ -53,10 +53,8 @@ export default function SettingsMail() {
           setSenderName(d.senderName || '');
           setSenderEmail(d.senderEmail || '');
           setEncryption(d.encryption || 'none');
-          setMailServiceType(d.mailServiceType || 'SMTP');
-          setGmailClientId(d.gmailClientId || '');
-          setGmailClientSecret(d.gmailClientSecret || '');
-          setGmailRefreshToken(d.gmailRefreshToken || '');
+          if (d.emailBgColor) setEmailBgColor(d.emailBgColor);
+          if (d.mailServiceType) setMailServiceType(d.mailServiceType);
         }
       })
       .catch(() => {})
@@ -80,18 +78,15 @@ export default function SettingsMail() {
           senderName,
           senderEmail,
           encryption,
+          emailHeaderColor,
+          emailBgColor,
           mailServiceType,
-          gmailClientId,
-          gmailClientSecret,
-          gmailRefreshToken,
         }),
       });
       const data = await res.json();
       if (data.success) {
         if (data.data?.smtpPass) setSmtpPass(data.data.smtpPass);
-        if (data.data?.gmailClientSecret) setGmailClientSecret(data.data.gmailClientSecret);
-        if (data.data?.gmailRefreshToken) setGmailRefreshToken(data.data.gmailRefreshToken);
-        setSuccess('郵件伺服器設定已更新');
+        setSuccess('設定已儲存 (系統已重新載入郵件設定)');
         setTimeout(() => setSuccess(''), 3000);
       } else {
         setError(typeof data.error === 'string' ? data.error : '儲存失敗');
@@ -156,7 +151,6 @@ export default function SettingsMail() {
         </button>
       </div>
 
-      {/* Branch Override Selector */}
       <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-4 mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-3">
           <span className="text-2xl">🏬</span>
@@ -193,7 +187,6 @@ export default function SettingsMail() {
       )}
 
       <div className="space-y-6">
-        {/* Section 1: SMTP server configuration */}
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 space-y-4 relative overflow-hidden">
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary-500 to-indigo-500"></div>
           <div className="flex items-center justify-between mb-4">
@@ -213,105 +206,48 @@ export default function SettingsMail() {
             </div>
           </div>
 
-          {mailServiceType === 'SMTP' ? (
-            <>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1.5">SMTP 主機 (Host)</label>
-              <input
-                type="text"
-                value={smtpHost}
-                onChange={(e) => setSmtpHost(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
-                placeholder="smtp.gmail.com"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1.5">SMTP 連接埠 (Port)</label>
-              <input
-                type="number"
-                value={smtpPort}
-                onChange={(e) => setSmtpPort(parseInt(e.target.value) || 587)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all font-mono"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1.5">SMTP 帳號 (User)</label>
-              <input
-                type="text"
-                value={smtpUser}
-                onChange={(e) => setSmtpUser(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
-                placeholder="user@example.com"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1.5">SMTP 密碼 (Password)</label>
-              <input
-                type="password"
-                value={smtpPass}
-                onChange={(e) => setSmtpPass(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
-                placeholder="••••••••••••"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1.5">加密方式 (Encryption)</label>
-              <select
-                value={encryption}
-                onChange={(e) => setEncryption(e.target.value as any)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all cursor-pointer font-medium"
-              >
-                <option value="none">無 (None) - Port 25 / 8025</option>
-                <option value="tls">STARTTLS - Port 587 (建議)</option>
-                <option value="ssl">SSL/TLS - Port 465</option>
-              </select>
-            </div>
-            <div className="flex items-center">
-              <p className="text-xs text-gray-400 mt-5 leading-relaxed bg-gray-50 p-3 rounded-xl border border-gray-100 w-full">
-                💡 <b>使用小常識：</b> Gmail 帳號請先至 Google 帳戶啟用「兩步驟驗證」，並為本系統產生一組專屬的 <b>「應用程式密碼」</b> 作為 SMTP 密碼登入。
-              </p>
-            </div>
-          </div>
-            </>
-          ) : (
-            <div className="space-y-4 bg-blue-50/50 p-4 rounded-xl border border-blue-100">
-              <p className="text-sm text-blue-700 font-medium mb-2">使用 Google Cloud 建立的 OAuth2 憑證來發送電子郵件，避免應用程式密碼被封鎖的問題。</p>
+          {mailServiceType === 'SMTP' && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-gray-100 pt-4">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Gmail Client ID</label>
-                <input
-                  type="text"
-                  value={gmailClientId}
-                  onChange={(e) => setGmailClientId(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 transition-all"
-                  placeholder="例如 123456789-abcdefg.apps.googleusercontent.com"
-                />
+                <label className="block text-sm font-medium text-gray-700 mb-1">SMTP Host</label>
+                <input type="text" value={smtpHost} onChange={(e) => setSmtpHost(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500" placeholder="例如 smtp.gmail.com" />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Gmail Client Secret</label>
-                <input
-                  type="password"
-                  value={gmailClientSecret}
-                  onChange={(e) => setGmailClientSecret(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 transition-all"
-                  placeholder="已設定 (留白保持不變)"
-                />
+                <label className="block text-sm font-medium text-gray-700 mb-1">SMTP Port</label>
+                <input type="number" value={smtpPort} onChange={(e) => setSmtpPort(Number(e.target.value))} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500" placeholder="例如 587" />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Gmail Refresh Token</label>
-                <input
-                  type="password"
-                  value={gmailRefreshToken}
-                  onChange={(e) => setGmailRefreshToken(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 transition-all"
-                  placeholder="已設定 (留白保持不變)"
-                />
+                <label className="block text-sm font-medium text-gray-700 mb-1">帳號 (User)</label>
+                <input type="text" value={smtpUser} onChange={(e) => setSmtpUser(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500" placeholder="您的信箱" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">密碼 (Password / App Password)</label>
+                <input type="password" value={smtpPass} onChange={(e) => setSmtpPass(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500" placeholder="已設定 (留白保持不變)" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">加密方式</label>
+                <select value={encryption} onChange={(e) => setEncryption(e.target.value as any)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 bg-white">
+                  <option value="none">無 (None)</option>
+                  <option value="tls">STARTTLS (通常為 587)</option>
+                  <option value="ssl">SSL/TLS (通常為 465)</option>
+                </select>
+              </div>
+            </div>
+          )}
+
+          {mailServiceType === 'GMAIL_API' && (
+            <div className="border-t border-gray-100 pt-4">
+              <div className="bg-blue-50 border border-blue-100 text-blue-800 p-4 rounded-xl flex items-start gap-3">
+                <div className="text-2xl">🔗</div>
+                <div>
+                  <h3 className="font-bold text-sm mb-1">前往 Google 整合設定</h3>
+                  <p className="text-sm">
+                    使用 Gmail API 寄信需要 Google OAuth 憑證。請前往 <strong>Google 整合設定</strong> 頁面填寫您的 Client ID、Client Secret 與 Refresh Token。
+                  </p>
+                  <a href="/settings/google" className="inline-block mt-3 px-4 py-2 bg-blue-600 text-white text-sm font-bold rounded-lg hover:bg-blue-700 transition-colors">
+                    設定 Gmail 憑證
+                  </a>
+                </div>
               </div>
             </div>
           )}

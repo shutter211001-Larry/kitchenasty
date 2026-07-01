@@ -66,7 +66,7 @@ import { metricsCollector } from './middleware/metricsCollector.js';
 // Initialize automation event listeners
 import './lib/events.js';
 
-export function createApp() {
+export async function createApp() {
   const app = express();
   // On Railway/Cloud providers, we trust the first proxy
   app.set('trust proxy', 1);
@@ -172,7 +172,7 @@ export function createApp() {
   app.use(express.urlencoded({ extended: true }));
 
   // Initialize passport for social login
-  initPassport();
+  await initPassport();
   app.use(passport.initialize());
 
   // Metrics collection (after passport so req.user is available)

@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { getStripe } from '../lib/stripe.js';
 import prisma from '../lib/db.js';
+import { getSettingsGroup } from './settings.controller.js';
 import { createPayPalOrder, capturePayPalOrder } from '../lib/paypal.js';
 import { emitOrderStatusUpdate } from '../lib/socket.js';
 import { LinePayClient } from '../lib/linepay.js';
@@ -260,14 +261,13 @@ export async function createLinePayPayment(req: Request, res: Response): Promise
   }
 
   try {
-    const siteSettings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
-    const paymentSettings = siteSettings?.paymentSettings ? (typeof siteSettings.paymentSettings === 'string' ? JSON.parse(siteSettings.paymentSettings) : siteSettings.paymentSettings) : {};
-
+    const lineSettings = await getSettingsGroup('lineSettings');
+    
     const linePay = new LinePayClient({
-      channelId: paymentSettings.linePayChannelId,
-      channelSecret: paymentSettings.linePayChannelSecret,
-      apiUrl: paymentSettings.linePayApiUrl,
-      proxyUrl: paymentSettings.linePayProxyUrl,
+      channelId: lineSettings.linePayChannelId || process.env.LINE_PAY_CHANNEL_ID || '',
+      channelSecret: lineSettings.linePayChannelSecret || process.env.LINE_PAY_CHANNEL_SECRET || '',
+      apiUrl: lineSettings.linePayApiUrl || process.env.LINE_PAY_API_URL,
+      proxyUrl: lineSettings.linePayProxyUrl || process.env.LINE_PAY_PROXY_URL,
     });
     
     const storefrontBaseUrl = process.env.VITE_STORE_URL_PUBLIC || process.env.STORE_URL_PUBLIC || 'http://localhost:5174';
@@ -279,17 +279,13 @@ export async function createLinePayPayment(req: Request, res: Response): Promise
     
     const queryString = queryParams.toString() ? `?${queryParams.toString()}` : '';
     const defaultReturnUrl = `${baseUrl}/checkout/linepay/confirm`;
-    const baseReturnUrl = paymentSettings.linePayReturnUrl || defaultReturnUrl;
+    const baseReturnUrl = lineSettings.linePayReturnUrl || defaultReturnUrl;
     const returnUrl = `${baseReturnUrl.replace(/\/$/, '')}${queryString}`;
 
     let currencyDecimals = 0;
-    if (siteSettings && siteSettings.generalSettings) {
-      const general = typeof siteSettings.generalSettings === 'string' 
-        ? JSON.parse(siteSettings.generalSettings) 
-        : siteSettings.generalSettings;
-      if ((general as any).currencyDecimals !== undefined) {
-        currencyDecimals = Number((general as any).currencyDecimals);
-      }
+    const generalSettings = await getSettingsGroup('generalSettings');
+    if (generalSettings && generalSettings.currencyDecimals !== undefined) {
+      currencyDecimals = Number(generalSettings.currencyDecimals);
     }
     const roundPrice = (val: number) => Number(val.toFixed(currencyDecimals));
 
@@ -396,14 +392,13 @@ export async function confirmLinePayPayment(req: Request, res: Response): Promis
        return;
     }
 
-    const siteSettings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
-    const paymentSettings = siteSettings?.paymentSettings ? (typeof siteSettings.paymentSettings === 'string' ? JSON.parse(siteSettings.paymentSettings) : siteSettings.paymentSettings) : {};
+    const lineSettings = await getSettingsGroup('lineSettings');
 
     const linePay = new LinePayClient({
-      channelId: paymentSettings.linePayChannelId,
-      channelSecret: paymentSettings.linePayChannelSecret,
-      apiUrl: paymentSettings.linePayApiUrl,
-      proxyUrl: paymentSettings.linePayProxyUrl,
+      channelId: lineSettings.linePayChannelId || process.env.LINE_PAY_CHANNEL_ID || '',
+      channelSecret: lineSettings.linePayChannelSecret || process.env.LINE_PAY_CHANNEL_SECRET || '',
+      apiUrl: lineSettings.linePayApiUrl || process.env.LINE_PAY_API_URL,
+      proxyUrl: lineSettings.linePayProxyUrl || process.env.LINE_PAY_PROXY_URL,
     });
     const payload = {
       amount: payment.amount,

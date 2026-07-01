@@ -4,13 +4,17 @@ import { initSocket } from './lib/socket.js';
 import { serverLogger } from './lib/logger.js';
 
 const PORT = process.env.PORT || 3000;
-const app = createApp();
-const httpServer = createServer(app);
+createApp().then(app => {
+  const httpServer = createServer(app);
 
-initSocket(httpServer);
+  initSocket(httpServer);
 
-const HOST = process.env.HOST || '::';
+  const HOST = process.env.HOST || '::';
 
-httpServer.listen(Number(PORT), HOST, () => {
-  serverLogger.info(`夏特點餐系統服務器已啟動：http://${HOST === '::' ? '[::]' : HOST}:${PORT}`);
+  httpServer.listen(Number(PORT), HOST, () => {
+    serverLogger.info(`夏特點餐系統服務器已啟動：http://${HOST === '::' ? '[::]' : HOST}:${PORT}`);
+  });
+}).catch(err => {
+  console.error("Failed to start server:", err);
+  process.exit(1);
 });

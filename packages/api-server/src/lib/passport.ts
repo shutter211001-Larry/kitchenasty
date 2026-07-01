@@ -5,14 +5,21 @@ import { grantRegistrationBonus } from './registrationBonus.js';
 
 const prisma = new PrismaClient();
 
-export const initPassport = () => {
+export const initPassport = async () => {
+  // Fetch settings from DB
+  const siteSettings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
+  const googleSettings = siteSettings?.googleSettings ? (typeof siteSettings.googleSettings === 'string' ? JSON.parse(siteSettings.googleSettings) : siteSettings.googleSettings) : {};
+
+  const googleClientId = googleSettings.googleLoginClientId || process.env.GOOGLE_LOGIN_CLIENT_ID;
+  const googleClientSecret = googleSettings.googleLoginClientSecret || process.env.GOOGLE_LOGIN_CLIENT_SECRET;
+
   // Google Strategy for Customers
-  if (process.env.GOOGLE_LOGIN_CLIENT_ID && process.env.GOOGLE_LOGIN_CLIENT_SECRET) {
+  if (googleClientId && googleClientSecret) {
     passport.use(
       new GoogleStrategy(
         {
-          clientID: process.env.GOOGLE_LOGIN_CLIENT_ID,
-          clientSecret: process.env.GOOGLE_LOGIN_CLIENT_SECRET,
+          clientID: googleClientId,
+          clientSecret: googleClientSecret,
           callbackURL: `${(process.env.API_URL_PUBLIC || 'http://localhost:3000').replace(/\/$/, '')}/api/auth/google/callback`,
           passReqToCallback: true,
         },

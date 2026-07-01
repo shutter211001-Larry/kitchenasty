@@ -106,7 +106,6 @@ export default function SettingsAdvanced() {
   const [maintenanceMessage, setMaintenanceMessage] = useState('');
   const [enableRateLimiting, setEnableRateLimiting] = useState(false);
   const [inventorySyncFrequency, setInventorySyncFrequency] = useState('6h');
-  const [geminiApiKey, setGeminiApiKey] = useState('');
 
   useEffect(() => {
     fetch('/api/settings/advanced', { headers: { Authorization: `Bearer ${token}` } })
@@ -118,7 +117,6 @@ export default function SettingsAdvanced() {
           if (d.maintenanceMessage) setMaintenanceMessage(d.maintenanceMessage);
           if (d.enableRateLimiting !== undefined) setEnableRateLimiting(d.enableRateLimiting);
           if (d.inventorySyncFrequency) setInventorySyncFrequency(d.inventorySyncFrequency);
-          if (d.geminiApiKey) setGeminiApiKey(d.geminiApiKey);
         }
       })
       .catch(() => {})
@@ -138,12 +136,10 @@ export default function SettingsAdvanced() {
           maintenanceMessage,
           enableRateLimiting,
           inventorySyncFrequency,
-          geminiApiKey,
         }),
       });
       const data = await res.json();
       if (data.success) {
-        if (data.data?.geminiApiKey) setGeminiApiKey(data.data.geminiApiKey);
         setSuccess('進階設定已更新');
         setTimeout(() => setSuccess(''), 3000);
       } else {
@@ -277,24 +273,20 @@ export default function SettingsAdvanced() {
           </div>
         </div>
 
-        {/* Section 1.5: AI Integration */}
-        <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm space-y-4 relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500 to-pink-500"></div>
-          <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-            ✨ AI 與進階整合
-          </h2>
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1.5">Gemini API Key</label>
-            <input
-              type="password"
-              value={geminiApiKey}
-              onChange={(e) => setGeminiApiKey(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
-              placeholder="已設定 (留白保持不變)"
-            />
-            <p className="text-xs text-gray-500 mt-2">
-              Google Gemini 的 API 憑證，用於驅動系統內的各項 AI 助理功能（例如：食譜產生、數據洞察等）。
-            </p>
+        {/* Google Integrations Redirect Info */}
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-indigo-500"></div>
+          <div className="flex items-start gap-4">
+            <div className="text-3xl">🌐</div>
+            <div>
+              <h2 className="text-lg font-bold text-gray-900 mb-1">Google 整合服務 (Gemini AI, SSO)</h2>
+              <p className="text-sm text-gray-500 mb-3">
+                Gemini AI 金鑰、第三方登入 (Google SSO) 以及其他 Google 服務已移至專屬設定頁面。
+              </p>
+              <a href="/settings/google" className="inline-block px-4 py-2 bg-blue-50 text-blue-700 text-sm font-bold rounded-lg border border-blue-100 hover:bg-blue-100 transition-colors">
+                前往 Google 整合設定
+              </a>
+            </div>
           </div>
         </div>
 

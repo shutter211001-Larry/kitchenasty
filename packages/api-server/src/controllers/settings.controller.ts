@@ -313,14 +313,15 @@ type SettingsField =
   | 'reviewSettings'
   | 'advancedSettings'
   | 'invoiceSettings'
-  | 'lineSettings';
+  | 'lineSettings'
+  | 'googleSettings';
 
-async function getSettingsGroup(field: SettingsField): Promise<Record<string, any>> {
+export async function getSettingsGroup(field: SettingsField): Promise<Record<string, any>> {
   const settings = await getOrCreateSettings();
   return (settings[field] as Record<string, any>) || {};
 }
 
-async function updateSettingsGroup(field: SettingsField, data: Record<string, any>): Promise<Record<string, any>> {
+export async function updateSettingsGroup(field: SettingsField, data: Record<string, any>): Promise<Record<string, any>> {
   await getOrCreateSettings();
   const updated = await prisma.siteSettings.update({
     where: { id: 'default' },
@@ -402,9 +403,6 @@ const mailSettingsSchema = z.object({
   emailHeaderColor: z.string().optional(),
   emailBgColor: z.string().optional(),
   mailServiceType: z.enum(['SMTP', 'GMAIL_API']).optional(),
-  gmailClientId: z.string().optional(),
-  gmailClientSecret: z.string().optional(),
-  gmailRefreshToken: z.string().optional(),
 });
 
 const lineSettingsSchema = z.object({
@@ -412,10 +410,19 @@ const lineSettingsSchema = z.object({
   officialAccountUrl: z.string().optional(),
   channelAccessToken: z.string().optional(),
   channelSecret: z.string().optional(),
+  lineLoginChannelId: z.string().optional(),
+  lineLoginChannelSecret: z.string().optional(),
   notifications: z.record(z.object({
     enabled: z.boolean().optional(),
     message: z.string().optional(),
   })).optional(),
+  linePayEnabled: z.boolean().optional(),
+  linePayChannelId: z.string().optional(),
+  linePayChannelSecret: z.string().optional(),
+  linePaySandbox: z.boolean().optional(),
+  linePayApiUrl: z.string().optional(),
+  linePayProxyUrl: z.string().optional(),
+  linePayReturnUrl: z.string().optional(),
 });
 
 const paymentSettingsSchema = z.object({
@@ -428,13 +435,6 @@ const paymentSettingsSchema = z.object({
   paypalClientSecret: z.string().optional(),
   paypalSandbox: z.boolean().optional(),
   cashEnabled: z.boolean().optional(),
-  linePayEnabled: z.boolean().optional(),
-  linePayChannelId: z.string().optional(),
-  linePayChannelSecret: z.string().optional(),
-  linePaySandbox: z.boolean().optional(),
-  linePayApiUrl: z.string().optional(),
-  linePayProxyUrl: z.string().optional(),
-  linePayReturnUrl: z.string().optional(),
 });
 
 const reviewSettingsSchema = z.object({
@@ -453,7 +453,16 @@ const advancedSettingsSchema = z.object({
     isRedeemable: z.boolean(),
     maxRedemptionAmount: z.number(),
   })).optional(),
+});
+
+const googleSettingsSchema = z.object({
   geminiApiKey: z.string().optional(),
+  googleLoginClientId: z.string().optional(),
+  googleLoginClientSecret: z.string().optional(),
+  gmailClientId: z.string().optional(),
+  gmailClientSecret: z.string().optional(),
+  gmailRefreshToken: z.string().optional(),
+  googleMapsApiKey: z.string().optional(),
 });
 
 const invoiceSettingsSchema = z.object({
@@ -573,8 +582,6 @@ export async function updateMailSettings(req: Request, res: Response): Promise<v
       ...existingMail,
       ...parsed.data,
       smtpPass: preserveIfMasked(parsed.data.smtpPass, existingMail.smtpPass),
-      gmailClientSecret: preserveIfMasked(parsed.data.gmailClientSecret, existingMail.gmailClientSecret),
-      gmailRefreshToken: preserveIfMasked(parsed.data.gmailRefreshToken, existingMail.gmailRefreshToken),
     };
 
     overrides[locationId] = {
@@ -639,13 +646,15 @@ export async function sendTestEmail(req: Request, res: Response): Promise<void> 
     mail = overrides[locationId]?.mailSettings || mail;
   }
   
+  const googleSettings = await getSettingsGroup('googleSettings');
+
   // Use environment variables for sensitive OAuth2 data if available
   const serviceType = process.env.MAIL_SERVICE_TYPE || 'SMTP';
   const oauth2Config = {
     user: mail.smtpUser || process.env.SMTP_USER,
-    clientId: process.env.GOOGLE_CLIENT_ID,
-    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    refreshToken: process.env.GOOGLE_REFRESH_TOKEN,
+    clientId: googleSettings.gmailClientId || process.env.GOOGLE_CLIENT_ID,
+    clientSecret: googleSettings.gmailClientSecret || process.env.GOOGLE_CLIENT_SECRET,
+    refreshToken: googleSettings.gmailRefreshToken || process.env.GOOGLE_REFRESH_TOKEN,
   };
 
   const host = (mail.smtpHost || process.env.SMTP_HOST || 'localhost').trim();
@@ -772,7 +781,6 @@ export async function getPaymentSettings(_req: Request, res: Response): Promise<
       stripeSecretKey: maskSecret(data.stripeSecretKey),
       stripeWebhookSecret: maskSecret(data.stripeWebhookSecret),
       paypalClientSecret: maskSecret(data.paypalClientSecret),
-      linePayChannelSecret: maskSecret(data.linePayChannelSecret),
     },
   });
 }
@@ -790,7 +798,6 @@ export async function updatePaymentSettings(req: Request, res: Response): Promis
     stripeSecretKey: preserveIfMasked(parsed.data.stripeSecretKey, existing.stripeSecretKey),
     stripeWebhookSecret: preserveIfMasked(parsed.data.stripeWebhookSecret, existing.stripeWebhookSecret),
     paypalClientSecret: preserveIfMasked(parsed.data.paypalClientSecret, existing.paypalClientSecret),
-    linePayChannelSecret: preserveIfMasked(parsed.data.linePayChannelSecret, existing.linePayChannelSecret),
   };
 
   const data = await updateSettingsGroup('paymentSettings', mergedData);
@@ -801,7 +808,6 @@ export async function updatePaymentSettings(req: Request, res: Response): Promis
       stripeSecretKey: maskSecret(data.stripeSecretKey),
       stripeWebhookSecret: maskSecret(data.stripeWebhookSecret),
       paypalClientSecret: maskSecret(data.paypalClientSecret),
-      linePayChannelSecret: maskSecret(data.linePayChannelSecret),
     },
   });
 }
@@ -836,6 +842,7 @@ export async function getAdvancedSettings(_req: Request, res: Response): Promise
     data: {
       ...data,
       geminiApiKey: maskSecret(data.geminiApiKey),
+      googleLoginClientSecret: maskSecret(data.googleLoginClientSecret),
     },
   });
 }
@@ -850,7 +857,6 @@ export async function updateAdvancedSettings(req: Request, res: Response): Promi
   const mergedData = {
     ...existing,
     ...parsed.data,
-    geminiApiKey: preserveIfMasked(parsed.data.geminiApiKey, existing.geminiApiKey),
     loyaltyRedemptionRules: {
       ...(existing.loyaltyRedemptionRules || {}),
       ...(parsed.data.loyaltyRedemptionRules || {}),
@@ -862,6 +868,7 @@ export async function updateAdvancedSettings(req: Request, res: Response): Promi
     data: {
       ...data,
       geminiApiKey: maskSecret(data.geminiApiKey),
+      googleLoginClientSecret: maskSecret(data.googleLoginClientSecret),
     },
   });
 }
@@ -911,6 +918,8 @@ export async function updateLineSettings(req: Request, res: Response): Promise<v
       ...parsed.data,
       channelAccessToken: preserveIfMasked(parsed.data.channelAccessToken, existingLine.channelAccessToken),
       channelSecret: preserveIfMasked(parsed.data.channelSecret, existingLine.channelSecret),
+      lineLoginChannelSecret: preserveIfMasked(parsed.data.lineLoginChannelSecret, existingLine.lineLoginChannelSecret),
+      linePayChannelSecret: preserveIfMasked(parsed.data.linePayChannelSecret, existingLine.linePayChannelSecret),
     };
 
     overrides[locationId] = {
@@ -929,6 +938,8 @@ export async function updateLineSettings(req: Request, res: Response): Promise<v
         ...mergedData,
         channelAccessToken: maskSecret(mergedData.channelAccessToken),
         channelSecret: maskSecret(mergedData.channelSecret),
+        lineLoginChannelSecret: maskSecret(mergedData.lineLoginChannelSecret),
+        linePayChannelSecret: maskSecret(mergedData.linePayChannelSecret),
       },
     });
     return;
@@ -940,6 +951,8 @@ export async function updateLineSettings(req: Request, res: Response): Promise<v
     ...parsed.data,
     channelAccessToken: preserveIfMasked(parsed.data.channelAccessToken, existing.channelAccessToken),
     channelSecret: preserveIfMasked(parsed.data.channelSecret, existing.channelSecret),
+    lineLoginChannelSecret: preserveIfMasked(parsed.data.lineLoginChannelSecret, existing.lineLoginChannelSecret),
+    linePayChannelSecret: preserveIfMasked(parsed.data.linePayChannelSecret, existing.linePayChannelSecret),
   };
 
   const data = await updateSettingsGroup('lineSettings', mergedData);
@@ -990,6 +1003,56 @@ export async function updateInvoiceSettings(req: Request, res: Response): Promis
       ...data,
       hashKey: maskSecret(data.hashKey),
       hashIv: maskSecret(data.hashIv),
+    },
+  });
+}
+
+// ============================================================
+// GOOGLE SETTINGS
+// ============================================================
+
+export async function getGoogleSettings(_req: Request, res: Response): Promise<void> {
+  const data = await getSettingsGroup('googleSettings');
+  res.json({
+    success: true,
+    data: {
+      ...data,
+      geminiApiKey: maskSecret(data.geminiApiKey),
+      googleLoginClientSecret: maskSecret(data.googleLoginClientSecret),
+      gmailClientSecret: maskSecret(data.gmailClientSecret),
+      gmailRefreshToken: maskSecret(data.gmailRefreshToken),
+      googleMapsApiKey: maskSecret(data.googleMapsApiKey),
+    },
+  });
+}
+
+export async function updateGoogleSettings(req: Request, res: Response): Promise<void> {
+  const parsed = googleSettingsSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ success: false, error: parsed.error.errors });
+    return;
+  }
+
+  const existing = await getSettingsGroup('googleSettings');
+  const mergedData = {
+    ...parsed.data,
+    geminiApiKey: preserveIfMasked(parsed.data.geminiApiKey, existing.geminiApiKey),
+    googleLoginClientSecret: preserveIfMasked(parsed.data.googleLoginClientSecret, existing.googleLoginClientSecret),
+    gmailClientSecret: preserveIfMasked(parsed.data.gmailClientSecret, existing.gmailClientSecret),
+    gmailRefreshToken: preserveIfMasked(parsed.data.gmailRefreshToken, existing.gmailRefreshToken),
+    googleMapsApiKey: preserveIfMasked(parsed.data.googleMapsApiKey, existing.googleMapsApiKey),
+  };
+
+  const data = await updateSettingsGroup('googleSettings', mergedData);
+  res.json({
+    success: true,
+    data: {
+      ...data,
+      geminiApiKey: maskSecret(data.geminiApiKey),
+      googleLoginClientSecret: maskSecret(data.googleLoginClientSecret),
+      gmailClientSecret: maskSecret(data.gmailClientSecret),
+      gmailRefreshToken: maskSecret(data.gmailRefreshToken),
+      googleMapsApiKey: maskSecret(data.googleMapsApiKey),
     },
   });
 }

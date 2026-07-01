@@ -23,8 +23,12 @@ async function getMailConfig(locationId?: string | null): Promise<{ transporter:
   let senderEmail = 'noreply@shutterorder.com';
   let requireTLS = false;
 
+  let googleSettings: any = {};
   try {
     const settings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
+    googleSettings = settings?.googleSettings || {};
+    if (typeof googleSettings === 'string') googleSettings = JSON.parse(googleSettings);
+    
     let mail = (settings?.mailSettings as Record<string, any>) || {};
 
     if (locationId) {
@@ -50,17 +54,21 @@ async function getMailConfig(locationId?: string | null): Promise<{ transporter:
   const from = process.env.EMAIL_FROM || `${senderName} <${senderEmail}>`;
   const serviceType = process.env.MAIL_SERVICE_TYPE || 'SMTP';
 
+  const gmailClientId = googleSettings.gmailClientId || process.env.GOOGLE_CLIENT_ID;
+  const gmailClientSecret = googleSettings.gmailClientSecret || process.env.GOOGLE_CLIENT_SECRET;
+  const gmailRefreshToken = googleSettings.gmailRefreshToken || process.env.GOOGLE_REFRESH_TOKEN;
+
   let transporter: Transporter;
 
-  if (serviceType === 'GMAIL_API' && process.env.GOOGLE_CLIENT_ID) {
+  if (serviceType === 'GMAIL_API' && gmailClientId) {
     transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
         type: 'OAuth2',
         user: user || process.env.SMTP_USER,
-        clientId: process.env.GOOGLE_CLIENT_ID,
-        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        refreshToken: process.env.GOOGLE_REFRESH_TOKEN,
+        clientId: gmailClientId,
+        clientSecret: gmailClientSecret,
+        refreshToken: gmailRefreshToken,
       },
     });
   } else {
@@ -261,14 +269,25 @@ function encodeFromHeader(fromStr: string): string {
 }
 
 async function sendGmailApiEmail(options: EmailOptions & { erpBranding?: any }) {
+  let googleSettings: any = {};
+  try {
+    const settings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
+    googleSettings = settings?.googleSettings || {};
+    if (typeof googleSettings === 'string') googleSettings = JSON.parse(googleSettings);
+  } catch {}
+
+  const gmailClientId = googleSettings.gmailClientId || process.env.GOOGLE_CLIENT_ID;
+  const gmailClientSecret = googleSettings.gmailClientSecret || process.env.GOOGLE_CLIENT_SECRET;
+  const gmailRefreshToken = googleSettings.gmailRefreshToken || process.env.GOOGLE_REFRESH_TOKEN;
+
   // Get Access Token
   const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({
-      client_id: process.env.GOOGLE_CLIENT_ID!,
-      client_secret: process.env.GOOGLE_CLIENT_SECRET!,
-      refresh_token: process.env.GOOGLE_REFRESH_TOKEN!,
+      client_id: gmailClientId!,
+      client_secret: gmailClientSecret!,
+      refresh_token: gmailRefreshToken!,
       grant_type: 'refresh_token',
     }),
   });
