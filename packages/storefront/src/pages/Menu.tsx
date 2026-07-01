@@ -44,10 +44,7 @@ interface MenuResponse {
   pagination: { page: number; limit: number; total: number; totalPages: number };
 }
 
-export default function Menu() {
-  const { t } = useTranslation();
-
-  const { t, i18n } = useTranslation();
+export default function Menu() {const { t, i18n } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   
   // Read state directly from URL search parameters (Single Source of Truth)

@@ -41,7 +41,7 @@ interface LocationData {
   lng?: number;
 }
 
-const defaultHours: OperatingHour[] = DAYS.map((_, i) => ({
+const defaultHours: OperatingHour[] = Array.from({ length: 7 }).map((_, i: number) => ({
   dayOfWeek: i,
   openTime: '10:00',
   closeTime: '22:00',
@@ -71,6 +71,7 @@ const emptyLocation: LocationData = {
 };
 
 export default function LocationForm() {
+  const { t } = useTranslation();
     const DAYS = [t('autoGen.admin.key758'), t('autoGen.admin.key759'), t('autoGen.admin.key760'), t('autoGen.admin.key761'), t('autoGen.admin.key762'), t('autoGen.admin.key763'), t('autoGen.admin.key764')];
 
   const { id } = useParams();
@@ -148,9 +149,7 @@ export default function LocationForm() {
   }, [id, isEdit]);
 
   const updateField = (field: keyof LocationData, value: any) => {
-  const { t } = useTranslation();
-
-    setForm((prev) => ({ ...prev, [field]: value }));
+  setForm((prev) => ({ ...prev, [field]: value }));
   };
 
   const autoSlug = (name: string) => {

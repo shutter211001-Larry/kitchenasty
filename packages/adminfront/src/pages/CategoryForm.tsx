@@ -51,6 +51,7 @@ const emptyCategory: CategoryData = {
 };
 
 export default function CategoryForm() {
+  const { t } = useTranslation();
     const LANGUAGES = [
       { code: 'zh-TW', label: t('autoGen.admin.key148') },
       { code: 'en', label: t('autoGen.admin.key149') },
@@ -128,9 +129,7 @@ export default function CategoryForm() {
   }, [id, isEdit]);
 
   const updateField = (field: keyof CategoryData, value: any) => {
-  const { t } = useTranslation();
-
-    setForm((prev) => ({ ...prev, [field]: value }));
+  setForm((prev) => ({ ...prev, [field]: value }));
   };
 
   const autoSlug = (name: string) => {

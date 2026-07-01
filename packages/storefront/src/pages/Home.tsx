@@ -9,10 +9,7 @@ import { ctaVariants } from '../templates/ctas/index.js';
 import type { TemplateId } from '../templates/index.js';
 import { getTranslated } from '../utils/translation.js';
 
-export default function Home() {
-  const { t } = useTranslation();
-
-  const { t, i18n } = useTranslation();
+export default function Home() {const { t, i18n } = useTranslation();
   const { settings } = useTheme();
   const { user } = useAuth();
   const lang = i18n.language;

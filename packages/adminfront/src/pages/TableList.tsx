@@ -17,6 +17,7 @@ interface LocationInfo {
 }
 
 export default function TableList() {
+  const { t } = useTranslation();
   const { locationId } = useParams();
   const navigate = useNavigate();
   const [tables, setTables] = useState<Table[]>([]);
@@ -32,9 +33,7 @@ export default function TableList() {
   const [storefrontUrl, setStorefrontUrl] = useState('');
 
   const fetchTables = () => {
-  const { t } = useTranslation();
-
-    setLoading(true);
+  setLoading(true);
     Promise.all([
       api.get<{ data: LocationInfo }>(`/locations/${locationId}`),
       api.get<{ data: Table[] }>(`/locations/${locationId}/tables`),

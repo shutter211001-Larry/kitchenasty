@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
 export default function SettingsPermissions() {
+  const { t } = useTranslation();
     const PERMISSION_KEYS = [
       { key: 'UPDATE_GENERAL_SETTINGS', label: t('autoGen.admin.key1492'), desc: t('autoGen.admin.key1493') },
       { key: 'UPDATE_ORDER_SETTINGS', label: t('autoGen.admin.key1494'), desc: t('autoGen.admin.key1495') },
@@ -61,9 +62,7 @@ export default function SettingsPermissions() {
   }
 
   const togglePermission = (role: string, key: string) => {
-  const { t } = useTranslation();
-
-    setPermissions(prev => ({
+  setPermissions(prev => ({
       ...prev,
       [role]: {
         ...prev[role],

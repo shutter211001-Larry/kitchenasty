@@ -20,11 +20,7 @@ export default function ModernCta({ cta, t, lang = 'zh-TW' }: CtaProps) {
 
   if (user || (!settings.showMembership && (!cta?.buttonLink || cta.buttonLink === '/register'))) {
     return null;
-  }
-
-  const { t } = useTranslation();
-
-  return (
+  }return (
     <section className="relative py-24 overflow-hidden bg-gray-100 dark:bg-gray-900">
       {/* Geometric background pattern */}
       <div className="absolute inset-0 opacity-[0.04] dark:opacity-[0.06]">

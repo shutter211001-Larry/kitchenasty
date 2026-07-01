@@ -14,10 +14,7 @@ const defaultIcons: Record<string, React.ReactNode> = {
   calendar: <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>,
 };
 
-export default function BoldFeatures({ features, t, lang = 'zh-TW' }: FeaturesProps) {
-  const { t } = useTranslation();
-
-  const { settings } = useTheme();
+export default function BoldFeatures({ features, t, lang = 'zh-TW' }: FeaturesProps) {const { settings } = useTheme();
 
   const items = features?.length ? features.filter(f => {
               if (!settings.navShowLocations && (f.title.includes(t('autoGen.store.key105')) || f.title.includes(t('autoGen.store.key106')) || f.title.includes(t('autoGen.store.key107')))) return false;

@@ -41,10 +41,7 @@ function getStepIndex(steps: { key: string; label: string }[], status: string): 
 import { getTranslated } from '../utils/translation.js';
 import { useRecentOrders } from '../hooks/useRecentOrders.js';
 
-export default function OrderStatus() {
-  const { t } = useTranslation();
-
-  const { t, i18n } = useTranslation();
+export default function OrderStatus() {const { t, i18n } = useTranslation();
   const { id } = useParams();
   const { token, user, logout } = useAuth();
   const { settings } = useTheme();

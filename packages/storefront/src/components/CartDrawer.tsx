@@ -4,10 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useCart } from '../context/CartContext.js';
 import { getTranslated } from '../utils/translation.js';
 
-export default function CartDrawer() {
-  const { t } = useTranslation();
-
-  const { t, i18n } = useTranslation();
+export default function CartDrawer() {const { t, i18n } = useTranslation();
   const { items, isOpen, setIsOpen, updateQuantity, removeItem, clear, subtotal } = useCart();
 
   const handleKeyDown = useCallback(

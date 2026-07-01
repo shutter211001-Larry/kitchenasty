@@ -20,11 +20,7 @@ export default function BoldCta({ cta, t, lang = 'zh-TW' }: CtaProps) {
 
   if (user || (!settings.showMembership && (!cta?.buttonLink || cta.buttonLink === '/register'))) {
     return null;
-  }
-
-  const { t } = useTranslation();
-
-  return (
+  }return (
     <section className="bg-gray-950 py-20 md:py-28">
       <div className="max-w-5xl mx-auto px-4 text-center">
         <h2 className="text-4xl md:text-6xl font-black text-white tracking-tight mb-6 uppercase">

@@ -20,11 +20,7 @@ export default function RusticCta({ cta, t, lang = 'zh-TW' }: CtaProps) {
 
   if (user || (!settings.showMembership && (!cta?.buttonLink || cta.buttonLink === '/register'))) {
     return null;
-  }
-
-  const { t } = useTranslation();
-
-  return (
+  }return (
     <section className="py-20 bg-stone-100 dark:bg-stone-900/40">
       <div className="max-w-4xl mx-auto px-4">
         <div

@@ -20,11 +20,7 @@ export default function CozyCta({ cta, t, lang = 'zh-TW' }: CtaProps) {
 
   if (user || (!settings.showMembership && (!cta?.buttonLink || cta.buttonLink === '/register'))) {
     return null;
-  }
-
-  const { t } = useTranslation();
-
-  return (
+  }return (
     <section className="py-20 bg-amber-50 dark:bg-amber-950/20">
       <div className="max-w-4xl mx-auto px-4">
         <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-sm border border-amber-100 dark:border-amber-900/30 px-8 py-14 md:px-16 text-center">

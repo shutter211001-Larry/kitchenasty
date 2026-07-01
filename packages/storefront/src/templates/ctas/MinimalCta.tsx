@@ -20,11 +20,7 @@ export default function MinimalCta({ cta, t, lang = 'zh-TW' }: CtaProps) {
 
   if (user || (!settings.showMembership && (!cta?.buttonLink || cta.buttonLink === '/register'))) {
     return null;
-  }
-
-  const { t } = useTranslation();
-
-  return (
+  }return (
     <section className="py-20">
       <div className="max-w-2xl mx-auto px-4 text-center">
         <h2 className="text-2xl font-normal text-gray-900 dark:text-white mb-3">

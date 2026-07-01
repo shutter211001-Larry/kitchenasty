@@ -70,11 +70,7 @@ export default function CookieBanner() {
   }, [preferences, saveConsent]);
 
   // Allow reopening via custom event (used by Footer "Cookie Settings" link)
-  if (!visible) return null;
-
-  const { t } = useTranslation();
-
-  return (
+  if (!visible) return null;return (
     <div className="fixed bottom-0 inset-x-0 z-50 bg-white border-t border-gray-200 shadow-lg">
       <div className="max-w-4xl mx-auto px-4 py-4 sm:px-6">
         <div className="flex flex-col gap-3">

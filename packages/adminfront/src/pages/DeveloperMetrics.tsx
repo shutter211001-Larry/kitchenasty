@@ -46,6 +46,7 @@ const METHOD_COLORS: Record<string, string> = {
 };
 
 export default function DeveloperMetrics() {
+  const { t } = useTranslation();
   const [summary, setSummary] = useState<MetricsSummary | null>(null);
   const [hourly, setHourly] = useState<HourlyData[]>([]);
   const [endpoints, setEndpoints] = useState<EndpointData[]>([]);
@@ -80,9 +81,7 @@ export default function DeveloperMetrics() {
   }, [hours, token]);
 
   const formatHour = (iso: any) => {
-  const { t } = useTranslation();
-
-    const d = new Date(iso);
+  const d = new Date(iso);
     return `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:00`;
   };
 

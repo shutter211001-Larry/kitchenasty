@@ -63,10 +63,7 @@ interface Props {
   onClose: () => void;
 }
 
-export default function MenuItemModal({ itemId, onClose }: Props) {
-  const { t } = useTranslation();
-
-  const { t, i18n } = useTranslation();
+export default function MenuItemModal({ itemId, onClose }: Props) {const { t, i18n } = useTranslation();
   const { addItem } = useCart();
   const { token } = useAuth();
   const [item, setItem] = useState<MenuItemDetail | null>(null);

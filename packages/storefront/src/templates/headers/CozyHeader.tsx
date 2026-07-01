@@ -3,12 +3,7 @@ import { Link } from 'react-router-dom';
 import LanguageSwitcher from '../../components/LanguageSwitcher.js';
 import { useHeaderProps } from './useHeaderProps.js';
 
-export default function CozyHeader() {
-  const { t, user, logout, itemCount, openCart, settings, navLinks, isActive, mobileOpen, setMobileOpen , isLoading, recentOrders } = useHeaderProps();
-
-  const { t } = useTranslation();
-
-  return (
+export default function CozyHeader() {const { t, user, logout, itemCount, openCart, settings, navLinks, isActive, mobileOpen, setMobileOpen , isLoading, recentOrders } = useHeaderProps();return (
     <header className="bg-amber-50 dark:bg-gray-900 sticky top-0 z-50 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">

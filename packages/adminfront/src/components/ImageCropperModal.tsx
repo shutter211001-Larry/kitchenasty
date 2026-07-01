@@ -10,6 +10,7 @@ interface ImageCropperModalProps {
 type AspectRatioPreset = '4:3' | '16:9' | '1:1' | '20:13' | 'free';
 
 export default function ImageCropperModal({ src, onCrop, onClose }: ImageCropperModalProps) {
+  const { t } = useTranslation();
   const [aspectRatio, setAspectRatio] = useState<AspectRatioPreset>('4:3');
   const [imgDimensions, setImgDimensions] = useState<{ width: number; height: number } | null>(null);
   const [crop, setCrop] = useState({ x: 10, y: 10, width: 80, height: 80 });
@@ -27,9 +28,7 @@ export default function ImageCropperModal({ src, onCrop, onClose }: ImageCropper
 
   // Initialize crop coordinates based on image natural aspect ratio and selected target ratio
   const initializeCrop = (naturalWidth: number, naturalHeight: number, preset: AspectRatioPreset) => {
-  const { t } = useTranslation();
-
-    if (preset === 'free') {
+  if (preset === 'free') {
       setCrop({ x: 10, y: 10, width: 80, height: 80 });
       return;
     }

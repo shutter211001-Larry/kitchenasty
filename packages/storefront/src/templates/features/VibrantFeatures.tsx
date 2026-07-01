@@ -23,10 +23,7 @@ const gradients = [
   'from-fuchsia-500 to-pink-500',
 ];
 
-export default function VibrantFeatures({ features, t, lang = 'zh-TW' }: FeaturesProps) {
-  const { t } = useTranslation();
-
-  const { settings } = useTheme();
+export default function VibrantFeatures({ features, t, lang = 'zh-TW' }: FeaturesProps) {const { settings } = useTheme();
 
   const items = features?.length ? features.filter(f => {
               if (!settings.navShowLocations && (f.title.includes(t('autoGen.store.key137')) || f.title.includes(t('autoGen.store.key138')) || f.title.includes(t('autoGen.store.key139')))) return false;

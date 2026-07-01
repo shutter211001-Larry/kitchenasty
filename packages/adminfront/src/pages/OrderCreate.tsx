@@ -37,6 +37,7 @@ interface CartItem {
 }
 
 export default function OrderCreate() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [locations, setLocations] = useState<Location[]>([]);
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
@@ -66,9 +67,7 @@ export default function OrderCreate() {
   }, []);
 
   const addToCart = (item: MenuItem) => {
-  const { t } = useTranslation();
-
-    // For simplicity, we add with no options first. 
+  // For simplicity, we add with no options first. 
     // In a full implementation, we would show a modal for options.
     const newItem: CartItem = {
       menuItemId: item.id,

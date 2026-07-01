@@ -23,6 +23,7 @@ interface Location {
 }
 
 export default function AdminChatWidget() {
+  const { t } = useTranslation();
   const { user, token } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -118,9 +119,7 @@ export default function AdminChatWidget() {
   }, [isOpen, messages]);
 
   const scrollToBottom = () => {
-  const { t } = useTranslation();
-
-    setTimeout(() => {
+  setTimeout(() => {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, 100);
   };

@@ -20,11 +20,7 @@ export default function ElegantCta({ cta, t, lang = 'zh-TW' }: CtaProps) {
 
   if (user || (!settings.showMembership && (!cta?.buttonLink || cta.buttonLink === '/register'))) {
     return null;
-  }
-
-  const { t } = useTranslation();
-
-  return (
+  }return (
     <section className="py-24 bg-gray-50 dark:bg-gray-900/50">
       <div className="max-w-3xl mx-auto px-4 text-center">
         <div className="w-16 h-px bg-primary-400 mx-auto mb-8" />

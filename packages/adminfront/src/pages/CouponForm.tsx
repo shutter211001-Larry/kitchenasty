@@ -4,6 +4,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { api } from '../lib/api';
 
 export default function CouponForm() {
+  const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
   const isEdit = Boolean(id);
@@ -113,9 +114,7 @@ export default function CouponForm() {
   }, [id, token]);
 
   const validateStep = (step: number) => {
-  const { t } = useTranslation();
-
-    if (step === 1 && !code.trim() && !isAutomatic) {
+  if (step === 1 && !code.trim() && !isAutomatic) {
       setError(t('autoGen.admin.key351'));
       return false;
     }

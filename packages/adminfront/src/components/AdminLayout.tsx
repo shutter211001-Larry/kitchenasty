@@ -11,7 +11,7 @@ interface NavItem {
   label: string;
   icon: string;
   roles: Role[];
-  children?: { path: string; label: string }[];
+  children?: { path: string; label: string; roles?: Role[] }[];
 }
 
 const navItems: NavItem[] = [
@@ -79,9 +79,9 @@ const navItems: NavItem[] = [
     roles: ['SUPER_ADMIN', 'MANAGER', 'STAFF'],
     children: [
       { path: '/attendance', label: 'nav.checkIn' },
-      { path: '/attendance/records', label: 'nav.attendanceRecords' },
-      { path: '/attendance/qr-generator', label: '產生 QR Code' },
-      { path: '/attendance/payroll', label: '薪資結算' },
+      { path: '/attendance/records', label: 'nav.attendanceRecords', roles: ['SUPER_ADMIN', 'MANAGER'] },
+      { path: '/attendance/qr-generator', label: '產生 QR Code', roles: ['SUPER_ADMIN', 'MANAGER'] },
+      { path: '/attendance/payroll', label: '薪資結算', roles: ['SUPER_ADMIN', 'MANAGER'] },
     ],
   },
 ];
@@ -254,7 +254,7 @@ export default function AdminLayout({ children, onLogout }: { children: React.Re
 
                 {item.children && isExpanded && (
                   <div className="bg-gray-950/60 border-l border-gray-800">
-                    {item.children.map((child) => {
+                    {item.children.filter((child) => !child.roles || (user && child.roles.includes(user.role))).map((child) => {
                       const isChildActive = location.pathname.startsWith(child.path);
                       return (
                         <Link

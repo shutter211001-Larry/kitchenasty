@@ -27,6 +27,7 @@ interface IngredientWarning {
 }
 
 export default function SettingsFranchise() {
+  const { t } = useTranslation();
   const token = localStorage.getItem('token') || '';
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'stores' | 'diagnostics' | 'inventory'>('stores');
@@ -101,9 +102,7 @@ export default function SettingsFranchise() {
   const [editStore, setEditStore] = useState<Partial<FranchiseStore>>({});
 
   const startEdit = (store: FranchiseStore) => {
-  const { t } = useTranslation();
-
-    setEditStore(store);
+  setEditStore(store);
     setIsEditing(true);
   };
 

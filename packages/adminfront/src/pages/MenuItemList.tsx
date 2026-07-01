@@ -30,6 +30,7 @@ interface MenuItemResponse {
 }
 
 export default function MenuItemList() {
+  const { t } = useTranslation();
   const [items, setItems] = useState<MenuItem[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
@@ -39,9 +40,7 @@ export default function MenuItemList() {
   const [pagination, setPagination] = useState({ page: 1, totalPages: 1, total: 0 });
 
   const fetchItems = (page = 1) => {
-  const { t } = useTranslation();
-
-    setLoading(true);
+  setLoading(true);
     const params = new URLSearchParams({ page: String(page), limit: '20' });
     if (search) params.set('search', search);
     if (categoryFilter) params.set('categoryId', categoryFilter);

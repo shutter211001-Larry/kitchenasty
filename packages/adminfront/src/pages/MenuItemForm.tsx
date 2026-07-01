@@ -94,6 +94,7 @@ const emptyOption: MenuOption = {
 };
 
 export default function MenuItemForm() {
+  const { t } = useTranslation();
     const emptyItem: MenuItemData = {
       name: '',
       nameTranslations: {},
@@ -244,9 +245,7 @@ export default function MenuItemForm() {
   }, [id, isEdit]);
 
   const updateField = (field: keyof MenuItemData, value: any) => {
-  const { t } = useTranslation();
-
-    setForm((prev) => ({ ...prev, [field]: value }));
+  setForm((prev) => ({ ...prev, [field]: value }));
   };
 
   const autoSlug = (name: string) => {

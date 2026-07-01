@@ -26,6 +26,7 @@ interface MenuItem {
 }
 
 export default function CustomerLoyalty() {
+  const { t } = useTranslation();
   // Original Customer States
   const [searchEmail, setSearchEmail] = useState('');
   const [customer, setCustomer] = useState<Customer | null>(null);
@@ -110,9 +111,7 @@ export default function CustomerLoyalty() {
   };
 
   const handleToggleRedeemable = (itemId: string) => {
-  const { t } = useTranslation();
-
-    const current = redemptionRules[itemId] || { isRedeemable: false, maxRedemptionAmount: 0 };
+  const current = redemptionRules[itemId] || { isRedeemable: false, maxRedemptionAmount: 0 };
     setRedemptionRules({
       ...redemptionRules,
       [itemId]: {
