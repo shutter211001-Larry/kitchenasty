@@ -78,54 +78,52 @@ const handleSocialCallback = (req: Request, res: Response) => {
 };
 
 // Social login — Google
-if (process.env.GOOGLE_LOGIN_CLIENT_ID) {
-  router.get('/google', (req: Request, res: Response, next: NextFunction) => {
-    const state = req.query.state as string || '';
-    const prompt = req.query.prompt as string || 'select_account';
-    
-    passport.authenticate('google', { 
-      scope: ['profile', 'email'], 
-      session: false,
-      state: state,
-      prompt: prompt
-    })(req, res, next);
-  });
+router.get('/google', (req: Request, res: Response, next: NextFunction) => {
+  const state = req.query.state as string || '';
+  const prompt = req.query.prompt as string || 'select_account';
+  
+  passport.authenticate('google', { 
+    scope: ['profile', 'email'], 
+    session: false,
+    state: state,
+    prompt: prompt
+  })(req, res, next);
+});
 
-  router.get('/google/callback', (req: Request, res: Response, next: NextFunction) => {
-    // Extract user token from state if provided
-    const stateStr = req.query.state as string;
-    if (stateStr) {
-      try {
-        const decodedStr = decodeURIComponent(stateStr);
-        if (decodedStr.startsWith('{')) {
-          const stateObj = JSON.parse(decodedStr);
-          if (stateObj.token) {
-            const payload = jwt.verify(stateObj.token, process.env.JWT_SECRET || 'fallback_secret');
-            req.user = payload as Express.User;
-          }
+router.get('/google/callback', (req: Request, res: Response, next: NextFunction) => {
+  // Extract user token from state if provided
+  const stateStr = req.query.state as string;
+  if (stateStr) {
+    try {
+      const decodedStr = decodeURIComponent(stateStr);
+      if (decodedStr.startsWith('{')) {
+        const stateObj = JSON.parse(decodedStr);
+        if (stateObj.token) {
+          const payload = jwt.verify(stateObj.token, process.env.JWT_SECRET || 'fallback_secret');
+          req.user = payload as Express.User;
         }
-      } catch (e) {
-        console.error('Failed to parse state token:', e);
       }
+    } catch (e) {
+      console.error('Failed to parse state token:', e);
     }
+  }
 
-    passport.authenticate('google', { session: false }, (err: any, user: any, info: any) => {
-      if (err) {
-        console.error('Google Auth Error:', err);
-        return res.redirect(`${STOREFRONT_URL}/auth/callback?error=server_error`);
+  passport.authenticate('google', { session: false }, (err: any, user: any, info: any) => {
+    if (err) {
+      console.error('Google Auth Error:', err);
+      return res.redirect(`${STOREFRONT_URL}/auth/callback?error=server_error`);
+    }
+    if (!user) {
+      if (info && info.message && info.message.includes('已被其他會員連結')) {
+        const socialId = info.message.split('|')[1] || '';
+        return res.redirect(`${STOREFRONT_URL}/account?error=conflict&provider=google&socialId=${socialId}&verified=true`);
       }
-      if (!user) {
-        if (info && info.message && info.message.includes('已被其他會員連結')) {
-          const socialId = info.message.split('|')[1] || '';
-          return res.redirect(`${STOREFRONT_URL}/account?error=conflict&provider=google&socialId=${socialId}&verified=true`);
-        }
-        return res.redirect(`${STOREFRONT_URL}/auth/callback?error=auth_failed`);
-      }
-      req.user = user;
-      next();
-    })(req, res, next);
-  }, handleSocialCallback);
-}
+      return res.redirect(`${STOREFRONT_URL}/auth/callback?error=auth_failed`);
+    }
+    req.user = user;
+    next();
+  })(req, res, next);
+}, handleSocialCallback);
 
 // SHARED
 router.get('/me', authenticate, authController.getMe);

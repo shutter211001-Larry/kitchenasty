@@ -4,6 +4,7 @@ import nodemailer from 'nodemailer';
 import prisma from '../lib/db.js';
 import { auditLog } from '../lib/audit.js';
 import { autoTranslateSiteSettings } from '../lib/translation-helper.js';
+import { initPassport } from '../lib/passport.js';
 
 const updateSettingsSchema = z.object({
   siteName: z.string().min(1).optional(),
@@ -1043,6 +1044,10 @@ export async function updateGoogleSettings(req: Request, res: Response): Promise
   };
 
   const data = await updateSettingsGroup('googleSettings', mergedData);
+
+  // Reload Google OAuth strategy immediately so restart is not needed
+  initPassport().catch(err => console.error('[Settings] Failed to reload passport:', err));
+
   res.json({
     success: true,
     data: {

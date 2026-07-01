@@ -1629,7 +1629,7 @@ export async function updateOrderStatus(req: Request<{ id: string }>, res: Respo
           }
 
           console.log(`[LINE Notify] Sending message to LINE...`);
-          sendLinePush(order.customer!.lineUserId!, lineMessage).then(() => {
+          sendLinePush(order.customer!.lineUserId!, lineMessage, order.locationId || undefined).then(() => {
             console.log('[LINE Notify] sendLinePush call completed');
           }).catch(err => {
             console.error('[LINE Notify] sendLinePush FAILED:', err);

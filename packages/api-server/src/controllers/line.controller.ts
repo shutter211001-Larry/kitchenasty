@@ -4,9 +4,26 @@ import prisma from '../lib/db.js';
 import { generateToken } from '../middleware/auth.js';
 import { grantRegistrationBonus } from '../lib/registrationBonus.js';
 
-async function getLineConfig() {
-  const channelSecret = process.env.LINE_CHANNEL_SECRET;
-  const channelAccessToken = process.env.LINE_CHANNEL_ACCESS_TOKEN;
+async function getLineConfig(locationId?: string) {
+  const settings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
+  
+  let channelSecret = process.env.LINE_CHANNEL_SECRET;
+  let channelAccessToken = process.env.LINE_CHANNEL_ACCESS_TOKEN;
+
+  if (settings) {
+    let lineSettings = (settings.lineSettings as any) || {};
+    
+    // Check location overrides if locationId is provided
+    if (locationId && settings.advancedSettings) {
+      const advanced = settings.advancedSettings as any;
+      if (advanced.locationOverrides && advanced.locationOverrides[locationId]?.lineSettings) {
+        lineSettings = { ...lineSettings, ...advanced.locationOverrides[locationId].lineSettings };
+      }
+    }
+
+    if (lineSettings.channelSecret) channelSecret = lineSettings.channelSecret;
+    if (lineSettings.channelAccessToken) channelAccessToken = lineSettings.channelAccessToken;
+  }
 
   if (!channelSecret || !channelAccessToken) {
     return null;
@@ -755,9 +772,12 @@ export async function lineLogin(req: Request, res: Response) {
 }
 
 // Utility to send push messages
-export async function sendLinePush(userId: string, message: string) {
-  const config = await getLineConfig();
-  if (!config) return;
+export async function sendLinePush(userId: string, message: string, locationId?: string) {
+  const config = await getLineConfig(locationId);
+  if (!config) {
+    console.log('[LINE Notify] sendLinePush skipped: LINE config not found for location', locationId || 'default');
+    return;
+  }
 
   const client = new Client(config);
   try {
