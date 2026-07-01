@@ -4,6 +4,7 @@ import Layout from "./components/Layout";
 import Dashboard from "./pages/Dashboard";
 import Ingredients from "./pages/Ingredients";
 import Inventory from "./pages/Inventory";
+import Expenses from "./pages/Expenses";
 import Suppliers from "./pages/Suppliers";
 import Recipes from "./pages/Recipes";
 import Settings from "./pages/Settings";
@@ -52,6 +53,7 @@ function AppContent() {
         <Route path="/" element={<Dashboard />} />
         <Route path="/ingredients" element={<Ingredients />} />
         <Route path="/inventory" element={<Inventory />} />
+        <Route path="/expenses" element={<Expenses />} />
         <Route path="/recipes" element={<Recipes />} />
         <Route path="/suppliers" element={<Suppliers />} />
         <Route path="/integration" element={<Integration />} />

@@ -35,6 +35,9 @@
     "apiMetrics": "API 數據",
     "auditLog": "審計日誌",
     "staff": "員工管理",
+    "attendance": "出勤打卡",
+    "checkIn": "線上打卡",
+    "attendanceRecords": "出勤紀錄",
     "logout": "登出"
   },
   "common": {

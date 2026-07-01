@@ -26,6 +26,7 @@ model User {
   assignedOrders  Order[]       @relation("AssignedStaff")
   sentMessages    ChatMessage[] @relation("SentMessages")
   location        Location?     @relation(fields: [locationId], references: [id])
+  attendances     StaffAttendance[]
 
   @@map("users")
 }
@@ -149,6 +150,7 @@ model Location {
   coupons          Coupon[]
   chatMessages     ChatMessage[]
   groupSessions    GroupOrderSession[]
+  staffAttendances StaffAttendance[]
 
   @@map("locations")
 }
@@ -780,4 +782,22 @@ model ChatMessage {
 
   @@index([createdAt])
   @@map("chat_messages")
+}
+
+model StaffAttendance {
+  id           String    @id @default(uuid())
+  userId       String    
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  locationId   String?
+  location     Location? @relation(fields: [locationId], references: [id])
+  checkIn      DateTime  @default(now())
+  checkOut     DateTime?
+  lat          Float?    
+  lng          Float?    
+  device       String?   
+  isOutOfRange Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@map("staff_attendance")
 }

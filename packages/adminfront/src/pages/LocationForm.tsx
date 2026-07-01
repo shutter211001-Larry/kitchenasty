@@ -80,6 +80,7 @@ export default function LocationForm() {
   const [form, setForm] = useState<LocationData>(emptyLocation);
   const [hours, setHours] = useState<OperatingHour[]>(defaultHours);
   const [zones, setZones] = useState<DeliveryZone[]>([]);
+  const [mapInput, setMapInput] = useState('');
   const [loading, setLoading] = useState(isEdit);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -137,6 +138,9 @@ export default function LocationForm() {
         if (loc.deliveryZones?.length) {
           setZones(loc.deliveryZones);
         }
+        if (loc.lat || loc.lng) {
+          setMapInput(`${loc.lat || 0}, ${loc.lng || 0}`);
+        }
         setLoading(false);
       })
       .catch((err) => { setError(err.message); setLoading(false); });
@@ -186,6 +190,38 @@ export default function LocationForm() {
 
   const removeZone = (index: number) => {
     setZones((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleMapInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setMapInput(val);
+
+    let lat: number | null = null;
+    let lng: number | null = null;
+
+    const match1 = val.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+    if (match1) {
+      lat = parseFloat(match1[1]);
+      lng = parseFloat(match1[2]);
+    } else {
+      const match2 = val.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/);
+      if (match2) {
+        lat = parseFloat(match2[1]);
+        lng = parseFloat(match2[2]);
+      } else {
+        const match3 = val.match(/^(-?\d+\.\d+)[,\s]+(-?\d+\.\d+)$/);
+        if (match3) {
+          lat = parseFloat(match3[1]);
+          lng = parseFloat(match3[2]);
+        }
+      }
+    }
+
+    if (lat !== null && lng !== null && !isNaN(lat) && !isNaN(lng)) {
+      setForm((prev) => ({ ...prev, lat: lat as number, lng: lng as number }));
+    } else if (!val.trim()) {
+      setForm((prev) => ({ ...prev, lat: 0, lng: 0 }));
+    }
   };
 
   if (loading) return <p className="text-gray-500">Loading...</p>;
@@ -318,25 +354,18 @@ export default function LocationForm() {
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Latitude (經度)</label>
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Google Maps 網址或經緯度 (自動解析)</label>
               <input
-                type="number"
-                step="any"
-                value={form.lat}
-                onChange={(e) => updateField('lat', parseFloat(e.target.value))}
+                type="text"
+                value={mapInput}
+                onChange={handleMapInputChange}
+                placeholder="請貼上 Google Maps 分店網址，或直接輸入「緯度, 經度」"
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
               />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Longitude (緯度)</label>
-              <input
-                type="number"
-                step="any"
-                value={form.lng}
-                onChange={(e) => updateField('lng', parseFloat(e.target.value))}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-              />
+              {!!(form.lat || form.lng) && (
+                 <p className="text-xs text-gray-500 mt-1">目前解析結果：緯度 {form.lat}, 經度 {form.lng}</p>
+              )}
             </div>
           </div>
         </section>

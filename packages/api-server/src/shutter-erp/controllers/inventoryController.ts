@@ -28,7 +28,7 @@ export const getInventoryLogs = async (req: AuthenticatedRequest, res: Response)
 
 export const createInventoryLog = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const { ingredientId, type, amount, reason } = req.body;
+    const { ingredientId, type, amount, reason, createExpense } = req.body;
 
     if (!ingredientId || !type || amount === undefined) {
       return res.status(400).json({ error: '材料、類型與數量為必填欄位' });
@@ -90,7 +90,26 @@ export const createInventoryLog = async (req: AuthenticatedRequest, res: Respons
         }
       });
 
-      return { updatedIngredient, log };
+      // 3. Create expense if requested
+      let expense = null;
+      if (type === 'IN' && createExpense) {
+        const defaultPrice = await tx.supplierPrice.findFirst({
+          where: { ingredientId, isDefault: true }
+        });
+        
+        const cost = defaultPrice ? defaultPrice.unitPrice * Number(amount) : 0;
+        
+        expense = await tx.expense.create({
+          data: {
+            amount: cost,
+            description: `進貨: ${ingredient.name} ${amount}${ingredient.unit}`,
+            inventoryLogId: log.id,
+            status: 'PENDING'
+          }
+        });
+      }
+
+      return { updatedIngredient, log, expense };
     });
 
     res.status(201).json(result);

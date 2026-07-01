@@ -10,6 +10,7 @@ import inventoryRoutes from './routes/inventoryRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import integrationRoutes from './routes/integrationRoutes.js';
 import settingsRoutes from './routes/settingsRoutes.js';
+import expenseRoutes from './routes/expenseRoutes.js';
 
 const router = Router();
 
@@ -25,5 +26,6 @@ router.use('/api/inventory', inventoryRoutes);
 router.use('/api/users', userRoutes);
 router.use('/api/integration', integrationRoutes);
 router.use('/api/settings', settingsRoutes);
+router.use('/api/expenses', expenseRoutes);
 
 export default router;

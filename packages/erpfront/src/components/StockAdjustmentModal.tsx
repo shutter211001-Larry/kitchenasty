@@ -21,6 +21,7 @@ const StockAdjustmentModal: React.FC<Props> = ({
   const [reason, setReason] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [createExpense, setCreateExpense] = useState(true);
 
   // Auto-filled reasons suggestions based on action type
   const suggestions = {
@@ -48,7 +49,8 @@ const StockAdjustmentModal: React.FC<Props> = ({
         ingredientId: ingredient.id,
         type,
         amount: numAmount,
-        reason: reason.trim() || suggestions[0] // Fallback to first suggestion if empty
+        reason: reason.trim() || suggestions[0],
+        createExpense: type === "IN" ? createExpense : undefined
       });
       onSuccess();
       onClose();
@@ -179,6 +181,22 @@ const StockAdjustmentModal: React.FC<Props> = ({
               </label>
               <input type="text" placeholder={t("erp_251")} value={reason} onChange={e => setReason(e.target.value)} className="w-full bg-muted/20 border border-border focus:border-primary/50 text-gray-800 rounded-2xl py-4 px-5 text-sm font-bold placeholder:text-muted-foreground/60 outline-none transition-all focus:ring-4 focus:ring-primary/5 focus:bg-white" />
             </div>
+
+            {/* Auto Expense Checkbox for IN */}
+            {type === "IN" && (
+              <div className="flex items-center gap-2 mt-4 ml-1">
+                <input
+                  type="checkbox"
+                  id="createExpense"
+                  checked={createExpense}
+                  onChange={(e) => setCreateExpense(e.target.checked)}
+                  className="w-4 h-4 text-primary bg-gray-100 border-gray-300 rounded focus:ring-primary focus:ring-2"
+                />
+                <label htmlFor="createExpense" className="text-sm font-bold text-gray-700 cursor-pointer">
+                  自動建立應付帳款
+                </label>
+              </div>
+            )}
           </div>
 
           {/* Footer */}
