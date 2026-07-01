@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { DollarSign, CheckCircle2, Clock, Search, ExternalLink } from "lucide-react";
+import { DollarSign, CheckCircle2, Clock, Search } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import toast from "react-hot-toast";
 
@@ -22,7 +22,6 @@ interface Expense {
 }
 
 export default function Expenses() {
-  const { user } = useAuth();
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
