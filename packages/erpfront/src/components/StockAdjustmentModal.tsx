@@ -22,6 +22,34 @@ const StockAdjustmentModal: React.FC<Props> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [createExpense, setCreateExpense] = useState(true);
+  const [supplierPriceId, setSupplierPriceId] = useState<string>("");
+  const [manualCost, setManualCost] = useState<string>("");
+
+  React.useEffect(() => {
+    if (ingredient?.prices?.length > 0) {
+      const defaultPrice = ingredient.prices.find((p: any) => p.isDefault);
+      if (defaultPrice) {
+        setSupplierPriceId(defaultPrice.id);
+      } else {
+        setSupplierPriceId(ingredient.prices[0].id);
+      }
+    }
+  }, [ingredient]);
+
+  React.useEffect(() => {
+    if (type === "IN" && createExpense && amount) {
+      const numAmount = Number(amount);
+      if (!isNaN(numAmount) && ingredient?.prices) {
+        if (supplierPriceId) {
+          const selectedPrice = ingredient.prices.find((p: any) => p.id === supplierPriceId);
+          if (selectedPrice) {
+            const calculatedCost = numAmount * selectedPrice.unitPrice;
+            setManualCost(Math.round(calculatedCost).toString());
+          }
+        }
+      }
+    }
+  }, [amount, supplierPriceId, createExpense, type, ingredient]);
 
   // Auto-filled reasons suggestions based on action type
   const suggestions = {
@@ -50,7 +78,9 @@ const StockAdjustmentModal: React.FC<Props> = ({
         type,
         amount: numAmount,
         reason: reason.trim() || suggestions[0],
-        createExpense: type === "IN" ? createExpense : undefined
+        createExpense: type === "IN" ? createExpense : undefined,
+        supplierPriceId: type === "IN" && createExpense && supplierPriceId ? supplierPriceId : undefined,
+        manualCost: type === "IN" && createExpense && manualCost ? Number(manualCost) : undefined
       });
       onSuccess();
       onClose();
@@ -182,19 +212,81 @@ const StockAdjustmentModal: React.FC<Props> = ({
               <input type="text" placeholder={t("erp_251")} value={reason} onChange={e => setReason(e.target.value)} className="w-full bg-muted/20 border border-border focus:border-primary/50 text-gray-800 rounded-2xl py-4 px-5 text-sm font-bold placeholder:text-muted-foreground/60 outline-none transition-all focus:ring-4 focus:ring-primary/5 focus:bg-white" />
             </div>
 
-            {/* Auto Expense Checkbox for IN */}
+            {/* Auto Expense Checkbox and Supplier Options for IN */}
             {type === "IN" && (
-              <div className="flex items-center gap-2 mt-4 ml-1">
-                <input
-                  type="checkbox"
-                  id="createExpense"
-                  checked={createExpense}
-                  onChange={(e) => setCreateExpense(e.target.checked)}
-                  className="w-4 h-4 text-primary bg-gray-100 border-gray-300 rounded focus:ring-primary focus:ring-2"
-                />
-                <label htmlFor="createExpense" className="text-sm font-bold text-gray-700 cursor-pointer">
-                  自動建立應付帳款
-                </label>
+              <div className="space-y-4 bg-muted/20 border border-border/50 rounded-2xl p-5 mt-4">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="createExpense"
+                    checked={createExpense}
+                    onChange={(e) => setCreateExpense(e.target.checked)}
+                    className="w-4 h-4 text-primary bg-gray-100 border-gray-300 rounded focus:ring-primary focus:ring-2"
+                  />
+                  <label htmlFor="createExpense" className="text-sm font-bold text-gray-700 cursor-pointer">
+                    自動建立應付帳款
+                  </label>
+                </div>
+                
+                {createExpense && ingredient?.prices && ingredient.prices.length > 0 && (
+                  <div className="space-y-4 pt-3 border-t border-border/50 animate-in fade-in slide-in-from-top-2 duration-300">
+                    <div className="space-y-2">
+                      <label className="text-[10px] uppercase font-black tracking-widest text-muted-foreground pl-1">
+                        選擇供應商報價
+                      </label>
+                      <select 
+                        value={supplierPriceId}
+                        onChange={(e) => setSupplierPriceId(e.target.value)}
+                        className="w-full bg-white border border-border focus:border-primary/50 text-gray-800 rounded-xl py-3 px-4 text-sm font-bold outline-none transition-all"
+                      >
+                        <option value="" disabled>請選擇供應商</option>
+                        {ingredient.prices.map((p: any) => (
+                          <option key={p.id} value={p.id}>
+                            {p.supplier?.name || '未知供應商'} - ${p.price} / {p.packageSize}{p.packageUnit} (單價: ${Number(p.unitPrice).toFixed(2)}/{ingredient.unit})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <label className="text-[10px] uppercase font-black tracking-widest text-muted-foreground pl-1">
+                        進貨總金額 (可手動修改)
+                      </label>
+                      <div className="relative">
+                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-black text-gray-400">$</span>
+                        <input 
+                          type="number" 
+                          step="any"
+                          value={manualCost}
+                          onChange={(e) => setManualCost(e.target.value)}
+                          className="w-full bg-white border border-border focus:border-primary/50 text-gray-800 rounded-xl py-3 pl-8 pr-4 text-sm font-bold outline-none transition-all"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {createExpense && (!ingredient?.prices || ingredient.prices.length === 0) && (
+                   <div className="pt-2">
+                     <p className="text-xs text-amber-600 font-bold bg-amber-50 p-3 rounded-xl border border-amber-100">
+                       此食材目前沒有綁定任何供應商報價，系統將建立金額為 $0 的帳款，您可以直接在下方手動輸入總額。
+                     </p>
+                     <div className="space-y-2 mt-3">
+                       <label className="text-[10px] uppercase font-black tracking-widest text-muted-foreground pl-1">
+                         進貨總金額 (手動輸入)
+                       </label>
+                       <div className="relative">
+                         <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-black text-gray-400">$</span>
+                         <input 
+                           type="number" 
+                           step="any"
+                           value={manualCost}
+                           onChange={(e) => setManualCost(e.target.value)}
+                           className="w-full bg-white border border-border focus:border-primary/50 text-gray-800 rounded-xl py-3 pl-8 pr-4 text-sm font-bold outline-none transition-all"
+                         />
+                       </div>
+                     </div>
+                   </div>
+                )}
               </div>
             )}
           </div>

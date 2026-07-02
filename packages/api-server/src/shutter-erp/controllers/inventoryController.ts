@@ -28,7 +28,7 @@ export const getInventoryLogs = async (req: AuthenticatedRequest, res: Response)
 
 export const createInventoryLog = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const { ingredientId, type, amount, reason, createExpense } = req.body;
+    const { ingredientId, type, amount, reason, createExpense, supplierPriceId, manualCost } = req.body;
 
     if (!ingredientId || !type || amount === undefined) {
       return res.status(400).json({ error: '材料、類型與數量為必填欄位' });
@@ -93,16 +93,41 @@ export const createInventoryLog = async (req: AuthenticatedRequest, res: Respons
       // 3. Create expense if requested
       let expense = null;
       if (type === 'IN' && createExpense) {
-        const defaultPrice = await tx.supplierPrice.findFirst({
-          where: { ingredientId, isDefault: true }
-        });
+        let cost = 0;
+        let supplierName = "";
         
-        const cost = defaultPrice ? defaultPrice.unitPrice * Number(amount) : 0;
+        if (manualCost !== undefined && manualCost !== null) {
+          cost = Number(manualCost);
+          if (supplierPriceId) {
+             const sp = await tx.supplierPrice.findUnique({ where: { id: supplierPriceId }, include: { supplier: true }});
+             if (sp?.supplier?.name) supplierName = ` (${sp.supplier.name})`;
+          }
+        } else {
+          let priceSource = null;
+          if (supplierPriceId) {
+            priceSource = await tx.supplierPrice.findUnique({
+              where: { id: supplierPriceId },
+              include: { supplier: true }
+            });
+          } else {
+            priceSource = await tx.supplierPrice.findFirst({
+              where: { ingredientId, isDefault: true },
+              include: { supplier: true }
+            });
+          }
+          
+          if (priceSource) {
+            cost = priceSource.unitPrice * Number(amount);
+            if (priceSource.supplier?.name) {
+              supplierName = ` (${priceSource.supplier.name})`;
+            }
+          }
+        }
         
         expense = await tx.expense.create({
           data: {
             amount: cost,
-            description: `進貨: ${ingredient.name} ${amount}${ingredient.unit}`,
+            description: `進貨: ${ingredient.name} ${amount}${ingredient.unit}${supplierName}`,
             inventoryLogId: log.id,
             status: 'PENDING'
           }

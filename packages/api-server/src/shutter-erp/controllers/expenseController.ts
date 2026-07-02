@@ -42,3 +42,15 @@ export const updateExpenseStatus = async (req: AuthenticatedRequest, res: Respon
     res.status(500).json({ error: 'Failed to update expense status' });
   }
 };
+
+export const deleteExpense = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const id = req.params.id as string;
+    await prisma.expense.delete({
+      where: { id }
+    });
+    res.status(204).send();
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to delete expense' });
+  }
+};

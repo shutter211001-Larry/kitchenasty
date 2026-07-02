@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { DollarSign, CheckCircle2, Clock, Search } from "lucide-react";
+import { DollarSign, CheckCircle2, Clock, Search, Trash2 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import toast from "react-hot-toast";
 import axios from "axios";
@@ -56,6 +56,19 @@ export default function Expenses() {
       }
     } catch (error) {
       toast.error("更新失敗");
+    }
+  };
+
+  const handleDeleteExpense = async (id: string) => {
+    if (!window.confirm("確定要刪除這筆帳款嗎？")) return;
+    try {
+      const res = await axios.delete(`http://localhost:3000/api/expenses/${id}`);
+      if (res.status === 204 || res.status === 200) {
+        toast.success("已成功刪除帳款");
+        fetchExpenses();
+      }
+    } catch (error) {
+      toast.error("刪除失敗");
     }
   };
 
@@ -176,21 +189,30 @@ export default function Expenses() {
                       </span>
                     </td>
                     <td className="py-4 px-6 text-right">
-                      {expense.status === 'PENDING' ? (
+                      <div className="flex justify-end gap-2">
+                        {expense.status === 'PENDING' ? (
+                          <button
+                            onClick={() => handleUpdateStatus(expense.id, 'PAID')}
+                            className="px-3 py-1.5 bg-green-50 text-green-600 hover:bg-green-100 rounded-lg text-xs font-bold transition-colors"
+                          >
+                            核銷 (標記為已付款)
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => handleUpdateStatus(expense.id, 'PENDING')}
+                            className="px-3 py-1.5 bg-gray-50 text-gray-600 hover:bg-gray-100 rounded-lg text-xs font-bold transition-colors"
+                          >
+                            撤銷核銷
+                          </button>
+                        )}
                         <button
-                          onClick={() => handleUpdateStatus(expense.id, 'PAID')}
-                          className="px-3 py-1.5 bg-green-50 text-green-600 hover:bg-green-100 rounded-lg text-xs font-bold transition-colors"
+                          onClick={() => handleDeleteExpense(expense.id)}
+                          className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                          title="刪除"
                         >
-                          核銷 (標記為已付款)
+                          <Trash2 className="w-4 h-4" />
                         </button>
-                      ) : (
-                        <button
-                          onClick={() => handleUpdateStatus(expense.id, 'PENDING')}
-                          className="px-3 py-1.5 bg-gray-50 text-gray-600 hover:bg-gray-100 rounded-lg text-xs font-bold transition-colors"
-                        >
-                          撤銷核銷
-                        </button>
-                      )}
+                      </div>
                     </td>
                   </tr>
                 ))
