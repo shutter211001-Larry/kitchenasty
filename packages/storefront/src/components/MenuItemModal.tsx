@@ -48,6 +48,7 @@ interface MenuItemDetail {
   descriptionTranslations?: Record<string, string>;
   price: number;
   image: string | null;
+  imageVariants?: Record<string, string> | null;
   isActive: boolean;
   category: { id: string; name: string; nameTranslations?: Record<string, string>; isFrozenDelivery?: boolean };
   options: MenuOption[];
@@ -89,6 +90,13 @@ export default function MenuItemModal({ itemId, onClose }: Props) {const { t, i1
       .then((json) => {
         const data = json.data;
         if (data.image) data.image = getFullUrl(data.image);
+        if (data.imageVariants) {
+          const variants: Record<string, string> = {};
+          for (const key in data.imageVariants) {
+            variants[key] = getFullUrl(data.imageVariants[key]) || data.imageVariants[key];
+          }
+          data.imageVariants = variants;
+        }
         setItem(data);
         // Set defaults
         const defaults: Record<string, string[]> = {};
@@ -211,8 +219,8 @@ export default function MenuItemModal({ itemId, onClose }: Props) {const { t, i1
           <>
             {/* Image */}
             <div className={containerClass}>
-              {item.image ? (
-                <img src={item.image} alt={getTranslated(item.name, item.nameTranslations, i18n.language)} className="w-full h-full object-cover" />
+              {item.image || item.imageVariants ? (
+                <img src={item.imageVariants?.[imgAspectRatio] || item.image || ''} alt={getTranslated(item.name, item.nameTranslations, i18n.language)} className="w-full h-full object-cover" />
               ) : (
                 <div className="w-full h-full bg-gradient-to-br from-primary-100 to-primary-200 flex items-center justify-center">
                   <svg className="w-16 h-16 text-primary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">

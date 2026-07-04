@@ -3,17 +3,19 @@ import React, { useState, useRef, useEffect } from 'react';
 
 interface ImageCropperModalProps {
   src: string;
-  onCrop: (blob: Blob) => void;
+  systemRatio?: string;
+  onCrop: (blobs: Record<string, Blob>) => void;
   onClose: () => void;
 }
 
 type AspectRatioPreset = '4:3' | '16:9' | '1:1' | '20:13' | 'free';
 
-export default function ImageCropperModal({ src, onCrop, onClose }: ImageCropperModalProps) {
+export default function ImageCropperModal({ src, systemRatio, onCrop, onClose }: ImageCropperModalProps) {
   const { t } = useTranslation();
   const [aspectRatio, setAspectRatio] = useState<AspectRatioPreset>('4:3');
   const [imgDimensions, setImgDimensions] = useState<{ width: number; height: number } | null>(null);
   const [crop, setCrop] = useState({ x: 10, y: 10, width: 80, height: 80 });
+  const [savedCrops, setSavedCrops] = useState<Record<string, {x: number, y: number, width: number, height: number}>>({});
   const [isDragging, setIsDragging] = useState(false);
   const [activeHandle, setActiveHandle] = useState<string | null>(null);
 
@@ -59,14 +61,30 @@ export default function ImageCropperModal({ src, onCrop, onClose }: ImageCropper
   const handleImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
     const { naturalWidth, naturalHeight } = e.currentTarget;
     setImgDimensions({ width: naturalWidth, height: naturalHeight });
-    initializeCrop(naturalWidth, naturalHeight, aspectRatio);
+    
+    // Set initial ratio to systemRatio if valid
+    let initialRatio: AspectRatioPreset = '4:3';
+    if (systemRatio === 'aspect-square') initialRatio = '1:1';
+    else if (systemRatio === 'aspect-[4/3]') initialRatio = '4:3';
+    else if (systemRatio === 'aspect-video') initialRatio = '16:9';
+    else if (systemRatio === 'h-40') initialRatio = '4:3';
+    else if (systemRatio === 'aspect-auto') initialRatio = 'free';
+    
+    setAspectRatio(initialRatio);
+    initializeCrop(naturalWidth, naturalHeight, initialRatio);
   };
 
   // Re-adjust crop area when user switches presets
-  useEffect(() => {
-    if (!imgDimensions) return;
-    initializeCrop(imgDimensions.width, imgDimensions.height, aspectRatio);
-  }, [aspectRatio]);
+  const handleRatioSwitch = (preset: AspectRatioPreset) => {
+    setSavedCrops(prev => ({ ...prev, [aspectRatio]: crop }));
+    setAspectRatio(preset);
+    
+    if (savedCrops[preset]) {
+      setCrop(savedCrops[preset]);
+    } else if (imgDimensions) {
+      initializeCrop(imgDimensions.width, imgDimensions.height, preset);
+    }
+  };
 
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>, handle: string) => {
     e.preventDefault();
@@ -204,42 +222,59 @@ export default function ImageCropperModal({ src, onCrop, onClose }: ImageCropper
     e.currentTarget.releasePointerCapture(e.pointerId);
   };
 
-  const handleConfirm = () => {
+  const generateBlob = async (img: HTMLImageElement, c: typeof crop): Promise<Blob | null> => {
+    if (!imgDimensions) return null;
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return null;
+
+    const sx = (c.x / 100) * imgDimensions.width;
+    const sy = (c.y / 100) * imgDimensions.height;
+    const sw = (c.width / 100) * imgDimensions.width;
+    const sh = (c.height / 100) * imgDimensions.height;
+
+    const targetWidth = Math.min(sw, 1200);
+    const targetHeight = (sh / sw) * targetWidth;
+
+    canvas.width = targetWidth;
+    canvas.height = targetHeight;
+    ctx.drawImage(img, sx, sy, sw, sh, 0, 0, targetWidth, targetHeight);
+
+    return new Promise((resolve) => {
+      canvas.toBlob((blob) => resolve(blob), 'image/jpeg', 0.9);
+    });
+  };
+
+  const handleConfirm = async () => {
     if (!imgDimensions) return;
-
     const img = new Image();
+    img.crossOrigin = 'anonymous';
     img.src = src;
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
+    
+    await new Promise((resolve) => {
+      img.onload = resolve;
+      img.onerror = resolve;
+    });
 
-      const sx = (crop.x / 100) * imgDimensions.width;
-      const sy = (crop.y / 100) * imgDimensions.height;
-      const sw = (crop.width / 100) * imgDimensions.width;
-      const sh = (crop.height / 100) * imgDimensions.height;
-
-      // Restrict max width of cropped menu image to 1200px to maintain supreme quality yet small size
-      const targetWidth = Math.min(sw, 1200);
-      const targetHeight = (sh / sw) * targetWidth;
-
-      canvas.width = targetWidth;
-      canvas.height = targetHeight;
-
-      // Draw cropped section onto the canvas
-      ctx.drawImage(img, sx, sy, sw, sh, 0, 0, targetWidth, targetHeight);
-
-      // Convert to blob and trigger callback
-      canvas.toBlob(
-        (blob) => {
-          if (blob) {
-            onCrop(blob);
-          }
-        },
-        'image/jpeg',
-        0.9
-      );
-    };
+    const finalCrops = { ...savedCrops, [aspectRatio]: crop };
+    const blobs: Record<string, Blob> = {};
+    
+    for (const [preset, c] of Object.entries(finalCrops)) {
+      const blob = await generateBlob(img, c);
+      if (blob) {
+        // Map preset back to system ratio strings
+        let mappedRatio = 'h-40';
+        if (preset === '1:1') mappedRatio = 'aspect-square';
+        else if (preset === '4:3') mappedRatio = 'aspect-[4/3]';
+        else if (preset === '16:9') mappedRatio = 'aspect-video';
+        else if (preset === 'free') mappedRatio = 'aspect-auto';
+        blobs[mappedRatio] = blob;
+      }
+    }
+    
+    if (Object.keys(blobs).length > 0) {
+      onCrop(blobs);
+    }
   };
 
   return (
@@ -253,7 +288,7 @@ export default function ImageCropperModal({ src, onCrop, onClose }: ImageCropper
           {src && (
             <div
               ref={containerRef}
-              className="relative inline-block overflow-hidden rounded-lg shadow-inner max-w-full max-h-[50vh]"
+              className="relative inline-block overflow-hidden rounded-lg shadow-inner max-w-full max-h-[50vh] touch-none"
             >
               <img
                 src={src}
@@ -360,6 +395,18 @@ export default function ImageCropperModal({ src, onCrop, onClose }: ImageCropper
             <div>
               <h3 className="text-lg font-bold text-gray-900">{t('imageCropperModal.cropProductImage')}</h3>
               <p className="text-xs text-gray-500 mt-1">{t('imageCropperModal.adjustImageDisplayRange')}</p>
+              {systemRatio && (
+                <div className="mt-2 inline-flex items-center gap-1.5 bg-blue-50 text-blue-700 px-2 py-1 rounded text-xs font-semibold border border-blue-100">
+                  <span className="text-[10px]">📍</span> 
+                  目前系統使用比例: {
+                    systemRatio === 'aspect-square' ? '1:1 (正方形)' :
+                    systemRatio === 'aspect-[4/3]' ? '4:3 (標準)' :
+                    systemRatio === 'aspect-video' ? '16:9 (寬螢幕)' :
+                    systemRatio === 'aspect-auto' ? '自動 (原始比例)' :
+                    '固定高度 (4:3)'
+                  }
+                </div>
+              )}
             </div>
 
             {/* Aspect Ratio Buttons */}
@@ -380,7 +427,7 @@ export default function ImageCropperModal({ src, onCrop, onClose }: ImageCropper
                     <button
                       key={preset}
                       type="button"
-                      onClick={() => setAspectRatio(preset)}
+                      onClick={() => handleRatioSwitch(preset)}
                       className={`px-3 py-2 text-xs font-medium rounded-lg border transition-all text-center ${
                         aspectRatio === preset
                           ? 'border-primary-600 bg-primary-50 text-primary-700 shadow-sm'

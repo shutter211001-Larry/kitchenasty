@@ -416,6 +416,7 @@ export async function deleteMenuItem(req: Request<{ id: string }>, res: Response
 
 export async function uploadMenuItemImage(req: Request<{ id: string }>, res: Response): Promise<void> {
   const { id } = req.params;
+  const ratio = req.query.ratio as string | undefined;
 
   const existing = await prisma.menuItem.findUnique({ where: { id } });
   if (!existing) {
@@ -430,9 +431,25 @@ export async function uploadMenuItemImage(req: Request<{ id: string }>, res: Res
 
   const imagePath = `/uploads/${req.file.filename}`;
 
+  let updateData: any = {};
+  if (ratio) {
+    const currentVariants = (typeof existing.imageVariants === 'object' && existing.imageVariants !== null)
+      ? existing.imageVariants
+      : {};
+    updateData.imageVariants = {
+      ...(currentVariants as object),
+      [ratio]: imagePath,
+    };
+    
+    // Also update the main image so there's always a fallback
+    updateData.image = imagePath;
+  } else {
+    updateData.image = imagePath;
+  }
+
   const item = await prisma.menuItem.update({
     where: { id },
-    data: { image: imagePath },
+    data: updateData,
     include: {
       category: { select: { id: true, name: true, nameTranslations: true } },
     },

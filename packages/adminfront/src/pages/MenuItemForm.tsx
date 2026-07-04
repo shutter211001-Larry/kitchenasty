@@ -334,19 +334,28 @@ export default function MenuItemForm() {
     e.target.value = '';
   };
 
-  const handleCropComplete = async (croppedBlob: Blob) => {
+  const handleCropComplete = async (croppedBlobs: Record<string, Blob>) => {
     if (!id || !originalFile) return;
     setCropSrc(null);
     setUploading(true);
     setError(null);
     try {
-      const croppedFile = new File([croppedBlob], originalFile.name.replace(/\.[^/.]+$/, "") + "_cropped.jpg", {
-        type: 'image/jpeg'
-      });
-      const formData = new FormData();
-      formData.append('image', croppedFile);
-      const res = await api.upload<{ data: { image: string } }>(`/menu/items/${id}/image`, formData);
-      setImageUrl(res.data.image);
+      let finalImageUrl = imageUrl;
+      
+      for (const [ratio, blob] of Object.entries(croppedBlobs)) {
+        const croppedFile = new File([blob], originalFile.name.replace(/\.[^/.]+$/, "") + `_${ratio.replace(/[:\/]/g, '_')}_cropped.jpg`, {
+          type: 'image/jpeg'
+        });
+        const formData = new FormData();
+        formData.append('image', croppedFile);
+        const res = await api.upload<{ data: { image: string } }>(`/menu/items/${id}/image?ratio=${encodeURIComponent(ratio)}`, formData);
+        
+        if (ratio === imageAspectRatio || !finalImageUrl) {
+          finalImageUrl = res.data.image;
+        }
+      }
+      
+      setImageUrl(finalImageUrl);
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -1016,6 +1025,7 @@ export default function MenuItemForm() {
       {cropSrc && (
         <ImageCropperModal
           src={cropSrc}
+          systemRatio={imageAspectRatio}
           onCrop={handleCropComplete}
           onClose={() => {
             setCropSrc(null);

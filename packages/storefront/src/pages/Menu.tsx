@@ -135,10 +135,20 @@ export default function Menu() {const { t, i18n } = useTranslation();
         return res.json();
       })
       .then((json) => {
-        const data = json.data.map((item: MenuItem) => ({
-          ...item,
-          image: getFullUrl(item.image)
-        }));
+        const data = json.data.map((item: MenuItem & { imageVariants?: any }) => {
+          let mappedVariants = item.imageVariants;
+          if (mappedVariants) {
+            mappedVariants = { ...mappedVariants };
+            for (const key in mappedVariants) {
+              mappedVariants[key] = getFullUrl(mappedVariants[key]) || mappedVariants[key];
+            }
+          }
+          return {
+            ...item,
+            image: getFullUrl(item.image),
+            imageVariants: mappedVariants,
+          };
+        });
         setItems(data);
         setPagination(json.pagination);
       })
@@ -274,8 +284,12 @@ export default function Menu() {const { t, i18n } = useTranslation();
                     onClick={() => setSelectedItemId(item.id)}
                     className="surface-card rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow text-left"
                   >
-                    {item.image ? (
-                      <img src={item.image} alt={getTranslated(item.name, item.nameTranslations, i18n.language)} className={imageClass} />
+                    {item.image || (item as any).imageVariants ? (
+                      <img 
+                        src={(item as any).imageVariants?.[imgAspectRatio] || item.image || ''} 
+                        alt={getTranslated(item.name, item.nameTranslations, i18n.language)} 
+                        className={imageClass} 
+                      />
                     ) : (
                       <div className={placeholderClass}>
                         <svg className="w-12 h-12 text-primary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
