@@ -286,3 +286,17 @@ model PasswordResetToken {
   expiresAt DateTime
   createdAt DateTime @default(now())
 }
+
+model LabelManufacturer {
+  id             String   @id @default(cuid())
+  name           String
+  companyName    String?
+  companyPhone   String?
+  companyAddress String?
+  originCountry  String?
+  brandNameZh    String?
+  brandNameEn    String?
+  
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}

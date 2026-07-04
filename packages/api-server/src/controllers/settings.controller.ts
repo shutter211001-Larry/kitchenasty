@@ -37,6 +37,7 @@ const updateSettingsSchema = z.object({
   menuSection: z.object({
     title: z.string().optional(),
     description: z.string().optional(),
+    imageAspectRatio: z.string().optional(),
   }).optional(),
   lineSettings: z.object({
     liffId: z.string().optional(),
@@ -96,7 +97,10 @@ function toPublicSettings(settings: Awaited<ReturnType<typeof getOrCreateSetting
     currencyDecimals: general.currencyDecimals !== undefined ? Number(general.currencyDecimals) : 2,
     storefrontTemplate: settings.storefrontTemplate,
     heroSection: settings.heroSection,
-    menuSection: settings.menuSection,
+    menuSection: {
+      ...(settings.menuSection as any || {}),
+      imageAspectRatio: (settings.menuSection as any)?.imageAspectRatio || 'h-40',
+    },
     featuresSection: settings.featuresSection,
     ctaSection: settings.ctaSection,
     navShowHome: isTrue(general.navShowHome, true),

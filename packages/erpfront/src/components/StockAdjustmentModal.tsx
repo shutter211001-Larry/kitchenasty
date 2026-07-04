@@ -24,6 +24,7 @@ const StockAdjustmentModal: React.FC<Props> = ({
   const [createExpense, setCreateExpense] = useState(true);
   const [supplierPriceId, setSupplierPriceId] = useState<string>("");
   const [manualCost, setManualCost] = useState<string>("");
+  const [updateQuote, setUpdateQuote] = useState(false);
 
   React.useEffect(() => {
     if (ingredient?.prices?.length > 0) {
@@ -80,7 +81,8 @@ const StockAdjustmentModal: React.FC<Props> = ({
         reason: reason.trim() || suggestions[0],
         createExpense: type === "IN" ? createExpense : undefined,
         supplierPriceId: type === "IN" && createExpense && supplierPriceId ? supplierPriceId : undefined,
-        manualCost: type === "IN" && createExpense && manualCost ? Number(manualCost) : undefined
+        manualCost: type === "IN" && createExpense && manualCost ? Number(manualCost) : undefined,
+        updateQuote: type === "IN" && createExpense && supplierPriceId ? updateQuote : undefined
       });
       onSuccess();
       onClose();
@@ -262,6 +264,19 @@ const StockAdjustmentModal: React.FC<Props> = ({
                           className="w-full bg-white border border-border focus:border-primary/50 text-gray-800 rounded-xl py-3 pl-8 pr-4 text-sm font-bold outline-none transition-all"
                         />
                       </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 pt-2">
+                      <input
+                        type="checkbox"
+                        id="updateQuote"
+                        checked={updateQuote}
+                        onChange={(e) => setUpdateQuote(e.target.checked)}
+                        className="w-4 h-4 text-primary bg-gray-100 border-gray-300 rounded focus:ring-primary focus:ring-2"
+                      />
+                      <label htmlFor="updateQuote" className="text-sm font-bold text-gray-700 cursor-pointer">
+                        以新單價同步更新供應商報價
+                      </label>
                     </div>
                   </div>
                 )}

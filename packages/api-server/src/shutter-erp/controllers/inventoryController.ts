@@ -28,7 +28,7 @@ export const getInventoryLogs = async (req: AuthenticatedRequest, res: Response)
 
 export const createInventoryLog = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const { ingredientId, type, amount, reason, createExpense, supplierPriceId, manualCost } = req.body;
+    const { ingredientId, type, amount, reason, createExpense, supplierPriceId, manualCost, updateQuote } = req.body;
 
     if (!ingredientId || !type || amount === undefined) {
       return res.status(400).json({ error: '材料、類型與數量為必填欄位' });
@@ -101,6 +101,19 @@ export const createInventoryLog = async (req: AuthenticatedRequest, res: Respons
           if (supplierPriceId) {
              const sp = await tx.supplierPrice.findUnique({ where: { id: supplierPriceId }, include: { supplier: true }});
              if (sp?.supplier?.name) supplierName = ` (${sp.supplier.name})`;
+             
+             if (updateQuote && sp) {
+               const numAmount = Number(amount);
+               if (numAmount > 0) {
+                 const newUnitPrice = cost / numAmount;
+                 const conversionFactor = sp.unitPrice > 0 ? sp.price / sp.unitPrice : 1;
+                 const newPrice = newUnitPrice * conversionFactor;
+                 await tx.supplierPrice.update({
+                   where: { id: sp.id },
+                   data: { unitPrice: newUnitPrice, price: newPrice }
+                 });
+               }
+             }
           }
         } else {
           let priceSource = null;

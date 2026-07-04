@@ -157,3 +157,4 @@ export const createErpTables = async (req: Request, res: Response) => {
     res.status(500).json({ success: false, error: error.message || 'Failed to create tables' });
   }
 };
+

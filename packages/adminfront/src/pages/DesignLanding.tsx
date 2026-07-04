@@ -29,6 +29,7 @@ interface CtaSection {
 interface MenuSection {
   title?: string;
   description?: string;
+  imageAspectRatio?: string;
 }
 
 export default function DesignLanding() {
@@ -382,6 +383,21 @@ export default function DesignLanding() {
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
               placeholder={t('designLanding.menuDescriptionPlaceholder')}
             />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t('designLanding.imageAspectRatio', '圖片比例 (Image Aspect Ratio)')}</label>
+            <select
+              value={menu.imageAspectRatio || 'h-40'}
+              onChange={(e) => setMenu({ ...menu, imageAspectRatio: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+            >
+              <option value="h-40">{t('designLanding.ratioFixedHeight', '固定高度 (Fixed Height - Default)')}</option>
+              <option value="aspect-square">{t('designLanding.ratio11', '1:1 (正方形)')}</option>
+              <option value="aspect-[4/3]">{t('designLanding.ratio43', '4:3 (標準)')}</option>
+              <option value="aspect-video">{t('designLanding.ratio169', '16:9 (寬螢幕)')}</option>
+              <option value="aspect-auto">{t('designLanding.ratioAuto', '自動 (原始比例)')}</option>
+            </select>
+            <p className="text-xs text-gray-500 mt-1">{t('designLanding.imageAspectRatioHint', '此設定會套用於菜單的商品圖片顯示比例')}</p>
           </div>
         </div>
       </div>

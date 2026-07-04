@@ -32,12 +32,479 @@ interface Recipe {
   isProduct?: boolean;
   bakingLossRate?: number;
 }
+
+export type LabelSize = "100x100" | "80x80" | "100x150" | "70x50";
+
+export interface CustomLine {
+  id: string;
+  type: "horizontal" | "vertical";
+  left: number;
+  top: number;
+  length: number;
+  thickness: string;
+  style: "solid" | "dashed" | "dotted" | "double";
+  color: string;
+}
+
+export interface GroupLayout {
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+}
+
+export interface LabelLayout {
+  A: GroupLayout;
+  B: GroupLayout;
+  C: GroupLayout;
+  D: GroupLayout;
+  E: GroupLayout;
+  F: GroupLayout;
+}
+
+export const DEFAULT_LAYOUTS: Record<LabelSize, LabelLayout> = {
+  "100x100": {
+    A: { left: 2, top: 48, width: 48, height: 34 },
+    B: { left: 2, top: 2, width: 96, height: 14 },
+    F: { left: 2, top: 16, width: 50, height: 30 },
+    C: { left: 52, top: 48, width: 46, height: 34 },
+    D: { left: 2, top: 84, width: 96, height: 14 },
+    E: { left: 54, top: 16, width: 44, height: 30 }
+  },
+  "80x80": {
+    A: { left: 2, top: 48, width: 48, height: 34 },
+    B: { left: 2, top: 2, width: 96, height: 14 },
+    F: { left: 2, top: 16, width: 50, height: 30 },
+    C: { left: 52, top: 48, width: 46, height: 34 },
+    D: { left: 2, top: 84, width: 96, height: 14 },
+    E: { left: 54, top: 16, width: 44, height: 30 }
+  },
+  "100x150": {
+    B: { left: 2, top: 2, width: 96, height: 12 },
+    F: { left: 2, top: 14, width: 96, height: 16 },
+    E: { left: 2, top: 32, width: 96, height: 32 },
+    C: { left: 2, top: 66, width: 96, height: 20 },
+    A: { left: 2, top: 88, width: 96, height: 28 },
+    D: { left: 2, top: 118, width: 96, height: 30 }
+  },
+  "70x50": {
+    B: { left: 2, top: 2, width: 96, height: 18 },
+    F: { left: 2, top: 20, width: 96, height: 30 },
+    E: { left: 2, top: 52, width: 96, height: 22 },
+    C: { left: 2, top: 76, width: 96, height: 12 },
+    A: { left: 2, top: 90, width: 96, height: 4 },
+    D: { left: 2, top: 96, width: 96, height: 2 }
+  }
+};
+
+export interface LabelConfigState {
+  printLanguage: string;
+  enableDualLanguage: boolean;
+  labelSize: LabelSize;
+  groupFontScales: Record<"A" | "B" | "C" | "D" | "E" | "F", number>;
+  barcodeExplanation: string;
+  showNotReadyToEat: boolean;
+  notReadyToEatText: string;
+  nutritionConfigs: Record<string, { decimals: number; maxLength: number; }>;
+  customLines: CustomLine[];
+  useCustomLayout: boolean;
+  groupLayouts: LabelLayout;
+  labelGap: number;
+  includeGapInPrint: boolean;
+  previewContinuous: boolean;
+  labelBorderRadius: number;
+  gapAlignment: "top" | "center" | "bottom";
+  showBranding: boolean;
+  showProductZh: boolean;
+  showProductEn: boolean;
+  showIngredients: boolean;
+  showNetWeight: boolean;
+  showStorage: boolean;
+  showExpiry: boolean;
+  showResponsible: boolean;
+  showReheating: boolean;
+  showAirFryer: boolean;
+  showOven: boolean;
+  showPan: boolean;
+  showNutrition: boolean;
+  showAllergens: boolean;
+  showBarcode: boolean;
+  productZh: string;
+  productEn: string;
+  ingredientsText: string;
+  netWeight: string;
+  storageCondition: string;
+  shelfLife: string;
+  expiryOption: "printed" | "date";
+  expiryDate: string;
+  brandNameZh: string;
+  brandNameEn: string;
+  logoType: "icon" | "upload" | "text";
+  selectedIconName: string;
+  uploadedLogo: string;
+  companyName: string;
+  companyPhone: string;
+  companyAddress: string;
+  originCountry: string;
+  showAddress: boolean;
+  showPhone: boolean;
+  showOrigin: boolean;
+  showManufacturer: boolean;
+  allergenWarning: string;
+  airFryerSteps: string;
+  ovenSteps: string;
+  panSteps: string;
+  reheatingMainTitleSize: number;
+  reheatingSubTitleSize: number;
+  reheatingContentSize: number;
+  reheatingMainTitle: string;
+  airFryerTitle: string;
+  ovenTitle: string;
+  panTitle: string;
+  portionSize: string;
+  portionsPerPkg: string;
+  calories: string;
+  protein: string;
+  fat: string;
+  saturatedFat: string;
+  transFat: string;
+  carbs: string;
+  sugar: string;
+  sodium: string;
+  barcodeText: string;
+  expandedIngredients: Record<string, boolean>;
+}
+
+export const useLabelConfigState = (t: any) => {
+  const [config, setConfig] = useState<LabelConfigState>({
+    printLanguage: "en",
+    enableDualLanguage: false,
+    labelSize: "100x100",
+    groupFontScales: { A: 1.0, B: 1.0, C: 1.0, D: 1.0, E: 1.0, F: 1.0 },
+    barcodeExplanation: t("erp_444"),
+    showNotReadyToEat: true,
+    notReadyToEatText: t("erp_445"),
+    nutritionConfigs: {
+    calories: { decimals: -1, maxLength: 8 },
+    protein: { decimals: 1, maxLength: 8 },
+    fat: { decimals: 1, maxLength: 8 },
+    saturatedFat: { decimals: 1, maxLength: 8 },
+    transFat: { decimals: 1, maxLength: 8 },
+    carbs: { decimals: 1, maxLength: 8 },
+    sugar: { decimals: 1, maxLength: 8 },
+    sodium: { decimals: -1, maxLength: 8 }
+  },
+    customLines: [],
+    useCustomLayout: false,
+    groupLayouts: DEFAULT_LAYOUTS["100x100"],
+    labelGap: 3,
+    includeGapInPrint: true,
+    previewContinuous: true,
+    labelBorderRadius: 4,
+    gapAlignment: "bottom",
+    showBranding: true,
+    showProductZh: true,
+    showProductEn: true,
+    showIngredients: true,
+    showNetWeight: true,
+    showStorage: true,
+    showExpiry: true,
+    showResponsible: true,
+    showReheating: true,
+    showAirFryer: true,
+    showOven: true,
+    showPan: true,
+    showNutrition: true,
+    showAllergens: true,
+    showBarcode: true,
+    productZh: t("erp_446"),
+    productEn: "PEPPERONI PIZZA",
+    ingredientsText: t("erp_447"),
+    netWeight: t("erp_448"),
+    storageCondition: t("erp_449"),
+    shelfLife: t("erp_450"),
+    expiryOption: "printed",
+    expiryDate: "2027/05/20",
+    brandNameZh: t("erp_451"),
+    brandNameEn: "PREMIUM FOOD LAB",
+    logoType: "icon",
+    selectedIconName: "ChefHat",
+    uploadedLogo: "",
+    companyName: t("erp_452"),
+    companyPhone: "02-2345-6789",
+    companyAddress: t("erp_453"),
+    originCountry: t("erp_454"),
+    showAddress: true,
+    showPhone: true,
+    showOrigin: true,
+    showManufacturer: true,
+    allergenWarning: t("erp_455"),
+    airFryerSteps: t("erp_456"),
+    ovenSteps: t("erp_457"),
+    panSteps: t("erp_458"),
+    reheatingMainTitleSize: 7.5,
+    reheatingSubTitleSize: 7.2,
+    reheatingContentSize: 6.2,
+    reheatingMainTitle: t("erp_459"),
+    airFryerTitle: t("erp_460"),
+    ovenTitle: t("erp_461"),
+    panTitle: t("erp_462"),
+    portionSize: "100",
+    portionsPerPkg: "2.4",
+    calories: "265",
+    protein: "12.5",
+    fat: "8.4",
+    saturatedFat: "3.2",
+    transFat: "0",
+    carbs: "35.2",
+    sugar: "1.8",
+    sodium: "480",
+    barcodeText: "https://smartkitchen-erp.com/recipe",
+    expandedIngredients: {},
+  });
+
+  return {
+    config,
+    setConfig,
+    printLanguage: config.printLanguage,
+    setPrintLanguage: (val: string | ((prev: string) => string)) => setConfig(prev => ({ ...prev, printLanguage: typeof val === 'function' ? (val as any)(prev.printLanguage) : val })),
+    enableDualLanguage: config.enableDualLanguage,
+    setEnableDualLanguage: (val: boolean | ((prev: boolean) => boolean)) => setConfig(prev => ({ ...prev, enableDualLanguage: typeof val === 'function' ? (val as any)(prev.enableDualLanguage) : val })),
+    labelSize: config.labelSize,
+    setLabelSize: (val: LabelSize | ((prev: LabelSize) => LabelSize)) => setConfig(prev => ({ ...prev, labelSize: typeof val === 'function' ? (val as any)(prev.labelSize) : val })),
+    groupFontScales: config.groupFontScales,
+    setGroupFontScales: (val: Record<"A" | "B" | "C" | "D" | "E" | "F", number> | ((prev: Record<"A" | "B" | "C" | "D" | "E" | "F", number>) => Record<"A" | "B" | "C" | "D" | "E" | "F", number>)) => setConfig(prev => ({ ...prev, groupFontScales: typeof val === 'function' ? (val as any)(prev.groupFontScales) : val })),
+    barcodeExplanation: config.barcodeExplanation,
+    setBarcodeExplanation: (val: string | ((prev: string) => string)) => setConfig(prev => ({ ...prev, barcodeExplanation: typeof val === 'function' ? (val as any)(prev.barcodeExplanation) : val })),
+    showNotReadyToEat: config.showNotReadyToEat,
+    setShowNotReadyToEat: (val: boolean | ((prev: boolean) => boolean)) => setConfig(prev => ({ ...prev, showNotReadyToEat: typeof val === 'function' ? (val as any)(prev.showNotReadyToEat) : val })),
+    notReadyToEatText: config.notReadyToEatText,
+    setNotReadyToEatText: (val: string | ((prev: string) => string)) => setConfig(prev => ({ ...prev, notReadyToEatText: typeof val === 'function' ? (val as any)(prev.notReadyToEatText) : val })),
+    nutritionConfigs: config.nutritionConfigs,
+    setNutritionConfigs: (val: Record<string, { decimals: number; maxLength: number; }> | ((prev: Record<string, { decimals: number; maxLength: number; }>) => Record<string, { decimals: number; maxLength: number; }>)) => setConfig(prev => ({ ...prev, nutritionConfigs: typeof val === 'function' ? (val as any)(prev.nutritionConfigs) : val })),
+    customLines: config.customLines,
+    setCustomLines: (val: CustomLine[] | ((prev: CustomLine[]) => CustomLine[])) => setConfig(prev => ({ ...prev, customLines: typeof val === 'function' ? (val as any)(prev.customLines) : val })),
+    useCustomLayout: config.useCustomLayout,
+    setUseCustomLayout: (val: boolean | ((prev: boolean) => boolean)) => setConfig(prev => ({ ...prev, useCustomLayout: typeof val === 'function' ? (val as any)(prev.useCustomLayout) : val })),
+    groupLayouts: config.groupLayouts,
+    setGroupLayouts: (val: LabelLayout | ((prev: LabelLayout) => LabelLayout)) => setConfig(prev => ({ ...prev, groupLayouts: typeof val === 'function' ? (val as any)(prev.groupLayouts) : val })),
+    labelGap: config.labelGap,
+    setLabelGap: (val: number | ((prev: number) => number)) => setConfig(prev => ({ ...prev, labelGap: typeof val === 'function' ? (val as any)(prev.labelGap) : val })),
+    includeGapInPrint: config.includeGapInPrint,
+    setIncludeGapInPrint: (val: boolean | ((prev: boolean) => boolean)) => setConfig(prev => ({ ...prev, includeGapInPrint: typeof val === 'function' ? (val as any)(prev.includeGapInPrint) : val })),
+    previewContinuous: config.previewContinuous,
+    setPreviewContinuous: (val: boolean | ((prev: boolean) => boolean)) => setConfig(prev => ({ ...prev, previewContinuous: typeof val === 'function' ? (val as any)(prev.previewContinuous) : val })),
+    labelBorderRadius: config.labelBorderRadius,
+    setLabelBorderRadius: (val: number | ((prev: number) => number)) => setConfig(prev => ({ ...prev, labelBorderRadius: typeof val === 'function' ? (val as any)(prev.labelBorderRadius) : val })),
+    gapAlignment: config.gapAlignment,
+    setGapAlignment: (val: "top" | "center" | "bottom" | ((prev: "top" | "center" | "bottom") => "top" | "center" | "bottom")) => setConfig(prev => ({ ...prev, gapAlignment: typeof val === 'function' ? (val as any)(prev.gapAlignment) : val })),
+    showBranding: config.showBranding,
+    setShowBranding: (val: boolean | ((prev: boolean) => boolean)) => setConfig(prev => ({ ...prev, showBranding: typeof val === 'function' ? (val as any)(prev.showBranding) : val })),
+    showProductZh: config.showProductZh,
+    setShowProductZh: (val: boolean | ((prev: boolean) => boolean)) => setConfig(prev => ({ ...prev, showProductZh: typeof val === 'function' ? (val as any)(prev.showProductZh) : val })),
+    showProductEn: config.showProductEn,
+    setShowProductEn: (val: boolean | ((prev: boolean) => boolean)) => setConfig(prev => ({ ...prev, showProductEn: typeof val === 'function' ? (val as any)(prev.showProductEn) : val })),
+    showIngredients: config.showIngredients,
+    setShowIngredients: (val: boolean | ((prev: boolean) => boolean)) => setConfig(prev => ({ ...prev, showIngredients: typeof val === 'function' ? (val as any)(prev.showIngredients) : val })),
+    showNetWeight: config.showNetWeight,
+    setShowNetWeight: (val: boolean | ((prev: boolean) => boolean)) => setConfig(prev => ({ ...prev, showNetWeight: typeof val === 'function' ? (val as any)(prev.showNetWeight) : val })),
+    showStorage: config.showStorage,
+    setShowStorage: (val: boolean | ((prev: boolean) => boolean)) => setConfig(prev => ({ ...prev, showStorage: typeof val === 'function' ? (val as any)(prev.showStorage) : val })),
+    showExpiry: config.showExpiry,
+    setShowExpiry: (val: boolean | ((prev: boolean) => boolean)) => setConfig(prev => ({ ...prev, showExpiry: typeof val === 'function' ? (val as any)(prev.showExpiry) : val })),
+    showResponsible: config.showResponsible,
+    setShowResponsible: (val: boolean | ((prev: boolean) => boolean)) => setConfig(prev => ({ ...prev, showResponsible: typeof val === 'function' ? (val as any)(prev.showResponsible) : val })),
+    showReheating: config.showReheating,
+    setShowReheating: (val: boolean | ((prev: boolean) => boolean)) => setConfig(prev => ({ ...prev, showReheating: typeof val === 'function' ? (val as any)(prev.showReheating) : val })),
+    showAirFryer: config.showAirFryer,
+    setShowAirFryer: (val: boolean | ((prev: boolean) => boolean)) => setConfig(prev => ({ ...prev, showAirFryer: typeof val === 'function' ? (val as any)(prev.showAirFryer) : val })),
+    showOven: config.showOven,
+    setShowOven: (val: boolean | ((prev: boolean) => boolean)) => setConfig(prev => ({ ...prev, showOven: typeof val === 'function' ? (val as any)(prev.showOven) : val })),
+    showPan: config.showPan,
+    setShowPan: (val: boolean | ((prev: boolean) => boolean)) => setConfig(prev => ({ ...prev, showPan: typeof val === 'function' ? (val as any)(prev.showPan) : val })),
+    showNutrition: config.showNutrition,
+    setShowNutrition: (val: boolean | ((prev: boolean) => boolean)) => setConfig(prev => ({ ...prev, showNutrition: typeof val === 'function' ? (val as any)(prev.showNutrition) : val })),
+    showAllergens: config.showAllergens,
+    setShowAllergens: (val: boolean | ((prev: boolean) => boolean)) => setConfig(prev => ({ ...prev, showAllergens: typeof val === 'function' ? (val as any)(prev.showAllergens) : val })),
+    showBarcode: config.showBarcode,
+    setShowBarcode: (val: boolean | ((prev: boolean) => boolean)) => setConfig(prev => ({ ...prev, showBarcode: typeof val === 'function' ? (val as any)(prev.showBarcode) : val })),
+    productZh: config.productZh,
+    setProductZh: (val: string | ((prev: string) => string)) => setConfig(prev => ({ ...prev, productZh: typeof val === 'function' ? (val as any)(prev.productZh) : val })),
+    productEn: config.productEn,
+    setProductEn: (val: string | ((prev: string) => string)) => setConfig(prev => ({ ...prev, productEn: typeof val === 'function' ? (val as any)(prev.productEn) : val })),
+    ingredientsText: config.ingredientsText,
+    setIngredientsText: (val: string | ((prev: string) => string)) => setConfig(prev => ({ ...prev, ingredientsText: typeof val === 'function' ? (val as any)(prev.ingredientsText) : val })),
+    netWeight: config.netWeight,
+    setNetWeight: (val: string | ((prev: string) => string)) => setConfig(prev => ({ ...prev, netWeight: typeof val === 'function' ? (val as any)(prev.netWeight) : val })),
+    storageCondition: config.storageCondition,
+    setStorageCondition: (val: string | ((prev: string) => string)) => setConfig(prev => ({ ...prev, storageCondition: typeof val === 'function' ? (val as any)(prev.storageCondition) : val })),
+    shelfLife: config.shelfLife,
+    setShelfLife: (val: string | ((prev: string) => string)) => setConfig(prev => ({ ...prev, shelfLife: typeof val === 'function' ? (val as any)(prev.shelfLife) : val })),
+    expiryOption: config.expiryOption,
+    setExpiryOption: (val: "printed" | "date" | ((prev: "printed" | "date") => "printed" | "date")) => setConfig(prev => ({ ...prev, expiryOption: typeof val === 'function' ? (val as any)(prev.expiryOption) : val })),
+    expiryDate: config.expiryDate,
+    setExpiryDate: (val: string | ((prev: string) => string)) => setConfig(prev => ({ ...prev, expiryDate: typeof val === 'function' ? (val as any)(prev.expiryDate) : val })),
+    brandNameZh: config.brandNameZh,
+    setBrandNameZh: (val: string | ((prev: string) => string)) => setConfig(prev => ({ ...prev, brandNameZh: typeof val === 'function' ? (val as any)(prev.brandNameZh) : val })),
+    brandNameEn: config.brandNameEn,
+    setBrandNameEn: (val: string | ((prev: string) => string)) => setConfig(prev => ({ ...prev, brandNameEn: typeof val === 'function' ? (val as any)(prev.brandNameEn) : val })),
+    logoType: config.logoType,
+    setLogoType: (val: "icon" | "upload" | "text" | ((prev: "icon" | "upload" | "text") => "icon" | "upload" | "text")) => setConfig(prev => ({ ...prev, logoType: typeof val === 'function' ? (val as any)(prev.logoType) : val })),
+    selectedIconName: config.selectedIconName,
+    setSelectedIconName: (val: string | ((prev: string) => string)) => setConfig(prev => ({ ...prev, selectedIconName: typeof val === 'function' ? (val as any)(prev.selectedIconName) : val })),
+    uploadedLogo: config.uploadedLogo,
+    setUploadedLogo: (val: string | ((prev: string) => string)) => setConfig(prev => ({ ...prev, uploadedLogo: typeof val === 'function' ? (val as any)(prev.uploadedLogo) : val })),
+    companyName: config.companyName,
+    setCompanyName: (val: string | ((prev: string) => string)) => setConfig(prev => ({ ...prev, companyName: typeof val === 'function' ? (val as any)(prev.companyName) : val })),
+    companyPhone: config.companyPhone,
+    setCompanyPhone: (val: string | ((prev: string) => string)) => setConfig(prev => ({ ...prev, companyPhone: typeof val === 'function' ? (val as any)(prev.companyPhone) : val })),
+    companyAddress: config.companyAddress,
+    setCompanyAddress: (val: string | ((prev: string) => string)) => setConfig(prev => ({ ...prev, companyAddress: typeof val === 'function' ? (val as any)(prev.companyAddress) : val })),
+    originCountry: config.originCountry,
+    setOriginCountry: (val: string | ((prev: string) => string)) => setConfig(prev => ({ ...prev, originCountry: typeof val === 'function' ? (val as any)(prev.originCountry) : val })),
+    showAddress: config.showAddress,
+    setShowAddress: (val: boolean | ((prev: boolean) => boolean)) => setConfig(prev => ({ ...prev, showAddress: typeof val === 'function' ? (val as any)(prev.showAddress) : val })),
+    showPhone: config.showPhone,
+    setShowPhone: (val: boolean | ((prev: boolean) => boolean)) => setConfig(prev => ({ ...prev, showPhone: typeof val === 'function' ? (val as any)(prev.showPhone) : val })),
+    showOrigin: config.showOrigin,
+    setShowOrigin: (val: boolean | ((prev: boolean) => boolean)) => setConfig(prev => ({ ...prev, showOrigin: typeof val === 'function' ? (val as any)(prev.showOrigin) : val })),
+    showManufacturer: config.showManufacturer,
+    setShowManufacturer: (val: boolean | ((prev: boolean) => boolean)) => setConfig(prev => ({ ...prev, showManufacturer: typeof val === 'function' ? (val as any)(prev.showManufacturer) : val })),
+    allergenWarning: config.allergenWarning,
+    setAllergenWarning: (val: string | ((prev: string) => string)) => setConfig(prev => ({ ...prev, allergenWarning: typeof val === 'function' ? (val as any)(prev.allergenWarning) : val })),
+    airFryerSteps: config.airFryerSteps,
+    setAirFryerSteps: (val: string | ((prev: string) => string)) => setConfig(prev => ({ ...prev, airFryerSteps: typeof val === 'function' ? (val as any)(prev.airFryerSteps) : val })),
+    ovenSteps: config.ovenSteps,
+    setOvenSteps: (val: string | ((prev: string) => string)) => setConfig(prev => ({ ...prev, ovenSteps: typeof val === 'function' ? (val as any)(prev.ovenSteps) : val })),
+    panSteps: config.panSteps,
+    setPanSteps: (val: string | ((prev: string) => string)) => setConfig(prev => ({ ...prev, panSteps: typeof val === 'function' ? (val as any)(prev.panSteps) : val })),
+    reheatingMainTitleSize: config.reheatingMainTitleSize,
+    setReheatingMainTitleSize: (val: number | ((prev: number) => number)) => setConfig(prev => ({ ...prev, reheatingMainTitleSize: typeof val === 'function' ? (val as any)(prev.reheatingMainTitleSize) : val })),
+    reheatingSubTitleSize: config.reheatingSubTitleSize,
+    setReheatingSubTitleSize: (val: number | ((prev: number) => number)) => setConfig(prev => ({ ...prev, reheatingSubTitleSize: typeof val === 'function' ? (val as any)(prev.reheatingSubTitleSize) : val })),
+    reheatingContentSize: config.reheatingContentSize,
+    setReheatingContentSize: (val: number | ((prev: number) => number)) => setConfig(prev => ({ ...prev, reheatingContentSize: typeof val === 'function' ? (val as any)(prev.reheatingContentSize) : val })),
+    reheatingMainTitle: config.reheatingMainTitle,
+    setReheatingMainTitle: (val: string | ((prev: string) => string)) => setConfig(prev => ({ ...prev, reheatingMainTitle: typeof val === 'function' ? (val as any)(prev.reheatingMainTitle) : val })),
+    airFryerTitle: config.airFryerTitle,
+    setAirFryerTitle: (val: string | ((prev: string) => string)) => setConfig(prev => ({ ...prev, airFryerTitle: typeof val === 'function' ? (val as any)(prev.airFryerTitle) : val })),
+    ovenTitle: config.ovenTitle,
+    setOvenTitle: (val: string | ((prev: string) => string)) => setConfig(prev => ({ ...prev, ovenTitle: typeof val === 'function' ? (val as any)(prev.ovenTitle) : val })),
+    panTitle: config.panTitle,
+    setPanTitle: (val: string | ((prev: string) => string)) => setConfig(prev => ({ ...prev, panTitle: typeof val === 'function' ? (val as any)(prev.panTitle) : val })),
+    portionSize: config.portionSize,
+    setPortionSize: (val: string | ((prev: string) => string)) => setConfig(prev => ({ ...prev, portionSize: typeof val === 'function' ? (val as any)(prev.portionSize) : val })),
+    portionsPerPkg: config.portionsPerPkg,
+    setPortionsPerPkg: (val: string | ((prev: string) => string)) => setConfig(prev => ({ ...prev, portionsPerPkg: typeof val === 'function' ? (val as any)(prev.portionsPerPkg) : val })),
+    calories: config.calories,
+    setCalories: (val: string | ((prev: string) => string)) => setConfig(prev => ({ ...prev, calories: typeof val === 'function' ? (val as any)(prev.calories) : val })),
+    protein: config.protein,
+    setProtein: (val: string | ((prev: string) => string)) => setConfig(prev => ({ ...prev, protein: typeof val === 'function' ? (val as any)(prev.protein) : val })),
+    fat: config.fat,
+    setFat: (val: string | ((prev: string) => string)) => setConfig(prev => ({ ...prev, fat: typeof val === 'function' ? (val as any)(prev.fat) : val })),
+    saturatedFat: config.saturatedFat,
+    setSaturatedFat: (val: string | ((prev: string) => string)) => setConfig(prev => ({ ...prev, saturatedFat: typeof val === 'function' ? (val as any)(prev.saturatedFat) : val })),
+    transFat: config.transFat,
+    setTransFat: (val: string | ((prev: string) => string)) => setConfig(prev => ({ ...prev, transFat: typeof val === 'function' ? (val as any)(prev.transFat) : val })),
+    carbs: config.carbs,
+    setCarbs: (val: string | ((prev: string) => string)) => setConfig(prev => ({ ...prev, carbs: typeof val === 'function' ? (val as any)(prev.carbs) : val })),
+    sugar: config.sugar,
+    setSugar: (val: string | ((prev: string) => string)) => setConfig(prev => ({ ...prev, sugar: typeof val === 'function' ? (val as any)(prev.sugar) : val })),
+    sodium: config.sodium,
+    setSodium: (val: string | ((prev: string) => string)) => setConfig(prev => ({ ...prev, sodium: typeof val === 'function' ? (val as any)(prev.sodium) : val })),
+    barcodeText: config.barcodeText,
+    setBarcodeText: (val: string | ((prev: string) => string)) => setConfig(prev => ({ ...prev, barcodeText: typeof val === 'function' ? (val as any)(prev.barcodeText) : val })),
+    expandedIngredients: config.expandedIngredients,
+    setExpandedIngredients: (val: Record<string, boolean> | ((prev: Record<string, boolean>) => Record<string, boolean>)) => setConfig(prev => ({ ...prev, expandedIngredients: typeof val === 'function' ? (val as any)(prev.expandedIngredients) : val })),
+  };
+};
+
 export const Labels = () => {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [selectedRecipeId, setSelectedRecipeId] = useState("");
   const [loading, setLoading] = useState(false);
   const [allIngredients, setAllIngredients] = useState<any[]>([]);
-  const [expandedIngredients, setExpandedIngredients] = useState<Record<string, boolean>>({});
+
+  const labelConfigHook = useLabelConfigState(t);
+  const {
+    config, setConfig,
+    printLanguage, setPrintLanguage,
+    enableDualLanguage, setEnableDualLanguage,
+    labelSize, setLabelSize,
+    groupFontScales, setGroupFontScales,
+    barcodeExplanation, setBarcodeExplanation,
+    showNotReadyToEat, setShowNotReadyToEat,
+    notReadyToEatText, setNotReadyToEatText,
+    nutritionConfigs, setNutritionConfigs,
+    customLines, setCustomLines,
+    useCustomLayout, setUseCustomLayout,
+    groupLayouts, setGroupLayouts,
+    labelGap, setLabelGap,
+    includeGapInPrint, setIncludeGapInPrint,
+    previewContinuous, setPreviewContinuous,
+    labelBorderRadius, setLabelBorderRadius,
+    gapAlignment, setGapAlignment,
+    showBranding, setShowBranding,
+    showProductZh, setShowProductZh,
+    showProductEn, setShowProductEn,
+    showIngredients, setShowIngredients,
+    showNetWeight, setShowNetWeight,
+    showStorage, setShowStorage,
+    showExpiry, setShowExpiry,
+    showResponsible, setShowResponsible,
+    showReheating, setShowReheating,
+    showAirFryer, setShowAirFryer,
+    showOven, setShowOven,
+    showPan, setShowPan,
+    showNutrition, setShowNutrition,
+    showAllergens, setShowAllergens,
+    showBarcode, setShowBarcode,
+    productZh, setProductZh,
+    productEn, setProductEn,
+    ingredientsText, setIngredientsText,
+    netWeight, setNetWeight,
+    storageCondition, setStorageCondition,
+    shelfLife, setShelfLife,
+    expiryOption, setExpiryOption,
+    expiryDate, setExpiryDate,
+    brandNameZh, setBrandNameZh,
+    brandNameEn, setBrandNameEn,
+    logoType, setLogoType,
+    selectedIconName, setSelectedIconName,
+    uploadedLogo, setUploadedLogo,
+    companyName, setCompanyName,
+    companyPhone, setCompanyPhone,
+    companyAddress, setCompanyAddress,
+    originCountry, setOriginCountry,
+    showAddress, setShowAddress,
+    showPhone, setShowPhone,
+    showOrigin, setShowOrigin,
+    showManufacturer, setShowManufacturer,
+    allergenWarning, setAllergenWarning,
+    airFryerSteps, setAirFryerSteps,
+    ovenSteps, setOvenSteps,
+    panSteps, setPanSteps,
+    reheatingMainTitleSize, setReheatingMainTitleSize,
+    reheatingSubTitleSize, setReheatingSubTitleSize,
+    reheatingContentSize, setReheatingContentSize,
+    reheatingMainTitle, setReheatingMainTitle,
+    airFryerTitle, setAirFryerTitle,
+    ovenTitle, setOvenTitle,
+    panTitle, setPanTitle,
+    portionSize, setPortionSize,
+    portionsPerPkg, setPortionsPerPkg,
+    calories, setCalories,
+    protein, setProtein,
+    fat, setFat,
+    saturatedFat, setSaturatedFat,
+    transFat, setTransFat,
+    carbs, setCarbs,
+    sugar, setSugar,
+    sodium, setSodium,
+    barcodeText, setBarcodeText,
+    expandedIngredients, setExpandedIngredients
+  } = labelConfigHook;
+
   const {
     t
   } = useTranslation();
@@ -72,7 +539,6 @@ export const Labels = () => {
     }
     return null;
   };
-  const [enableDualLanguage, setEnableDualLanguage] = useState<boolean>(false);
   const getFormattedIngredientsText = (): string => {
     let formatted = ingredientsText || "";
     const references = parseIngredientReferences(ingredientsText);
@@ -100,12 +566,9 @@ export const Labels = () => {
   };
 
   // Layout Size Options
-  type LabelSize = "100x100" | "80x80" | "100x150" | "70x50";
-  const [labelSize, setLabelSize] = useState<LabelSize>("100x100");
 
   // Group Collapse Accordion States
   const [activeAccordion, setActiveAccordion] = useState<"A" | "B" | "C" | "D" | "E" | "F" | "L" | null>("A");
-  const [useImperialExactSize, setUseImperialExactSize] = useState<boolean>(true);
 
   // Group Font Scales (Multiplier from 0.6 to 2.0)
   const [groupFontScales, setGroupFontScales] = useState<Record<"A" | "B" | "C" | "D" | "E" | "F", number>>({
@@ -124,15 +587,12 @@ export const Labels = () => {
   };
 
   // Barcode Explanation dynamic text
-  const [barcodeExplanation, setBarcodeExplanation] = useState<string>(t("erp_444"));
 
   // Copy and Paste Layout configuration utilities
   const [targetRecipeIdToCopyTo, setTargetRecipeIdToCopyTo] = useState<string>("");
   const [copyingLayoutToRecipe, setCopyingLayoutToRecipe] = useState<boolean>(false);
 
   // Warning Label for Non-Ready-To-Eat
-  const [showNotReadyToEat, setShowNotReadyToEat] = useState<boolean>(true);
-  const [notReadyToEatText, setNotReadyToEatText] = useState<string>(t("erp_445"));
 
   // Nutrition Precision and Max Length Configs
   const [nutritionConfigs, setNutritionConfigs] = useState<Record<string, {
@@ -186,17 +646,6 @@ export const Labels = () => {
   };
 
   // Custom Line Segments
-  interface CustomLine {
-    id: string;
-    type: "horizontal" | "vertical";
-    left: number;
-    top: number;
-    length: number;
-    thickness: string;
-    style: "solid" | "dashed" | "dotted" | "double";
-    color: string;
-  }
-  const [customLines, setCustomLines] = useState<CustomLine[]>([]);
   const [draggingLineId, setDraggingLineId] = useState<string | null>(null);
   const [resizingLineId, setResizingLineId] = useState<string | null>(null);
   const [dragLineStartPos, setDragLineStartPos] = useState({
@@ -333,176 +782,6 @@ export const Labels = () => {
   }, [draggingLineId, resizingLineId, dragLineStartPos, dragLineStartLayout]);
 
   // Drag-and-Resize Custom Positioning Layout Mode
-  const [useCustomLayout, setUseCustomLayout] = useState<boolean>(false);
-  interface GroupLayout {
-    left: number;
-    top: number;
-    width: number;
-    height: number;
-  }
-  interface LabelLayout {
-    A: GroupLayout;
-    B: GroupLayout;
-    C: GroupLayout;
-    D: GroupLayout;
-    E: GroupLayout;
-    F: GroupLayout;
-  }
-  const DEFAULT_LAYOUTS: Record<"100x100" | "80x80" | "100x150" | "70x50", LabelLayout> = {
-    "100x100": {
-      A: {
-        left: 2,
-        top: 48,
-        width: 48,
-        height: 34
-      },
-      B: {
-        left: 2,
-        top: 2,
-        width: 96,
-        height: 14
-      },
-      F: {
-        left: 2,
-        top: 16,
-        width: 50,
-        height: 30
-      },
-      C: {
-        left: 52,
-        top: 48,
-        width: 46,
-        height: 34
-      },
-      D: {
-        left: 2,
-        top: 84,
-        width: 96,
-        height: 14
-      },
-      E: {
-        left: 54,
-        top: 16,
-        width: 44,
-        height: 30
-      }
-    },
-    "80x80": {
-      A: {
-        left: 2,
-        top: 48,
-        width: 48,
-        height: 34
-      },
-      B: {
-        left: 2,
-        top: 2,
-        width: 96,
-        height: 14
-      },
-      F: {
-        left: 2,
-        top: 16,
-        width: 50,
-        height: 30
-      },
-      C: {
-        left: 52,
-        top: 48,
-        width: 46,
-        height: 34
-      },
-      D: {
-        left: 2,
-        top: 84,
-        width: 96,
-        height: 14
-      },
-      E: {
-        left: 54,
-        top: 16,
-        width: 44,
-        height: 30
-      }
-    },
-    "100x150": {
-      B: {
-        left: 2,
-        top: 2,
-        width: 96,
-        height: 12
-      },
-      F: {
-        left: 2,
-        top: 14,
-        width: 96,
-        height: 16
-      },
-      E: {
-        left: 2,
-        top: 32,
-        width: 96,
-        height: 32
-      },
-      C: {
-        left: 2,
-        top: 66,
-        width: 96,
-        height: 20
-      },
-      A: {
-        left: 2,
-        top: 88,
-        width: 96,
-        height: 28
-      },
-      D: {
-        left: 2,
-        top: 118,
-        width: 96,
-        height: 30
-      }
-    },
-    "70x50": {
-      B: {
-        left: 2,
-        top: 2,
-        width: 96,
-        height: 18
-      },
-      F: {
-        left: 2,
-        top: 20,
-        width: 96,
-        height: 30
-      },
-      E: {
-        left: 2,
-        top: 52,
-        width: 96,
-        height: 22
-      },
-      C: {
-        left: 2,
-        top: 76,
-        width: 96,
-        height: 12
-      },
-      A: {
-        left: 2,
-        top: 90,
-        width: 96,
-        height: 4
-      },
-      D: {
-        left: 2,
-        top: 96,
-        width: 96,
-        height: 2
-      }
-    }
-  };
-  const [groupLayouts, setGroupLayouts] = useState<LabelLayout>(DEFAULT_LAYOUTS["100x100"]);
 
   // Update layout defaults when labelSize changes
   useEffect(() => {
@@ -602,78 +881,28 @@ export const Labels = () => {
   }, [draggingGroup, resizingGroup, dragStartPos, dragStartLayout, labelSize]);
 
   // Continuous Spacing Options (Label Gap in mm)
-  const [labelGap, setLabelGap] = useState<number>(3);
-  const [includeGapInPrint, setIncludeGapInPrint] = useState<boolean>(true);
-  const [previewContinuous, setPreviewContinuous] = useState<boolean>(true);
-  const [labelBorderRadius, setLabelBorderRadius] = useState<number>(4);
-  const [gapAlignment, setGapAlignment] = useState<"top" | "center" | "bottom">("bottom");
 
   // Toggle options (Checkboxes for adaptive columns)
-  const [showBranding, setShowBranding] = useState(true);
-  const [showProductZh, setShowProductZh] = useState(true);
-  const [showProductEn, setShowProductEn] = useState(true);
-  const [showIngredients, setShowIngredients] = useState(true);
-  const [showNetWeight, setShowNetWeight] = useState(true);
-  const [showStorage, setShowStorage] = useState(true);
-  const [showExpiry, setShowExpiry] = useState(true);
-  const [showResponsible, setShowResponsible] = useState(true);
-  const [showReheating, setShowReheating] = useState(true);
-  const [showAirFryer, setShowAirFryer] = useState(true);
-  const [showOven, setShowOven] = useState(true);
-  const [showPan, setShowPan] = useState(true);
-  const [showNutrition, setShowNutrition] = useState(true);
-  const [showAllergens, setShowAllergens] = useState(true);
-  const [showBarcode, setShowBarcode] = useState(true);
 
   // Field values
-  const [productZh, setProductZh] = useState(t("erp_446"));
-  const [productEn, setProductEn] = useState("PEPPERONI PIZZA");
-  const [ingredientsText, setIngredientsText] = useState(t("erp_447"));
-  const [netWeight, setNetWeight] = useState(t("erp_448"));
-  const [storageCondition, setStorageCondition] = useState(t("erp_449"));
-  const [shelfLife, setShelfLife] = useState(t("erp_450"));
   const [expiryOption, setExpiryOption] = useState<"printed" | "date">("printed"); // 'printed' -> 標示於封口, 'date' -> 特定日期
-  const [expiryDate, setExpiryDate] = useState("2027/05/20");
 
   // Customizable Brand Names
-  const [brandNameZh, setBrandNameZh] = useState(t("erp_451"));
-  const [brandNameEn, setBrandNameEn] = useState("PREMIUM FOOD LAB");
 
   // Custom Logo Options
-  const [logoType, setLogoType] = useState<"icon" | "upload" | "text">("icon");
-  const [selectedIconName, setSelectedIconName] = useState<string>("ChefHat");
   const [uploadedLogo, setUploadedLogo] = useState<string>(""); // Base64 image data-url
 
   // Responsible Party Info
-  const [companyName, setCompanyName] = useState(t("erp_452"));
-  const [companyPhone, setCompanyPhone] = useState("02-2345-6789");
-  const [companyAddress, setCompanyAddress] = useState(t("erp_453"));
-  const [originCountry, setOriginCountry] = useState(t("erp_454"));
 
   // Individual corporate detail display toggles
-  const [showAddress, setShowAddress] = useState(true);
-  const [showPhone, setShowPhone] = useState(true);
-  const [showOrigin, setShowOrigin] = useState(true);
-  const [showManufacturer, setShowManufacturer] = useState(true);
 
   // Allergen Statement
-  const [allergenWarning, setAllergenWarning] = useState(t("erp_455"));
 
   // Reheating Instructions
-  const [airFryerSteps, setAirFryerSteps] = useState(t("erp_456"));
-  const [ovenSteps, setOvenSteps] = useState(t("erp_457"));
-  const [panSteps, setPanSteps] = useState(t("erp_458"));
 
   // Reheating Instructions Font Sizes
-  const [reheatingMainTitleSize, setReheatingMainTitleSize] = useState(7.5);
-  const [reheatingSubTitleSize, setReheatingSubTitleSize] = useState(7.2);
-  const [reheatingContentSize, setReheatingContentSize] = useState(6.2);
 
   // Reheating Instructions Custom Titles
-  const [reheatingMainTitle, setReheatingMainTitle] = useState(t("erp_459"));
-  const [airFryerTitle, setAirFryerTitle] = useState(t("erp_460"));
-  const [ovenTitle, setOvenTitle] = useState(t("erp_461"));
-  const [panTitle, setPanTitle] = useState(t("erp_462"));
 
   // Recipe portion scaling states
   const [loadedRecipe, setLoadedRecipe] = useState<any | null>(null);
@@ -683,17 +912,8 @@ export const Labels = () => {
   const [portionSize, setPortionSize] = useState("100"); // 每一份量克數
   const [portionsPerPkg, setPortionsPerPkg] = useState("2.4"); // 本包裝含幾份
 
-  const [calories, setCalories] = useState("265");
-  const [protein, setProtein] = useState("12.5");
-  const [fat, setFat] = useState("8.4");
-  const [saturatedFat, setSaturatedFat] = useState("3.2");
-  const [transFat, setTransFat] = useState("0");
-  const [carbs, setCarbs] = useState("35.2");
-  const [sugar, setSugar] = useState("1.8");
-  const [sodium, setSodium] = useState("480");
 
   // Barcode / QR Code content
-  const [barcodeText, setBarcodeText] = useState("https://smartkitchen-erp.com/recipe");
 
   // Load recipes list
   const fetchRecipes = async () => {
@@ -794,105 +1014,9 @@ export const Labels = () => {
     }
   }, []);
   const [savingLabelConfig, setSavingLabelConfig] = useState(false);
-  const restoreLabelConfig = (config: any) => {
-    if (!config) return;
-
-    // Continuous Spacing details
-    if (config.labelGap !== undefined) setLabelGap(config.labelGap);
-    if (config.includeGapInPrint !== undefined) setIncludeGapInPrint(config.includeGapInPrint);
-    if (config.previewContinuous !== undefined) setPreviewContinuous(config.previewContinuous);
-    if (config.labelBorderRadius !== undefined) setLabelBorderRadius(config.labelBorderRadius);
-    if (config.gapAlignment !== undefined) setGapAlignment(config.gapAlignment);
-
-    // Core details
-    if (config.useCustomLayout !== undefined) setUseCustomLayout(config.useCustomLayout);
-    if (config.customLines !== undefined) setCustomLines(config.customLines || []);
-    if (config.showNotReadyToEat !== undefined) setShowNotReadyToEat(config.showNotReadyToEat);
-    if (config.notReadyToEatText !== undefined) setNotReadyToEatText(config.notReadyToEatText);
-    if (config.nutritionConfigs !== undefined) setNutritionConfigs(config.nutritionConfigs);
-    if (config.groupLayouts !== undefined) {
-      const defaults = DEFAULT_LAYOUTS[labelSize] || DEFAULT_LAYOUTS["100x100"];
-      setGroupLayouts({
-        ...defaults,
-        ...config.groupLayouts
-      });
-    }
-    if (config.groupFontScales !== undefined) {
-      setGroupFontScales({
-        A: 1.0,
-        B: 1.0,
-        C: 1.0,
-        D: 1.0,
-        E: 1.0,
-        F: 1.0,
-        ...config.groupFontScales
-      });
-    }
-    if (config.barcodeExplanation !== undefined) setBarcodeExplanation(config.barcodeExplanation);
-    if (config.productZh !== undefined) setProductZh(config.productZh);
-    if (config.productEn !== undefined) setProductEn(config.productEn);
-    if (config.ingredientsText !== undefined) setIngredientsText(config.ingredientsText);
-    if (config.netWeight !== undefined) setNetWeight(config.netWeight);
-    if (config.storageCondition !== undefined) setStorageCondition(config.storageCondition);
-    if (config.shelfLife !== undefined) setShelfLife(config.shelfLife);
-    if (config.expiryOption !== undefined) setExpiryOption(config.expiryOption);
-    if (config.brandNameZh !== undefined) setBrandNameZh(config.brandNameZh);
-    if (config.brandNameEn !== undefined) setBrandNameEn(config.brandNameEn);
-    if (config.logoType !== undefined) setLogoType(config.logoType);
-
-    // Corporate & Warnings
-    if (config.companyName !== undefined) setCompanyName(config.companyName);
-    if (config.companyPhone !== undefined) setCompanyPhone(config.companyPhone);
-    if (config.companyAddress !== undefined) setCompanyAddress(config.companyAddress);
-    if (config.originCountry !== undefined) setOriginCountry(config.originCountry);
-    if (config.allergenWarning !== undefined) setAllergenWarning(config.allergenWarning);
-    if (config.barcodeText !== undefined) setBarcodeText(config.barcodeText);
-
-    // Toggle Visibility Options
-    if (config.showBranding !== undefined) setShowBranding(config.showBranding);
-    if (config.showProductZh !== undefined) setShowProductZh(config.showProductZh);
-    if (config.showProductEn !== undefined) setShowProductEn(config.showProductEn);
-    if (config.showIngredients !== undefined) setShowIngredients(config.showIngredients);
-    if (config.showNetWeight !== undefined) setShowNetWeight(config.showNetWeight);
-    if (config.showStorage !== undefined) setShowStorage(config.showStorage);
-    if (config.showExpiry !== undefined) setShowExpiry(config.showExpiry);
-    if (config.showResponsible !== undefined) setShowResponsible(config.showResponsible);
-    if (config.showReheating !== undefined) setShowReheating(config.showReheating);
-    if (config.showAirFryer !== undefined) setShowAirFryer(config.showAirFryer);
-    if (config.showOven !== undefined) setShowOven(config.showOven);
-    if (config.showPan !== undefined) setShowPan(config.showPan);
-    if (config.showNutrition !== undefined) setShowNutrition(config.showNutrition);
-    if (config.showAllergens !== undefined) setShowAllergens(config.showAllergens);
-    if (config.showBarcode !== undefined) setShowBarcode(config.showBarcode);
-    if (config.expandedIngredients !== undefined) setExpandedIngredients(config.expandedIngredients || {});
-
-    // Reheating Details
-    if (config.airFryerSteps !== undefined) setAirFryerSteps(config.airFryerSteps);
-    if (config.ovenSteps !== undefined) setOvenSteps(config.ovenSteps);
-    if (config.panSteps !== undefined) setPanSteps(config.panSteps);
-    if (config.reheatingMainTitle !== undefined) setReheatingMainTitle(config.reheatingMainTitle);
-    if (config.airFryerTitle !== undefined) setAirFryerTitle(config.airFryerTitle);
-    if (config.ovenTitle !== undefined) setOvenTitle(config.ovenTitle);
-    if (config.panTitle !== undefined) setPanTitle(config.panTitle);
-
-    // Nutrition values
-    if (config.portionSize !== undefined) setPortionSize(config.portionSize);
-    if (config.portionsPerPkg !== undefined) setPortionsPerPkg(config.portionsPerPkg);
-    if (config.calories !== undefined) setCalories(config.calories);
-    if (config.protein !== undefined) setProtein(config.protein);
-    if (config.fat !== undefined) setFat(config.fat);
-    if (config.saturatedFat !== undefined) setSaturatedFat(config.saturatedFat);
-    if (config.transFat !== undefined) setTransFat(config.transFat);
-    if (config.carbs !== undefined) setCarbs(config.carbs);
-    if (config.sugar !== undefined) setSugar(config.sugar);
-    if (config.sodium !== undefined) setSodium(config.sodium);
-
-    // Scaling
-    if (config.portionScale !== undefined) setPortionScale(config.portionScale);
-
-    // Dual Language
-    if (config.enableDualLanguage !== undefined) setEnableDualLanguage(config.enableDualLanguage);
-    if (config.printLanguage !== undefined) setPrintLanguage(config.printLanguage);
+const restoreLabelConfig = (incomingConfig: any) => {
+    if (!incomingConfig) return;
+    setConfig(prev => ({ ...prev, ...incomingConfig }));
   };
 
   // Copy and Paste Layout configuration utilities
@@ -984,6 +1108,8 @@ export const Labels = () => {
         brandNameZh,
         brandNameEn,
         logoType,
+        selectedIconName,
+        uploadedLogo,
         companyName,
         companyPhone,
         companyAddress,
@@ -1005,6 +1131,10 @@ export const Labels = () => {
         showNutrition,
         showAllergens,
         showBarcode,
+        showAddress,
+        showPhone,
+        showOrigin,
+        showManufacturer,
         airFryerSteps,
         ovenSteps,
         panSteps,
@@ -1012,6 +1142,9 @@ export const Labels = () => {
         airFryerTitle,
         ovenTitle,
         panTitle,
+        reheatingMainTitleSize,
+        reheatingSubTitleSize,
+        reheatingContentSize,
         portionSize,
         portionsPerPkg,
         calories,
@@ -1023,7 +1156,9 @@ export const Labels = () => {
         sugar,
         sodium,
         portionScale,
-        expandedIngredients
+        expandedIngredients,
+        enableDualLanguage,
+        printLanguage
       };
       await axios.patch(`http://localhost:3000/api/recipes/${selectedRecipeId}/label-config`, {
         labelConfig
@@ -1164,172 +1299,17 @@ export const Labels = () => {
   };
 
   // Reset form to default Pizza Studio Pepperoni
-  const handleReset = () => {
+const handleReset = () => {
     setSelectedRecipeId("");
-    setUseCustomLayout(false);
-    setCustomLines([]);
-    setShowNotReadyToEat(true);
-    setNotReadyToEatText(t("erp_445"));
-    setNutritionConfigs({
-      calories: {
-        decimals: -1,
-        maxLength: 8
-      },
-      protein: {
-        decimals: 1,
-        maxLength: 8
-      },
-      fat: {
-        decimals: 1,
-        maxLength: 8
-      },
-      saturatedFat: {
-        decimals: 1,
-        maxLength: 8
-      },
-      transFat: {
-        decimals: 1,
-        maxLength: 8
-      },
-      carbs: {
-        decimals: 1,
-        maxLength: 8
-      },
-      sugar: {
-        decimals: 1,
-        maxLength: 8
-      },
-      sodium: {
-        decimals: -1,
-        maxLength: 8
-      }
-    });
-    setGroupLayouts(DEFAULT_LAYOUTS[labelSize] || DEFAULT_LAYOUTS["100x100"]);
     setActiveAccordion("A");
     setLoadedRecipe(null);
     setPortionScale(1.0);
-    setLabelGap(3);
-    setIncludeGapInPrint(true);
-    setPreviewContinuous(true);
-    setLabelBorderRadius(4);
-    setGapAlignment("bottom");
-    setProductZh(t("erp_446"));
-    setProductEn("PEPPERONI PIZZA");
-    setIngredientsText(t("erp_447"));
-    setNetWeight(t("erp_448"));
-    setStorageCondition(t("erp_449"));
-    setShelfLife(t("erp_450"));
-    setExpiryOption("printed");
-    setBrandNameZh(t("erp_451"));
-    setBrandNameEn("PREMIUM FOOD LAB");
-    setLogoType("icon");
-    setSelectedIconName("ChefHat");
-    setUploadedLogo("");
-    setCompanyName(t("erp_452"));
-    setCompanyPhone("02-2345-6789");
-    setCompanyAddress(t("erp_453"));
-    setOriginCountry(t("erp_454"));
-    setAllergenWarning(t("erp_455"));
-    setCalories("265");
-    setProtein("12.5");
-    setFat("8.4");
-    setSaturatedFat("3.2");
-    setTransFat("0");
-    setCarbs("35.2");
-    setSugar("1.8");
-    setSodium("480");
-    setPortionSize("100");
-    setPortionsPerPkg("2.4");
-    setBarcodeText("https://smartkitchen-erp.com/recipe");
-    setShowReheating(true);
-    setShowAirFryer(true);
-    setShowOven(true);
-    setShowPan(true);
-    setShowNutrition(true);
-    setShowAllergens(true);
-    setShowBranding(true);
-    setShowBarcode(true);
-    setReheatingMainTitleSize(7.5);
-    setReheatingSubTitleSize(7.2);
-    setReheatingContentSize(6.2);
-    setReheatingMainTitle(t("erp_459"));
-    setAirFryerTitle(t("erp_460"));
-    setOvenTitle(t("erp_461"));
-    setPanTitle(t("erp_462"));
-    setShowAddress(true);
-    setShowPhone(true);
-    setShowOrigin(true);
-    setShowManufacturer(true);
-    setGroupFontScales({
-      A: 1.0,
-      B: 1.0,
-      C: 1.0,
-      D: 1.0,
-      E: 1.0,
-      F: 1.0
-    });
-    setBarcodeExplanation(t("erp_444"));
-    setExpandedIngredients({});
-    setEnableDualLanguage(false);
-    setPrintLanguage("en");
+    // Reload page to re-initialize defaults, or we can just remove local storage and reload.
     localStorage.removeItem("shuttererp_label_settings");
+    window.location.reload();
   };
-  const handleSaveSettings = () => {
-    const settings = {
-      useCustomLayout,
-      customLines,
-      showNotReadyToEat,
-      notReadyToEatText,
-      nutritionConfigs,
-      labelSize,
-      groupFontScales,
-      barcodeExplanation,
-      labelGap,
-      includeGapInPrint,
-      previewContinuous,
-      labelBorderRadius,
-      gapAlignment,
-      showBranding,
-      showProductZh,
-      showProductEn,
-      showIngredients,
-      showNetWeight,
-      showStorage,
-      showExpiry,
-      showResponsible,
-      showReheating,
-      showAirFryer,
-      showOven,
-      showPan,
-      showNutrition,
-      showAllergens,
-      showBarcode,
-      showAddress,
-      showPhone,
-      showOrigin,
-      showManufacturer,
-      brandNameZh,
-      brandNameEn,
-      logoType,
-      selectedIconName,
-      uploadedLogo,
-      companyName,
-      companyPhone,
-      companyAddress,
-      originCountry,
-      barcodeText,
-      reheatingMainTitle,
-      airFryerTitle,
-      ovenTitle,
-      panTitle,
-      reheatingMainTitleSize,
-      reheatingSubTitleSize,
-      reheatingContentSize,
-      expandedIngredients,
-      enableDualLanguage,
-      printLanguage
-    };
-    localStorage.setItem("shuttererp_label_settings", JSON.stringify(settings));
+const handleSaveSettings = () => {
+    localStorage.setItem("shuttererp_label_settings", JSON.stringify(config));
     alert(t("erp_504"));
   };
   const renderLabelLogo = () => {
@@ -1357,14 +1337,14 @@ export const Labels = () => {
   const shouldMoveInfoToBottomLeft = isBottomLeftEmpty || isRightColumnCrowded;
   const hasActiveReheating = showReheating && (showAirFryer || showOven || showPan);
   const getLabelDimensions = () => {
-    let w = useImperialExactSize ? 101.6 : 100;
-    let h = useImperialExactSize ? 101.6 : 100;
+    let w = 100;
+    let h = 100;
     if (labelSize === "80x80") {
       w = 80;
       h = 80;
     } else if (labelSize === "100x150") {
-      w = useImperialExactSize ? 101.6 : 100;
-      h = useImperialExactSize ? 152.4 : 150;
+      w = 100;
+      h = 150;
     } else if (labelSize === "70x50") {
       w = 70;
       h = 50;
@@ -1440,9 +1420,7 @@ export const Labels = () => {
       lineHeight: 1.25,
       backgroundColor: "#ffffff",
       color: "#000000",
-      borderColor: "#000000",
-      borderWidth: "1.2mm",
-      borderStyle: "solid",
+      border: "none",
       borderRadius: `${labelBorderRadius}mm`,
       display: "flex",
       flexDirection: "column",
@@ -1479,13 +1457,6 @@ export const Labels = () => {
             <RotateCcw className="w-3.5 h-3.5" />
             <span>{t("erp_509")}</span>
           </button>
-
-          <div className="flex items-center gap-2 px-3 py-2 bg-amber-50 border border-amber-200 text-amber-800 rounded-xl font-bold text-xs shadow-sm">
-            <input type="checkbox" id="imperial-size-toggle" checked={useImperialExactSize} onChange={(e) => setUseImperialExactSize(e.target.checked)} className="rounded border-amber-300 text-amber-600 focus:ring-amber-500 w-3.5 h-3.5 cursor-pointer" />
-            <label htmlFor="imperial-size-toggle" className="cursor-pointer select-none">
-              繞過驅動縮放 (101.6mm)
-            </label>
-          </div>
 
           <button onClick={() => window.print()} className="w-full md:w-auto px-6 py-2.5 bg-gray-900 text-white rounded-xl font-black text-xs shadow-xl hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer">
             <Printer className="w-4 h-4" />
@@ -4122,7 +4093,7 @@ export const Labels = () => {
             width: auto !important;
           }
           #printable-label {
-            border: 1.2mm solid black !important;
+            border: none !important;
             border-radius: ${labelBorderRadius}mm !important;
             box-shadow: none !important;
             transform: none !important;
@@ -4132,7 +4103,7 @@ export const Labels = () => {
             color: #000000 !important;
           }
           @page {
-            size: ${labelSize === "100x100" ? `${useImperialExactSize ? 101.6 : 100}mm ${(useImperialExactSize ? 101.6 : 100) + (includeGapInPrint ? labelGap : 0)}mm` : labelSize === "80x80" ? `80mm ${80 + (includeGapInPrint ? labelGap : 0)}mm` : labelSize === "100x150" ? `${useImperialExactSize ? 101.6 : 100}mm ${(useImperialExactSize ? 152.4 : 150) + (includeGapInPrint ? labelGap : 0)}mm` : `70mm ${50 + (includeGapInPrint ? labelGap : 0)}mm`};
+            size: ${labelSize === "100x100" ? `100mm ${100 + (includeGapInPrint ? labelGap : 0)}mm` : labelSize === "80x80" ? `80mm ${80 + (includeGapInPrint ? labelGap : 0)}mm` : labelSize === "100x150" ? `100mm ${150 + (includeGapInPrint ? labelGap : 0)}mm` : `70mm ${50 + (includeGapInPrint ? labelGap : 0)}mm`};
             margin: 0;
           }
         }
