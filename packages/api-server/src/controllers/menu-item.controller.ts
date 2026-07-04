@@ -64,6 +64,7 @@ const createMenuItemSchema = z.object({
   dietaryPreferenceIds: z.array(z.string()).optional(),
   recipeId: z.string().nullable().optional(),
   recipeName: z.string().nullable().optional(),
+  cropData: z.any().optional(),
 });
 
 const updateMenuItemSchema = createMenuItemSchema.partial().omit({ slug: true });

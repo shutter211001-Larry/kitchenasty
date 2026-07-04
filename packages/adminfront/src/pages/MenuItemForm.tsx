@@ -44,6 +44,7 @@ interface MenuItemData {
   locationId: string;
   isRewardItem?: boolean;
   rewardPointsPrice?: number;
+  cropData?: any;
 }
 
 interface CategoryOption {
@@ -222,6 +223,7 @@ export default function MenuItemForm() {
           locationId: item.locationId || '',
           isRewardItem: item.isRewardItem || false,
           rewardPointsPrice: item.rewardPointsPrice || 0,
+          cropData: item.cropData || {},
         });
         if (item.image) setImageUrl(item.image);
         if (item.recipeId) {
@@ -324,18 +326,68 @@ export default function MenuItemForm() {
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !id) return;
-    setOriginalFile(file);
+    
+    setUploading(true);
+    setError(null);
+    
     const reader = new FileReader();
     reader.onload = () => {
-      setCropSrc(reader.result as string);
+      const img = new Image();
+      img.onload = async () => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          setUploading(false);
+          return;
+        }
+
+        let width = img.width;
+        let height = img.height;
+        const MAX_SIZE = 1920;
+
+        if (width > MAX_SIZE || height > MAX_SIZE) {
+          if (width > height) {
+            height = Math.round((height * MAX_SIZE) / width);
+            width = MAX_SIZE;
+          } else {
+            width = Math.round((width * MAX_SIZE) / height);
+            height = MAX_SIZE;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        ctx.drawImage(img, 0, 0, width, height);
+
+        canvas.toBlob(async (blob) => {
+          if (!blob) {
+            setUploading(false);
+            return;
+          }
+
+          const webpFile = new File([blob], file.name.replace(/\\.[^/.]+$/, "") + '_master.webp', { type: 'image/webp' });
+          const formData = new FormData();
+          formData.append('image', webpFile);
+
+          try {
+            const res = await api.upload<{ data: { image: string } }>(`/menu/items/${id}/image`, formData);
+            setImageUrl(res.data.image);
+            setCropSrc(res.data.image);
+          } catch (err: any) {
+            setError(err.message);
+          } finally {
+            setUploading(false);
+          }
+        }, 'image/webp', 0.85);
+      };
+      img.src = reader.result as string;
     };
     reader.readAsDataURL(file);
-    // Clear input so the same file can be selected again
     e.target.value = '';
   };
 
-  const handleCropComplete = async (croppedBlobs: Record<string, Blob>) => {
-    if (!id || !originalFile) return;
+  const handleCropComplete = async (croppedBlobs: Record<string, Blob>, cropData: any) => {
+    if (!id || !imageUrl) return;
     setCropSrc(null);
     setUploading(true);
     setError(null);
@@ -343,24 +395,25 @@ export default function MenuItemForm() {
       let finalImageUrl = imageUrl;
       
       for (const [ratio, blob] of Object.entries(croppedBlobs)) {
-        const croppedFile = new File([blob], originalFile.name.replace(/\.[^/.]+$/, "") + `_${ratio.replace(/[:\/]/g, '_')}_cropped.jpg`, {
-          type: 'image/jpeg'
+        const croppedFile = new File([blob], `cropped_${ratio.replace(/[:\\/]/g, '_')}.webp`, {
+          type: 'image/webp'
         });
         const formData = new FormData();
         formData.append('image', croppedFile);
         const res = await api.upload<{ data: { image: string } }>(`/menu/items/${id}/image?ratio=${encodeURIComponent(ratio)}`, formData);
         
-        if (ratio === imageAspectRatio || !finalImageUrl) {
+        if (ratio === imageAspectRatio) {
           finalImageUrl = res.data.image;
         }
       }
       
-      setImageUrl(finalImageUrl);
+      await api.patch(`/menu/items/${id}`, { cropData });
+      setForm(prev => ({ ...prev, cropData }));
+      
     } catch (err: any) {
       setError(err.message);
     } finally {
       setUploading(false);
-      setOriginalFile(null);
     }
   };
 
@@ -720,21 +773,37 @@ export default function MenuItemForm() {
             <h3 className="text-lg font-medium text-gray-900 mb-4">{t('menuItemForm.productImage')}</h3>
             <div className="flex items-start gap-6">
               {imageUrl ? (
-                <div className="relative">
+                <div className="relative group">
                   <img
                     src={getFullUrl(imageUrl)!}
                     alt={form.name}
                     className={imgClass}
                   />
-                  <button
-                    type="button"
-                    onClick={handleImageRemove}
-                    disabled={uploading}
-                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600 disabled:opacity-50"
-                    aria-label={t('menuItemForm.removeImage')}
-                  >
-                    X
-                  </button>
+                  <div className="absolute top-2 right-2 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button
+                      type="button"
+                      onClick={() => setCropSrc(imageUrl)}
+                      disabled={uploading}
+                      className="bg-primary-500 text-white rounded-full p-2 shadow-md hover:bg-primary-600 disabled:opacity-50 flex items-center justify-center"
+                      title={t('menuItemForm.editCrop', '重新裁切')}
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleImageRemove}
+                      disabled={uploading}
+                      className="bg-red-500 text-white rounded-full p-2 shadow-md hover:bg-red-600 disabled:opacity-50 flex items-center justify-center"
+                      title={t('menuItemForm.removeImage')}
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <div className={placeholderClass}>
@@ -1026,6 +1095,7 @@ export default function MenuItemForm() {
         <ImageCropperModal
           src={cropSrc}
           systemRatio={imageAspectRatio}
+          initialCropData={form.cropData}
           onCrop={handleCropComplete}
           onClose={() => {
             setCropSrc(null);

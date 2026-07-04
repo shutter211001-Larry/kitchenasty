@@ -217,6 +217,7 @@ model MenuItem {
   price                   Float
   image                   String?
   imageVariants           Json?
+  cropData                Json?
   isActive                Boolean                     @default(true)
   sortOrder               Int                         @default(0)
   trackStock              Boolean                     @default(false)

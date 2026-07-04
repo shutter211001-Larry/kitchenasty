@@ -4,18 +4,19 @@ import React, { useState, useRef, useEffect } from 'react';
 interface ImageCropperModalProps {
   src: string;
   systemRatio?: string;
-  onCrop: (blobs: Record<string, Blob>) => void;
+  initialCropData?: Record<string, {x: number, y: number, width: number, height: number}>;
+  onCrop: (blobs: Record<string, Blob>, cropData: Record<string, {x: number, y: number, width: number, height: number}>) => void;
   onClose: () => void;
 }
 
 type AspectRatioPreset = '4:3' | '16:9' | '1:1' | '20:13' | 'free';
 
-export default function ImageCropperModal({ src, systemRatio, onCrop, onClose }: ImageCropperModalProps) {
+export default function ImageCropperModal({ src, systemRatio, initialCropData, onCrop, onClose }: ImageCropperModalProps) {
   const { t } = useTranslation();
   const [aspectRatio, setAspectRatio] = useState<AspectRatioPreset>('4:3');
   const [imgDimensions, setImgDimensions] = useState<{ width: number; height: number } | null>(null);
   const [crop, setCrop] = useState({ x: 10, y: 10, width: 80, height: 80 });
-  const [savedCrops, setSavedCrops] = useState<Record<string, {x: number, y: number, width: number, height: number}>>({});
+  const [savedCrops, setSavedCrops] = useState<Record<string, {x: number, y: number, width: number, height: number}>>(initialCropData || {});
   const [isDragging, setIsDragging] = useState(false);
   const [activeHandle, setActiveHandle] = useState<string | null>(null);
 
@@ -71,7 +72,11 @@ export default function ImageCropperModal({ src, systemRatio, onCrop, onClose }:
     else if (systemRatio === 'aspect-auto') initialRatio = 'free';
     
     setAspectRatio(initialRatio);
-    initializeCrop(naturalWidth, naturalHeight, initialRatio);
+    if (initialCropData && initialCropData[initialRatio]) {
+      setCrop(initialCropData[initialRatio]);
+    } else {
+      initializeCrop(naturalWidth, naturalHeight, initialRatio);
+    }
   };
 
   // Re-adjust crop area when user switches presets
@@ -273,7 +278,7 @@ export default function ImageCropperModal({ src, systemRatio, onCrop, onClose }:
     }
     
     if (Object.keys(blobs).length > 0) {
-      onCrop(blobs);
+      onCrop(blobs, finalCrops);
     }
   };
 
@@ -292,6 +297,7 @@ export default function ImageCropperModal({ src, systemRatio, onCrop, onClose }:
             >
               <img
                 src={src}
+                crossOrigin="anonymous"
                 onLoad={handleImageLoad}
                 className="max-h-[50vh] max-w-full block select-none pointer-events-none"
                 alt="Original food preview"
