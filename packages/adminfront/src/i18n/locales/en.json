@@ -35,6 +35,9 @@
     "apiMetrics": "API Metrics",
     "auditLog": "Audit Log",
     "staff": "Staff Management",
+    "attendance": "出勤打卡",
+    "checkIn": "線上打卡",
+    "attendanceRecords": "出勤紀錄",
     "logout": "Logout"
   },
   "staff": {
@@ -1285,6 +1288,9 @@
     "logisticsProvider": "Logistics Provider"
   },
   "orderDetail": {
+    "fulfillOrder": "Fulfill Order",
+    "logisticsProvider": "Logistics Provider",
+    "trackingNumber": "Tracking Number",
     "enterValidDiscountedPrice": "[EN] 請輸入有效的折讓後價格！",
     "adjustDiscountFailed": "[EN] 調整折讓失敗",
     "discountAppliedSuccessfully": "[EN] 折讓價格套用成功！",
@@ -1329,10 +1335,7 @@
     "remoteOrOnSite": "[EN] 遠端/現場",
     "location": "[EN] 地點",
     "guest": "[EN] 訪客",
-    "scheduledTime": "[EN] 預約取餐/送達時間",
-    "fulfillOrder": "Fulfill Order",
-    "logisticsProvider": "Logistics Provider",
-    "trackingNumber": "Tracking Number"
+    "scheduledTime": "[EN] 預約取餐/送達時間"
   },
   "orderList": {
     "updatePaymentStatusFailed": "[EN] 更新結帳狀態失敗",

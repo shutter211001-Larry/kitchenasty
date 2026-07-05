@@ -35,7 +35,58 @@
     "apiMetrics": "API 데이터",
     "auditLog": "감사 로그",
     "staff": "직원 관리",
+    "attendance": "出勤打卡",
+    "checkIn": "線上打卡",
+    "attendanceRecords": "出勤紀錄",
     "logout": "로그아웃"
+  },
+  "staff": {
+    "title": "직원 관리 (Staff)",
+    "editTitle": "직원 편집",
+    "inviteTitle": "직원 초대",
+    "inviteSent": "초대장이 발송되었습니다!",
+    "inviteAnother": "다른 직원 초대",
+    "backToList": "직원 목록으로 돌아가기",
+    "email": "이메일",
+    "name": "이름",
+    "nameOptional": "이름 (선택 사항)",
+    "role": "직책",
+    "phone": "전화번호",
+    "location": "소��� 지점",
+    "active": "활성화 상태",
+    "isActive": "활성화됨",
+    "isInactive": "비활성화됨",
+    "roles": {
+      "superAdmin": "슈퍼 관리자 (Super Admin)",
+      "manager": "매니저 (Manager)",
+      "staff": "직원 (Staff)"
+    },
+    "actions": {
+      "invite": "+ 직원 초대",
+      "edit": "편집",
+      "save": "변경 사항 저장",
+      "saving": "저장 중...",
+      "delete": "직원 삭제",
+      "deleting": "삭제 중...",
+      "sendInvite": "초대 발송",
+      "sending": "발송 중..."
+    },
+    "dangerZone": "위험 구역",
+    "deleteWarning": "직원을 삭제하면 복구할 수 없습니다. 이 작업을 수행하시겠습니까?",
+    "deleteConfirm": "이 직원을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
+    "searchPlaceholder": "이름 또는 이메일 검색...",
+    "roleFilter": "모든 직책",
+    "notFound": "직원을 찾을 수 없습니다.",
+    "table": {
+      "name": "이름",
+      "email": "이메일",
+      "role": "직책",
+      "location": "소속 지점",
+      "status": "계정 상태",
+      "actions": "작업"
+    },
+    "none": "없음",
+    "back": "← 뒤로"
   },
   "common": {
     "adminPanel": "관리자 패널",
@@ -179,54 +230,6 @@
       "createFirst": "첫 번째 규칙 생성",
       "invalidJson": "잘못된 JSON 형식"
     }
-  },
-  "staff": {
-    "title": "직원 관리 (Staff)",
-    "editTitle": "직원 편집",
-    "inviteTitle": "직원 초대",
-    "inviteSent": "초대장이 발송되었습니다!",
-    "inviteAnother": "다른 직원 초대",
-    "backToList": "직원 목록으로 돌아가기",
-    "email": "이메일",
-    "name": "이름",
-    "nameOptional": "이름 (선택 사항)",
-    "role": "직책",
-    "phone": "전화번호",
-    "location": "소��� 지점",
-    "active": "활성화 상태",
-    "isActive": "활성화됨",
-    "isInactive": "비활성화됨",
-    "roles": {
-      "superAdmin": "슈퍼 관리자 (Super Admin)",
-      "manager": "매니저 (Manager)",
-      "staff": "직원 (Staff)"
-    },
-    "actions": {
-      "invite": "+ 직원 초대",
-      "edit": "편집",
-      "save": "변경 사항 저장",
-      "saving": "저장 중...",
-      "delete": "직원 삭제",
-      "deleting": "삭제 중...",
-      "sendInvite": "초대 발송",
-      "sending": "발송 중..."
-    },
-    "dangerZone": "위험 구역",
-    "deleteWarning": "직원을 삭제하면 복구할 수 없습니다. 이 작업을 수행하시겠습니까?",
-    "deleteConfirm": "이 직원을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
-    "searchPlaceholder": "이름 또는 이메일 검색...",
-    "roleFilter": "모든 직책",
-    "notFound": "직원을 찾을 수 없습니다.",
-    "table": {
-      "name": "이름",
-      "email": "이메일",
-      "role": "직책",
-      "location": "소속 지점",
-      "status": "계정 상태",
-      "actions": "작업"
-    },
-    "none": "없음",
-    "back": "← 뒤로"
   },
   "checkout": {
     "orderNotes": "주문 비고",
@@ -1285,6 +1288,9 @@
     "logisticsProvider": "택배사"
   },
   "orderDetail": {
+    "fulfillOrder": "배송 정보 입력",
+    "logisticsProvider": "물류 회사",
+    "trackingNumber": "송장 번호",
     "enterValidDiscountedPrice": "請輸入有效的折讓後價格！",
     "adjustDiscountFailed": "調整折讓失敗",
     "discountAppliedSuccessfully": "折讓價格套用成功！",
@@ -1329,10 +1335,7 @@
     "remoteOrOnSite": "遠端/現場",
     "location": "地點",
     "guest": "訪客",
-    "scheduledTime": "預約取餐/送達時間",
-    "fulfillOrder": "배송 정보 입력",
-    "logisticsProvider": "물류 회사",
-    "trackingNumber": "송장 번호"
+    "scheduledTime": "預約取餐/送達時間"
   },
   "orderList": {
     "updatePaymentStatusFailed": "更新結帳狀態失敗",

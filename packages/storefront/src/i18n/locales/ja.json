@@ -15,7 +15,8 @@
     "close": "閉じる",
     "none": "なし",
     "guest": "ゲスト",
-    "confirmCancel": "この注文をキャンセルしてもよろしいですか？"
+    "confirmCancel": "この注文をキャンセルしてもよろしいですか？",
+    "success": "Success"
   },
   "nav": {
     "home": "ホーム",
@@ -83,6 +84,7 @@
     "registerSubtitle": "{{storeName}}に参加して、簡単に注文や予約をしましょう。",
     "name": "氏名",
     "phone": "電話番号（任意）",
+    "address": "Address (optional)",
     "createAccount": "アカウント作成",
     "creating": "作成中...",
     "hasAccount": "既にアカウントをお持ちですか？",
@@ -99,6 +101,7 @@
     "personalInfo": "個人情報",
     "emailLabel": "メールアドレス",
     "phoneLabel": "電話番号",
+    "addressLabel": "Address",
     "notProvided": "未提供",
     "memberSince": "登録日",
     "orderHistory": "注文履歴",
@@ -210,6 +213,9 @@
     "title": "チェックアウト",
     "emptyCart": "カートは空です。",
     "browseMenu": "メニューを見る",
+    "dineInTable": "Dine-in Table",
+    "dineInTableDesc": "Your order will be prepared for this table",
+    "clearTable": "Change to Takeout / Delivery",
     "orderType": "注文タイプ",
     "delivery": "デリバリー",
     "pickup": "テイクアウト",
@@ -219,6 +225,9 @@
     "city": "市区町村",
     "state": "都道府県",
     "zipCode": "郵便番号",
+    "cityCounty": "縣市",
+    "district": "鄉鎮市區",
+    "streetAddressPlaceholder": "例如：披薩街 100 號 3 樓",
     "contactInfo": "連絡先情報",
     "loginBenefit": "💡 ログインしてロイヤリティポイントを獲得しましょう！",
     "googleLogin": "Googleでログイン",
@@ -240,6 +249,7 @@
     "selectDateTime": "日時を選択",
     "orderNotes": "注文メモ（任意）",
     "couponCode": "クーポンコード",
+    "enterCouponCode": "割引コードを入力",
     "apply": "適用",
     "couponApplied": "クーポンが適用されました！",
     "paymentMethod": "支払い方法",
@@ -250,6 +260,7 @@
     "subtotal": "小計",
     "tax": "税金",
     "deliveryFee": "配送料",
+    "free": "無料",
     "discount": "折扣",
     "loyaltyDiscount": "ポイント割引",
     "total": "合計",
@@ -265,8 +276,6 @@
     "phoneEntered": "電話番号が入力されました (この注文に関連付けられます)",
     "creditCardSub": "クレジットカードで安全に決済",
     "paypalSub": "PayPal アカウントで決済",
-    "asap": "最短お届け",
-    "scheduled": "予約注文",
     "frozenDelivery": "冷凍宅配",
     "frozenDeliveryAddress": "冷凍宅配收件地址",
     "addressAutoFilled": "✓ 会員住所が自動的に適用されました",
@@ -279,8 +288,10 @@
     "noAvailableSlots": "利用可能な時間帯はありません",
     "discountsAndRewards": "割引と特典",
     "locationNotAcceptingOrders": "この店舗は現在注文を受け付けていません。",
-    "free": "無料",
-    "enterCouponCode": "割引コードを入力",
+    "roundingAdjustment": "結算調整 (Rounding)",
+    "loyaltyTitle": "Loyalty Points",
+    "loyaltyPointsToRedeem": "points to redeem",
+    "cashOnDeliverySub": "Pay at location",
     "dineInTableNumber": "內用桌號",
     "mealPreparedAtTable": "您的餐點將會為您準備於此桌位",
     "closedToday": "今日已打烊",
@@ -304,7 +315,6 @@
     "accompanyingFriends": "同行友人",
     "accompanyingFriendsList": "同行友人",
     "freeShipping": "免運費",
-    "roundingAdjustment": "結算調整 (Rounding)",
     "homeDelivery": "宅配便",
     "storeToStore": "コンビニ受取"
   },
@@ -356,12 +366,10 @@
     "recentGuestOrders": "最近の注文（ゲスト）",
     "recentGuestOrdersDesc": "このブラウザに保存されている注文記録です。",
     "loginToViewFull": "ログインして全履歴を表示",
-    "busyNoticeDesc": "現在、新規注文の受付を停止しています。既存の注文のステータス更新が遅れる場合があります。",
-    "busyNoticeTitle": "現在混み合っています",
-    "offlineCacheDesc": "サーバー負荷が高いため、前回の注文ステータスを表示しています。",
-    "offlineCacheTitle": "オフラインプレビューモード",
     "lookupPhone": "電話番号",
-    "lookupEmailOrPhoneRequired": "注文を取得するには、メールアドレスまたは電話番号を入力してください。"
+    "lookupEmailOrPhoneRequired": "注文を取得するには、メールアドレスまたは電話番号を入力してください。",
+    "roundingAdjustment": "Rounding Adjustment",
+    "errorLoadingDesc": "An error occurred while loading orders"
   },
   "orderStatus": {
     "placed": "注文済み",
@@ -441,6 +449,15 @@
     "orEnterCodeToJoin": "Or enter code to join",
     "enterCodeToJoinTogether": "Enter code to order together"
   },
+  "cookie": {
+    "title": "Cookie Settings",
+    "description": "We use cookies to enhance your browsing experience. You can customize your settings below.",
+    "showDetails": "Show Details",
+    "hideDetails": "Hide Details",
+    "savePreferences": "Save Preferences",
+    "acceptAll": "Accept All"
+  },
+  "recent_orders_updated": "Recent orders updated",
   "cartDrawer": {
     "points": "點"
   },
@@ -531,5 +548,7 @@
     "location": "定位",
     "reservation": "預約",
     "booking": "預約"
-  }
+  },
+  "We are currently closed for immediate orders. Please select a future pickup time.": "目前不在營業時間內，請選擇未來的取餐時間。",
+  "Scheduled time must be within business hours considering preparation buffers.": "所選時間不在營業時間內，請重新選擇。"
 }

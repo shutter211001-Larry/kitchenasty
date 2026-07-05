@@ -15,7 +15,8 @@
     "close": "닫기",
     "none": "없음",
     "guest": "게스트",
-    "confirmCancel": "이 주문을 취소하시겠습니까?"
+    "confirmCancel": "이 주문을 취소하시겠습니까?",
+    "success": "Success"
   },
   "nav": {
     "home": "홈",
@@ -83,6 +84,7 @@
     "registerSubtitle": "{{storeName}}에 가입하여 간편하게 주문하고 예약하세요.",
     "name": "성함",
     "phone": "전화번호 (선택)",
+    "address": "Address (optional)",
     "createAccount": "계정 만들기",
     "creating": "계정 생성 중...",
     "hasAccount": "이미 계정이 있으신가요?",
@@ -99,6 +101,7 @@
     "personalInfo": "개인 정보",
     "emailLabel": "이메일",
     "phoneLabel": "전화번호",
+    "addressLabel": "Address",
     "notProvided": "제공되지 않음",
     "memberSince": "가입일",
     "orderHistory": "주문 내역",
@@ -210,6 +213,9 @@
     "title": "결제",
     "emptyCart": "장바구니가 비어 있습니다.",
     "browseMenu": "메뉴 둘러보기",
+    "dineInTable": "Dine-in Table",
+    "dineInTableDesc": "Your order will be prepared for this table",
+    "clearTable": "Change to Takeout / Delivery",
     "orderType": "주문 유형",
     "delivery": "배달",
     "pickup": "포장",
@@ -219,6 +225,9 @@
     "city": "시/군/구",
     "state": "시/도",
     "zipCode": "우편번호",
+    "cityCounty": "縣市",
+    "district": "鄉鎮市區",
+    "streetAddressPlaceholder": "例如：披薩街 100 號 3 樓",
     "contactInfo": "연락처 정보",
     "loginBenefit": "💡 로그인하시면 로열티 포인트를 적립하실 수 있습니다!",
     "googleLogin": "Google로 로그인",
@@ -240,6 +249,7 @@
     "selectDateTime": "날짜 및 시간 선택",
     "orderNotes": "요청 사항 (선택)",
     "couponCode": "쿠폰 코드",
+    "enterCouponCode": "할인 코드 입력",
     "apply": "적용",
     "couponApplied": "쿠폰이 적용되었습니다!",
     "paymentMethod": "결제 방법",
@@ -250,6 +260,7 @@
     "subtotal": "소계",
     "tax": "세금",
     "deliveryFee": "배달비",
+    "free": "무료",
     "discount": "折扣",
     "loyaltyDiscount": "포인트 할인",
     "total": "합계",
@@ -265,8 +276,6 @@
     "phoneEntered": "전화번호가 입력되었습니다 (이 주문에 연결됩니다)",
     "creditCardSub": "신용카드로 안전하게 결제",
     "paypalSub": "PayPal 계정으로 결제",
-    "asap": "최대한 빨리",
-    "scheduled": "예약 주문",
     "frozenDelivery": "冷凍宅配",
     "frozenDeliveryAddress": "冷凍宅配收件地址",
     "addressAutoFilled": "✓ 회원 주소가 자동으로 적용되었습니다",
@@ -279,8 +288,10 @@
     "noAvailableSlots": "이용 가능한 예약 시간대가 없습니다",
     "discountsAndRewards": "할인 및 보상",
     "locationNotAcceptingOrders": "이 지점은 현재 주문을 받지 않습니다.",
-    "free": "무료",
-    "enterCouponCode": "할인 코드 입력",
+    "roundingAdjustment": "結算調整 (Rounding)",
+    "loyaltyTitle": "Loyalty Points",
+    "loyaltyPointsToRedeem": "points to redeem",
+    "cashOnDeliverySub": "Pay at location",
     "dineInTableNumber": "內用桌號",
     "mealPreparedAtTable": "您的餐點將會為您準備於此桌位",
     "closedToday": "今日已打烊",
@@ -304,7 +315,6 @@
     "accompanyingFriends": "同行友人",
     "accompanyingFriendsList": "同行友人",
     "freeShipping": "免運費",
-    "roundingAdjustment": "結算調整 (Rounding)",
     "homeDelivery": "택배",
     "storeToStore": "편의점 수령"
   },
@@ -356,12 +366,10 @@
     "recentGuestOrders": "최근 주문 (게스트)",
     "recentGuestOrdersDesc": "이 브라우저에 저장된 주문 기록입니다.",
     "loginToViewFull": "로그인하여 전체 내역 보기",
-    "busyNoticeDesc": "현재 신규 주문을 받지 않고 있습니다. 기존 주문의 상태 업데이트가 약간 지연될 수 있습니다.",
-    "busyNoticeTitle": "현재 매장이 혼잡합니다",
-    "offlineCacheDesc": "서버 부하가 높아 마지막으로 확인된 주문 상태를 표시하고 있습니다.",
-    "offlineCacheTitle": "오프라인 미리보기 모드",
     "lookupPhone": "전화번호",
-    "lookupEmailOrPhoneRequired": "주문을 검색하려면 이메일 주소 또는 전화번호를 입력하세요."
+    "lookupEmailOrPhoneRequired": "주문을 검색하려면 이메일 주소 또는 전화번호를 입력하세요.",
+    "roundingAdjustment": "Rounding Adjustment",
+    "errorLoadingDesc": "An error occurred while loading orders"
   },
   "orderStatus": {
     "placed": "주문 완료",
@@ -441,6 +449,15 @@
     "orEnterCodeToJoin": "Or enter code to join",
     "enterCodeToJoinTogether": "Enter code to order together"
   },
+  "cookie": {
+    "title": "Cookie Settings",
+    "description": "We use cookies to enhance your browsing experience. You can customize your settings below.",
+    "showDetails": "Show Details",
+    "hideDetails": "Hide Details",
+    "savePreferences": "Save Preferences",
+    "acceptAll": "Accept All"
+  },
+  "recent_orders_updated": "Recent orders updated",
   "cartDrawer": {
     "points": "點"
   },
@@ -531,5 +548,7 @@
     "location": "定位",
     "reservation": "預約",
     "booking": "預約"
-  }
+  },
+  "We are currently closed for immediate orders. Please select a future pickup time.": "目前不在營業時間內，請選擇未來的取餐時間。",
+  "Scheduled time must be within business hours considering preparation buffers.": "所選時間不在營業時間內，請重新選擇。"
 }

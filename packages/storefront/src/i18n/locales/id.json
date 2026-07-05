@@ -15,7 +15,8 @@
     "close": "Tutup",
     "none": "Tidak Ada",
     "guest": "Pelanggan",
-    "confirmCancel": "Apakah Anda yakin ingin membatalkan pesanan ini?"
+    "confirmCancel": "Apakah Anda yakin ingin membatalkan pesanan ini?",
+    "success": "Success"
   },
   "nav": {
     "home": "Beranda",
@@ -83,6 +84,7 @@
     "registerSubtitle": "Bergabung dengan {{storeName}} untuk kemudahan pemesanan dan reservasi.",
     "name": "Nama Lengkap",
     "phone": "Telepon (opsional)",
+    "address": "Address (optional)",
     "createAccount": "Buat Akun",
     "creating": "Membuat akun...",
     "hasAccount": "Sudah punya akun?",
@@ -99,6 +101,7 @@
     "personalInfo": "Informasi Pribadi",
     "emailLabel": "Email",
     "phoneLabel": "Telepon",
+    "addressLabel": "Address",
     "notProvided": "Tidak tersedia",
     "memberSince": "Anggota sejak",
     "orderHistory": "Riwayat Pesanan",
@@ -210,6 +213,9 @@
     "title": "Checkout",
     "emptyCart": "Keranjang Anda kosong.",
     "browseMenu": "Jelajahi Menu",
+    "dineInTable": "Dine-in Table",
+    "dineInTableDesc": "Your order will be prepared for this table",
+    "clearTable": "Change to Takeout / Delivery",
     "orderType": "Tipe Pesanan",
     "delivery": "Pengantaran",
     "pickup": "Pengambilan",
@@ -219,6 +225,9 @@
     "city": "Kota",
     "state": "Provinsi",
     "zipCode": "Kode Pos",
+    "cityCounty": "縣市",
+    "district": "鄉鎮市區",
+    "streetAddressPlaceholder": "例如：披薩街 100 號 3 樓",
     "contactInfo": "Informasi Kontak",
     "loginBenefit": "💡 Masuk untuk mendapatkan poin loyalitas!",
     "googleLogin": "Masuk dengan Google",
@@ -240,6 +249,7 @@
     "selectDateTime": "Pilih Tanggal & Waktu",
     "orderNotes": "Catatan Pesanan (opsional)",
     "couponCode": "Kode Kupon",
+    "enterCouponCode": "Masukkan kode diskon",
     "apply": "Gunakan",
     "couponApplied": "Kupon berhasil digunakan!",
     "paymentMethod": "Metode Pembayaran",
@@ -250,6 +260,7 @@
     "subtotal": "Subtotal",
     "tax": "Pajak",
     "deliveryFee": "Biaya Pengantaran",
+    "free": "Gratis",
     "discount": "折扣",
     "loyaltyDiscount": "Diskon Poin Loyalitas",
     "total": "Total",
@@ -265,9 +276,6 @@
     "phoneEntered": "Nomor telepon kontak telah dimasukkan (Nomor ini akan terkait dengan pesanan ini)",
     "creditCardSub": "Pembayaran aman menggunakan kartu kredit",
     "paypalSub": "Bayar dengan akun PayPal",
-    "asap": "Sesegera Mungkin",
-    "guestCheckout": "Checkout Tamu",
-    "scheduled": "Terjadwal",
     "frozenDelivery": "冷凍宅配",
     "frozenDeliveryAddress": "冷凍宅配收件地址",
     "addressAutoFilled": "✓ Alamat anggota otomatis diterapkan",
@@ -280,8 +288,10 @@
     "noAvailableSlots": "Tidak ada slot waktu yang tersedia",
     "discountsAndRewards": "Diskon & Hadiah",
     "locationNotAcceptingOrders": "Lokasi ini saat ini tidak menerima pesanan.",
-    "free": "Gratis",
-    "enterCouponCode": "Masukkan kode diskon",
+    "roundingAdjustment": "結算調整 (Rounding)",
+    "loyaltyTitle": "Loyalty Points",
+    "loyaltyPointsToRedeem": "points to redeem",
+    "cashOnDeliverySub": "Pay at location",
     "dineInTableNumber": "內用桌號",
     "mealPreparedAtTable": "您的餐點將會為您準備於此桌位",
     "closedToday": "今日已打烊",
@@ -305,7 +315,6 @@
     "accompanyingFriends": "同行友人",
     "accompanyingFriendsList": "同行友人",
     "freeShipping": "免運費",
-    "roundingAdjustment": "結算調整 (Rounding)",
     "homeDelivery": "Home Delivery",
     "storeToStore": "Store-to-Store Pickup"
   },
@@ -358,7 +367,9 @@
     "recentGuestOrdersDesc": "Ini adalah riwayat pesanan yang disimpan di browser ini.",
     "loginToViewFull": "Masuk untuk melihat riwayat lengkap",
     "lookupPhone": "Nomor Telepon",
-    "lookupEmailOrPhoneRequired": "Silakan masukkan alamat email atau nomor telepon untuk mengambil pesanan."
+    "lookupEmailOrPhoneRequired": "Silakan masukkan alamat email atau nomor telepon untuk mengambil pesanan.",
+    "roundingAdjustment": "Rounding Adjustment",
+    "errorLoadingDesc": "An error occurred while loading orders"
   },
   "orderStatus": {
     "placed": "Dipesan",
@@ -438,6 +449,15 @@
     "orEnterCodeToJoin": "Or enter code to join",
     "enterCodeToJoinTogether": "Enter code to order together"
   },
+  "cookie": {
+    "title": "Cookie Settings",
+    "description": "We use cookies to enhance your browsing experience. You can customize your settings below.",
+    "showDetails": "Show Details",
+    "hideDetails": "Hide Details",
+    "savePreferences": "Save Preferences",
+    "acceptAll": "Accept All"
+  },
+  "recent_orders_updated": "Recent orders updated",
   "cartDrawer": {
     "points": "點"
   },
@@ -528,5 +548,7 @@
     "location": "定位",
     "reservation": "預約",
     "booking": "預約"
-  }
+  },
+  "We are currently closed for immediate orders. Please select a future pickup time.": "目前不在營業時間內，請選擇未來的取餐時間。",
+  "Scheduled time must be within business hours considering preparation buffers.": "所選時間不在營業時間內，請重新選擇。"
 }

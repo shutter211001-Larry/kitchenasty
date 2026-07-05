@@ -15,7 +15,8 @@
     "close": "Đóng",
     "none": "Không có",
     "guest": "Khách hàng",
-    "confirmCancel": "Bạn có chắc chắn muốn hủy đơn hàng này không?"
+    "confirmCancel": "Bạn có chắc chắn muốn hủy đơn hàng này không?",
+    "success": "Success"
   },
   "nav": {
     "home": "Trang chủ",
@@ -83,6 +84,7 @@
     "registerSubtitle": "Tham gia {{storeName}} để đặt hàng và đặt bàn dễ dàng hơn.",
     "name": "Họ và tên",
     "phone": "Số điện thoại (tùy chọn)",
+    "address": "Address (optional)",
     "createAccount": "Tạo tài khoản",
     "creating": "Đang tạo tài khoản...",
     "hasAccount": "Đã có tài khoản?",
@@ -99,6 +101,7 @@
     "personalInfo": "Thông tin cá nhân",
     "emailLabel": "Email",
     "phoneLabel": "Số điện thoại",
+    "addressLabel": "Address",
     "notProvided": "Chưa cung cấp",
     "memberSince": "Thành viên từ",
     "orderHistory": "Lịch sử đơn hàng",
@@ -210,6 +213,9 @@
     "title": "Thanh toán",
     "emptyCart": "Giỏ hàng của bạn đang trống.",
     "browseMenu": "Xem thực đơn",
+    "dineInTable": "Dine-in Table",
+    "dineInTableDesc": "Your order will be prepared for this table",
+    "clearTable": "Change to Takeout / Delivery",
     "orderType": "Hình thức đặt hàng",
     "delivery": "Giao hàng",
     "pickup": "Tự đến lấy",
@@ -219,6 +225,9 @@
     "city": "Thành phố",
     "state": "Tỉnh/Thành phố",
     "zipCode": "Mã bưu điện",
+    "cityCounty": "縣市",
+    "district": "鄉鎮市區",
+    "streetAddressPlaceholder": "例如：披薩街 100 號 3 樓",
     "contactInfo": "Thông tin liên hệ",
     "loginBenefit": "💡 Đăng nhập để nhận điểm thưởng!",
     "googleLogin": "Đăng nhập với Google",
@@ -240,6 +249,7 @@
     "selectDateTime": "Chọn ngày & giờ",
     "orderNotes": "Ghi chú đơn hàng (tùy chọn)",
     "couponCode": "Mã giảm giá",
+    "enterCouponCode": "Nhập mã giảm giá",
     "apply": "Áp dụng",
     "couponApplied": "Đã áp dụng mã giảm giá!",
     "paymentMethod": "Phương thức thanh toán",
@@ -250,6 +260,7 @@
     "subtotal": "Tạm tính",
     "tax": "Thuế",
     "deliveryFee": "Phí giao hàng",
+    "free": "Miễn phí",
     "discount": "折扣",
     "loyaltyDiscount": "Giảm giá bằng điểm thưởng",
     "total": "Tổng cộng",
@@ -265,9 +276,6 @@
     "phoneEntered": "Đã nhập số điện thoại liên hệ (Số này sẽ được liên kết với đơn hàng này)",
     "creditCardSub": "Thanh toán an toàn bằng thẻ tín dụng",
     "paypalSub": "Thanh toán bằng tài khoản PayPal",
-    "asap": "Càng sớm càng tốt",
-    "guestCheckout": "Thanh toán khách",
-    "scheduled": "Hẹn giờ",
     "frozenDelivery": "冷凍宅配",
     "frozenDeliveryAddress": "冷凍宅配收件地址",
     "addressAutoFilled": "✓ Tự động áp dụng địa chỉ thành viên",
@@ -280,8 +288,10 @@
     "noAvailableSlots": "Không có khung giờ trống nào",
     "discountsAndRewards": "Giảm giá & Phần thưởng",
     "locationNotAcceptingOrders": "Chi nhánh này hiện không nhận đơn đặt hàng.",
-    "free": "Miễn phí",
-    "enterCouponCode": "Nhập mã giảm giá",
+    "roundingAdjustment": "結算調整 (Rounding)",
+    "loyaltyTitle": "Loyalty Points",
+    "loyaltyPointsToRedeem": "points to redeem",
+    "cashOnDeliverySub": "Pay at location",
     "dineInTableNumber": "內用桌號",
     "mealPreparedAtTable": "您的餐點將會為您準備於此桌位",
     "closedToday": "今日已打烊",
@@ -305,7 +315,6 @@
     "accompanyingFriends": "同行友人",
     "accompanyingFriendsList": "同行友人",
     "freeShipping": "免運費",
-    "roundingAdjustment": "結算調整 (Rounding)",
     "homeDelivery": "Home Delivery",
     "storeToStore": "Store-to-Store Pickup"
   },
@@ -358,7 +367,9 @@
     "recentGuestOrdersDesc": "Đây là lịch sử đơn hàng được lưu trữ trên trình duyệt này.",
     "loginToViewFull": "Đăng nhập để xem toàn bộ lịch sử.",
     "lookupPhone": "Số điện thoại",
-    "lookupEmailOrPhoneRequired": "Vui lòng nhập địa chỉ email hoặc số điện thoại để tìm lại đơn hàng."
+    "lookupEmailOrPhoneRequired": "Vui lòng nhập địa chỉ email hoặc số điện thoại để tìm lại đơn hàng.",
+    "roundingAdjustment": "Rounding Adjustment",
+    "errorLoadingDesc": "An error occurred while loading orders"
   },
   "orderStatus": {
     "placed": "Đã đặt",
@@ -438,6 +449,15 @@
     "orEnterCodeToJoin": "Or enter code to join",
     "enterCodeToJoinTogether": "Enter code to order together"
   },
+  "cookie": {
+    "title": "Cookie Settings",
+    "description": "We use cookies to enhance your browsing experience. You can customize your settings below.",
+    "showDetails": "Show Details",
+    "hideDetails": "Hide Details",
+    "savePreferences": "Save Preferences",
+    "acceptAll": "Accept All"
+  },
+  "recent_orders_updated": "Recent orders updated",
   "cartDrawer": {
     "points": "點"
   },
@@ -528,5 +548,7 @@
     "location": "定位",
     "reservation": "預約",
     "booking": "預約"
-  }
+  },
+  "We are currently closed for immediate orders. Please select a future pickup time.": "目前不在營業時間內，請選擇未來的取餐時間。",
+  "Scheduled time must be within business hours considering preparation buffers.": "所選時間不在營業時間內，請重新選擇。"
 }

@@ -1,73 +1,55 @@
 const fs = require('fs');
 const path = require('path');
 
-const locales = ['de.json', 'en.json', 'es.json', 'fr.json', 'id.json', 'it.json', 'ja.json', 'ko.json', 'pt.json', 'th.json', 'tl.json', 'vi.json', 'zh-TW.json'];
+const packages = ['adminfront', 'storefront', 'erpfront', 'kitchenfront', 'posfront'];
+const localesList = ['de.json', 'en.json', 'es.json', 'fr.json', 'id.json', 'it.json', 'ja.json', 'ko.json', 'pt.json', 'th.json', 'tl.json', 'vi.json', 'zh-TW.json'];
 
-// Adminfront Translations
-const adminfrontDir = path.join(__dirname, '../packages/adminfront/src/i18n/locales');
-const adminKeys = {
-  fulfillOrder: {
-    'zh-TW.json': '填寫出貨資訊',
-    'en.json': 'Fulfill Order',
-    'ja.json': '発送情報を入力',
-    'ko.json': '배송 정보 입력'
-  },
-  logisticsProvider: {
-    'zh-TW.json': '物流公司',
-    'en.json': 'Logistics Provider',
-    'ja.json': '物流会社',
-    'ko.json': '물류 회사'
-  },
-  trackingNumber: {
-    'zh-TW.json': '託運單號',
-    'en.json': 'Tracking Number',
-    'ja.json': '追跡番号',
-    'ko.json': '송장 번호'
+function syncObject(base, enBase, target) {
+  const result = {};
+  for (const key of Object.keys(base)) {
+    if (typeof base[key] === 'object' && base[key] !== null && !Array.isArray(base[key])) {
+      result[key] = syncObject(
+        base[key], 
+        (enBase && enBase[key]) || {}, 
+        (target && target[key]) || {}
+      );
+    } else {
+      if (target && target[key] !== undefined && target[key] !== '') {
+        result[key] = target[key];
+      } else if (enBase && enBase[key] !== undefined && enBase[key] !== '') {
+        result[key] = enBase[key];
+      } else {
+        result[key] = base[key];
+      }
+    }
   }
-};
+  return result;
+}
 
-for (const locale of locales) {
-  const filePath = path.join(adminfrontDir, locale);
-  if (fs.existsSync(filePath)) {
-    const data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-    if (!data.orderDetail) data.orderDetail = {};
+for (const pkg of packages) {
+  const localesDir = path.join(__dirname, '../packages', pkg, 'src/i18n/locales');
+  if (!fs.existsSync(localesDir)) continue;
+  
+  console.log(`Syncing i18n for ${pkg}...`);
+  const zhPath = path.join(localesDir, 'zh-TW.json');
+  if (!fs.existsSync(zhPath)) continue;
+  
+  const base = JSON.parse(fs.readFileSync(zhPath, 'utf8'));
+  const enPath = path.join(localesDir, 'en.json');
+  const enBase = fs.existsSync(enPath) ? JSON.parse(fs.readFileSync(enPath, 'utf8')) : {};
+
+  // First ensure en.json has all keys
+  const newEn = syncObject(base, base, enBase);
+  fs.writeFileSync(enPath, JSON.stringify(newEn, null, 2) + '\n');
+  
+  for (const loc of localesList) {
+    if (loc === 'zh-TW.json' || loc === 'en.json') continue;
+    const targetPath = path.join(localesDir, loc);
+    const target = fs.existsSync(targetPath) ? JSON.parse(fs.readFileSync(targetPath, 'utf8')) : {};
     
-    data.orderDetail.fulfillOrder = adminKeys.fulfillOrder[locale] || adminKeys.fulfillOrder['en.json'];
-    data.orderDetail.logisticsProvider = adminKeys.logisticsProvider[locale] || adminKeys.logisticsProvider['en.json'];
-    data.orderDetail.trackingNumber = adminKeys.trackingNumber[locale] || adminKeys.trackingNumber['en.json'];
-    
-    fs.writeFileSync(filePath, JSON.stringify(data, null, 2) + '\n');
+    const newTarget = syncObject(base, newEn, target);
+    fs.writeFileSync(targetPath, JSON.stringify(newTarget, null, 2) + '\n');
   }
 }
 
-// Storefront Translations
-const storefrontDir = path.join(__dirname, '../packages/storefront/src/i18n/locales');
-const storeKeys = {
-  homeDelivery: {
-    'zh-TW.json': '宅配',
-    'en.json': 'Home Delivery',
-    'ja.json': '宅配便',
-    'ko.json': '택배'
-  },
-  storeToStore: {
-    'zh-TW.json': '店到店',
-    'en.json': 'Store-to-Store Pickup',
-    'ja.json': 'コンビニ受取',
-    'ko.json': '편의점 수령'
-  }
-};
-
-for (const locale of locales) {
-  const filePath = path.join(storefrontDir, locale);
-  if (fs.existsSync(filePath)) {
-    const data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-    if (!data.checkout) data.checkout = {};
-    
-    data.checkout.homeDelivery = storeKeys.homeDelivery[locale] || storeKeys.homeDelivery['en.json'];
-    data.checkout.storeToStore = storeKeys.storeToStore[locale] || storeKeys.storeToStore['en.json'];
-    
-    fs.writeFileSync(filePath, JSON.stringify(data, null, 2) + '\n');
-  }
-}
-
-console.log('Translations synced for all 13 languages!');
+console.log('All 13 languages synced successfully!');

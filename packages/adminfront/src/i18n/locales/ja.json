@@ -35,7 +35,58 @@
     "apiMetrics": "APIデータ",
     "auditLog": "監査ログ",
     "staff": "スタッフ管理",
+    "attendance": "出勤打卡",
+    "checkIn": "線上打卡",
+    "attendanceRecords": "出勤紀錄",
     "logout": "ログアウト"
+  },
+  "staff": {
+    "title": "スタッフ管理 (Staff)",
+    "editTitle": "スタッフを編集",
+    "inviteTitle": "スタッフを招待",
+    "inviteSent": "招待が送信されました！",
+    "inviteAnother": "別のスタッフを招待",
+    "backToList": "スタッフリストに戻る",
+    "email": "メールアドレス",
+    "name": "名前",
+    "nameOptional": "名前 (任意)",
+    "role": "役職",
+    "phone": "電話番号",
+    "location": "所属店舗",
+    "active": "有効状態",
+    "isActive": "有効",
+    "isInactive": "無効",
+    "roles": {
+      "superAdmin": "スーパー管理者 (Super Admin)",
+      "manager": "店長 (Manager)",
+      "staff": "スタッフ (Staff)"
+    },
+    "actions": {
+      "invite": "+ スタッフを招待",
+      "edit": "編集",
+      "save": "変更を保存",
+      "saving": "保存中...",
+      "delete": "スタッフを削除",
+      "deleting": "削除中...",
+      "sendInvite": "招待を送信",
+      "sending": "送信中..."
+    },
+    "dangerZone": "危険ゾーン",
+    "deleteWarning": "スタッフを削除すると元に戻せません。この操作を実行してもよろしいですか？",
+    "deleteConfirm": "このスタッフを削除してもよろしいですか？この操作は元に戻せません。",
+    "searchPlaceholder": "名前またはメールアドレスを検索...",
+    "roleFilter": "���べての役職",
+    "notFound": "スタッフが見つかりません。",
+    "table": {
+      "name": "名前",
+      "email": "メールアドレス",
+      "role": "役職",
+      "location": "所属店舗",
+      "status": "アカウントステータス",
+      "actions": "操作"
+    },
+    "none": "なし",
+    "back": "← 戻る"
   },
   "common": {
     "adminPanel": "管理パネル",
@@ -179,54 +230,6 @@
       "createFirst": "最初のルールを作成",
       "invalidJson": "JSON形式が不正です"
     }
-  },
-  "staff": {
-    "title": "スタッフ管理 (Staff)",
-    "editTitle": "スタッフを編集",
-    "inviteTitle": "スタッフを招待",
-    "inviteSent": "招待が送信されました！",
-    "inviteAnother": "別のスタッフを招待",
-    "backToList": "スタッフリストに戻る",
-    "email": "メールアドレス",
-    "name": "名前",
-    "nameOptional": "名前 (任意)",
-    "role": "役職",
-    "phone": "電話番号",
-    "location": "所属店舗",
-    "active": "有効状態",
-    "isActive": "有効",
-    "isInactive": "無効",
-    "roles": {
-      "superAdmin": "スーパー管理者 (Super Admin)",
-      "manager": "店長 (Manager)",
-      "staff": "スタッフ (Staff)"
-    },
-    "actions": {
-      "invite": "+ スタッフを招待",
-      "edit": "編集",
-      "save": "変更を保存",
-      "saving": "保存中...",
-      "delete": "スタッフを削除",
-      "deleting": "削除中...",
-      "sendInvite": "招待を送信",
-      "sending": "送信中..."
-    },
-    "dangerZone": "危険ゾーン",
-    "deleteWarning": "スタッフを削除すると元に戻せません。この操作を実行してもよろしいですか？",
-    "deleteConfirm": "このスタッフを削除してもよろしいですか？この操作は元に戻せません。",
-    "searchPlaceholder": "名前またはメールアドレスを検索...",
-    "roleFilter": "���べての役職",
-    "notFound": "スタッフが見つかりません。",
-    "table": {
-      "name": "名前",
-      "email": "メールアドレス",
-      "role": "役職",
-      "location": "所属店舗",
-      "status": "アカウントステータス",
-      "actions": "操作"
-    },
-    "none": "なし",
-    "back": "← 戻る"
   },
   "checkout": {
     "orderNotes": "注文メモ",
@@ -1285,6 +1288,9 @@
     "logisticsProvider": "配送業者"
   },
   "orderDetail": {
+    "fulfillOrder": "発送情報を入力",
+    "logisticsProvider": "物流会社",
+    "trackingNumber": "追跡番号",
     "enterValidDiscountedPrice": "請輸入有效的折讓後價格！",
     "adjustDiscountFailed": "調整折讓失敗",
     "discountAppliedSuccessfully": "折讓價格套用成功！",
@@ -1329,10 +1335,7 @@
     "remoteOrOnSite": "遠端/現場",
     "location": "地點",
     "guest": "訪客",
-    "scheduledTime": "預約取餐/送達時間",
-    "fulfillOrder": "発送情報を入力",
-    "logisticsProvider": "物流会社",
-    "trackingNumber": "追跡番号"
+    "scheduledTime": "預約取餐/送達時間"
   },
   "orderList": {
     "updatePaymentStatusFailed": "更新結帳狀態失敗",

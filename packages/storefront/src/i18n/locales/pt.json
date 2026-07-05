@@ -15,7 +15,8 @@
     "close": "Fechar",
     "none": "Nenhum",
     "guest": "Cliente",
-    "confirmCancel": "Tem certeza de que deseja cancelar este pedido?"
+    "confirmCancel": "Tem certeza de que deseja cancelar este pedido?",
+    "success": "Success"
   },
   "nav": {
     "home": "Início",
@@ -83,6 +84,7 @@
     "registerSubtitle": "Junte-se ao {{storeName}} para pedidos e reservas fáceis.",
     "name": "Nome completo",
     "phone": "Telefone (opcional)",
+    "address": "Address (optional)",
     "createAccount": "Criar Conta",
     "creating": "Criando conta...",
     "hasAccount": "Já tem uma conta?",
@@ -99,6 +101,7 @@
     "personalInfo": "Informações Pessoais",
     "emailLabel": "E-mail",
     "phoneLabel": "Telefone",
+    "addressLabel": "Address",
     "notProvided": "Não informado",
     "memberSince": "Membro desde",
     "orderHistory": "Histórico de Pedidos",
@@ -210,6 +213,9 @@
     "title": "Finalizar Pedido",
     "emptyCart": "Seu carrinho está vazio.",
     "browseMenu": "Ver Cardápio",
+    "dineInTable": "Dine-in Table",
+    "dineInTableDesc": "Your order will be prepared for this table",
+    "clearTable": "Change to Takeout / Delivery",
     "orderType": "Tipo de Pedido",
     "delivery": "Entrega",
     "pickup": "Retirada",
@@ -219,6 +225,9 @@
     "city": "Cidade",
     "state": "Estado",
     "zipCode": "CEP",
+    "cityCounty": "縣市",
+    "district": "鄉鎮市區",
+    "streetAddressPlaceholder": "例如：披薩街 100 號 3 樓",
     "contactInfo": "Informações de contato",
     "loginBenefit": "💡 Faça login para ganhar pontos!",
     "googleLogin": "Entrar com Google",
@@ -240,6 +249,7 @@
     "selectDateTime": "Selecionar Data e Hora",
     "orderNotes": "Observações do pedido (opcional)",
     "couponCode": "Código de Cupom",
+    "enterCouponCode": "Insira o código de desconto",
     "apply": "Aplicar",
     "couponApplied": "Cupom aplicado!",
     "paymentMethod": "Forma de Pagamento",
@@ -250,6 +260,7 @@
     "subtotal": "Subtotal",
     "tax": "Impostos",
     "deliveryFee": "Taxa de entrega",
+    "free": "Grátis",
     "discount": "折扣",
     "loyaltyDiscount": "Desconto de pontos de fidelidade",
     "total": "Total",
@@ -265,9 +276,6 @@
     "phoneEntered": "Número de telefone inserido (este número será associado a este pedido)",
     "creditCardSub": "Pague com cartão de crédito de forma segura",
     "paypalSub": "Pague com a sua conta PayPal",
-    "asap": "O mais rápido possível",
-    "guestCheckout": "Pagamento visitante",
-    "scheduled": "Agendado",
     "frozenDelivery": "冷凍宅配",
     "frozenDeliveryAddress": "冷凍宅配收件地址",
     "addressAutoFilled": "✓ Endereço de membro aplicado automaticamente",
@@ -280,8 +288,10 @@
     "noAvailableSlots": "Sem horários disponíveis",
     "discountsAndRewards": "Descontos e Recompensas",
     "locationNotAcceptingOrders": "Este local não está aceitando pedidos no momento.",
-    "free": "Grátis",
-    "enterCouponCode": "Insira o código de desconto",
+    "roundingAdjustment": "結算調整 (Rounding)",
+    "loyaltyTitle": "Loyalty Points",
+    "loyaltyPointsToRedeem": "points to redeem",
+    "cashOnDeliverySub": "Pay at location",
     "dineInTableNumber": "內用桌號",
     "mealPreparedAtTable": "您的餐點將會為您準備於此桌位",
     "closedToday": "今日已打烊",
@@ -305,7 +315,6 @@
     "accompanyingFriends": "同行友人",
     "accompanyingFriendsList": "同行友人",
     "freeShipping": "免運費",
-    "roundingAdjustment": "結算調整 (Rounding)",
     "homeDelivery": "Home Delivery",
     "storeToStore": "Store-to-Store Pickup"
   },
@@ -358,7 +367,9 @@
     "recentGuestOrdersDesc": "Estes são os registros de pedidos armazenados neste navegador.",
     "loginToViewFull": "Inicie sessão para ver o histórico completo.",
     "lookupPhone": "Número de telefone",
-    "lookupEmailOrPhoneRequired": "Introduza um endereço de e-mail ou número de telefone para recuperar o pedido."
+    "lookupEmailOrPhoneRequired": "Introduza um endereço de e-mail ou número de telefone para recuperar o pedido.",
+    "roundingAdjustment": "Rounding Adjustment",
+    "errorLoadingDesc": "An error occurred while loading orders"
   },
   "orderStatus": {
     "placed": "Realizado",
@@ -438,6 +449,15 @@
     "orEnterCodeToJoin": "Or enter code to join",
     "enterCodeToJoinTogether": "Enter code to order together"
   },
+  "cookie": {
+    "title": "Cookie Settings",
+    "description": "We use cookies to enhance your browsing experience. You can customize your settings below.",
+    "showDetails": "Show Details",
+    "hideDetails": "Hide Details",
+    "savePreferences": "Save Preferences",
+    "acceptAll": "Accept All"
+  },
+  "recent_orders_updated": "Recent orders updated",
   "cartDrawer": {
     "points": "點"
   },
@@ -528,5 +548,7 @@
     "location": "定位",
     "reservation": "預約",
     "booking": "預約"
-  }
+  },
+  "We are currently closed for immediate orders. Please select a future pickup time.": "目前不在營業時間內，請選擇未來的取餐時間。",
+  "Scheduled time must be within business hours considering preparation buffers.": "所選時間不在營業時間內，請重新選擇。"
 }
