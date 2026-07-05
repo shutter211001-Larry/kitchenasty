@@ -87,9 +87,7 @@ export default function AIMenuDetection() {
         formData.append('images', file);
       });
 
-      const res = await api.post<{ data: { categories: ParsedCategory[] } }>('/menu/ai-detect', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
+      const res = await api.upload<{ data: { categories: ParsedCategory[] } }>('/menu/ai-detect', formData);
 
       setCategories(res.data.categories);
     } catch (err: any) {
