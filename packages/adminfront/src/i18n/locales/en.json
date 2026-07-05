@@ -35,9 +35,9 @@
     "apiMetrics": "API Metrics",
     "auditLog": "Audit Log",
     "staff": "Staff Management",
-    "attendance": "出勤打卡",
-    "checkIn": "線上打卡",
-    "attendanceRecords": "出勤紀錄",
+    "attendance": "Attendance",
+    "checkIn": "Clock In",
+    "attendanceRecords": "Attendance Records",
     "logout": "Logout"
   },
   "staff": {

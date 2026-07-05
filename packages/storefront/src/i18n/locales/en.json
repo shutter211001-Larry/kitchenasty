@@ -225,9 +225,9 @@
     "city": "City",
     "state": "State",
     "zipCode": "ZIP Code",
-    "cityCounty": "縣市",
-    "district": "鄉鎮市區",
-    "streetAddressPlaceholder": "例如：披薩街 100 號 3 樓",
+    "cityCounty": "City / County",
+    "district": "District",
+    "streetAddressPlaceholder": "Enter street address",
     "contactInfo": "Contact Information",
     "loginBenefit": "💡 Login to earn loyalty points!",
     "googleLogin": "Sign in with Google",
@@ -316,7 +316,9 @@
     "accompanyingFriendsList": "[EN] 同行友人",
     "freeShipping": "[EN] 免運費",
     "homeDelivery": "Home Delivery",
-    "storeToStore": "Store-to-Store Pickup"
+    "storeToStore": "Store-to-Store Pickup",
+    "We are currently closed for immediate orders. Please select a future pickup time.": "We are currently closed for immediate orders. Please select a future pickup time.",
+    "Scheduled time must be within business hours considering preparation buffers.": "Scheduled time must be within business hours considering preparation buffers."
   },
   "orderConfirmation": {
     "title": "Order Placed!",
