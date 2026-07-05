@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { ToggleRow } from '../components/ui/ToggleRow';
 
 export default function SettingsPayments() {
   const { t } = useTranslation();
@@ -99,19 +100,13 @@ export default function SettingsPayments() {
 
       {/* Stripe */}
       <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-gray-900">{t('settingsPayments.stripeCreditCard')}</h2>
-          <label className={`flex items-center gap-2 ${(stripePublishableKey.trim() === '' || stripeSecretKey.trim() === '') ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}>
-            <input 
-              type="checkbox" 
-              checked={stripeEnabled && stripePublishableKey.trim() !== '' && stripeSecretKey.trim() !== ''} 
-              onChange={(e) => setStripeEnabled(e.target.checked)} 
-              disabled={stripePublishableKey.trim() === '' || stripeSecretKey.trim() === ''}
-              className="w-4 h-4 text-primary-600 rounded disabled:opacity-50 disabled:cursor-not-allowed" 
-            />
-            <span className="text-sm text-gray-700">{t('settingsPayments.enable')}</span>
-          </label>
-        </div>
+        <ToggleRow
+          title={t('settingsPayments.stripeCreditCard')}
+          checked={stripeEnabled && stripePublishableKey.trim() !== '' && stripeSecretKey.trim() !== ''}
+          onChange={setStripeEnabled}
+          disabled={stripePublishableKey.trim() === '' || stripeSecretKey.trim() === ''}
+          className="bg-transparent border-none p-0 mb-4"
+        />
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">{t('settingsPayments.publishableKey')}</label>
@@ -130,19 +125,13 @@ export default function SettingsPayments() {
 
       {/* PayPal */}
       <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-gray-900">PayPal</h2>
-          <label className={`flex items-center gap-2 ${(paypalClientId.trim() === '' || paypalClientSecret.trim() === '') ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}>
-            <input 
-              type="checkbox" 
-              checked={paypalEnabled && paypalClientId.trim() !== '' && paypalClientSecret.trim() !== ''} 
-              onChange={(e) => setPaypalEnabled(e.target.checked)} 
-              disabled={paypalClientId.trim() === '' || paypalClientSecret.trim() === ''}
-              className="w-4 h-4 text-primary-600 rounded disabled:opacity-50 disabled:cursor-not-allowed" 
-            />
-            <span className="text-sm text-gray-700">{t('settingsPayments.enable')}</span>
-          </label>
-        </div>
+        <ToggleRow
+          title="PayPal"
+          checked={paypalEnabled && paypalClientId.trim() !== '' && paypalClientSecret.trim() !== ''}
+          onChange={setPaypalEnabled}
+          disabled={paypalClientId.trim() === '' || paypalClientSecret.trim() === ''}
+          className="bg-transparent border-none p-0 mb-4"
+        />
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">{t('settingsPayments.clientId')}</label>
@@ -152,10 +141,12 @@ export default function SettingsPayments() {
             <label className="block text-sm font-medium text-gray-700 mb-1">{t('settingsPayments.clientSecret')}</label>
             <input type="password" value={paypalClientSecret} onChange={(e) => setPaypalClientSecret(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500" />
           </div>
-          <label className="flex items-center gap-3">
-            <input type="checkbox" checked={paypalSandbox} onChange={(e) => setPaypalSandbox(e.target.checked)} className="w-4 h-4 text-primary-600 rounded" />
-            <span className="text-sm font-medium text-gray-700">{t('settingsPayments.sandboxMode')}</span>
-          </label>
+          <ToggleRow
+            title={t('settingsPayments.sandboxMode')}
+            checked={paypalSandbox}
+            onChange={setPaypalSandbox}
+            className="bg-transparent border-none p-0 mt-2"
+          />
         </div>
       </div>
 
@@ -175,13 +166,12 @@ export default function SettingsPayments() {
 
       {/* Cash */}
       <div className="bg-white rounded-lg border border-gray-200 p-6">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-gray-900">{t('settingsPayments.cashOnDeliveryOrStore')}</h2>
-          <label className="flex items-center gap-2">
-            <input type="checkbox" checked={cashEnabled} onChange={(e) => setCashEnabled(e.target.checked)} className="w-4 h-4 text-primary-600 rounded" />
-            <span className="text-sm text-gray-700">{t('settingsPayments.enable')}</span>
-          </label>
-        </div>
+        <ToggleRow
+          title={t('settingsPayments.cashOnDeliveryOrStore')}
+          checked={cashEnabled}
+          onChange={setCashEnabled}
+          className="bg-transparent border-none p-0"
+        />
       </div>
 
       <div className="flex justify-end pt-4">

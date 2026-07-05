@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { ToggleRow } from '../components/ui/ToggleRow';
 
 export default function SettingsReviews() {
   const { t } = useTranslation();
@@ -73,23 +74,31 @@ export default function SettingsReviews() {
       {error && <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">{error}</div>}
       {success && <div className="mb-4 p-3 bg-green-50 border border-green-200 text-green-700 rounded-lg text-sm">{success}</div>}
 
-      <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-6">
-        <label className="flex items-center gap-3 cursor-pointer">
-          <input type="checkbox" checked={enabled} onChange={(e) => setEnabled(e.target.checked)} className="w-4 h-4 text-primary-600 rounded" />
-          <span className="text-sm font-medium text-gray-700">{t('settingsReviews.enableCustomerReviews')}</span>
-        </label>
+      <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-4">
+        <ToggleRow
+          title={t('settingsReviews.enableCustomerReviews')}
+          checked={enabled}
+          onChange={setEnabled}
+          className="bg-transparent border-none p-0"
+        />
 
-        <label className="flex items-center gap-3 cursor-pointer">
-          <input type="checkbox" checked={requireOrder} onChange={(e) => setRequireOrder(e.target.checked)} className="w-4 h-4 text-primary-600 rounded" />
-          <span className="text-sm font-medium text-gray-700">{t('settingsReviews.onlyCompletedOrdersCanReview')}</span>
-        </label>
+        <div className={`transition-opacity duration-200 space-y-4 ${!enabled ? 'opacity-50 pointer-events-none' : ''}`}>
+          <ToggleRow
+            title={t('settingsReviews.onlyCompletedOrdersCanReview')}
+            checked={requireOrder}
+            onChange={setRequireOrder}
+            className="bg-transparent border-none p-0"
+          />
 
-        <label className="flex items-center gap-3 cursor-pointer">
-          <input type="checkbox" checked={autoApprove} onChange={(e) => setAutoApprove(e.target.checked)} className="w-4 h-4 text-primary-600 rounded" />
-          <span className="text-sm font-medium text-gray-700">{t('settingsReviews.autoApproveReviews')}</span>
-        </label>
+          <ToggleRow
+            title={t('settingsReviews.autoApproveReviews')}
+            checked={autoApprove}
+            onChange={setAutoApprove}
+            className="bg-transparent border-none p-0"
+          />
+        </div>
 
-        <div className="pt-2">
+        <div className={`pt-2 transition-opacity duration-200 ${!enabled ? 'opacity-50 pointer-events-none' : ''}`}>
           <label className="block text-sm font-medium text-gray-700 mb-1">{t('settingsReviews.minRatingToReview')}</label>
           <input type="number" min={1} max={5} value={minimumRating} onChange={(e) => setMinimumRating(parseInt(e.target.value) || 1)} className="w-full max-w-xs px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500" />
           <p className="mt-1 text-xs text-gray-500">{t('settingsReviews.minStarsRequiredToReview')}</p>

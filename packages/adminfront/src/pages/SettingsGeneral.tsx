@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { SUPPORTED_LANGUAGES } from '../i18n/index.js';
 import { useAuth } from '../context/AuthContext.js';
+import { ToggleRow } from '../components/ui/ToggleRow';
 
 export default function SettingsGeneral() {
   const { t } = useTranslation();
@@ -180,39 +181,45 @@ export default function SettingsGeneral() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-3">
               <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider">{t('settingsGeneral.showNavigationLinks')}</h3>
-              <label className="flex items-center gap-3 cursor-pointer">
-                <input type="checkbox" checked={navShowHome} onChange={(e) => setNavShowHome(e.target.checked)} className="w-4 h-4 text-primary-600 rounded" />
-                <span className="text-sm text-gray-700">{t('settingsGeneral.showHomePage')}</span>
-              </label>
-              <label className="flex items-center gap-3 cursor-pointer">
-                <input type="checkbox" checked={navShowLocations} onChange={(e) => setNavShowLocations(e.target.checked)} className="w-4 h-4 text-primary-600 rounded" />
-                <span className="text-sm text-gray-700">{t('settingsGeneral.showBranchInfo')}</span>
-              </label>
-              <label className="flex items-center gap-3 cursor-pointer">
-                <input type="checkbox" checked={navShowMenu} onChange={(e) => setNavShowMenu(e.target.checked)} className="w-4 h-4 text-primary-600 rounded" />
-                <span className="text-sm text-gray-700">{t('settingsGeneral.showOnlineOrdering')}</span>
-              </label>
-              <label className="flex items-center gap-3 cursor-pointer">
-                <input type="checkbox" checked={navShowReservations} onChange={(e) => setNavShowReservations(e.target.checked)} className="w-4 h-4 text-primary-600 rounded" />
-                <span className="text-sm text-gray-700">{t('settingsGeneral.showBookingService')}</span>
-              </label>
+              <ToggleRow
+                title={t('settingsGeneral.showHomePage')}
+                checked={navShowHome}
+                onChange={setNavShowHome}
+                className="bg-transparent border-none p-2"
+              />
+              <ToggleRow
+                title={t('settingsGeneral.showBranchInfo')}
+                checked={navShowLocations}
+                onChange={setNavShowLocations}
+                className="bg-transparent border-none p-2"
+              />
+              <ToggleRow
+                title={t('settingsGeneral.showOnlineOrdering')}
+                checked={navShowMenu}
+                onChange={setNavShowMenu}
+                className="bg-transparent border-none p-2"
+              />
+              <ToggleRow
+                title={t('settingsGeneral.showBookingService')}
+                checked={navShowReservations}
+                onChange={setNavShowReservations}
+                className="bg-transparent border-none p-2"
+              />
             </div>
             <div className="space-y-3">
               <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider">{t('settingsGeneral.systemFeatures')}</h3>
-              <label className="flex items-center gap-3 cursor-pointer p-3 bg-gray-50 rounded-lg border border-gray-200">
-                <input type="checkbox" checked={showMembership} onChange={(e) => setShowMembership(e.target.checked)} className="w-4 h-4 text-primary-600 rounded" />
-                <div>
-                  <p className="text-sm font-bold text-gray-900">{t('settingsGeneral.enableMemberSystem')}</p>
-                  <p className="text-xs text-gray-500">{t('settingsGeneral.hideLoginRegisterDescription')}</p>
-                </div>
-              </label>
-              <label className="flex items-center gap-3 cursor-pointer p-3 bg-gray-50 rounded-lg border border-gray-200">
-                <input type="checkbox" checked={showLanguageEmoji} onChange={(e) => setShowLanguageEmoji(e.target.checked)} className="w-4 h-4 text-primary-600 rounded" />
-                <div>
-                  <p className="text-sm font-bold text-gray-900">{t('settingsGeneral.showLanguageFlagEmoji')}</p>
-                  <p className="text-xs text-gray-500">{t('settingsGeneral.showFlagIconDescription')}</p>
-                </div>
-              </label>
+              <ToggleRow
+                title={t('settingsGeneral.enableMemberSystem')}
+                description={t('settingsGeneral.hideLoginRegisterDescription')}
+                checked={showMembership}
+                onChange={setShowMembership}
+              />
+              <ToggleRow
+                title={t('settingsGeneral.showLanguageFlagEmoji')}
+                description={t('settingsGeneral.showFlagIconDescription')}
+                checked={showLanguageEmoji}
+                onChange={setShowLanguageEmoji}
+              />
             </div>
           </div>
         </div>

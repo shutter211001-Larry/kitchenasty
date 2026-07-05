@@ -1,6 +1,8 @@
 import { useTranslation } from 'react-i18next';
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
+import { ToggleRow } from '../components/ui/ToggleRow';
 
 export default function SettingsInvoice() {
   const { t } = useTranslation();
@@ -70,7 +72,7 @@ export default function SettingsInvoice() {
       <div className="flex items-center justify-between mb-6 border-b border-gray-200 pb-4">
         <div>
           <Link to="/settings" className="text-sm text-primary-600 hover:text-primary-700 transition-colors font-medium flex items-center gap-1">
-            <span>&larr;</span> {t('settingsInvoice.backToSystemSettings')}
+            <ArrowLeft className="w-4 h-4" /> {t('settingsInvoice.backToSystemSettings')}
           </Link>
           <h1 className="text-2xl font-bold text-gray-900 mt-1">{t('settingsInvoice.eInvoiceSettings')}</h1>
         </div>
@@ -100,20 +102,15 @@ export default function SettingsInvoice() {
         <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm space-y-4 relative overflow-hidden">
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-green-500 to-emerald-500"></div>
           
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-              {t('settingsInvoice.ecpayEInvoice')}
-            </h2>
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={enabled}
-                onChange={(e) => setEnabled(e.target.checked)}
-                className="w-4 h-4 text-primary-600 rounded focus:ring-primary-500 border-gray-300"
-              />
-              <span className="text-sm font-semibold text-gray-700">{t('settingsInvoice.enableEInvoice')}</span>
-            </label>
-          </div>
+          <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2 mb-4">
+            {t('settingsInvoice.ecpayEInvoice')}
+          </h2>
+          <ToggleRow
+            title={t('settingsInvoice.enableEInvoice')}
+            checked={enabled}
+            onChange={setEnabled}
+            className="bg-transparent border-none p-0 mb-4"
+          />
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>

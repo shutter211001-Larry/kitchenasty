@@ -56,6 +56,13 @@ const updateSettingsSchema = z.object({
     enableTCat: z.boolean().optional(),
     enablePelican: z.boolean().optional(),
     enableECPay: z.boolean().optional(),
+    tcatCustomerId: z.string().optional(),
+    tcatApiKey: z.string().optional(),
+    pelicanMerchantId: z.string().optional(),
+    pelicanApiKey: z.string().optional(),
+    ecpayMerchantId: z.string().optional(),
+    ecpayHashKey: z.string().optional(),
+    ecpayHashIv: z.string().optional(),
   }).optional(),
 });
 
@@ -393,6 +400,13 @@ const orderSettingsSchema = z.object({
   enableTCat: z.boolean().optional(),
   enablePelican: z.boolean().optional(),
   enableECPay: z.boolean().optional(),
+  tcatCustomerId: z.string().optional(),
+  tcatApiKey: z.string().optional(),
+  pelicanMerchantId: z.string().optional(),
+  pelicanApiKey: z.string().optional(),
+  ecpayMerchantId: z.string().optional(),
+  ecpayHashKey: z.string().optional(),
+  ecpayHashIv: z.string().optional(),
 });
 
 const reservationSettingsSchema = z.object({

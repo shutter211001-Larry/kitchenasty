@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { ToggleRow } from '../components/ui/ToggleRow.js';
 
 export default function SettingsOrder() {
   const { t } = useTranslation();
@@ -233,51 +234,47 @@ export default function SettingsOrder() {
               </label>
             </div>
             
-            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-100">
-              <div>
-                <span className="font-medium text-gray-900 block">台灣宅配通 (Pelican)</span>
-                <span className="text-xs text-gray-500">開啟此選項，出貨選單將顯示台灣宅配通。</span>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" className="sr-only peer" checked={enablePelican} onChange={e => setEnablePelican(e.target.checked)} />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
-              </label>
-            </div>
+            <ToggleRow
+              title="台灣宅配通 (Pelican)"
+              description="開啟此選項，出貨選單將顯示台灣宅配通。"
+              checked={enablePelican}
+              onChange={setEnablePelican}
+              className="bg-gray-50 border-gray-100"
+            />
             
-            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-100">
-              <div>
-                <span className="font-medium text-gray-900 block">綠界科技 ECPay 店到店</span>
-                <span className="text-xs text-gray-500">開啟此選項，出貨選單將顯示綠界店到店交貨便。</span>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" className="sr-only peer" checked={enableECPay} onChange={e => setEnableECPay(e.target.checked)} />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
-              </label>
-            </div>
+            <ToggleRow
+              title="綠界科技 ECPay 店到店"
+              description="開啟此選項，出貨選單將顯示綠界店到店交貨便。"
+              checked={enableECPay}
+              onChange={setEnableECPay}
+              className="bg-gray-50 border-gray-100"
+            />
           </div>
         </div>
 
         <div className="pt-4 border-t border-gray-100 space-y-4">
-          <label className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg border border-blue-100 cursor-pointer">
-            <input type="checkbox" checked={allowGuestCheckout} onChange={(e) => setAllowGuestCheckout(e.target.checked)} className="w-4 h-4 text-primary-600 rounded" />
-            <div>
-              <p className="text-sm font-bold text-gray-900">{t('settingsOrder.allowGuestCheckout')}</p>
-              <p className="text-xs text-gray-500">{t('settingsOrder.guestCheckoutDesc')}</p>
-            </div>
-          </label>
+          <ToggleRow
+            title={t('settingsOrder.allowGuestCheckout')}
+            description={t('settingsOrder.guestCheckoutDesc')}
+            checked={allowGuestCheckout}
+            onChange={setAllowGuestCheckout}
+            className="bg-blue-50 border-blue-100"
+          />
 
-          <label className="flex items-center gap-3 p-3 bg-purple-50 rounded-lg border border-purple-100 cursor-pointer">
-            <input type="checkbox" checked={enableCounterDisplay} onChange={(e) => setEnableCounterDisplay(e.target.checked)} className="w-4 h-4 text-primary-600 rounded" />
-            <div>
-              <p className="text-sm font-bold text-gray-900">{t('settingsOrder.enableCounterDashboard')}</p>
-              <p className="text-xs text-gray-500">{t('settingsOrder.counterDashboardDesc')}</p>
-            </div>
-          </label>
+          <ToggleRow
+            title={t('settingsOrder.enableCounterDashboard')}
+            description={t('settingsOrder.counterDashboardDesc')}
+            checked={enableCounterDisplay}
+            onChange={setEnableCounterDisplay}
+            className="bg-purple-50 border-purple-100"
+          />
 
-          <label className="flex items-center gap-3">
-            <input type="checkbox" checked={enableFutureOrdering} onChange={(e) => setEnableFutureOrdering(e.target.checked)} className="w-4 h-4 text-primary-600 rounded" />
-            <span className="text-sm font-medium text-gray-700">{t('settingsOrder.allowScheduledOrders')}</span>
-          </label>
+          <ToggleRow
+            title={t('settingsOrder.allowScheduledOrders')}
+            checked={enableFutureOrdering}
+            onChange={setEnableFutureOrdering}
+            className="bg-transparent border-none p-2"
+          />
 
           {enableFutureOrdering && (
             <div className="ml-7 p-4 bg-blue-50/50 rounded-lg border border-blue-100 grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -322,10 +319,12 @@ export default function SettingsOrder() {
             </div>
           )}
 
-          <label className="flex items-center gap-3">
-            <input type="checkbox" checked={enableTipping} onChange={(e) => setEnableTipping(e.target.checked)} className="w-4 h-4 text-primary-600 rounded" />
-            <span className="text-sm font-medium text-gray-700">{t('settingsOrder.enableTipping')}</span>
-          </label>
+          <ToggleRow
+            title={t('settingsOrder.enableTipping')}
+            checked={enableTipping}
+            onChange={setEnableTipping}
+            className="bg-transparent border-none p-2"
+          />
 
           <div className={!enableTipping ? 'opacity-50 pointer-events-none' : ''}>
             <label className="block text-sm font-medium text-gray-700 mb-1">{t('settingsOrder.tipPercentageOptions')}</label>

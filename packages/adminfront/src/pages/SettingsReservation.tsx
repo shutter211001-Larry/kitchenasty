@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { ToggleRow } from '../components/ui/ToggleRow';
 
 export default function SettingsReservation() {
   const { t } = useTranslation();
@@ -78,10 +79,12 @@ export default function SettingsReservation() {
       {success && <div className="mb-4 p-3 bg-green-50 border border-green-200 text-green-700 rounded-lg text-sm">{success}</div>}
 
       <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-4">
-        <label className="flex items-center gap-3">
-          <input type="checkbox" checked={enabled} onChange={(e) => setEnabled(e.target.checked)} className="w-4 h-4 text-primary-600 rounded" />
-          <span className="text-sm font-medium text-gray-700">{t('settingsReservation.enableOnlineReservation')}</span>
-        </label>
+        <ToggleRow
+          title={t('settingsReservation.enableOnlineReservation')}
+          checked={enabled}
+          onChange={setEnabled}
+          className="bg-transparent border-none p-0"
+        />
 
         <div className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${!enabled ? 'opacity-50 pointer-events-none' : ''}`}>
           <div>
@@ -107,10 +110,14 @@ export default function SettingsReservation() {
           </div>
         </div>
 
-        <label className={`flex items-center gap-3 ${!enabled ? 'opacity-50 pointer-events-none' : ''}`}>
-          <input type="checkbox" checked={autoConfirm} onChange={(e) => setAutoConfirm(e.target.checked)} className="w-4 h-4 text-primary-600 rounded" />
-          <span className="text-sm font-medium text-gray-700">{t('settingsReservation.autoConfirmReservation')}</span>
-        </label>
+        <div className={`transition-opacity duration-200 ${!enabled ? 'opacity-50 pointer-events-none' : ''}`}>
+          <ToggleRow
+            title={t('settingsReservation.autoConfirmReservation')}
+            checked={autoConfirm}
+            onChange={setAutoConfirm}
+            className="bg-transparent border-none p-0 mt-4"
+          />
+        </div>
       </div>
 
       <div className="flex justify-end pt-4">

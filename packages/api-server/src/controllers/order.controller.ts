@@ -358,6 +358,9 @@ const createOrderSchema = z.object({
   groupSessionId: z.string().optional(),
   honeypot: z.string().optional(),
   frozenDeliveryMethod: z.string().optional(),
+  manualDiscount: z.number().min(0).optional(),
+  trackingNumber: z.string().optional(),
+  logisticsProvider: z.string().optional(),
 });
 
 function generateOrderNumber(): string {
@@ -377,7 +380,8 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
   const { 
     orderType, items, comment, scheduledAt, address, 
     guestName, guestEmail, guestPhone, loyaltyPointsRedeem,
-    userLat, userLon, locationId, honeypot, couponCode, tableName, groupSessionId, frozenDeliveryMethod
+    userLat, userLon, locationId, honeypot, couponCode, tableName, groupSessionId, frozenDeliveryMethod,
+    manualDiscount, trackingNumber, logisticsProvider
   } = parsed.data;
 
   // HONEYPOT check: Bots often fill all fields. If this hidden field is filled, reject it silently or with a generic error.
@@ -895,6 +899,11 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
     appliedCouponId = coupon.id;
   }
 
+  // C. Manual Discount (Staff only)
+  if (isStaff && manualDiscount !== undefined) {
+    couponDiscount += manualDiscount;
+  }
+
   if (freeDelivery) {
     deliveryFee = 0;
   }
@@ -994,6 +1003,8 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
       language: userLang,
       tableId,
       groupId: groupSessionId || undefined,
+      trackingNumber,
+      logisticsProvider,
       items: { create: orderItemsData },
     } as any,
     include: {

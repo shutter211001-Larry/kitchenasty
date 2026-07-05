@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 
 export default function SettingsMail() {
   const token = localStorage.getItem('token') || '';
@@ -123,7 +124,7 @@ export default function SettingsMail() {
       <div className="flex items-center justify-between mb-6 border-b border-gray-200 pb-4">
         <div>
           <Link to="/settings" className="text-sm text-primary-600 hover:text-primary-700 transition-colors font-medium flex items-center gap-1">
-            <span>&larr;</span> 返回系統設定
+            <ArrowLeft className="w-4 h-4" /> 返回系統設定
           </Link>
           <h1 className="text-2xl font-bold text-gray-900 mt-1 flex items-center gap-2">
             ⚙️ 郵件伺服器設定 (SMTP)

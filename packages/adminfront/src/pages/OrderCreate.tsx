@@ -60,6 +60,15 @@ export default function OrderCreate() {
   const [guestEmail, setGuestEmail] = useState('');
   const [address, setAddress] = useState({ line1: '', city: '', state: '', zip: '' });
   const [frozenDeliveryMethod, setFrozenDeliveryMethod] = useState<'HOME_DELIVERY' | 'STORE_TO_STORE'>('HOME_DELIVERY');
+  
+  const [couponCode, setCouponCode] = useState('');
+  const [manualDiscount, setManualDiscount] = useState<number>(0);
+  const [trackingNumber, setTrackingNumber] = useState('');
+  const [logisticsProvider, setLogisticsProvider] = useState('');
+  
+  const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
+  const [selectedOptions, setSelectedOptions] = useState<Record<string, string[]>>({});
+
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -78,16 +87,61 @@ export default function OrderCreate() {
       .finally(() => setLoading(false));
   }, []);
 
-  const addToCart = (item: MenuItem) => {
-  // For simplicity, we add with no options first. 
-    // In a full implementation, we would show a modal for options.
+  const openItemModal = (item: MenuItem) => {
+    if (item.options && item.options.length > 0) {
+      setSelectedItem(item);
+      setSelectedOptions({});
+    } else {
+      addToCart(item, [], 0);
+    }
+  };
+
+  const handleOptionChange = (optionId: string, valueId: string, checked: boolean) => {
+    setSelectedOptions(prev => {
+      const current = prev[optionId] || [];
+      if (checked) {
+        return { ...prev, [optionId]: [...current, valueId] };
+      } else {
+        return { ...prev, [optionId]: current.filter(id => id !== valueId) };
+      }
+    });
+  };
+
+  const confirmAddToCart = () => {
+    if (!selectedItem) return;
+    
+    let optionModifier = 0;
+    const itemOptions: CartItem['options'] = [];
+    
+    selectedItem.options.forEach(opt => {
+      const selected = selectedOptions[opt.id] || [];
+      selected.forEach(valId => {
+        const val = opt.values.find(v => v.id === valId);
+        if (val) {
+          optionModifier += val.priceModifier;
+          itemOptions.push({
+            menuOptionValueId: val.id,
+            name: opt.name,
+            value: val.name,
+            priceModifier: val.priceModifier
+          });
+        }
+      });
+    });
+
+    addToCart(selectedItem, itemOptions, optionModifier);
+    setSelectedItem(null);
+  };
+
+  const addToCart = (item: MenuItem, options: CartItem['options'], optionModifier: number = 0) => {
+    const unitPrice = item.price + optionModifier;
     const newItem: CartItem = {
       menuItemId: item.id,
       name: item.name,
       quantity: 1,
-      unitPrice: item.price,
-      subtotal: item.price,
-      options: [],
+      unitPrice,
+      subtotal: unitPrice,
+      options,
     };
     setCart([...cart, newItem]);
   };
@@ -96,9 +150,8 @@ export default function OrderCreate() {
     setCart(cart.filter((_, i) => i !== index));
   };
 
-  const calculateTotal = () => {
-    return cart.reduce((sum, item) => sum + item.subtotal, 0);
-  };
+  const calculateSubtotal = () => cart.reduce((sum, item) => sum + item.subtotal, 0);
+  const calculateTotal = () => Math.max(0, calculateSubtotal() - manualDiscount);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -128,6 +181,10 @@ export default function OrderCreate() {
         guestEmail,
         address: (orderType === 'DELIVERY' || orderType === 'FROZEN_DELIVERY') ? address : undefined,
         frozenDeliveryMethod: orderType === 'FROZEN_DELIVERY' ? frozenDeliveryMethod : undefined,
+        trackingNumber: orderType === 'FROZEN_DELIVERY' ? trackingNumber : undefined,
+        logisticsProvider: orderType === 'FROZEN_DELIVERY' ? logisticsProvider : undefined,
+        couponCode: couponCode || undefined,
+        manualDiscount: manualDiscount > 0 ? manualDiscount : undefined,
       };
 
       const res = await api.post<{ data: { id: string } }>('/orders', orderData);
@@ -158,7 +215,7 @@ export default function OrderCreate() {
               {menuItems.map(item => (
                 <button
                   key={item.id}
-                  onClick={() => addToCart(item)}
+                  onClick={() => openItemModal(item)}
                   className="flex items-center gap-4 p-3 border border-gray-100 rounded-lg hover:bg-gray-50 transition-colors text-left group"
                 >
                   {item.image ? (
@@ -294,6 +351,34 @@ export default function OrderCreate() {
                 </div>
               </div>
             ) : null}
+
+            {orderType === 'FROZEN_DELIVERY' && (
+              <div className="mt-6 space-y-4 pt-6 border-t border-gray-100">
+                <h3 className="font-medium text-gray-900">物流資訊</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('orderCreate.logisticsProvider') || '物流服務商'}</label>
+                    <input
+                      type="text"
+                      value={logisticsProvider}
+                      onChange={e => setLogisticsProvider(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
+                      placeholder="例如：黑貓宅急便"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('orderCreate.trackingNumber') || '物流單號'}</label>
+                    <input
+                      type="text"
+                      value={trackingNumber}
+                      onChange={e => setTrackingNumber(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
+                      placeholder="輸入單號"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -369,7 +454,39 @@ export default function OrderCreate() {
               )}
 
               <div className="border-t border-gray-100 pt-4 space-y-2">
-                <div className="flex justify-between text-lg font-bold">
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-500">小計</span>
+                  <span>${calculateSubtotal().toFixed(2)}</span>
+                </div>
+                
+                <div className="space-y-3 pt-3 border-t border-gray-50">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">{t('orderCreate.couponCode') || '優惠碼'}</label>
+                    <input
+                      type="text"
+                      value={couponCode}
+                      onChange={e => setCouponCode(e.target.value)}
+                      className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-primary-500 outline-none"
+                      placeholder="輸入優惠碼"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">{t('orderCreate.manualDiscount') || '手動折扣金額'}</label>
+                    <div className="relative">
+                      <span className="absolute left-2 top-1.5 text-gray-500 text-sm">$</span>
+                      <input
+                        type="number"
+                        min="0"
+                        value={manualDiscount || ''}
+                        onChange={e => setManualDiscount(parseFloat(e.target.value) || 0)}
+                        className="w-full pl-6 pr-2 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-primary-500 outline-none"
+                        placeholder="0"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex justify-between text-lg font-bold pt-3 mt-3 border-t border-gray-200">
                   <span>{t('orderCreate.total')}</span>
                   <span className="text-primary-600">${calculateTotal().toFixed(2)}</span>
                 </div>
@@ -386,6 +503,54 @@ export default function OrderCreate() {
           </div>
         </div>
       </div>
+
+      {selectedItem && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="p-4 border-b flex items-center justify-between">
+              <h3 className="font-bold text-lg">{selectedItem.name} - {t('orderCreate.optionsTitle') || '餐點選項'}</h3>
+              <button onClick={() => setSelectedItem(null)} className="text-gray-400 hover:text-gray-600">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
+            <div className="p-4 overflow-y-auto flex-1 space-y-6">
+              {selectedItem.options.map(opt => (
+                <div key={opt.id}>
+                  <h4 className="font-medium text-sm text-gray-900 mb-2">{opt.name}</h4>
+                  <div className="space-y-2">
+                    {opt.values.map(val => (
+                      <label key={val.id} className="flex items-center gap-3 cursor-pointer p-2 hover:bg-gray-50 rounded-lg border border-transparent hover:border-gray-100 transition-colors">
+                        <input
+                          type="checkbox"
+                          className="w-4 h-4 text-primary-600 rounded border-gray-300 focus:ring-primary-500"
+                          checked={(selectedOptions[opt.id] || []).includes(val.id)}
+                          onChange={e => handleOptionChange(opt.id, val.id, e.target.checked)}
+                        />
+                        <span className="flex-1 text-sm">{val.name}</span>
+                        {val.priceModifier > 0 && <span className="text-sm text-gray-500">+${val.priceModifier.toFixed(2)}</span>}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="p-4 border-t bg-gray-50 flex justify-end gap-3">
+              <button
+                onClick={() => setSelectedItem(null)}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+              >
+                {t('orderCreate.cancel') || '取消'}
+              </button>
+              <button
+                onClick={confirmAddToCart}
+                className="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700"
+              >
+                {t('orderCreate.addCart') || '加入購物車'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 import { api } from '../lib/api.js';
 
 interface FranchiseStore {
@@ -236,7 +237,7 @@ export default function SettingsFranchise() {
       <div className="flex items-center justify-between mb-6 border-b border-gray-100 pb-4">
         <div>
           <Link to="/settings" className="text-xs font-semibold text-primary-600 hover:text-primary-700 transition-colors flex items-center gap-1.5 mb-1">
-            <span>&larr;</span> {t('settingsFranchise.returnToSystemSettings')}
+            <ArrowLeft className="w-4 h-4" /> {t('settingsFranchise.returnToSystemSettings')}
           </Link>
           <h1 className="text-2xl font-black text-gray-900 tracking-tight flex items-center gap-2">
             {t('settingsFranchise.franchiseManagement')}

@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
+import { ToggleRow } from '../components/ui/ToggleRow.js';
 
 function IPBlacklistManager({ token }: { token: string }) {
   const [list, setList] = useState<{ ip: string; reason: string | null; createdAt: string }[]>([]);
@@ -210,7 +212,7 @@ export default function SettingsAdvanced() {
       <div className="flex items-center justify-between mb-6 border-b border-gray-200 pb-4">
         <div>
           <Link to="/settings" className="text-sm text-primary-600 hover:text-primary-700 transition-colors font-medium flex items-center gap-1">
-            <span>&larr;</span> 返回系統設定
+            <ArrowLeft className="w-4 h-4" /> 返回系統設定
           </Link>
           <h1 className="text-2xl font-bold text-gray-900 mt-1">⚙️ 系統進階與效能設定</h1>
         </div>
@@ -245,15 +247,12 @@ export default function SettingsAdvanced() {
           </h2>
           
           <div>
-            <label className="flex items-center gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={maintenanceMode}
-                onChange={(e) => setMaintenanceMode(e.target.checked)}
-                className="w-4 h-4 text-primary-600 rounded focus:ring-primary-500 border-gray-300"
-              />
-              <span className="text-sm font-semibold text-gray-700">啟用維護模式</span>
-            </label>
+            <ToggleRow
+              title="啟用維護模式"
+              checked={maintenanceMode}
+              onChange={setMaintenanceMode}
+              className="bg-transparent border-none p-0"
+            />
             {maintenanceMode && (
               <div className="mt-3 p-3 bg-red-50 border border-red-200 text-red-700 rounded-xl text-xs font-semibold">
                 ⚠️ 警告：啟用維護模式後，顧客端點餐網站將暫時阻擋，僅顯示下方的維護公告訊息。
@@ -367,21 +366,16 @@ export default function SettingsAdvanced() {
 
         {/* Section 3: Rate Limiting */}
         <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm space-y-3">
-          <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+          <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2 mb-2">
             🛡️ 安全性防禦設定
           </h2>
-          <label className="flex items-center gap-3 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={enableRateLimiting}
-              onChange={(e) => setEnableRateLimiting(e.target.checked)}
-              className="w-4 h-4 text-primary-600 rounded focus:ring-primary-500 border-gray-300"
-            />
-            <span className="text-sm font-semibold text-gray-700">啟用 API 請求速率限制 (Rate Limiting)</span>
-          </label>
-          <p className="text-xs text-gray-400">
-            開啟此功能後，系統會自動防止同一 IP 在極短時間內發送大量惡意點單請求，加固系統免受簡易的 CC 攻擊。
-          </p>
+          <ToggleRow
+            title="啟用 API 請求速率限制 (Rate Limiting)"
+            description="開啟此功能後，系統會自動防止同一 IP 在極短時間內發送大量惡意點單請求，加固系統免受簡易的 CC 攻擊。"
+            checked={enableRateLimiting}
+            onChange={setEnableRateLimiting}
+            className="bg-transparent border-none p-0"
+          />
         </div>
 
         {/* Section 4: IP Blacklist Section */}

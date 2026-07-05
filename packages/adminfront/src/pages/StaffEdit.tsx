@@ -1,6 +1,7 @@
 import { useState, useEffect, FormEvent } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.js';
+import { ToggleSwitch } from '../components/ui/ToggleRow';
 import { useTranslation } from 'react-i18next';
 
 interface Staff {
@@ -204,17 +205,16 @@ export default function StaffEdit() {
           />
         </div>
 
-        <div className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            id="isActive"
+        <label className="flex items-center gap-2 cursor-pointer">
+          <ToggleSwitch
             checked={isActive}
-            onChange={(e) => setIsActive(e.target.checked)}
+            onChange={setIsActive}
             disabled={user?.id === staff.id}
-            className={`rounded border-gray-300 text-primary-600 focus:ring-primary-500 ${user?.id === staff.id ? 'opacity-50 cursor-not-allowed' : ''}`}
           />
-          <label htmlFor="isActive" className="text-sm text-gray-700">{t('staff.active')}</label>
-        </div>
+          <span className={`text-sm ${isActive ? 'text-gray-900 font-medium' : 'text-gray-500'} ${user?.id === staff.id ? 'opacity-50' : ''}`}>
+            {t('staff.active')}
+          </span>
+        </label>
 
         <button
           type="submit"

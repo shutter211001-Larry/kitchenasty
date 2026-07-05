@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.js';
 import { api } from '../lib/api.js';
 
@@ -135,7 +136,7 @@ export default function SettingsNotifications() {
     <div className="max-w-5xl mx-auto px-4 py-2">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <Link to="/settings" className="text-sm text-primary-600 hover:text-primary-700 font-medium">&larr; 返回設定</Link>
+          <Link to="/settings" className="text-sm text-primary-600 hover:text-primary-700 font-medium flex items-center gap-1"><ArrowLeft className="w-4 h-4" /> 返回設定</Link>
           <h1 className="text-2xl font-bold text-gray-900 mt-1">通知發送設定</h1>
           <p className="text-sm text-gray-500 mt-1">統一管理電子郵件與 LINE 的自動通知觸發時機，以及郵件的品牌裝飾風格</p>
         </div>
