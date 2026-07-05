@@ -21,7 +21,7 @@ async function getOrderedModels(apiKey: string): Promise<string[]> {
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
     if (!response.ok) {
       logger.warn(`[DEBUG] ListModels failed (${response.status}), using static fallback.`);
-      return ['models/gemini-1.5-flash'];
+      return ['models/gemini-3.5-flash', 'models/gemini-1.5-flash'];
     }
     
     const data = await response.json();
@@ -30,11 +30,19 @@ async function getOrderedModels(apiKey: string): Promise<string[]> {
     // Filter for models that support content generation
     const usable = allModels.filter(m => m.supportedGenerationMethods.includes('generateContent'));
     
-    // Prioritize Flash models (higher quota, faster) over Pro models
-    const flashModels = usable.filter(m => m.name.toLowerCase().includes('flash'));
-    const otherModels = usable.filter(m => !m.name.toLowerCase().includes('flash'));
+    // Prioritize 3.x over older, and Flash models (higher quota, faster) over Pro models
+    const gemini3 = usable.filter(m => m.name.includes('gemini-3'));
+    const gemini1_5 = usable.filter(m => m.name.includes('gemini-1.5'));
+    const otherModels = usable.filter(m => !m.name.includes('gemini-3') && !m.name.includes('gemini-1.5'));
     
-    cachedOrderedModels = [...flashModels, ...otherModels].map(m => m.name);
+    const sortModels = (models: typeof usable) => {
+      const flash = models.filter(m => m.name.toLowerCase().includes('flash'));
+      const pro = models.filter(m => m.name.toLowerCase().includes('pro'));
+      const rest = models.filter(m => !m.name.toLowerCase().includes('flash') && !m.name.toLowerCase().includes('pro'));
+      return [...flash, ...pro, ...rest];
+    };
+    
+    cachedOrderedModels = [...sortModels(gemini3), ...sortModels(gemini1_5), ...otherModels].map(m => m.name);
     logger.info(`[DEBUG] AI Strategy dynamic ordering: ${cachedOrderedModels.join(', ')}`);
     
     return cachedOrderedModels.length > 0 ? cachedOrderedModels : ['models/gemini-1.5-flash'];
@@ -48,8 +56,9 @@ async function getOrderedModels(apiKey: string): Promise<string[]> {
  * High-availability fetch wrapper that automatically falls back to 
  * the next available model if the current one fails (e.g., 429 Quota Exceeded).
  */
-async function fetchWithFallback(apiKey: string, prompt: string): Promise<any> {
+async function fetchWithFallback(apiKey: string, promptOrParts: string | any[]): Promise<any> {
   const models = await getOrderedModels(apiKey);
+  const parts = typeof promptOrParts === 'string' ? [{ text: promptOrParts }] : promptOrParts;
   
   for (const model of models) {
     try {
@@ -57,7 +66,7 @@ async function fetchWithFallback(apiKey: string, prompt: string): Promise<any> {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
+          contents: [{ parts }],
         })
       });
 
@@ -225,3 +234,34 @@ export async function generateGeminiObject(prompt: string): Promise<any> {
 
   return parseJSONWithMarkdownFallback(resultText);
 }
+
+/**
+ * Prompt Gemini with images (Multimodal) and return a parsed JSON object.
+ */
+export async function generateGeminiVisionObject(prompt: string, base64Images: { data: string, mimeType: string }[]): Promise<any> {
+  const apiKey = await getApiKey();
+  if (!apiKey) {
+    throw new Error('GEMINI_API_KEY not configured.');
+  }
+
+  const parts: any[] = [{ text: prompt }];
+  
+  for (const img of base64Images) {
+    parts.push({
+      inlineData: {
+        data: img.data,
+        mimeType: img.mimeType
+      }
+    });
+  }
+
+  const data = await fetchWithFallback(apiKey, parts);
+  const resultText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+  
+  if (!resultText) {
+    throw new Error('No valid response from AI vision model');
+  }
+
+  return parseJSONWithMarkdownFallback(resultText);
+}
+

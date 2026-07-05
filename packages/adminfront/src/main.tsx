@@ -14,6 +14,7 @@ import CategoryList from './pages/CategoryList.js';
 import CategoryForm from './pages/CategoryForm.js';
 import MenuItemList from './pages/MenuItemList.js';
 import MenuItemForm from './pages/MenuItemForm.js';
+import AIMenuDetection from './pages/AIMenuDetection.js';
 import StockManagement from './pages/StockManagement.js';
 import AllergenList from './pages/AllergenList.js';
 import DietaryPreferenceList from './pages/DietaryPreferenceList.js';
@@ -117,6 +118,7 @@ function AppRoutes() {
         <Route path="/menu/categories/:id" element={<RequireRole roles={['SUPER_ADMIN', 'MANAGER']}><CategoryForm /></RequireRole>} />
         <Route path="/menu/stock" element={<RequireRole roles={['SUPER_ADMIN', 'MANAGER']}><StockManagement /></RequireRole>} />
         <Route path="/menu/items" element={<RequireRole roles={['SUPER_ADMIN', 'MANAGER']}><MenuItemList /></RequireRole>} />
+        <Route path="/menu/items/ai-detect" element={<RequireRole roles={['SUPER_ADMIN', 'MANAGER']}><AIMenuDetection /></RequireRole>} />
         <Route path="/menu/items/new" element={<RequireRole roles={['SUPER_ADMIN', 'MANAGER']}><MenuItemForm /></RequireRole>} />
         <Route path="/menu/items/:id" element={<RequireRole roles={['SUPER_ADMIN', 'MANAGER']}><MenuItemForm /></RequireRole>} />
         <Route path="/menu/allergens" element={<RequireRole roles={['SUPER_ADMIN', 'MANAGER']}><AllergenList /></RequireRole>} />
