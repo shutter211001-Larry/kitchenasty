@@ -1280,6 +1280,9 @@
     "createOrder": "建立訂單"
   },
   "orderDetail": {
+    "fulfillOrder": "填寫出貨資訊",
+    "logisticsProvider": "物流公司",
+    "trackingNumber": "託運單號",
     "enterValidDiscountedPrice": "請輸入有效的折讓後價格！",
     "adjustDiscountFailed": "調整折讓失敗",
     "discountAppliedSuccessfully": "折讓價格套用成功！",

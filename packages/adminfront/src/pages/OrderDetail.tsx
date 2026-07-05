@@ -17,6 +17,9 @@ interface OrderDetail {
   id: string;
   orderNumber: string;
   orderType: string;
+  frozenDeliveryMethod?: string;
+  trackingNumber?: string;
+  logisticsProvider?: string;
   status: string;
   subtotal: number;
   tax: number;
@@ -63,6 +66,11 @@ export default function OrderDetailPage() {
   const { user } = useAuth();
   const canManage = user?.role === 'SUPER_ADMIN' || user?.role === 'MANAGER';
 
+  // Fulfill Modal State
+  const [showFulfillModal, setShowFulfillModal] = useState(false);
+  const [trackingNumber, setTrackingNumber] = useState('');
+  const [logisticsProvider, setLogisticsProvider] = useState('黑貓宅急便');
+
   const token = localStorage.getItem('token') || '';
 
   useEffect(() => {
@@ -88,24 +96,49 @@ export default function OrderDetailPage() {
   }, [id, token]);
 
   async function updateStatus(newStatus: string) {
+    if (order?.orderType === 'FROZEN_DELIVERY' && newStatus === 'OUT_FOR_DELIVERY') {
+      setShowFulfillModal(true);
+      return;
+    }
+    await executeStatusUpdate(newStatus);
+  }
+
+  async function executeStatusUpdate(newStatus: string, trackingData?: { trackingNumber: string, logisticsProvider: string }) {
     setUpdating(true);
     try {
+      const bodyPayload: any = { status: newStatus };
+      if (trackingData) {
+        bodyPayload.trackingNumber = trackingData.trackingNumber;
+        bodyPayload.logisticsProvider = trackingData.logisticsProvider;
+      }
+      
       const res = await fetch(`/api/orders/${id}/status`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ status: newStatus }),
+        body: JSON.stringify(bodyPayload),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
-      setOrder((prev) => prev ? { ...prev, status: newStatus } : prev);
+      setOrder((prev) => prev ? { 
+        ...prev, 
+        status: newStatus,
+        ...(trackingData ? trackingData : {}) 
+      } : prev);
+      
+      if (showFulfillModal) setShowFulfillModal(false);
     } catch (err: any) {
       setError(err.message);
     } finally {
       setUpdating(false);
     }
+  }
+
+  async function submitFulfillment(e: React.FormEvent) {
+    e.preventDefault();
+    await executeStatusUpdate('OUT_FOR_DELIVERY', { trackingNumber, logisticsProvider });
   }
 
   async function updatePaymentStatus(newPaymentStatus: string) {
@@ -421,12 +454,25 @@ export default function OrderDetailPage() {
             <dl className="space-y-3 text-sm">
               <div>
                 <dt className="text-gray-500">{t('orders.type')}</dt>
-                <dd className="font-medium text-gray-900 flex items-center gap-2">
-                  <span>{order.orderType}</span>
-                  {order.table && (
-                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-amber-100 text-amber-800 border border-amber-200">
-                      {t('orderDetail.tableNumber')} {order.table.name}
-                    </span>
+                <dd className="font-medium text-gray-900 flex flex-col gap-1">
+                  <div className="flex items-center gap-2">
+                    <span>{order.orderType}</span>
+                    {order.table && (
+                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-amber-100 text-amber-800 border border-amber-200">
+                        {t('orderDetail.tableNumber')} {order.table.name}
+                      </span>
+                    )}
+                    {order.orderType === 'FROZEN_DELIVERY' && order.frozenDeliveryMethod && (
+                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-blue-100 text-blue-800 border border-blue-200">
+                        {order.frozenDeliveryMethod === 'STORE_TO_STORE' ? '店到店' : '宅配'}
+                      </span>
+                    )}
+                  </div>
+                  {order.trackingNumber && (
+                    <div className="text-sm mt-1">
+                      <span className="text-gray-500 mr-2">{order.logisticsProvider || '物流'}:</span>
+                      <span className="font-semibold">{order.trackingNumber}</span>
+                    </div>
                   )}
                 </dd>
               </div>
@@ -473,6 +519,71 @@ export default function OrderDetailPage() {
           </div>
         </div>
       </div>
+
+      {showFulfillModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6 animate-in fade-in zoom-in duration-200">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">{t('orderDetail.fulfillOrder') || '填寫出貨資訊'}</h2>
+            <form onSubmit={submitFulfillment} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('orderDetail.logisticsProvider') || '物流公司'}</label>
+                <select
+                  value={logisticsProvider}
+                  onChange={(e) => setLogisticsProvider(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+                >
+                  <option value="黑貓宅急便">黑貓宅急便</option>
+                  <option value="台灣宅配通">台灣宅配通</option>
+                  <option value="新竹物流">新竹物流</option>
+                  <option value="綠界科技 ECPay">綠界科技 ECPay</option>
+                  <option value="自訂/其他">自訂/其他</option>
+                </select>
+              </div>
+              
+              {logisticsProvider === '自訂/其他' && (
+                <div>
+                  <input
+                    type="text"
+                    placeholder="請輸入物流公司名稱"
+                    onChange={(e) => setLogisticsProvider(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+                    required
+                  />
+                </div>
+              )}
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('orderDetail.trackingNumber') || '託運單號'}</label>
+                <input
+                  type="text"
+                  value={trackingNumber}
+                  onChange={(e) => setTrackingNumber(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+                  placeholder="請輸入託運單號"
+                  required
+                />
+              </div>
+
+              <div className="flex justify-end gap-3 pt-4 mt-6 border-t border-gray-100">
+                <button
+                  type="button"
+                  onClick={() => setShowFulfillModal(false)}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  {t('common.cancel')}
+                </button>
+                <button
+                  type="submit"
+                  disabled={updating || !trackingNumber}
+                  className="px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors disabled:opacity-50"
+                >
+                  {updating ? t('common.saving') : (t('common.confirm') || '確認出貨')}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
