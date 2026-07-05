@@ -74,6 +74,8 @@ export async function detectMenuFromImages(req: Request, res: Response): Promise
 const importSchema = z.object({
   categories: z.array(
     z.object({
+      action: z.enum(['MERGE', 'CREATE']).optional(),
+      targetCategoryId: z.string().optional(),
       name: z.string(),
       items: z.array(
         z.object({
@@ -124,21 +126,52 @@ export async function importMenuAndTranslate(req: Request, res: Response): Promi
     
     // Process sequentially to avoid DB locks or overwhelming AI translations
     for (const cat of categories) {
-      // Create category data
-      const catData = {
-        name: cat.name,
-        slug: await generateSlug(cat.name, 'category'),
-        isActive: true,
-        sortOrder: 0,
-      };
+      let categoryId = '';
       
-      const translatedCatData = await autoTranslateCategory(catData);
-      const createdCategory = await prisma.category.create({
-        data: translatedCatData
-      });
+      if (cat.action === 'MERGE' && cat.targetCategoryId) {
+        // Verify target category exists
+        const existingCat = await prisma.category.findUnique({
+          where: { id: cat.targetCategoryId }
+        });
+        if (!existingCat) {
+          throw new Error(`Target category ${cat.targetCategoryId} not found for merge.`);
+        }
+        categoryId = existingCat.id;
+      } else {
+        // Create category data
+        const catData = {
+          name: cat.name,
+          slug: await generateSlug(cat.name, 'category'),
+          isActive: true,
+          sortOrder: 0,
+        };
+        
+        const translatedCatData = await autoTranslateCategory(catData);
+        const createdCategory = await prisma.category.create({
+          data: translatedCatData
+        });
+        categoryId = createdCategory.id;
+      }
 
       // Create items for this category
       for (const item of cat.items) {
+        // Check if item already exists in this category
+        const existingItem = await prisma.menuItem.findFirst({
+          where: {
+            categoryId: categoryId,
+            name: item.name
+          }
+        });
+
+        if (existingItem) {
+          // Update price only
+          await prisma.menuItem.update({
+            where: { id: existingItem.id },
+            data: { price: item.price }
+          });
+          continue; // Skip creating options for updated items to avoid complexity
+        }
+
         const itemData = {
           name: item.name,
           slug: await generateSlug(item.name, 'menuItem'),
@@ -146,7 +179,7 @@ export async function importMenuAndTranslate(req: Request, res: Response): Promi
           description: item.description || '',
           isActive: true,
           sortOrder: 0,
-          categoryId: createdCategory.id,
+          categoryId: categoryId,
           unit: '份', // Default unit
         };
 

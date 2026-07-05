@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { X } from 'lucide-react';
@@ -24,6 +24,8 @@ interface ParsedItem {
 }
 
 interface ParsedCategory {
+  action?: 'MERGE' | 'CREATE';
+  targetCategoryId?: string;
   name: string;
   items: ParsedItem[];
 }
@@ -38,6 +40,13 @@ export default function AIMenuDetection() {
   const [importing, setImporting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [categories, setCategories] = useState<ParsedCategory[] | null>(null);
+  const [existingCategories, setExistingCategories] = useState<{ id: string; name: string }[]>([]);
+
+  useEffect(() => {
+    api.get<{ data: { id: string; name: string }[] }>('/menu/categories')
+      .then(res => setExistingCategories(res.data))
+      .catch(err => console.error('Failed to load categories', err));
+  }, []);
 
   const compressImage = (file: File): Promise<File> => {
     return new Promise((resolve, reject) => {
@@ -258,12 +267,38 @@ export default function AIMenuDetection() {
               <div key={cIndex} className="mb-8 last:mb-0">
                 <div className="flex items-center gap-4 mb-4 bg-gray-50 p-3 rounded-lg">
                   <label className="font-medium text-gray-700 w-24">分類名稱</label>
-                  <input
-                    type="text"
-                    value={cat.name}
-                    onChange={(e) => updateCategoryName(cIndex, e.target.value)}
-                    className="flex-1 border-gray-300 rounded px-3 py-1"
-                  />
+                  <div className="flex-1 flex gap-2">
+                    <input
+                      type="text"
+                      value={cat.name}
+                      onChange={(e) => updateCategoryName(cIndex, e.target.value)}
+                      className="w-1/2 border-gray-300 rounded px-3 py-1"
+                      disabled={cat.action === 'MERGE'}
+                    />
+                    <select
+                      value={cat.action === 'MERGE' ? cat.targetCategoryId : ''}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        const newCats = [...categories!];
+                        if (val === '') {
+                          newCats[cIndex].action = 'CREATE';
+                          newCats[cIndex].targetCategoryId = undefined;
+                        } else {
+                          newCats[cIndex].action = 'MERGE';
+                          newCats[cIndex].targetCategoryId = val;
+                          const selectedCat = existingCategories.find(c => c.id === val);
+                          if (selectedCat) newCats[cIndex].name = selectedCat.name;
+                        }
+                        setCategories(newCats);
+                      }}
+                      className="w-1/2 border-gray-300 rounded px-3 py-1 bg-white"
+                    >
+                      <option value="">✨ 建立為新類別</option>
+                      {existingCategories.map(ec => (
+                        <option key={ec.id} value={ec.id}>🔗 合併至現有：{ec.name}</option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
                 
                 <table className="w-full text-left border-collapse">
