@@ -46,6 +46,7 @@ export async function detectMenuFromImages(req: Request, res: Response): Promise
                   {
                     "name": "string (e.g. '種類', '大小', '加料')",
                     "isRequired": boolean,
+                    "maxSelect": number (default 1, but if multiple choices allowed like '加料', set to a larger number e.g. 10),
                     "values": [
                       {
                         "name": "string",
@@ -83,6 +84,7 @@ const importSchema = z.object({
             z.object({
               name: z.string(),
               isRequired: z.boolean(),
+              maxSelect: z.number().optional(),
               values: z.array(
                 z.object({
                   name: z.string(),
@@ -97,11 +99,17 @@ const importSchema = z.object({
   )
 });
 
-function generateSlug(name: string): string {
-  // A simple slug generator that replaces non-alphanumeric with hyphens
-  const base = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-  const randomSuffix = Math.random().toString(36).substring(2, 6);
-  return base ? `${base}-${randomSuffix}` : `item-${randomSuffix}`;
+async function generateSlug(name: string, model: 'category' | 'menuItem'): Promise<string> {
+  const base = name.toLowerCase().replace(/[^a-z0-9\u4e00-\u9fa5]+/g, '-').replace(/(^-|-$)/g, '');
+  let candidate = base || `item-${Math.random().toString(36).substring(2, 6)}`;
+  
+  const existing = model === 'category'
+    ? await prisma.category.findUnique({ where: { slug: candidate } })
+    : await prisma.menuItem.findUnique({ where: { slug: candidate } });
+
+  if (!existing) return candidate;
+  
+  return `${candidate}-${Math.random().toString(36).substring(2, 6)}`;
 }
 
 export async function importMenuAndTranslate(req: Request, res: Response): Promise<void> {
@@ -119,7 +127,7 @@ export async function importMenuAndTranslate(req: Request, res: Response): Promi
       // Create category data
       const catData = {
         name: cat.name,
-        slug: generateSlug(cat.name),
+        slug: await generateSlug(cat.name, 'category'),
         isActive: true,
         sortOrder: 0,
       };
@@ -133,7 +141,7 @@ export async function importMenuAndTranslate(req: Request, res: Response): Promi
       for (const item of cat.items) {
         const itemData = {
           name: item.name,
-          slug: generateSlug(item.name),
+          slug: await generateSlug(item.name, 'menuItem'),
           price: item.price,
           description: item.description || '',
           isActive: true,
@@ -147,22 +155,25 @@ export async function importMenuAndTranslate(req: Request, res: Response): Promi
         let optionsToCreate: any = undefined;
         if (item.options && item.options.length > 0) {
           optionsToCreate = {
-            create: item.options.map((opt: any, optIndex: number) => ({
-              name: opt.name,
-              isRequired: opt.isRequired,
-              displayType: 'SELECT',
-              minSelect: opt.isRequired ? 1 : 0,
-              maxSelect: 1,
-              sortOrder: optIndex,
-              values: {
-                create: opt.values.map((v: any, vIndex: number) => ({
-                  name: v.name,
-                  priceModifier: v.priceModifier || 0,
-                  sortOrder: vIndex,
-                  isDefault: false
-                }))
-              }
-            }))
+            create: item.options.map((opt: any, optIndex: number) => {
+              const maxSel = opt.maxSelect || 1;
+              return {
+                name: opt.name,
+                isRequired: opt.isRequired,
+                displayType: maxSel > 1 ? 'CHECKBOX' : 'RADIO',
+                minSelect: opt.isRequired ? 1 : 0,
+                maxSelect: maxSel,
+                sortOrder: optIndex,
+                values: {
+                  create: opt.values.map((v: any, vIndex: number) => ({
+                    name: v.name,
+                    priceModifier: v.priceModifier || 0,
+                    sortOrder: vIndex,
+                    isDefault: false
+                  }))
+                }
+              };
+            })
           };
         }
 

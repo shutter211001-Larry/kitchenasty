@@ -11,6 +11,7 @@ interface ParsedOptionValue {
 interface ParsedOption {
   name: string;
   isRequired: boolean;
+  maxSelect?: number;
   values: ParsedOptionValue[];
 }
 
@@ -237,7 +238,8 @@ export default function AIMenuDetection() {
                               {item.options.map((opt, oIdx) => (
                                 <div key={oIdx} className="mb-1 last:mb-0">
                                   <span className="font-medium text-indigo-600">{opt.name}</span>
-                                  {opt.isRequired ? <span className="text-red-500 ml-1">(必選)</span> : ''}
+                                  {opt.isRequired ? <span className="text-red-500 ml-1 text-[10px]">(必選)</span> : ''}
+                                  {(opt.maxSelect && opt.maxSelect > 1) ? <span className="text-gray-500 ml-1 text-[10px]">(可複選至多 {opt.maxSelect} 項)</span> : ''}
                                   <span className="mx-1">:</span>
                                   <span className="text-gray-600">
                                     {opt.values.map(v => v.priceModifier ? `${v.name}(+$${v.priceModifier})` : v.name).join(', ')}
