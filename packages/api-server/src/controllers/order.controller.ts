@@ -394,6 +394,7 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
   }
 
   const isStaff = req.user?.type === 'staff';
+  const canUseManualOverrides = isStaff && (req.user?.role === 'SUPER_ADMIN' || req.user?.role === 'MANAGER');
 
   if (!isStaff && (orderType === 'DELIVERY' || orderType === 'FROZEN_DELIVERY') && !address) {
     res.status(400).json({ success: false, error: 'Delivery address is required' });
@@ -901,12 +902,12 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
     appliedCouponId = coupon.id;
   }
 
-  // C. Manual Override (Staff only)
-  if (isStaff && manualDiscount !== undefined) {
+  // C. Manual Override (Staff only - restricted roles)
+  if (canUseManualOverrides && manualDiscount !== undefined) {
     couponDiscount += manualDiscount;
   }
 
-  if (isStaff && manualDeliveryFee !== undefined) {
+  if (canUseManualOverrides && manualDeliveryFee !== undefined) {
     deliveryFee = manualDeliveryFee;
   }
 
@@ -915,7 +916,7 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
   }
 
   let tax = subtotal * (currentTaxRate / 100);
-  if (isStaff && manualTax !== undefined) {
+  if (canUseManualOverrides && manualTax !== undefined) {
     tax = manualTax;
   }
 

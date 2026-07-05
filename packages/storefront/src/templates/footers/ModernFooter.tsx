@@ -73,7 +73,7 @@ export default function ModernFooter() {
 
         <div className="border-t border-white/10 mt-10 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-xs text-gray-500">
-            &copy; {new Date().getFullYear()} {settings.siteName}. {t('footer.allRightsReserved')}
+            © {new Date().getFullYear()} {settings.siteName}. {t('footer.allRightsReserved')}
           </p>
           <div className="h-1 w-16 rounded-full bg-gradient-to-r from-primary-500 to-primary-700" />
         </div>

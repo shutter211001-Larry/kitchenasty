@@ -78,7 +78,7 @@ export default function VibrantFooter() {
 
         <div className="border-t border-white/20 mt-10 pt-8 text-center">
           <p className="text-sm text-white/60">
-            &copy; {new Date().getFullYear()} {settings.siteName}. {t('footer.allRightsReserved')}
+            © {new Date().getFullYear()} {settings.siteName}. {t('footer.allRightsReserved')}
           </p>
         </div>
       </div>

@@ -396,7 +396,7 @@ export default function SettingsNotifications() {
                                       <div className="bg-white border-b border-gray-200 p-3 text-[11px] text-gray-500 flex flex-col gap-1">
                                         <div><strong className="text-gray-700 font-medium">郵件主旨:</strong> 訂單 #SHUTTER-2026-001 狀態更新 - {chineseStatus}</div>
                                         <div><strong className="text-gray-700 font-medium">收件人:</strong> customer@example.com</div>
-                                        <div><strong className="text-gray-700 font-medium">寄件人:</strong> {emailBrandName} &lt;noreply@shutterorder.com&gt;</div>
+                                        <div><strong className="text-gray-700 font-medium">寄件人:</strong> {emailBrandName} <noreply@shutterorder.com></div>
                                       </div>
                                       <div 
                                         style={{ backgroundColor: emailBgColor }}

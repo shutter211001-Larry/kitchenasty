@@ -79,7 +79,7 @@ export default function RusticFooter() {
 
         <div className="border-t border-stone-700 mt-10 pt-8 text-center">
           <p className="text-sm text-stone-500">
-            &copy; {new Date().getFullYear()} {settings.siteName}. {t('footer.allRightsReserved')}
+            © {new Date().getFullYear()} {settings.siteName}. {t('footer.allRightsReserved')}
           </p>
         </div>
       </div>

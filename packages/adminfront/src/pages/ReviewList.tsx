@@ -130,7 +130,7 @@ export default function ReviewList() {
                       <StarRating rating={review.rating} />
                     </div>
                     <div className="text-xs text-gray-500 mt-0.5">
-                      {review.location.name} &middot; {new Date(review.createdAt).toLocaleDateString()}
+                      {review.location.name} · {new Date(review.createdAt).toLocaleDateString()}
                     </div>
                   </div>
                   <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${review.isApproved ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'

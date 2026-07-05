@@ -258,7 +258,7 @@ export default function Reservations() {
                     </span>
                   </div>
                   <div className="text-sm text-sub">
-                    {r.location.name} &middot; {r.partySize} {r.partySize === 1 ? t('reservations.guest', { count: 1 }) : t('reservations.guests', { count: r.partySize })}
+                    {r.location.name} · {r.partySize} {r.partySize === 1 ? t('reservations.guest', { count: 1 }) : t('reservations.guests', { count: r.partySize })}
                     {r.table && ` \u00B7 Table: ${r.table.name}`}
                   </div>
                   {r.comment && (

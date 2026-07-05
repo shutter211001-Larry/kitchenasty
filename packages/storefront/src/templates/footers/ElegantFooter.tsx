@@ -79,7 +79,7 @@ export default function ElegantFooter() {
 
         <div className="border-t border-gray-200 mt-10 pt-8">
           <p className="text-xs tracking-widest uppercase text-gray-400">
-            &copy; {new Date().getFullYear()} {settings.siteName}. {t('footer.allRightsReserved')}
+            © {new Date().getFullYear()} {settings.siteName}. {t('footer.allRightsReserved')}
           </p>
         </div>
       </div>

@@ -49,6 +49,7 @@ export default function OrderCreate() {
   const { user } = useAuth();
   
   const defaultGuestName = user ? `${t(ROLE_LABELS[user.role] || user.role)} ${user.name}` : '';
+  const canUseManualOverrides = user?.role === 'SUPER_ADMIN' || user?.role === 'MANAGER';
   
   const [locations, setLocations] = useState<Location[]>([]);
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
@@ -595,50 +596,54 @@ export default function OrderCreate() {
                       <p className="text-xs text-red-500 mt-1">{summary.manualCouponError}</p>
                     )}
                   </div>
-                  <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">{t('orderCreate.manualDiscount') || '手動折扣金額'}</label>
-                    <div className="relative">
-                      <span className="absolute left-2 top-1.5 text-gray-500 text-sm">$</span>
-                      <input
-                        type="number"
-                        min="0"
-                        value={manualDiscount || ''}
-                        onChange={e => setManualDiscount(parseFloat(e.target.value) || 0)}
-                        className="w-full pl-6 pr-2 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-primary-500 outline-none"
-                        placeholder="0"
-                      />
-                    </div>
-                  </div>
-                  {(orderType === 'DELIVERY' || orderType === 'FROZEN_DELIVERY') && (
-                    <div>
-                      <label className="block text-xs font-medium text-gray-700 mb-1">{t('orderCreate.manualDeliveryFee') || '手動設定運費 (留空套用系統運費)'}</label>
-                      <div className="relative">
-                        <span className="absolute left-2 top-1.5 text-gray-500 text-sm">$</span>
-                        <input
-                          type="number"
-                          min="0"
-                          value={manualDeliveryFee}
-                          onChange={e => setManualDeliveryFee(e.target.value === '' ? '' : parseFloat(e.target.value))}
-                          className="w-full pl-6 pr-2 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-primary-500 outline-none"
-                          placeholder="留空自動計算"
-                        />
+                  {canUseManualOverrides && (
+                    <>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">{t('orderCreate.manualDiscount') || '手動折扣金額'}</label>
+                        <div className="relative">
+                          <span className="absolute left-2 top-1.5 text-gray-500 text-sm">$</span>
+                          <input
+                            type="number"
+                            min="0"
+                            value={manualDiscount || ''}
+                            onChange={e => setManualDiscount(parseFloat(e.target.value) || 0)}
+                            className="w-full pl-6 pr-2 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-primary-500 outline-none"
+                            placeholder="0"
+                          />
+                        </div>
                       </div>
-                    </div>
+                      {(orderType === 'DELIVERY' || orderType === 'FROZEN_DELIVERY') && (
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">{t('orderCreate.manualDeliveryFee') || '手動設定運費 (留空套用系統運費)'}</label>
+                          <div className="relative">
+                            <span className="absolute left-2 top-1.5 text-gray-500 text-sm">$</span>
+                            <input
+                              type="number"
+                              min="0"
+                              value={manualDeliveryFee}
+                              onChange={e => setManualDeliveryFee(e.target.value === '' ? '' : parseFloat(e.target.value))}
+                              className="w-full pl-6 pr-2 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-primary-500 outline-none"
+                              placeholder="留空自動計算"
+                            />
+                          </div>
+                        </div>
+                      )}
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">{t('orderCreate.manualTax') || '手動設定稅金 (留空套用系統稅金)'}</label>
+                        <div className="relative">
+                          <span className="absolute left-2 top-1.5 text-gray-500 text-sm">$</span>
+                          <input
+                            type="number"
+                            min="0"
+                            value={manualTax}
+                            onChange={e => setManualTax(e.target.value === '' ? '' : parseFloat(e.target.value))}
+                            className="w-full pl-6 pr-2 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-primary-500 outline-none"
+                            placeholder="留空自動計算"
+                          />
+                        </div>
+                      </div>
+                    </>
                   )}
-                  <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">{t('orderCreate.manualTax') || '手動設定稅金 (留空套用系統稅金)'}</label>
-                    <div className="relative">
-                      <span className="absolute left-2 top-1.5 text-gray-500 text-sm">$</span>
-                      <input
-                        type="number"
-                        min="0"
-                        value={manualTax}
-                        onChange={e => setManualTax(e.target.value === '' ? '' : parseFloat(e.target.value))}
-                        className="w-full pl-6 pr-2 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-primary-500 outline-none"
-                        placeholder="留空自動計算"
-                      />
-                    </div>
-                  </div>
                 </div>
 
                 <div className="flex justify-between text-lg font-bold pt-3 mt-3 border-t border-gray-200">

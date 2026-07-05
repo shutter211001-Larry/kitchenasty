@@ -101,7 +101,7 @@ export default function CozyFooter() {
 
         <div className="border-t border-amber-200 mt-10 pt-8 text-center">
           <p className="text-sm text-amber-600">
-            &copy; {new Date().getFullYear()} {settings.siteName}. {t('footer.allRightsReserved')}
+            © {new Date().getFullYear()} {settings.siteName}. {t('footer.allRightsReserved')}
           </p>
         </div>
       </div>

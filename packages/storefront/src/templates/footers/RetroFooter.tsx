@@ -89,7 +89,7 @@ export default function RetroFooter() {
         <div className="mt-10 pt-6 text-center">
           <div className="border-t border-dashed border-amber-800 mb-6" />
           <p className="text-xs uppercase tracking-[0.3em] text-amber-500">
-            &copy; {new Date().getFullYear()} {settings.siteName}. {t('footer.allRightsReserved')}
+            © {new Date().getFullYear()} {settings.siteName}. {t('footer.allRightsReserved')}
           </p>
         </div>
       </div>

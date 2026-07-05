@@ -80,7 +80,7 @@ function ClassicFooter() {
         </div>
 
         <div className="border-t border-gray-800 mt-8 pt-8 text-center text-sm">
-          <p>&copy; {new Date().getFullYear()} {settings.siteName}. {t('footer.allRightsReserved')}</p>
+          <p>© {new Date().getFullYear()} {settings.siteName}. {t('footer.allRightsReserved')}</p>
         </div>
       </div>
     </footer>

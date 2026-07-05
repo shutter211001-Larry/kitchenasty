@@ -70,7 +70,7 @@ export default function BoldFooter() {
 
         <div className="border-t-4 border-gray-800 mt-12 pt-8 text-center">
           <p className="text-lg font-bold text-gray-500">
-            &copy; {new Date().getFullYear()} {settings.siteName}. {t('footer.allRightsReserved')}
+            © {new Date().getFullYear()} {settings.siteName}. {t('footer.allRightsReserved')}
           </p>
         </div>
       </div>

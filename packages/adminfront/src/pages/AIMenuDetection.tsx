@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { X } from 'lucide-react';
 import { api } from '../lib/api.js';
 
 interface ParsedOptionValue {
@@ -300,7 +301,7 @@ export default function AIMenuDetection() {
                                       <input type="text" value={v.name} onChange={e => updateOptionValue(cIndex, iIndex, oIdx, vIdx, 'name', e.target.value)} className="flex-1 text-xs border-gray-300 rounded px-1.5 py-1" placeholder="選項值" />
                                       <span className="text-[10px] text-gray-400">+$</span>
                                       <input type="number" value={v.priceModifier} onChange={e => updateOptionValue(cIndex, iIndex, oIdx, vIdx, 'priceModifier', Number(e.target.value))} className="w-14 text-xs border-gray-300 rounded px-1.5 py-1" placeholder="0" />
-                                      <button onClick={() => removeOptionValue(cIndex, iIndex, oIdx, vIdx)} className="text-gray-400 hover:text-red-500 px-1">&times;</button>
+                                      <button onClick={() => removeOptionValue(cIndex, iIndex, oIdx, vIdx)} className="text-gray-400 hover:text-red-500 px-1 flex items-center justify-center"><X className="w-4 h-4" /></button>
                                     </div>
                                   ))}
                                 </div>

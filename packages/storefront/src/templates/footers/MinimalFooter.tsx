@@ -22,7 +22,7 @@ export default function MinimalFooter() {
               </div>
             )}
             <span className="text-sm font-medium text-gray-900">{settings.siteName}</span>
-            <span className="text-xs text-gray-400 hidden sm:inline">&mdash; {t('footer.description')}</span>
+            <span className="text-xs text-gray-400 hidden sm:inline">— {t('footer.description')}</span>
           </div>
 
           <nav className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs">
@@ -51,7 +51,7 @@ export default function MinimalFooter() {
 
         <div className="mt-4 text-center md:text-right">
           <p className="text-xs text-gray-400">
-            &copy; {new Date().getFullYear()} {settings.siteName}. {t('footer.allRightsReserved')}
+            © {new Date().getFullYear()} {settings.siteName}. {t('footer.allRightsReserved')}
           </p>
         </div>
       </div>
