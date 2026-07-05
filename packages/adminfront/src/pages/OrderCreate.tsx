@@ -2,6 +2,13 @@ import { useTranslation } from 'react-i18next';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../lib/api.js';
+import { useAuth } from '../context/AuthContext.js';
+
+const ROLE_LABELS: Record<string, string> = {
+  SUPER_ADMIN: 'staff.roles.superAdmin',
+  MANAGER: 'staff.roles.manager',
+  STAFF: 'staff.roles.staff',
+};
 
 interface MenuItem {
   id: string;
@@ -39,12 +46,16 @@ interface CartItem {
 export default function OrderCreate() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  
+  const defaultGuestName = user ? `${t(ROLE_LABELS[user.role] || user.role)} ${user.name}` : '';
+  
   const [locations, setLocations] = useState<Location[]>([]);
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [selectedLocationId, setSelectedLocationId] = useState('');
   const [orderType, setOrderType] = useState<'PICKUP' | 'DELIVERY'>('PICKUP');
   const [cart, setCart] = useState<CartItem[]>([]);
-  const [guestName, setGuestName] = useState('');
+  const [guestName, setGuestName] = useState(defaultGuestName);
   const [guestPhone, setGuestPhone] = useState('');
   const [guestEmail, setGuestEmail] = useState('');
   const [address, setAddress] = useState({ line1: '', city: '', state: '', zip: '' });
