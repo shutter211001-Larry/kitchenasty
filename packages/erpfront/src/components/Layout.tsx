@@ -14,6 +14,7 @@ import {
   Menu,
   X,
   DollarSign,
+  PieChart,
 } from "lucide-react";
 import { cn } from "../lib/utils";
 import { useAuth } from "../context/AuthContext";
@@ -156,6 +157,12 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
             onClick={closeMobileMenu}
           />
           <SidebarItem
+            icon={PieChart}
+            label="損益表 (P&L)"
+            path="/finance"
+            onClick={closeMobileMenu}
+          />
+          <SidebarItem
             icon={Utensils}
             label={t("erp_190")}
             path="/recipes"
@@ -246,6 +253,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           />
           <SidebarItem icon={Archive} label={t("erp_189")} path="/inventory" />
           <SidebarItem icon={DollarSign} label="帳務管理" path="/expenses" />
+          <SidebarItem icon={PieChart} label="損益表 (P&L)" path="/finance" />
           <SidebarItem icon={Utensils} label={t("erp_190")} path="/recipes" />
           <SidebarItem
             icon={Briefcase}

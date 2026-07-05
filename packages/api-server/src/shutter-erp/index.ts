@@ -12,6 +12,7 @@ import integrationRoutes from './routes/integrationRoutes.js';
 import settingsRoutes from './routes/settingsRoutes.js';
 import expenseRoutes from './routes/expenseRoutes.js';
 import labelManufacturerRoutes from './routes/labelManufacturerRoutes.js';
+import financeRoutes from './routes/financeRoutes.js';
 
 const router = Router();
 
@@ -29,5 +30,6 @@ router.use('/api/integration', integrationRoutes);
 router.use('/api/settings', settingsRoutes);
 router.use('/api/expenses', expenseRoutes);
 router.use('/api/label-manufacturers', labelManufacturerRoutes);
+router.use('/api/finance', financeRoutes);
 
 export default router;
