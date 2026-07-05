@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
-import { useTranslation } from "react-i18next";
+
 import { 
   TrendingUp, 
-  TrendingDown, 
   DollarSign, 
   Users, 
   ShoppingCart,
@@ -42,7 +41,6 @@ interface FinanceData {
 }
 
 export default function Finance() {
-  const { t } = useTranslation();
   const [data, setData] = useState<FinanceData | null>(null);
   const [loading, setLoading] = useState(true);
   

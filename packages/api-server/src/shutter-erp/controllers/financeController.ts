@@ -54,33 +54,21 @@ export const getProfitAndLoss = async (req: Request, res: Response) => {
       },
       include: {
         user: {
-          select: { hourlyWage: true, salaryType: true, monthlyWage: true },
+          select: { hourlyWage: true },
         },
       },
     });
 
     let hourlyPayroll = 0;
     attendances.forEach((record) => {
-      if (record.user.salaryType === 'HOURLY' && record.checkOut) {
+      if (record.checkOut && record.user) {
         const hours = (record.checkOut.getTime() - record.checkIn.getTime()) / (1000 * 60 * 60);
-        hourlyPayroll += hours * record.user.hourlyWage;
+        hourlyPayroll += hours * (record.user.hourlyWage || 0);
       }
     });
 
-    // B. Monthly Staff
-    const monthlyUsers = await adminPrisma.user.findMany({
-      where: {
-        isActive: true,
-        salaryType: 'MONTHLY',
-      },
-      select: { monthlyWage: true },
-    });
-
-    // Calculate proportion of the period relative to a 30-day month (simplified, can be improved)
-    const daysInPeriod = (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24);
-    const monthProportion = daysInPeriod / 30;
-
-    const monthlyPayroll = monthlyUsers.reduce((sum, user) => sum + (user.monthlyWage * monthProportion), 0);
+    // Monthly Staff not supported in schema yet
+    const monthlyPayroll = 0;
 
     const totalPayroll = hourlyPayroll + monthlyPayroll;
 

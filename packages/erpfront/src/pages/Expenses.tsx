@@ -377,7 +377,7 @@ export default function Expenses() {
                           dataKey="value"
                         >
                           {analytics.statusDistribution.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.name === '已付款' ? '#10b981' : '#ef4444'} />
+                            <Cell key={`cell-${index}`} fill={entry.status === 'PAID' ? '#10b981' : '#ef4444'} />
                           ))}
                         </Pie>
                         <Tooltip 
