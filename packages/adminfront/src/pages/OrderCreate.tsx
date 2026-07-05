@@ -53,7 +53,7 @@ export default function OrderCreate() {
   const [locations, setLocations] = useState<Location[]>([]);
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [selectedLocationId, setSelectedLocationId] = useState('');
-  const [orderType, setOrderType] = useState<'PICKUP' | 'DELIVERY'>('PICKUP');
+  const [orderType, setOrderType] = useState<'PICKUP' | 'DELIVERY' | 'FROZEN_DELIVERY'>('PICKUP');
   const [cart, setCart] = useState<CartItem[]>([]);
   const [guestName, setGuestName] = useState(defaultGuestName);
   const [guestPhone, setGuestPhone] = useState('');
@@ -105,7 +105,7 @@ export default function OrderCreate() {
       setError(t('orderCreate.emptyCart'));
       return;
     }
-    if (orderType === 'DELIVERY' && !address.line1) {
+    if ((orderType === 'DELIVERY' || orderType === 'FROZEN_DELIVERY') && !address.line1) {
       setError(t('orderCreate.deliveryAddressRequired'));
       return;
     }
@@ -125,7 +125,7 @@ export default function OrderCreate() {
         guestName,
         guestPhone,
         guestEmail,
-        address: orderType === 'DELIVERY' ? address : undefined,
+        address: (orderType === 'DELIVERY' || orderType === 'FROZEN_DELIVERY') ? address : undefined,
       };
 
       const res = await api.post<{ data: { id: string } }>('/orders', orderData);
@@ -217,7 +217,7 @@ export default function OrderCreate() {
               </div>
             </div>
 
-            {orderType === 'DELIVERY' && (
+            {(orderType === 'DELIVERY' || orderType === 'FROZEN_DELIVERY') && (
               <div className="mt-6 space-y-4 pt-6 border-t border-gray-100">
                 <h3 className="font-medium text-gray-900">{t('orderCreate.deliveryAddress')}</h3>
                 <div>
@@ -278,16 +278,25 @@ export default function OrderCreate() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">{t('orderCreate.pickupMethod')}</label>
                 <div className="flex bg-gray-100 rounded-lg p-1">
                   <button
+                    type="button"
                     onClick={() => setOrderType('PICKUP')}
                     className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-colors ${orderType === 'PICKUP' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
                   >
-                    {t('orderCreate.selfPickup')}
+                    {t('orderList.pickup')}
                   </button>
                   <button
+                    type="button"
                     onClick={() => setOrderType('DELIVERY')}
                     className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-colors ${orderType === 'DELIVERY' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
                   >
-                    {t('orderCreate.delivery')}
+                    {t('orderList.delivery')}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setOrderType('FROZEN_DELIVERY')}
+                    className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-colors ${orderType === 'FROZEN_DELIVERY' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
+                  >
+                    {t('orderList.frozenDelivery') || 'Frozen Delivery'}
                   </button>
                 </div>
               </div>

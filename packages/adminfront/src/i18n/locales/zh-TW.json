@@ -1384,7 +1384,9 @@
     "pagePrefix": "第",
     "pageOfTotal": "頁，共",
     "pageSuffix": "頁",
-    "nextPage": "下一頁"
+    "nextPage": "下一頁",
+    "typeFrozenDelivery": "冷凍宅配 (Frozen)",
+    "frozenDelivery": "冷凍宅配"
   },
   "promotionsHub": {
     "couponsAndEvents": "🏷️ 優惠券與活動 (Coupons)",

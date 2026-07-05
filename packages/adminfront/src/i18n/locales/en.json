@@ -1381,7 +1381,9 @@
     "pagePrefix": "[EN] 第",
     "pageOfTotal": "[EN] 頁，共",
     "pageSuffix": "[EN] 頁",
-    "nextPage": "[EN] 下一頁"
+    "nextPage": "[EN] 下一頁",
+    "typeFrozenDelivery": "Frozen Delivery",
+    "frozenDelivery": "Frozen Delivery"
   },
   "promotionsHub": {
     "couponsAndEvents": "[EN] 🏷️ 優惠券與活動 (Coupons)",

@@ -392,7 +392,10 @@ function AnalyticsPanel({
             <ResponsiveContainer width="100%" height={250}>
               <PieChart>
                 <Pie
-                  data={analytics.orderTypeDistribution}
+                  data={analytics.orderTypeDistribution.map(d => ({
+                    ...d,
+                    type: d.type === 'DELIVERY' ? t('orderList.typeDelivery') || 'Delivery' : d.type === 'FROZEN_DELIVERY' ? t('orderList.typeFrozenDelivery') || 'Frozen Delivery' : d.type === 'PICKUP' ? t('orderList.typePickup') || 'Pickup' : d.type
+                  }))}
                   dataKey="count"
                   nameKey="type"
                   cx="50%"

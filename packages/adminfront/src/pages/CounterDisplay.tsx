@@ -392,7 +392,7 @@ export default function CounterDisplay() {
   };
 
   const handleComplete = async (orderId: string, orderType: string) => {
-    const completedStatus = orderType === 'DELIVERY' ? 'OUT_FOR_DELIVERY' : 'PICKED_UP';
+    const completedStatus = (orderType === 'DELIVERY' || orderType === 'FROZEN_DELIVERY') ? 'OUT_FOR_DELIVERY' : 'PICKED_UP';
     setUpdating(orderId);
     try {
       await api.patch(`/orders/${orderId}/status`, { status: completedStatus });
@@ -551,9 +551,9 @@ export default function CounterDisplay() {
                         {groupOrders.map((order) => (
                           <div key={order.id} className="bg-white rounded-lg border border-indigo-100 px-3 py-2 text-xs shadow-sm">
                             <span className="font-mono font-bold text-gray-900">#{order.orderNumber}</span>
-                            <span className={`ml-2 px-1.5 py-0.5 rounded font-medium ${order.orderType === 'DELIVERY' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'
+                            <span className={`ml-2 px-1.5 py-0.5 rounded font-medium ${order.orderType === 'DELIVERY' ? 'bg-blue-100 text-blue-700' : order.orderType === 'FROZEN_DELIVERY' ? 'bg-purple-100 text-purple-700' : 'bg-green-100 text-green-700'
                               }`}>
-                              {order.orderType === 'DELIVERY' ? t('kitchen.delivery') : t('kitchen.pickup')}
+                              {order.orderType === 'DELIVERY' ? t('kitchen.delivery') : order.orderType === 'FROZEN_DELIVERY' ? t('orderList.frozenDelivery') : t('kitchen.pickup')}
                             </span>
                             <span className="ml-2 text-indigo-600 font-medium">
                               {new Date(order.scheduledAt!).toLocaleString([], { hour: '2-digit', minute: '2-digit' })}
@@ -657,8 +657,8 @@ export default function CounterDisplay() {
                         <div className="flex flex-col gap-0.5">
                           <span className="font-mono text-[10px] text-gray-400">#{order.orderNumber}</span>
                           <div className="flex items-center gap-1">
-                            <span className={`text-[10px] px-1 py-0.5 rounded font-bold ${order.orderType === 'DELIVERY' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'}`}>
-                              {order.orderType === 'DELIVERY' ? t('kitchen.delivery') : t('kitchen.pickup')}
+                            <span className={`text-[10px] px-1 py-0.5 rounded font-bold ${order.orderType === 'DELIVERY' ? 'bg-blue-100 text-blue-700' : order.orderType === 'FROZEN_DELIVERY' ? 'bg-purple-100 text-purple-700' : 'bg-green-100 text-green-700'}`}>
+                              {order.orderType === 'DELIVERY' ? t('kitchen.delivery') : order.orderType === 'FROZEN_DELIVERY' ? t('orderList.frozenDelivery') : t('kitchen.pickup')}
                             </span>
                             <span className={`text-[10px] px-1 py-0.5 rounded font-bold ${
                               order.paymentStatus === 'PAID'
@@ -709,6 +709,8 @@ export default function CounterDisplay() {
                           <span>
                             {order.orderType === 'DELIVERY' 
                               ? t('kitchen.deliveryTime') || t('counterDisplay.scheduledDelivery') 
+                              : order.orderType === 'FROZEN_DELIVERY' 
+                              ? t('orderList.typeFrozenDelivery') || t('counterDisplay.scheduledDelivery')
                               : t('kitchen.pickupTime') || t('counterDisplay.scheduledPickup')
                             }
                           </span>
@@ -1012,7 +1014,7 @@ export default function CounterDisplay() {
                       )}
                       {status === 'READY' && (
                         <button onClick={(e) => { e.stopPropagation(); handleComplete(order.id, order.orderType); }} disabled={updating === order.id} className="flex-1 bg-green-600 text-white text-xs font-bold py-2.5 rounded-lg hover:bg-green-700 disabled:opacity-50 shadow-sm transition-all active:scale-95">
-                          {order.orderType === 'DELIVERY' ? t('counterDisplay.startDelivery') : t('counterDisplay.completePickup')}
+                          {(order.orderType === 'DELIVERY' || order.orderType === 'FROZEN_DELIVERY') ? t('counterDisplay.startDelivery') : t('counterDisplay.completePickup')}
                         </button>
                       )}
                       <button

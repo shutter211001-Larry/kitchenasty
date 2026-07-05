@@ -1381,7 +1381,9 @@
     "pagePrefix": "第",
     "pageOfTotal": "頁，共",
     "pageSuffix": "頁",
-    "nextPage": "下一頁"
+    "nextPage": "下一頁",
+    "typeFrozenDelivery": "냉동 배송",
+    "frozenDelivery": "냉동 배송"
   },
   "promotionsHub": {
     "couponsAndEvents": "🏷️ 優惠券與活動 (Coupons)",

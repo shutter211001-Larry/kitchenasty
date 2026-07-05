@@ -308,6 +308,7 @@ export default function OrderList() {
           <option value="">{t('orderList.allTypes')}</option>
           <option value="DELIVERY">{t('orderList.typeDelivery')}</option>
           <option value="PICKUP">{t('orderList.typePickup')}</option>
+          <option value="FROZEN_DELIVERY">{t('orderList.typeFrozenDelivery')}</option>
         </select>
       </div>
 
@@ -371,9 +372,9 @@ export default function OrderList() {
                       {order.customer ? order.customer.name : <span className="text-gray-400">{t('common.guest') || t('orderList.guest')}</span>}
                     </td>
                     <td className="px-4 py-3">
-                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${order.orderType === 'DELIVERY' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'
+                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${order.orderType === 'DELIVERY' ? 'bg-blue-100 text-blue-700' : order.orderType === 'FROZEN_DELIVERY' ? 'bg-purple-100 text-purple-700' : 'bg-green-100 text-green-700'
                         }`}>
-                        {order.orderType === 'DELIVERY' ? t('orderList.delivery') : t('orderList.pickup')}
+                        {order.orderType === 'DELIVERY' ? t('orderList.delivery') : order.orderType === 'FROZEN_DELIVERY' ? t('orderList.frozenDelivery') : t('orderList.pickup')}
                       </span>
                     </td>
                     <td className="px-4 py-3">
@@ -472,8 +473,8 @@ export default function OrderList() {
                 </div>
 
                 <div className="flex justify-between items-center text-xs text-gray-500 pt-2.5 border-t border-gray-100">
-                  <span className={`px-2 py-0.5 rounded-full font-bold ${order.orderType === 'DELIVERY' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'}`}>
-                    {order.orderType === 'DELIVERY' ? t('orderList.delivery') : t('orderList.selfPickup')}
+                  <span className={`px-2 py-0.5 rounded-full font-bold ${order.orderType === 'DELIVERY' ? 'bg-blue-100 text-blue-700' : order.orderType === 'FROZEN_DELIVERY' ? 'bg-purple-100 text-purple-700' : 'bg-green-100 text-green-700'}`}>
+                    {order.orderType === 'DELIVERY' ? t('orderList.delivery') : order.orderType === 'FROZEN_DELIVERY' ? t('orderList.frozenDelivery') : t('orderList.selfPickup')}
                   </span>
                   <span className="font-extrabold text-primary-600 text-sm">${order.total}</span>
                 </div>

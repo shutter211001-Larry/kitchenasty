@@ -304,7 +304,7 @@ export default function KitchenDisplay() {
   };
 
   const handleComplete = async (orderId: string, orderType: string) => {
-    const completedStatus = orderType === 'DELIVERY' ? 'OUT_FOR_DELIVERY' : 'PICKED_UP';
+    const completedStatus = (orderType === 'DELIVERY' || orderType === 'FROZEN_DELIVERY') ? 'OUT_FOR_DELIVERY' : 'PICKED_UP';
     setUpdating(orderId);
     try {
       await api.patch(`/orders/${orderId}/status`, { status: completedStatus });
@@ -460,9 +460,9 @@ export default function KitchenDisplay() {
                         {groupOrders.map((order) => (
                           <div key={order.id} className="bg-white rounded-lg border border-indigo-100 px-3 py-2 text-xs shadow-sm">
                             <span className="font-mono font-bold text-gray-900">#{order.orderNumber}</span>
-                            <span className={`ml-2 px-1.5 py-0.5 rounded font-medium ${order.orderType === 'DELIVERY' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'
+                            <span className={`ml-2 px-1.5 py-0.5 rounded font-medium ${order.orderType === 'DELIVERY' ? 'bg-blue-100 text-blue-700' : order.orderType === 'FROZEN_DELIVERY' ? 'bg-purple-100 text-purple-700' : 'bg-green-100 text-green-700'
                               }`}>
-                              {order.orderType === 'DELIVERY' ? t('kitchen.delivery') : t('kitchen.pickup')}
+                              {order.orderType === 'DELIVERY' ? t('kitchen.delivery') : order.orderType === 'FROZEN_DELIVERY' ? t('orderList.frozenDelivery') : t('kitchen.pickup')}
                             </span>
                             {order.table && (
                               <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded font-bold bg-amber-100 text-amber-800 border border-amber-200">
@@ -577,10 +577,12 @@ export default function KitchenDisplay() {
                             </span>
                           </div>
                           <span className={`ml-2 text-xs px-1.5 py-0.5 rounded font-medium ${order.orderType === 'DELIVERY'
-                              ? 'bg-blue-100 text-blue-700'
-                              : 'bg-green-100 text-green-700'
+                            ? 'bg-blue-100 text-blue-700'
+                            : order.orderType === 'FROZEN_DELIVERY'
+                            ? 'bg-purple-100 text-purple-700'
+                            : 'bg-green-100 text-green-700'
                             }`}>
-                            {order.orderType === 'DELIVERY' ? t('kitchenDisplay.delivery') : t('kitchenDisplay.pickup')}
+                            {order.orderType === 'DELIVERY' ? t('kitchenDisplay.delivery') : order.orderType === 'FROZEN_DELIVERY' ? t('orderList.frozenDelivery') : t('kitchenDisplay.pickup')}
                           </span>
                           {order.table && (
                             <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200">
@@ -616,8 +618,10 @@ export default function KitchenDisplay() {
                             <span className="text-sm">🕒</span>
                             <span>
                               {order.orderType === 'DELIVERY' 
-                                ? t('kitchen.deliveryTime') || t('kitchenDisplay.scheduledDelivery') 
-                                : t('kitchen.pickupTime') || t('kitchenDisplay.scheduledPickup')
+                                ? t('kitchenDisplay.deliveryTime') 
+                                : order.orderType === 'FROZEN_DELIVERY'
+                                ? t('orderList.typeFrozenDelivery') || 'Frozen Delivery'
+                                : t('kitchenDisplay.pickupTime')
                               }
                             </span>
                           </span>
@@ -748,9 +752,9 @@ export default function KitchenDisplay() {
                             }}
                             disabled={updating === order.id}
                             className="flex-1 bg-green-600 text-white text-xs font-medium py-2 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
-                            aria-label={`Mark order ${order.orderNumber} as ${order.orderType === 'DELIVERY' ? 'out for delivery' : 'picked up'}`}
+                            aria-label={`Mark order ${order.orderNumber} as ${(order.orderType === 'DELIVERY' || order.orderType === 'FROZEN_DELIVERY') ? 'out for delivery' : 'picked up'}`}
                           >
-                            {order.orderType === 'DELIVERY' ? t('kitchenDisplay.startDelivery') : t('kitchenDisplay.completePickup')}
+                            {(order.orderType === 'DELIVERY' || order.orderType === 'FROZEN_DELIVERY') ? t('kitchenDisplay.startDelivery') : t('kitchenDisplay.completePickup')}
                           </button>
                         )}
                         <button
