@@ -162,7 +162,19 @@ export const getRecords = async (req: Request, res: Response) => {
   const { locationId, userId, startDate, endDate, isOutOfRange } = req.query;
 
   const where: any = {};
-  if (locationId) where.locationId = String(locationId);
+  
+  // Restrict MANAGER to their own location
+  if (req.user?.role === 'MANAGER') {
+    const manager = await prisma.user.findUnique({ where: { id: req.user.id }});
+    if (manager?.locationId) {
+      where.locationId = manager.locationId;
+    } else {
+      where.locationId = 'unassigned-location';
+    }
+  } else if (locationId) {
+    where.locationId = String(locationId);
+  }
+
   if (userId) where.userId = String(userId);
   if (isOutOfRange === 'true') where.isOutOfRange = true;
 
@@ -339,6 +351,15 @@ export const getCorrectionRequests = async (req: Request, res: Response) => {
     const where: any = {};
     if (status) {
       where.status = status as any;
+    }
+
+    if (req.user?.role === 'MANAGER') {
+      const manager = await prisma.user.findUnique({ where: { id: req.user.id }});
+      if (manager?.locationId) {
+        where.user = { locationId: manager.locationId };
+      } else {
+        where.user = { locationId: 'unassigned-location' };
+      }
     }
 
     const requests = await prisma.attendanceCorrectionRequest.findMany({

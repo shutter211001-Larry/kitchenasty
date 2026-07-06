@@ -258,7 +258,9 @@ export default function AdminLayout({ children, onLogout }: { children: React.Re
                 {item.children && isExpanded && (
                   <div className="bg-gray-950/60 border-l border-gray-800">
                     {item.children.filter((child) => !child.roles || (user && child.roles.includes(user.role))).map((child) => {
-                      const isChildActive = location.pathname.startsWith(child.path);
+                      const isChildActive = child.path === item.path 
+                        ? location.pathname === child.path 
+                        : location.pathname.startsWith(child.path);
                       return (
                         <Link
                           key={child.path}

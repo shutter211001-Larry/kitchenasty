@@ -47,7 +47,18 @@ export const getMyLeaveRequests = async (req: Request, res: Response) => {
 
 export const getAllLeaveRequests = async (req: Request, res: Response) => {
   try {
+    const where: any = {};
+    if (req.user?.role === 'MANAGER') {
+      const manager = await prisma.user.findUnique({ where: { id: req.user.id }});
+      if (manager?.locationId) {
+        where.user = { locationId: manager.locationId };
+      } else {
+        where.user = { locationId: 'unassigned-location' };
+      }
+    }
+
     const leaves = await prisma.leaveRequest.findMany({
+      where,
       include: {
         user: { select: { id: true, name: true } },
         manager: { select: { id: true, name: true } }
