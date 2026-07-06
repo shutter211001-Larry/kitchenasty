@@ -1,5 +1,9 @@
 DO $$ BEGIN
+    DO $ BEGIN
     CREATE TYPE "SalaryType" AS ENUM ('HOURLY', 'MONTHLY');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $;
 EXCEPTION
     WHEN duplicate_object THEN null;
 END $$;
