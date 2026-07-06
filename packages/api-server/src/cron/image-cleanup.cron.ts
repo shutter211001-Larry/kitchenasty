@@ -1,8 +1,8 @@
 import cron from 'node-cron';
 import fs from 'fs/promises';
 import path from 'path';
-import { prisma } from '@shutter-erp/client';
-import { logger } from '../lib/logger.js';
+import prisma from '../lib/db.js';
+import logger from '../lib/logger.js';
 
 /**
  * 掃描所有圖片儲存欄位並比對實體檔案，清除未被參照的圖片
@@ -77,7 +77,7 @@ export async function cleanupUnusedImages() {
           deletedCount++;
           logger.debug(`Deleted unused image: ${file}`);
         } catch (err) {
-          logger.error(`Failed to delete file ${file}:`, err);
+          logger.error({ err }, `Failed to delete file ${file}`);
         }
       }
     }
@@ -85,7 +85,7 @@ export async function cleanupUnusedImages() {
     logger.info(`Unused images cleanup completed. Deleted ${deletedCount} files.`);
     
   } catch (error) {
-    logger.error('Error during unused images cleanup:', error);
+    logger.error({ err: error }, 'Error during unused images cleanup');
   }
 }
 

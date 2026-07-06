@@ -68,6 +68,7 @@ import { metricsCollector } from './middleware/metricsCollector.js';
 
 // Initialize automation event listeners
 import './lib/events.js';
+import { scheduleImageCleanup } from './cron/image-cleanup.cron.js';
 
 export async function createApp() {
   const app = express();
@@ -96,6 +97,9 @@ export async function createApp() {
         }
       }
     }, 60 * 1000); // Check every minute
+    
+    // Start image cleanup cron job
+    scheduleImageCleanup();
   }
   // -------------------------------------
 
