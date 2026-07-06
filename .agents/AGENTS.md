@@ -9,8 +9,10 @@
 **Trigger**: When making any changes to the Prisma schema (`schema.prisma` or `shutter-erp.prisma`).
 **Rule**: Because this project is deployed remotely (e.g., on Railway) and relies on `npx prisma migrate deploy` during startup, you MUST generate a Prisma migration file whenever you modify the database schema. 
 - Do NOT just run `npx prisma db push` without generating a migration file. 
-- If you are operating in a non-interactive environment where `npx prisma migrate dev` fails, you must manually create a timestamped folder under `prisma/migrations` containing a `migration.sql` script with the exact SQL DDL statements for your changes, and mark it as resolved locally if necessary.
-- CRITICAL: When writing manual `migration.sql` scripts, you MUST write idempotent SQL (e.g., `ALTER TABLE "table" ADD COLUMN IF NOT EXISTS "column" TEXT;`). This prevents `502 Bad Gateway` deployment crash loops on Railway if the remote database already contains the schema changes.
+- If you are operating in a non-interactive environment where `npx prisma migrate dev` fails, you must manually create a timestamped folder under `prisma/migrations` containing a `migration.sql` script with the exact SQL DDL statements for your changes.
+- CRITICAL (BOM Prevention): When creating `migration.sql` manually, you MUST use the native `write_to_file` tool to ensure it is saved as UTF-8 without BOM. NEVER use Windows PowerShell commands (like `Add-Content` or `>`) to generate the file, as PowerShell injects a `\u{feff}` BOM that will crash PostgreSQL on Railway.
+- CRITICAL (Idempotency): You MUST write idempotent SQL (e.g., `ALTER TABLE "table" ADD COLUMN IF NOT EXISTS "column" TEXT;`). This prevents `502 Bad Gateway` deployment crash loops on Railway.
+- CRITICAL (Recovery): If a deployment fails due to a migration error on Railway, the database will be locked. You must use `npx prisma migrate resolve --rolled-back <migration_name>` with the target `DATABASE_URL` to unblock it.
 
 ## 3. open-location-code Typings Workaround
 **Trigger**: When using or implementing the \open-location-code\ library in TypeScript.

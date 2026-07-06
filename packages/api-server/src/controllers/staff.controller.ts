@@ -25,6 +25,10 @@ export async function listStaff(req: Request, res: Response): Promise<void> {
   if (isActive !== undefined) {
     where.isActive = isActive === 'true';
   }
+  const locationId = req.query.locationId as string | undefined;
+  if (locationId) {
+    where.locationId = locationId;
+  }
   if (search) {
     where.OR = [
       { name: { contains: search, mode: 'insensitive' } },
