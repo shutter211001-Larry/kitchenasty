@@ -51,10 +51,10 @@ export default function RosterManagement() {
 
   useEffect(() => {
     if (user?.role === 'SUPER_ADMIN') {
-      api.get('/locations?limit=50').then(res => {
-        setLocations(res.data.data);
-        if (res.data.data.length > 0) {
-          setSelectedLocation(res.data.data[0].id);
+      api.get<{ data: any[] }>('/locations?limit=50').then(res => {
+        setLocations(res.data);
+        if (res.data.length > 0) {
+          setSelectedLocation(res.data[0].id);
         }
       });
     } else if (user?.locationId) {
@@ -67,11 +67,11 @@ export default function RosterManagement() {
     setLoading(true);
     try {
       const [shiftsRes, reqsRes] = await Promise.all([
-        api.get(`/roster/shifts?locationId=${selectedLocation}&startDate=${startDate}&endDate=${endDate}`),
-        api.get(`/roster/requirements?locationId=${selectedLocation}&startDate=${startDate}&endDate=${endDate}`)
+        api.get<{ data: Shift[] }>(`/roster/shifts?locationId=${selectedLocation}&startDate=${startDate}&endDate=${endDate}`),
+        api.get<{ data: ShiftRequirement[] }>(`/roster/requirements?locationId=${selectedLocation}&startDate=${startDate}&endDate=${endDate}`)
       ]);
-      setShifts(shiftsRes.data.data || []);
-      setRequirements(reqsRes.data.data || []);
+      setShifts(shiftsRes.data || []);
+      setRequirements(reqsRes.data || []);
     } catch (err) {
       console.error(err);
     } finally {
