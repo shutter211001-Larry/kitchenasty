@@ -104,6 +104,7 @@ export default function LocationForm() {
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'basic' | 'hours' | 'hr' | 'delivery'>('basic');
 
   const handleDelete = async () => {
     if (!window.confirm(t('locationForm.confirmDeleteStore'))) {
@@ -284,7 +285,32 @@ export default function LocationForm() {
         </div>
       )}
 
+            {/* Tabs Layout */}
+      <div className="flex overflow-x-auto border-b border-gray-200 mb-6 space-x-8">
+        {[
+          { id: 'basic', label: t('locationForm.basicInformation') || '基本設定' },
+          { id: 'hours', label: t('locationForm.businessHoursSettings') || '營業時間' },
+          { id: 'hr', label: t('locationForm.humanResources') || '人力資源' },
+          { id: 'delivery', label: t('locationForm.deliveryArea') || '外送區域' }
+        ].map(tab => (
+          <button
+            type="button"
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id as any)}
+            className={`pb-4 text-sm font-black whitespace-nowrap transition-all border-b-2 px-1 cursor-pointer ${
+              activeTab === tab.id
+                ? 'border-primary-600 text-primary-600 scale-105'
+                : 'border-transparent text-gray-500 hover:text-gray-900 hover:border-gray-300'
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
       <form onSubmit={handleSubmit} className="space-y-8">
+        {activeTab === 'basic' && (
+          <div className="space-y-8 animate-in fade-in duration-300">
         {/* Basic Info */}
         <section className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <h3 className="text-lg font-medium text-gray-900 mb-4">{t('locationForm.basicInformation')}</h3>
@@ -474,36 +500,11 @@ export default function LocationForm() {
           </div>
         </section>
 
-        {/* Payroll Settings */}
-        <section className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-1">{t('locationForm.payrollSettings') || '薪資設定 (Payroll)'}</h3>
-          <p className="text-sm text-gray-500 mb-4">{t('locationForm.payrollSettingsDescription') || '設定此門市的國定假日計薪標準。'}</p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('locationForm.hourlyHolidayMultiplier') || '時薪制國定假日倍率'}</label>
-              <input
-                type="number"
-                value={form.hourlyNationalHolidayMultiplier}
-                onChange={(e) => updateField('hourlyNationalHolidayMultiplier', parseFloat(e.target.value) || 1)}
-                min={1}
-                step={0.5}
-                className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm shadow-sm transition-all duration-200 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-              />
-            </div>
-            <div className="flex items-center pt-6">
-              <label className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={form.monthlyNationalHolidayOvertime}
-                  onChange={(e) => updateField('monthlyNationalHolidayOvertime', e.target.checked)}
-                  className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-                />
-                <span className="text-sm text-gray-700">{t('locationForm.monthlyHolidayOvertime') || '月薪制國定假日發給加班費'}</span>
-              </label>
-            </div>
-          </div>
-        </section>
+                  </div>
+        )}
 
+        {activeTab === 'hours' && (
+          <div className="space-y-8 animate-in fade-in duration-300">
         {/* Operating Hours */}
         <section className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div className="flex items-center justify-between mb-6">
@@ -630,7 +631,11 @@ export default function LocationForm() {
             })}
           </div>
         </section>
+          </div>
+        )}
 
+        {activeTab === 'hr' && (
+          <div className="space-y-8 animate-in fade-in duration-300">
         {/* Payroll Configuration */}
         <section className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center gap-2">
@@ -737,7 +742,7 @@ export default function LocationForm() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">國定假日出勤倍率</label>
+              <label className="block text-sm font-medium text-gray-700">{t('locationForm.hourlyHolidayMultiplier') || '時薪制國定假日薪資倍率'}</label>
               <div className="mt-1 relative rounded-md shadow-sm">
                 <input
                   type="number"
@@ -754,6 +759,11 @@ export default function LocationForm() {
             </div>
           </div>
         </section>
+          </div>
+        )}
+
+        {activeTab === 'delivery' && (
+          <div className="space-y-8 animate-in fade-in duration-300">
         {/* Delivery Zones */}
         <section className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div className="flex items-center justify-between mb-4">
@@ -826,6 +836,8 @@ export default function LocationForm() {
             ))}
           </div>
         </section>
+          </div>
+        )}
 
         {/* Danger Zone */}
         {isEdit && user?.role === 'SUPER_ADMIN' && (

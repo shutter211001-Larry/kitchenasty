@@ -365,6 +365,11 @@ export default function RosterManagement() {
 
       </div>
       </PageContent>
+      <StaffRosterSettingsModal
+        isOpen={isSettingsModalOpen}
+        onClose={() => setIsSettingsModalOpen(false)}
+        locationId={selectedLocation}
+      />
     </div>
   );
 }
