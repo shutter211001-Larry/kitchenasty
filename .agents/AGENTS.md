@@ -11,7 +11,11 @@
 - Do NOT just run `npx prisma db push` without generating a migration file. 
 - If you are operating in a non-interactive environment where `npx prisma migrate dev` fails, you must manually create a timestamped folder under `prisma/migrations` containing a `migration.sql` script with the exact SQL DDL statements for your changes.
 - CRITICAL (BOM Prevention): When creating `migration.sql` manually, you MUST use the native `write_to_file` tool to ensure it is saved as UTF-8 without BOM. NEVER use Windows PowerShell commands (like `Add-Content` or `>`) to generate the file, as PowerShell injects a `\u{feff}` BOM that will crash PostgreSQL on Railway.
-- CRITICAL (Idempotency): You MUST write idempotent SQL (e.g., `ALTER TABLE "table" ADD COLUMN IF NOT EXISTS "column" TEXT;`). This prevents `502 Bad Gateway` deployment crash loops on Railway.
+- CRITICAL (Idempotency): You MUST write idempotent SQL to prevent `502 Bad Gateway` deployment crash loops on Railway. **Prisma does NOT generate idempotent SQL automatically**. After running `npx prisma migrate dev`, you MUST manually edit the generated `migration.sql` file and apply the following idempotency patterns:
+  - Change `CREATE TABLE "table"` to `CREATE TABLE IF NOT EXISTS "table"`.
+  - Wrap `CREATE TYPE` (Enums) in a DO block: `DO $$ BEGIN CREATE TYPE "Type" AS ENUM ('A'); EXCEPTION WHEN duplicate_object THEN null; END $$;`
+  - Use `IF NOT EXISTS` for columns: `ALTER TABLE "table" ADD COLUMN IF NOT EXISTS "column" TEXT;`
+  - Wrap `ADD CONSTRAINT` (Foreign Keys) in a DO block: `DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_name') THEN ALTER TABLE "table" ADD CONSTRAINT "fk_name" FOREIGN KEY ...; END IF; END $$;`
 - CRITICAL (Recovery): If a deployment fails due to a migration error on Railway, the database will be locked. You must use `npx prisma migrate resolve --rolled-back <migration_name>` with the target `DATABASE_URL` to unblock it.
 
 ## 3. open-location-code Typings Workaround
