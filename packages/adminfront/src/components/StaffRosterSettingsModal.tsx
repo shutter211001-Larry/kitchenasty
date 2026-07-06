@@ -136,9 +136,9 @@ export default function StaffRosterSettingsModal({ isOpen, onClose, locationId }
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">{t('staffEdit.availability') || 'Available Days (Time Slots)'}</label>
-                <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 space-y-3">
-                  {[0, 1, 2, 3, 4, 5, 6].map((dayIndex) => {
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('staffEdit.availableDays') || 'Available Days & Time Slots (排班可用時段)'}</label>
+                <div className="space-y-3">
+                  {[0, 1, 2, 3, 4, 5, 6].map(dayIndex => {
                     const dayNames = [
                       t('days.sunday') || 'Sun', t('days.monday') || 'Mon', t('days.tuesday') || 'Tue',
                       t('days.wednesday') || 'Wed', t('days.thursday') || 'Thu', t('days.friday') || 'Fri', t('days.saturday') || 'Sat'
@@ -147,46 +147,56 @@ export default function StaffRosterSettingsModal({ isOpen, onClose, locationId }
                     const isAvailable = !!avail;
 
                     return (
-                      <div key={dayIndex} className="flex items-center gap-4">
-                        <label className="flex items-center gap-2 w-24">
-                          <input
-                            type="checkbox"
-                            checked={isAvailable}
-                            onChange={(e) => {
-                              if (e.target.checked) {
-                                setAvailabilities([...availabilities, { dayOfWeek: dayIndex, startTime: '09:00', endTime: '18:00' }]);
-                              } else {
-                                setAvailabilities(availabilities.filter(a => a.dayOfWeek !== dayIndex));
-                              }
-                            }}
-                            className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-                          />
-                          <span className="text-sm font-medium text-gray-700">{dayNames[dayIndex]}</span>
-                        </label>
-                        {isAvailable && (
-                          <div className="flex items-center gap-2 flex-1">
+                      <div key={dayIndex} className={`flex flex-wrap sm:flex-nowrap items-center gap-4 p-4 rounded-xl border transition-all duration-200 ${isAvailable ? 'bg-white border-primary-200 shadow-sm' : 'bg-gray-50/50 border-gray-200 opacity-70'}`}>
+                        <label className="flex items-center gap-3 w-32 cursor-pointer">
+                          <div className="relative flex items-center">
                             <input
-                              type="time"
-                              value={avail.startTime}
+                              type="checkbox"
+                              checked={isAvailable}
                               onChange={(e) => {
-                                setAvailabilities(availabilities.map(a => 
-                                  a.dayOfWeek === dayIndex ? { ...a, startTime: e.target.value } : a
-                                ));
+                                if (e.target.checked) {
+                                  setAvailabilities([...availabilities, { dayOfWeek: dayIndex, startTime: '09:00', endTime: '18:00' }]);
+                                } else {
+                                  setAvailabilities(availabilities.filter(a => a.dayOfWeek !== dayIndex));
+                                }
                               }}
-                              className="px-2 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-primary-500 outline-none"
-                            />
-                            <span className="text-gray-500 text-sm">to</span>
-                            <input
-                              type="time"
-                              value={avail.endTime}
-                              onChange={(e) => {
-                                setAvailabilities(availabilities.map(a => 
-                                  a.dayOfWeek === dayIndex ? { ...a, endTime: e.target.value } : a
-                                ));
-                              }}
-                              className="px-2 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-primary-500 outline-none"
+                              className="peer h-5 w-5 cursor-pointer rounded border-gray-300 text-primary-600 focus:ring-primary-500 transition-all"
                             />
                           </div>
+                          <span className={`text-sm font-bold ${isAvailable ? 'text-primary-700' : 'text-gray-500'}`}>{dayNames[dayIndex]}</span>
+                        </label>
+                        {isAvailable ? (
+                          <div className="flex items-center gap-3 flex-1">
+                            <div className="flex flex-col w-full">
+                              <label className="text-[10px] text-gray-400 font-medium uppercase mb-1">開始時間</label>
+                              <input
+                                type="time"
+                                value={avail.startTime}
+                                onChange={(e) => {
+                                  setAvailabilities(availabilities.map(a => 
+                                    a.dayOfWeek === dayIndex ? { ...a, startTime: e.target.value } : a
+                                  ));
+                                }}
+                                className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm shadow-inner transition-all duration-200 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 focus:bg-white"
+                              />
+                            </div>
+                            <span className="text-gray-400 text-sm mt-5">至</span>
+                            <div className="flex flex-col w-full">
+                              <label className="text-[10px] text-gray-400 font-medium uppercase mb-1">結束時間</label>
+                              <input
+                                type="time"
+                                value={avail.endTime}
+                                onChange={(e) => {
+                                  setAvailabilities(availabilities.map(a => 
+                                    a.dayOfWeek === dayIndex ? { ...a, endTime: e.target.value } : a
+                                  ));
+                                }}
+                                className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm shadow-inner transition-all duration-200 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 focus:bg-white"
+                              />
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="flex-1 text-sm text-gray-400 font-medium italic">此日不排班 (Unavailable)</div>
                         )}
                       </div>
                     );
