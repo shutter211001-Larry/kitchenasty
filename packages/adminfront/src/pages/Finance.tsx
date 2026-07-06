@@ -90,32 +90,32 @@ export default function Finance() {
   };
 
   const ActionButtons = (
-    <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto bg-white p-2 rounded-2xl shadow-sm border border-gray-200">
+    <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto bg-gray-50 p-2 rounded-xl shadow-sm border border-gray-200">
       <div className="flex items-center gap-2">
-        <Calendar className="w-4 h-4 text-gray-500" />
+        <Calendar className="w-4 h-4 text-gray-500 ml-2" />
         <input
           type="date"
           value={dateRange.start}
           onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })}
-          className="text-sm border-none focus:ring-0 px-2 py-1 outline-none"
+          className="text-sm border-none bg-transparent focus:ring-0 px-2 py-1 outline-none font-medium"
         />
         <span className="text-gray-400">-</span>
         <input
           type="date"
           value={dateRange.end}
           onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })}
-          className="text-sm border-none focus:ring-0 px-2 py-1 outline-none"
+          className="text-sm border-none bg-transparent focus:ring-0 px-2 py-1 outline-none font-medium"
         />
       </div>
-      <div className="flex gap-1 border-l pl-2">
-        <button onClick={() => handlePreset('thisMonth')} className="px-3 py-1 text-xs font-bold bg-primary-100 text-primary-600 rounded-lg hover:bg-primary-200">本月</button>
-        <button onClick={() => handlePreset('lastMonth')} className="px-3 py-1 text-xs font-bold bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200">上月</button>
+      <div className="flex gap-1 border-l border-gray-300 pl-2">
+        <button onClick={() => handlePreset('thisMonth')} className="px-3 py-1.5 text-xs font-bold bg-white border border-gray-200 text-primary-600 rounded-lg shadow-sm hover:bg-gray-50 transition-colors">本月</button>
+        <button onClick={() => handlePreset('lastMonth')} className="px-3 py-1.5 text-xs font-bold bg-white border border-gray-200 text-gray-600 rounded-lg shadow-sm hover:bg-gray-50 transition-colors">上月</button>
       </div>
     </div>
   );
 
   return (
-    <div className="p-6">
+    <div className="pb-12">
       <PageHeader 
         title="損益表 (P&L)" 
         subtitle="檢視營業收入、成本與淨利"
@@ -127,6 +127,7 @@ export default function Finance() {
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
         </div>
       ) : data ? (
+        <PageContent>
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <StatCard 
@@ -213,6 +214,7 @@ export default function Finance() {
             </PageContent>
           </div>
         </div>
+        </PageContent>
       ) : null}
     </div>
   );
