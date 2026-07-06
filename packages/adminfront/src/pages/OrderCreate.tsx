@@ -3,6 +3,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../lib/api.js';
 import { useAuth } from '../context/AuthContext.js';
+import { PageHeader } from '../components/layout/PageHeader';
+import { PageContent } from '../components/layout/PageContent';
 
 const ROLE_LABELS: Record<string, string> = {
   SUPER_ADMIN: 'staff.roles.superAdmin',
@@ -282,17 +284,21 @@ export default function OrderCreate() {
   }, {} as Record<string, { name: string, items: MenuItem[] }>);
 
   return (
-    <div className="max-w-6xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">{t('orderCreate.addManualOrder')}</h1>
-      </div>
+    <div className="pb-12">
+      <PageHeader
+        title={t('orderCreate.addManualOrder')}
+        backUrl="/orders"
+        backText={t('orders.backToOrders')}
+      />
+
+      <PageContent>
 
       {error && <div className="bg-red-50 text-red-700 p-4 rounded-lg mb-6">{error}</div>}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Left: Menu Items */}
         <div className="lg:col-span-2 space-y-6">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <h2 className="text-lg font-semibold mb-4">{t('orderCreate.selectProduct')}</h2>
             <div className="space-y-4">
               {Object.entries(groupedItems).map(([categoryId, group]) => {
@@ -346,7 +352,7 @@ export default function OrderCreate() {
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <h2 className="text-lg font-semibold mb-4">{t('orderCreate.customerInfo')}</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -355,7 +361,7 @@ export default function OrderCreate() {
                   type="text"
                   value={guestName}
                   onChange={e => setGuestName(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
+                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none shadow-sm transition-all duration-200"
                   placeholder={t('orderCreate.customerName')}
                 />
               </div>
@@ -365,7 +371,7 @@ export default function OrderCreate() {
                   type="text"
                   value={guestPhone}
                   onChange={e => setGuestPhone(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
+                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none shadow-sm transition-all duration-200"
                   placeholder={t('orderCreate.phoneNumber')}
                 />
               </div>
@@ -375,7 +381,7 @@ export default function OrderCreate() {
                   type="email"
                   value={guestEmail}
                   onChange={e => setGuestEmail(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
+                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none shadow-sm transition-all duration-200"
                   placeholder={t('orderCreate.emailOptional')}
                 />
               </div>
@@ -414,7 +420,7 @@ export default function OrderCreate() {
                     required
                     value={address.line1}
                     onChange={e => setAddress({ ...address, line1: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
+                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none shadow-sm transition-all duration-200"
                     placeholder="例如：7-11 信義店 (店號: 123456)"
                   />
                 </div>
@@ -428,7 +434,7 @@ export default function OrderCreate() {
                     type="text"
                     value={address.line1}
                     onChange={e => setAddress({ ...address, line1: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
+                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none shadow-sm transition-all duration-200"
                     placeholder={t('orderCreate.streetAddressPlaceholder')}
                   />
                 </div>
@@ -439,7 +445,7 @@ export default function OrderCreate() {
                       type="text"
                       value={address.city}
                       onChange={e => setAddress({ ...address, city: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
+                      className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none shadow-sm transition-all duration-200"
                       placeholder={t('orderCreate.cityLabel')}
                     />
                   </div>
@@ -449,7 +455,7 @@ export default function OrderCreate() {
                       type="text"
                       value={address.zip}
                       onChange={e => setAddress({ ...address, zip: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
+                      className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none shadow-sm transition-all duration-200"
                       placeholder={t('orderCreate.zipLabel')}
                     />
                   </div>
@@ -467,7 +473,7 @@ export default function OrderCreate() {
                       type="text"
                       value={logisticsProvider}
                       onChange={e => setLogisticsProvider(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
+                      className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none shadow-sm transition-all duration-200"
                       placeholder="例如：黑貓宅急便"
                     />
                   </div>
@@ -477,7 +483,7 @@ export default function OrderCreate() {
                       type="text"
                       value={trackingNumber}
                       onChange={e => setTrackingNumber(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
+                      className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none shadow-sm transition-all duration-200"
                       placeholder="輸入單號"
                     />
                   </div>
@@ -489,7 +495,7 @@ export default function OrderCreate() {
 
         {/* Right: Summary & Settings */}
         <div className="space-y-6">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 sticky top-6">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sticky top-6">
             <h2 className="text-lg font-semibold mb-4">{t('orderCreate.orderSettings')}</h2>
             <div className="space-y-4 mb-6">
               <div>
@@ -497,7 +503,7 @@ export default function OrderCreate() {
                 <select
                   value={selectedLocationId}
                   onChange={e => setSelectedLocationId(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
+                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none shadow-sm transition-all duration-200"
                 >
                   {locations.map(loc => (
                     <option key={loc.id} value={loc.id}>{loc.name}</option>
@@ -589,7 +595,7 @@ export default function OrderCreate() {
                       type="text"
                       value={couponCode}
                       onChange={e => setCouponCode(e.target.value)}
-                      className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-primary-500 outline-none"
+                      className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-primary-500/20 outline-none shadow-sm transition-all duration-200"
                       placeholder="輸入優惠碼"
                     />
                     {summary?.manualCouponError && (
@@ -607,7 +613,7 @@ export default function OrderCreate() {
                             min="0"
                             value={manualDiscount || ''}
                             onChange={e => setManualDiscount(parseFloat(e.target.value) || 0)}
-                            className="w-full pl-6 pr-2 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-primary-500 outline-none"
+                            className="w-full pl-7 pr-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-primary-500/20 outline-none shadow-sm transition-all duration-200"
                             placeholder="0"
                           />
                         </div>
@@ -622,7 +628,7 @@ export default function OrderCreate() {
                               min="0"
                               value={manualDeliveryFee}
                               onChange={e => setManualDeliveryFee(e.target.value === '' ? '' : parseFloat(e.target.value))}
-                              className="w-full pl-6 pr-2 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-primary-500 outline-none"
+                              className="w-full pl-7 pr-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-primary-500/20 outline-none shadow-sm transition-all duration-200"
                               placeholder="留空自動計算"
                             />
                           </div>
@@ -637,7 +643,7 @@ export default function OrderCreate() {
                             min="0"
                             value={manualTax}
                             onChange={e => setManualTax(e.target.value === '' ? '' : parseFloat(e.target.value))}
-                            className="w-full pl-6 pr-2 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-primary-500 outline-none"
+                            className="w-full pl-7 pr-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-primary-500/20 outline-none shadow-sm transition-all duration-200"
                             placeholder="留空自動計算"
                           />
                         </div>
@@ -711,6 +717,7 @@ export default function OrderCreate() {
           </div>
         </div>
       )}
+      </PageContent>
     </div>
   );
 }

@@ -1,6 +1,8 @@
 import { useTranslation } from 'react-i18next';
 import React, { useEffect, useState } from 'react';
 import { api } from '../lib/api.js';
+import { PageHeader } from '../components/layout/PageHeader';
+import { PageContent } from '../components/layout/PageContent';
 
 interface Category {
   id: string;
@@ -325,50 +327,48 @@ export default function StockManagement() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Title Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-800">{t('stockManagement.doubleStockMatrixPanel')}</h2>
-          <p className="text-sm text-gray-500 mt-1">
+    <div className="pb-12">
+      <PageHeader
+        title={t('stockManagement.doubleStockMatrixPanel')}
+        action={
+          <div className="flex flex-wrap items-center gap-2 self-start md:self-auto">
+            <button
+              onClick={async () => {
+                let url = import.meta.env.VITE_ERP_URL_PUBLIC;
+                if (!url) {
+                  try {
+                    const res = await fetch('/api/settings/public-env');
+                    const data = await res.json();
+                    url = data.erpUrl;
+                  } catch (e) {
+                    console.error('Failed to fetch public env vars', e);
+                  }
+                }
+                if (!url) {
+                  alert(t('stockManagement.erpUrlNotConfigured'));
+                  return;
+                }
+                window.open(url, '_blank');
+              }}
+              className="px-4 py-2 bg-indigo-600 border border-transparent rounded-lg text-sm font-medium text-white hover:bg-indigo-700 shadow-sm transition-colors inline-flex items-center gap-1.5"
+            >
+              {t('stockManagement.goToErpManagement')}
+            </button>
+            <button
+              onClick={fetchData}
+              className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 shadow-sm transition-colors inline-flex items-center gap-1.5"
+            >
+              {t('stockManagement.refresh')}
+            </button>
+          </div>
+        }
+      />
+      <PageContent>
+        <div className="mb-6">
+          <p className="text-sm text-gray-500">
             {t('stockManagement.stockRelationDescription')}
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-2 self-start md:self-auto">
-          <button
-            onClick={async () => {
-              // 優先讀取前端環境變數
-              let url = import.meta.env.VITE_ERP_URL_PUBLIC;
-              
-              // 若無，則向 API Server 查詢
-              if (!url) {
-                try {
-                  const res = await fetch('/api/settings/public-env');
-                  const data = await res.json();
-                  url = data.erpUrl;
-                } catch (e) {
-                  console.error('Failed to fetch public env vars', e);
-                }
-              }
-
-              if (!url) {
-                alert(t('stockManagement.erpUrlNotConfigured'));
-                return;
-              }
-              window.open(url, '_blank');
-            }}
-            className="px-4 py-2 bg-indigo-600 border border-transparent rounded-lg text-sm font-medium text-white hover:bg-indigo-700 shadow-sm transition-colors inline-flex items-center gap-1.5"
-          >
-            {t('stockManagement.goToErpManagement')}
-          </button>
-          <button
-            onClick={fetchData}
-            className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 shadow-sm transition-colors inline-flex items-center gap-1.5"
-          >
-            {t('stockManagement.refresh')}
-          </button>
-        </div>
-      </div>
 
       {/* Error display */}
       {error && (
@@ -408,7 +408,7 @@ export default function StockManagement() {
             placeholder={t('stockManagement.searchProductPlaceholder')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+            className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-primary-500/20 outline-none shadow-sm transition-all duration-200"
           />
         </div>
 
@@ -418,7 +418,7 @@ export default function StockManagement() {
           <select
             value={selectedCategoryId}
             onChange={(e) => setSelectedCategoryId(e.target.value)}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+            className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-primary-500/20 outline-none shadow-sm transition-all duration-200"
           >
             <option value="">{t('stockManagement.allCategories')}</option>
             {categories.map((c) => (
@@ -848,6 +848,7 @@ export default function StockManagement() {
             );
           })}
       </div>
+      </PageContent>
     </div>
   );
 }

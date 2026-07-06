@@ -1,6 +1,8 @@
 import { useTranslation } from 'react-i18next';
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { PageHeader } from '../components/layout/PageHeader';
+import { PageContent } from '../components/layout/PageContent';
 
 interface Reservation {
   id: string;
@@ -83,17 +85,15 @@ export default function ReservationList() {
   }
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">{t('reservationList.reservationManagement')}</h1>
-      </div>
-
+    <div className="pb-12">
+      <PageHeader title={t('reservationList.reservationManagement')} />
+      <PageContent>
       {/* Filters */}
       <div className="flex flex-wrap gap-3 mb-6">
         <select
           value={statusFilter}
           onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
-          className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none"
+          className="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-primary-500/20 outline-none shadow-sm transition-all duration-200"
           aria-label={t('reservationList.filterByStatus')}
         >
           <option value="">{t('reservationList.allStatuses')}</option>
@@ -107,7 +107,7 @@ export default function ReservationList() {
           type="date"
           value={dateFilter}
           onChange={(e) => { setDateFilter(e.target.value); setPage(1); }}
-          className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none"
+          className="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-primary-500/20 outline-none shadow-sm transition-all duration-200"
           aria-label="Filter by date"
         />
         {dateFilter && (
@@ -136,7 +136,7 @@ export default function ReservationList() {
 
       {!loading && reservations.length > 0 && (
         <>
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-200 bg-gray-50">
@@ -249,6 +249,7 @@ export default function ReservationList() {
           )}
         </>
       )}
+      </PageContent>
     </div>
   );
 }

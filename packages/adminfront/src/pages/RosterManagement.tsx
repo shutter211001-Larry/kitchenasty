@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { api } from '../lib/api.js';
 import { useAuth } from '../context/AuthContext.js';
 import StaffRosterSettingsModal from '../components/StaffRosterSettingsModal.js';
+import ShiftRequirementsModal from '../components/ShiftRequirementsModal.js';
 import { PageHeader } from '../components/layout/PageHeader';
 import { PageContent } from '../components/layout/PageContent';
 
@@ -47,6 +48,7 @@ export default function RosterManagement() {
   const [loading, setLoading] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+  const [isRequirementsModalOpen, setIsRequirementsModalOpen] = useState(false);
 
   // Initialize dates to current week
   useEffect(() => {
@@ -169,6 +171,13 @@ export default function RosterManagement() {
         }
         action={
           <div className="flex gap-2">
+            <button
+              onClick={() => setIsRequirementsModalOpen(true)}
+              disabled={!selectedLocation}
+              className="flex items-center gap-2 px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded-lg font-medium shadow-sm hover:bg-gray-50 disabled:opacity-50 transition-all active:scale-95"
+            >
+              📊 門市人力需求設定
+            </button>
             <button
               onClick={() => setIsSettingsModalOpen(true)}
               disabled={!selectedLocation}
@@ -361,6 +370,18 @@ export default function RosterManagement() {
       <StaffRosterSettingsModal
         isOpen={isSettingsModalOpen}
         onClose={() => setIsSettingsModalOpen(false)}
+        locationId={selectedLocation}
+      />
+
+      <ShiftRequirementsModal
+        isOpen={isRequirementsModalOpen}
+        onClose={() => {
+          setIsRequirementsModalOpen(false);
+          // Refetch to update the shortage display
+          if (selectedLocation && startDate && endDate) {
+            fetchRosterData();
+          }
+        }}
         locationId={selectedLocation}
       />
     </div>

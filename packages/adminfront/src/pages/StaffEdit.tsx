@@ -156,7 +156,6 @@ export default function StaffEdit() {
   }
 
   return (
-  return (
     <div className="max-w-lg mx-auto pb-12">
       <PageHeader
         title={t('staff.editTitle')}

@@ -875,7 +875,7 @@ export default function LocationForm() {
           >
             {saving ? t('locationForm.saving') : isEdit ? t('locationForm.updateStoreInfo') : t('locationForm.createStore')}
           </button>
-        </section>
+        </div>
       </form>
       </PageContent>
     </div>

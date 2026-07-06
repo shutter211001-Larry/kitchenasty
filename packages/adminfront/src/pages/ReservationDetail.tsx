@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { PageHeader } from '../components/layout/PageHeader';
+import { PageContent } from '../components/layout/PageContent';
 
 interface Table {
   id: string;
@@ -101,29 +103,29 @@ export default function ReservationDetail() {
   }
 
   return (
-    <div>
-      <div className="flex items-center gap-4 mb-6">
-        <Link to="/reservations" className="text-gray-400 hover:text-gray-600" aria-label="Back to reservations">
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-        </Link>
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Reservation Details</h1>
-          <p className="text-sm text-gray-500">
-            {new Date(reservation.date).toLocaleDateString()} at {reservation.time}
-          </p>
-        </div>
-        <span className={`ml-auto text-sm px-3 py-1 rounded-full font-medium ${STATUS_COLORS[reservation.status] || 'bg-gray-100'}`}>
-          {reservation.status}
-        </span>
+    <div className="pb-12">
+      <PageHeader
+        title="Reservation Details"
+        backUrl="/reservations"
+        backText="Back to reservations"
+        action={
+          <span className={`text-sm px-3 py-1 rounded-full font-medium ${STATUS_COLORS[reservation.status] || 'bg-gray-100'}`}>
+            {reservation.status}
+          </span>
+        }
+      />
+      <PageContent>
+      <div className="mb-6">
+        <p className="text-sm text-gray-500">
+          {new Date(reservation.date).toLocaleDateString()} at {reservation.time}
+        </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main content */}
         <div className="lg:col-span-2 space-y-6">
           {/* Guest Info */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Guest Information</h2>
             <dl className="grid grid-cols-2 gap-4 text-sm">
               <div>
@@ -148,7 +150,7 @@ export default function ReservationDetail() {
           </div>
 
           {/* Reservation Details */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Details</h2>
             <dl className="grid grid-cols-2 gap-4 text-sm">
               <div>
@@ -182,7 +184,7 @@ export default function ReservationDetail() {
         {/* Sidebar */}
         <div className="space-y-6">
           {/* Status Update */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Update Status</h2>
             <div className="space-y-2">
               {STATUSES.map((status) => (
@@ -203,13 +205,13 @@ export default function ReservationDetail() {
           </div>
 
           {/* Table Assignment */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Assign Table</h2>
             <select
               value={reservation.table?.id || ''}
               onChange={(e) => updateReservation({ tableId: e.target.value || null })}
               disabled={updating}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none"
+              className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-primary-500/20 outline-none shadow-sm transition-all duration-200"
               aria-label="Assign table"
             >
               <option value="">No table assigned</option>
@@ -222,6 +224,7 @@ export default function ReservationDetail() {
           </div>
         </div>
       </div>
+      </PageContent>
     </div>
   );
 }

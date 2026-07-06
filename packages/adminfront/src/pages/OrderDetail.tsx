@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext.js';
+import { PageHeader } from '../components/layout/PageHeader';
+import { PageContent } from '../components/layout/PageContent';
 
 interface OrderItem {
   id: string;
@@ -243,37 +245,38 @@ export default function OrderDetailPage() {
   }
 
   return (
-    <div>
-      <div className="flex items-center gap-4 mb-6">
-        <Link to="/orders" className="text-gray-400 hover:text-gray-600" aria-label={t('orderDetail.backToOrderList')}>
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-        </Link>
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">{t('orderDetail.orderDetails')}{order.orderNumber}</h1>
-          <p className="text-sm text-gray-500">
-            {t('orderDetail.orderTime')}{new Date(order.createdAt).toLocaleString()}
-          </p>
-        </div>
-        <span className={`ml-auto text-sm px-3 py-1 rounded-full font-medium ${STATUS_COLORS[order.status] || 'bg-gray-100'}`}>
-          {order.status === 'PENDING' && t('orderDetail.pending')}
-          {order.status === 'CONFIRMED' && t('orderDetail.confirmed')}
-          {order.status === 'PREPARING' && t('orderDetail.preparing')}
-          {order.status === 'READY' && t('orderDetail.readyForPickup')}
-          {order.status === 'OUT_FOR_DELIVERY' && t('orderDetail.outForDelivery')}
-          {order.status === 'DELIVERED' && t('orderDetail.delivered')}
-          {order.status === 'PICKED_UP' && t('orderDetail.pickedUp')}
-          {order.status === 'CANCELLED' && t('orderDetail.cancelled')}
-          {!['PENDING', 'CONFIRMED', 'PREPARING', 'READY', 'OUT_FOR_DELIVERY', 'DELIVERED', 'PICKED_UP', 'CANCELLED'].includes(order.status) && order.status.replace(/_/g, ' ')}
-        </span>
+    <div className="pb-12">
+      <PageHeader
+        title={`${t('orderDetail.orderDetails')} ${order.orderNumber}`}
+        backUrl="/orders"
+        backText={t('orders.backToOrders')}
+        action={
+          <span className={`text-sm px-3 py-1 rounded-full font-medium ${STATUS_COLORS[order.status] || 'bg-gray-100'}`}>
+            {order.status === 'PENDING' && t('orderDetail.pending')}
+            {order.status === 'CONFIRMED' && t('orderDetail.confirmed')}
+            {order.status === 'PREPARING' && t('orderDetail.preparing')}
+            {order.status === 'READY' && t('orderDetail.readyForPickup')}
+            {order.status === 'OUT_FOR_DELIVERY' && t('orderDetail.outForDelivery')}
+            {order.status === 'DELIVERED' && t('orderDetail.delivered')}
+            {order.status === 'PICKED_UP' && t('orderDetail.pickedUp')}
+            {order.status === 'CANCELLED' && t('orderDetail.cancelled')}
+            {!['PENDING', 'CONFIRMED', 'PREPARING', 'READY', 'OUT_FOR_DELIVERY', 'DELIVERED', 'PICKED_UP', 'CANCELLED'].includes(order.status) && order.status.replace(/_/g, ' ')}
+          </span>
+        }
+      />
+
+      <PageContent>
+      <div className="mb-6">
+        <p className="text-sm text-gray-500">
+          {t('orderDetail.orderTime')}{new Date(order.createdAt).toLocaleString()}
+        </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main content */}
         <div className="lg:col-span-2 space-y-6">
           {/* Items */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('orders.items')}</h2>
             <div className="space-y-3">
               {order.items.map((item) => (
@@ -357,7 +360,7 @@ export default function OrderDetailPage() {
                           placeholder={t('orderDetail.enterDiscountedPrice')}
                           value={adjustedTotalInput}
                           onChange={(e) => setAdjustedTotalInput(e.target.value)}
-                          className="w-full pl-7 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                          className="w-full pl-7 pr-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-primary-500/20 outline-none shadow-sm transition-all duration-200"
                         />
                       </div>
                       <button
@@ -381,7 +384,7 @@ export default function OrderDetailPage() {
 
           {/* Notes */}
           {order.comment && (
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
               <h2 className="text-lg font-semibold text-gray-900 mb-2">{t('checkout.orderNotes') || t('orderDetail.orderNotes')}</h2>
               <p className="text-gray-600 text-sm">{order.comment}</p>
             </div>
@@ -391,7 +394,7 @@ export default function OrderDetailPage() {
         {/* Sidebar */}
         <div className="space-y-6">
           {/* Status update */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('orderDetail.updateOrderStatus')}</h2>
             <div className="space-y-2">
               {STATUSES.map((status) => (
@@ -420,7 +423,7 @@ export default function OrderDetailPage() {
           </div>
 
           {/* Payment status update */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
             <h2 className="text-lg font-semibold text-gray-900 mb-4 font-sans">{t('orderDetail.updatePaymentStatus')}</h2>
             <div className="flex gap-2">
               <button
@@ -450,7 +453,7 @@ export default function OrderDetailPage() {
 
           {/* Delete Action */}
           {canManage && (
-            <div className="bg-red-50 rounded-xl border border-red-100 p-4 sm:p-6">
+            <div className="bg-red-50 rounded-lg border border-red-100 p-4 sm:p-6">
               <h2 className="text-lg font-semibold text-red-900 mb-2">{t('orderDetail.dangerZone')}</h2>
               <p className="text-xs text-red-600 mb-4">{t('orderDetail.deleteOrderWarning')}</p>
               <button
@@ -464,7 +467,7 @@ export default function OrderDetailPage() {
           )}
 
           {/* Order info */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('orders.orderDetail')}</h2>
             <dl className="space-y-3 text-sm">
               <div>
@@ -628,6 +631,7 @@ export default function OrderDetailPage() {
           </div>
         </div>
       )}
+      </PageContent>
     </div>
   );
 }
