@@ -98,6 +98,8 @@ export async function getStaff(req: Request<{ id: string }>, res: Response): Pro
       timeOffs: true,
       jobRoles: { select: { id: true, name: true } },
       location: { select: { id: true, name: true } },
+      employmentRecord: true,
+      insuranceProfile: true,
       createdAt: true,
       updatedAt: true,
     },
@@ -136,6 +138,21 @@ const updateStaffSchema = z.object({
   })).optional(),
   isActive: z.boolean().optional(),
   jobRoleIds: z.array(z.string()).optional(),
+  employmentRecord: z.object({
+    hireDate: z.string(),
+    terminationDate: z.string().nullable().optional(),
+    status: z.enum(['ACTIVE', 'SUSPENDED', 'TERMINATED']).optional(),
+    bankName: z.string().nullable().optional(),
+    bankBranch: z.string().nullable().optional(),
+    bankAccountNumber: z.string().nullable().optional(),
+  }).nullable().optional(),
+  insuranceProfile: z.object({
+    laborInsuranceBracket: z.number().min(0),
+    healthInsuranceBracket: z.number().min(0),
+    pensionEmployer: z.number().min(0).max(100).optional(),
+    pensionEmployee: z.number().min(0).max(100).optional(),
+    dependents: z.number().min(0).optional(),
+  }).nullable().optional(),
 });
 
 export async function updateStaff(req: Request<{ id: string }>, res: Response): Promise<void> {
@@ -166,12 +183,36 @@ export async function updateStaff(req: Request<{ id: string }>, res: Response): 
   }
 
   // Update user basic details
-  const { availabilities, timeOffs, jobRoleIds, ...userData } = parsed.data;
+  const { availabilities, timeOffs, jobRoleIds, employmentRecord, insuranceProfile, ...userData } = parsed.data;
 
   const user = await prisma.user.update({
     where: { id: targetId },
     data: {
       ...userData,
+      ...(employmentRecord !== undefined && {
+        employmentRecord: employmentRecord === null ? { delete: true } : {
+          upsert: {
+            create: {
+              ...employmentRecord,
+              hireDate: new Date(employmentRecord.hireDate),
+              terminationDate: employmentRecord.terminationDate ? new Date(employmentRecord.terminationDate) : null,
+            },
+            update: {
+              ...employmentRecord,
+              hireDate: new Date(employmentRecord.hireDate),
+              terminationDate: employmentRecord.terminationDate ? new Date(employmentRecord.terminationDate) : null,
+            },
+          }
+        }
+      }),
+      ...(insuranceProfile !== undefined && {
+        insuranceProfile: insuranceProfile === null ? { delete: true } : {
+          upsert: {
+            create: insuranceProfile,
+            update: insuranceProfile,
+          }
+        }
+      }),
       ...(availabilities !== undefined && {
         availabilities: {
           deleteMany: {},
@@ -210,6 +251,8 @@ export async function updateStaff(req: Request<{ id: string }>, res: Response): 
       timeOffs: true,
       jobRoles: { select: { id: true, name: true } },
       location: { select: { id: true, name: true } },
+      employmentRecord: true,
+      insuranceProfile: true,
     },
   });
 

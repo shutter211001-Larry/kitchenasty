@@ -56,6 +56,7 @@ import i18nRoutes from './routes/i18n.routes.js';
 import invoiceRoutes from './routes/invoice.routes.js';
 import jobRoleRoutes from './routes/job-role.routes.js';
 import rosterRoutes from './routes/roster.routes.js';
+import payrollRoutes from './routes/payroll.routes.js';
 import shutterErpRouter from './shutter-erp/index.js';
 import { openApiSpec } from './lib/openapi.js';
 import { initPassport } from './lib/passport.js';
@@ -242,6 +243,7 @@ export async function createApp() {
   app.use('/api/invoices', invoiceRoutes);
   app.use('/api/job-roles', jobRoleRoutes);
   app.use('/api/roster', rosterRoutes);
+  app.use('/api/payroll', payrollRoutes);
   app.use('/shutter-erp', shutterErpRouter);
 
   // 404 handler
