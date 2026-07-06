@@ -363,6 +363,7 @@ model MenuItemDietaryPreference {
 model Order {
   id                   String               @id @default(cuid())
   orderNumber          String               @unique
+  idempotencyKey       String?              @unique
   customerId           String?
   locationId           String
   addressId            String?
@@ -818,6 +819,7 @@ model ChatMessage {
 
 model StaffAttendance {
   id                 String                        @id @default(uuid())
+  idempotencyKey     String?                       @unique
   userId             String
   user               User                          @relation(fields: [userId], references: [id], onDelete: Cascade)
   locationId         String?

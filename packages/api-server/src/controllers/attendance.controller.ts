@@ -42,7 +42,7 @@ export const getQrToken = async (req: Request, res: Response) => {
 
 export const checkIn = async (req: Request, res: Response) => {
   const userId = req.user?.id;
-  const { locationId, lat, lng, device, qrToken } = req.body;
+  const { locationId, lat, lng, device, qrToken, idempotencyKey, checkInTime } = req.body;
 
   let finalLocationId = locationId;
   let isOutOfRange = false;
@@ -65,6 +65,16 @@ export const checkIn = async (req: Request, res: Response) => {
 
   if (!userId || !finalLocationId) {
     return res.status(400).json({ success: false, error: 'Missing required fields' });
+  }
+
+  // Idempotency check for offline sync
+  if (idempotencyKey) {
+    const existingSync = await prisma.staffAttendance.findUnique({
+      where: { idempotencyKey }
+    });
+    if (existingSync) {
+      return res.json({ success: true, data: existingSync });
+    }
   }
 
   if (!qrToken && (lat === undefined || lng === undefined)) {
@@ -104,12 +114,14 @@ export const checkIn = async (req: Request, res: Response) => {
 
   const record = await prisma.staffAttendance.create({
     data: {
+      idempotencyKey,
       userId,
       locationId: finalLocationId,
       lat: lat ?? null,
       lng: lng ?? null,
       device: isQR ? `${device || 'Unknown'} (QR Scan)` : device,
-      isOutOfRange
+      isOutOfRange,
+      checkIn: checkInTime ? new Date(checkInTime) : new Date()
     }
   });
 
@@ -119,6 +131,7 @@ export const checkIn = async (req: Request, res: Response) => {
 export const checkOut = async (req: Request, res: Response) => {
   const userId = req.user?.id;
   const id = req.params.id as string;
+  const { checkOutTime } = req.body || {};
 
   if (!userId || !id) {
     return res.status(400).json({ success: false, error: 'Missing required fields' });
@@ -133,12 +146,13 @@ export const checkOut = async (req: Request, res: Response) => {
   }
 
   if (record.checkOut) {
-    return res.status(400).json({ success: false, error: 'Already checked out' });
+    // If it's a sync retry and we already checked out, just return success
+    return res.json({ success: true, data: record });
   }
 
   const updated = await prisma.staffAttendance.update({
     where: { id },
-    data: { checkOut: new Date() }
+    data: { checkOut: checkOutTime ? new Date(checkOutTime) : new Date() }
   });
 
   res.json({ success: true, data: updated });

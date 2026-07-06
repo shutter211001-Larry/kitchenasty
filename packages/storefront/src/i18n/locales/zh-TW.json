@@ -316,7 +316,9 @@
     "accompanyingFriendsList": "同行友人",
     "freeShipping": "免運費",
     "homeDelivery": "宅配",
-    "storeToStore": "店到店"
+    "storeToStore": "店到店",
+    "storeToStoreDetails": "取件門市資訊",
+    "storeBranchPlaceholder": "例如：7-11 信義店 (店號: 123456)"
   },
   "orderConfirmation": {
     "title": "點餐成功！",

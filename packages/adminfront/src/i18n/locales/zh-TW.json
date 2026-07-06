@@ -1313,7 +1313,12 @@
     "couponCode": "優惠碼",
     "manualDiscount": "手動折扣金額",
     "trackingNumber": "物流單號",
-    "logisticsProvider": "物流服務商"
+    "logisticsProvider": "物流服務商",
+    "homeDelivery": "宅配",
+    "storeToStore": "店到店",
+    "storeDetails": "取件門市資訊",
+    "storeNameId": "門市名稱或店號",
+    "zipLabel": "外送郵遞區號"
   },
   "orderDetail": {
     "fulfillOrder": "填寫出貨資訊",
@@ -1866,7 +1871,11 @@
     "saveAllChanges": "儲存所有變更"
   },
   "staffEdit": {
-    "hourlyWage": "時薪 (Hourly Wage)"
+    "hourlyWage": "時薪 (Hourly Wage)",
+    "salaryType": "計薪方式",
+    "hourly": "時薪 (Hourly Wage)",
+    "monthly": "月薪 (Monthly)",
+    "monthlyWage": "月薪 (Monthly Wage)"
   },
   "staffList": {
     "loading": "載入中",

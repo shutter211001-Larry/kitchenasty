@@ -1313,7 +1313,12 @@
     "couponCode": "Coupon Code",
     "manualDiscount": "Mano-manong Diskwento",
     "trackingNumber": "Tracking Number",
-    "logisticsProvider": "Logistics Provider"
+    "logisticsProvider": "Logistics Provider",
+    "homeDelivery": "[EN] 宅配 (Home Delivery)",
+    "storeToStore": "[EN] 店到店 (Store to Store)",
+    "storeDetails": "[EN] 取件門市資訊 (Store Details)",
+    "storeNameId": "[EN] 門市名稱或店號 (Store Name / ID)",
+    "zipLabel": "[EN] 外送郵遞區號 (Zip Code)"
   },
   "orderDetail": {
     "fulfillOrder": "Fulfill Order",
@@ -1866,7 +1871,11 @@
     "saveAllChanges": "[EN] 儲存所有變更"
   },
   "staffEdit": {
-    "hourlyWage": "[EN] 時薪 (Hourly Wage)"
+    "hourlyWage": "Sahod kada Oras",
+    "salaryType": "Uri ng Sahod",
+    "hourly": "Sahod kada Oras",
+    "monthly": "Buwanang Sahod",
+    "monthlyWage": "Buwanang Sahod"
   },
   "staffList": {
     "loading": "[EN] 載入中",

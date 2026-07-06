@@ -173,6 +173,19 @@ export default function AdminLayout({ children, onLogout }: { children: React.Re
     }
   }
 
+  const [isOffline, setIsOffline] = useState(!navigator.onLine);
+
+  useEffect(() => {
+    const handleOnline = () => setIsOffline(false);
+    const handleOffline = () => setIsOffline(true);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
   // Close dropdown on click outside
   useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -393,6 +406,13 @@ export default function AdminLayout({ children, onLogout }: { children: React.Re
             )}
           </div>
         </header>
+
+        {isOffline && (
+          <div className="bg-yellow-500 text-white px-4 py-2 text-sm font-bold flex items-center justify-center shadow-md z-40">
+            ⚠️ 網路連線異常，已啟用本地幽靈模式，可繼續點餐與打卡。連線恢復後將自動同步。
+          </div>
+        )}
+
         <main className="flex-1 p-6">{children}</main>
         
         {/* Chat Widget */}

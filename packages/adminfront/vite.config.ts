@@ -7,7 +7,13 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
+      strategies: 'injectManifest',
+      srcDir: 'src',
+      filename: 'sw.ts',
       registerType: 'autoUpdate',
+      injectManifest: {
+        maximumFileSizeToCacheInBytes: 5000000,
+      },
       manifest: {
         name: 'Shutter Admin',
         short_name: 'Shutter Admin',
@@ -25,9 +31,6 @@ export default defineConfig({
             type: 'image/svg+xml'
           }
         ]
-      },
-      workbox: {
-        maximumFileSizeToCacheInBytes: 5000000
       }
     })
   ],

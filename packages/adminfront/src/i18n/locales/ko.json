@@ -1313,7 +1313,12 @@
     "couponCode": "쿠폰 코드",
     "manualDiscount": "수동 할인액",
     "trackingNumber": "운송장 번호",
-    "logisticsProvider": "택배사"
+    "logisticsProvider": "택배사",
+    "homeDelivery": "[EN] 宅配 (Home Delivery)",
+    "storeToStore": "[EN] 店到店 (Store to Store)",
+    "storeDetails": "[EN] 取件門市資訊 (Store Details)",
+    "storeNameId": "[EN] 門市名稱或店號 (Store Name / ID)",
+    "zipLabel": "[EN] 外送郵遞區號 (Zip Code)"
   },
   "orderDetail": {
     "fulfillOrder": "배송 정보 입력",
@@ -1866,7 +1871,11 @@
     "saveAllChanges": "[EN] 儲存所有變更"
   },
   "staffEdit": {
-    "hourlyWage": "[EN] 時薪 (Hourly Wage)"
+    "hourlyWage": "시급",
+    "salaryType": "급여 유형",
+    "hourly": "시급",
+    "monthly": "월급",
+    "monthlyWage": "월급"
   },
   "staffList": {
     "loading": "[EN] 載入中",

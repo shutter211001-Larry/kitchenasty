@@ -363,6 +363,7 @@ const createOrderSchema = z.object({
   manualTax: z.number().min(0).optional(),
   trackingNumber: z.string().optional(),
   logisticsProvider: z.string().optional(),
+  idempotencyKey: z.string().optional(),
 });
 
 function generateOrderNumber(): string {
@@ -383,8 +384,25 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
     orderType, items, comment, scheduledAt, address, 
     guestName, guestEmail, guestPhone, loyaltyPointsRedeem,
     userLat, userLon, locationId, honeypot, couponCode, tableName, groupSessionId, frozenDeliveryMethod,
-    manualDiscount, manualDeliveryFee, manualTax, trackingNumber, logisticsProvider
+    manualDiscount, manualDeliveryFee, manualTax, trackingNumber, logisticsProvider, idempotencyKey
   } = parsed.data;
+
+  if (idempotencyKey) {
+    const existingOrder = await prisma.order.findUnique({
+      where: { idempotencyKey },
+      include: {
+        items: { include: { menuItem: true, options: true } },
+        address: true,
+        location: true,
+        customer: true,
+      }
+    });
+    if (existingOrder) {
+      // Idempotency check: order already exists, return it immediately without re-processing
+      res.json({ success: true, data: existingOrder });
+      return;
+    }
+  }
 
   // HONEYPOT check: Bots often fill all fields. If this hidden field is filled, reject it silently or with a generic error.
   if (honeypot) {
@@ -990,6 +1008,7 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
   const order = await (prisma.order.create as any)({
     data: {
       orderNumber: generateOrderNumber(),
+      idempotencyKey,
       pickupNumber,
       customerId,
       locationId: location.id,

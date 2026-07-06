@@ -32,14 +32,21 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
   return data;
 }
 
+function withIdempotency(body: unknown) {
+  if (body && typeof body === 'object' && !Array.isArray(body)) {
+    return { ...body, idempotencyKey: crypto.randomUUID() };
+  }
+  return body;
+}
+
 export const api = {
   get: <T>(path: string) => request<T>(path),
   post: <T>(path: string, body: unknown) =>
-    request<T>(path, { method: 'POST', body: JSON.stringify(body) }),
+    request<T>(path, { method: 'POST', body: JSON.stringify(withIdempotency(body)) }),
   patch: <T>(path: string, body: unknown) =>
-    request<T>(path, { method: 'PATCH', body: JSON.stringify(body) }),
+    request<T>(path, { method: 'PATCH', body: JSON.stringify(withIdempotency(body)) }),
   put: <T>(path: string, body: unknown) =>
-    request<T>(path, { method: 'PUT', body: JSON.stringify(body) }),
+    request<T>(path, { method: 'PUT', body: JSON.stringify(withIdempotency(body)) }),
   delete: <T>(path: string) =>
     request<T>(path, { method: 'DELETE' }),
   upload: async <T>(path: string, formData: FormData): Promise<T> => {
