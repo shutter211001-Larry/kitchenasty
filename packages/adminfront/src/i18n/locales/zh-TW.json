@@ -38,7 +38,8 @@
     "attendance": "出勤打卡",
     "checkIn": "線上打卡",
     "attendanceRecords": "出勤紀錄",
-    "logout": "登出"
+    "logout": "登出",
+    "finance": "財務損益"
   },
   "staff": {
     "title": "員工管理 (Staff)",

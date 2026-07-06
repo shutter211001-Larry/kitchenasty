@@ -38,7 +38,8 @@
     "attendance": "Attendance",
     "checkIn": "Clock In",
     "attendanceRecords": "Attendance Records",
-    "logout": "Logout"
+    "logout": "Logout",
+    "finance": "การเงิน"
   },
   "staff": {
     "title": "Staff Management",
