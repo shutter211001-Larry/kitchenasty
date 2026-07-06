@@ -9,31 +9,34 @@ datasource db {
 }
 
 model User {
-  id              String    @id @default(cuid())
-  email           String    @unique
-  password        String
-  name            String
-  role            Role      @default(STAFF)
-  phone           String?
-  avatar          String?
-  isActive        Boolean   @default(true)
-  preferredLanguage String  @default("zh-TW")
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  locationId      String?
-  lineDisplayName String?
-  lineUserId      String?   @unique
-  hourlyWage      Float     @default(0)
-  salaryType      SalaryType @default(HOURLY)
-  monthlyWage     Float     @default(0)
-  assignedOrders  Order[]       @relation("AssignedStaff")
-  sentMessages    ChatMessage[] @relation("SentMessages")
-  location        Location?     @relation(fields: [locationId], references: [id])
-  attendances     StaffAttendance[]
-  correctionRequests AttendanceCorrectionRequest[]
+  id                  String                        @id @default(cuid())
+  email               String                        @unique
+  password            String
+  name                String
+  role                Role                          @default(STAFF)
+  phone               String?
+  avatar              String?
+  isActive            Boolean                       @default(true)
+  preferredLanguage   String                        @default("zh-TW")
+  createdAt           DateTime                      @default(now())
+  updatedAt           DateTime                      @updatedAt
+  locationId          String?
+  lineDisplayName     String?
+  lineUserId          String?                       @unique
+  hourlyWage          Float                         @default(0)
+  salaryType          SalaryType                    @default(HOURLY)
+  monthlyWage         Float                         @default(0)
+  assignedOrders      Order[]                       @relation("AssignedStaff")
+  sentMessages        ChatMessage[]                 @relation("SentMessages")
+  location            Location?                     @relation(fields: [locationId], references: [id])
+  attendances         StaffAttendance[]
+  correctionRequests  AttendanceCorrectionRequest[]
   approvedCorrections AttendanceCorrectionRequest[] @relation("ManagerApprovedCorrections")
-  leaves          LeaveRequest[]
-  approvedLeaves  LeaveRequest[] @relation("ManagerApprovedLeaves")
+  leaves              LeaveRequest[]
+  approvedLeaves      LeaveRequest[]                @relation("ManagerApprovedLeaves")
+  jobRoles            JobRole[]                     @relation("UserJobRoles")
+  availabilities      UserAvailability[]
+  shifts              Shift[]
 
   @@map("users")
 }
@@ -49,35 +52,35 @@ model StaffPasswordResetToken {
 }
 
 model Customer {
-  id                  String               @id @default(cuid())
-  email               String?              @unique
-  password            String?
-  name                String
-  phone               String?
-  address             String?
-  isEmployee          Boolean              @default(false)
-  isGuest             Boolean              @default(false)
-  createdAt           DateTime             @default(now())
-  updatedAt           DateTime             @updatedAt
-  groupId             String?
-  loyaltyPoints       Int                  @default(0)
-  isWhitelisted       Boolean              @default(false)
-  isBlacklisted       Boolean              @default(false)
-  expoPushToken       String?
-  lineDisplayName     String?
-  lineUserId          String?              @unique
-  facebookId          String?              @unique
-  googleEmail         String?
-  googleId            String?              @unique
+  id                        String               @id @default(cuid())
+  email                     String?              @unique
+  password                  String?
+  name                      String
+  phone                     String?
+  address                   String?
+  isEmployee                Boolean              @default(false)
+  isGuest                   Boolean              @default(false)
+  createdAt                 DateTime             @default(now())
+  updatedAt                 DateTime             @updatedAt
+  groupId                   String?
+  loyaltyPoints             Int                  @default(0)
+  isWhitelisted             Boolean              @default(false)
+  isBlacklisted             Boolean              @default(false)
+  expoPushToken             String?
+  lineDisplayName           String?
+  lineUserId                String?              @unique
+  facebookId                String?              @unique
+  googleEmail               String?
+  googleId                  String?              @unique
   emailNotificationsEnabled Boolean              @default(true)
   lineNotificationsEnabled  Boolean              @default(true)
-  addresses           Address[]
-  cookieConsents      CookieConsent[]
-  group               CustomerGroup?       @relation(fields: [groupId], references: [id])
-  loyaltyTransactions LoyaltyTransaction[]
-  orders              Order[]
-  reservations        Reservation[]
-  reviews             Review[]
+  addresses                 Address[]
+  cookieConsents            CookieConsent[]
+  group                     CustomerGroup?       @relation(fields: [groupId], references: [id])
+  loyaltyTransactions       LoyaltyTransaction[]
+  orders                    Order[]
+  reservations              Reservation[]
+  reviews                   Review[]
 
   @@map("customers")
 }
@@ -114,52 +117,60 @@ model Address {
 }
 
 model Location {
-  id               String          @id @default(cuid())
-  name             String
-  slug             String          @unique
-  description      String?
-  phone            String?
-  email            String?
-  address          String
-  city             String
-  state            String?
-  postalCode       String
-  country          String          @default("US")
-  lat              Float?
-  lng              Float?
-  image            String?
-  isActive         Boolean         @default(true)
-  deliveryEnabled  Boolean         @default(true)
-  pickupEnabled    Boolean         @default(true)
-  minOrderDelivery Float           @default(0)
-  minOrderPickup   Float           @default(0)
-  deliveryLeadTime Int             @default(30)
-  pickupLeadTime   Int             @default(15)
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @updatedAt
-  isBusy           Boolean         @default(false)
-  busyMessage      String?
-  owner            String?         @default("未指派")
-  royaltyRate      Float?          @default(5.0)
-  hourlyNationalHolidayMultiplier Float @default(2.0)
-  monthlyNationalHolidayOvertime Boolean @default(true)
-  apiEndpoint      String?
-  contractStart    String?         @default("2025-01-01")
-  contractEnd      String?         @default("2028-12-31")
-  categories       Category[]
-  deliveryZones    DeliveryZone[]
-  mealtimes        Mealtime[]
-  menuItems        MenuItem[]
-  operatingHours   OperatingHour[]
-  orders           Order[]
-  reservations     Reservation[]
-  reviews          Review[]
-  tables           Table[]
-  staff            User[]
-  coupons          Coupon[]
-  chatMessages     ChatMessage[]
-  groupSessions    GroupOrderSession[]
-  staffAttendances StaffAttendance[]
+  id                              String              @id @default(cuid())
+  name                            String
+  slug                            String              @unique
+  description                     String?
+  phone                           String?
+  email                           String?
+  address                         String
+  city                            String
+  state                           String?
+  postalCode                      String
+  country                         String              @default("US")
+  lat                             Float?
+  lng                             Float?
+  image                           String?
+  isActive                        Boolean             @default(true)
+  deliveryEnabled                 Boolean             @default(true)
+  pickupEnabled                   Boolean             @default(true)
+  minOrderDelivery                Float               @default(0)
+  minOrderPickup                  Float               @default(0)
+  deliveryLeadTime                Int                 @default(30)
+  pickupLeadTime                  Int                 @default(15)
+  createdAt                       DateTime            @default(now())
+  updatedAt                       DateTime            @updatedAt
+  isBusy                          Boolean             @default(false)
+  busyMessage                     String?
+  owner                           String?             @default("未指派")
+  royaltyRate                     Float?              @default(5.0)
+  hourlyNationalHolidayMultiplier Float               @default(2.0)
+  monthlyNationalHolidayOvertime  Boolean             @default(true)
+  enableOvertimePay               Boolean             @default(true)
+  overtimeMultiplier1             Float               @default(1.34)
+  overtimeMultiplier2             Float               @default(1.67)
+  restDayMultiplier               Float               @default(1.34)
+  regularDayMultiplier            Float               @default(2.0)
+  apiEndpoint                     String?
+  contractStart                   String?             @default("2025-01-01")
+  contractEnd                     String?             @default("2028-12-31")
+  categories                      Category[]
+  deliveryZones                   DeliveryZone[]
+  mealtimes                       Mealtime[]
+  menuItems                       MenuItem[]
+  operatingHours                  OperatingHour[]
+  orders                          Order[]
+  reservations                    Reservation[]
+  reviews                         Review[]
+  tables                          Table[]
+  staff                           User[]
+  coupons                         Coupon[]
+  chatMessages                    ChatMessage[]
+  groupSessions                   GroupOrderSession[]
+  staffAttendances                StaffAttendance[]
+  jobRoles                        JobRole[]
+  shiftRequirements               ShiftRequirement[]
+  shifts                          Shift[]
 
   @@map("locations")
 }
@@ -350,51 +361,51 @@ model MenuItemDietaryPreference {
 }
 
 model Order {
-  id                  String               @id @default(cuid())
-  orderNumber         String               @unique
-  customerId          String?
-  locationId          String
-  addressId           String?
-  orderType           OrderType
-  status              OrderStatus          @default(PENDING)
-  paymentStatus       String?
-  subtotal            Float
-  deliveryFee         Float                @default(0)
-  tax                 Float                @default(0)
-  discount            Float                @default(0)
-  tip                 Float                @default(0)
-  total               Float
-  scheduledAt         DateTime?
-  comment             String?
-  couponId            String?
-  assignedToId        String?
-  guestName           String?
-  guestEmail          String?
-  guestPhone          String?
-  createdAt           DateTime             @default(now())
-  updatedAt           DateTime             @updatedAt
-  distance            Float?
-  isRemote            Boolean              @default(false)
-  pickupNumber        String?              @db.VarChar(10)
-  userLat             Float?
-  userLon             Float?
-  language            String?              @default("zh-TW")
-  trackingNumber      String?
-  logisticsProvider   String?
+  id                   String               @id @default(cuid())
+  orderNumber          String               @unique
+  customerId           String?
+  locationId           String
+  addressId            String?
+  orderType            OrderType
+  status               OrderStatus          @default(PENDING)
+  paymentStatus        String?
+  subtotal             Float
+  deliveryFee          Float                @default(0)
+  tax                  Float                @default(0)
+  discount             Float                @default(0)
+  tip                  Float                @default(0)
+  total                Float
+  scheduledAt          DateTime?
+  comment              String?
+  couponId             String?
+  assignedToId         String?
+  guestName            String?
+  guestEmail           String?
+  guestPhone           String?
+  createdAt            DateTime             @default(now())
+  updatedAt            DateTime             @updatedAt
+  distance             Float?
+  isRemote             Boolean              @default(false)
+  pickupNumber         String?              @db.VarChar(10)
+  userLat              Float?
+  userLon              Float?
+  language             String?              @default("zh-TW")
+  trackingNumber       String?
+  logisticsProvider    String?
   frozenDeliveryMethod String?
-  loyaltyTransactions LoyaltyTransaction[]
-  items               OrderItem[]
-  address             Address?             @relation(fields: [addressId], references: [id])
-  assignedTo          User?                @relation("AssignedStaff", fields: [assignedToId], references: [id])
-  coupon              Coupon?              @relation(fields: [couponId], references: [id])
-  customer            Customer?            @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  location            Location             @relation(fields: [locationId], references: [id])
-  table               Table?               @relation(fields: [tableId], references: [id])
-  tableId             String?
-  groupId             String?
-  groupSession        GroupOrderSession?   @relation(fields: [groupId], references: [id])
-  payments            Payment[]
-  reviews             Review[]
+  loyaltyTransactions  LoyaltyTransaction[]
+  items                OrderItem[]
+  address              Address?             @relation(fields: [addressId], references: [id])
+  assignedTo           User?                @relation("AssignedStaff", fields: [assignedToId], references: [id])
+  coupon               Coupon?              @relation(fields: [couponId], references: [id])
+  customer             Customer?            @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  location             Location             @relation(fields: [locationId], references: [id])
+  table                Table?               @relation(fields: [tableId], references: [id])
+  tableId              String?
+  groupId              String?
+  groupSession         GroupOrderSession?   @relation(fields: [groupId], references: [id])
+  payments             Payment[]
+  reviews              Review[]
 
   @@index([createdAt])
   @@index([status])
@@ -450,15 +461,15 @@ model Payment {
 }
 
 model Table {
-  id           String        @id @default(cuid())
-  locationId   String
-  name         String
-  capacity     Int
-  isActive     Boolean             @default(true)
-  orders       Order[]
-  reservations Reservation[]
+  id            String              @id @default(cuid())
+  locationId    String
+  name          String
+  capacity      Int
+  isActive      Boolean             @default(true)
+  orders        Order[]
+  reservations  Reservation[]
   groupSessions GroupOrderSession[]
-  location     Location            @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  location      Location            @relation(fields: [locationId], references: [id], onDelete: Cascade)
 
   @@unique([locationId, name])
   @@map("tables")
@@ -540,18 +551,18 @@ model LoyaltyTransaction {
 }
 
 model GroupOrderSession {
-  id          String    @id @default(cuid())
-  pin         String    @db.VarChar(4)
-  locationId  String
-  tableId     String
-  status      String    @default("ACTIVE") // ACTIVE, CHECKED_OUT, CANCELLED
-  cartItems   Json      @default("[]")
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id         String   @id @default(cuid())
+  pin        String   @db.VarChar(4)
+  locationId String
+  tableId    String
+  status     String   @default("ACTIVE") // ACTIVE, CHECKED_OUT, CANCELLED
+  cartItems  Json     @default("[]")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
-  location    Location  @relation(fields: [locationId], references: [id], onDelete: Cascade)
-  table       Table     @relation(fields: [tableId], references: [id], onDelete: Cascade)
-  orders      Order[]
+  location Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  table    Table    @relation(fields: [tableId], references: [id], onDelete: Cascade)
+  orders   Order[]
 
   @@index([locationId])
   @@index([tableId])
@@ -602,27 +613,27 @@ model LegalPage {
 }
 
 model CookieCategory {
-  id          String          @id @default(cuid())
-  name        String          @unique
-  label       String
-  labelTranslations Json?
-  description String
+  id                      String          @id @default(cuid())
+  name                    String          @unique
+  label                   String
+  labelTranslations       Json?
+  description             String
   descriptionTranslations Json?
-  isRequired  Boolean         @default(false)
-  isActive    Boolean         @default(true)
-  sortOrder   Int             @default(0)
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
-  consents    CookieConsent[]
+  isRequired              Boolean         @default(false)
+  isActive                Boolean         @default(true)
+  sortOrder               Int             @default(0)
+  createdAt               DateTime        @default(now())
+  updatedAt               DateTime        @updatedAt
+  consents                CookieConsent[]
 
   @@map("cookie_categories")
 }
 
 model RegistrationBonusRecord {
-  id        String   @id @default(cuid())
-  provider  String   // 'email', 'google', 'line'
-  identifier String   // email or socialId
-  claimedAt DateTime @default(now())
+  id         String   @id @default(cuid())
+  provider   String // 'email', 'google', 'line'
+  identifier String // email or socialId
+  claimedAt  DateTime @default(now())
 
   @@unique([provider, identifier])
   @@map("registration_bonus_records")
@@ -806,19 +817,19 @@ model ChatMessage {
 }
 
 model StaffAttendance {
-  id           String    @id @default(uuid())
-  userId       String    
-  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  locationId   String?
-  location     Location? @relation(fields: [locationId], references: [id])
-  checkIn      DateTime  @default(now())
-  checkOut     DateTime?
-  lat          Float?    
-  lng          Float?    
-  device       String?   
-  isOutOfRange Boolean   @default(false)
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  id                 String                        @id @default(uuid())
+  userId             String
+  user               User                          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  locationId         String?
+  location           Location?                     @relation(fields: [locationId], references: [id])
+  checkIn            DateTime                      @default(now())
+  checkOut           DateTime?
+  lat                Float?
+  lng                Float?
+  device             String?
+  isOutOfRange       Boolean                       @default(false)
+  createdAt          DateTime                      @default(now())
+  updatedAt          DateTime                      @updatedAt
   correctionRequests AttendanceCorrectionRequest[]
 
   @@map("staff_attendance")
@@ -831,19 +842,19 @@ enum CorrectionRequestStatus {
 }
 
 model AttendanceCorrectionRequest {
-  id                    String    @id @default(uuid())
-  userId                String
-  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  attendanceId          String?
-  attendance            StaffAttendance? @relation(fields: [attendanceId], references: [id], onDelete: SetNull)
-  requestedCheckIn      DateTime?
-  requestedCheckOut     DateTime?
-  reason                String
-  status                CorrectionRequestStatus @default(PENDING)
-  managerId             String?
-  manager               User?     @relation("ManagerApprovedCorrections", fields: [managerId], references: [id])
-  createdAt             DateTime  @default(now())
-  updatedAt             DateTime  @updatedAt
+  id                String                  @id @default(uuid())
+  userId            String
+  user              User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  attendanceId      String?
+  attendance        StaffAttendance?        @relation(fields: [attendanceId], references: [id], onDelete: SetNull)
+  requestedCheckIn  DateTime?
+  requestedCheckOut DateTime?
+  reason            String
+  status            CorrectionRequestStatus @default(PENDING)
+  managerId         String?
+  manager           User?                   @relation("ManagerApprovedCorrections", fields: [managerId], references: [id])
+  createdAt         DateTime                @default(now())
+  updatedAt         DateTime                @updatedAt
 
   @@map("attendance_correction_requests")
 }
@@ -862,18 +873,82 @@ enum LeaveStatus {
 }
 
 model LeaveRequest {
-  id              String      @id @default(cuid())
-  userId          String
-  user            User        @relation(fields: [userId], references: [id])
-  leaveType       LeaveType
-  startTime       DateTime
-  endTime         DateTime
-  reason          String
-  status          LeaveStatus @default(PENDING)
-  managerId       String?
-  manager         User?       @relation("ManagerApprovedLeaves", fields: [managerId], references: [id])
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
+  id        String      @id @default(cuid())
+  userId    String
+  user      User        @relation(fields: [userId], references: [id])
+  leaveType LeaveType
+  startTime DateTime
+  endTime   DateTime
+  reason    String
+  status    LeaveStatus @default(PENDING)
+  managerId String?
+  manager   User?       @relation("ManagerApprovedLeaves", fields: [managerId], references: [id])
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
 
   @@map("leave_requests")
+}
+
+model JobRole {
+  id                String             @id @default(cuid())
+  name              String
+  locationId        String?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  users             User[]             @relation("UserJobRoles")
+  location          Location?          @relation(fields: [locationId], references: [id])
+  shiftRequirements ShiftRequirement[]
+  shifts            Shift[]
+
+  @@map("job_roles")
+}
+
+model UserAvailability {
+  id        String @id @default(cuid())
+  userId    String
+  dayOfWeek Int // 0-6 (Sun-Sat)
+  startTime String // HH:mm
+  endTime   String // HH:mm
+  user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_availabilities")
+}
+
+enum DayType {
+  WORKDAY
+  REST_DAY
+  REGULAR_OFF
+  NATIONAL_HOLIDAY
+}
+
+model ShiftRequirement {
+  id         String   @id @default(cuid())
+  locationId String
+  date       DateTime @db.Date
+  jobRoleId  String
+  startTime  String
+  endTime    String
+  count      Int
+  location   Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  jobRole    JobRole  @relation(fields: [jobRoleId], references: [id], onDelete: Cascade)
+
+  @@map("shift_requirements")
+}
+
+model Shift {
+  id         String   @id @default(cuid())
+  userId     String
+  locationId String
+  jobRoleId  String?
+  date       DateTime @db.Date
+  startTime  String?
+  endTime    String?
+  dayType    DayType  @default(WORKDAY)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  location   Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  jobRole    JobRole? @relation(fields: [jobRoleId], references: [id], onDelete: SetNull)
+
+  @@map("shifts")
 }

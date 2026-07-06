@@ -43,6 +43,11 @@ const createLocationSchema = z.object({
   })).optional(),
   hourlyNationalHolidayMultiplier: z.number().min(1).default(2.0),
   monthlyNationalHolidayOvertime: z.boolean().default(true),
+  enableOvertimePay: z.boolean().default(true),
+  overtimeMultiplier1: z.number().min(1).default(1.34),
+  overtimeMultiplier2: z.number().min(1).default(1.67),
+  restDayMultiplier: z.number().min(1).default(1.34),
+  regularDayMultiplier: z.number().min(1).default(2.0),
 });
 
 const updateLocationSchema = createLocationSchema.partial().omit({ slug: true });

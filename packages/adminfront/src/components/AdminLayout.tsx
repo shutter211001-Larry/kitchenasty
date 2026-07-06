@@ -84,6 +84,8 @@ const navItems: NavItem[] = [
       { path: '/attendance/leave', label: 'attendance.leaveTitle' },
       { path: '/attendance/qr-generator', label: '產生 QR Code', roles: ['SUPER_ADMIN', 'MANAGER'] },
       { path: '/attendance/payroll', label: '薪資結算', roles: ['SUPER_ADMIN', 'MANAGER'] },
+      { path: '/attendance/job-roles', label: '職位設定', roles: ['SUPER_ADMIN', 'MANAGER'] },
+      { path: '/attendance/roster', label: '排班管理', roles: ['SUPER_ADMIN', 'MANAGER'] },
     ],
   },
 ];

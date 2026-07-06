@@ -237,6 +237,11 @@ export const getPayroll = async (req: Request, res: Response) => {
           checkIn: { gte: startDate, lte: endDate },
           checkOut: { not: null }
         }
+      },
+      shifts: {
+        where: {
+          date: { gte: startDate, lte: endDate }
+        }
       }
     }
   });
@@ -247,26 +252,51 @@ export const getPayroll = async (req: Request, res: Response) => {
     let totalHours = 0;
     let baseSalary = 0;
     let holidayOvertimePay = 0;
+    let restDayOvertimePay = 0;
+    let regularDayOvertimePay = 0;
+    let dailyOvertimePay = 0;
     let leaveDeduction = 0;
     
+    const loc = user.location;
+    const hourlyRate = user.salaryType === 'HOURLY' ? user.hourlyWage : user.monthlyWage / 240;
+
     for (const record of user.attendances) {
       if (!record.checkOut) continue;
       const durationMs = record.checkOut.getTime() - record.checkIn.getTime();
       const durationHours = durationMs / (1000 * 60 * 60);
       
-      const isHoliday = await isNationalHoliday(record.checkIn);
-      const hourlyMultiplier = isHoliday ? (user.location?.hourlyNationalHolidayMultiplier || 2.0) : 1.0;
+      const recordDate = new Date(record.checkIn);
+      recordDate.setHours(0, 0, 0, 0);
       
-      if (user.salaryType === 'HOURLY') {
-        totalHours += durationHours;
-        if (isHoliday) {
-          holidayOvertimePay += durationHours * user.hourlyWage * (hourlyMultiplier - 1);
+      const shift = user.shifts.find(s => s.date.getTime() === recordDate.getTime());
+      let dayType = shift?.dayType || 'WORKDAY';
+      
+      const isHoliday = await isNationalHoliday(record.checkIn);
+      if (isHoliday) dayType = 'NATIONAL_HOLIDAY';
+      
+      totalHours += durationHours;
+
+      if (dayType === 'NATIONAL_HOLIDAY') {
+        const mult = loc?.hourlyNationalHolidayMultiplier ?? 2.0;
+        if (user.salaryType === 'HOURLY' || (loc?.monthlyNationalHolidayOvertime ?? true)) {
+          holidayOvertimePay += durationHours * hourlyRate * (mult - 1);
         }
+      } else if (dayType === 'REST_DAY') {
+        const mult = loc?.restDayMultiplier ?? 1.34;
+        restDayOvertimePay += durationHours * hourlyRate * (mult - 1);
+      } else if (dayType === 'REGULAR_OFF') {
+        const mult = loc?.regularDayMultiplier ?? 2.0;
+        regularDayOvertimePay += durationHours * hourlyRate * (mult - 1);
       } else {
-        totalHours += durationHours;
-        if (isHoliday && (user.location?.monthlyNationalHolidayOvertime ?? true)) {
-          const hourlyRate = user.monthlyWage / 240;
-          holidayOvertimePay += durationHours * hourlyRate * (hourlyMultiplier - 1); 
+        // WORKDAY Daily Overtime
+        if (loc?.enableOvertimePay && durationHours > 8) {
+          const mult1 = loc?.overtimeMultiplier1 ?? 1.34;
+          const mult2 = loc?.overtimeMultiplier2 ?? 1.67;
+          
+          let ot1Hours = Math.min(2, durationHours - 8);
+          let ot2Hours = Math.max(0, durationHours - 10);
+          
+          dailyOvertimePay += (ot1Hours * hourlyRate * (mult1 - 1)) + (ot2Hours * hourlyRate * (mult2 - 1));
         }
       }
     }
@@ -276,7 +306,6 @@ export const getPayroll = async (req: Request, res: Response) => {
     } else {
       baseSalary = user.monthlyWage;
       
-      const hourlyRate = user.monthlyWage / 240;
       const minuteRate = hourlyRate / 60;
       
       for (const leave of user.leaves) {
@@ -289,7 +318,7 @@ export const getPayroll = async (req: Request, res: Response) => {
       }
     }
 
-    const totalSalary = Math.round(baseSalary + holidayOvertimePay - leaveDeduction);
+    const totalSalary = Math.round(baseSalary + holidayOvertimePay + restDayOvertimePay + regularDayOvertimePay + dailyOvertimePay - leaveDeduction);
 
     if (totalHours > 0 || user.salaryType === 'MONTHLY') {
       payrollData.push({
@@ -301,6 +330,9 @@ export const getPayroll = async (req: Request, res: Response) => {
         totalHours: Number(totalHours.toFixed(2)),
         baseSalary: Math.round(baseSalary),
         holidayOvertimePay: Math.round(holidayOvertimePay),
+        restDayOvertimePay: Math.round(restDayOvertimePay),
+        regularDayOvertimePay: Math.round(regularDayOvertimePay),
+        dailyOvertimePay: Math.round(dailyOvertimePay),
         leaveDeduction: Math.round(leaveDeduction),
         totalSalary
       });

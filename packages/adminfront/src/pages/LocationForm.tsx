@@ -42,6 +42,11 @@ interface LocationData {
   lng?: number;
   hourlyNationalHolidayMultiplier: number;
   monthlyNationalHolidayOvertime: boolean;
+  enableOvertimePay: boolean;
+  overtimeMultiplier1: number;
+  overtimeMultiplier2: number;
+  restDayMultiplier: number;
+  regularDayMultiplier: number;
 }
 
 const defaultHours: OperatingHour[] = Array.from({ length: 7 }).map((_, i: number) => ({
@@ -73,6 +78,11 @@ const emptyLocation: LocationData = {
   lng: 0,
   hourlyNationalHolidayMultiplier: 2.0,
   monthlyNationalHolidayOvertime: true,
+  enableOvertimePay: true,
+  overtimeMultiplier1: 1.34,
+  overtimeMultiplier2: 1.67,
+  restDayMultiplier: 1.34,
+  regularDayMultiplier: 2.0,
 };
 
 export default function LocationForm() {
@@ -135,6 +145,11 @@ export default function LocationForm() {
           lng: loc.lng || 0,
           hourlyNationalHolidayMultiplier: loc.hourlyNationalHolidayMultiplier ?? 2.0,
           monthlyNationalHolidayOvertime: loc.monthlyNationalHolidayOvertime ?? true,
+          enableOvertimePay: loc.enableOvertimePay ?? true,
+          overtimeMultiplier1: loc.overtimeMultiplier1 ?? 1.34,
+          overtimeMultiplier2: loc.overtimeMultiplier2 ?? 1.67,
+          restDayMultiplier: loc.restDayMultiplier ?? 1.34,
+          regularDayMultiplier: loc.regularDayMultiplier ?? 2.0,
         });
         if (loc.operatingHours?.length) {
           setHours(loc.operatingHours.map((h: any) => ({
@@ -618,6 +633,129 @@ export default function LocationForm() {
           </div>
         </section>
 
+        {/* Payroll Configuration */}
+        <section className="bg-white rounded-lg shadow p-6">
+          <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center gap-2">
+            <span className="text-xl">💰</span>
+            薪資與排班設定 (Payroll & Roster Settings)
+          </h3>
+          <p className="text-sm text-gray-500 mb-6">
+            這些設定會影響系統自動計薪的結果。預設值為符合台灣勞基法的合法標準，您可以依據門市實際運作狀況進行調整。
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                id="enableOvertimePay"
+                checked={form.enableOvertimePay}
+                onChange={(e) => setForm({ ...form, enableOvertimePay: e.target.checked })}
+                className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+              />
+              <label htmlFor="enableOvertimePay" className="ml-2 block text-sm text-gray-900">
+                啟用平日加班費 (超過8小時)
+              </label>
+            </div>
+            
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                id="monthlyNationalHolidayOvertime"
+                checked={form.monthlyNationalHolidayOvertime}
+                onChange={(e) => setForm({ ...form, monthlyNationalHolidayOvertime: e.target.checked })}
+                className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+              />
+              <label htmlFor="monthlyNationalHolidayOvertime" className="ml-2 block text-sm text-gray-900">
+                月薪人員國定假日出勤加給
+              </label>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700">平日加班費倍率 (第9~10小時)</label>
+              <div className="mt-1 relative rounded-md shadow-sm">
+                <input
+                  type="number"
+                  step="0.01"
+                  value={form.overtimeMultiplier1}
+                  onChange={(e) => setForm({ ...form, overtimeMultiplier1: parseFloat(e.target.value) || 1.0 })}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
+                />
+                <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                  <span className="text-gray-500 sm:text-sm">倍</span>
+                </div>
+              </div>
+              <p className="mt-1 text-xs text-gray-500">法定預設: 1.34倍</p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700">平日加班費倍率 (第11~12小時)</label>
+              <div className="mt-1 relative rounded-md shadow-sm">
+                <input
+                  type="number"
+                  step="0.01"
+                  value={form.overtimeMultiplier2}
+                  onChange={(e) => setForm({ ...form, overtimeMultiplier2: parseFloat(e.target.value) || 1.0 })}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
+                />
+                <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                  <span className="text-gray-500 sm:text-sm">倍</span>
+                </div>
+              </div>
+              <p className="mt-1 text-xs text-gray-500">法定預設: 1.67倍</p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700">休息日出勤倍率</label>
+              <div className="mt-1 relative rounded-md shadow-sm">
+                <input
+                  type="number"
+                  step="0.01"
+                  value={form.restDayMultiplier}
+                  onChange={(e) => setForm({ ...form, restDayMultiplier: parseFloat(e.target.value) || 1.0 })}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
+                />
+                <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                  <span className="text-gray-500 sm:text-sm">倍</span>
+                </div>
+              </div>
+              <p className="mt-1 text-xs text-gray-500">法定預設: 前2小時1.34，後6小時1.67 (此處簡化為統一倍率，建議填1.34)</p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700">例假日出勤倍率</label>
+              <div className="mt-1 relative rounded-md shadow-sm">
+                <input
+                  type="number"
+                  step="0.01"
+                  value={form.regularDayMultiplier}
+                  onChange={(e) => setForm({ ...form, regularDayMultiplier: parseFloat(e.target.value) || 1.0 })}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
+                />
+                <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                  <span className="text-gray-500 sm:text-sm">倍</span>
+                </div>
+              </div>
+              <p className="mt-1 text-xs text-gray-500">法定預設: 2.0倍 (雙倍薪資)</p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700">國定假日出勤倍率</label>
+              <div className="mt-1 relative rounded-md shadow-sm">
+                <input
+                  type="number"
+                  step="0.01"
+                  value={form.hourlyNationalHolidayMultiplier}
+                  onChange={(e) => setForm({ ...form, hourlyNationalHolidayMultiplier: parseFloat(e.target.value) || 1.0 })}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
+                />
+                <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                  <span className="text-gray-500 sm:text-sm">倍</span>
+                </div>
+              </div>
+              <p className="mt-1 text-xs text-gray-500">法定預設: 2.0倍 (雙倍薪資)</p>
+            </div>
+          </div>
+        </section>
         {/* Delivery Zones */}
         <section className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center justify-between mb-4">
