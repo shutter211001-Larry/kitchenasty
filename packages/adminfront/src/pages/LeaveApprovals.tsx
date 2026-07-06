@@ -63,10 +63,6 @@ export default function LeaveApprovals() {
 
   return (
     <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">{t('attendance.leaveApprovalTitle') || '請假審核'}</h2>
-      </div>
-
       <div className="bg-white rounded shadow overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">

@@ -66,8 +66,6 @@ export default function AttendanceCorrections() {
 
   return (
     <div className="p-6">
-      <h2 className="text-2xl font-bold text-gray-900 mb-6">{t('attendanceCorrections.title')}</h2>
-
       <div className="bg-white p-4 rounded shadow mb-6 flex gap-4 items-end">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">{t('attendanceCorrections.status')}</label>

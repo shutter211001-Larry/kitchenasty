@@ -65,11 +65,10 @@ import SettingsFranchise from './pages/SettingsFranchise.js';
 import SettingsInvoice from './pages/SettingsInvoice.js';
 import Attendance from './pages/Attendance.js';
 import AttendanceRecords from './pages/AttendanceRecords.js';
-import AttendanceCorrections from './pages/AttendanceCorrections.js';
+import Leave from './pages/Leave.js';
+import Approvals from './pages/Approvals.js';
 import AttendanceQRGenerator from './pages/AttendanceQRGenerator.js';
 import AttendancePayroll from './pages/AttendancePayroll.js';
-import Leave from './pages/Leave.js';
-import LeaveApprovals from './pages/LeaveApprovals.js';
 
 import './index.css';
 
@@ -177,10 +176,9 @@ function AppRoutes() {
         {/* Attendance */}
         <Route path="/attendance" element={<Attendance />} />
         <Route path="/attendance/records" element={<RequireRole roles={['SUPER_ADMIN', 'MANAGER']}><AttendanceRecords /></RequireRole>} />
-        <Route path="/attendance/corrections" element={<RequireRole roles={['SUPER_ADMIN', 'MANAGER']}><AttendanceCorrections /></RequireRole>} />
+        <Route path="/attendance/approvals" element={<RequireRole roles={['SUPER_ADMIN', 'MANAGER']}><Approvals /></RequireRole>} />
         <Route path="/attendance/qr-generator" element={<RequireRole roles={['SUPER_ADMIN', 'MANAGER']}><AttendanceQRGenerator /></RequireRole>} />
         <Route path="/attendance/leave" element={<Leave />} />
-        <Route path="/attendance/leave-approvals" element={<RequireRole roles={['SUPER_ADMIN', 'MANAGER']}><LeaveApprovals /></RequireRole>} />
         <Route path="/attendance/payroll" element={<RequireRole roles={['SUPER_ADMIN', 'MANAGER']}><AttendancePayroll /></RequireRole>} />
       </Routes>
     </AdminLayout>
