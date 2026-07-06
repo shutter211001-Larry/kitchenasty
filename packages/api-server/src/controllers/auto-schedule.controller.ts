@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { z } from 'zod';
 import prisma from '../lib/db.js';
+import { getMergedRequirements } from './roster.controller.js';
 
 const autoScheduleSchema = z.object({
   locationId: z.string().min(1),
@@ -26,14 +27,8 @@ export async function autoSchedule(req: Request, res: Response): Promise<void> {
   const start = new Date(startDate);
   const end = new Date(endDate);
 
-  // 1. Fetch requirements
-  const requirements = await prisma.shiftRequirement.findMany({
-    where: {
-      locationId,
-      date: { gte: start, lte: end },
-    },
-    orderBy: [{ date: 'asc' }, { startTime: 'asc' }],
-  });
+  // 1. Fetch requirements (Merged)
+  const requirements = await getMergedRequirements(locationId, start, end);
 
   // 2. Fetch users with roles and availabilities
   const users = await prisma.user.findMany({

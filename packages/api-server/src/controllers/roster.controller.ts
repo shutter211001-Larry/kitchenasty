@@ -164,21 +164,11 @@ export async function saveAvailabilities(req: Request, res: Response): Promise<v
 // HANDLERS (REQUIREMENTS)
 // ============================================================
 
-export async function listRequirements(req: Request, res: Response): Promise<void> {
-  const { locationId, startDate, endDate } = req.query;
-
-  if (!locationId || !startDate || !endDate) {
-    res.status(400).json({ success: false, error: 'Missing parameters' });
-    return;
-  }
-
-  const start = new Date(startDate as string);
-  const end = new Date(endDate as string);
-
+export async function getMergedRequirements(locationId: string, start: Date, end: Date) {
   // 1. Get specific date overrides
   const specificReqs = await prisma.shiftRequirement.findMany({
     where: {
-      locationId: locationId as string,
+      locationId,
       date: { gte: start, lte: end },
     },
     include: { jobRole: true },
@@ -190,7 +180,7 @@ export async function listRequirements(req: Request, res: Response): Promise<voi
 
   // 2. Get weekly template
   const weeklyReqs = await prisma.weeklyShiftRequirement.findMany({
-    where: { locationId: locationId as string },
+    where: { locationId },
     include: { jobRole: true },
   });
 
@@ -225,6 +215,22 @@ export async function listRequirements(req: Request, res: Response): Promise<voi
     if (a.date.getTime() !== b.date.getTime()) return a.date.getTime() - b.date.getTime();
     return a.startTime.localeCompare(b.startTime);
   });
+
+  return finalReqs;
+}
+
+export async function listRequirements(req: Request, res: Response): Promise<void> {
+  const { locationId, startDate, endDate } = req.query;
+
+  if (!locationId || !startDate || !endDate) {
+    res.status(400).json({ success: false, error: 'Missing parameters' });
+    return;
+  }
+
+  const start = new Date(startDate as string);
+  const end = new Date(endDate as string);
+
+  const finalReqs = await getMergedRequirements(locationId as string, start, end);
 
   res.json({ success: true, data: finalReqs });
 }
