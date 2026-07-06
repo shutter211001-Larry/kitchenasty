@@ -3,6 +3,7 @@
 ## 1. i18n Sync Requirement
 **Trigger**: When modifying translation JSON files, OR when adding new UI labels, menu items, or texts in the codebase that use translation keys (e.g., `t('some.key')` or `label: 'nav.someKey'`).
 **Rule**: This project supports 13 languages. Whenever you reference a NEW translation key in the code, you MUST immediately check if it exists in the translation files. You MUST ensure that the key is added to ALL 13 language files (`en.json`, `es.json`, `fr.json`, `de.json`, `it.json`, `ja.json`, `ko.json`, `pt.json`, `th.json`, `tl.json`, `vi.json`, `id.json`, `zh-TW.json`) located in `packages/adminfront/src/i18n/locales/` to keep the i18n system fully synced. Do NOT leave the keys undefined.
+- **No Language Prefixes**: When automatically injecting fallback values or testing translations into the JSON files, DO NOT prepend the strings with language tags like `[ZH-TW]` or `[EN]`. Insert the raw string or English fallback directly so the UI remains clean.
 
 ## 2. Prisma Migration Requirement
 **Trigger**: When making any changes to the Prisma schema (`schema.prisma` or `shutter-erp.prisma`).
