@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { api } from '../lib/api.js';
 import { useAuth } from '../context/AuthContext.js';
 import { Link } from 'react-router-dom';
+import { List, Calendar as CalendarIcon, Printer } from 'lucide-react';
 import StaffRosterSettingsModal from '../components/StaffRosterSettingsModal.js';
 import { PageHeader } from '../components/layout/PageHeader';
 import { PageContent } from '../components/layout/PageContent';
@@ -49,6 +50,7 @@ export default function RosterManagement() {
   const [generating, setGenerating] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [isRequirementsModalOpen, setIsRequirementsModalOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<'list' | 'calendar'>('calendar');
 
   // Initialize dates to current week
   useEffect(() => {
@@ -160,6 +162,76 @@ export default function RosterManagement() {
     }
   };
 
+  const renderCalendarView = () => {
+    // Group `combinedShifts.combined` by Date string
+    if (!startDate || !endDate) return null;
+    
+    const days: { date: string, shifts: DisplayShift[] }[] = [];
+    let current = new Date(startDate);
+    const end = new Date(endDate);
+    
+    while (current <= end) {
+      const dStr = current.toISOString().split('T')[0];
+      const dayShifts = combinedShifts.combined.filter(shift => new Date(shift.date).toISOString().split('T')[0] === dStr);
+      days.push({ date: dStr, shifts: dayShifts });
+      current.setDate(current.getDate() + 1);
+    }
+
+    return (
+      <div id="printable-roster" className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden print:border-none print:shadow-none mb-6">
+        <div className="p-4 border-b border-gray-200 bg-gray-50 flex justify-between items-center print:bg-white print:border-b-2 print:border-gray-900 hidden print:flex">
+          <h2 className="text-xl font-bold text-gray-900">
+            門市排班表 ({new Date(startDate).toLocaleDateString()} - {new Date(endDate).toLocaleDateString()})
+          </h2>
+        </div>
+        <div 
+          className="divide-y md:divide-y-0 md:divide-x divide-gray-200 border-b border-gray-200 print:divide-y-0 print:divide-x"
+          style={{ display: 'grid', gridTemplateColumns: `repeat(${days.length || 1}, minmax(0, 1fr))` }}
+        >
+          {days.map((day, i) => (
+            <div key={i} className="min-h-[400px] flex flex-col bg-white print:break-inside-avoid">
+              <div className="bg-gray-50 p-3 text-center border-b border-gray-200 print:bg-gray-100">
+                <div className="font-bold text-sm text-gray-800">
+                  {new Date(day.date).toLocaleDateString('zh-TW', { weekday: 'short' })}
+                </div>
+                <div className="text-xs text-gray-500">
+                  {new Date(day.date).toLocaleDateString('zh-TW', { month: 'numeric', day: 'numeric' })}
+                </div>
+              </div>
+              <div className="p-2 flex-1 space-y-2 overflow-y-auto max-h-[600px] print:max-h-none print:overflow-visible">
+                {day.shifts.map(shift => (
+                  <div key={shift.id} className={`p-2.5 rounded-lg border text-xs shadow-sm ${shift.isShortage ? 'bg-red-50 border-red-200' : 'bg-white border-gray-200'}`}>
+                    <div className="flex items-center gap-1.5 mb-1.5">
+                      {!shift.isShortage && (
+                        <div className="w-5 h-5 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center text-[10px] font-bold">
+                          {shift.user?.name.charAt(0)}
+                        </div>
+                      )}
+                      <div className={`font-bold truncate ${shift.isShortage ? 'text-red-700' : 'text-gray-900'}`}>
+                        {shift.user?.name}
+                      </div>
+                    </div>
+                    <div className="flex flex-col gap-0.5 mt-1">
+                      <div className="text-gray-500 font-medium">
+                        {shift.jobRole?.name || '-'}
+                      </div>
+                      <div className="text-gray-600 font-mono font-medium text-[11px] bg-gray-50 px-1.5 py-0.5 rounded inline-block w-fit">
+                        {shift.startTime} - {shift.endTime}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                {day.shifts.length === 0 && (
+                  <div className="text-gray-300 text-center py-6 text-xs font-medium">無班次</div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="pb-12">
       <PageHeader
@@ -256,40 +328,68 @@ export default function RosterManagement() {
         >
           重新整理
         </button>
+
+        <div className="flex-1"></div>
+        
+        <div className="flex items-center bg-gray-100 p-1 rounded-lg">
+          <button
+            onClick={() => setViewMode('list')}
+            className={`px-3 py-1.5 flex items-center gap-1.5 rounded-md text-sm font-medium transition-colors ${viewMode === 'list' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+          >
+            <List className="w-4 h-4" />
+            列表視圖
+          </button>
+          <button
+            onClick={() => setViewMode('calendar')}
+            className={`px-3 py-1.5 flex items-center gap-1.5 rounded-md text-sm font-medium transition-colors ${viewMode === 'calendar' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+          >
+            <CalendarIcon className="w-4 h-4" />
+            月曆視圖
+          </button>
+        </div>
+
+        <button
+          onClick={() => window.print()}
+          className="px-4 py-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors"
+        >
+          <Printer className="w-4 h-4" />
+          列印班表
+        </button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Requirements Column */}
-        <div className="lg:col-span-1">
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-            <div className="px-4 py-3 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
-              <h2 className="font-semibold text-gray-800">人力需求配置</h2>
-              <span className="text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded-full">{requirements.length} 筆</span>
-            </div>
-            <div className="p-4 max-h-[600px] overflow-y-auto">
-              {loading ? (
-                <div className="text-center py-8 text-gray-400">載入中...</div>
-              ) : requirements.length === 0 ? (
-                <div className="text-center py-8 text-gray-400">無人力需求設定</div>
-              ) : (
-                <div className="space-y-3">
-                  {requirements.map((req) => (
-                    <div key={req.id} className="p-3 bg-gray-50 rounded-lg border border-gray-100 flex justify-between items-center hover:border-primary-200 transition-colors">
-                      <div>
-                        <div className="text-sm font-bold text-gray-900">{new Date(req.date).toLocaleDateString()}</div>
-                        <div className="text-xs text-gray-500 mt-1">{req.jobRole?.name || '無指定'}</div>
+      {viewMode === 'list' ? (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 print:hidden">
+          {/* Requirements Column */}
+          <div className="lg:col-span-1">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+              <div className="px-4 py-3 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
+                <h2 className="font-semibold text-gray-800">人力需求配置</h2>
+                <span className="text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded-full">{requirements.length} 筆</span>
+              </div>
+              <div className="p-4 max-h-[600px] overflow-y-auto">
+                {loading ? (
+                  <div className="text-center py-8 text-gray-400">載入中...</div>
+                ) : requirements.length === 0 ? (
+                  <div className="text-center py-8 text-gray-400">無人力需求設定</div>
+                ) : (
+                  <div className="space-y-3">
+                    {requirements.map((req) => (
+                      <div key={req.id} className="p-3 bg-gray-50 rounded-lg border border-gray-100 flex justify-between items-center hover:border-primary-200 transition-colors">
+                        <div>
+                          <div className="text-sm font-bold text-gray-900">{new Date(req.date).toLocaleDateString()}</div>
+                          <div className="text-xs text-gray-500 mt-1">{req.jobRole?.name || '無指定'}</div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-sm font-mono text-primary-700">{req.startTime} - {req.endTime}</div>
+                          <div className="text-xs font-semibold text-gray-600 mt-1">需 {req.count} 人</div>
+                        </div>
                       </div>
-                      <div className="text-right">
-                        <div className="text-sm font-mono text-primary-700">{req.startTime} - {req.endTime}</div>
-                        <div className="text-xs font-semibold text-gray-600 mt-1">需 {req.count} 人</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-        </div>
 
         {/* Shifts Column */}
         <div className="lg:col-span-2">
@@ -362,8 +462,25 @@ export default function RosterManagement() {
           </div>
         </div>
       </div>
+      ) : (
+        renderCalendarView()
+      )}
 
-      </div>
+      {viewMode === 'calendar' && (
+        <style>
+          {`
+            @media print {
+              body * { visibility: hidden; }
+              #printable-roster, #printable-roster * { visibility: visible; }
+              #printable-roster { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 0; }
+              /* Hide the sidebar and top navbar space for printing */
+              #printable-roster { margin-top: -80px; margin-left: -256px; } 
+            }
+          `}
+        </style>
+      )}
+
+        </div>
       </PageContent>
       <StaffRosterSettingsModal
         isOpen={isSettingsModalOpen}
