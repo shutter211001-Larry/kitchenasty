@@ -211,8 +211,18 @@ export const getPayroll = async (req: Request, res: Response) => {
   const startDate = new Date(Number(year), Number(month) - 1, 1);
   const endDate = new Date(Number(year), Number(month), 0, 23, 59, 59, 999);
 
+  const where: any = { isActive: true };
+  if (req.user?.role === 'MANAGER') {
+    const manager = await prisma.user.findUnique({ where: { id: req.user.id }});
+    if (manager?.locationId) {
+      where.locationId = manager.locationId;
+    } else {
+      where.locationId = 'unassigned-location';
+    }
+  }
+
   const users = await prisma.user.findMany({
-    where: { isActive: true },
+    where,
     include: {
       location: true,
       leaves: {
