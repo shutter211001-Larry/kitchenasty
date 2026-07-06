@@ -38,6 +38,7 @@ model User {
   approvedLeaves      LeaveRequest[]                @relation("ManagerApprovedLeaves")
   jobRoles            JobRole[]                     @relation("UserJobRoles")
   availabilities      UserAvailability[]
+  timeOffs            StaffTimeOff[]
   shifts              Shift[]
 
   @@map("users")
@@ -916,6 +917,17 @@ model UserAvailability {
   user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("user_availabilities")
+}
+
+model StaffTimeOff {
+  id        String   @id @default(cuid())
+  userId    String
+  date      DateTime @db.Date
+  reason    String?
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
+  @@map("staff_time_off")
 }
 
 enum DayType {

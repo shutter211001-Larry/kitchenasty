@@ -1880,7 +1880,10 @@
     "schedulingSettings": "[ES] 排班設定 (Scheduling Settings)",
     "maxDaysPerWeek": "[ES] 每週最多排班天數 (Max Days per Week)",
     "maxHoursPerWeek": "[ES] 每週最多排班時數 (Max Hours per Week)",
-    "availability": "[ES] 排班可用時段 (Available Days & Time Slots)"
+    "availability": "[ES] 排班可用時段 (Available Days & Time Slots)",
+    "timeOffTitle": "[ES] 指定休假/禁排日期 (Specific Dates Off)",
+    "timeOffReason": "[ES] 原因（選填）(Reason - Optional)",
+    "timeOffAdd": "[ES] 新增日期 (Add Date)"
   },
   "staffList": {
     "loading": "[EN] 載入中",

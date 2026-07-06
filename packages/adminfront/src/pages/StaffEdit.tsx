@@ -22,6 +22,10 @@ interface Staff {
     startTime: string;
     endTime: string;
   }>;
+  timeOffs: Array<{
+    date: string;
+    reason: string | null;
+  }>;
   location: { id: string; name: string } | null;
 }
 
@@ -48,6 +52,9 @@ export default function StaffEdit() {
   const [maxDaysPerWeek, setMaxDaysPerWeek] = useState(5);
   const [maxHoursPerWeek, setMaxHoursPerWeek] = useState(40);
   const [availabilities, setAvailabilities] = useState<Array<{ dayOfWeek: number, startTime: string, endTime: string }>>([]);
+  const [timeOffs, setTimeOffs] = useState<Array<{ date: string, reason: string | null }>>([]);
+  const [newTimeOffDate, setNewTimeOffDate] = useState('');
+  const [newTimeOffReason, setNewTimeOffReason] = useState('');
   const [isActive, setIsActive] = useState(true);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -75,6 +82,7 @@ export default function StaffEdit() {
         setMaxDaysPerWeek(s.maxDaysPerWeek ?? 5);
         setMaxHoursPerWeek(s.maxHoursPerWeek ?? 40);
         setAvailabilities(s.availabilities || []);
+        setTimeOffs((s.timeOffs || []).map((t: any) => ({ ...t, date: new Date(t.date).toISOString().split('T')[0] })));
         setIsActive(s.isActive);
         if (locData.success) setLocations(locData.data || []);
       })
@@ -102,6 +110,7 @@ export default function StaffEdit() {
           maxDaysPerWeek: Number(maxDaysPerWeek),
           maxHoursPerWeek: Number(maxHoursPerWeek),
           availabilities,
+          timeOffs,
           isActive,
         }),
       });
@@ -339,6 +348,64 @@ export default function StaffEdit() {
                 </div>
               );
             })}
+          </div>
+
+          <div className="mt-6">
+            <label className="block text-sm font-medium text-gray-700 mb-2">{t('staffEdit.timeOffTitle') || 'Specific Dates Off (指定休假/禁排日期)'}</label>
+            <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 space-y-4">
+              <div className="flex flex-wrap items-center gap-2">
+                <input
+                  type="date"
+                  value={newTimeOffDate}
+                  onChange={(e) => setNewTimeOffDate(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none"
+                />
+                <input
+                  type="text"
+                  placeholder={t('staffEdit.timeOffReason') || 'Reason (Optional)'}
+                  value={newTimeOffReason}
+                  onChange={(e) => setNewTimeOffReason(e.target.value)}
+                  className="flex-1 min-w-[200px] px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!newTimeOffDate) return;
+                    // Prevent duplicates
+                    if (timeOffs.some(t => t.date === newTimeOffDate)) return;
+                    setTimeOffs([...timeOffs, { date: newTimeOffDate, reason: newTimeOffReason || null }]);
+                    setNewTimeOffDate('');
+                    setNewTimeOffReason('');
+                  }}
+                  disabled={!newTimeOffDate}
+                  className="px-4 py-2 bg-primary-100 text-primary-700 rounded-lg text-sm font-medium hover:bg-primary-200 transition-colors disabled:opacity-50"
+                >
+                  {t('staffEdit.timeOffAdd') || 'Add Date'}
+                </button>
+              </div>
+
+              {timeOffs.length > 0 && (
+                <ul className="space-y-2 mt-4">
+                  {timeOffs.map((to, i) => (
+                    <li key={i} className="flex items-center justify-between bg-white px-4 py-2 border border-gray-200 rounded-lg">
+                      <div className="flex flex-col">
+                        <span className="text-sm font-medium text-gray-900">{to.date}</span>
+                        {to.reason && <span className="text-xs text-gray-500">{to.reason}</span>}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setTimeOffs(timeOffs.filter((_, idx) => idx !== i))}
+                        className="text-red-500 hover:text-red-700 p-1"
+                      >
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
           </div>
         </div>
 

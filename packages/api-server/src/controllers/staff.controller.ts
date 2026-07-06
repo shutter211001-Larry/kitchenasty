@@ -91,6 +91,7 @@ export async function getStaff(req: Request<{ id: string }>, res: Response): Pro
       maxDaysPerWeek: true,
       maxHoursPerWeek: true,
       availabilities: true,
+      timeOffs: true,
       location: { select: { id: true, name: true } },
       createdAt: true,
       updatedAt: true,
@@ -124,6 +125,10 @@ const updateStaffSchema = z.object({
     startTime: z.string(),
     endTime: z.string(),
   })).optional(),
+  timeOffs: z.array(z.object({
+    date: z.string(),
+    reason: z.string().nullable().optional(),
+  })).optional(),
   isActive: z.boolean().optional(),
 });
 
@@ -155,7 +160,7 @@ export async function updateStaff(req: Request<{ id: string }>, res: Response): 
   }
 
   // Update user basic details
-  const { availabilities, ...userData } = parsed.data;
+  const { availabilities, timeOffs, ...userData } = parsed.data;
 
   const user = await prisma.user.update({
     where: { id: targetId },
@@ -165,6 +170,15 @@ export async function updateStaff(req: Request<{ id: string }>, res: Response): 
         availabilities: {
           deleteMany: {},
           create: availabilities,
+        },
+      }),
+      ...(timeOffs !== undefined && {
+        timeOffs: {
+          deleteMany: {},
+          create: timeOffs.map(t => ({
+            date: new Date(t.date),
+            reason: t.reason
+          })),
         },
       }),
     },
@@ -182,6 +196,7 @@ export async function updateStaff(req: Request<{ id: string }>, res: Response): 
       maxDaysPerWeek: true,
       maxHoursPerWeek: true,
       availabilities: true,
+      timeOffs: true,
       location: { select: { id: true, name: true } },
     },
   });

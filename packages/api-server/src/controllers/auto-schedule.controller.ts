@@ -41,6 +41,7 @@ export async function autoSchedule(req: Request, res: Response): Promise<void> {
     include: {
       jobRoles: true,
       availabilities: true,
+      timeOffs: true,
     },
   });
 
@@ -70,6 +71,12 @@ export async function autoSchedule(req: Request, res: Response): Promise<void> {
     let eligibleUsers = users.filter(user => {
       // Must have the required job role
       if (!user.jobRoles.some(r => r.id === req.jobRoleId)) return false;
+
+      // Check specific date time-offs
+      // TimeOffs are usually saved at midnight UTC, and req.date is also at midnight UTC.
+      // So a simple getTime() comparison should work if both are normalized.
+      const hasTimeOff = user.timeOffs?.some(to => to.date.getTime() === req.date.getTime());
+      if (hasTimeOff) return false;
 
       // Check availability constraints
       // If user has NO availabilities at all in DB, we assume they are available 24/7 (e.g. full-time)
