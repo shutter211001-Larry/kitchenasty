@@ -175,7 +175,7 @@ export default function Reservations() {
                   className="w-full px-3 py-2 bg-surface border border-input rounded-lg text-sm focus:ring-2 focus:ring-primary-500 outline-none text-main"
                 >
                   {Array.from({ length: 20 }, (_, i) => i + 1).map((n) => (
-                    <option key={n} value={n}>{n} {n === 1 ? t('reservations.guest', { count: n }) : t('reservations.guests', { count: n })}</option>
+                    <option key={n} value={n}>{n === 1 ? t('reservations.guest', { count: n }) : t('reservations.guests', { count: n })}</option>
                   ))}
                 </select>
               </div>
