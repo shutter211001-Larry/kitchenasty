@@ -1319,7 +1319,14 @@
     "storeToStore": "店到店 (Store to Store)",
     "storeDetails": "取件門市資訊 (Store Details)",
     "storeNameId": "門市名稱或店號 (Store Name / ID)",
-    "zipLabel": "外送郵遞區號 (Zip Code)"
+    "zipLabel": "外送郵遞區號 (Zip Code)",
+    "subtotal": "Subtotal",
+    "deliveryFee": "Delivery Fee",
+    "promoCode": "Promo Code",
+    "enterPromoCode": "Enter Promo Code",
+    "manualDeliveryFee": "Manual Delivery Fee",
+    "leaveBlankAutoCalc": "Leave blank to auto-calculate",
+    "manualTax": "Manual Tax"
   },
   "orderDetail": {
     "fulfillOrder": "発送情報を入力",

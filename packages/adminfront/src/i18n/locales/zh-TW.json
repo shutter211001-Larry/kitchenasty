@@ -1319,7 +1319,14 @@
     "storeToStore": "店到店",
     "storeDetails": "取件門市資訊",
     "storeNameId": "門市名稱或店號",
-    "zipLabel": "外送郵遞區號"
+    "zipLabel": "外送郵遞區號",
+    "subtotal": "小計",
+    "deliveryFee": "運費",
+    "promoCode": "優惠碼",
+    "enterPromoCode": "輸入優惠碼",
+    "manualDeliveryFee": "手動運費",
+    "leaveBlankAutoCalc": "留空自動計算",
+    "manualTax": "手動稅額"
   },
   "orderDetail": {
     "fulfillOrder": "填寫出貨資訊",
