@@ -145,34 +145,32 @@ const Login: React.FC = () => {
           )}
         </form>
 
-        {!hasSuperAdmin && <>
-            {/* Divider */}
-            <div className="w-full flex items-center gap-3 my-6">
-              <div className="flex-1 h-[1px] bg-white/[0.05]" />
-              <span className="text-[10px] uppercase font-black tracking-widest text-slate-600">
-                {t("erp_755")}
-              </span>
-              <div className="flex-1 h-[1px] bg-white/[0.05]" />
-            </div>
+        {/* Divider */}
+        <div className="w-full flex items-center gap-3 my-6">
+          <div className="flex-1 h-[1px] bg-white/[0.05]" />
+          <span className="text-[10px] uppercase font-black tracking-widest text-slate-600">
+            {t("erp_755")}
+          </span>
+          <div className="flex-1 h-[1px] bg-white/[0.05]" />
+        </div>
 
-            {/* Quick autofill test container */}
-            <button onClick={handleQuickFill} className="w-full bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.06] hover:border-white/[0.12] p-4 rounded-2xl flex items-center gap-3.5 group transition-all text-left outline-none cursor-pointer">
-              <div className="w-10 h-10 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-xl flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                <ShieldCheck className="w-5 h-5" />
-              </div>
-              <div>
-                <div className="text-xs font-black text-white flex items-center gap-1.5">
-                  <span>{t("erp_756")}</span>
-                  <span className="px-1.5 py-0.5 bg-emerald-500/10 text-emerald-400 text-[8px] font-black uppercase rounded">
-                    Auto
-                  </span>
-                </div>
-                <div className="text-[10px] text-slate-400 mt-0.5">
-                  {t("erp_757")}
-                </div>
-              </div>
-            </button>
-          </>}
+        {/* Quick autofill test container */}
+        <button onClick={() => { setEmail("test@test.com"); setPassword("12345678"); setError(null); }} className="w-full bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.06] hover:border-white/[0.12] p-4 rounded-2xl flex items-center gap-3.5 group transition-all text-left outline-none cursor-pointer">
+          <div className="w-10 h-10 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-xl flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+            <ShieldCheck className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="text-xs font-black text-white flex items-center gap-1.5">
+              <span>{t("erp_756")}</span>
+              <span className="px-1.5 py-0.5 bg-emerald-500/10 text-emerald-400 text-[8px] font-black uppercase rounded">
+                Auto
+              </span>
+            </div>
+            <div className="text-[10px] text-slate-400 mt-0.5">
+              自動帶入 SaaS 測試帳號 (test@test.com)
+            </div>
+          </div>
+        </button>
       </div>
     </div>;
 };
