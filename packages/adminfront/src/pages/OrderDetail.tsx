@@ -82,11 +82,9 @@ export default function OrderDetailPage() {
   useEffect(() => {
     Promise.all([
       api.get(`orders/${id}`).then(res => {
-        if (!res.ok) throw new Error('Failed to load order');
         return res.json();
       }),
       api.get(`settings/order`).then(res => {
-        if (!res.ok) return null;
         return res.json();
       })
     ])
@@ -131,7 +129,6 @@ export default function OrderDetailPage() {
       
       const res = await api.patch(`orders/${id}/status`, JSON.stringify(bodyPayload));
       const data = res;
-      if (!res.ok) throw new Error(data.error);
       setOrder((prev) => prev ? { 
         ...prev, 
         status: newStatus,
@@ -157,7 +154,6 @@ export default function OrderDetailPage() {
     try {
       const res = await api.patch(`orders/${id}/payment-status`, JSON.stringify({ paymentStatus: newPaymentStatus }));
       const data = res;
-      if (!res.ok) throw new Error(data.error);
       setOrder((prev) => prev ? { ...prev, paymentStatus: newPaymentStatus } : prev);
     } catch (err: any) {
       setError(err.message);
@@ -176,7 +172,6 @@ export default function OrderDetailPage() {
     try {
       const res = await api.patch(`orders/${id}/discount`, JSON.stringify({ adjustedTotal: val }));
       const data = res;
-      if (!res.ok) throw new Error(data.error || t('orderDetail.adjustDiscountFailed'));
       setOrder((prev) => prev ? { ...prev, ...data.data } : data.data);
       const unrounded = data.data.subtotal + data.data.tax + data.data.deliveryFee - data.data.discount;
       const roundedTotal = Number(unrounded.toFixed(currencyDecimals));
@@ -194,7 +189,6 @@ export default function OrderDetailPage() {
     try {
       setUpdating(true);
       const res = await api.delete(`orders/${id}`);
-      if (!res.ok) throw new Error(t('orderDetail.deleteFailed'));
       window.location.href = '/orders';
     } catch (err: any) {
       setError(err.message);

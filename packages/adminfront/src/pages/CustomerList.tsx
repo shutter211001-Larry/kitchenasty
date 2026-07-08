@@ -85,7 +85,6 @@ export default function CustomerList() {
           content: promoContent
         }));
       const data = res;
-      if (!res.ok) throw new Error(data.error || 'Failed to send');
       setPromoStatus('success');
       setPromoSubject('');
       setPromoContent('');
@@ -118,7 +117,6 @@ export default function CustomerList() {
     setEditLoading(true);
     try {
       const res = await api.put(`customers/${editingCustomer.id}`, JSON.stringify(editForm));
-      if (!res.ok) throw new Error('Update failed');
       setShowEditModal(false);
       fetchCustomers();
     } catch (err: any) {
@@ -133,7 +131,6 @@ export default function CustomerList() {
     setDeleteLoading(true);
     try {
       const res = await api.delete(`customers/${deletingId}`);
-      if (!res.ok) throw new Error('Delete failed');
       setShowDeleteModal(false);
       fetchCustomers();
     } catch (err: any) {

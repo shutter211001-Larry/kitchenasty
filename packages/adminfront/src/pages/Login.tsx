@@ -40,9 +40,6 @@ export default function Login({ onLogin }: Props) {
       } catch (parseErr) {
         throw new Error('伺服器連線失敗或正在維護中，請稍後再試。 (Server connection failed)');
       }
-
-      if (!res.ok) throw new Error(data.error || 'Login failed');
-      
       if (data.data?.user?.tenantId) {
         localStorage.setItem('tenantId', data.data.user.tenantId);
       }
@@ -72,8 +69,6 @@ export default function Login({ onLogin }: Props) {
       try {
         data = res;
       } catch (parseErr) {}
-
-      if (!res.ok) throw new Error(data.error || 'Request failed');
       setMessage(data.message || '重置信已寄出');
     } catch (err: any) {
       setError(err.message);

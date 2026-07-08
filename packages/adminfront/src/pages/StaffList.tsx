@@ -68,10 +68,6 @@ export default function StaffList() {
   async function toggleActive(id: string, isActive: boolean) {
     try {
       const res = await api.patch(`staff/${id}`, JSON.stringify({ isActive }));
-      if (!res.ok) {
-        const data = res;
-        throw new Error(data.error || 'Failed to update');
-      }
       setStaff((prev) => prev.map((s) => (s.id === id ? { ...s, isActive } : s)));
     } catch (err: any) {
       setError(err.message);

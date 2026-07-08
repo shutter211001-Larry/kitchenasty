@@ -32,39 +32,37 @@ async function request<T = any>(path: string, options?: RequestInit): Promise<T>
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
   };
 
-  const res = await fetch(`${API_BASE}${path}`, {
+  const fullPath = path.startsWith('/') ? path : `/${path}`;
+  const res = await fetch(`${API_BASE}${fullPath}`, {
     ...options,
     headers: { ...headers, ...options?.headers },
   });
 
-  const data = await res.json();
-
-  if (!res.ok) {
-    const error = data.error || `Request failed: ${res.status}`;
-    const errorMsg = typeof error === 'string' ? error : JSON.stringify(error);
-    const err = new Error(errorMsg);
-    (err as any).data = error; // Attach original error data
-    throw err;
-  }
-
+  const text = await res.text();
+  const data = text ? JSON.parse(text) : {};
   return data;
 }
 
-function withIdempotency(body: unknown) {
-  if (body && typeof body === 'object' && !Array.isArray(body)) {
-    return { ...body, idempotencyKey: crypto.randomUUID() };
+function prepareBody(body: unknown) {
+  if (body === undefined || body === null) return undefined;
+  let parsed = body;
+  if (typeof body === 'string') {
+    try { parsed = JSON.parse(body); } catch { return body; } // If it's a plain string, just return it
   }
-  return body;
+  if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+    parsed = { ...parsed, idempotencyKey: crypto.randomUUID() };
+  }
+  return JSON.stringify(parsed);
 }
 
 export const api = {
   get: <T = any>(path: string) => request<T>(path),
   post: <T = any>(path: string, body?: unknown) =>
-    request<T>(path, { method: 'POST', body: body ? JSON.stringify(withIdempotency(body)) : undefined }),
+    request<T>(path, { method: 'POST', body: prepareBody(body) }),
   patch: <T = any>(path: string, body?: unknown) =>
-    request<T>(path, { method: 'PATCH', body: body ? JSON.stringify(withIdempotency(body)) : undefined }),
+    request<T>(path, { method: 'PATCH', body: prepareBody(body) }),
   put: <T = any>(path: string, body?: unknown) =>
-    request<T>(path, { method: 'PUT', body: body ? JSON.stringify(withIdempotency(body)) : undefined }),
+    request<T>(path, { method: 'PUT', body: prepareBody(body) }),
   delete: <T = any>(path: string) =>
     request<T>(path, { method: 'DELETE' }),
   upload: async <T = any>(path: string, formData: FormData): Promise<T> => {
@@ -82,7 +80,6 @@ export const api = {
       body: formData,
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error || `Upload failed: ${res.status}`);
     return data;
   },
 };

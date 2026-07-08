@@ -61,7 +61,6 @@ export default function OrderList() {
     const nextStatus = currentStatus === 'PAID' ? 'UNPAID' : 'PAID';
     try {
       const res = await api.patch(`orders/${id}/payment-status`, JSON.stringify({ paymentStatus: nextStatus }));
-      if (!res.ok) throw new Error(t('orderList.updatePaymentStatusFailed'));
       setOrders(orders.map(o => o.id === id ? { ...o, paymentStatus: nextStatus } : o));
     } catch (err: any) {
       setError(err.message);
@@ -104,7 +103,6 @@ export default function OrderList() {
       try {
         setLoading(true);
         const res = await api.delete(`orders/${id}`);
-        if (!res.ok) throw new Error(t('orderList.deleteFailed'));
         setOrders(orders.filter(o => o.id !== id));
       } catch (err: any) {
         setError(err.message);
@@ -132,7 +130,6 @@ export default function OrderList() {
     try {
       setLoading(true);
       const res = await api.get(`orders/export?startDate=${startDate}&endDate=${endDate}`);
-      if (!res.ok) throw new Error(t('orderList.exportFailed'));
       const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -175,7 +172,6 @@ export default function OrderList() {
     try {
       setLoading(true);
       const res = await api.get('orders/template');
-      if (!res.ok) throw new Error(t('orderList.downloadFailed'));
       const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -196,7 +192,6 @@ export default function OrderList() {
       setLoading(true);
       const res = await api.post('orders/reminders');
       const data = res;
-      if (!res.ok) throw new Error(data.error || 'Failed to send reminders');
       alert(`提醒已發送！\n${data.data.message}`);
     } catch (err: any) {
       setError(err.message);

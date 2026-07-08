@@ -42,9 +42,6 @@ export default function ResetPassword() {
       try {
         data = res;
       } catch (parseErr) {}
-
-      if (!res.ok) throw new Error(data.error || 'Reset failed');
-      
       setSuccess(true);
       setTimeout(() => {
         navigate('/login');

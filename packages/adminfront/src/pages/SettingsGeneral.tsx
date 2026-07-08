@@ -106,10 +106,8 @@ export default function SettingsGeneral() {
       const data = res;
       
       if (data.success) {
-        if (langRes.ok) {
-          i18n.changeLanguage(language);
-          if (refreshUser) refreshUser();
-        }
+        i18n.changeLanguage(language);
+        if (refreshUser) refreshUser();
         setSuccess(t('settingsGeneral.settingsUpdatedSuccessfully'));
         setTimeout(() => setSuccess(''), 3000);
       } else {

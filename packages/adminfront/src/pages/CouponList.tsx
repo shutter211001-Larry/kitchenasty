@@ -58,7 +58,6 @@ export default function CouponList() {
   async function toggleActive(id: string, isActive: boolean) {
     try {
       const res = await api.patch(`coupons/${id}`, JSON.stringify({ isActive }));
-      if (!res.ok) throw new Error('Failed to update');
       setCoupons((prev) => prev.map((c) => (c.id === id ? { ...c, isActive } : c)));
     } catch (err: any) {
       setError(err.message);
@@ -70,7 +69,6 @@ export default function CouponList() {
     try {
       const res = await api.delete(`coupons/${id}`);
       const data = res;
-      if (!res.ok) throw new Error(data.error || t('couponList.deleteFailed'));
       setCoupons((prev) => prev.filter((c) => c.id !== id));
     } catch (err: any) {
       alert(err.message);

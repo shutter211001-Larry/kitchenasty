@@ -171,7 +171,6 @@ export default function CouponForm() {
         body: JSON.stringify(body),
       });
       const data = res;
-      if (!res.ok) throw new Error(typeof data.error === 'string' ? data.error : 'Failed to save');
       navigate('/promotions');
     } catch (err: any) {
       setError(err.message);

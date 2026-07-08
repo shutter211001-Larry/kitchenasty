@@ -64,7 +64,6 @@ export default function ReservationList() {
   async function updateStatus(id: string, status: string) {
     try {
       const res = await api.patch(`reservations/${id}`, JSON.stringify({ status }));
-      if (!res.ok) throw new Error('Failed to update');
       setReservations((prev) =>
         prev.map((r) => (r.id === id ? { ...r, status } : r))
       );

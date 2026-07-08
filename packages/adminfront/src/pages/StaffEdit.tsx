@@ -193,7 +193,6 @@ export default function StaffEdit() {
           }
         }));
       const data = res;
-      if (!res.ok) throw new Error(data.error || 'Failed to update');
       navigate('/staff');
     } catch (err: any) {
       setError(err.message);
@@ -208,7 +207,6 @@ export default function StaffEdit() {
     try {
       const res = await api.delete(`staff/${id}`);
       const data = res;
-      if (!res.ok) throw new Error(data.error || 'Failed to delete');
       navigate('/staff');
     } catch (err: any) {
       setError(err.message);

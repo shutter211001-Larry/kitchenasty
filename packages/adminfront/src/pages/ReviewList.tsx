@@ -59,7 +59,6 @@ export default function ReviewList() {
   async function moderate(id: string, isApproved: boolean) {
     try {
       const res = await api.patch(`reviews/${id}`, JSON.stringify({ isApproved }));
-      if (!res.ok) throw new Error('Failed to update');
       setReviews((prev) => prev.map((r) => (r.id === id ? { ...r, isApproved } : r)));
     } catch (err: any) {
       setError(err.message);
@@ -69,7 +68,6 @@ export default function ReviewList() {
   async function deleteReview(id: string) {
     try {
       const res = await api.delete(`reviews/${id}`);
-      if (!res.ok) throw new Error('Failed to delete');
       setReviews((prev) => prev.filter((r) => r.id !== id));
     } catch (err: any) {
       setError(err.message);

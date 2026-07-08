@@ -91,10 +91,23 @@
 
 ## 18. AdminFront API Client Requirement (No Native Fetch)
 **Trigger**: When modifying, creating, or refactoring components/hooks in "adminfront" that make HTTP requests.
-**Rule**: NEVER use the native "fetch()" API. The backend requires multi-tenant headers ("x-tenant-id") to authorize requests on "localhost". The native "fetch()" does not append these headers, causing 401 Unauthorized or 400 Bad Request errors. You MUST always import the custom API client ("import { api } from '../lib/api.js';") and use "api.get", "api.post", "api.put", etc. If you see existing code using "fetch()", you should refactor it to use "api" during your edits.
+**Rule**: NEVER use the native `fetch()` API. The backend requires multi-tenant headers (`x-tenant-id`) to authorize requests on "localhost". The native `fetch()` does not append these headers, causing 401 Unauthorized or 400 Bad Request errors. You MUST always import the custom API client (`import { api } from '../lib/api.js';`) and use `api.get`, `api.post`, `api.put`, etc. 
+
+When refactoring from `fetch` or writing new API calls, strictly follow these API Client usage rules:
+- **No `.json()`**: The client automatically parses and returns the JSON payload. NEVER chain `await res.json()`, as it will throw a `TypeError: res.json is not a function` and crash the app. Use the return value directly (e.g., `const data = await api.get('/path');`).
+- **No `res.ok` Checks**: The client automatically throws an error for non-2xx responses. The returned value is the raw JSON data object (which does NOT have an `ok` property). NEVER write `if (!res.ok)` checks, as it will evaluate to true and falsely throw errors on successful requests.
+- **Leading Slashes**: ALWAYS start the API path with a forward slash `/` (e.g., `api.post('/auth/login')`) to prevent broken URL concatenation (e.g., `/apiauth/login` 404 Not Found).
+- **No Manual Stringification**: The client automatically stringifies the request body. Pass the raw object directly (e.g., `api.post('/path', { email })`), do NOT use `JSON.stringify()`, which would double-stringify the payload and cause `Unexpected token '"'` 400 Bad Request errors in the backend.
 
 ## 19. Prisma Multi-Tenancy Data Leak Prevention (Raw SQL & Child Models)
 **Trigger**: When writing or modifying Prisma queries in the backend API (specifically $queryRaw, $executeRaw, or querying child models like "OrderItem" that lack a direct "tenantId" column).
 **Rule**: The Prisma multi-tenancy extension in "db.ts" ONLY automatically injects "tenantId" filters into standard operations for models explicitly listed in "tenantAwareModels". 
 - **Raw SQL**: The extension does NOT intercept "" or "". You MUST manually extract "tenantId" ("const tenantId = tenantStorage.getStore()?.tenantId;") and explicitly add "AND "tenantId" = " to the "WHERE" clause of your raw SQL.
 - **Child Models**: Models like "OrderItem" are not tenant-aware directly. When querying or grouping them, you MUST manually add a relation filter (e.g., "where: { order: { tenantId } }") to prevent global data leakage across tenants.
+
+## 20. Windows Prisma Query Engine File Lock Prevention
+**Trigger**: When needing to run `npm install`, `npm update`, or `npm uninstall` in the workspace while working on a machine running Windows.
+**Rule**: Because the backend uses Prisma, the Node.js process locks the Prisma Query Engine file (`query_engine-windows.dll.node`) during execution. If you run `npm install` while the backend (`api-server`) is running, npm will fail with an `EPERM` error and corrupt the Prisma Client. 
+- You MUST ALWAYS use the `manage_task` tool to **kill** the backend server task (`npm run dev:api-server`) BEFORE running any `npm install` commands.
+- After the installation is complete, you MUST restart the server.
+- If the Prisma client becomes corrupted, you must run `npx prisma generate` for ALL schemas (e.g., `npx prisma generate` and `npx prisma generate --schema=prisma/erp/shutter-erp.prisma`) to recover.
