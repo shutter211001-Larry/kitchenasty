@@ -16,15 +16,7 @@ const Login: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [isForgotPassword, setIsForgotPassword] = useState(false);
-  const [hasSuperAdmin, setHasSuperAdmin] = useState(true); // default true for security, check dynamically upon mount
 
-  useEffect(() => {
-    axios.get("http://localhost:3000/api/auth/setup-status").then(res => {
-      setHasSuperAdmin(res.data.hasSuperAdmin);
-    }).catch(err => {
-      console.error("Failed to fetch setup status", err);
-    });
-  }, []);
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
@@ -61,11 +53,7 @@ const Login: React.FC = () => {
     }
   };
 
-  const handleQuickFill = () => {
-    setEmail("admin@shutter.com");
-    setPassword("admin123");
-    setError(null);
-  };
+
   return <div className="min-h-screen w-full bg-slate-950 flex items-center justify-center p-4 relative overflow-hidden font-sans">
       {/* Premium background blobs */}
       <div className="absolute top-[-20%] left-[-10%] w-[60vw] h-[60vw] rounded-full bg-primary/10 blur-[120px] pointer-events-none" />
@@ -155,7 +143,7 @@ const Login: React.FC = () => {
         </div>
 
         {/* Quick autofill test container */}
-        <button onClick={() => { setEmail("test@test.com"); setPassword("12345678"); setError(null); }} className="w-full bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.06] hover:border-white/[0.12] p-4 rounded-2xl flex items-center gap-3.5 group transition-all text-left outline-none cursor-pointer">
+        <button onClick={() => { setEmail("test@test.com"); setPassword("test"); setError(null); }} className="w-full bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.06] hover:border-white/[0.12] p-4 rounded-2xl flex items-center gap-3.5 group transition-all text-left outline-none cursor-pointer">
           <div className="w-10 h-10 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-xl flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
             <ShieldCheck className="w-5 h-5" />
           </div>

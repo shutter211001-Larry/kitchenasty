@@ -30,7 +30,11 @@ const tenantAwareModels = [
   'AttendanceCorrectionRequest', 'LeaveRequest', 'JobRole', 'UserAvailability',
   'StaffTimeOff', 'ShiftRequirement', 'WeeklyShiftRequirement', 'Shift',
   'PayrollPeriod', 'Payslip', 'PayslipItem', 'InsuranceProfile', 'EmploymentRecord',
-  'LeaveBalance', 'AttendanceAnomaly', 'EmployeeDocument'
+  'LeaveBalance', 'AttendanceAnomaly', 'EmployeeDocument',
+  'Ingredient', 'Supplier', 'SupplierPrice', 'Recipe', 'RecipeItem',
+  'RecipeOutput', 'RecipeStep', 'StepParameter', 'ItemParameter',
+  'InventoryLog', 'Expense', 'ActionGroup', 'Action', 'UnitGroup',
+  'Unit', 'UnitConversion', 'ErpSetting', 'LabelManufacturer'
 ];
 
 // 3. Extend Prisma Client to automatically inject tenantId (Row-Level Security concept)

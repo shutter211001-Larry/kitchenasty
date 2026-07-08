@@ -1,11 +1,9 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@shutter-erp/client';
-
-const prisma = new PrismaClient();
+import { prisma } from '../lib/prisma.js';
 
 export const getSettings = async (req: Request, res: Response) => {
   try {
-    const setting = await prisma.systemSetting.findUnique({
+    const setting = await prisma.erpSetting.findFirst({
       where: { key: 'GLOBAL_PREFS' }
     });
     
@@ -34,11 +32,20 @@ export const updateSettings = async (req: Request, res: Response) => {
       autoUnitConversionThreshold: typeof autoUnitConversionThreshold === 'number' ? autoUnitConversionThreshold : 1000
     };
 
-    const setting = await prisma.systemSetting.upsert({
-      where: { key: 'GLOBAL_PREFS' },
-      update: { value: prefs as any },
-      create: { key: 'GLOBAL_PREFS', value: prefs as any }
+    let setting = await prisma.erpSetting.findFirst({
+      where: { key: 'GLOBAL_PREFS' }
     });
+
+    if (setting) {
+      setting = await prisma.erpSetting.update({
+        where: { id: setting.id },
+        data: { value: prefs as any }
+      });
+    } else {
+      setting = await prisma.erpSetting.create({
+        data: { key: 'GLOBAL_PREFS', value: prefs as any }
+      });
+    }
 
     res.json(setting.value);
   } catch (error) {
@@ -49,7 +56,7 @@ export const updateSettings = async (req: Request, res: Response) => {
 
 export const getMailBranding = async (req: Request, res: Response) => {
   try {
-    const setting = await prisma.systemSetting.findUnique({
+    const setting = await prisma.erpSetting.findFirst({
       where: { key: 'mailBranding' }
     });
     
@@ -82,11 +89,20 @@ export const updateMailBranding = async (req: Request, res: Response) => {
       emailBgColor: emailBgColor || '#f3f4f6'
     };
 
-    const setting = await prisma.systemSetting.upsert({
-      where: { key: 'mailBranding' },
-      update: { value: prefs as any },
-      create: { key: 'mailBranding', value: prefs as any }
+    let setting = await prisma.erpSetting.findFirst({
+      where: { key: 'mailBranding' }
     });
+
+    if (setting) {
+      setting = await prisma.erpSetting.update({
+        where: { id: setting.id },
+        data: { value: prefs as any }
+      });
+    } else {
+      setting = await prisma.erpSetting.create({
+        data: { key: 'mailBranding', value: prefs as any }
+      });
+    }
 
     res.json({ success: true, message: 'Mail branding updated successfully', data: setting.value });
   } catch (error) {
@@ -119,42 +135,5 @@ export const testMailBranding = async (req: Request, res: Response) => {
 };
 
 export const createErpTables = async (req: Request, res: Response) => {
-  try {
-    await prisma.$executeRawUnsafe(`
-      CREATE TABLE IF NOT EXISTS "InviteToken" (
-        "id" TEXT NOT NULL,
-        "token" TEXT NOT NULL,
-        "email" TEXT NOT NULL,
-        "role" "Role" NOT NULL DEFAULT 'STAFF',
-        "invitedBy" TEXT NOT NULL,
-        "usedAt" TIMESTAMP(3),
-        "expiresAt" TIMESTAMP(3) NOT NULL,
-        "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        CONSTRAINT "InviteToken_pkey" PRIMARY KEY ("id")
-      );
-    `);
-    await prisma.$executeRawUnsafe(`
-      CREATE UNIQUE INDEX IF NOT EXISTS "InviteToken_token_key" ON "InviteToken"("token");
-    `);
-    
-    await prisma.$executeRawUnsafe(`
-      CREATE TABLE IF NOT EXISTS "PasswordResetToken" (
-        "id" TEXT NOT NULL,
-        "token" TEXT NOT NULL,
-        "email" TEXT NOT NULL,
-        "expiresAt" TIMESTAMP(3) NOT NULL,
-        "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        CONSTRAINT "PasswordResetToken_pkey" PRIMARY KEY ("id")
-      );
-    `);
-    await prisma.$executeRawUnsafe(`
-      CREATE UNIQUE INDEX IF NOT EXISTS "PasswordResetToken_token_key" ON "PasswordResetToken"("token");
-    `);
-    
-    res.json({ success: true, message: 'ERP tables created successfully on the database' });
-  } catch (error: any) {
-    console.error('Failed to create ERP tables:', error);
-    res.status(500).json({ success: false, error: error.message || 'Failed to create tables' });
-  }
+  res.json({ success: true, message: 'No longer needed, tables are merged.' });
 };
-

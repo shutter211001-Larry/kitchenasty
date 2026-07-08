@@ -1,7 +1,5 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@shutter-erp/client';
-
-const prisma = new PrismaClient();
+import { prisma } from '../lib/prisma.js';
 
 export const getLabelManufacturers = async (req: Request, res: Response) => {
   try {

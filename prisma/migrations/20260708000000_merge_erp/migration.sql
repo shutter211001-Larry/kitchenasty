@@ -1,0 +1,414 @@
+-- CreateEnum
+DO $$ BEGIN CREATE TYPE "OutputType" AS ENUM ('PRIMARY', 'BYPRODUCT', 'WASTE'); EXCEPTION WHEN duplicate_object THEN null; END $$;
+
+-- AlterTable
+ALTER TABLE "LabelManufacturer" ADD COLUMN     "tenantId" TEXT;
+
+-- CreateTable
+CREATE TABLE IF NOT EXISTS "Ingredient" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "category" TEXT,
+    "unit" TEXT NOT NULL,
+    "components" TEXT,
+    "safetyStock" DOUBLE PRECISION DEFAULT 0,
+    "currentStock" DOUBLE PRECISION NOT NULL DEFAULT 0,
+    "calories" DOUBLE PRECISION,
+    "protein" DOUBLE PRECISION,
+    "fat" DOUBLE PRECISION,
+    "carbohydrates" DOUBLE PRECISION,
+    "sodium" DOUBLE PRECISION,
+    "saturatedFat" DOUBLE PRECISION,
+    "transFat" DOUBLE PRECISION,
+    "sugar" DOUBLE PRECISION,
+    "isAllergen" BOOLEAN NOT NULL DEFAULT false,
+    "allergenType" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "tenantId" TEXT,
+
+    CONSTRAINT "Ingredient_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE IF NOT EXISTS "Supplier" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "contactPerson" TEXT,
+    "phone" TEXT,
+    "address" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "tenantId" TEXT,
+
+    CONSTRAINT "Supplier_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE IF NOT EXISTS "SupplierPrice" (
+    "id" TEXT NOT NULL,
+    "ingredientId" TEXT NOT NULL,
+    "supplierId" TEXT,
+    "packageSize" DOUBLE PRECISION NOT NULL,
+    "packageUnit" TEXT NOT NULL,
+    "price" DOUBLE PRECISION NOT NULL,
+    "unitPrice" DOUBLE PRECISION NOT NULL,
+    "isDefault" BOOLEAN NOT NULL DEFAULT false,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "tenantId" TEXT,
+
+    CONSTRAINT "SupplierPrice_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE IF NOT EXISTS "Recipe" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "description" TEXT,
+    "yieldAmount" DOUBLE PRECISION NOT NULL DEFAULT 1,
+    "yieldUnit" TEXT NOT NULL DEFAULT '份',
+    "isSubRecipe" BOOLEAN NOT NULL DEFAULT false,
+    "isProduct" BOOLEAN NOT NULL DEFAULT true,
+    "bakingLossRate" DOUBLE PRECISION DEFAULT 0,
+    "labelConfig" JSONB,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "tenantId" TEXT,
+
+    CONSTRAINT "Recipe_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE IF NOT EXISTS "RecipeItem" (
+    "id" TEXT NOT NULL,
+    "recipeId" TEXT,
+    "stepId" TEXT,
+    "sourceStepId" TEXT,
+    "ingredientId" TEXT,
+    "subRecipeId" TEXT,
+    "quantity" DOUBLE PRECISION NOT NULL,
+    "portionQuantity" DOUBLE PRECISION,
+    "unit" TEXT NOT NULL DEFAULT 'g',
+    "order" INTEGER NOT NULL DEFAULT 0,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "tenantId" TEXT,
+
+    CONSTRAINT "RecipeItem_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE IF NOT EXISTS "RecipeOutput" (
+    "id" TEXT NOT NULL,
+    "recipeId" TEXT NOT NULL,
+    "type" "OutputType" NOT NULL,
+    "ingredientId" TEXT,
+    "name" TEXT NOT NULL,
+    "yield" DOUBLE PRECISION NOT NULL,
+    "unit" TEXT NOT NULL,
+    "nutritionFacts" JSONB,
+    "tenantId" TEXT,
+
+    CONSTRAINT "RecipeOutput_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE IF NOT EXISTS "RecipeStep" (
+    "id" TEXT NOT NULL,
+    "recipeId" TEXT NOT NULL,
+    "action" TEXT NOT NULL,
+    "description" TEXT,
+    "order" INTEGER NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "tenantId" TEXT,
+
+    CONSTRAINT "RecipeStep_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE IF NOT EXISTS "StepParameter" (
+    "id" TEXT NOT NULL,
+    "stepId" TEXT NOT NULL,
+    "value" DOUBLE PRECISION NOT NULL,
+    "unit" TEXT NOT NULL,
+    "tenantId" TEXT,
+
+    CONSTRAINT "StepParameter_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE IF NOT EXISTS "ItemParameter" (
+    "id" TEXT NOT NULL,
+    "itemId" TEXT NOT NULL,
+    "value" DOUBLE PRECISION NOT NULL,
+    "unit" TEXT NOT NULL,
+    "tenantId" TEXT,
+
+    CONSTRAINT "ItemParameter_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE IF NOT EXISTS "InventoryLog" (
+    "id" TEXT NOT NULL,
+    "ingredientId" TEXT NOT NULL,
+    "type" TEXT NOT NULL,
+    "amount" DOUBLE PRECISION NOT NULL,
+    "reason" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "tenantId" TEXT,
+
+    CONSTRAINT "InventoryLog_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE IF NOT EXISTS "expenses" (
+    "id" TEXT NOT NULL,
+    "amount" DOUBLE PRECISION NOT NULL,
+    "description" TEXT,
+    "inventoryLogId" TEXT,
+    "status" TEXT NOT NULL DEFAULT 'PENDING',
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "tenantId" TEXT,
+
+    CONSTRAINT "expenses_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE IF NOT EXISTS "ActionGroup" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "icon" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "tenantId" TEXT,
+
+    CONSTRAINT "ActionGroup_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE IF NOT EXISTS "Action" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "groupId" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "tenantId" TEXT,
+
+    CONSTRAINT "Action_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE IF NOT EXISTS "UnitGroup" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "tenantId" TEXT,
+
+    CONSTRAINT "UnitGroup_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE IF NOT EXISTS "Unit" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "groupId" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "tenantId" TEXT,
+
+    CONSTRAINT "Unit_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE IF NOT EXISTS "UnitConversion" (
+    "id" TEXT NOT NULL,
+    "ingredientId" TEXT NOT NULL,
+    "fromUnit" TEXT NOT NULL,
+    "toUnit" TEXT NOT NULL,
+    "multiplier" DOUBLE PRECISION NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "tenantId" TEXT,
+
+    CONSTRAINT "UnitConversion_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE IF NOT EXISTS "ErpSetting" (
+    "id" TEXT NOT NULL,
+    "key" TEXT NOT NULL,
+    "value" JSONB NOT NULL,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "tenantId" TEXT,
+
+    CONSTRAINT "ErpSetting_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE IF NOT EXISTS "_AllergenToIngredient" (
+    "A" TEXT NOT NULL,
+    "B" TEXT NOT NULL
+);
+
+-- CreateTable
+CREATE TABLE IF NOT EXISTS "_ActionGroupDefaultUnits" (
+    "A" TEXT NOT NULL,
+    "B" TEXT NOT NULL
+);
+
+-- CreateTable
+CREATE TABLE IF NOT EXISTS "_ActionDefaultUnits" (
+    "A" TEXT NOT NULL,
+    "B" TEXT NOT NULL
+);
+
+-- CreateIndex
+CREATE UNIQUE INDEX "expenses_inventoryLogId_key" ON "expenses"("inventoryLogId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "ErpSetting_tenantId_key_key" ON "ErpSetting"("tenantId", "key");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "_AllergenToIngredient_AB_unique" ON "_AllergenToIngredient"("A", "B");
+
+-- CreateIndex
+CREATE INDEX "_AllergenToIngredient_B_index" ON "_AllergenToIngredient"("B");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "_ActionGroupDefaultUnits_AB_unique" ON "_ActionGroupDefaultUnits"("A", "B");
+
+-- CreateIndex
+CREATE INDEX "_ActionGroupDefaultUnits_B_index" ON "_ActionGroupDefaultUnits"("B");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "_ActionDefaultUnits_AB_unique" ON "_ActionDefaultUnits"("A", "B");
+
+-- CreateIndex
+CREATE INDEX "_ActionDefaultUnits_B_index" ON "_ActionDefaultUnits"("B");
+
+-- AddForeignKey
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'Ingredient_tenantId_fkey') THEN ALTER TABLE "Ingredient" ADD CONSTRAINT "Ingredient_tenantId_fkey" FOREIGN KEY ("tenantId") REFERENCES "tenants"("id") ON DELETE CASCADE ON UPDATE CASCADE; END IF; END $$;
+
+-- AddForeignKey
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'Supplier_tenantId_fkey') THEN ALTER TABLE "Supplier" ADD CONSTRAINT "Supplier_tenantId_fkey" FOREIGN KEY ("tenantId") REFERENCES "tenants"("id") ON DELETE CASCADE ON UPDATE CASCADE; END IF; END $$;
+
+-- AddForeignKey
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'SupplierPrice_ingredientId_fkey') THEN ALTER TABLE "SupplierPrice" ADD CONSTRAINT "SupplierPrice_ingredientId_fkey" FOREIGN KEY ("ingredientId") REFERENCES "Ingredient"("id") ON DELETE RESTRICT ON UPDATE CASCADE; END IF; END $$;
+
+-- AddForeignKey
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'SupplierPrice_supplierId_fkey') THEN ALTER TABLE "SupplierPrice" ADD CONSTRAINT "SupplierPrice_supplierId_fkey" FOREIGN KEY ("supplierId") REFERENCES "Supplier"("id") ON DELETE SET NULL ON UPDATE CASCADE; END IF; END $$;
+
+-- AddForeignKey
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'SupplierPrice_tenantId_fkey') THEN ALTER TABLE "SupplierPrice" ADD CONSTRAINT "SupplierPrice_tenantId_fkey" FOREIGN KEY ("tenantId") REFERENCES "tenants"("id") ON DELETE CASCADE ON UPDATE CASCADE; END IF; END $$;
+
+-- AddForeignKey
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'Recipe_tenantId_fkey') THEN ALTER TABLE "Recipe" ADD CONSTRAINT "Recipe_tenantId_fkey" FOREIGN KEY ("tenantId") REFERENCES "tenants"("id") ON DELETE CASCADE ON UPDATE CASCADE; END IF; END $$;
+
+-- AddForeignKey
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'RecipeItem_recipeId_fkey') THEN ALTER TABLE "RecipeItem" ADD CONSTRAINT "RecipeItem_recipeId_fkey" FOREIGN KEY ("recipeId") REFERENCES "Recipe"("id") ON DELETE SET NULL ON UPDATE CASCADE; END IF; END $$;
+
+-- AddForeignKey
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'RecipeItem_stepId_fkey') THEN ALTER TABLE "RecipeItem" ADD CONSTRAINT "RecipeItem_stepId_fkey" FOREIGN KEY ("stepId") REFERENCES "RecipeStep"("id") ON DELETE SET NULL ON UPDATE CASCADE; END IF; END $$;
+
+-- AddForeignKey
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'RecipeItem_sourceStepId_fkey') THEN ALTER TABLE "RecipeItem" ADD CONSTRAINT "RecipeItem_sourceStepId_fkey" FOREIGN KEY ("sourceStepId") REFERENCES "RecipeStep"("id") ON DELETE SET NULL ON UPDATE CASCADE; END IF; END $$;
+
+-- AddForeignKey
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'RecipeItem_ingredientId_fkey') THEN ALTER TABLE "RecipeItem" ADD CONSTRAINT "RecipeItem_ingredientId_fkey" FOREIGN KEY ("ingredientId") REFERENCES "Ingredient"("id") ON DELETE SET NULL ON UPDATE CASCADE; END IF; END $$;
+
+-- AddForeignKey
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'RecipeItem_subRecipeId_fkey') THEN ALTER TABLE "RecipeItem" ADD CONSTRAINT "RecipeItem_subRecipeId_fkey" FOREIGN KEY ("subRecipeId") REFERENCES "Recipe"("id") ON DELETE SET NULL ON UPDATE CASCADE; END IF; END $$;
+
+-- AddForeignKey
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'RecipeItem_tenantId_fkey') THEN ALTER TABLE "RecipeItem" ADD CONSTRAINT "RecipeItem_tenantId_fkey" FOREIGN KEY ("tenantId") REFERENCES "tenants"("id") ON DELETE CASCADE ON UPDATE CASCADE; END IF; END $$;
+
+-- AddForeignKey
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'RecipeOutput_recipeId_fkey') THEN ALTER TABLE "RecipeOutput" ADD CONSTRAINT "RecipeOutput_recipeId_fkey" FOREIGN KEY ("recipeId") REFERENCES "Recipe"("id") ON DELETE CASCADE ON UPDATE CASCADE; END IF; END $$;
+
+-- AddForeignKey
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'RecipeOutput_ingredientId_fkey') THEN ALTER TABLE "RecipeOutput" ADD CONSTRAINT "RecipeOutput_ingredientId_fkey" FOREIGN KEY ("ingredientId") REFERENCES "Ingredient"("id") ON DELETE SET NULL ON UPDATE CASCADE; END IF; END $$;
+
+-- AddForeignKey
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'RecipeOutput_tenantId_fkey') THEN ALTER TABLE "RecipeOutput" ADD CONSTRAINT "RecipeOutput_tenantId_fkey" FOREIGN KEY ("tenantId") REFERENCES "tenants"("id") ON DELETE CASCADE ON UPDATE CASCADE; END IF; END $$;
+
+-- AddForeignKey
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'RecipeStep_recipeId_fkey') THEN ALTER TABLE "RecipeStep" ADD CONSTRAINT "RecipeStep_recipeId_fkey" FOREIGN KEY ("recipeId") REFERENCES "Recipe"("id") ON DELETE RESTRICT ON UPDATE CASCADE; END IF; END $$;
+
+-- AddForeignKey
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'RecipeStep_tenantId_fkey') THEN ALTER TABLE "RecipeStep" ADD CONSTRAINT "RecipeStep_tenantId_fkey" FOREIGN KEY ("tenantId") REFERENCES "tenants"("id") ON DELETE CASCADE ON UPDATE CASCADE; END IF; END $$;
+
+-- AddForeignKey
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'StepParameter_stepId_fkey') THEN ALTER TABLE "StepParameter" ADD CONSTRAINT "StepParameter_stepId_fkey" FOREIGN KEY ("stepId") REFERENCES "RecipeStep"("id") ON DELETE CASCADE ON UPDATE CASCADE; END IF; END $$;
+
+-- AddForeignKey
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'StepParameter_tenantId_fkey') THEN ALTER TABLE "StepParameter" ADD CONSTRAINT "StepParameter_tenantId_fkey" FOREIGN KEY ("tenantId") REFERENCES "tenants"("id") ON DELETE CASCADE ON UPDATE CASCADE; END IF; END $$;
+
+-- AddForeignKey
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'ItemParameter_itemId_fkey') THEN ALTER TABLE "ItemParameter" ADD CONSTRAINT "ItemParameter_itemId_fkey" FOREIGN KEY ("itemId") REFERENCES "RecipeItem"("id") ON DELETE CASCADE ON UPDATE CASCADE; END IF; END $$;
+
+-- AddForeignKey
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'ItemParameter_tenantId_fkey') THEN ALTER TABLE "ItemParameter" ADD CONSTRAINT "ItemParameter_tenantId_fkey" FOREIGN KEY ("tenantId") REFERENCES "tenants"("id") ON DELETE CASCADE ON UPDATE CASCADE; END IF; END $$;
+
+-- AddForeignKey
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'InventoryLog_ingredientId_fkey') THEN ALTER TABLE "InventoryLog" ADD CONSTRAINT "InventoryLog_ingredientId_fkey" FOREIGN KEY ("ingredientId") REFERENCES "Ingredient"("id") ON DELETE RESTRICT ON UPDATE CASCADE; END IF; END $$;
+
+-- AddForeignKey
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'InventoryLog_tenantId_fkey') THEN ALTER TABLE "InventoryLog" ADD CONSTRAINT "InventoryLog_tenantId_fkey" FOREIGN KEY ("tenantId") REFERENCES "tenants"("id") ON DELETE CASCADE ON UPDATE CASCADE; END IF; END $$;
+
+-- AddForeignKey
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'expenses_inventoryLogId_fkey') THEN ALTER TABLE "expenses" ADD CONSTRAINT "expenses_inventoryLogId_fkey" FOREIGN KEY ("inventoryLogId") REFERENCES "InventoryLog"("id") ON DELETE SET NULL ON UPDATE CASCADE; END IF; END $$;
+
+-- AddForeignKey
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'expenses_tenantId_fkey') THEN ALTER TABLE "expenses" ADD CONSTRAINT "expenses_tenantId_fkey" FOREIGN KEY ("tenantId") REFERENCES "tenants"("id") ON DELETE CASCADE ON UPDATE CASCADE; END IF; END $$;
+
+-- AddForeignKey
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'ActionGroup_tenantId_fkey') THEN ALTER TABLE "ActionGroup" ADD CONSTRAINT "ActionGroup_tenantId_fkey" FOREIGN KEY ("tenantId") REFERENCES "tenants"("id") ON DELETE CASCADE ON UPDATE CASCADE; END IF; END $$;
+
+-- AddForeignKey
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'Action_groupId_fkey') THEN ALTER TABLE "Action" ADD CONSTRAINT "Action_groupId_fkey" FOREIGN KEY ("groupId") REFERENCES "ActionGroup"("id") ON DELETE CASCADE ON UPDATE CASCADE; END IF; END $$;
+
+-- AddForeignKey
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'Action_tenantId_fkey') THEN ALTER TABLE "Action" ADD CONSTRAINT "Action_tenantId_fkey" FOREIGN KEY ("tenantId") REFERENCES "tenants"("id") ON DELETE CASCADE ON UPDATE CASCADE; END IF; END $$;
+
+-- AddForeignKey
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'UnitGroup_tenantId_fkey') THEN ALTER TABLE "UnitGroup" ADD CONSTRAINT "UnitGroup_tenantId_fkey" FOREIGN KEY ("tenantId") REFERENCES "tenants"("id") ON DELETE CASCADE ON UPDATE CASCADE; END IF; END $$;
+
+-- AddForeignKey
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'Unit_groupId_fkey') THEN ALTER TABLE "Unit" ADD CONSTRAINT "Unit_groupId_fkey" FOREIGN KEY ("groupId") REFERENCES "UnitGroup"("id") ON DELETE CASCADE ON UPDATE CASCADE; END IF; END $$;
+
+-- AddForeignKey
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'Unit_tenantId_fkey') THEN ALTER TABLE "Unit" ADD CONSTRAINT "Unit_tenantId_fkey" FOREIGN KEY ("tenantId") REFERENCES "tenants"("id") ON DELETE CASCADE ON UPDATE CASCADE; END IF; END $$;
+
+-- AddForeignKey
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'UnitConversion_ingredientId_fkey') THEN ALTER TABLE "UnitConversion" ADD CONSTRAINT "UnitConversion_ingredientId_fkey" FOREIGN KEY ("ingredientId") REFERENCES "Ingredient"("id") ON DELETE CASCADE ON UPDATE CASCADE; END IF; END $$;
+
+-- AddForeignKey
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'UnitConversion_tenantId_fkey') THEN ALTER TABLE "UnitConversion" ADD CONSTRAINT "UnitConversion_tenantId_fkey" FOREIGN KEY ("tenantId") REFERENCES "tenants"("id") ON DELETE CASCADE ON UPDATE CASCADE; END IF; END $$;
+
+-- AddForeignKey
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'ErpSetting_tenantId_fkey') THEN ALTER TABLE "ErpSetting" ADD CONSTRAINT "ErpSetting_tenantId_fkey" FOREIGN KEY ("tenantId") REFERENCES "tenants"("id") ON DELETE CASCADE ON UPDATE CASCADE; END IF; END $$;
+
+-- AddForeignKey
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'LabelManufacturer_tenantId_fkey') THEN ALTER TABLE "LabelManufacturer" ADD CONSTRAINT "LabelManufacturer_tenantId_fkey" FOREIGN KEY ("tenantId") REFERENCES "tenants"("id") ON DELETE CASCADE ON UPDATE CASCADE; END IF; END $$;
+
+-- AddForeignKey
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = '_AllergenToIngredient_A_fkey') THEN ALTER TABLE "_AllergenToIngredient" ADD CONSTRAINT "_AllergenToIngredient_A_fkey" FOREIGN KEY ("A") REFERENCES "allergens"("id") ON DELETE CASCADE ON UPDATE CASCADE; END IF; END $$;
+
+-- AddForeignKey
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = '_AllergenToIngredient_B_fkey') THEN ALTER TABLE "_AllergenToIngredient" ADD CONSTRAINT "_AllergenToIngredient_B_fkey" FOREIGN KEY ("B") REFERENCES "Ingredient"("id") ON DELETE CASCADE ON UPDATE CASCADE; END IF; END $$;
+
+-- AddForeignKey
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = '_ActionGroupDefaultUnits_A_fkey') THEN ALTER TABLE "_ActionGroupDefaultUnits" ADD CONSTRAINT "_ActionGroupDefaultUnits_A_fkey" FOREIGN KEY ("A") REFERENCES "ActionGroup"("id") ON DELETE CASCADE ON UPDATE CASCADE; END IF; END $$;
+
+-- AddForeignKey
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = '_ActionGroupDefaultUnits_B_fkey') THEN ALTER TABLE "_ActionGroupDefaultUnits" ADD CONSTRAINT "_ActionGroupDefaultUnits_B_fkey" FOREIGN KEY ("B") REFERENCES "UnitGroup"("id") ON DELETE CASCADE ON UPDATE CASCADE; END IF; END $$;
+
+-- AddForeignKey
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = '_ActionDefaultUnits_A_fkey') THEN ALTER TABLE "_ActionDefaultUnits" ADD CONSTRAINT "_ActionDefaultUnits_A_fkey" FOREIGN KEY ("A") REFERENCES "Action"("id") ON DELETE CASCADE ON UPDATE CASCADE; END IF; END $$;
+
+-- AddForeignKey
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = '_ActionDefaultUnits_B_fkey') THEN ALTER TABLE "_ActionDefaultUnits" ADD CONSTRAINT "_ActionDefaultUnits_B_fkey" FOREIGN KEY ("B") REFERENCES "UnitGroup"("id") ON DELETE CASCADE ON UPDATE CASCADE; END IF; END $$;
+
