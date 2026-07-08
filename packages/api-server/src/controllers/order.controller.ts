@@ -1271,6 +1271,7 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
     orderType: order.orderType,
     locationId: order.locationId,
     paymentStatus: order.paymentStatus,
+    tenantId: (order as any).tenantId,
   });
 
   // Emit event for automation rules
@@ -1556,6 +1557,7 @@ export async function updateOrderStatus(req: Request<{ id: string }>, res: Respo
     customerId: updated.customerId,
     locationId: updated.locationId,
     paymentStatus: updated.paymentStatus,
+    tenantId: (updated as any).tenantId,
   });
 
   // Send status update email if enabled in settings
@@ -1819,6 +1821,7 @@ export async function updateOrderDiscount(req: Request<{ id: string }>, res: Res
     orderType: updated.orderType,
     customerId: updated.customerId,
     locationId: updated.locationId,
+    tenantId: (updated as any).tenantId,
   });
 
   res.json({ success: true, data: updated });
@@ -1878,6 +1881,7 @@ export async function cancelOrder(req: Request<{ id: string }>, res: Response): 
     orderType: updated.orderType,
     customerId: updated.customerId,
     locationId: updated.locationId,
+    tenantId: (updated as any).tenantId,
   });
 
   res.json({ success: true, data: updated });
@@ -2264,6 +2268,7 @@ export async function updateOrderPaymentStatus(req: Request<{ id: string }>, res
     customerId: updated.customerId,
     locationId: updated.locationId,
     paymentStatus: updated.paymentStatus,
+    tenantId: (updated as any).tenantId,
   } as any);
 
   res.status(200).json({ success: true, data: updated });
@@ -2320,6 +2325,7 @@ export async function addOrderPayment(req: Request<{ id: string }>, res: Respons
       orderNumber: updatedOrder.orderNumber,
       status: updatedOrder.status,
       orderType: updatedOrder.orderType,
+      tenantId: (updatedOrder as any).tenantId,
     });
   }
 

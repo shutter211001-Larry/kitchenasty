@@ -61,36 +61,36 @@ export function initSocket(httpServer: HttpServer): Server {
     });
 
     // Join kitchen room for staff viewing kitchen display
-    socket.on('join:kitchen', (data?: { locationId?: string }) => {
+    socket.on('join:kitchen', (data?: { locationId?: string; tenantId?: string }) => {
       if (data?.locationId) {
         socket.join(`kitchen:${data.locationId}`);
-      } else {
-        socket.join('kitchen');
+      } else if (data?.tenantId) {
+        socket.join(`kitchen:tenant:${data.tenantId}`);
       }
     });
 
-    socket.on('leave:kitchen', (data?: { locationId?: string }) => {
+    socket.on('leave:kitchen', (data?: { locationId?: string; tenantId?: string }) => {
       if (data?.locationId) {
         socket.leave(`kitchen:${data.locationId}`);
-      } else {
-        socket.leave('kitchen');
+      } else if (data?.tenantId) {
+        socket.leave(`kitchen:tenant:${data.tenantId}`);
       }
     });
 
     // Join chat room for admins
-    socket.on('join:chat', (data?: { locationId?: string }) => {
+    socket.on('join:chat', (data?: { locationId?: string; tenantId?: string }) => {
       if (data?.locationId && data.locationId !== 'global') {
         socket.join(`admin:chat:${data.locationId}`);
-      } else {
-        socket.join('admin:chat:global');
+      } else if (data?.tenantId) {
+        socket.join(`admin:chat:tenant:${data.tenantId}`);
       }
     });
 
-    socket.on('leave:chat', (data?: { locationId?: string }) => {
+    socket.on('leave:chat', (data?: { locationId?: string; tenantId?: string }) => {
       if (data?.locationId && data.locationId !== 'global') {
         socket.leave(`admin:chat:${data.locationId}`);
-      } else {
-        socket.leave('admin:chat:global');
+      } else if (data?.tenantId) {
+        socket.leave(`admin:chat:tenant:${data.tenantId}`);
       }
     });
 
@@ -119,6 +119,7 @@ export function emitOrderStatusUpdate(order: {
   customerId?: string | null;
   locationId?: string;
   paymentStatus?: string | null;
+  tenantId?: string | null;
 }): void {
   if (!io) return;
   // Notify the specific order room (customer tracking)
@@ -128,7 +129,9 @@ export function emitOrderStatusUpdate(order: {
   if (order.locationId) {
     io.to(`kitchen:${order.locationId}`).emit('order:statusUpdate', order);
   }
-  io.to('kitchen').emit('order:statusUpdate', order);
+  if (order.tenantId) {
+    io.to(`kitchen:tenant:${order.tenantId}`).emit('order:statusUpdate', order);
+  }
 
   // Send push notification to the customer
   if (order.customerId) {
@@ -180,16 +183,19 @@ export function emitNewOrder(order: {
   orderType: string;
   locationId?: string;
   paymentStatus?: string | null;
+  tenantId?: string | null;
 }): void {
   if (!io) return;
   if (order.locationId) {
     io.to(`kitchen:${order.locationId}`).emit('order:new', order);
   }
-  io.to('kitchen').emit('order:new', order);
+  if (order.tenantId) {
+    io.to(`kitchen:tenant:${order.tenantId}`).emit('order:new', order);
+  }
 }
 
-export function emitChatMessage(message: any, locationId: string = 'global'): void {
+export function emitChatMessage(message: any, locationId: string = 'global', tenantId?: string): void {
   if (!io) return;
-  const room = locationId === 'global' ? 'admin:chat:global' : `admin:chat:${locationId}`;
+  const room = locationId === 'global' && tenantId ? `admin:chat:tenant:${tenantId}` : `admin:chat:${locationId}`;
   io.to(room).emit('chat:newMessage', message);
 }

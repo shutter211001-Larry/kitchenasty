@@ -5,6 +5,7 @@ import { getSettingsGroup } from './settings.controller.js';
 import { createPayPalOrder, capturePayPalOrder } from '../lib/paypal.js';
 import { emitOrderStatusUpdate } from '../lib/socket.js';
 import { LinePayClient } from '../lib/linepay.js';
+import { tenantStorage } from '../middleware/tenantStorage.js';
 
 export async function createPaymentIntent(req: Request, res: Response): Promise<void> {
   const { orderId } = req.body;
@@ -61,65 +62,80 @@ export async function createPaymentIntent(req: Request, res: Response): Promise<
 }
 
 export async function handleWebhook(req: Request, res: Response): Promise<void> {
-  const sig = req.headers['stripe-signature'] as string;
-  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
-
-  if (!webhookSecret) {
-    res.status(500).json({ success: false, error: 'Webhook secret not configured' });
+  const { tenantId } = req.params;
+  
+  if (!tenantId) {
+    res.status(400).json({ success: false, error: 'tenantId URL parameter is required for webhooks' });
     return;
   }
 
-  let event;
-  try {
-    const stripe = await getStripe();
-    event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
-  } catch (err: any) {
-    res.status(400).json({ success: false, error: `Webhook error: ${err.message}` });
-    return;
-  }
+  // Wrap the entire webhook processing in the specific tenant's context
+  await tenantStorage.run({ tenantId: tenantId as string }, async () => {
+    const sig = req.headers['stripe-signature'] as string;
+    
+    // We fetch settings within the tenant context to get the tenant-specific webhook secret
+    const settings = await prisma.siteSettings.findFirst();
+    const payment = (settings?.paymentSettings as Record<string, any>) || {};
+    const webhookSecret = payment.stripeWebhookSecret || process.env.STRIPE_WEBHOOK_SECRET;
 
-  switch (event.type) {
-    case 'payment_intent.succeeded': {
-      const paymentIntent = event.data.object;
-      const orderId = paymentIntent.metadata.orderId;
+    if (!webhookSecret) {
+      res.status(500).json({ success: false, error: 'Webhook secret not configured for this tenant' });
+      return;
+    }
 
-      if (orderId) {
-        // Update payment status
+    let event;
+    try {
+      const stripe = await getStripe();
+      event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
+    } catch (err: any) {
+      res.status(400).json({ success: false, error: `Webhook error: ${err.message}` });
+      return;
+    }
+
+    switch (event.type) {
+      case 'payment_intent.succeeded': {
+        const paymentIntent = event.data.object;
+        const orderId = paymentIntent.metadata.orderId;
+
+        if (orderId) {
+          // Update payment status
+          await prisma.payment.updateMany({
+            where: { transactionId: paymentIntent.id },
+            data: { status: 'COMPLETED' },
+          });
+
+          // Update order status to confirmed and paymentStatus to PAID
+          const updatedOrder = await prisma.order.update({
+            where: { id: orderId },
+            data: { status: 'CONFIRMED', paymentStatus: 'PAID' },
+          });
+
+          emitOrderStatusUpdate({
+            id: updatedOrder.id,
+            orderNumber: updatedOrder.orderNumber,
+            status: updatedOrder.status,
+            orderType: updatedOrder.orderType,
+            customerId: updatedOrder.customerId,
+            locationId: updatedOrder.locationId,
+            paymentStatus: updatedOrder.paymentStatus,
+            tenantId: updatedOrder.tenantId,
+          } as any);
+        }
+        break;
+      }
+
+      case 'payment_intent.payment_failed': {
+        const paymentIntent = event.data.object;
         await prisma.payment.updateMany({
           where: { transactionId: paymentIntent.id },
-          data: { status: 'COMPLETED' },
+          data: { status: 'FAILED' },
         });
-
-        // Update order status to confirmed and paymentStatus to PAID
-        const updatedOrder = await prisma.order.update({
-          where: { id: orderId },
-          data: { status: 'CONFIRMED', paymentStatus: 'PAID' },
-        });
-
-        emitOrderStatusUpdate({
-          id: updatedOrder.id,
-          orderNumber: updatedOrder.orderNumber,
-          status: updatedOrder.status,
-          orderType: updatedOrder.orderType,
-          customerId: updatedOrder.customerId,
-          locationId: updatedOrder.locationId,
-          paymentStatus: updatedOrder.paymentStatus,
-        } as any);
+        break;
       }
-      break;
     }
 
-    case 'payment_intent.payment_failed': {
-      const paymentIntent = event.data.object;
-      await prisma.payment.updateMany({
-        where: { transactionId: paymentIntent.id },
-        data: { status: 'FAILED' },
-      });
-      break;
-    }
-  }
-
-  res.json({ received: true });
+    res.json({ received: true });
+  });
 }
 
 export async function markCashPayment(req: Request, res: Response): Promise<void> {
@@ -222,6 +238,7 @@ export async function capturePayPalPayment(req: Request, res: Response): Promise
         customerId: updatedOrder.customerId,
         locationId: updatedOrder.locationId,
         paymentStatus: updatedOrder.paymentStatus,
+        tenantId: updatedOrder.tenantId,
       } as any);
 
       res.json({ success: true, data: { status: 'COMPLETED' } });
@@ -426,6 +443,7 @@ export async function confirmLinePayPayment(req: Request, res: Response): Promis
         customerId: updatedOrder.customerId,
         locationId: updatedOrder.locationId,
         paymentStatus: updatedOrder.paymentStatus,
+        tenantId: updatedOrder.tenantId,
       } as any);
 
       res.json({ success: true, data: { status: 'COMPLETED' } });

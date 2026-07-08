@@ -10,6 +10,7 @@ export interface JwtPayload {
   email: string | null;
   type: 'staff' | 'customer';
   role?: Role;
+  tenantId: string | null;
 }
 
 declare global {
@@ -29,7 +30,7 @@ export function verifyToken(token: string): JwtPayload {
   return jwt.verify(token, JWT_SECRET) as JwtPayload;
 }
 
-export function authenticate(req: Request, res: Response, next: NextFunction): void {
+export async function authenticate(req: Request, res: Response, next: NextFunction): Promise<void> {
   const authHeader = req.headers.authorization;
   if (!authHeader?.startsWith('Bearer ')) {
     res.status(401).json({ success: false, error: 'Authentication required' });
@@ -38,7 +39,22 @@ export function authenticate(req: Request, res: Response, next: NextFunction): v
 
   try {
     const token = authHeader.slice(7);
-    req.user = verifyToken(token);
+    const decoded = verifyToken(token);
+    
+    // In a multi-tenant SaaS, cross-tenant token forgery is a risk.
+    // Ensure the token was issued for the current tenant.
+    const { tenantStorage } = await import('./tenantStorage.js');
+    const store = tenantStorage.getStore();
+    const currentTenantId = store?.tenantId || null;
+    
+    // For Super Admins or global routes, tenantId might be null. 
+    // We only enforce tenant checking if the token HAS a tenantId.
+    if (decoded.tenantId && decoded.tenantId !== currentTenantId && decoded.role !== 'SUPER_ADMIN') {
+      res.status(401).json({ success: false, error: 'Token is not valid for this domain' });
+      return;
+    }
+
+    req.user = decoded;
     next();
   } catch {
     res.status(401).json({ success: false, error: 'Invalid or expired token' });
@@ -117,12 +133,20 @@ export function requirePermission(action: string, fallbackRoles: Role[]) {
   };
 }
 
-export function optionalAuth(req: Request, _res: Response, next: NextFunction): void {
+export async function optionalAuth(req: Request, _res: Response, next: NextFunction): Promise<void> {
   const authHeader = req.headers.authorization;
   if (authHeader?.startsWith('Bearer ')) {
     try {
       const token = authHeader.slice(7);
-      req.user = verifyToken(token);
+      const decoded = verifyToken(token);
+      
+      const { tenantStorage } = await import('./tenantStorage.js');
+      const store = tenantStorage.getStore();
+      const currentTenantId = store?.tenantId || null;
+      
+      if (!decoded.tenantId || decoded.tenantId === currentTenantId || decoded.role === 'SUPER_ADMIN') {
+        req.user = decoded;
+      }
     } catch {
       // Token invalid, continue without auth
     }

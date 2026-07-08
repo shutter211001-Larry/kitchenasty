@@ -18,13 +18,16 @@ router.post('/staff/reset-password', authController.resetStaffPassword);
 router.post('/customer/register', registerRateLimiter, authController.customerRegister);
 router.post('/customer/login', loginRateLimiter, authController.customerLogin);
 
-const handleSocialCallback = (req: Request, res: Response) => {
-  if (!req.user) return res.redirect(`${STOREFRONT_URL}/auth/callback?error=auth_failed`);
+const handleSocialCallback = async (req: Request, res: Response) => {
+  let baseUrl = process.env.STORE_URL_PUBLIC || 'http://localhost:5174';
+  if (!req.user) return res.redirect(`${baseUrl}/auth/callback?error=auth_failed`);
   const user = req.user as any;
+  const { tenantStorage } = await import('../middleware/tenantStorage.js');
   const token = generateToken({
     id: user.id,
     email: user.email,
     type: user.type || 'customer',
+    tenantId: tenantStorage.getStore()?.tenantId || null,
   });
   
   // Extract redirect from state if present
@@ -53,6 +56,9 @@ const handleSocialCallback = (req: Request, res: Response) => {
 
       if (stateObj) {
         redirectPath = stateObj.redirect || stateObj.redirectUri || redirectPath;
+        if (stateObj.origin) {
+          baseUrl = stateObj.origin;
+        }
       }
     } catch (e) {
       console.warn('[Auth] Failed to parse OAuth state:', e);
@@ -74,18 +80,38 @@ const handleSocialCallback = (req: Request, res: Response) => {
     }
   }
 
-  res.redirect(`${STOREFRONT_URL}/auth/callback?token=${token}&redirect=${encodeURIComponent(redirectPath)}`);
+  res.redirect(`${baseUrl}/auth/callback?token=${token}&redirect=${encodeURIComponent(redirectPath)}`);
 };
 
 // Social login — Google
 router.get('/google', (req: Request, res: Response, next: NextFunction) => {
-  const state = req.query.state as string || '';
+  let stateStr = req.query.state as string || '';
+  const referer = req.get('referer');
+  
+  try {
+    let stateObj: any = {};
+    if (stateStr) {
+      if (stateStr.startsWith('{')) stateObj = JSON.parse(stateStr);
+      else stateObj = JSON.parse(decodeURIComponent(stateStr));
+    }
+    
+    if (!stateObj.origin && referer) {
+      const url = new URL(referer);
+      stateObj.origin = url.origin;
+    }
+    
+    // Always store state as a JSON string to preserve the origin
+    stateStr = JSON.stringify(stateObj);
+  } catch (e) {
+    // If parsing fails, we fall back to the original string
+  }
+
   const prompt = req.query.prompt as string || 'select_account';
   
   passport.authenticate('google', { 
     scope: ['profile', 'email'], 
     session: false,
-    state: state,
+    state: stateStr,
     prompt: prompt
   })(req, res, next);
 });
@@ -111,14 +137,27 @@ router.get('/google/callback', (req: Request, res: Response, next: NextFunction)
   passport.authenticate('google', { session: false }, (err: any, user: any, info: any) => {
     if (err) {
       console.error('Google Auth Error:', err);
-      return res.redirect(`${STOREFRONT_URL}/auth/callback?error=server_error`);
+      return res.redirect(`${process.env.STORE_URL_PUBLIC || 'http://localhost:5174'}/auth/callback?error=server_error`);
     }
+    
+    let baseUrl = process.env.STORE_URL_PUBLIC || 'http://localhost:5174';
+    const stateStr = req.query.state as string;
+    if (stateStr) {
+      try {
+        const decodedStr = decodeURIComponent(stateStr);
+        if (decodedStr.startsWith('{')) {
+          const stateObj = JSON.parse(decodedStr);
+          if (stateObj.origin) baseUrl = stateObj.origin;
+        }
+      } catch (e) {}
+    }
+
     if (!user) {
       if (info && info.message && info.message.includes('已被其他會員連結')) {
         const socialId = info.message.split('|')[1] || '';
-        return res.redirect(`${STOREFRONT_URL}/account?error=conflict&provider=google&socialId=${socialId}&verified=true`);
+        return res.redirect(`${baseUrl}/account?error=conflict&provider=google&socialId=${socialId}&verified=true`);
       }
-      return res.redirect(`${STOREFRONT_URL}/auth/callback?error=auth_failed`);
+      return res.redirect(`${baseUrl}/auth/callback?error=auth_failed`);
     }
     req.user = user;
     next();

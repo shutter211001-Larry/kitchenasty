@@ -4,6 +4,7 @@ import { z } from 'zod';
 import crypto from 'crypto';
 import prisma from '../lib/db.js';
 import { generateToken } from '../middleware/auth.js';
+import { tenantStorage } from '../middleware/tenantStorage.js';
 import { grantRegistrationBonus } from '../lib/registrationBonus.js';
 import { sendEmail, staffPasswordResetEmail } from '../lib/email.js';
 
@@ -79,6 +80,7 @@ export async function staffLogin(req: Request, res: Response): Promise<void> {
     email: user.email,
     type: 'staff',
     role: user.role,
+    tenantId: tenantStorage.getStore()?.tenantId || null,
   });
 
   res.json({
@@ -132,6 +134,7 @@ export async function staffRegister(req: Request, res: Response): Promise<void> 
     email: user.email,
     type: 'staff',
     role: user.role,
+    tenantId: tenantStorage.getStore()?.tenantId || null,
   });
 
   res.status(201).json({ success: true, data: { token, user } });
@@ -261,6 +264,7 @@ export async function customerRegister(req: Request, res: Response): Promise<voi
     id: customer.id,
     email: customer.email,
     type: 'customer',
+    tenantId: tenantStorage.getStore()?.tenantId || null,
   });
 
   res.status(201).json({ success: true, data: { token, customer } });
@@ -296,6 +300,7 @@ export async function customerLogin(req: Request, res: Response): Promise<void> 
     id: customer.id,
     email: customer.email,
     type: 'customer',
+    tenantId: tenantStorage.getStore()?.tenantId || null,
   });
 
   res.json({

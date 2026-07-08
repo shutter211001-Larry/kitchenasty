@@ -3,15 +3,23 @@ import type { Transporter } from 'nodemailer';
 import prisma from './db.js';
 import { emailLogger } from './logger.js';
 
-let cachedTransporter: Transporter | null = null;
-let cachedFrom: string = '';
-let cacheExpiry = 0;
+import { tenantStorage } from '../middleware/tenantStorage.js';
+
+interface CacheEntry<T> {
+  data: T;
+  expiry: number;
+}
+const transporterCache = new Map<string, CacheEntry<{ transporter: Transporter; from: string }>>();
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
 async function getMailConfig(locationId?: string | null): Promise<{ transporter: Transporter; from: string }> {
+  const tenantId = tenantStorage.getStore()?.tenantId || 'global';
+  const cacheKey = `${tenantId}_${locationId || 'default'}`;
+  
   const now = Date.now();
-  if (!locationId && cachedTransporter && now < cacheExpiry) {
-    return { transporter: cachedTransporter, from: cachedFrom };
+  const cached = transporterCache.get(cacheKey);
+  if (cached && now < cached.expiry) {
+    return cached.data;
   }
 
   let host = process.env.SMTP_HOST || 'localhost';
@@ -83,37 +91,41 @@ async function getMailConfig(locationId?: string | null): Promise<{ transporter:
     } as any);
   }
 
-  if (!locationId) {
-    cachedTransporter = transporter;
-    cachedFrom = from;
-    cacheExpiry = now + CACHE_TTL;
-  }
+  transporterCache.set(cacheKey, {
+    data: { transporter, from },
+    expiry: now + CACHE_TTL
+  });
 
   return { transporter, from };
 }
 
 export function invalidateMailCache(): void {
-  cachedTransporter = null;
-  cacheExpiry = 0;
-  cachedMailBranding = null;
-  brandingCacheExpiry = 0;
+  const tenantId = tenantStorage.getStore()?.tenantId || 'global';
+  for (const key of transporterCache.keys()) {
+    if (key.startsWith(`${tenantId}_`)) {
+      transporterCache.delete(key);
+    }
+  }
+  brandingCache.delete(tenantId);
 }
 
-let cachedMailBranding: {
+const brandingCache = new Map<string, CacheEntry<{
   emailBrandName: string;
   emailHeaderColor: string;
   emailBgColor: string;
-} | null = null;
-let brandingCacheExpiry = 0;
+}>>();
 
 export async function getMailBranding(): Promise<{
   emailBrandName: string;
   emailHeaderColor: string;
   emailBgColor: string;
 }> {
+  const tenantId = tenantStorage.getStore()?.tenantId || 'global';
   const now = Date.now();
-  if (cachedMailBranding && now < brandingCacheExpiry) {
-    return cachedMailBranding;
+  
+  const cached = brandingCache.get(tenantId);
+  if (cached && now < cached.expiry) {
+    return cached.data;
   }
 
   let emailBrandName = '夏特點餐系統';
@@ -128,9 +140,9 @@ export async function getMailBranding(): Promise<{
     if (mail.emailBgColor) emailBgColor = mail.emailBgColor;
   } catch {}
 
-  cachedMailBranding = { emailBrandName, emailHeaderColor, emailBgColor };
-  brandingCacheExpiry = now + 5 * 60 * 1000; // 5 minutes
-  return cachedMailBranding;
+  const result = { emailBrandName, emailHeaderColor, emailBgColor };
+  brandingCache.set(tenantId, { data: result, expiry: now + 5 * 60 * 1000 });
+  return result;
 }
 
 interface EmailOptions {

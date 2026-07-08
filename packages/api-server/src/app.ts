@@ -167,6 +167,9 @@ export async function createApp() {
 
   // Multi-tenant middleware MUST run before routes
   app.use(tenantMiddleware);
+  
+  const { requireTenant } = await import('./middleware/tenantMiddleware.js');
+  app.use(requireTenant);
 
   // Health check (before rate limiter so monitoring/readiness probes always work)
   app.get('/api/health', (_req, res) => {
