@@ -39,7 +39,7 @@ export async function getMetrics(req: Request, res: Response): Promise<void> {
   const hourlyMap = new Map<string, { count: number; errors: number; totalTime: number }>();
   for (const m of metrics) {
     const hour = new Date(m.createdAt);
-    hour.setMinutes(0, 0, 0);
+    hour.setUTCMinutes(0, 0, 0);
     const key = hour.toISOString();
     const existing = hourlyMap.get(key) || { count: 0, errors: 0, totalTime: 0 };
     existing.count++;

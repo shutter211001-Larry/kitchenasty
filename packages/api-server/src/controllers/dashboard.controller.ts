@@ -5,10 +5,10 @@ import prisma from '../lib/db.js';
 export async function getDashboardStats(req: Request, res: Response): Promise<void> {
   try {
     const now = new Date();
-    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const todayStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
     const weekStart = new Date(todayStart);
     weekStart.setUTCDate(weekStart.getUTCDate() - 7);
-    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    const monthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
 
     const siteSettings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
     const generalSettings = typeof siteSettings?.generalSettings === 'string' 
@@ -104,7 +104,7 @@ export async function getAnalytics(req: Request, res: Response): Promise<void> {
   const days = Math.min(90, Math.max(7, parseInt(req.query.days as string) || 30));
   const startDate = new Date();
   startDate.setUTCDate(startDate.getUTCDate() - days);
-  startDate.setHours(0, 0, 0, 0);
+  startDate.setUTCHours(0, 0, 0, 0);
 
   // Daily revenue and order counts
   const dailyStats = await prisma.$queryRaw<{ date: string; orders: bigint; revenue: number }[]>(

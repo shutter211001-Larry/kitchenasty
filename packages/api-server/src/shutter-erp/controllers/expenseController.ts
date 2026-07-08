@@ -60,7 +60,7 @@ export const getExpenseAnalytics = async (req: AuthenticatedRequest, res: Respon
     const days = parseInt(req.query.days as string) || 30;
     const startDate = new Date();
     startDate.setUTCDate(startDate.getUTCDate() - days);
-    startDate.setHours(0, 0, 0, 0);
+    startDate.setUTCHours(0, 0, 0, 0);
 
     const expenses = await prisma.expense.findMany({
       where: {

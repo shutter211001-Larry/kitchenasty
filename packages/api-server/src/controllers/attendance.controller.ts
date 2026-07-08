@@ -97,7 +97,7 @@ export const checkIn = async (req: Request, res: Response) => {
   }
 
   const startOfDay = new Date();
-  startOfDay.setHours(0, 0, 0, 0);
+  startOfDay.setUTCHours(0, 0, 0, 0);
 
   const existing = await prisma.staffAttendance.findFirst({
     where: {
@@ -197,7 +197,7 @@ export const getRecords = async (req: Request, res: Response) => {
     if (startDate) where.checkIn.gte = new Date(String(startDate));
     if (endDate) {
       const end = new Date(String(endDate));
-      end.setHours(23, 59, 59, 999);
+      end.setUTCHours(23, 59, 59, 999);
       where.checkIn.lte = end;
     }
   }
@@ -280,7 +280,7 @@ export const getPayroll = async (req: Request, res: Response) => {
       const durationHours = durationMs / (1000 * 60 * 60);
       
       const recordDate = new Date(record.checkIn);
-      recordDate.setHours(0, 0, 0, 0);
+      recordDate.setUTCHours(0, 0, 0, 0);
       
       const shift = user.shifts.find(s => s.date.getTime() === recordDate.getTime());
       let dayType = shift?.dayType || 'WORKDAY';

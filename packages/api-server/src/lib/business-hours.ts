@@ -100,10 +100,10 @@ export function generateDaySlots(
     const [closeH, closeM] = session.closeTime.split(':').map(Number);
 
     const sessionStart = new Date(startOfDayTaiwan.getTime());
-    sessionStart.setMinutes(openH * 60 + openM + (settings.preOpeningBuffer || 0));
+    sessionStart.setUTCMinutes(openH * 60 + openM + (settings.preOpeningBuffer || 0));
 
     const sessionEnd = new Date(startOfDayTaiwan.getTime());
-    sessionEnd.setMinutes(closeH * 60 + closeM - (settings.postClosingBuffer || 0));
+    sessionEnd.setUTCMinutes(closeH * 60 + closeM - (settings.postClosingBuffer || 0));
 
     if ((closeH * 60 + closeM) <= (openH * 60 + openM)) {
       sessionEnd.setUTCDate(sessionEnd.getUTCDate() + 1);

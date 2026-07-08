@@ -33,7 +33,7 @@ export const fetchTaiwanHolidays = async (year: number) => {
 };
 
 export const isNationalHoliday = async (date: Date): Promise<boolean> => {
-  const year = date.getFullYear();
+  const year = date.getUTCFullYear();
   await fetchTaiwanHolidays(year);
   
   const formattedDate = date.toISOString().split('T')[0];

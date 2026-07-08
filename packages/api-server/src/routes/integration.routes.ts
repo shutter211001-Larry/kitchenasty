@@ -81,7 +81,7 @@ router.get('/reservations', async (req, res) => {
     const reservations = await prisma.reservation.findMany({
       where: {
         date: {
-          gte: new Date(new Date().setHours(0,0,0,0)) // starting from today
+          gte: new Date(new Date().setUTCHours(0,0,0,0)) // starting from today
         },
         status: {
           in: ['PENDING', 'CONFIRMED']

@@ -544,7 +544,7 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
       
       // Check if scheduled time is in the past or before lead time
       const minTime = new Date(now);
-      minTime.setMinutes(minTime.getMinutes() + leadTime);
+      minTime.setUTCMinutes(minTime.getUTCMinutes() + leadTime);
       if (scheduled < minTime) {
         res.status(400).json({ success: false, error: `Scheduled time must be at least ${leadTime} minutes from now` });
         return;
@@ -1920,7 +1920,7 @@ export async function exportOrders(req: Request, res: Response): Promise<void> {
 
   const start = new Date(startDate as string);
   const end = new Date(endDate as string);
-  end.setHours(23, 59, 59, 999);
+  end.setUTCHours(23, 59, 59, 999);
 
   const orders = await prisma.order.findMany({
     where: {
