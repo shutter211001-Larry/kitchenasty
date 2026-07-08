@@ -51,7 +51,7 @@ export default function AcceptInvite() {
 
     try {
       const res = await api.post('staff/accept-invite', JSON.stringify({ token: tokenParam, name, password }));
-      const data = await res.json();
+      const data = res;
       if (!res.ok) throw new Error(data.error || 'Failed to accept invite');
 
       login(data.data.token);

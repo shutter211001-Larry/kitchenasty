@@ -338,7 +338,7 @@ export default function StockManagement() {
                 if (!url) {
                   try {
                     const res = await api.get('settings/public-env');
-                    const data = await res.json();
+                    const data = res;
                     url = data.erpUrl;
                   } catch (e) {
                     console.error('Failed to fetch public env vars', e);

@@ -152,7 +152,7 @@ export default function SettingsOrder() {
           deliveryLeadTime: Number(deliveryLeadTime),
           emailNotifications 
         }));
-      const data = await res.json();
+      const data = res;
       if (data.success) {
         setSuccess(t('settingsOrder.orderSettingsUpdated'));
         setTimeout(() => setSuccess(''), 3000);

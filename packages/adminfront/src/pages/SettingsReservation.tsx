@@ -46,7 +46,7 @@ export default function SettingsReservation() {
     setSuccess('');
     try {
       const res = await api.put('settings/reservation', JSON.stringify({ enabled, timeInterval, stayTime, maxAdvanceBookingDays, minCancellationNoticeHours, autoConfirm }));
-      const data = await res.json();
+      const data = res;
       if (data.success) {
         setSuccess('Reservation settings updated');
         setTimeout(() => setSuccess(''), 3000);

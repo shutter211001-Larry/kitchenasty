@@ -20,7 +20,7 @@ const getTenantId = () => {
   return '';
 };
 
-async function request<T>(path: string, options?: RequestInit): Promise<T> {
+async function request<T = any>(path: string, options?: RequestInit): Promise<T> {
   const token = localStorage.getItem('token');
   const tenantId = getTenantId();
   const domain = window.location.hostname;
@@ -58,16 +58,16 @@ function withIdempotency(body: unknown) {
 }
 
 export const api = {
-  get: <T>(path: string) => request<T>(path),
-  post: <T>(path: string, body: unknown) =>
-    request<T>(path, { method: 'POST', body: JSON.stringify(withIdempotency(body)) }),
-  patch: <T>(path: string, body: unknown) =>
-    request<T>(path, { method: 'PATCH', body: JSON.stringify(withIdempotency(body)) }),
-  put: <T>(path: string, body: unknown) =>
-    request<T>(path, { method: 'PUT', body: JSON.stringify(withIdempotency(body)) }),
-  delete: <T>(path: string) =>
+  get: <T = any>(path: string) => request<T>(path),
+  post: <T = any>(path: string, body?: unknown) =>
+    request<T>(path, { method: 'POST', body: body ? JSON.stringify(withIdempotency(body)) : undefined }),
+  patch: <T = any>(path: string, body?: unknown) =>
+    request<T>(path, { method: 'PATCH', body: body ? JSON.stringify(withIdempotency(body)) : undefined }),
+  put: <T = any>(path: string, body?: unknown) =>
+    request<T>(path, { method: 'PUT', body: body ? JSON.stringify(withIdempotency(body)) : undefined }),
+  delete: <T = any>(path: string) =>
     request<T>(path, { method: 'DELETE' }),
-  upload: async <T>(path: string, formData: FormData): Promise<T> => {
+  upload: async <T = any>(path: string, formData: FormData): Promise<T> => {
     const token = localStorage.getItem('token');
     const tenantId = getTenantId();
     const domain = window.location.hostname;

@@ -195,7 +195,7 @@ export default function OrderList() {
     try {
       setLoading(true);
       const res = await api.post('orders/reminders');
-      const data = await res.json();
+      const data = res;
       if (!res.ok) throw new Error(data.error || 'Failed to send reminders');
       alert(`提醒已發送！\n${data.data.message}`);
     } catch (err: any) {

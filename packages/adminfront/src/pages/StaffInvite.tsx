@@ -23,7 +23,7 @@ export default function StaffInvite() {
 
     try {
       const res = await api.post('staff/invite', JSON.stringify({ email, name: name || undefined, role }));
-      const data = await res.json();
+      const data = res;
       if (!res.ok) throw new Error(data.error || 'Failed to send invite');
       setSuccess(true);
     } catch (err: any) {

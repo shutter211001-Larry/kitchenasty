@@ -40,7 +40,7 @@ export default function ResetPassword() {
       
       let data: any = {};
       try {
-        data = await res.json();
+        data = res;
       } catch (parseErr) {}
 
       if (!res.ok) throw new Error(data.error || 'Reset failed');

@@ -81,7 +81,7 @@ export default function DesignTheme() {
     setSuccess('');
     try {
       const res = await api.put('settings', JSON.stringify({ colorPrimary, colorSecondary, darkMode }));
-      const data = await res.json();
+      const data = res;
       if (data.success) {
         setSuccess(t('designTheme.themeSettingsUpdated'));
         setTimeout(() => setSuccess(''), 3000);

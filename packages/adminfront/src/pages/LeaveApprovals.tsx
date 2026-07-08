@@ -18,7 +18,7 @@ export default function LeaveApprovals() {
   async function fetchLeaves() {
     try {
       const res = await api.get('leaves');
-      const data = await res.json();
+      const data = res;
       if (data.success) setLeaves(data.data);
     } catch (err) {
       console.error(err);
@@ -30,7 +30,7 @@ export default function LeaveApprovals() {
     try {
       const res = await api.put(`leaves/${id}/status`, JSON.stringify({ status }));
       
-      const data = await res.json();
+      const data = res;
       if (data.success) {
         toast.success(t('attendance.leaveStatusUpdated') || 'Status updated');
         fetchLeaves();

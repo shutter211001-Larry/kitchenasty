@@ -162,7 +162,7 @@ export default function Attendance() {
   async function fetchLocations() {
     try {
       const res = await api.get('locations');
-      const data = await res.json();
+      const data = res;
       if (data.success) {
         setLocations(data.data);
       }
@@ -174,7 +174,7 @@ export default function Attendance() {
   async function fetchMyRecords() {
     try {
       const res = await api.get('attendance/my-records');
-      const data = await res.json();
+      const data = res;
       if (data.success) {
         setMyRecords(data.data);
       }
@@ -186,7 +186,7 @@ export default function Attendance() {
   async function fetchMyCorrections() {
     try {
       const res = await api.get('attendance/corrections/my-records');
-      const data = await res.json();
+      const data = res;
       if (data.success) {
         setMyCorrections(data.data);
       }
@@ -215,7 +215,7 @@ export default function Attendance() {
           device: navigator.userAgent,
           qrToken
         }));
-      const data = await res.json();
+      const data = res;
       if (data.success) {
         if (data.data.isOutOfRange) {
            toast.success(t('attendance.clockInSuccessAbnormalDistance'), { icon: '⚠️' });
@@ -237,7 +237,7 @@ export default function Attendance() {
     setLoading(true);
     try {
       const res = await api.post(`attendance/check-out/${id}`);
-      const data = await res.json();
+      const data = res;
       if (data.success) {
         toast.success(t('attendance.clockOutSuccess'));
         fetchMyRecords();
@@ -280,7 +280,7 @@ export default function Attendance() {
 
       const res = await api.post('attendance/corrections', JSON.stringify(payload));
       
-      const data = await res.json();
+      const data = res;
       if (data.success) {
         toast.success(t('attendanceCorrections.success'));
         setShowCorrectionModal(false);

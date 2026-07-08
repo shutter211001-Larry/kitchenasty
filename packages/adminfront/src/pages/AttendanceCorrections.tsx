@@ -23,7 +23,7 @@ export default function AttendanceCorrections() {
       if (statusFilter) query.append('status', statusFilter);
 
       const res = await api.get(`attendance/corrections?${query.toString()}`);
-      const data = await res.json();
+      const data = res;
       if (data.success) {
         setRequests(data.data);
       } else {
@@ -41,7 +41,7 @@ export default function AttendanceCorrections() {
     setLoading(true);
     try {
       const res = await api.put(`attendance/corrections/${id}/status`, JSON.stringify({ status: newStatus }));
-      const data = await res.json();
+      const data = res;
       if (data.success) {
         toast.success(t('attendanceCorrections.updateSuccess'));
         fetchRequests();

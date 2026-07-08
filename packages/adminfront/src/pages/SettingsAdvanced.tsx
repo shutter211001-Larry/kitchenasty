@@ -118,7 +118,7 @@ export default function SettingsAdvanced() {
           enableRateLimiting,
           inventorySyncFrequency,
         }));
-      const data = await res.json();
+      const data = res;
       if (data.success) {
         setSuccess('進階設定已更新');
         setTimeout(() => setSuccess(''), 3000);

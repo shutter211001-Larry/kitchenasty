@@ -130,7 +130,7 @@ export default function OrderDetailPage() {
       }
       
       const res = await api.patch(`orders/${id}/status`, JSON.stringify(bodyPayload));
-      const data = await res.json();
+      const data = res;
       if (!res.ok) throw new Error(data.error);
       setOrder((prev) => prev ? { 
         ...prev, 
@@ -156,7 +156,7 @@ export default function OrderDetailPage() {
     setUpdating(true);
     try {
       const res = await api.patch(`orders/${id}/payment-status`, JSON.stringify({ paymentStatus: newPaymentStatus }));
-      const data = await res.json();
+      const data = res;
       if (!res.ok) throw new Error(data.error);
       setOrder((prev) => prev ? { ...prev, paymentStatus: newPaymentStatus } : prev);
     } catch (err: any) {
@@ -175,7 +175,7 @@ export default function OrderDetailPage() {
     setUpdating(true);
     try {
       const res = await api.patch(`orders/${id}/discount`, JSON.stringify({ adjustedTotal: val }));
-      const data = await res.json();
+      const data = res;
       if (!res.ok) throw new Error(data.error || t('orderDetail.adjustDiscountFailed'));
       setOrder((prev) => prev ? { ...prev, ...data.data } : data.data);
       const unrounded = data.data.subtotal + data.data.tax + data.data.deliveryFee - data.data.discount;

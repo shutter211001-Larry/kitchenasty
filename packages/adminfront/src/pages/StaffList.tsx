@@ -69,7 +69,7 @@ export default function StaffList() {
     try {
       const res = await api.patch(`staff/${id}`, JSON.stringify({ isActive }));
       if (!res.ok) {
-        const data = await res.json();
+        const data = res;
         throw new Error(data.error || 'Failed to update');
       }
       setStaff((prev) => prev.map((s) => (s.id === id ? { ...s, isActive } : s)));

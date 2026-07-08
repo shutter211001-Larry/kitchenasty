@@ -43,7 +43,7 @@ export default function DesignBranding() {
     setSuccess('');
     try {
       const res = await api.put('settings', JSON.stringify({ siteName, siteTitle, siteDescription }));
-      const data = await res.json();
+      const data = res;
       if (data.success) {
         setSuccess(t('designBranding.brandSettingsUpdated'));
         setTimeout(() => setSuccess(''), 3000);
@@ -63,7 +63,7 @@ export default function DesignBranding() {
 
     try {
       const res = await api.post(`settings/${type}`, formData);
-      const data = await res.json();
+      const data = res;
       if (data.success && data.data) {
         if (type === 'logo') setLogo(getFullUrl(data.data.logo));
         else setFavicon(getFullUrl(data.data.favicon));

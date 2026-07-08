@@ -36,7 +36,7 @@ export default function LegalPageForm() {
 
     try {
       const res = await api.put(`legal/${slug}`, JSON.stringify({ title, content }));
-      const data = await res.json();
+      const data = res;
       if (data.success) {
         navigate('/legal/pages');
       } else {

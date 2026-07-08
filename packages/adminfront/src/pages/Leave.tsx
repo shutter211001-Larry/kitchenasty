@@ -26,7 +26,7 @@ export default function Leave() {
   async function fetchMyLeaves() {
     try {
       const res = await api.get('leaves/my-records');
-      const data = await res.json();
+      const data = res;
       if (data.success) setMyLeaves(data.data);
     } catch (err) {
       console.error(err);
@@ -40,7 +40,7 @@ export default function Leave() {
     try {
       const res = await api.post('leaves', JSON.stringify(form));
       
-      const data = await res.json();
+      const data = res;
       if (data.success) {
         toast.success(t('attendance.leaveSuccess') || 'Leave request submitted');
         setShowModal(false);

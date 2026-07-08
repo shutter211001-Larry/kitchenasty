@@ -323,7 +323,7 @@ export default function DesignTemplates() {
     setSuccess('');
     try {
       const res = await api.put('settings', JSON.stringify({ storefrontTemplate: id }));
-      const data = await res.json();
+      const data = res;
       if (data.success) {
         setCurrent(id);
         setSuccess(`模板 "${templates.find((t) => t.id === id)?.name}" 已成功套用`);

@@ -84,7 +84,7 @@ export default function CustomerList() {
           subject: promoSubject,
           content: promoContent
         }));
-      const data = await res.json();
+      const data = res;
       if (!res.ok) throw new Error(data.error || 'Failed to send');
       setPromoStatus('success');
       setPromoSubject('');

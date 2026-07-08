@@ -85,7 +85,7 @@ export default function SettingsMail() {
           mailServiceType,
         }),
       });
-      const data = await res.json();
+      const data = res;
       if (data.success) {
         if (data.data?.smtpPass) setSmtpPass(data.data.smtpPass);
         setSuccess('設定已儲存 (系統已重新載入郵件設定)');
@@ -111,7 +111,7 @@ export default function SettingsMail() {
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ to: testEmail }),
       });
-      const data = await res.json();
+      const data = res;
       setTestResult(data.success ? '測試信已發送！' : (data.error || '發送失敗'));
     } catch {
       setTestResult('網路連線錯誤');

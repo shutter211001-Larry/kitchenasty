@@ -46,7 +46,7 @@ export default function SettingsPermissions() {
     setSuccess('');
     try {
       const res = await api.put('settings/general', JSON.stringify({ permissions }));
-      const data = await res.json();
+      const data = res;
       if (data.success) {
         setSuccess(t('settingsPermissions.permissionsUpdated'));
         setTimeout(() => setSuccess(''), 3000);

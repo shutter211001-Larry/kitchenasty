@@ -47,7 +47,7 @@ export default function SettingsInvoice() {
           hashKey,
           hashIv,
         }));
-      const data = await res.json();
+      const data = res;
       if (data.success) {
         if (data.data?.hashKey) setHashKey(data.data.hashKey);
         if (data.data?.hashIv) setHashIv(data.data.hashIv);

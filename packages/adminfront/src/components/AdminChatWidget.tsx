@@ -135,7 +135,7 @@ export default function AdminChatWidget() {
           content: currentInput,
           locationId: activeLocationId
         }));
-      const data = await res.json();
+      const data = res;
       if (!data.success) {
         console.error('Failed to send message:', data.message);
       }

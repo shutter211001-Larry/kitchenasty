@@ -58,7 +58,7 @@ export default function SettingsGoogle() {
           gmailRefreshToken,
           googleMapsApiKey,
         }));
-      const data = await res.json();
+      const data = res;
       if (data.success) {
         if (data.data?.geminiApiKey) setGeminiApiKey(data.data.geminiApiKey);
         if (data.data?.googleLoginClientSecret) setGoogleLoginClientSecret(data.data.googleLoginClientSecret);

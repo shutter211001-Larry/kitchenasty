@@ -50,7 +50,7 @@ export default function AttendanceQRGenerator() {
   async function fetchLocations() {
     try {
       const res = await api.get('locations');
-      const data = await res.json();
+      const data = res;
       if (data.success) {
         setLocations(data.data);
       }
@@ -63,7 +63,7 @@ export default function AttendanceQRGenerator() {
     if (!selectedLocation) return;
     try {
       const res = await api.get(`attendance/qr-token?locationId=${selectedLocation}`);
-      const data = await res.json();
+      const data = res;
       if (data.success) {
         setQrToken(data.data.token);
         setTimeLeft(30);

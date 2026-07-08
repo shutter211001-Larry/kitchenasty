@@ -42,7 +42,7 @@ export default function SettingsReviews() {
     setSuccess('');
     try {
       const res = await api.put('settings/review', JSON.stringify({ enabled, requireOrder, autoApprove, minimumRating }));
-      const data = await res.json();
+      const data = res;
       if (data.success) {
         setSuccess(t('settingsReviews.reviewSettingsUpdated'));
         setTimeout(() => setSuccess(''), 3000);

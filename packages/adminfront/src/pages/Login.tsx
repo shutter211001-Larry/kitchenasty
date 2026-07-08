@@ -36,7 +36,7 @@ export default function Login({ onLogin }: Props) {
       
       let data: any;
       try {
-        data = await res.json();
+        data = res;
       } catch (parseErr) {
         throw new Error('伺服器連線失敗或正在維護中，請稍後再試。 (Server connection failed)');
       }
@@ -70,7 +70,7 @@ export default function Login({ onLogin }: Props) {
       
       let data: any = {};
       try {
-        data = await res.json();
+        data = res;
       } catch (parseErr) {}
 
       if (!res.ok) throw new Error(data.error || 'Request failed');

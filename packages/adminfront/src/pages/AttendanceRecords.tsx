@@ -26,7 +26,7 @@ export default function AttendanceRecords() {
   async function fetchLocations() {
     try {
       const res = await api.get('locations');
-      const data = await res.json();
+      const data = res;
       if (data.success) {
         setLocations(data.data);
       }
@@ -45,7 +45,7 @@ export default function AttendanceRecords() {
       if (isOutOfRange) query.append('isOutOfRange', 'true');
 
       const res = await api.get(`attendance/records?${query.toString()}`);
-      const data = await res.json();
+      const data = res;
       if (data.success) {
         setRecords(data.data);
       } else {

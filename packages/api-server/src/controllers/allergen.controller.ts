@@ -8,10 +8,15 @@ const createAllergenSchema = z.object({
   nameTranslations: z.record(z.string()).optional(),
 });
 
+import { tenantStorage } from '../middleware/tenantStorage.js';
+
 export async function listAllergens(_req: Request, res: Response): Promise<void> {
+  const tenantId = tenantStorage.getStore()?.tenantId;
+  const menuItemsFilter = tenantId ? { where: { menuItem: { tenantId } } } : true;
+
   const allergens = await prisma.allergen.findMany({
     orderBy: { name: 'asc' },
-    include: { _count: { select: { menuItems: true } } },
+    include: { _count: { select: { menuItems: menuItemsFilter as any } } },
   });
 
   res.json({ success: true, data: allergens });

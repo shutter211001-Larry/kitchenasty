@@ -52,7 +52,7 @@ export default function CookieCategoryList() {
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(form),
       });
-      const data = await res.json();
+      const data = res;
       if (data.success) {
         setForm(emptyForm);
         setEditingId(null);
@@ -70,7 +70,7 @@ export default function CookieCategoryList() {
     if (!confirm(t('cookieCategoryList.confirmDeleteCookieCategory'))) return;
     try {
       const res = await api.delete(`legal/cookie-categories/${id}`);
-      const data = await res.json();
+      const data = res;
       if (data.success) loadCategories();
     } catch {}
   }

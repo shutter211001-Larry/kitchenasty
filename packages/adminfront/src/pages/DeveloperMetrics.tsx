@@ -92,7 +92,7 @@ export default function DeveloperMetrics() {
               if (!confirm(t('developerMetrics.confirmSyncDatabase'))) return;
               try {
                 const res = await api.post('developer/sync-db');
-                const data = await res.json();
+                const data = res;
                 if (data.success) {
                   alert(t('developerMetrics.databaseSyncSuccess'));
                 } else {
@@ -116,7 +116,7 @@ export default function DeveloperMetrics() {
               setSyncingLocales(true);
               try {
                 const res = await api.post('developer/sync-locales');
-                const data = await res.json();
+                const data = res;
                 if (data.success) {
                   alert(`語系同步成功！已補齊 ${data.updatedCount} 筆翻譯。`);
                 } else {

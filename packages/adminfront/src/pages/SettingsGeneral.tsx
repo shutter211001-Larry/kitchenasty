@@ -103,7 +103,7 @@ export default function SettingsGeneral() {
       const p2 = api.patch('auth/me/language', JSON.stringify({ language }));
 
       const [res, langRes] = await Promise.all([p1, p2]);
-      const data = await res.json();
+      const data = res;
       
       if (data.success) {
         if (langRes.ok) {

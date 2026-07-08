@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api } from '../lib/api.js';
+import { useAuth } from '../context/AuthContext.js';
 
 interface Allergen {
   id: string;
@@ -11,6 +12,8 @@ interface Allergen {
 
 export default function AllergenList() {
   const { t } = useTranslation();
+  const { user } = useAuth();
+  const isSuperAdmin = user?.role === 'SUPER_ADMIN';
     const LANGUAGES = [
       { code: 'en', label: t('allergenList.english') },
       { code: 'ja', label: t('allergenList.japanese') },
@@ -167,9 +170,11 @@ export default function AllergenList() {
                   <span className="text-xs text-gray-500">{a._count?.menuItems || 0} {t('allergenList.itemCount')}</span>
                 </td>
                 <td className="px-6 py-4 text-right">
-                  <button onClick={() => handleDelete(a.id)} className="text-red-500 hover:text-red-700 text-sm">
-                    {t('allergenList.delete')}
-                  </button>
+                  {isSuperAdmin && (
+                    <button onClick={() => handleDelete(a.id)} className="text-red-500 hover:text-red-700 text-sm">
+                      {t('allergenList.delete')}
+                    </button>
+                  )}
                 </td>
               </tr>
             ))}

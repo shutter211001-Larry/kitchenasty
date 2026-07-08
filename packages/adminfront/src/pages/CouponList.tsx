@@ -69,7 +69,7 @@ export default function CouponList() {
     if (!window.confirm(`您確定要刪除優惠券 ${code} 嗎？此操作將無法復原。`)) return;
     try {
       const res = await api.delete(`coupons/${id}`);
-      const data = await res.json();
+      const data = res;
       if (!res.ok) throw new Error(data.error || t('couponList.deleteFailed'));
       setCoupons((prev) => prev.filter((c) => c.id !== id));
     } catch (err: any) {

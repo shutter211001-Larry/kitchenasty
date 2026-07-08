@@ -60,7 +60,7 @@ export default function ReservationDetail() {
     setUpdating(true);
     try {
       const res = await api.patch(`reservations/${id}`, JSON.stringify(updates));
-      const data = await res.json();
+      const data = res;
       if (!res.ok) throw new Error(data.error);
       setReservation(data.data);
     } catch (err: any) {

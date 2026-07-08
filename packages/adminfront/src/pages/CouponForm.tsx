@@ -170,7 +170,7 @@ export default function CouponForm() {
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(body),
       });
-      const data = await res.json();
+      const data = res;
       if (!res.ok) throw new Error(typeof data.error === 'string' ? data.error : 'Failed to save');
       navigate('/promotions');
     } catch (err: any) {

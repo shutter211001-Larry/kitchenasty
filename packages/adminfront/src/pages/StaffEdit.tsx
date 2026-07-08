@@ -192,7 +192,7 @@ export default function StaffEdit() {
             dependents: Number(dependents),
           }
         }));
-      const data = await res.json();
+      const data = res;
       if (!res.ok) throw new Error(data.error || 'Failed to update');
       navigate('/staff');
     } catch (err: any) {
@@ -207,7 +207,7 @@ export default function StaffEdit() {
     setDeleting(true);
     try {
       const res = await api.delete(`staff/${id}`);
-      const data = await res.json();
+      const data = res;
       if (!res.ok) throw new Error(data.error || 'Failed to delete');
       navigate('/staff');
     } catch (err: any) {

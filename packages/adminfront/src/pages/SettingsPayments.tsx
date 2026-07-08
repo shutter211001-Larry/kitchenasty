@@ -61,7 +61,7 @@ export default function SettingsPayments() {
           paypalEnabled, paypalClientId, paypalClientSecret, paypalSandbox,
           cashEnabled
         }));
-      const data = await res.json();
+      const data = res;
       if (data.success) {
         if (data.data) {
           if (data.data.stripeSecretKey) setStripeSecretKey(data.data.stripeSecretKey);
