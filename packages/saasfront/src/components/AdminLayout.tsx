@@ -55,7 +55,7 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { id: 'dashboard', path: '/', label: 'nav.dashboard', icon: <LayoutDashboard size={20} />, roles: ['SUPER_ADMIN'] },
+  { id: 'dashboard', path: '/', label: '平台總覽', icon: <LayoutDashboard size={20} />, roles: ['SUPER_ADMIN'] },
   {
     id: 'tenants',
     label: '租戶管理',
@@ -75,9 +75,9 @@ const ROLE_COLORS: Record<Role, string> = {
 };
 
 const ROLE_LABELS: Record<Role, string> = {
-  SUPER_ADMIN: 'Platform Owner',
-  MANAGER: 'Manager',
-  STAFF: 'Staff',
+  SUPER_ADMIN: 'SaaS 超級管理員',
+  MANAGER: '餐廳店長',
+  STAFF: '餐廳員工',
 };
 
 export default function AdminLayout({ children, onLogout }: { children: React.ReactNode; onLogout?: () => void }) {
@@ -178,8 +178,8 @@ export default function AdminLayout({ children, onLogout }: { children: React.Re
         aria-label="Main navigation"
       >
         <div className="px-6 py-4 border-b border-gray-700">
-          <h1 className="text-xl font-bold text-indigo-400">Shutter SaaS Platform</h1>
-          <p className="text-xs text-gray-400 mt-1">Super Admin Console</p>
+          <h1 className="text-xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">夏特 SaaS 平台系統</h1>
+          <p className="text-xs text-indigo-300 mt-1 uppercase tracking-wider font-medium">超級管理中心</p>
         </div>
         <nav className="flex-1 py-4 overflow-y-auto select-none">
           {filteredNav.map(item => {
@@ -345,7 +345,7 @@ export default function AdminLayout({ children, onLogout }: { children: React.Re
                         onClick={() => setDropdownOpen(false)}
                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
                       >
-                        {t('nav.settings')}
+                        系統設定
                       </Link>
                     )}
                     {onLogout && (
@@ -354,9 +354,9 @@ export default function AdminLayout({ children, onLogout }: { children: React.Re
                           setDropdownOpen(false);
                           onLogout();
                         }}
-                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                        className="block w-full text-left px-4 py-2 text-sm text-red-600 font-medium hover:bg-red-50"
                       >
-                        {t('nav.logout')}
+                        登出系統
                       </button>
                     )}
                   </div>
