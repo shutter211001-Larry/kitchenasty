@@ -1,6 +1,6 @@
 import Stripe from 'stripe';
 import prisma from './db.js';
-import { tenantStorage } from '../middleware/tenantMiddleware.js';
+import { tenantStorage } from '../middleware/tenantStorage.js';
 
 const stripeCache = new Map<string, Stripe>();
 

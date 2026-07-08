@@ -505,19 +505,68 @@ const invoiceSettingsSchema = z.object({
 // GENERAL SETTINGS
 // ============================================================
 
-export async function getGeneralSettings(_req: Request, res: Response): Promise<void> {
-  const data = await getSettingsGroup('generalSettings');
-  res.json({ success: true, data });
+export const getGeneralSettings = async (req: Request, res: Response) => {
+  try {
+    const settings = await prisma.siteSettings.findFirst();
+    
+    // Fetch current tenant to get the domain
+    const store = (await import('../middleware/tenantStorage.js')).tenantStorage.getStore();
+    let domain = '';
+    if (store?.tenantId) {
+      const tenant = await (prisma as any).tenant.findUnique({ where: { id: store.tenantId } });
+      if (tenant) domain = tenant.domain || '';
+    }
+
+    if (!settings) {
+      return res.json({ success: true, data: { domain } });
+    }
+
+    const general = (settings.generalSettings as Record<string, any>) || {};
+
+    res.json({
+      success: true,
+      data: {
+        domain,
+        ...general
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'Failed to fetch general settings' });
+  }
 }
 
-export async function updateGeneralSettings(req: Request, res: Response): Promise<void> {
-  const parsed = generalSettingsSchema.safeParse(req.body);
-  if (!parsed.success) {
-    res.status(400).json({ success: false, error: parsed.error.errors });
-    return;
+export const updateGeneralSettings = async (req: Request, res: Response) => {
+  try {
+    const { domain, ...generalData } = req.body;
+    
+    const parsed = generalSettingsSchema.safeParse(generalData);
+    if (!parsed.success) {
+      res.status(400).json({ success: false, error: parsed.error.errors });
+      return;
+    }
+
+    // Update the domain in the Tenant model
+    const store = (await import('../middleware/tenantStorage.js')).tenantStorage.getStore();
+    if (store?.tenantId && domain !== undefined) {
+      // Check if domain is taken
+      if (domain) {
+        const existing = await (prisma as any).tenant.findFirst({ where: { domain } });
+        if (existing && existing.id !== store.tenantId) {
+          return res.status(400).json({ success: false, error: '該網域已被其他店鋪使用' });
+        }
+      }
+      
+      await (prisma as any).tenant.update({
+        where: { id: store.tenantId },
+        data: { domain: domain || null }
+      });
+    }
+
+    const data = await updateSettingsGroup('generalSettings', parsed.data);
+    res.json({ success: true, data });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'Failed to update general settings' });
   }
-  const data = await updateSettingsGroup('generalSettings', parsed.data);
-  res.json({ success: true, data });
 }
 
 // ============================================================

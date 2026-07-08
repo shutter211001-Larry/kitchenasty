@@ -1,5 +1,5 @@
 import { PrismaClient, Prisma } from '@prisma/client';
-import { tenantStorage } from '../middleware/tenantMiddleware.js';
+import { tenantStorage } from '../middleware/tenantStorage.js';
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
