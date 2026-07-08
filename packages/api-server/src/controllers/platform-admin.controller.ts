@@ -33,10 +33,12 @@ export const createTenant = async (req: Request, res: Response) => {
     const bcrypt = await import('bcryptjs');
     const hashedPassword = await bcrypt.default.hash(adminPassword, 10);
 
+    const trimmedDomain = domain?.trim() || null;
+
     const newTenant = await (prisma as any).tenant.create({
       data: {
         name,
-        domain: domain || null,
+        domain: trimmedDomain,
         users: {
           create: {
             email: adminEmail,
@@ -59,7 +61,8 @@ export const createTenant = async (req: Request, res: Response) => {
   } catch (error) {
     logger.error({ err: error }, 'Failed to create tenant');
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
-      res.status(409).json({ success: false, error: 'Domain or Email already exists' });
+      const target = (error.meta?.target as string[])?.join(', ') || 'field';
+      res.status(409).json({ success: false, error: `${target === 'email' ? '信箱' : '網域'}已存在，請使用其他名稱 (${target})` });
     } else {
       res.status(500).json({ success: false, error: 'Failed to create tenant' });
     }

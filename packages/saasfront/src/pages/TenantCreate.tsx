@@ -28,7 +28,7 @@ export default function TenantCreate() {
       toast.success('成功建立新租戶');
       navigate('/tenants');
     } catch (error: any) {
-      toast.error(error.response?.data?.error || '建立租戶失敗');
+      toast.error(error.message || '建立租戶失敗');
     } finally {
       setLoading(false);
     }
