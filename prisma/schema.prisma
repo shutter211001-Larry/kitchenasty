@@ -25,6 +25,40 @@ model Tenant {
   coupons      Coupon[]
   siteSettings SiteSettings?
 
+  tables                       Table[]
+  reservations                 Reservation[]
+  reviews                      Review[]
+  loyaltyTransactions          LoyaltyTransaction[]
+  groupOrderSessions           GroupOrderSession[]
+  customerGroups               CustomerGroup[]
+  staffPasswordResetTokens     StaffPasswordResetToken[]
+  legalPages                   LegalPage[]
+  cookieCategories             CookieCategory[]
+  registrationBonusRecords     RegistrationBonusRecord[]
+  cookieConsents               CookieConsent[]
+  inviteTokens                 InviteToken[]
+  automationRules              AutomationRule[]
+  auditLogs                    AuditLog[]
+  erpRecipeMappings            ErpRecipeMapping[]
+  chatMessages                 ChatMessage[]
+  staffAttendances             StaffAttendance[]
+  attendanceCorrectionRequests AttendanceCorrectionRequest[]
+  leaveRequests                LeaveRequest[]
+  jobRoles                     JobRole[]
+  userAvailabilities           UserAvailability[]
+  staffTimeOffs                StaffTimeOff[]
+  shiftRequirements            ShiftRequirement[]
+  weeklyShiftRequirements      WeeklyShiftRequirement[]
+  shifts                       Shift[]
+  payrollPeriods               PayrollPeriod[]
+  payslips                     Payslip[]
+  payslipItems                 PayslipItem[]
+  insuranceProfiles            InsuranceProfile[]
+  employmentRecords            EmploymentRecord[]
+  leaveBalances                LeaveBalance[]
+  attendanceAnomalies          AttendanceAnomaly[]
+  employeeDocuments            EmployeeDocument[]
+
   @@map("tenants")
 }
 
@@ -79,6 +113,9 @@ model StaffPasswordResetToken {
   expiresAt DateTime
   createdAt DateTime @default(now())
 
+  tenantId String?
+  tenant   Tenant? @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
   @@map("staff_password_reset_tokens")
 }
 
@@ -125,6 +162,9 @@ model CustomerGroup {
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
   customers Customer[]
+
+  tenantId String?
+  tenant   Tenant? @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@map("customer_groups")
 }
@@ -520,6 +560,9 @@ model Table {
   groupSessions GroupOrderSession[]
   location      Location            @relation(fields: [locationId], references: [id], onDelete: Cascade)
 
+  tenantId String?
+  tenant   Tenant? @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
   @@unique([locationId, name])
   @@map("tables")
 }
@@ -539,6 +582,9 @@ model Reservation {
   customer   Customer          @relation(fields: [customerId], references: [id], onDelete: Cascade)
   location   Location          @relation(fields: [locationId], references: [id])
   table      Table?            @relation(fields: [tableId], references: [id])
+
+  tenantId String?
+  tenant   Tenant? @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@map("reservations")
 }
@@ -585,6 +631,9 @@ model Review {
   location   Location @relation(fields: [locationId], references: [id])
   order      Order?   @relation(fields: [orderId], references: [id])
 
+  tenantId String?
+  tenant   Tenant? @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
   @@map("reviews")
 }
 
@@ -598,6 +647,9 @@ model LoyaltyTransaction {
   createdAt   DateTime               @default(now())
   customer    Customer               @relation(fields: [customerId], references: [id], onDelete: Cascade)
   order       Order?                 @relation(fields: [orderId], references: [id])
+
+  tenantId String?
+  tenant   Tenant? @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@map("loyalty_transactions")
 }
@@ -615,6 +667,9 @@ model GroupOrderSession {
   location Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
   table    Table    @relation(fields: [tableId], references: [id], onDelete: Cascade)
   orders   Order[]
+
+  tenantId String?
+  tenant   Tenant? @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@index([locationId])
   @@index([tableId])
@@ -664,6 +719,9 @@ model LegalPage {
   updatedAt DateTime @updatedAt
   createdAt DateTime @default(now())
 
+  tenantId String?
+  tenant   Tenant? @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
   @@map("legal_pages")
 }
 
@@ -681,6 +739,9 @@ model CookieCategory {
   updatedAt               DateTime        @updatedAt
   consents                CookieConsent[]
 
+  tenantId String?
+  tenant   Tenant? @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
   @@map("cookie_categories")
 }
 
@@ -689,6 +750,9 @@ model RegistrationBonusRecord {
   provider   String // 'email', 'google', 'line'
   identifier String // email or socialId
   claimedAt  DateTime @default(now())
+
+  tenantId String?
+  tenant   Tenant? @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@unique([provider, identifier])
   @@map("registration_bonus_records")
@@ -705,6 +769,9 @@ model CookieConsent {
   cookieCategory   CookieCategory @relation(fields: [cookieCategoryId], references: [id], onDelete: Cascade)
   customer         Customer?      @relation(fields: [customerId], references: [id], onDelete: Cascade)
 
+  tenantId String?
+  tenant   Tenant? @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
   @@map("cookie_consents")
 }
 
@@ -718,6 +785,9 @@ model InviteToken {
   usedAt    DateTime?
   createdAt DateTime  @default(now())
 
+  tenantId String?
+  tenant   Tenant? @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
   @@map("invite_tokens")
 }
 
@@ -730,6 +800,9 @@ model AutomationRule {
   isActive   Boolean  @default(true)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+
+  tenantId String?
+  tenant   Tenant? @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@map("automation_rules")
 }
@@ -770,6 +843,9 @@ model AuditLog {
   ipAddress String?
   requestId String?
   createdAt DateTime @default(now())
+
+  tenantId String?
+  tenant   Tenant? @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@index([createdAt])
   @@index([userId])
@@ -855,6 +931,9 @@ model ErpRecipeMapping {
   recipeName    String   @default("")
   updatedAt     DateTime @updatedAt
 
+  tenantId String?
+  tenant   Tenant? @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
   @@map("erp_recipe_mappings")
 }
 
@@ -866,6 +945,9 @@ model ChatMessage {
   createdAt  DateTime  @default(now())
   sender     User      @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
   location   Location? @relation(fields: [locationId], references: [id])
+
+  tenantId String?
+  tenant   Tenant? @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@index([createdAt])
   @@map("chat_messages")
@@ -888,6 +970,9 @@ model StaffAttendance {
   updatedAt          DateTime                      @updatedAt
   correctionRequests AttendanceCorrectionRequest[]
   anomalies          AttendanceAnomaly[]
+
+  tenantId String?
+  tenant   Tenant? @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@map("staff_attendance")
 }
@@ -912,6 +997,9 @@ model AttendanceCorrectionRequest {
   manager           User?                   @relation("ManagerApprovedCorrections", fields: [managerId], references: [id])
   createdAt         DateTime                @default(now())
   updatedAt         DateTime                @updatedAt
+
+  tenantId String?
+  tenant   Tenant? @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@map("attendance_correction_requests")
 }
@@ -943,6 +1031,9 @@ model LeaveRequest {
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
 
+  tenantId String?
+  tenant   Tenant? @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
   @@map("leave_requests")
 }
 
@@ -958,6 +1049,9 @@ model JobRole {
   weeklyRequirements WeeklyShiftRequirement[]
   shifts             Shift[]
 
+  tenantId String?
+  tenant   Tenant? @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
   @@map("job_roles")
 }
 
@@ -969,6 +1063,9 @@ model UserAvailability {
   endTime   String // HH:mm
   user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  tenantId String?
+  tenant   Tenant? @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
   @@map("user_availabilities")
 }
 
@@ -978,6 +1075,9 @@ model StaffTimeOff {
   date   DateTime @db.Date
   reason String?
   user   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  tenantId String?
+  tenant   Tenant? @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@unique([userId, date])
   @@map("staff_time_off")
@@ -1001,6 +1101,9 @@ model ShiftRequirement {
   location   Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
   jobRole    JobRole  @relation(fields: [jobRoleId], references: [id], onDelete: Cascade)
 
+  tenantId String?
+  tenant   Tenant? @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
   @@map("shift_requirements")
 }
 
@@ -1014,6 +1117,9 @@ model WeeklyShiftRequirement {
   count      Int
   location   Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
   jobRole    JobRole  @relation(fields: [jobRoleId], references: [id], onDelete: Cascade)
+
+  tenantId String?
+  tenant   Tenant? @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@map("weekly_shift_requirements")
 }
@@ -1033,6 +1139,9 @@ model Shift {
   location   Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
   jobRole    JobRole? @relation(fields: [jobRoleId], references: [id], onDelete: SetNull)
 
+  tenantId String?
+  tenant   Tenant? @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
   @@map("shifts")
 }
 
@@ -1051,6 +1160,9 @@ model PayrollPeriod {
   updatedAt  DateTime      @updatedAt
   payslips   Payslip[]
   location   Location      @relation(fields: [locationId], references: [id])
+
+  tenantId String?
+  tenant   Tenant? @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@map("payroll_periods")
 }
@@ -1077,6 +1189,9 @@ model Payslip {
   user            User          @relation(fields: [userId], references: [id])
   items           PayslipItem[]
 
+  tenantId String?
+  tenant   Tenant? @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
   @@map("payslips")
 }
 
@@ -1093,6 +1208,9 @@ model PayslipItem {
   type      PayslipItemType
   amount    Float
   payslip   Payslip         @relation(fields: [payslipId], references: [id], onDelete: Cascade)
+
+  tenantId String?
+  tenant   Tenant? @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@map("payslip_items")
 }
@@ -1114,6 +1232,9 @@ model InsuranceProfile {
   dependents             Int    @default(0)
   user                   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  tenantId String?
+  tenant   Tenant? @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
   @@map("insurance_profiles")
 }
 
@@ -1127,6 +1248,9 @@ model EmploymentRecord {
   bankBranch        String?
   bankAccountNumber String?
   user              User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  tenantId String?
+  tenant   Tenant? @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@map("employment_records")
 }
@@ -1146,6 +1270,9 @@ model LeaveBalance {
   usedDays  Float     @default(0)
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  tenantId String?
+  tenant   Tenant? @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
   @@unique([userId, leaveType, year])
   @@map("leave_balances")
 }
@@ -1160,6 +1287,9 @@ model AttendanceAnomaly {
   createdAt    DateTime        @default(now())
   updatedAt    DateTime        @updatedAt
   attendance   StaffAttendance @relation(fields: [attendanceId], references: [id], onDelete: Cascade)
+
+  tenantId String?
+  tenant   Tenant? @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@map("attendance_anomalies")
 }
@@ -1181,6 +1311,9 @@ model EmployeeDocument {
   createdAt  DateTime       @default(now())
   updatedAt  DateTime       @updatedAt
   user       User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  tenantId String?
+  tenant   Tenant? @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@map("employee_documents")
 }
