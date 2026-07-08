@@ -51,7 +51,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (!cancelled) {
           const fetchedUser = data.data.user;
           // ENFORCE: Only Global SUPER_ADMINs can access saasfront
-          if (fetchedUser.role !== 'SUPER_ADMIN' || fetchedUser.tenantId !== null) {
+          if (fetchedUser.role !== 'SUPER_ADMIN' || (fetchedUser.tenantId !== null && fetchedUser.tenantId !== undefined)) {
             throw new Error('SaaS Platform Admin access required');
           }
           setUser(fetchedUser);
@@ -94,7 +94,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (res.ok) {
         const data = await res.json();
         const fetchedUser = data.data.user;
-        if (fetchedUser.role !== 'SUPER_ADMIN' || fetchedUser.tenantId !== null) {
+        if (fetchedUser.role !== 'SUPER_ADMIN' || (fetchedUser.tenantId !== null && fetchedUser.tenantId !== undefined)) {
           throw new Error('SaaS Platform Admin access required');
         }
         setUser(fetchedUser);

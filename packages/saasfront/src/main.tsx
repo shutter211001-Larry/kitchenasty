@@ -3,14 +3,14 @@ import ReactDOM from 'react-dom/client';
 import './i18n/index.js';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext.js';
-import { TenantProvider } from './context/TenantContext.js';
+
 import AdminLayout from './components/AdminLayout.js';
 import RequireRole from './components/RequireRole.js';
 import Login from './pages/Login.js';
 import ResetPassword from './pages/ResetPassword.js';
 import Dashboard from './pages/Dashboard.js';
-import TenantList from './pages/TenantList.js';
-import TenantCreate from './pages/TenantCreate.js';
+import TenantList from './pages/TenantList.tsx';
+import TenantCreate from './pages/TenantCreate.tsx';
 
 import './index.css';
 
@@ -52,11 +52,9 @@ function AppRoutes() {
 function App() {
   return (
     <BrowserRouter basename={import.meta.env.BASE_URL}>
-      <TenantProvider>
-        <AuthProvider>
-          <AppRoutes />
-        </AuthProvider>
-      </TenantProvider>
+      <AuthProvider>
+        <AppRoutes />
+      </AuthProvider>
     </BrowserRouter>
   );
 }

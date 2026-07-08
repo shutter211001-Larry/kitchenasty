@@ -87,7 +87,6 @@ export default function AdminLayout({ children, onLogout }: { children: React.Re
   const [pendingCount, setPendingCount] = useState(0);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const [enableCounterDisplay, setEnableCounterDisplay] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({
     operations: true,
@@ -125,14 +124,6 @@ export default function AdminLayout({ children, onLogout }: { children: React.Re
         if (statsData.success && statsData.data) {
           setPendingCount(statsData.data.pendingOrders ?? 0);
         }
-
-        const settingsRes = await fetch('/api/settings/order', {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const settingsData = await settingsRes.json();
-        if (settingsData.success && settingsData.data) {
-          setEnableCounterDisplay(!!settingsData.data.enableCounterDisplay);
-        }
       } catch { /* ignore */ }
     }
 
@@ -141,20 +132,6 @@ export default function AdminLayout({ children, onLogout }: { children: React.Re
     return () => clearInterval(interval);
   }, [token]);
 
-
-  // Inject Counter link if enabled
-  if (enableCounterDisplay && user) {
-    const opsCategory = filteredNav.find(item => item.id === 'operations');
-    if (opsCategory && opsCategory.children && !opsCategory.children.some(child => child.path === '/counter')) {
-      const kitchenIdx = opsCategory.children.findIndex(child => child.path === '/kitchen');
-      const counterChild = { path: '/counter', label: 'nav.counter', roles: ['SUPER_ADMIN', 'MANAGER', 'STAFF'] as Role[] };
-      if (kitchenIdx !== -1) {
-        opsCategory.children.splice(kitchenIdx + 1, 0, counterChild);
-      } else {
-        opsCategory.children.push(counterChild);
-      }
-    }
-  }
 
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
 
