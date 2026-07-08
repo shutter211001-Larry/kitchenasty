@@ -742,22 +742,22 @@ CREATE UNIQUE INDEX IF NOT EXISTS "dietary_preferences_name_key" ON "dietary_pre
 CREATE UNIQUE INDEX IF NOT EXISTS "orders_orderNumber_key" ON "orders"("orderNumber");
 
 -- CreateIndex
-CREATE UNIQUE INDEX IF NOT EXISTS "orders_createdAt_idx" ON "orders"("createdAt");
+CREATE INDEX IF NOT EXISTS "orders_createdAt_idx" ON "orders"("createdAt");
 
 -- CreateIndex
-CREATE UNIQUE INDEX IF NOT EXISTS "orders_status_idx" ON "orders"("status");
+CREATE INDEX IF NOT EXISTS "orders_status_idx" ON "orders"("status");
 
 -- CreateIndex
-CREATE UNIQUE INDEX IF NOT EXISTS "orders_locationId_idx" ON "orders"("locationId");
+CREATE INDEX IF NOT EXISTS "orders_locationId_idx" ON "orders"("locationId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX IF NOT EXISTS "orders_customerId_idx" ON "orders"("customerId");
+CREATE INDEX IF NOT EXISTS "orders_customerId_idx" ON "orders"("customerId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX IF NOT EXISTS "order_items_orderId_idx" ON "order_items"("orderId");
+CREATE INDEX IF NOT EXISTS "order_items_orderId_idx" ON "order_items"("orderId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX IF NOT EXISTS "order_items_menuItemId_idx" ON "order_items"("menuItemId");
+CREATE INDEX IF NOT EXISTS "order_items_menuItemId_idx" ON "order_items"("menuItemId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX IF NOT EXISTS "tables_locationId_name_key" ON "tables"("locationId", "name");
@@ -766,13 +766,13 @@ CREATE UNIQUE INDEX IF NOT EXISTS "tables_locationId_name_key" ON "tables"("loca
 CREATE UNIQUE INDEX IF NOT EXISTS "coupons_code_key" ON "coupons"("code");
 
 -- CreateIndex
-CREATE UNIQUE INDEX IF NOT EXISTS "group_order_sessions_locationId_idx" ON "group_order_sessions"("locationId");
+CREATE INDEX IF NOT EXISTS "group_order_sessions_locationId_idx" ON "group_order_sessions"("locationId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX IF NOT EXISTS "group_order_sessions_tableId_idx" ON "group_order_sessions"("tableId");
+CREATE INDEX IF NOT EXISTS "group_order_sessions_tableId_idx" ON "group_order_sessions"("tableId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX IF NOT EXISTS "group_order_sessions_pin_idx" ON "group_order_sessions"("pin");
+CREATE INDEX IF NOT EXISTS "group_order_sessions_pin_idx" ON "group_order_sessions"("pin");
 
 -- CreateIndex
 CREATE UNIQUE INDEX IF NOT EXISTS "legal_pages_slug_key" ON "legal_pages"("slug");
@@ -787,25 +787,25 @@ CREATE UNIQUE INDEX IF NOT EXISTS "registration_bonus_records_provider_identifie
 CREATE UNIQUE INDEX IF NOT EXISTS "invite_tokens_token_key" ON "invite_tokens"("token");
 
 -- CreateIndex
-CREATE UNIQUE INDEX IF NOT EXISTS "api_metrics_createdAt_idx" ON "api_metrics"("createdAt");
+CREATE INDEX IF NOT EXISTS "api_metrics_createdAt_idx" ON "api_metrics"("createdAt");
 
 -- CreateIndex
-CREATE UNIQUE INDEX IF NOT EXISTS "api_metrics_path_method_idx" ON "api_metrics"("path", "method");
+CREATE INDEX IF NOT EXISTS "api_metrics_path_method_idx" ON "api_metrics"("path", "method");
 
 -- CreateIndex
 CREATE UNIQUE INDEX IF NOT EXISTS "ip_blacklist_ip_key" ON "ip_blacklist"("ip");
 
 -- CreateIndex
-CREATE UNIQUE INDEX IF NOT EXISTS "audit_logs_createdAt_idx" ON "audit_logs"("createdAt");
+CREATE INDEX IF NOT EXISTS "audit_logs_createdAt_idx" ON "audit_logs"("createdAt");
 
 -- CreateIndex
-CREATE UNIQUE INDEX IF NOT EXISTS "audit_logs_userId_idx" ON "audit_logs"("userId");
+CREATE INDEX IF NOT EXISTS "audit_logs_userId_idx" ON "audit_logs"("userId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX IF NOT EXISTS "audit_logs_entity_idx" ON "audit_logs"("entity");
+CREATE INDEX IF NOT EXISTS "audit_logs_entity_idx" ON "audit_logs"("entity");
 
 -- CreateIndex
-CREATE UNIQUE INDEX IF NOT EXISTS "chat_messages_createdAt_idx" ON "chat_messages"("createdAt");
+CREATE INDEX IF NOT EXISTS "chat_messages_createdAt_idx" ON "chat_messages"("createdAt");
 
 -- AddForeignKey
 DO $$ BEGIN

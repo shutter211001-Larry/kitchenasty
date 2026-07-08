@@ -39,16 +39,23 @@ export async function staffLogin(req: Request, res: Response): Promise<void> {
   // Auto-seed default administrator if the user table is empty
   const userCount = await prisma.user.count();
   if (userCount === 0) {
-    console.log('Seeding default administrator admin@shutter.com / admin123...');
-    const adminHash = await bcrypt.hash('admin123', 10);
-    await prisma.user.create({
-      data: {
-        email: 'admin@shutter.com',
-        name: '系統管理員',
-        password: adminHash,
-        role: 'SUPER_ADMIN'
-      }
-    });
+    const adminEmail = process.env.ADMIN_EMAIL;
+    const adminPassword = process.env.ADMIN_PASSWORD;
+    
+    if (adminEmail && adminPassword) {
+      console.log(`Seeding default administrator ${adminEmail} ...`);
+      const adminHash = await bcrypt.hash(adminPassword, 10);
+      await prisma.user.create({
+        data: {
+          email: adminEmail,
+          name: '系統管理員',
+          password: adminHash,
+          role: 'SUPER_ADMIN'
+        }
+      });
+    } else {
+      console.log('No ADMIN_EMAIL or ADMIN_PASSWORD provided in environment variables. Skipping default admin creation.');
+    }
   }
 
   const user = await prisma.user.findUnique({ 

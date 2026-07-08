@@ -23,10 +23,10 @@ async function main() {
 
     console.log('\n✅ Seed completed successfully!');
     console.log('--------------------------------------------------');
-    console.log('🔑 Admin login: admin@shutter.com / admin123');
-    console.log('🔑 Manager login: manager@shutter.com / admin123');
-    console.log('🔑 Staff login: staff@shutter.com / admin123');
-    console.log('🔑 Customer login: customer@example.com / customer123');
+    console.log('🔑 平台管理員: (依據環境變數 ADMIN_EMAIL / ADMIN_PASSWORD)');
+    console.log('🔑 示範店長帳號: demo@shutter.com / admin123');
+    console.log('🔑 員工帳號: staff@shutter.com / admin123');
+    console.log('🔑 客戶帳號: customer@example.com / customer123');
     console.log('--------------------------------------------------');
   } catch (e) {
     console.error('\n❌ Error during seeding:');

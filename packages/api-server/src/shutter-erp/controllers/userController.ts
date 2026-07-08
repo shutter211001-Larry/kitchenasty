@@ -46,7 +46,7 @@ export const inviteUser = async (req: AuthenticatedRequest, res: Response) => {
       data: {
         token,
         email,
-        role: role === 'ADMIN' ? 'ADMIN' : 'STAFF',
+        role: role === 'MANAGER' ? 'MANAGER' : 'STAFF',
         invitedBy: req.user!.id,
         expiresAt,
       },
@@ -80,21 +80,21 @@ export const updateUser = async (req: AuthenticatedRequest, res: Response) => {
     }
 
     // Safety: Prevent active user from changing their own role to prevent administrative lockout
-    if (id === req.user?.id && role !== 'ADMIN') {
+    if (id === req.user?.id && role !== 'MANAGER') {
       const activeUser = await prisma.user.findUnique({ where: { id } });
-      if (activeUser?.role === 'ADMIN') {
+      if (activeUser?.role === 'MANAGER') {
         return res.status(400).json({ error: '安全保護：系統管理員不能變更自己為一般員工權限' });
       }
     }
 
     const updateData: any = {
       name,
-      role: role === 'ADMIN' ? 'ADMIN' : 'STAFF'
+      role: role === 'MANAGER' ? 'MANAGER' : 'STAFF'
     };
 
     // If password is provided, re-hash and update password
     if (password && password.trim() !== '') {
-      updateData.passwordHash = await bcrypt.hash(password, 10);
+      updateData.password = await bcrypt.hash(password, 10);
     }
 
     const user = await prisma.user.update({

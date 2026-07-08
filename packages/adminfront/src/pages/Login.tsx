@@ -149,7 +149,7 @@ export default function Login({ onLogin }: Props) {
             </button>
           )}
 
-          {!isForgotPassword && !hasSuperAdmin && (
+          {!isForgotPassword && !hasSuperAdmin && import.meta.env.DEV && (
             <button
               type="button"
               onClick={() => {

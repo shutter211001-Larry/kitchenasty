@@ -14,7 +14,8 @@ export async function seedErp(prisma: PrismaClient) {
         recipeId: 'REC-001',
         menuItemName: margherita.name,
         menuItemPrice: margherita.price,
-        recipeName: 'Margherita Dough & Toppings',
+        recipeName: '瑪格麗特麵團與配料',
+        tenantId: 'demo-tenant-id',
       },
     });
   }

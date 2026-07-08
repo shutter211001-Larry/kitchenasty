@@ -3,6 +3,19 @@ import { PrismaClient } from '@prisma/client';
 export async function seedSystem(prisma: PrismaClient) {
   console.log('Seeding System Settings...');
 
+  // Demo Tenant
+  const demoTenant = await prisma.tenant.upsert({
+    where: { domain: 'demo.shutter.com' },
+    update: {},
+    create: {
+      id: 'demo-tenant-id',
+      name: '夏特示範餐廳',
+      domain: 'demo.shutter.com',
+      hasErpAccess: true,
+      isActive: true,
+    }
+  });
+
   // Site settings
   await prisma.siteSettings.upsert({
     where: { id: 'default' },

@@ -2,16 +2,9 @@ import 'dotenv/config';
 import fs from 'fs';
 import path from 'path';
 import { parse } from 'csv-parse';
-import { PrismaClient } from '@shutter-erp/client';
+import { PrismaClient } from '@prisma/client';
 
-const connectionString = process.env.SHUTTER_ERP_DATABASE_URL || process.env.DATABASE_URL;
-const prisma = new PrismaClient({
-  datasources: {
-    db: {
-      url: connectionString
-    }
-  }
-});
+const prisma = new PrismaClient();
 const csvFilePath = path.join(__dirname, '../../data/20_2.csv');
 
 interface FoodItem {
@@ -129,6 +122,7 @@ async function seed() {
           sodium: item.sodium,
           isAllergen: item.isAllergen,
           allergenType: item.allergenType,
+          tenantId: 'demo-tenant-id',
         }
       }).catch((err: any) => console.error(`匯入失敗: ${item.name}`, err));
     }

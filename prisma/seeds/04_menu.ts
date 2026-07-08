@@ -3,8 +3,8 @@ import { PrismaClient } from '@prisma/client';
 export async function seedMenu(prisma: PrismaClient) {
   console.log('Seeding Menu...');
 
-  const location = await prisma.location.findUnique({ where: { slug: 'downtown' } });
-  if (!location) throw new Error("Location 'downtown' not found for menu seeding.");
+  const location = await prisma.location.findUnique({ where: { slug: 'xinyi-branch' } });
+  if (!location) throw new Error("Location 'xinyi-branch' not found for menu seeding.");
 
   // Create allergens
   const allergens = await Promise.all(
@@ -43,14 +43,14 @@ export async function seedMenu(prisma: PrismaClient) {
 
   // Categories
   const categories = await Promise.all([
-    { name: 'Mezze & Starters', slug: 'appetizers', sortOrder: 1, isFrozenDelivery: false },
-    { name: 'Mains', slug: 'main-courses', sortOrder: 2, isFrozenDelivery: false },
-    { name: 'Flatbreads & Pizza', slug: 'pizzas', sortOrder: 3, isFrozenDelivery: false },
-    { name: 'Frozen Delivery', slug: 'frozen', sortOrder: 4, isFrozenDelivery: true },
+    { name: '開胃小點', slug: 'appetizers', sortOrder: 1, isFrozenDelivery: false },
+    { name: '主廚推薦', slug: 'main-courses', sortOrder: 2, isFrozenDelivery: false },
+    { name: '經典披薩', slug: 'pizzas', sortOrder: 3, isFrozenDelivery: false },
+    { name: '冷凍生鮮宅配', slug: 'frozen', sortOrder: 4, isFrozenDelivery: true },
   ].map(cat => prisma.category.upsert({
     where: { slug: cat.slug },
     update: {},
-    create: { ...cat, locationId: location.id }
+    create: { ...cat, locationId: location.id, tenantId: 'demo-tenant-id' }
   })));
   const catMap = Object.fromEntries(categories.map(c => [c.slug, c.id]));
 
@@ -59,13 +59,14 @@ export async function seedMenu(prisma: PrismaClient) {
     where: { slug: 'margherita-pizza' },
     update: {},
     create: {
-      name: 'Margherita Pizza',
+      name: '經典瑪格麗特披薩',
       slug: 'margherita-pizza',
-      description: 'San Marzano tomato sauce, buffalo mozzarella, fresh basil',
-      price: 14.99,
+      description: '使用聖馬札諾番茄醬、新鮮水牛莫札瑞拉起司與九層塔，經典道地義式風味。',
+      price: 280,
       image: 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=600&h=400&fit=crop',
       categoryId: catMap['pizzas'],
       locationId: location.id,
+      tenantId: 'demo-tenant-id',
       sortOrder: 1,
     },
   });
@@ -75,7 +76,7 @@ export async function seedMenu(prisma: PrismaClient) {
     data: [
       {
         menuItemId: margherita.id,
-        name: 'Size',
+        name: '尺寸',
         displayType: 'RADIO',
         isRequired: true,
       }
@@ -83,12 +84,12 @@ export async function seedMenu(prisma: PrismaClient) {
     skipDuplicates: true,
   });
 
-  const sizeOption = await prisma.menuOption.findFirst({ where: { menuItemId: margherita.id, name: 'Size' } });
+  const sizeOption = await prisma.menuOption.findFirst({ where: { menuItemId: margherita.id, name: '尺寸' } });
   if (sizeOption) {
     await prisma.menuOptionValue.createMany({
       data: [
-        { menuOptionId: sizeOption.id, name: '10" Small', priceModifier: 0, isDefault: true, sortOrder: 1 },
-        { menuOptionId: sizeOption.id, name: '12" Medium', priceModifier: 3.00, sortOrder: 2 },
+        { menuOptionId: sizeOption.id, name: '10吋 (小)', priceModifier: 0, isDefault: true, sortOrder: 1 },
+        { menuOptionId: sizeOption.id, name: '12吋 (中)', priceModifier: 60, sortOrder: 2 },
       ],
       skipDuplicates: true,
     });
@@ -96,15 +97,17 @@ export async function seedMenu(prisma: PrismaClient) {
 
   // Frozen Item
   const frozenPizza = await prisma.menuItem.upsert({
-    where: { slug: 'frozen-margherita' },
+    where: { slug: 'frozen-beef-noodle' },
     update: {},
     create: {
-      name: 'Frozen Margherita Pizza (Pack of 3)',
-      slug: 'frozen-margherita',
-      description: 'Our classic margherita, flash frozen for you to bake at home.',
-      price: 35.00,
+      name: '招牌紅燒牛肉麵 (3入組)',
+      slug: 'frozen-beef-noodle',
+      description: '嚴選澳洲牛腱心，慢火熬煮12小時的濃郁紅燒湯頭。急速冷凍包裝，讓您在家也能享用主廚好手藝。',
+      price: 850,
+      image: 'https://images.unsplash.com/photo-1582878826629-29b7ad1cb438?w=600&h=400&fit=crop',
       categoryId: catMap['frozen'],
       locationId: location.id,
+      tenantId: 'demo-tenant-id',
       sortOrder: 1,
       orderType: 'FROZEN_DELIVERY',
     },

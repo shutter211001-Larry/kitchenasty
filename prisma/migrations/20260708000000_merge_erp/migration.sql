@@ -1,9 +1,22 @@
 -- CreateEnum
 DO $$ BEGIN CREATE TYPE "OutputType" AS ENUM ('PRIMARY', 'BYPRODUCT', 'WASTE'); EXCEPTION WHEN duplicate_object THEN null; END $$;
 
--- AlterTable
-ALTER TABLE "LabelManufacturer" ADD COLUMN     "tenantId" TEXT;
+-- CreateTable
+CREATE TABLE IF NOT EXISTS "LabelManufacturer" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "companyName" TEXT,
+    "companyPhone" TEXT,
+    "companyAddress" TEXT,
+    "originCountry" TEXT,
+    "brandNameZh" TEXT,
+    "brandNameEn" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "tenantId" TEXT,
 
+    CONSTRAINT "LabelManufacturer_pkey" PRIMARY KEY ("id")
+);
 -- CreateTable
 CREATE TABLE IF NOT EXISTS "Ingredient" (
     "id" TEXT NOT NULL,

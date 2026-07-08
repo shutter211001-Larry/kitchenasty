@@ -3,7 +3,7 @@ import { PrismaClient, OrderStatus } from '@prisma/client';
 export async function seedOrders(prisma: PrismaClient) {
   console.log('Seeding Orders & Transactions...');
 
-  const location = await prisma.location.findUnique({ where: { slug: 'downtown' } });
+  const location = await prisma.location.findUnique({ where: { slug: 'xinyi-branch' } });
   const customer = await prisma.customer.findUnique({ where: { email: 'customer@example.com' } });
   const margherita = await prisma.menuItem.findUnique({ where: { slug: 'margherita-pizza' } });
   const table = await prisma.table.findFirst({ where: { locationId: location?.id } });
@@ -18,11 +18,12 @@ export async function seedOrders(prisma: PrismaClient) {
       code: 'WELCOME10',
       type: 'PERCENTAGE',
       value: 10,
-      minOrder: 20,
-      maxDiscount: 15,
+      minOrder: 200,
+      maxDiscount: 150,
       usageLimit: 1000,
       perCustomer: 1,
       isActive: true,
+      tenantId: 'demo-tenant-id',
     },
   });
 
@@ -34,6 +35,7 @@ export async function seedOrders(prisma: PrismaClient) {
         locationId: location.id,
         tableId: table.id,
         status: 'ACTIVE',
+        tenantId: 'demo-tenant-id',
       },
     });
 
@@ -47,19 +49,20 @@ export async function seedOrders(prisma: PrismaClient) {
         locationId: location.id,
         orderType: 'PICKUP',
         status: 'PENDING',
-        subtotal: 14.99,
-        total: 14.99 * 1.08,
-        tax: 14.99 * 0.08,
+        subtotal: 280,
+        total: 280,
+        tax: 0,
         groupId: groupSession.id,
         tableId: table.id,
+        tenantId: 'demo-tenant-id',
         items: {
           create: [
             {
               menuItemId: margherita.id,
-              name: 'Margherita Pizza',
+              name: '經典瑪格麗特披薩',
               quantity: 1,
-              unitPrice: 14.99,
-              subtotal: 14.99,
+              unitPrice: 280,
+              subtotal: 280,
             },
           ],
         },
@@ -68,7 +71,7 @@ export async function seedOrders(prisma: PrismaClient) {
   }
 
   // Sample Frozen Order
-  const frozenPizza = await prisma.menuItem.findUnique({ where: { slug: 'frozen-margherita' } });
+  const frozenPizza = await prisma.menuItem.findUnique({ where: { slug: 'frozen-beef-noodle' } });
   if (frozenPizza) {
     await prisma.order.upsert({
       where: { orderNumber: 'SH-SEED-FRZ-001' },
@@ -80,18 +83,19 @@ export async function seedOrders(prisma: PrismaClient) {
         orderType: 'FROZEN_DELIVERY',
         status: 'CONFIRMED',
         frozenDeliveryMethod: '711_FROZEN',
-        subtotal: 35.00,
-        deliveryFee: 15.00,
-        total: 50.00,
+        subtotal: 850,
+        deliveryFee: 150,
+        total: 1000,
         logisticsProvider: '711',
         trackingNumber: '711-TRACK-123',
+        tenantId: 'demo-tenant-id',
         items: {
           create: [{
             menuItemId: frozenPizza.id,
             name: frozenPizza.name,
             quantity: 1,
-            unitPrice: 35.00,
-            subtotal: 35.00,
+            unitPrice: 850,
+            subtotal: 850,
           }],
         },
       },

@@ -191,7 +191,7 @@ export async function sendEmail(options: EmailOptions): Promise<void> {
         let branding;
         if (options.system === 'ERP') {
           const { prisma: shutterErpPrisma } = await import('../shutter-erp/lib/prisma.js');
-          const setting = await shutterErpPrisma.systemSetting.findUnique({ where: { key: 'mailBranding' } });
+          const setting = await shutterErpPrisma.erpSetting.findFirst({ where: { key: 'mailBranding' } });
           erpBranding = setting?.value || {
             senderName: '夏特 ERP 系統',
             senderEmail: 'noreply@shutterorder.com',

@@ -5,27 +5,28 @@ export async function seedLocations(prisma: PrismaClient) {
 
   // Create location
   const location = await prisma.location.upsert({
-    where: { slug: 'downtown' },
+    where: { slug: 'xinyi-branch' },
     update: {},
     create: {
-      name: 'Saffron & Sage Downtown',
-      slug: 'downtown',
-      description: 'Our flagship location in the heart of downtown San Francisco — seasonal Mediterranean cuisine in a warm, inviting setting',
-      phone: '(555) 123-4567',
-      email: 'downtown@saffronandsage.com',
-      address: '123 Main Street',
-      city: 'San Francisco',
-      state: 'CA',
-      postalCode: '94102',
-      country: 'US',
-      lat: 37.7749,
-      lng: -122.4194,
+      name: '信義旗艦店',
+      slug: 'xinyi-branch',
+      description: '位於信義區心臟地帶，提供最新鮮的地中海與在地結合創意料理，享受溫馨舒適的用餐環境。',
+      phone: '02-8765-4321',
+      email: 'xinyi@shutter.com',
+      address: '信義路五段7號',
+      city: '台北市',
+      state: '信義區',
+      postalCode: '110',
+      country: 'TW',
+      lat: 25.033964,
+      lng: 121.564468,
       deliveryEnabled: true,
       pickupEnabled: true,
-      minOrderDelivery: 15,
+      minOrderDelivery: 300,
       minOrderPickup: 0,
       deliveryLeadTime: 35,
       pickupLeadTime: 15,
+      tenantId: 'demo-tenant-id',
     },
   });
 
@@ -62,16 +63,16 @@ export async function seedLocations(prisma: PrismaClient) {
     data: [
       {
         locationId: location.id,
-        name: 'Zone 1 - Nearby',
-        charge: 3.99,
-        minOrder: 15,
+        name: '區域 1 - 近距離 (3公里內)',
+        charge: 50,
+        minOrder: 300,
         isActive: true,
       },
       {
         locationId: location.id,
-        name: 'Zone 2 - Extended',
-        charge: 6.99,
-        minOrder: 25,
+        name: '區域 2 - 遠距離 (3-8公里)',
+        charge: 100,
+        minOrder: 500,
         isActive: true,
       }
     ],
@@ -81,11 +82,11 @@ export async function seedLocations(prisma: PrismaClient) {
   // Tables
   for (let i = 1; i <= 10; i++) {
     await prisma.table.upsert({
-      where: { locationId_name: { locationId: location.id, name: `Table ${i}` } },
+      where: { locationId_name: { locationId: location.id, name: `第 ${i} 桌` } },
       update: {},
       create: {
         locationId: location.id,
-        name: `Table ${i}`,
+        name: `第 ${i} 桌`,
         capacity: i <= 4 ? 2 : i <= 8 ? 4 : 6,
       },
     });

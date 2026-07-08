@@ -5,7 +5,7 @@ export async function seedStaff(prisma: PrismaClient) {
 
   const staff = await prisma.user.findFirst({ where: { role: 'STAFF' } });
   const manager = await prisma.user.findFirst({ where: { role: 'MANAGER' } });
-  const location = await prisma.location.findUnique({ where: { slug: 'downtown' } });
+  const location = await prisma.location.findUnique({ where: { slug: 'xinyi-branch' } });
 
   if (staff && location) {
     // Attendance
@@ -25,6 +25,7 @@ export async function seedStaff(prisma: PrismaClient) {
         lng: location.lng,
         device: 'Staff Mobile App',
         isOutOfRange: false,
+        tenantId: 'demo-tenant-id',
       },
     });
 
@@ -35,8 +36,9 @@ export async function seedStaff(prisma: PrismaClient) {
           userId: staff.id,
           attendanceId: attendance.id,
           requestedCheckIn: new Date(today.getTime() - 15 * 60000), // 15 mins earlier
-          reason: 'Forgot to check in when arriving early for prep.',
+          reason: '早上提早來備料忘記打卡。',
           status: 'PENDING',
+          tenantId: 'demo-tenant-id',
         },
       });
     }
@@ -46,7 +48,8 @@ export async function seedStaff(prisma: PrismaClient) {
       data: {
         senderId: staff.id,
         locationId: location.id,
-        content: 'I have finished prepping the dough for today.',
+        content: '店長，今天的披薩麵糰都已經備好了喔！',
+        tenantId: 'demo-tenant-id',
       },
     });
 
@@ -55,7 +58,8 @@ export async function seedStaff(prisma: PrismaClient) {
         data: {
           senderId: manager.id,
           locationId: location.id,
-          content: 'Great, thanks!',
+          content: '收到，辛苦了！',
+          tenantId: 'demo-tenant-id',
         },
       });
     }
