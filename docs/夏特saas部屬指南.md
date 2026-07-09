@@ -135,6 +135,27 @@ LINE Pay 在 Sandbox 或正式環境中，**強制要求伺服器必須有固定
    - `SMTP_PASS` = `這16碼密碼(不含空格)`
    - `EMAIL_FROM` = `你的gmail信箱@gmail.com`
 
+**選項 C：使用正式的 Gmail API (OAuth2 機制，最高送達率)**
+如果您希望使用正式的 Google OAuth2 來發信（不會被 Google 阻擋為低安全性應用程式），您需要取得 `Refresh Token`。
+1. 在 [Google Cloud Console](https://console.cloud.google.com/) 的專案中，前往 **"APIs & Services" > "Library"**，搜尋並啟用 **"Gmail API"**。
+2. 前往 **"Credentials"**，建立一組 **OAuth client ID** (類型選 Web application)。
+   - 在 **Authorized redirect URIs** 中加入：`https://developers.google.com/oauthplayground`
+   - 建立後取得 `Client ID` 與 `Client Secret`。
+3. 前往 [Google OAuth 2.0 Playground](https://developers.google.com/oauthplayground/)。
+4. 點擊右上角的**齒輪圖示 (OAuth 2.0 configuration)**，勾選 **"Use your own OAuth credentials"**。
+5. 填入您剛才拿到的 `Client ID` 與 `Client Secret`。
+6. 在左側 **"Step 1"** 找到 `Gmail API v1`，展開並勾選 `https://mail.google.com/`。
+7. 點擊 **"Authorize APIs"**，登入您的 Gmail 帳號並授權。
+8. 授權跳轉回來後，點擊 **"Step 2"** 的 **"Exchange authorization code for tokens"**。
+9. 複製畫面上的 **`Refresh token`**。
+10. 在 Railway 或 `saasfront` 後台配置以下變數：
+    - `MAIL_SERVICE_TYPE` = `GMAIL_API`
+    - `SMTP_USER` = `授權的Gmail信箱@gmail.com`
+    - `EMAIL_FROM` = `授權的Gmail信箱@gmail.com`
+    - `GOOGLE_CLIENT_ID` = `您的 Client ID`
+    - `GOOGLE_CLIENT_SECRET` = `您的 Client Secret`
+    - `GOOGLE_REFRESH_TOKEN` = `您剛才拿到的 Refresh Token`
+
 2. 建立一個新的 **Provider**。
 3. 點擊 **Create a Messaging API channel**。
 4. 填寫機器人名稱與圖示後建立。
