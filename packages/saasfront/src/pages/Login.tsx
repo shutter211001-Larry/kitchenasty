@@ -1,4 +1,5 @@
 import { useState, FormEvent, useEffect } from 'react';
+import { api } from '../lib/api';
 
 interface Props {
   onLogin: (token: string) => void;
@@ -14,8 +15,7 @@ export default function Login({ onLogin }: Props) {
   const [isForgotPassword, setIsForgotPassword] = useState(false);
 
   useEffect(() => {
-    fetch('/api/auth/staff/setup-status')
-      .then(res => res.json())
+    api.get<any>('/auth/staff/setup-status')
       .then(data => {
         if (data && typeof data.hasSuperAdmin === 'boolean') {
           setHasSuperAdmin(data.hasSuperAdmin);
@@ -31,20 +31,7 @@ export default function Login({ onLogin }: Props) {
     setLoading(true);
 
     try {
-      const res = await fetch('/api/auth/staff/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-      
-      let data: any;
-      try {
-        data = await res.json();
-      } catch (parseErr) {
-        throw new Error('伺服器連線失敗或正在維護中，請稍後再試。 (Server connection failed)');
-      }
-
-      if (!res.ok) throw new Error(data.error || 'Login failed');
+      const data = await api.post<any>('/auth/staff/login', { email, password });
       onLogin(data.data.token);
     } catch (err: any) {
       setError(err.message);
@@ -64,18 +51,7 @@ export default function Login({ onLogin }: Props) {
     setLoading(true);
 
     try {
-      const res = await fetch('/api/auth/staff/forgot-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
-      });
-      
-      let data: any = {};
-      try {
-        data = await res.json();
-      } catch (parseErr) {}
-
-      if (!res.ok) throw new Error(data.error || 'Request failed');
+      const data = await api.post<any>('/auth/staff/forgot-password', { email });
       setMessage(data.message || '重置信已寄出');
     } catch (err: any) {
       setError(err.message);
