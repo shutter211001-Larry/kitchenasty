@@ -42,4 +42,6 @@ export default defineConfig({
       }
     })
   ],
+  preview: { allowedHosts: true, proxy: proxyConfig },
+  server: { proxy: proxyConfig }
 })

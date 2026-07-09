@@ -49,7 +49,6 @@ export default defineConfig({
   preview: { allowedHosts: true, proxy: proxyConfig },
   server: {
     port: 5176,
-    proxy: proxyConfig,
-    },
-  },
+    proxy: proxyConfig
+  }
 });
