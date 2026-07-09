@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { z } from 'zod';
+import { uploadImage, parseS3Settings } from '../lib/s3.js';
 import prisma from '../lib/db.js';
 import { auditLog } from '../lib/audit.js';
 import { autoTranslateCategory } from '../lib/translation-helper.js';
@@ -189,7 +190,14 @@ export async function uploadCategoryImage(req: Request<{ id: string }>, res: Res
     return;
   }
 
-  const imagePath = `/uploads/${req.file.filename}`;
+  // Fetch tenant's S3 settings
+  const siteSettings = await prisma.siteSettings.findUnique({
+    where: { tenantId: existing.tenantId || undefined }
+  });
+  const advancedSettings = siteSettings?.advancedSettings as any;
+  const s3Settings = parseS3Settings(advancedSettings?.s3Settings);
+
+  const imagePath = await uploadImage(req.file, s3Settings);
 
   const category = await prisma.category.update({
     where: { id },

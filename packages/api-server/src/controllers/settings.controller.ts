@@ -6,6 +6,7 @@ import prisma from '../lib/db.js';
 import { auditLog } from '../lib/audit.js';
 import { autoTranslateSiteSettings } from '../lib/translation-helper.js';
 import { initPassport } from '../lib/passport.js';
+import { uploadImage, parseS3Settings } from '../lib/s3.js';
 
 const updateSettingsSchema = z.object({
   siteName: z.string().min(1).optional(),
@@ -250,15 +251,17 @@ export async function uploadLogo(req: Request, res: Response): Promise<void> {
     return;
   }
 
-  await getOrCreateSettings();
+  const settings = await getOrCreateSettings();
+  const advancedSettings = settings.advancedSettings as any;
+  const s3Settings = parseS3Settings(advancedSettings?.s3Settings);
 
-  const logoPath = `/uploads/${req.file.filename}`;
-  const settings = await prisma.siteSettings.update({
+  const logoPath = await uploadImage(req.file, s3Settings);
+  const updatedSettings = await prisma.siteSettings.update({
     where: { id: 'default' },
     data: { logo: logoPath },
   });
 
-  res.json({ success: true, data: toPublicSettings(settings) });
+  res.json({ success: true, data: toPublicSettings(updatedSettings) });
 }
 
 export async function uploadFavicon(req: Request, res: Response): Promise<void> {
@@ -267,15 +270,17 @@ export async function uploadFavicon(req: Request, res: Response): Promise<void> 
     return;
   }
 
-  await getOrCreateSettings();
+  const settings = await getOrCreateSettings();
+  const advancedSettings = settings.advancedSettings as any;
+  const s3Settings = parseS3Settings(advancedSettings?.s3Settings);
 
-  const faviconPath = `/uploads/${req.file.filename}`;
-  const settings = await prisma.siteSettings.update({
+  const faviconPath = await uploadImage(req.file, s3Settings);
+  const updatedSettings = await prisma.siteSettings.update({
     where: { id: 'default' },
     data: { favicon: faviconPath },
   });
 
-  res.json({ success: true, data: toPublicSettings(settings) });
+  res.json({ success: true, data: toPublicSettings(updatedSettings) });
 }
 
 export async function uploadHeroBackground(req: Request, res: Response): Promise<void> {
@@ -286,7 +291,10 @@ export async function uploadHeroBackground(req: Request, res: Response): Promise
 
   const settings = await getOrCreateSettings();
   const heroSection = (settings.heroSection as any) || {};
-  const imagePath = `/uploads/${req.file.filename}`;
+  const advancedSettings = settings.advancedSettings as any;
+  const s3Settings = parseS3Settings(advancedSettings?.s3Settings);
+
+  const imagePath = await uploadImage(req.file, s3Settings);
   
   const updated = await prisma.siteSettings.update({
     where: { id: 'default' },

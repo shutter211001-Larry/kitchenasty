@@ -14,16 +14,10 @@ export async function detectMenuFromImages(req: Request, res: Response): Promise
   }
 
   try {
-    const base64Images = await Promise.all(
-      files.map(async (file) => {
-        const buffer = await fs.promises.readFile(file.path);
-        const base64 = buffer.toString('base64');
-        return { data: base64, mimeType: file.mimetype };
-      })
-    );
-
-    // Clean up temporary files
-    await Promise.all(files.map((file) => fs.promises.unlink(file.path).catch(() => {})));
+    const base64Images = files.map((file) => {
+      const base64 = file.buffer.toString('base64');
+      return { data: base64, mimeType: file.mimetype };
+    });
 
     const prompt = `
       You are a professional menu digitization assistant.
@@ -65,8 +59,6 @@ export async function detectMenuFromImages(req: Request, res: Response): Promise
     const result = await generateGeminiVisionObject(prompt, base64Images);
     res.json({ success: true, data: result });
   } catch (error: any) {
-    // Clean up in case of error
-    await Promise.all(files.map((file) => fs.promises.unlink(file.path).catch(() => {})));
     res.status(500).json({ success: false, error: error.message || 'Failed to analyze images' });
   }
 }

@@ -1,4 +1,6 @@
 import { Request, Response } from 'express';
+import { Prisma } from '@prisma/client';
+import { uploadImage, parseS3Settings } from '../lib/s3.js';
 import { z } from 'zod';
 import prisma from '../lib/db.js';
 import { auditLog } from '../lib/audit.js';
@@ -430,7 +432,15 @@ export async function uploadMenuItemImage(req: Request<{ id: string }>, res: Res
     return;
   }
 
-  const imagePath = `/uploads/${req.file.filename}`;
+  // Fetch tenant's S3 settings
+  const siteSettings = await prisma.siteSettings.findUnique({
+    where: { tenantId: existing.tenantId || undefined }
+  });
+  const advancedSettings = siteSettings?.advancedSettings as any;
+  const s3Settings = parseS3Settings(advancedSettings?.s3Settings);
+
+  const imagePath = await uploadImage(req.file, s3Settings);
+
 
   let updateData: any = {};
   if (ratio) {

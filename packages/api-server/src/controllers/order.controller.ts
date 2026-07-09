@@ -1058,18 +1058,24 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
     
     // 1. Decrement product independent stock
     if (menuItem.trackStock) {
-      await prisma.menuItem.update({
-        where: { id: item.menuItemId },
+      const result = await prisma.menuItem.updateMany({
+        where: { id: item.menuItemId, stockQty: { gte: item.quantity } },
         data: { stockQty: { decrement: item.quantity } },
       });
+      if (result.count === 0) {
+        throw new Error(`Insufficient stock for item: ${menuItem.name}`);
+      }
     }
 
     // 2. Decrement category shared stock
     if (menuItem.category && (menuItem.category as any).trackSharedStock) {
-      await (prisma.category as any).update({
-        where: { id: menuItem.categoryId },
+      const result = await (prisma.category as any).updateMany({
+        where: { id: menuItem.categoryId, sharedStockQty: { gte: item.quantity } },
         data: { sharedStockQty: { decrement: item.quantity } },
       });
+      if (result.count === 0) {
+        throw new Error(`Insufficient shared stock for category of item: ${menuItem.name}`);
+      }
     }
 
 

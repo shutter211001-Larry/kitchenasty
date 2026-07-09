@@ -82,17 +82,115 @@ export async function cleanupUnusedImages() {
       }
     }
     
-    logger.info(`Unused images cleanup completed. Deleted ${deletedCount} files.`);
+    logger.info(`Unused local images cleanup completed. Deleted ${deletedCount} files.`);
     
   } catch (error) {
-    logger.error({ err: error }, 'Error during unused images cleanup');
+    logger.error({ err: error }, 'Error during unused local images cleanup');
   }
 }
 
-// 建立排程任務 (每天凌晨 3:00 執行)
-export function scheduleImageCleanup() {
-  cron.schedule('0 3 * * *', () => {
-    cleanupUnusedImages();
+import { S3Client, ListObjectsV2Command, DeleteObjectsCommand } from '@aws-sdk/client-s3';
+import { parseS3Settings } from '../lib/s3.js';
+
+export async function cleanupS3Images(referencedImages: Set<string>) {
+  logger.info('Starting unused S3 images cleanup...');
+  const settingsList = await prisma.siteSettings.findMany();
+  
+  for (const settings of settingsList) {
+    const s3Settings = parseS3Settings((settings.advancedSettings as any)?.s3Settings);
+    if (!s3Settings) continue;
+
+    try {
+      const s3Client = new S3Client({
+        region: 'auto',
+        endpoint: s3Settings.endpoint,
+        credentials: {
+          accessKeyId: s3Settings.accessKey,
+          secretAccessKey: s3Settings.secretKey,
+        },
+      });
+
+      let continuationToken: string | undefined = undefined;
+      let deletedCount = 0;
+
+      do {
+        const listCommand = new ListObjectsV2Command({
+          Bucket: s3Settings.bucket,
+          ContinuationToken: continuationToken,
+        });
+
+        const listResponse = await s3Client.send(listCommand);
+        const objects = listResponse.Contents || [];
+
+        const objectsToDelete = objects
+          .filter(obj => obj.Key && !referencedImages.has(obj.Key))
+          .map(obj => ({ Key: obj.Key as string }));
+
+        if (objectsToDelete.length > 0) {
+          const deleteCommand = new DeleteObjectsCommand({
+            Bucket: s3Settings.bucket,
+            Delete: { Objects: objectsToDelete },
+          });
+          await s3Client.send(deleteCommand);
+          deletedCount += objectsToDelete.length;
+        }
+
+        continuationToken = listResponse.NextContinuationToken;
+      } while (continuationToken);
+
+      logger.info(`S3 cleanup completed for bucket ${s3Settings.bucket}. Deleted ${deletedCount} files.`);
+    } catch (error) {
+      logger.error({ err: error, bucket: s3Settings.bucket }, 'Error during S3 cleanup');
+    }
+  }
+}
+
+export async function cleanupAllImages() {
+  const referencedImages = new Set<string>();
+
+  // Collect all references
+  const users = await prisma.user.findMany({ select: { avatar: true } });
+  users.forEach(u => u.avatar && referencedImages.add(path.basename(u.avatar)));
+
+  const locations = await prisma.location.findMany({ select: { image: true } });
+  locations.forEach(l => l.image && referencedImages.add(path.basename(l.image)));
+
+  const categories = await prisma.category.findMany({ select: { image: true } });
+  categories.forEach(c => c.image && referencedImages.add(path.basename(c.image)));
+
+  const menuItems = await prisma.menuItem.findMany({ select: { image: true, imageVariants: true } });
+  menuItems.forEach(m => {
+    if (m.image) referencedImages.add(path.basename(m.image));
+    if (m.imageVariants && typeof m.imageVariants === 'object' && m.imageVariants !== null) {
+      Object.values(m.imageVariants as Record<string, string>).forEach(variantPath => {
+        if (typeof variantPath === 'string') {
+          referencedImages.add(path.basename(variantPath));
+        }
+      });
+    }
   });
-  logger.info('Image cleanup cron job scheduled at 03:00 AM daily.');
+
+  const settingsList = await prisma.siteSettings.findMany();
+  settingsList.forEach(s => {
+    if (s.favicon) referencedImages.add(path.basename(s.favicon));
+    if (s.logo) referencedImages.add(path.basename(s.logo));
+    
+    if (s.heroSection && typeof s.heroSection === 'object' && s.heroSection !== null) {
+      const hero = s.heroSection as any;
+      if (typeof hero.backgroundImage === 'string') {
+        referencedImages.add(path.basename(hero.backgroundImage));
+      }
+    }
+  });
+
+  await cleanupUnusedImages();
+  await cleanupS3Images(referencedImages);
+}
+
+// 建立排程任務 (每月月底或每週執行一次，目前設為每週日凌晨 3 點執行，以節省 API)
+export function scheduleImageCleanup() {
+  cron.schedule('0 3 * * 0', () => {
+    cleanupAllImages();
+  });
+  logger.info('Image cleanup cron job scheduled at 03:00 AM every Sunday.');
 }

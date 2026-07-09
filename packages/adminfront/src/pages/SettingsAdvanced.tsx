@@ -91,6 +91,13 @@ export default function SettingsAdvanced() {
   const [enableRateLimiting, setEnableRateLimiting] = useState(false);
   const [inventorySyncFrequency, setInventorySyncFrequency] = useState('6h');
 
+  // S3 Settings
+  const [s3Endpoint, setS3Endpoint] = useState('');
+  const [s3Bucket, setS3Bucket] = useState('');
+  const [s3AccessKey, setS3AccessKey] = useState('');
+  const [s3SecretKey, setS3SecretKey] = useState('');
+  const [s3PublicUrl, setS3PublicUrl] = useState('');
+
   useEffect(() => {
     api.get('settings/advanced')
       
@@ -101,6 +108,13 @@ export default function SettingsAdvanced() {
           if (d.maintenanceMessage) setMaintenanceMessage(d.maintenanceMessage);
           if (d.enableRateLimiting !== undefined) setEnableRateLimiting(d.enableRateLimiting);
           if (d.inventorySyncFrequency) setInventorySyncFrequency(d.inventorySyncFrequency);
+          if (d.s3Settings) {
+            setS3Endpoint(d.s3Settings.endpoint || '');
+            setS3Bucket(d.s3Settings.bucket || '');
+            setS3AccessKey(d.s3Settings.accessKey || '');
+            setS3SecretKey(d.s3Settings.secretKey || '');
+            setS3PublicUrl(d.s3Settings.publicUrl || '');
+          }
         }
       })
       .catch(() => {})
@@ -112,12 +126,19 @@ export default function SettingsAdvanced() {
     setError('');
     setSuccess('');
     try {
-      const res = await api.put('settings/advanced', JSON.stringify({
+      const res = await api.put('settings/advanced', {
           maintenanceMode,
           maintenanceMessage,
           enableRateLimiting,
           inventorySyncFrequency,
-        }));
+          s3Settings: {
+            endpoint: s3Endpoint,
+            bucket: s3Bucket,
+            accessKey: s3AccessKey,
+            secretKey: s3SecretKey,
+            publicUrl: s3PublicUrl,
+          },
+        });
       const data = res;
       if (data.success) {
         setSuccess('進階設定已更新');
@@ -331,7 +352,41 @@ export default function SettingsAdvanced() {
             />
           </div>
 
-          {/* Section 4: IP Blacklist Section */}
+          {/* Section 4: S3 / Cloudflare R2 Settings */}
+          <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-4">
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                ☁️ 雲端圖床 (S3 / Cloudflare R2) 設定
+              </h2>
+              <p className="text-sm text-gray-500 mt-1">設定專屬的雲端儲存空間。設定完成後，所有上傳的圖片將直接串流至您的圖床，不會佔用伺服器空間。若留空，系統將退回使用本地儲存 (不建議)。</p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">S3 Endpoint URL</label>
+                <input className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 focus:bg-white focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all duration-200 outline-none placeholder:text-gray-400 shadow-sm" type="text" placeholder="https://<account_id>.r2.cloudflarestorage.com" value={s3Endpoint} onChange={e => setS3Endpoint(e.target.value)} />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Bucket Name (儲存桶名稱)</label>
+                <input className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 focus:bg-white focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all duration-200 outline-none placeholder:text-gray-400 shadow-sm" type="text" placeholder="shutter-images" value={s3Bucket} onChange={e => setS3Bucket(e.target.value)} />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Access Key ID</label>
+                <input className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 focus:bg-white focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all duration-200 outline-none placeholder:text-gray-400 shadow-sm" type="text" placeholder="Access Key" value={s3AccessKey} onChange={e => setS3AccessKey(e.target.value)} />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Secret Access Key</label>
+                <input className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 focus:bg-white focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all duration-200 outline-none placeholder:text-gray-400 shadow-sm" type="password" placeholder="Secret Key" value={s3SecretKey} onChange={e => setS3SecretKey(e.target.value)} />
+              </div>
+              <div className="md:col-span-2">
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Public Domain URL (公開訪問網址)</label>
+                <input className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 focus:bg-white focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all duration-200 outline-none placeholder:text-gray-400 shadow-sm" type="text" placeholder="https://pub-xxxxxx.r2.dev" value={s3PublicUrl} onChange={e => setS3PublicUrl(e.target.value)} />
+                <p className="text-xs text-gray-500 mt-1">此網址將會與檔名組合，成為前端載入圖片的來源。請確認結尾不要有斜線。</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Section 5: IP Blacklist Section */}
           <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-4">
             <div>
               <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">

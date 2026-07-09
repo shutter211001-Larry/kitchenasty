@@ -111,3 +111,25 @@ When refactoring from `fetch` or writing new API calls, strictly follow these AP
 - You MUST ALWAYS use the `manage_task` tool to **kill** the backend server task (`npm run dev:api-server`) BEFORE running any `npm install` commands.
 - After the installation is complete, you MUST restart the server.
 - If the Prisma client becomes corrupted, you must run `npx prisma generate` for ALL schemas (e.g., `npx prisma generate` and `npx prisma generate --schema=prisma/erp/shutter-erp.prisma`) to recover.
+
+## 21. Shutter SaaS System Architecture (Services & Databases)
+**Trigger**: When deploying, starting, troubleshooting, or writing documentation about the Shutter SaaS system architecture.
+**Rule**: You MUST remember that the Shutter SaaS platform consists of exactly **6 core services**:
+1. **1 Shared Database**: `Shutter DB` (PostgreSQL) - The main database and ERP database have been merged into a single database. Do not assume there are two separate databases.
+2. **1 Backend Server**: `api-server` - The central REST API and WebSocket server.
+3. **4 Frontend Applications**: 
+   - `adminfront` (Tenant Admin UI)
+   - `storefront` (Customer Ordering UI)
+   - `erpfront` (Headquarters ERP UI)
+   - `saasfront` (SaaS Super Admin Platform)
+When listing environment variables for URLs, ensure all 4 frontends are accounted for (e.g., `SAAS_URL_PUBLIC`, `STORE_URL_PUBLIC`, `ADMIN_URL_PUBLIC`, `ERP_URL_PUBLIC`).
+
+## 22. Shutter Core Functional Domains (業務功能架構)
+**Trigger**: When exploring, documenting, debugging, or modifying features within the Shutter system (e.g., POS, HR, Kitchen Display, Marketing).
+**Rule**: You MUST be aware of the system's 5 core functional domains to properly navigate the codebase and architect solutions:
+1. **Omnichannel Ordering & POS**: (OrderCreate, group-order, LINE Pay, Stripe, Taiwan e-invoice, Counter Display)
+2. **Kitchen & Inventory**: (Kitchen Display System/KDS Kanban, Stock Management, Web Bluetooth Printer)
+3. **Menu & Franchise Management**: (AI Menu Detection, Infinite category levels, modifiers, Delivery Zones, Location management)
+4. **HR & Payroll (TW Labor Law Compliant)**: (QR Code Attendance, Payroll calculations, Shift/Roster Requirements, Leave Approvals, Job Roles)
+5. **CRM & Marketing**: (Customer Loyalty, Coupons, LINE OA integration, Automation Rules, Consent/Audit Logs)
+When working on any of these areas, always refer to this architecture to ensure you are modifying the correct domain files (e.g., `adminfront/src/pages` or `api-server/src/routes`).

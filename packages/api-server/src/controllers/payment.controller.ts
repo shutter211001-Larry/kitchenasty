@@ -98,6 +98,15 @@ export async function handleWebhook(req: Request, res: Response): Promise<void> 
         const orderId = paymentIntent.metadata.orderId;
 
         if (orderId) {
+          const existingOrder = await prisma.order.findUnique({
+            where: { id: orderId },
+            select: { paymentStatus: true }
+          });
+          
+          if (!existingOrder || existingOrder.paymentStatus === 'PAID') {
+            break; // 冪等性：如果已經付款成功，則不再重複觸發後續邏輯
+          }
+
           // Update payment status
           await prisma.payment.updateMany({
             where: { transactionId: paymentIntent.id },
