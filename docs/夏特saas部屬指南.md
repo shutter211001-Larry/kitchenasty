@@ -116,39 +116,40 @@ LINE Pay 在 Sandbox 或正式環境中，**強制要求伺服器必須有固定
 
 ---
 
-## 第四部分：部署 API 伺服器與前端
+## 第四部分：部署各個獨立服務 (Railway / 雲端平台)
 
-若您使用 Docker Compose，可以直接參考專案下的 `docker-compose.yml`。
-若使用 Railway 等雲端平台，請注意前端服務的環境變數綁定：
+在 Railway 或類似的雲端平台上，由於我們是 Monorepo (單一儲存庫) 架構，請在同一個 GitHub Repo 下建立 5 個獨立的服務 (Service)，並依照以下設定：
 
-### 前端環境變數 (adminfront, storefront, erpfront, saasfront)
-四個前端專案都必須在「建置階段 (Build time)」知道後端 API 的位置，請為這四個容器設定以下變數：
+### 1. api-server (後端核心)
+- **部署方式**：Dockerfile
+- **Dockerfile Path**：`packages/api-server/Dockerfile`
+- **環境變數**：請參考第一部分的設定，並確保連接上您的 `DATABASE_URL`。
 
-| 變數名稱 | 說明 | 是否必填 |
-|----------|------|----------|
-| `VITE_API_URL_PUBLIC` | 填寫您的 `api-server` 對外公開網址 (例如 `https://api.example.com`) | **是** |
+### 2. 四個前端專案 (adminfront, storefront, erpfront, saasfront)
+這四個前端專案皆採用 Vite 框架，部署設定皆相同（只需更改指令後面的專案名稱）：
+- **部署方式**：Nixpacks / Node.js
+- **Root Directory**：`/` (保持根目錄，不要選入 packages)
+- **Build Command**：`npm install && npm run build -w packages/<對應專案名稱>` (例如：`npm run build -w packages/adminfront`)
+- **Start Command**：`npm run preview -w packages/<對應專案名稱> -- --host 0.0.0.0 --port $PORT`
 
 > [!IMPORTANT]
-> 前端環境變數打包後即固定。若您日後更改了 API 網址，必須重新觸發前端的 Build 流程才會生效。
+> 前端環境變數打包後即固定。請務必在前端服務的 Variables 頁籤中，設定 `VITE_API_URL_PUBLIC` 指向 `api-server` 的公開網址。若您日後更改了 API 網址，必須重新觸發前端的 Build 流程才會生效。
 
 ---
 
 ## 第五部分：資料庫初始化與預設資料 (首次部署)
 
 當所有的伺服器都亮起綠燈 (Active) 時，這代表容器已經運行，但資料庫內仍是空的。
-在**第一次部署**時，請透過終端機 (或進入 `api-server` 容器內部)，依序執行以下三個指令來建立架構與預設資料：
+在**第一次部署**時，請透過終端機 (或進入 `api-server` 容器內部)，依序執行以下指令來建立架構與預設資料：
 
-1. **建立主系統資料表**
+1. **建立系統資料表 (Migration)**
+   這會套用所有 Schema 變更並初始化資料表。
    ```bash
    npx prisma migrate deploy --schema prisma/schema.prisma
    ```
 
-2. **建立 ERP 系統資料表**
-   ```bash
-   npx prisma migrate deploy --schema prisma/erp/shutter-erp.prisma
-   ```
-
-3. **寫入種子資料 (Seed)**
+2. **寫入種子資料 (Seed)**
+   這會建立預設的超級管理員與基礎系統設定。
    ```bash
    npm run db:seed -w packages/api-server
    ```
@@ -161,7 +162,7 @@ LINE Pay 在 Sandbox 或正式環境中，**強制要求伺服器必須有固定
 - [ ] 1 個資料庫 (Shutter DB) 皆已正常啟動並可連線。
 - [ ] `api-server` 成功讀取 `DATABASE_URL`，且已設定 `SAAS_URL_PUBLIC` 等 4 個前端網址。
 - [ ] 4 個前端專案皆已設定 `VITE_API_URL_PUBLIC` 並成功完成建置。
-- [ ] 已執行三次 Prisma 命令 (2 個 migrate + 1 個 seed) 完成資料庫初始化。
+- [ ] 已執行 Prisma 命令 (migrate deploy 與 seed) 完成資料庫初始化。
 - [ ] 透過瀏覽器訪問 `http(s)://<你的adminfront網址>/` 能夠正常看到登入畫面。
 - [ ] SaaS 管理員登入後，**請引導各租戶到後台填寫 LINE Pay Proxy URL、Stripe 等資料庫金鑰設定**。
 
