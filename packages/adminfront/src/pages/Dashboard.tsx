@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { api } from '../lib/api.js';
 import { useTranslation } from 'react-i18next';
@@ -71,6 +71,16 @@ export default function Dashboard() {
   const [error, setError] = useState('');
   const [tab, setTab] = useState<'overview' | 'analytics'>('overview');
   const [analyticsDays, setAnalyticsDays] = useState(30);
+
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const redirect = searchParams.get('redirect');
+
+  useEffect(() => {
+    if (redirect) {
+      navigate(redirect, { replace: true });
+    }
+  }, [redirect, navigate]);
 
   const token = localStorage.getItem('token') || '';
 

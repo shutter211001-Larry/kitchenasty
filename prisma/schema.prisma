@@ -724,6 +724,8 @@ model SiteSettings {
   menuSection         Json?
   invoiceSettings     Json?
   googleSettings      Json?
+  pendingIntegrations Json?
+  pendingIntegrationsToken String?
 
   tenantId String? @unique
   tenant   Tenant? @relation(fields: [tenantId], references: [id], onDelete: Cascade)

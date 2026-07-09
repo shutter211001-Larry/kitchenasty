@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { z } from 'zod';
+import { tenantStorage } from '../middleware/tenantStorage.js';
 import nodemailer from 'nodemailer';
 import prisma from '../lib/db.js';
 import { auditLog } from '../lib/audit.js';
@@ -1135,4 +1136,51 @@ export async function updateGoogleSettings(req: Request, res: Response): Promise
       googleMapsApiKey: maskSecret(data.googleMapsApiKey),
     },
   });
+}
+
+// ============================================================
+// INTEGRATIONS APPROVAL (SaaS)
+// ============================================================
+
+export async function approvePendingIntegrations(req: Request, res: Response): Promise<void> {
+  const { token } = req.body;
+  if (!token) {
+    res.status(400).json({ success: false, error: '缺少驗證權杖' });
+    return;
+  }
+
+  const tenantId = tenantStorage.getStore()?.tenantId;
+  if (!tenantId) {
+    res.status(400).json({ success: false, error: 'Tenant context missing' });
+    return;
+  }
+
+  const settings = await prisma.siteSettings.findUnique({
+    where: { tenantId }
+  });
+
+  if (!settings || !settings.pendingIntegrations || settings.pendingIntegrationsToken !== token) {
+    res.status(400).json({ success: false, error: '金鑰驗證失敗或已過期，請聯繫平台管理員重新發送' });
+    return;
+  }
+
+  const pending: any = typeof settings.pendingIntegrations === 'string' 
+    ? JSON.parse(settings.pendingIntegrations) 
+    : settings.pendingIntegrations;
+
+  await prisma.siteSettings.update({
+    where: { id: settings.id },
+    data: {
+      lineSettings: pending.lineSettings || settings.lineSettings,
+      googleSettings: pending.googleSettings || settings.googleSettings,
+      mailSettings: pending.mailSettings || settings.mailSettings,
+      paymentSettings: pending.paymentSettings || settings.paymentSettings,
+      invoiceSettings: pending.invoiceSettings || settings.invoiceSettings,
+      orderSettings: pending.orderSettings || settings.orderSettings,
+      pendingIntegrations: null as any,
+      pendingIntegrationsToken: null
+    }
+  });
+
+  res.json({ success: true, message: '整合金鑰已成功套用' });
 }

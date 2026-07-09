@@ -18,7 +18,8 @@ export default function TenantIntegrations() {
     line: {
       liffId: '', channelAccessToken: '', channelSecret: '',
       lineLoginChannelId: '', lineLoginChannelSecret: '',
-      linePayChannelId: '', linePayChannelSecret: ''
+      linePayChannelId: '', linePayChannelSecret: '',
+      linePayApiUrl: '', linePayProxyUrl: '', linePayReturnUrl: ''
     },
     google: {
       googleLoginClientId: '', googleLoginClientSecret: '',
@@ -29,7 +30,8 @@ export default function TenantIntegrations() {
       smtpHost: '', smtpPort: '', smtpUser: '', smtpPass: '', senderEmail: '', senderName: '', mailServiceType: 'SMTP'
     },
     payment: {
-      stripePublicKey: '', stripeSecretKey: ''
+      stripePublicKey: '', stripeSecretKey: '', stripeWebhookSecret: '',
+      paypalClientId: '', paypalClientSecret: ''
     },
     invoice: {
       merchantId: '', hashKey: '', hashIv: ''
@@ -61,7 +63,7 @@ export default function TenantIntegrations() {
     setSaving(true);
     try {
       await api.put(`/platform-admin/tenants/${id}/integrations`, keys);
-      toast.success('金鑰已成功更新並通知該店管理員！');
+      toast.success('已發送確認信，等待店家管理員同意套用！', { duration: 5000 });
       navigate('/tenants');
     } catch (error) {
       toast.error('儲存失敗');
@@ -110,7 +112,7 @@ export default function TenantIntegrations() {
         <div className="flex gap-3">
           <button onClick={handleSave} disabled={saving} className="bg-orange-600 hover:bg-orange-700 disabled:opacity-50 text-white px-6 py-3 rounded-xl text-sm font-medium transition-all shadow-lg shadow-orange-600/20 flex items-center gap-2">
             <Save className="w-4 h-4" />
-            {saving ? '儲存中...' : '儲存金鑰並通知店家'}
+            {saving ? '處理中...' : '儲存並發送確認信給店家'}
           </button>
         </div>
       </div>
@@ -181,6 +183,24 @@ export default function TenantIntegrations() {
                   <div>
                     <label className="block text-sm font-medium text-gray-400 mb-1.5">Pay Channel Secret</label>
                     <input type="password" value={keys.line.linePayChannelSecret} onChange={e => handleChange('line', 'linePayChannelSecret', e.target.value)} className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-orange-500/50 outline-none transition-all" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4 pt-2">
+                <h3 className="text-lg font-semibold text-white border-b border-gray-800 pb-2">進階網址設定 (Advanced Routing)</h3>
+                <div className="grid grid-cols-2 gap-5">
+                  <div className="col-span-2">
+                    <label className="block text-sm font-medium text-gray-400 mb-1.5">LINE Pay API URL</label>
+                    <input type="text" value={keys.line.linePayApiUrl} onChange={e => handleChange('line', 'linePayApiUrl', e.target.value)} placeholder="預設: https://api-pay.line.me" className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-orange-500/50 outline-none transition-all" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-400 mb-1.5">Forward Proxy URL</label>
+                    <input type="text" value={keys.line.linePayProxyUrl} onChange={e => handleChange('line', 'linePayProxyUrl', e.target.value)} placeholder="例如: http://proxy-user:pass@proxy-host:port" className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-orange-500/50 outline-none transition-all" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-400 mb-1.5">Return URL (自訂跳轉網址)</label>
+                    <input type="text" value={keys.line.linePayReturnUrl} onChange={e => handleChange('line', 'linePayReturnUrl', e.target.value)} placeholder="請留白以使用系統動態產生的 Return URL" className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-orange-500/50 outline-none transition-all" />
                   </div>
                 </div>
               </div>
@@ -313,6 +333,24 @@ export default function TenantIntegrations() {
                   <div className="col-span-2">
                     <label className="block text-sm font-medium text-gray-400 mb-1.5">Secret Key</label>
                     <input type="password" value={keys.payment.stripeSecretKey} onChange={e => handleChange('payment', 'stripeSecretKey', e.target.value)} className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-orange-500/50 outline-none transition-all" />
+                  </div>
+                  <div className="col-span-2">
+                    <label className="block text-sm font-medium text-gray-400 mb-1.5">Webhook 秘密金鑰 (Webhook Secret)</label>
+                    <input type="password" value={keys.payment.stripeWebhookSecret} onChange={e => handleChange('payment', 'stripeWebhookSecret', e.target.value)} className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-orange-500/50 outline-none transition-all" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4 pt-2">
+                <h3 className="text-lg font-semibold text-white border-b border-gray-800 pb-2">PayPal 信用卡與錢包收款</h3>
+                <div className="grid grid-cols-2 gap-5">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-400 mb-1.5">Client ID</label>
+                    <input type="text" value={keys.payment.paypalClientId} onChange={e => handleChange('payment', 'paypalClientId', e.target.value)} className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-orange-500/50 outline-none transition-all" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-400 mb-1.5">Client Secret</label>
+                    <input type="password" value={keys.payment.paypalClientSecret} onChange={e => handleChange('payment', 'paypalClientSecret', e.target.value)} className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-orange-500/50 outline-none transition-all" />
                   </div>
                 </div>
               </div>

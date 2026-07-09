@@ -30,6 +30,7 @@ import {
   getGoogleSettings,
   updateGoogleSettings,
   debugSettings,
+  approvePendingIntegrations,
 } from '../controllers/settings.controller.js';
 
 const router = Router();
@@ -123,6 +124,9 @@ router.put('/line', authenticate, requireRole('SUPER_ADMIN'), updateLineSettings
 // Google — SUPER_ADMIN only
 router.get('/google', authenticate, requireRole('SUPER_ADMIN'), getGoogleSettings);
 router.put('/google', authenticate, requireRole('SUPER_ADMIN'), updateGoogleSettings);
+
+// Integrations Approval — SUPER_ADMIN only
+router.post('/integrations/approve', authenticate, requireRole('SUPER_ADMIN'), approvePendingIntegrations);
 
 // Invoice — SUPER_ADMIN only
 router.get('/invoice', authenticate, requireRole('SUPER_ADMIN'), getInvoiceSettings);

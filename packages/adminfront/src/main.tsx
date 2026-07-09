@@ -75,6 +75,7 @@ import JobRoleSettings from './pages/JobRoleSettings.js';
 import RosterManagement from './pages/RosterManagement.js';
 import Finance from './pages/Finance.js';
 import { ShiftRequirementsPage } from './pages/ShiftRequirementsPage.js';
+import ApproveIntegrations from './pages/ApproveIntegrations.js';
 
 import './index.css';
 
@@ -94,6 +95,7 @@ function AppRoutes() {
       <Routes>
         <Route path="/accept-invite" element={<AcceptInvite />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/approve-integrations" element={<Navigate to={`/?redirect=/approve-integrations${encodeURIComponent(window.location.search)}`} />} />
         <Route path="*" element={<Login onLogin={login} />} />
       </Routes>
     );
@@ -104,6 +106,7 @@ function AppRoutes() {
       <Routes>
         {/* All roles */}
         <Route path="/" element={<Dashboard />} />
+        <Route path="/approve-integrations" element={<RequireRole roles={['SUPER_ADMIN']}><ApproveIntegrations /></RequireRole>} />
         <Route path="/orders" element={<OrderList />} />
         <Route path="/orders/new" element={<OrderCreate />} />
         <Route path="/orders/:id" element={<OrderDetailPage />} />
@@ -206,6 +209,13 @@ function App() {
       </TenantProvider>
     </BrowserRouter>
   );
+}
+
+const params = new URLSearchParams(window.location.search);
+const overrideTenantId = params.get('set_tenant_id');
+if (overrideTenantId) {
+  localStorage.setItem('tenantId', overrideTenantId);
+  window.location.href = window.location.pathname;
 }
 
 ReactDOM.createRoot(document.getElementById('root')!).render(

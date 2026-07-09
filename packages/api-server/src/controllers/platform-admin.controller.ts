@@ -112,8 +112,6 @@ export const resetDemoTenant = async (req: Request, res: Response) => {
     (async () => {
       try {
         logger.info('Starting demo tenant seed...');
-        const __filename = fileURLToPath(import.meta.url);
-        const __dirname = path.dirname(__filename);
         const apiServerDir = path.join(__dirname, '../../');
         
         await execAsync('npm run db:seed', { cwd: apiServerDir });
@@ -167,7 +165,10 @@ export const getTenantIntegrations = async (req: Request, res: Response) => {
         lineLoginChannelId: line.lineLoginChannelId || '',
         lineLoginChannelSecret: maskSecret(line.lineLoginChannelSecret),
         linePayChannelId: line.linePayChannelId || '',
-        linePayChannelSecret: maskSecret(line.linePayChannelSecret)
+        linePayChannelSecret: maskSecret(line.linePayChannelSecret),
+        linePayApiUrl: line.linePayApiUrl || '',
+        linePayProxyUrl: line.linePayProxyUrl || '',
+        linePayReturnUrl: line.linePayReturnUrl || ''
       },
       google: {
         googleLoginClientId: google.googleLoginClientId || '',
@@ -190,6 +191,9 @@ export const getTenantIntegrations = async (req: Request, res: Response) => {
       payment: {
         stripePublicKey: payment.stripePublicKey || '',
         stripeSecretKey: maskSecret(payment.stripeSecretKey),
+        stripeWebhookSecret: maskSecret(payment.stripeWebhookSecret),
+        paypalClientId: payment.paypalClientId || '',
+        paypalClientSecret: maskSecret(payment.paypalClientSecret)
       },
       invoice: {
         merchantId: invoice.merchantId || '',
@@ -249,7 +253,8 @@ export const updateTenantIntegrations = async (req: Request, res: Response) => {
     const newLine = applyUpdate(currentLine, line, [
       'liffId', 'channelAccessToken', 'channelSecret', 
       'lineLoginChannelId', 'lineLoginChannelSecret', 
-      'linePayChannelId', 'linePayChannelSecret'
+      'linePayChannelId', 'linePayChannelSecret',
+      'linePayApiUrl', 'linePayProxyUrl', 'linePayReturnUrl'
     ]);
 
     const newGoogle = applyUpdate(currentGoogle, google, [
@@ -263,7 +268,8 @@ export const updateTenantIntegrations = async (req: Request, res: Response) => {
     ]);
 
     const newPayment = applyUpdate(currentPayment, payment, [
-      'stripePublicKey', 'stripeSecretKey'
+      'stripePublicKey', 'stripeSecretKey', 'stripeWebhookSecret',
+      'paypalClientId', 'paypalClientSecret'
     ]);
 
     const newInvoice = applyUpdate(currentInvoice, invoice, [
@@ -276,41 +282,57 @@ export const updateTenantIntegrations = async (req: Request, res: Response) => {
       'pelicanMerchantId', 'pelicanApiKey'
     ]);
 
+    const pendingPayload = {
+      lineSettings: newLine,
+      googleSettings: newGoogle,
+      mailSettings: newMail,
+      paymentSettings: newPayment,
+      invoiceSettings: newInvoice,
+      orderSettings: newOrder
+    };
+
+    const token = require('crypto').randomBytes(32).toString('hex');
+
     await (prisma as any).siteSettings.update({
       where: { id: currentSettings.id },
       data: {
-        lineSettings: newLine,
-        googleSettings: newGoogle,
-        mailSettings: newMail,
-        paymentSettings: newPayment,
-        invoiceSettings: newInvoice,
-        orderSettings: newOrder
+        pendingIntegrations: pendingPayload,
+        pendingIntegrationsToken: token
       }
     });
 
-    res.json({ success: true, message: '整合金鑰更新成功' });
+    res.json({ success: true, message: '已發送確認信給該店超級管理員' });
 
     // Send email notification to tenant's SUPER_ADMIN asynchronously
     (async () => {
       try {
+        const tenant = await (prisma as any).tenant.findUnique({ where: { id } });
         const tenantAdmins = await (prisma as any).user.findMany({
           where: { tenantId: id, role: 'SUPER_ADMIN', email: { not: null } }
         });
 
-        if (tenantAdmins.length > 0) {
+        if (tenantAdmins.length > 0 && tenant) {
           const { tenantStorage } = await import('../middleware/tenantStorage.js');
           const { sendEmail } = await import('../lib/email.js');
+          
+          const isProd = process.env.NODE_ENV === 'production';
+          const protocol = isProd ? 'https' : 'http';
+          const hostname = tenant.domain || `${tenant.id}.localhost`;
+          const port = isProd ? '' : ':5173';
+          const approvalLink = `${protocol}://${hostname}${port}/approve-integrations?token=${token}`;
           
           tenantStorage.run({ tenantId: null }, () => {
             for (const admin of tenantAdmins) {
               sendEmail({
                 to: admin.email,
-                subject: 'SaaS 平台系統通知：您的整合金鑰已更新',
+                subject: 'SaaS 平台系統通知：整合金鑰設定審核',
                 html: `<div style="font-family: sans-serif; padding: 20px;">
-                        <h2>整合金鑰更新通知</h2>
+                        <h2>整合金鑰更新確認</h2>
                         <p>親愛的 ${admin.name}，您好：</p>
-                        <p>系統管理員已從 SaaS 控制面板為您的餐廳更新了第三方整合金鑰（LINE, Google, 信箱或金流）。</p>
-                        <p>如果有任何疑問，請聯繫您的專屬客服窗口。</p>
+                        <p>系統管理員為您的餐廳配置了新的第三方整合金鑰（LINE, Google, 信箱或金流）。</p>
+                        <p>請點擊下方按鈕進行確認並套用設定：</p>
+                        <a href="${approvalLink}" style="display: inline-block; padding: 12px 24px; background-color: #ea580c; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 20px 0;">確認並套用設定</a>
+                        <p style="color: #666; font-size: 14px;">如果您沒有提出此要求，請忽略此信件。</p>
                         <p>祝您生意興隆！<br/>夏特點餐系統 團隊</p>
                        </div>`
               });

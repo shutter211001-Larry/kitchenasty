@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../lib/api.js';
 import { toast } from 'react-hot-toast';
-import { Plus, Server, Edit, Trash2, Key } from 'lucide-react';
+import { Plus, Server, Edit, Trash2, Key, Globe, ExternalLink } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 interface Tenant {
@@ -123,7 +123,28 @@ export default function TenantList() {
             {tenants.map((t) => (
               <tr key={t.id} className="hover:bg-gray-800/50 transition-colors">
                 <td className="px-6 py-4 font-medium text-white">{t.name}</td>
-                <td className="px-6 py-4 font-mono text-xs text-indigo-400">{t.domain || '未設定'}</td>
+                <td className="px-6 py-4 font-mono text-xs">
+                  <div className="flex items-center gap-2">
+                    <Globe className="w-3.5 h-3.5 text-gray-400" />
+                    <button
+                      onClick={async () => {
+                        const newDomain = window.prompt('請輸入新的自訂網域 (例如: test.localhost)', t.domain || '');
+                        if (newDomain !== null) {
+                          try {
+                            await api.patch(`/platform-admin/tenants/${t.id}`, { domain: newDomain.toLowerCase().trim() || null });
+                            toast.success('網域更新成功');
+                            fetchTenants();
+                          } catch (error: any) {
+                            toast.error(error.message || '網域更新失敗');
+                          }
+                        }
+                      }}
+                      className="text-xs text-indigo-400 hover:text-indigo-300 hover:underline cursor-pointer"
+                    >
+                      {t.domain || '網域未設定 (點擊設定)'}
+                    </button>
+                  </div>
+                </td>
                 <td className="px-6 py-4">
                   <div className="text-xs space-y-1">
                     <p><span className="text-gray-500">使用者：</span> {t._count?.users || 0}</p>
@@ -146,13 +167,26 @@ export default function TenantList() {
                 <td className="px-6 py-4 text-gray-400">
                   {new Date(t.createdAt).toLocaleDateString()}
                 </td>
-                <td className="px-6 py-4 text-right flex items-center justify-end gap-2">
-                  <button onClick={() => navigate(`/tenants/${t.id}/integrations`, { state: { tenantName: t.name } })} className="text-gray-400 hover:text-orange-400 p-2 transition-colors" title="設定整合金鑰">
-                    <Key className="w-4 h-4" />
-                  </button>
-                  <button onClick={() => toggleStatus(t)} className="text-gray-400 hover:text-white p-2 transition-colors" title="編輯狀態">
-                    <Edit className="w-4 h-4" />
-                  </button>
+                <td className="px-6 py-4">
+                  <div className="flex items-center justify-end gap-3">
+                    <button
+                      onClick={() => window.open(`http://localhost:5173/?set_tenant_id=${t.id}`, '_blank')}
+                      className="text-gray-400 hover:text-emerald-400 transition-colors"
+                      title="開啟該店專屬管理後台 (Local Dev)"
+                    >
+                      <ExternalLink className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => navigate(`/tenants/${t.id}/integrations`, { state: { tenantName: t.name } })}
+                      className="text-gray-400 hover:text-indigo-400 transition-colors"
+                      title="SaaS 平台金鑰管理"
+                    >
+                      <Key className="w-4 h-4" />
+                    </button>
+                    <button onClick={() => toggleStatus(t)} className="text-gray-400 hover:text-white transition-colors" title="編輯狀態">
+                      <Edit className="w-4 h-4" />
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
