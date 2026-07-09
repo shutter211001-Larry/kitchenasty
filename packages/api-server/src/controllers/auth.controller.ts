@@ -381,14 +381,31 @@ export async function getMe(req: Request, res: Response): Promise<void> {
   }
 
   if (req.user.type === 'staff') {
-    const user = await prisma.user.findUnique({
-      where: { id: req.user.id },
-      select: { id: true, email: true, name: true, role: true, phone: true, avatar: true, lineUserId: true, lineDisplayName: true, locationId: true, preferredLanguage: true, tenantId: true, tenant: { select: { hasErpAccess: true } } },
+    const { tenantStorage } = await import('../middleware/tenantStorage.js');
+    
+    // We must search globally because SUPER_ADMIN has tenantId = null
+    const user = await tenantStorage.run({ tenantId: null }, async () => {
+      return await prisma.user.findUnique({
+        where: { id: req.user!.id },
+        select: { id: true, email: true, name: true, role: true, phone: true, avatar: true, lineUserId: true, lineDisplayName: true, locationId: true, preferredLanguage: true, tenantId: true, tenant: { select: { hasErpAccess: true } } },
+      });
     });
+    
     if (!user) {
       res.status(401).json({ success: false, error: 'User not found' });
       return;
     }
+    
+    const requestTenantId = tenantStorage.getStore()?.tenantId || null;
+    
+    // Ensure the user actually belongs to this tenant, unless they are a Super Admin
+    if (user.role !== 'SUPER_ADMIN') {
+      if (requestTenantId && user.tenantId !== requestTenantId) {
+        res.status(401).json({ success: false, error: 'User tenant mismatch' });
+        return;
+      }
+    }
+    
     res.json({ success: true, data: { type: 'staff', user: { ...user, hasErpAccess: user.tenant?.hasErpAccess } } });
   } else {
     const customer = await prisma.customer.findUnique({
