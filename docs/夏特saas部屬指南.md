@@ -130,7 +130,7 @@ LINE Pay 在 Sandbox 或正式環境中，**強制要求伺服器必須有固定
 - **部署方式**：Nixpacks / Node.js
 - **Root Directory**：`/` (保持根目錄，不要選入 packages)
 - **Build Command**：`npm install && npm run build -w packages/<對應專案名稱>` (例如：`npm run build -w packages/adminfront`)
-- **Start Command**：`npm run preview -w packages/<對應專案名稱> -- --host 0.0.0.0 --port $PORT`
+- **Start Command**：`npm run preview -w packages/<對應專案名稱> -- --host --port $PORT`
 
 > [!IMPORTANT]
 > 前端環境變數打包後即固定。請務必在前端服務的 Variables 頁籤中，設定 `VITE_API_URL_PUBLIC` 指向 `api-server` 的公開網址。若您日後更改了 API 網址，必須重新觸發前端的 Build 流程才會生效。
