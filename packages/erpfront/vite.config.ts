@@ -4,6 +4,18 @@ import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
 // https://vite.dev/config/
+
+const targetUrl = process.env.VITE_API_URL_PUBLIC ? 
+  (process.env.VITE_API_URL_PUBLIC.startsWith('http') ? process.env.VITE_API_URL_PUBLIC : `https://${process.env.VITE_API_URL_PUBLIC}`) 
+  : 'http://localhost:3000';
+
+const proxyConfig = {
+  '/api': { target: targetUrl, changeOrigin: true },
+  '/uploads': { target: targetUrl, changeOrigin: true },
+  '/shutter-erp': { target: targetUrl, changeOrigin: true },
+  '/socket.io': { target: targetUrl, ws: true, changeOrigin: true },
+};
+
 export default defineConfig({
   plugins: [
     react(),

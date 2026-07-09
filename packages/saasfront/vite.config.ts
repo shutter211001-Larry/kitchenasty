@@ -2,6 +2,18 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
+
+const targetUrl = process.env.VITE_API_URL_PUBLIC ? 
+  (process.env.VITE_API_URL_PUBLIC.startsWith('http') ? process.env.VITE_API_URL_PUBLIC : `https://${process.env.VITE_API_URL_PUBLIC}`) 
+  : 'http://localhost:3000';
+
+const proxyConfig = {
+  '/api': { target: targetUrl, changeOrigin: true },
+  '/uploads': { target: targetUrl, changeOrigin: true },
+  '/shutter-erp': { target: targetUrl, changeOrigin: true },
+  '/socket.io': { target: targetUrl, ws: true, changeOrigin: true },
+};
+
 export default defineConfig({
   base: process.env.VITE_BASE_PATH || '/',
   plugins: [
@@ -34,14 +46,10 @@ export default defineConfig({
       }
     })
   ],
-  preview: { allowedHosts: true },
+  preview: { allowedHosts: true, proxy: proxyConfig },
   server: {
     port: 5176,
-    proxy: {
-      '/api': 'http://localhost:3000',
-      '/uploads': 'http://localhost:3000',
-      '/shutter-erp': 'http://localhost:3000',
-      '/socket.io': { target: 'http://localhost:3000', ws: true },
+    proxy: proxyConfig,
     },
   },
 });
