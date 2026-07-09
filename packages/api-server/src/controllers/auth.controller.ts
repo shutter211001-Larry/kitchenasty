@@ -19,7 +19,9 @@ const staffLoginSchema = z.object({
 
 export async function getSetupStatus(req: Request, res: Response): Promise<void> {
   try {
-    const adminCount = await prisma.user.count({ where: { role: 'SUPER_ADMIN' } });
+    const adminCount = await tenantStorage.run({ tenantId: null }, async () => {
+      return await prisma.user.count({ where: { role: 'SUPER_ADMIN' } });
+    });
     res.json({ hasSuperAdmin: adminCount > 0 });
   } catch (err) {
     res.status(500).json({ error: '獲取系統初始化狀態失敗' });
@@ -36,37 +38,59 @@ export async function staffLogin(req: Request, res: Response): Promise<void> {
   const { email, password } = parsed.data;
   console.log(`[AUTH DEBUG] Attempting login for email: "${email}"`);
 
-  // Auto-seed default administrator if the user table is empty
-  const userCount = await prisma.user.count();
-  if (userCount === 0) {
+  // Auto-seed default administrator if the user table is empty globally
+  const globalUserCount = await tenantStorage.run({ tenantId: null }, async () => {
+    return await prisma.user.count();
+  });
+  
+  if (globalUserCount === 0) {
     const adminEmail = process.env.ADMIN_EMAIL;
     const adminPassword = process.env.ADMIN_PASSWORD;
     
     if (adminEmail && adminPassword) {
       console.log(`Seeding default administrator ${adminEmail} ...`);
       const adminHash = await bcrypt.hash(adminPassword, 10);
-      await prisma.user.create({
-        data: {
-          email: adminEmail,
-          name: '系統管理員',
-          password: adminHash,
-          role: 'SUPER_ADMIN'
-        }
+      
+      // We must explicitly bypass the tenant context so the Super Admin is created globally
+      // without triggering the 'users_tenantId_fkey' constraint violation.
+      await tenantStorage.run({ tenantId: null }, async () => {
+        await prisma.user.create({
+          data: {
+            email: adminEmail,
+            name: '系統管理員',
+            password: adminHash,
+            role: 'SUPER_ADMIN'
+          }
+        });
       });
     } else {
       console.log('No ADMIN_EMAIL or ADMIN_PASSWORD provided in environment variables. Skipping default admin creation.');
     }
   }
 
-  const user = await prisma.user.findUnique({ 
-    where: { email },
-    include: { tenant: { select: { hasErpAccess: true } } }
+  const requestTenantId = tenantStorage.getStore()?.tenantId || null;
+
+  // We must search for the user globally, because Super Admins have tenantId = null
+  const user = await tenantStorage.run({ tenantId: null }, async () => {
+    return await prisma.user.findUnique({ 
+      where: { email },
+      include: { tenant: { select: { hasErpAccess: true } } }
+    });
   });
 
   if (!user) {
     console.log(`[AUTH DEBUG] User not found for email: "${email}"`);
     res.status(401).json({ success: false, error: 'Invalid credentials' });
     return;
+  }
+
+  // Authorization check: User must either be a SUPER_ADMIN or belong to the current request's tenant
+  if (user.role !== 'SUPER_ADMIN') {
+    if (requestTenantId && user.tenantId !== requestTenantId) {
+      console.log(`[AUTH DEBUG] User tenant mismatch. Expected: ${requestTenantId}, Got: ${user.tenantId}`);
+      res.status(401).json({ success: false, error: 'Invalid credentials' });
+      return;
+    }
   }
 
   console.log(`[AUTH DEBUG] User found: ID=${user.id}, Role=${user.role}, IsActive=${user.isActive}`);
