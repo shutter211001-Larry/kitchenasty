@@ -91,3 +91,239 @@ export const updateTenant = async (req: Request, res: Response) => {
     res.status(500).json({ success: false, error: 'Failed to update tenant' });
   }
 };
+
+import { exec } from 'child_process';
+import util from 'util';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const execAsync = util.promisify(exec);
+
+export const resetDemoTenant = async (req: Request, res: Response) => {
+  try {
+    // Delete the demo tenant to cascade wipe everything
+    await (prisma as any).tenant.deleteMany({
+      where: { id: 'demo-tenant-id' }
+    });
+
+    res.json({ success: true, message: 'Reset started' });
+
+    // Run seed scripts in the background
+    (async () => {
+      try {
+        logger.info('Starting demo tenant seed...');
+        const __filename = fileURLToPath(import.meta.url);
+        const __dirname = path.dirname(__filename);
+        const apiServerDir = path.join(__dirname, '../../');
+        
+        await execAsync('npm run db:seed', { cwd: apiServerDir });
+        await execAsync('npx tsx scripts/shutter-erp/seedFoodData.ts', { cwd: apiServerDir });
+        
+        logger.info('Demo tenant reset complete!');
+      } catch (e) {
+        logger.error({ err: e }, 'Error seeding demo tenant');
+      }
+    })();
+  } catch (error) {
+    logger.error({ err: error }, 'Failed to reset demo tenant');
+    // Only send error if we haven't sent a response yet
+    if (!res.headersSent) {
+      res.status(500).json({ success: false, error: 'Failed to reset demo tenant' });
+    }
+  }
+};
+
+const maskSecret = (secret?: string | null) => secret ? '********' : '';
+const parseJson = (val: any) => {
+  if (typeof val === 'string') {
+    try { return JSON.parse(val); } catch { return {}; }
+  }
+  return val || {};
+};
+
+export const getTenantIntegrations = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const settings = await (prisma as any).siteSettings.findFirst({
+      where: { tenantId: id }
+    });
+
+    if (!settings) {
+      return res.status(404).json({ success: false, error: 'Settings not found' });
+    }
+
+    const line = parseJson(settings.lineSettings);
+    const google = parseJson(settings.googleSettings);
+    const mail = parseJson(settings.mailSettings);
+    const payment = parseJson(settings.paymentSettings);
+    const invoice = parseJson(settings.invoiceSettings);
+    const order = parseJson(settings.orderSettings);
+
+    const data = {
+      line: {
+        liffId: line.liffId || '',
+        channelAccessToken: maskSecret(line.channelAccessToken),
+        channelSecret: maskSecret(line.channelSecret),
+        lineLoginChannelId: line.lineLoginChannelId || '',
+        lineLoginChannelSecret: maskSecret(line.lineLoginChannelSecret),
+        linePayChannelId: line.linePayChannelId || '',
+        linePayChannelSecret: maskSecret(line.linePayChannelSecret)
+      },
+      google: {
+        googleLoginClientId: google.googleLoginClientId || '',
+        googleLoginClientSecret: maskSecret(google.googleLoginClientSecret),
+        gmailClientId: google.gmailClientId || '',
+        gmailClientSecret: maskSecret(google.gmailClientSecret),
+        gmailRefreshToken: maskSecret(google.gmailRefreshToken),
+        googleMapsApiKey: maskSecret(google.googleMapsApiKey),
+        geminiApiKey: maskSecret(google.geminiApiKey)
+      },
+      mail: {
+        smtpHost: mail.smtpHost || '',
+        smtpPort: mail.smtpPort || '',
+        smtpUser: mail.smtpUser || '',
+        smtpPass: maskSecret(mail.smtpPass),
+        senderEmail: mail.senderEmail || '',
+        senderName: mail.senderName || '',
+        mailServiceType: mail.mailServiceType || 'SMTP',
+      },
+      payment: {
+        stripePublicKey: payment.stripePublicKey || '',
+        stripeSecretKey: maskSecret(payment.stripeSecretKey),
+      },
+      invoice: {
+        merchantId: invoice.merchantId || '',
+        hashKey: maskSecret(invoice.hashKey),
+        hashIv: maskSecret(invoice.hashIv),
+      },
+      logistics: {
+        ecpayMerchantId: order.ecpayMerchantId || '',
+        ecpayHashKey: maskSecret(order.ecpayHashKey),
+        ecpayHashIv: maskSecret(order.ecpayHashIv),
+        tcatCustomerId: order.tcatCustomerId || '',
+        tcatApiKey: maskSecret(order.tcatApiKey),
+        pelicanMerchantId: order.pelicanMerchantId || '',
+        pelicanApiKey: maskSecret(order.pelicanApiKey),
+      }
+    };
+
+    res.json({ success: true, data });
+  } catch (error) {
+    logger.error({ err: error }, 'Failed to get tenant integrations');
+    res.status(500).json({ success: false, error: 'Failed to get tenant integrations' });
+  }
+};
+
+export const updateTenantIntegrations = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { line, google, mail, payment, invoice, logistics } = req.body;
+
+    const currentSettings = await (prisma as any).siteSettings.findFirst({
+      where: { tenantId: id }
+    });
+
+    if (!currentSettings) {
+      return res.status(404).json({ success: false, error: 'Settings not found' });
+    }
+
+    const currentLine = parseJson(currentSettings.lineSettings);
+    const currentGoogle = parseJson(currentSettings.googleSettings);
+    const currentMail = parseJson(currentSettings.mailSettings);
+    const currentPayment = parseJson(currentSettings.paymentSettings);
+    const currentInvoice = parseJson(currentSettings.invoiceSettings);
+    const currentOrder = parseJson(currentSettings.orderSettings);
+
+    const applyUpdate = (current: any, update: any, keys: string[]) => {
+      const result = { ...current };
+      for (const key of keys) {
+        if (update && update[key] !== undefined) {
+          if (update[key] !== '********') {
+            result[key] = update[key];
+          }
+        }
+      }
+      return result;
+    };
+
+    const newLine = applyUpdate(currentLine, line, [
+      'liffId', 'channelAccessToken', 'channelSecret', 
+      'lineLoginChannelId', 'lineLoginChannelSecret', 
+      'linePayChannelId', 'linePayChannelSecret'
+    ]);
+
+    const newGoogle = applyUpdate(currentGoogle, google, [
+      'googleLoginClientId', 'googleLoginClientSecret',
+      'gmailClientId', 'gmailClientSecret', 'gmailRefreshToken', 
+      'googleMapsApiKey', 'geminiApiKey'
+    ]);
+
+    const newMail = applyUpdate(currentMail, mail, [
+      'smtpHost', 'smtpPort', 'smtpUser', 'smtpPass', 'senderEmail', 'senderName', 'mailServiceType'
+    ]);
+
+    const newPayment = applyUpdate(currentPayment, payment, [
+      'stripePublicKey', 'stripeSecretKey'
+    ]);
+
+    const newInvoice = applyUpdate(currentInvoice, invoice, [
+      'merchantId', 'hashKey', 'hashIv'
+    ]);
+
+    const newOrder = applyUpdate(currentOrder, logistics, [
+      'ecpayMerchantId', 'ecpayHashKey', 'ecpayHashIv',
+      'tcatCustomerId', 'tcatApiKey',
+      'pelicanMerchantId', 'pelicanApiKey'
+    ]);
+
+    await (prisma as any).siteSettings.update({
+      where: { id: currentSettings.id },
+      data: {
+        lineSettings: newLine,
+        googleSettings: newGoogle,
+        mailSettings: newMail,
+        paymentSettings: newPayment,
+        invoiceSettings: newInvoice,
+        orderSettings: newOrder
+      }
+    });
+
+    res.json({ success: true, message: '整合金鑰更新成功' });
+
+    // Send email notification to tenant's SUPER_ADMIN asynchronously
+    (async () => {
+      try {
+        const tenantAdmins = await (prisma as any).user.findMany({
+          where: { tenantId: id, role: 'SUPER_ADMIN', email: { not: null } }
+        });
+
+        if (tenantAdmins.length > 0) {
+          const { tenantStorage } = await import('../middleware/tenantStorage.js');
+          const { sendEmail } = await import('../lib/email.js');
+          
+          tenantStorage.run({ tenantId: null }, () => {
+            for (const admin of tenantAdmins) {
+              sendEmail({
+                to: admin.email,
+                subject: 'SaaS 平台系統通知：您的整合金鑰已更新',
+                html: `<div style="font-family: sans-serif; padding: 20px;">
+                        <h2>整合金鑰更新通知</h2>
+                        <p>親愛的 ${admin.name}，您好：</p>
+                        <p>系統管理員已從 SaaS 控制面板為您的餐廳更新了第三方整合金鑰（LINE, Google, 信箱或金流）。</p>
+                        <p>如果有任何疑問，請聯繫您的專屬客服窗口。</p>
+                        <p>祝您生意興隆！<br/>夏特點餐系統 團隊</p>
+                       </div>`
+              });
+            }
+          });
+        }
+      } catch (err) {
+        logger.error({ err }, 'Failed to send integration update email');
+      }
+    })();
+
+  } catch (error) {
+    logger.error({ err: error }, 'Failed to update tenant integrations');
+    res.status(500).json({ success: false, error: 'Failed to update tenant integrations' });
+  }
+};

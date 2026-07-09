@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../lib/api.js';
 import { toast } from 'react-hot-toast';
-import { Plus, Server, Edit, Trash2 } from 'lucide-react';
+import { Plus, Server, Edit, Trash2, Key } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 interface Tenant {
@@ -78,13 +78,32 @@ export default function TenantList() {
           </h1>
           <p className="text-gray-400 text-sm mt-1">管理所有 SaaS 實例、網域配置與啟用狀態。</p>
         </div>
-        <button
-          onClick={() => navigate('/tenants/new')}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl text-sm font-medium transition-all shadow-lg shadow-indigo-600/30 flex items-center gap-2"
-        >
-          <Plus className="w-4 h-4" />
-          建立新租戶
-        </button>
+        <div className="flex gap-3">
+          <button
+            onClick={async () => {
+              if (!window.confirm('確定要重置示範店家資料嗎？這將刪除該店家所有現有資料並重新匯入，這可能需要幾分鐘的時間。')) return;
+              const loadingToast = toast.loading('開始重置示範店家資料...');
+              try {
+                await api.post('/platform-admin/tenants/reset-demo', {});
+                toast.success('示範店家重置程序已啟動！資料將在背景匯入。', { id: loadingToast });
+                setTimeout(fetchTenants, 5000); // Refresh slightly later
+              } catch (error) {
+                toast.error('重置失敗，請稍後再試。', { id: loadingToast });
+              }
+            }}
+            className="bg-gray-800 hover:bg-gray-700 text-white px-5 py-2.5 rounded-xl text-sm font-medium transition-all shadow-lg border border-gray-700 flex items-center gap-2"
+          >
+            <Server className="w-4 h-4 text-orange-500" />
+            重置示範店家資料
+          </button>
+          <button
+            onClick={() => navigate('/tenants/new')}
+            className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl text-sm font-medium transition-all shadow-lg shadow-indigo-600/30 flex items-center gap-2"
+          >
+            <Plus className="w-4 h-4" />
+            建立新租戶
+          </button>
+        </div>
       </div>
 
       <div className="bg-gray-900 rounded-2xl border border-gray-800 overflow-hidden shadow-xl">
@@ -127,8 +146,11 @@ export default function TenantList() {
                 <td className="px-6 py-4 text-gray-400">
                   {new Date(t.createdAt).toLocaleDateString()}
                 </td>
-                <td className="px-6 py-4 text-right">
-                  <button onClick={() => toggleStatus(t)} className="text-gray-400 hover:text-white p-2">
+                <td className="px-6 py-4 text-right flex items-center justify-end gap-2">
+                  <button onClick={() => navigate(`/tenants/${t.id}/integrations`, { state: { tenantName: t.name } })} className="text-gray-400 hover:text-orange-400 p-2 transition-colors" title="設定整合金鑰">
+                    <Key className="w-4 h-4" />
+                  </button>
+                  <button onClick={() => toggleStatus(t)} className="text-gray-400 hover:text-white p-2 transition-colors" title="編輯狀態">
                     <Edit className="w-4 h-4" />
                   </button>
                 </td>
@@ -136,7 +158,7 @@ export default function TenantList() {
             ))}
             {tenants.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-6 py-8 text-center text-gray-500">目前沒有任何租戶資料，請點擊上方按鈕建立新租戶。</td>
+                <td colSpan={7} className="px-6 py-8 text-center text-gray-500">目前沒有任何租戶資料，請點擊上方按鈕建立新租戶。</td>
               </tr>
             )}
           </tbody>

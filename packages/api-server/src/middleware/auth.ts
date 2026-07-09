@@ -79,6 +79,15 @@ export function requireRole(...roles: Role[]) {
   };
 }
 
+export function requireGlobalAdmin(req: Request, res: Response, next: NextFunction): void {
+  // Ensure the user is a SUPER_ADMIN and does NOT belong to any specific tenant
+  if (!req.user || req.user.role !== 'SUPER_ADMIN' || req.user.tenantId !== null) {
+    res.status(403).json({ success: false, error: 'Global Platform Admin access required' });
+    return;
+  }
+  next();
+}
+
 export function requirePermission(action: string, fallbackRoles: Role[]) {
   return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     if (!req.user || req.user.type !== 'staff' || !req.user.role) {

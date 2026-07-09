@@ -11,6 +11,7 @@ import ResetPassword from './pages/ResetPassword.js';
 import Dashboard from './pages/Dashboard.js';
 import TenantList from './pages/TenantList.tsx';
 import TenantCreate from './pages/TenantCreate.tsx';
+import TenantIntegrations from './pages/TenantIntegrations.tsx';
 
 import './index.css';
 
@@ -43,6 +44,7 @@ function AppRoutes() {
         {/* Tenants */}
         <Route path="/tenants" element={<TenantList />} />
         <Route path="/tenants/new" element={<TenantCreate />} />
+        <Route path="/tenants/:id/integrations" element={<TenantIntegrations />} />
         
       </Routes>
     </AdminLayout>

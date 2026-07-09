@@ -186,7 +186,17 @@ export async function requestStaffPasswordReset(req: Request, res: Response): Pr
     const resetLink = `${adminUrl.replace(/\/+$/, '')}/reset-password?token=${token}`;
     
     const emailContent = staffPasswordResetEmail({ email, resetLink });
-    await sendEmail({ to: email, ...emailContent });
+    
+    if (user.role === 'SUPER_ADMIN') {
+      // 強制使用 SaaS 平台 (Global) 的信箱設定來發送老闆的密碼重置信，
+      // 避免因單一租戶 (老闆) 的 SMTP 設定錯誤導致無法收到密碼重置信
+      tenantStorage.run({ tenantId: null }, () => {
+        sendEmail({ to: email, ...emailContent });
+      });
+    } else {
+      // 一般員工 (MANAGER, STAFF) 則依照他們所屬餐廳的信箱設定發送
+      sendEmail({ to: email, ...emailContent });
+    }
 
     res.status(200).json({ message: '密碼重置信已寄出。' });
   } catch (error) {

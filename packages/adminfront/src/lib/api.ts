@@ -40,6 +40,11 @@ async function request<T = any>(path: string, options?: RequestInit): Promise<T>
 
   const text = await res.text();
   const data = text ? JSON.parse(text) : {};
+  
+  if (!res.ok) {
+    throw new Error(data.error || data.message || 'API request failed');
+  }
+  
   return data;
 }
 
@@ -79,7 +84,14 @@ export const api = {
       headers,
       body: formData,
     });
-    const data = await res.json();
+    
+    const text = await res.text();
+    const data = text ? JSON.parse(text) : {};
+    
+    if (!res.ok) {
+      throw new Error(data.error || data.message || 'Upload failed');
+    }
+    
     return data;
   },
 };
