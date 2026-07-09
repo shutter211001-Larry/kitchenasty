@@ -138,3 +138,11 @@ When working on any of these areas, always refer to this architecture to ensure 
 ## 23. Express CORS & URL Normalization Sync
 **Trigger**: When adding a new frontend application to the SaaS architecture (e.g., adding `SAAS_URL_PUBLIC`) or modifying frontend URLs.
 **Rule**: You MUST ensure that the new URL environment variable is added to BOTH the URL normalization array (around line 10) AND the `corsOrigins` array in `packages/api-server/src/app.ts`. The `api-server` manually normalizes and whitelists these specific keys. If you omit the new variable, the frontend will be permanently blocked by CORS on production deployments.
+
+## 24. 嚴格的本地測試與發布流程 (Strict Local Verification & Release Flow)
+**Trigger**: When completing a code modification task, especially before running `git commit`, `git push`, or reporting task completion to the user.
+**Rule**: You MUST proactively run local verification to ensure your changes compile and function correctly without syntax or build errors. 
+- For frontend changes, run the specific build command (e.g., `npm run build -w packages/saasfront`).
+- For backend changes, ensure the server builds or runs (e.g., `npm run build -w packages/api-server`).
+- You MUST wait for the build/test task to finish successfully.
+- ONLY AFTER local verification passes, are you allowed to commit the code, push to the remote repository, and report completion to the user. NEVER push untested code.

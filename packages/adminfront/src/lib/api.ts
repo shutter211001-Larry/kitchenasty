@@ -42,7 +42,7 @@ async function request<T = any>(path: string, options?: RequestInit): Promise<T>
   const data = text ? JSON.parse(text) : {};
   
   if (!res.ok) {
-    throw new Error(data.error || data.message || 'API request failed');
+    throw new Error(data.error || data.message || `API request failed: [Status ${res.status}] ${text.substring(0, 100)}`);
   }
   
   return data;
