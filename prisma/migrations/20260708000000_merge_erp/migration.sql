@@ -1,4 +1,4 @@
-뿯붿-- CreateEnum
+-- CreateEnum
 CREATE TYPE "OutputType" AS ENUM ('PRIMARY', 'BYPRODUCT', 'WASTE');
 
 -- AlterTable
