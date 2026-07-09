@@ -170,9 +170,12 @@ export default function TenantList() {
                 <td className="px-6 py-4">
                   <div className="flex items-center justify-end gap-3">
                     <button
-                      onClick={() => window.open(`http://localhost:5173/?set_tenant_id=${t.id}`, '_blank')}
+                      onClick={() => {
+                        const baseUrl = import.meta.env.VITE_ADMIN_URL_PUBLIC || 'http://localhost:5173';
+                        window.open(`${baseUrl}?set_tenant_id=${t.id}`, '_blank');
+                      }}
                       className="text-gray-400 hover:text-emerald-400 transition-colors"
-                      title="開啟該店專屬管理後台 (Local Dev)"
+                      title="開啟該店專屬管理後台"
                     >
                       <ExternalLink className="w-4 h-4" />
                     </button>
