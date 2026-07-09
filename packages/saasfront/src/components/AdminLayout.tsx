@@ -1,9 +1,7 @@
-import { api } from '../lib/api';
 import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext.js';
-import AdminChatWidget from './AdminChatWidget';
 
 import { 
   LayoutDashboard, 
@@ -84,8 +82,7 @@ const ROLE_LABELS: Record<Role, string> = {
 export default function AdminLayout({ children, onLogout }: { children: React.ReactNode; onLogout?: () => void }) {
   const { t } = useTranslation();
   const location = useLocation();
-  const { user, token } = useAuth();
-  const [pendingCount, setPendingCount] = useState(0);
+  const { user } = useAuth();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -112,24 +109,7 @@ export default function AdminLayout({ children, onLogout }: { children: React.Re
         .filter(item => !item.children || item.children.length > 0)
     : [];
 
-  // Poll pending order count and settings
-  useEffect(() => {
-    if (!token) return;
-
-    async function fetchData() {
-      try {
-        const statsData = await api.get<any>('/api/dashboard/stats');
-        if (statsData.success && statsData.data) {
-          setPendingCount(statsData.data.pendingOrders ?? 0);
-        }
-      } catch { /* ignore */ }
-    }
-
-    fetchData();
-    const interval = setInterval(fetchData, 60000);
-    return () => clearInterval(interval);
-  }, [token]);
-
+  // Removed restaurant-specific polling for SaaS platform
 
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
 
@@ -278,26 +258,6 @@ export default function AdminLayout({ children, onLogout }: { children: React.Re
             </svg>
           </button>
           <div className="flex items-center gap-3">
-            {/* Notifications bell */}
-            <Link
-              to="/orders?status=PENDING"
-              className="relative p-2 text-gray-400 hover:text-gray-600 transition-colors"
-              title="Pending orders"
-              aria-label="Pending orders"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-              </svg>
-              <span className="sr-only" aria-live="polite">
-                {pendingCount > 0 ? `${pendingCount} pending order${pendingCount === 1 ? '' : 's'}` : ''}
-              </span>
-              {pendingCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 flex items-center justify-center w-4 h-4 text-[10px] font-bold text-white bg-red-500 rounded-full" aria-hidden="true">
-                  {pendingCount > 99 ? '99+' : pendingCount}
-                </span>
-              )}
-            </Link>
-
             {/* Settings gear */}
             {isSuperAdmin && (
               <Link
@@ -371,9 +331,6 @@ export default function AdminLayout({ children, onLogout }: { children: React.Re
         )}
 
         <main className="flex-1 p-6">{children}</main>
-        
-        {/* Chat Widget */}
-        {user && <AdminChatWidget />}
       </div>
     </div>
   );

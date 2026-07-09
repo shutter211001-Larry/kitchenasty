@@ -114,7 +114,7 @@ export async function staffLogin(req: Request, res: Response): Promise<void> {
     email: user.email,
     type: 'staff',
     role: user.role,
-    tenantId: user.tenantId || tenantStorage.getStore()?.tenantId || null,
+    tenantId: user.role === 'SUPER_ADMIN' ? null : (user.tenantId || tenantStorage.getStore()?.tenantId || null),
   });
 
   res.json({
@@ -170,7 +170,7 @@ export async function staffRegister(req: Request, res: Response): Promise<void> 
     email: user.email,
     type: 'staff',
     role: user.role,
-    tenantId: tenantStorage.getStore()?.tenantId || null,
+    tenantId: user.role === 'SUPER_ADMIN' ? null : (tenantStorage.getStore()?.tenantId || null),
   });
 
   res.status(201).json({ success: true, data: { token, user } });
