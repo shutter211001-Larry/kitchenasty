@@ -15,6 +15,13 @@ const proxyConfig = {
 };
 
 export default defineConfig({
+  define: {
+    'import.meta.env.VITE_API_URL_PUBLIC': JSON.stringify(process.env.VITE_API_URL_PUBLIC || process.env.API_URL_PUBLIC),
+    'import.meta.env.VITE_ADMIN_URL_PUBLIC': JSON.stringify(process.env.VITE_ADMIN_URL_PUBLIC || process.env.ADMIN_URL_PUBLIC),
+    'import.meta.env.VITE_STORE_URL_PUBLIC': JSON.stringify(process.env.VITE_STORE_URL_PUBLIC || process.env.STORE_URL_PUBLIC),
+    'import.meta.env.VITE_ERP_URL_PUBLIC': JSON.stringify(process.env.VITE_ERP_URL_PUBLIC || process.env.ERP_URL_PUBLIC),
+    'import.meta.env.VITE_SAAS_URL_PUBLIC': JSON.stringify(process.env.VITE_SAAS_URL_PUBLIC || process.env.SAAS_URL_PUBLIC),
+  },
   base: process.env.VITE_BASE_PATH || '/',
   plugins: [
     react(),
