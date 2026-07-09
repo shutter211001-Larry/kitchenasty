@@ -64,6 +64,15 @@ const navItems: NavItem[] = [
       { path: '/tenants', label: '所有租戶', roles: ['SUPER_ADMIN'] },
       { path: '/tenants/new', label: '建立新租戶', roles: ['SUPER_ADMIN'] },
     ]
+  },
+  {
+    id: 'settings',
+    label: '系統全域設定',
+    icon: <Settings size={20} />,
+    roles: ['SUPER_ADMIN'],
+    children: [
+      { path: '/settings/mail', label: '郵件伺服器', roles: ['SUPER_ADMIN'] },
+    ]
   }
 ];
 

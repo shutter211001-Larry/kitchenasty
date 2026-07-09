@@ -12,6 +12,7 @@ import Dashboard from './pages/Dashboard.js';
 import TenantList from './pages/TenantList.tsx';
 import TenantCreate from './pages/TenantCreate.tsx';
 import TenantIntegrations from './pages/TenantIntegrations.tsx';
+import SettingsMail from './pages/SettingsMail.tsx';
 
 import './index.css';
 
@@ -45,6 +46,9 @@ function AppRoutes() {
         <Route path="/tenants" element={<TenantList />} />
         <Route path="/tenants/new" element={<TenantCreate />} />
         <Route path="/tenants/:id/integrations" element={<TenantIntegrations />} />
+        
+        {/* Settings */}
+        <Route path="/settings/mail" element={<SettingsMail />} />
         
       </Routes>
     </AdminLayout>
