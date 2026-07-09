@@ -37,10 +37,12 @@ export const apiSlice = createApi({
   endpoints: (builder) => ({
     getCategories: builder.query<any[], void>({
       query: () => '/menu/categories',
+      transformResponse: (res: { success: boolean; data: any[] }) => res.data || [],
       providesTags: ['Category'],
     }),
     getMenuItems: builder.query<any[], void>({
       query: () => '/menu/items',
+      transformResponse: (res: { success: boolean; data: any[] }) => res.data || [],
       providesTags: ['MenuItem'],
     }),
   }),

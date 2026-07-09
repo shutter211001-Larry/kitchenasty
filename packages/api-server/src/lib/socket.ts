@@ -13,6 +13,7 @@ export function initSocket(httpServer: HttpServer): Server {
     process.env.STORE_URL_PUBLIC,
     process.env.ADMIN_URL_PUBLIC,
     process.env.ERP_URL_PUBLIC,
+    process.env.SAAS_URL_PUBLIC,
     'http://localhost:5173', 
     'http://localhost:5174', 
     'http://localhost:5175',

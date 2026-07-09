@@ -2,9 +2,9 @@ import { useTranslation } from 'react-i18next';
 import { useState, useEffect, useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useAuth } from '../context/AuthContext';
-import { api } from '../lib/api.js';
+import { api, API_URL } from '../lib/api.js';
 
-const SOCKET_URL = import.meta.env.VITE_API_URL_PUBLIC || '';
+const SOCKET_URL = API_URL || '';
 
 interface ChatMessage {
   id: string;
@@ -59,12 +59,9 @@ export default function AdminChatWidget() {
   // Fetch history when activeLocationId changes
   useEffect(() => {
     if (!token) return;
-    const url = activeLocationId === 'global' ? '/api/chat/messages' : `/api/chat/messages?locationId=${activeLocationId}`;
+    const url = activeLocationId === 'global' ? '/chat/messages' : `/chat/messages?locationId=${activeLocationId}`;
     
-    fetch(url, {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-      
+    api.get(url)
       .then((data: any) => {
         if (data.success) {
           setMessages(data.data);
