@@ -317,152 +317,130 @@ export default function TenantList() {
                     {expandedTenantId === t.id && (
                       <tr className="bg-gray-800/40 border-b border-gray-800/50 shadow-inner">
                         <td colSpan={5} className="px-6 py-6 cursor-default">
-                          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 text-sm text-gray-300 px-2">
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-sm">
                             
-                            {/* Column 1: Basic Info */}
-                            <div>
-                              <h4 className="font-semibold text-white mb-4 pb-2 border-b border-gray-700 flex items-center gap-2">
+                            {/* Card 1: 購買者基本資料 */}
+                            <div className="bg-gray-900/80 border border-gray-800 rounded-xl p-5 shadow-sm">
+                              <h4 className="font-medium text-gray-400 text-xs tracking-wider uppercase mb-4 flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-indigo-400" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" /></svg>
                                 購買者基本資料
                               </h4>
-                              <div className="space-y-3">
-                                <p className="flex"><span className="text-gray-500 w-16 shrink-0">姓名：</span> <span className="text-gray-200">{t.users?.[0]?.name || '未提供'}</span></p>
-                                <p className="flex"><span className="text-gray-500 w-16 shrink-0">信箱：</span> <span className="text-gray-200">{t.users?.[0]?.email || '未提供'}</span></p>
-                                <p className="flex"><span className="text-gray-500 w-16 shrink-0">電話：</span> <span className="text-gray-200">{t.users?.[0]?.phone || '未提供'}</span></p>
+                              <div className="space-y-4">
+                                <div>
+                                  <p className="text-gray-500 text-xs mb-1">姓名</p>
+                                  <p className="text-gray-100 font-medium">{t.users?.[0]?.name || '未提供'}</p>
+                                </div>
+                                <div>
+                                  <p className="text-gray-500 text-xs mb-1">電子信箱 (Mail)</p>
+                                  <p className="text-gray-100 font-medium">{t.users?.[0]?.email || '未提供'}</p>
+                                </div>
+                                <div>
+                                  <p className="text-gray-500 text-xs mb-1">聯絡電話</p>
+                                  <p className="text-gray-100 font-medium">{t.users?.[0]?.phone || '未提供'}</p>
+                                </div>
                               </div>
                             </div>
 
-                            {/* Column 2: Advanced Settings */}
-                            <div>
-                              <h4 className="font-semibold text-white mb-4 pb-2 border-b border-gray-700 flex items-center gap-2">
-                                租約與進階設定
+                            {/* Card 2: 租約與網域 */}
+                            <div className="bg-gray-900/80 border border-gray-800 rounded-xl p-5 shadow-sm">
+                              <h4 className="font-medium text-gray-400 text-xs tracking-wider uppercase mb-4 flex items-center gap-2">
+                                <Globe className="w-4 h-4 text-indigo-400" />
+                                租約與網域
                               </h4>
                               <div className="space-y-4">
-                                {/* Domain Setting */}
                                 <div>
                                   <div className="flex items-center justify-between mb-1">
-                                    <span className="text-gray-500">自訂網域：</span>
-                                    {editingDomainId !== t.id && (
-                                      <button 
-                                        onClick={(e) => { e.stopPropagation(); setEditingDomainId(t.id); setDomainValue(t.domain || ''); }}
-                                        className="text-xs text-indigo-400 hover:text-indigo-300 flex items-center gap-1"
-                                      >
-                                        <Edit className="w-3 h-3" /> 編輯
-                                      </button>
-                                    )}
-                                  </div>
-                                  {editingDomainId === t.id ? (
-                                    <div className="flex items-center gap-2">
-                                      <input 
-                                        type="text" 
-                                        value={domainValue}
-                                        onChange={(e) => setDomainValue(e.target.value)}
-                                        placeholder="例如 test.localhost"
-                                        className="bg-gray-900 border border-gray-700 text-white text-sm rounded-md px-2 py-1 flex-1 focus:outline-none focus:border-indigo-500"
-                                      />
-                                      <button onClick={() => saveDomain(t)} className="p-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded"><Check className="w-3.5 h-3.5" /></button>
-                                      <button onClick={() => setEditingDomainId(null)} className="p-1.5 bg-gray-700 hover:bg-gray-600 text-white rounded"><X className="w-3.5 h-3.5" /></button>
-                                    </div>
-                                  ) : (
-                                    <p className="text-gray-200 font-mono bg-gray-900/50 px-2 py-1 rounded border border-gray-800">
-                                      {t.domain || '尚未設定'}
-                                    </p>
-                                  )}
-                                </div>
-
-                                {/* Expiration Setting */}
-                                <div>
-                                  <div className="flex items-center justify-between mb-1">
-                                    <span className="text-gray-500">到期日：</span>
+                                    <p className="text-gray-500 text-xs">到期日</p>
                                     {editingExpId !== t.id && (
-                                      <button 
-                                        onClick={(e) => { e.stopPropagation(); setEditingExpId(t.id); setExpValue(t.subscriptionEndsAt ? new Date(t.subscriptionEndsAt).toISOString().split('T')[0] : ''); }}
-                                        className="text-xs text-indigo-400 hover:text-indigo-300 flex items-center gap-1"
-                                      >
-                                        <Edit className="w-3 h-3" /> 編輯
+                                      <button onClick={(e) => { e.stopPropagation(); setEditingExpId(t.id); setExpValue(t.subscriptionEndsAt ? new Date(t.subscriptionEndsAt).toISOString().split('T')[0] : ''); }} className="text-indigo-400 hover:text-indigo-300">
+                                        <Edit className="w-3 h-3" />
                                       </button>
                                     )}
                                   </div>
                                   {editingExpId === t.id ? (
-                                    <div className="flex items-center gap-2">
-                                      <input 
-                                        type="date" 
-                                        value={expValue}
-                                        onChange={(e) => setExpValue(e.target.value)}
-                                        className="bg-gray-900 border border-gray-700 text-white text-sm rounded-md px-2 py-1 flex-1 focus:outline-none focus:border-indigo-500 [color-scheme:dark]"
-                                      />
-                                      <button onClick={() => saveExpiration(t)} className="p-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded"><Check className="w-3.5 h-3.5" /></button>
-                                      <button onClick={() => setEditingExpId(null)} className="p-1.5 bg-gray-700 hover:bg-gray-600 text-white rounded"><X className="w-3.5 h-3.5" /></button>
+                                    <div className="flex items-center gap-1 mt-1">
+                                      <input type="date" value={expValue} onChange={(e) => setExpValue(e.target.value)} className="bg-gray-950 border border-gray-700 text-white text-xs rounded px-2 py-1 flex-1 focus:outline-none focus:border-indigo-500 [color-scheme:dark]" />
+                                      <button onClick={() => saveExpiration(t)} className="p-1 bg-indigo-600 text-white rounded"><Check className="w-3 h-3" /></button>
+                                      <button onClick={() => setEditingExpId(null)} className="p-1 bg-gray-700 text-white rounded"><X className="w-3 h-3" /></button>
                                     </div>
                                   ) : (
-                                    <p className="text-gray-200 bg-gray-900/50 px-2 py-1 rounded border border-gray-800">
-                                      {t.subscriptionEndsAt ? new Date(t.subscriptionEndsAt).toLocaleDateString() : '無期限'}
-                                    </p>
+                                    <p className="text-gray-100 font-medium">{t.subscriptionEndsAt ? new Date(t.subscriptionEndsAt).toLocaleDateString() : '無期限'}</p>
                                   )}
                                 </div>
+                                <div>
+                                  <div className="flex items-center justify-between mb-1">
+                                    <p className="text-gray-500 text-xs">自訂網域</p>
+                                    {editingDomainId !== t.id && (
+                                      <button onClick={(e) => { e.stopPropagation(); setEditingDomainId(t.id); setDomainValue(t.domain || ''); }} className="text-indigo-400 hover:text-indigo-300">
+                                        <Edit className="w-3 h-3" />
+                                      </button>
+                                    )}
+                                  </div>
+                                  {editingDomainId === t.id ? (
+                                    <div className="flex items-center gap-1 mt-1">
+                                      <input type="text" value={domainValue} onChange={(e) => setDomainValue(e.target.value)} placeholder="例如 test.localhost" className="bg-gray-950 border border-gray-700 text-white text-xs rounded px-2 py-1 flex-1 focus:outline-none focus:border-indigo-500" />
+                                      <button onClick={() => saveDomain(t)} className="p-1 bg-indigo-600 text-white rounded"><Check className="w-3 h-3" /></button>
+                                      <button onClick={() => setEditingDomainId(null)} className="p-1 bg-gray-700 text-white rounded"><X className="w-3 h-3" /></button>
+                                    </div>
+                                  ) : (
+                                    <p className="text-gray-100 font-mono font-medium">{t.domain || '未設定'}</p>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Card 3: 模組狀態 */}
+                            <div className="bg-gray-900/80 border border-gray-800 rounded-xl p-5 shadow-sm">
+                              <h4 className="font-medium text-gray-400 text-xs tracking-wider uppercase mb-4 flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-indigo-400" viewBox="0 0 20 20" fill="currentColor"><path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
+                                模組狀態與整合
+                              </h4>
+                              <div className="space-y-5">
+                                <div className="flex items-center justify-between p-3 bg-gray-950/50 rounded-lg border border-gray-800/80">
+                                  <div>
+                                    <p className="text-gray-200 font-medium text-sm">ERP 模組</p>
+                                    <p className="text-gray-500 text-xs mt-0.5">{t.hasErpAccess ? '總部功能已啟用' : '已停用'}</p>
+                                  </div>
+                                  <button onClick={(e) => { e.stopPropagation(); toggleErpAccess(t); }} className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none ${t.hasErpAccess ? 'bg-indigo-500' : 'bg-gray-700'}`}>
+                                    <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${t.hasErpAccess ? 'translate-x-4' : 'translate-x-1'}`} />
+                                  </button>
+                                </div>
                                 
-                                <button
-                                  onClick={() => navigate(`/tenants/${t.id}/integrations`, { state: { tenantName: t.name } })}
-                                  className="w-full mt-2 flex items-center justify-center gap-2 px-3 py-1.5 bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-lg text-sm text-gray-300 transition-colors"
-                                >
-                                  <Key className="w-4 h-4 text-indigo-400" />
-                                  設定第三方整合 (LINE / 支付 / 發票)
+                                <button onClick={() => navigate(`/tenants/${t.id}/integrations`, { state: { tenantName: t.name } })} className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/20 rounded-lg text-xs font-medium transition-colors">
+                                  <Key className="w-3.5 h-3.5" /> 第三方整合 (LINE / 支付)
                                 </button>
                               </div>
                             </div>
 
-                            {/* Column 3: Danger Zone */}
-                            <div>
-                              <h4 className="font-semibold text-red-400 mb-4 pb-2 border-b border-red-900/30 flex items-center gap-2">
-                                <AlertTriangle className="w-4 h-4" /> 危險操作
+                            {/* Card 4: 租約與危險操作 */}
+                            <div className="bg-gray-900/80 border border-gray-800 rounded-xl p-5 shadow-sm">
+                              <h4 className="font-medium text-red-400 text-xs tracking-wider uppercase mb-4 flex items-center gap-2">
+                                <AlertTriangle className="w-4 h-4" /> 租約操作
                               </h4>
                               <div className="space-y-4">
-                                <div className="flex items-center justify-between p-3 bg-gray-900/50 rounded-lg border border-gray-800">
-                                  <div>
-                                    <p className="text-white font-medium">租約狀態</p>
-                                    <p className="text-xs text-gray-500 mt-0.5">{t.isActive ? '目前允許登入與營運' : '已禁止所有存取'}</p>
-                                  </div>
-                                  <button
-                                    onClick={() => toggleStatus(t)}
-                                    className={`px-3 py-1.5 rounded-md text-xs font-medium border transition-colors ${t.isActive ? 'bg-red-500/10 text-red-400 border-red-500/20 hover:bg-red-500/20' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20'}`}
-                                  >
+                                <div className="flex flex-col gap-2">
+                                  <p className="text-gray-500 text-xs">整體租約狀態</p>
+                                  <button onClick={() => toggleStatus(t)} className={`w-full px-3 py-2 rounded-lg text-xs font-medium border transition-colors flex justify-center items-center gap-2 ${t.isActive ? 'bg-red-500/10 text-red-400 border-red-500/20 hover:bg-red-500/20' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20'}`}>
                                     {t.isActive ? '停權此租戶' : '恢復啟用'}
                                   </button>
                                 </div>
 
-                                {deletingId === t.id ? (
-                                  <div className="p-3 bg-red-900/20 border border-red-500/30 rounded-lg space-y-3">
-                                    <p className="text-xs text-red-400">請輸入名稱 <span className="font-bold text-white select-all">{t.name}</span> 以確認刪除：</p>
-                                    <input 
-                                      type="text" 
-                                      value={deleteConfirmName}
-                                      onChange={(e) => setDeleteConfirmName(e.target.value)}
-                                      placeholder={t.name}
-                                      className="w-full bg-gray-900 border border-red-500/50 text-white text-sm rounded-md px-3 py-1.5 focus:outline-none focus:border-red-400"
-                                    />
-                                    <div className="flex gap-2">
-                                      <button 
-                                        onClick={() => confirmDeleteTenant(t)}
-                                        className="flex-1 bg-red-600 hover:bg-red-700 text-white text-xs py-1.5 rounded font-medium transition-colors"
-                                      >
-                                        確認刪除
-                                      </button>
-                                      <button 
-                                        onClick={() => { setDeletingId(null); setDeleteConfirmName(''); }}
-                                        className="flex-1 bg-gray-700 hover:bg-gray-600 text-white text-xs py-1.5 rounded font-medium transition-colors"
-                                      >
-                                        取消
-                                      </button>
+                                <div className="pt-2 border-t border-gray-800">
+                                  {deletingId === t.id ? (
+                                    <div className="bg-red-900/20 border border-red-500/30 p-2.5 rounded-lg space-y-2">
+                                      <p className="text-[10px] text-red-400">請輸入 <span className="font-bold text-white select-all">{t.name}</span> 以確認刪除：</p>
+                                      <input type="text" value={deleteConfirmName} onChange={(e) => setDeleteConfirmName(e.target.value)} placeholder={t.name} className="w-full bg-gray-950 border border-red-500/50 text-white text-xs rounded px-2 py-1.5 focus:outline-none focus:border-red-400" />
+                                      <div className="flex gap-1">
+                                        <button onClick={() => confirmDeleteTenant(t)} className="flex-1 bg-red-600 hover:bg-red-700 text-white text-xs py-1 rounded font-medium">確認刪除</button>
+                                        <button onClick={() => { setDeletingId(null); setDeleteConfirmName(''); }} className="flex-1 bg-gray-700 hover:bg-gray-600 text-white text-xs py-1 rounded font-medium">取消</button>
+                                      </div>
                                     </div>
-                                  </div>
-                                ) : (
-                                  <button
-                                    onClick={() => { setDeletingId(t.id); setDeleteConfirmName(''); }}
-                                    className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 rounded-lg text-sm text-red-400 transition-colors"
-                                  >
-                                    <Trash2 className="w-4 h-4" />
-                                    刪除租戶與所有資料
-                                  </button>
-                                )}
+                                  ) : (
+                                    <button onClick={() => { setDeletingId(t.id); setDeleteConfirmName(''); }} className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-red-950/30 hover:bg-red-900/50 text-red-400 border border-red-500/10 rounded-lg text-xs transition-colors">
+                                      <Trash2 className="w-3.5 h-3.5" /> 永久刪除資料
+                                    </button>
+                                  )}
+                                </div>
                               </div>
                             </div>
                             
