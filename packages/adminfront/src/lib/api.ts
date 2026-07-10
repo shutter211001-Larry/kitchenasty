@@ -36,7 +36,7 @@ async function request<T = any>(path: string, options?: RequestInit): Promise<T>
   const data = text ? JSON.parse(text) : {};
   
   if (!res.ok) {
-    if (res.status === 401) {
+    if (res.status === 401 && window.location.pathname !== '/login') {
       localStorage.removeItem('token');
       window.location.href = '/login';
     }

@@ -34,6 +34,9 @@ const createDatabase = async () => {
       replicationIdentifier: `pull_${name}`,
       pull: {
         async handler(lastCheckpoint: any) {
+          if (!localStorage.getItem('token')) {
+            throw new Error('Authentication required');
+          }
           try {
             const query = new URLSearchParams();
             if (lastCheckpoint) {
@@ -44,8 +47,10 @@ const createDatabase = async () => {
               `/replication/pull/${name}?${query.toString()}`
             );
             return res;
-          } catch (err) {
-            console.error(`[RxDB Pull Error] ${name}:`, err);
+          } catch (err: any) {
+            if (err.message !== 'Authentication required') {
+              console.error(`[RxDB Pull Error] ${name}:`, err);
+            }
             throw err;
           }
         }
@@ -53,6 +58,9 @@ const createDatabase = async () => {
       push: {
         async handler(docs) {
           if (name !== 'orders') return []; // 唯讀集合不推播
+          if (!localStorage.getItem('token')) {
+            throw new Error('Authentication required');
+          }
           try {
             const pushDocs = docs.map(d => d.newDocumentState);
             const res = await api.post<{ success: boolean, conflicts: any[] }>(`/replication/push/${name}`, {
@@ -64,8 +72,10 @@ const createDatabase = async () => {
               if (localDoc) await localDoc.patch({ _isSynced: true });
             }
             return res.conflicts || [];
-          } catch (err) {
-            console.error(`[RxDB Push Error] ${name}:`, err);
+          } catch (err: any) {
+            if (err.message !== 'Authentication required') {
+              console.error(`[RxDB Push Error] ${name}:`, err);
+            }
             throw err;
           }
         }
