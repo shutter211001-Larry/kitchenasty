@@ -7,6 +7,7 @@ import { generateToken } from '../middleware/auth.js';
 import { tenantStorage } from '../middleware/tenantStorage.js';
 import { grantRegistrationBonus } from '../lib/registrationBonus.js';
 import { sendEmail, staffPasswordResetEmail } from '../lib/email.js';
+import jwt from 'jsonwebtoken';
 
 // ============================================================
 // STAFF AUTH
@@ -70,70 +71,156 @@ export async function staffLogin(req: Request, res: Response): Promise<void> {
 
   const requestTenantId = tenantStorage.getStore()?.tenantId || null;
 
-  // We must search for the user globally, because Super Admins have tenantId = null
-  const user = await tenantStorage.run({ tenantId: null }, async () => {
-    return await prisma.user.findUnique({ 
+  // Search for ALL users globally with this email
+  const users = await tenantStorage.run({ tenantId: null }, async () => {
+    return await prisma.user.findMany({ 
       where: { email },
-      include: { tenant: { select: { hasErpAccess: true } } }
+      include: { tenant: { select: { id: true, name: true, domain: true, hasErpAccess: true } } }
     });
   });
 
-  if (!user) {
+  if (!users || users.length === 0) {
     console.log(`[AUTH DEBUG] User not found for email: "${email}"`);
     res.status(401).json({ success: false, error: 'Invalid credentials' });
     return;
   }
 
-  // Authorization check: User must either be a SUPER_ADMIN or belong to the current request's tenant
-  if (user.role !== 'SUPER_ADMIN') {
-    if (requestTenantId && user.tenantId !== requestTenantId) {
-      console.log(`[AUTH DEBUG] User tenant mismatch. Expected: ${requestTenantId}, Got: ${user.tenantId}`);
-      res.status(401).json({ success: false, error: 'Invalid credentials' });
-      return;
+  // Filter valid accounts
+  const validUsers = [];
+  for (const u of users) {
+    if (u.isActive && await bcrypt.compare(password, u.password)) {
+      validUsers.push(u);
     }
   }
 
-  console.log(`[AUTH DEBUG] User found: ID=${user.id}, Role=${user.role}, IsActive=${user.isActive}`);
-
-  if (!user.isActive) {
-    console.log(`[AUTH DEBUG] Login failed: User is not active`);
+  if (validUsers.length === 0) {
     res.status(401).json({ success: false, error: 'Invalid credentials' });
     return;
   }
 
-  const valid = await bcrypt.compare(password, user.password);
-  console.log(`[AUTH DEBUG] Password validation result: ${valid}`);
+  const issueToken = (user: any) => {
+    const token = generateToken({
+      id: user.id,
+      email: user.email,
+      type: 'staff',
+      role: user.role,
+      tenantId: user.role === 'SUPER_ADMIN' ? null : user.tenantId,
+    });
+  
+    res.json({
+      success: true,
+      data: {
+        token,
+        user: {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          role: user.role,
+          lineUserId: user.lineUserId,
+          lineDisplayName: user.lineDisplayName,
+          hasPassword: !!user.password,
+          tenantId: user.tenantId,
+          hasErpAccess: user.tenant?.hasErpAccess,
+        },
+      },
+    });
+  };
 
-  if (!valid) {
-    res.status(401).json({ success: false, error: 'Invalid credentials' });
-    return;
+  // If specifically targeting a tenant via subdomain
+  if (requestTenantId) {
+    const targetUser = validUsers.find(u => u.tenantId === requestTenantId || u.role === 'SUPER_ADMIN');
+    if (!targetUser) {
+      res.status(401).json({ success: false, error: 'Invalid credentials for this domain' });
+      return;
+    }
+    return issueToken(targetUser);
   }
 
-  const token = generateToken({
-    id: user.id,
-    email: user.email,
-    type: 'staff',
-    role: user.role,
-    tenantId: user.role === 'SUPER_ADMIN' ? null : (user.tenantId || tenantStorage.getStore()?.tenantId || null),
-  });
+  // Universal portal login
+  if (validUsers.length === 1) {
+    return issueToken(validUsers[0]);
+  }
 
+  const superAdmin = validUsers.find(u => u.role === 'SUPER_ADMIN');
+  if (superAdmin) {
+    return issueToken(superAdmin);
+  }
+
+  // Needs tenant selection
+  const selectToken = jwt.sign({ email }, process.env.JWT_SECRET || 'dev-secret-change-me', { expiresIn: '15m' });
+  
   res.json({
     success: true,
-    data: {
-      token,
-      user: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        role: user.role,
-        lineUserId: user.lineUserId,
-        lineDisplayName: user.lineDisplayName,
-        hasPassword: !!user.password,
-        tenantId: user.tenantId,
-        hasErpAccess: user.tenant?.hasErpAccess,
-      },
-    },
+    needsTenantSelection: true,
+    loginSessionToken: selectToken,
+    availableTenants: validUsers.map(u => ({
+      id: u.tenantId,
+      name: u.tenant?.name || '未命名餐廳',
+      domain: u.tenant?.domain || '',
+    }))
   });
+}
+
+const staffSelectTenantSchema = z.object({
+  loginSessionToken: z.string(),
+  tenantId: z.string(),
+});
+
+export async function staffSelectTenant(req: Request, res: Response): Promise<void> {
+  const parsed = staffSelectTenantSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ success: false, error: 'Invalid input parameters' });
+    return;
+  }
+
+  const { loginSessionToken, tenantId } = parsed.data;
+
+  try {
+    const decoded = jwt.verify(loginSessionToken, process.env.JWT_SECRET || 'dev-secret-change-me') as { email: string };
+    const { email } = decoded;
+
+    // Find the specific user account for this tenant
+    const user = await tenantStorage.run({ tenantId: null }, async () => {
+      return await prisma.user.findFirst({
+        where: { email, tenantId },
+        include: { tenant: { select: { hasErpAccess: true } } }
+      });
+    });
+
+    if (!user || !user.isActive) {
+      res.status(401).json({ success: false, error: 'Access denied to this tenant' });
+      return;
+    }
+
+    const token = generateToken({
+      id: user.id,
+      email: user.email,
+      type: 'staff',
+      role: user.role,
+      tenantId: user.tenantId,
+    });
+
+    res.json({
+      success: true,
+      data: {
+        token,
+        user: {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          role: user.role,
+          lineUserId: user.lineUserId,
+          lineDisplayName: user.lineDisplayName,
+          hasPassword: !!user.password,
+          tenantId: user.tenantId,
+          hasErpAccess: user.tenant?.hasErpAccess,
+        },
+      },
+    });
+
+  } catch (error) {
+    res.status(401).json({ success: false, error: 'Invalid or expired session token' });
+  }
 }
 
 const staffRegisterSchema = z.object({
@@ -152,9 +239,10 @@ export async function staffRegister(req: Request, res: Response): Promise<void> 
 
   const { email, password, name, role } = parsed.data;
 
-  const existing = await prisma.user.findUnique({ where: { email } });
+  const requestTenantId = tenantStorage.getStore()?.tenantId || null;
+  const existing = await prisma.user.findFirst({ where: { email, tenantId: requestTenantId } });
   if (existing) {
-    res.status(409).json({ success: false, error: 'Email already registered' });
+    res.status(409).json({ success: false, error: 'Email already registered for this tenant' });
     return;
   }
 
@@ -188,8 +276,9 @@ export async function requestStaffPasswordReset(req: Request, res: Response): Pr
       return;
     }
 
-    const user = await prisma.user.findUnique({ 
-      where: { email },
+    const requestTenantId = tenantStorage.getStore()?.tenantId || null;
+    const user = await prisma.user.findFirst({ 
+      where: { email, tenantId: requestTenantId },
       include: { tenant: true }
     });
     if (!user) {
@@ -263,7 +352,7 @@ export async function resetStaffPassword(req: Request, res: Response): Promise<v
     const passwordHash = await bcrypt.hash(newPassword, 10);
     
     await prisma.$transaction([
-      prisma.user.update({
+      prisma.user.updateMany({
         where: { email: resetToken.email },
         data: { password: passwordHash }
       }),

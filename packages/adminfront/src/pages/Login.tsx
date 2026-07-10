@@ -14,9 +14,11 @@ export default function Login({ onLogin }: Props) {
   const [hasSuperAdmin, setHasSuperAdmin] = useState(true);
   const [isForgotPassword, setIsForgotPassword] = useState(false);
 
+  const [availableTenants, setAvailableTenants] = useState<{ id: string; name: string; domain: string }[]>([]);
+  const [loginSessionToken, setLoginSessionToken] = useState('');
+
   useEffect(() => {
     api.get('auth/staff/setup-status')
-      
       .then(data => {
         if (data && typeof data.hasSuperAdmin === 'boolean') {
           setHasSuperAdmin(data.hasSuperAdmin);
@@ -32,14 +34,16 @@ export default function Login({ onLogin }: Props) {
     setLoading(true);
 
     try {
-      const res = await api.post('auth/staff/login', JSON.stringify({ email, password }));
+      const res = await api.post('auth/staff/login', { email, password });
       
-      let data: any;
-      try {
-        data = res;
-      } catch (parseErr) {
-        throw new Error('伺服器連線失敗或正在維護中，請稍後再試。 (Server connection failed)');
+      if (res.needsTenantSelection) {
+        setAvailableTenants(res.availableTenants);
+        setLoginSessionToken(res.loginSessionToken);
+        setLoading(false);
+        return;
       }
+      
+      let data: any = res;
       if (data.data?.user?.tenantId) {
         localStorage.setItem('tenantId', data.data.user.tenantId);
       }
@@ -47,6 +51,24 @@ export default function Login({ onLogin }: Props) {
       onLogin(data.data.token);
     } catch (err: any) {
       setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleSelectTenant(tenantId: string) {
+    setError('');
+    setLoading(true);
+    try {
+      const res = await api.post('auth/staff/select-tenant', { loginSessionToken, tenantId });
+      let data: any = res;
+      if (data.data?.user?.tenantId) {
+        localStorage.setItem('tenantId', data.data.user.tenantId);
+      }
+      onLogin(data.data.token);
+    } catch (err: any) {
+      setError(err.message);
+      setAvailableTenants([]); // Reset on failure
     } finally {
       setLoading(false);
     }
@@ -63,18 +85,48 @@ export default function Login({ onLogin }: Props) {
     setLoading(true);
 
     try {
-      const res = await api.post('auth/staff/forgot-password', JSON.stringify({ email }));
-      
-      let data: any = {};
-      try {
-        data = res;
-      } catch (parseErr) {}
-      setMessage(data.message || '重置信已寄出');
+      const res = await api.post('auth/staff/forgot-password', { email });
+      setMessage(res.message || '重置信已寄出');
     } catch (err: any) {
       setError(err.message);
     } finally {
       setLoading(false);
     }
+  }
+
+  if (availableTenants.length > 0) {
+    return (
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center px-4">
+        <div className="w-full max-w-sm bg-white rounded-xl shadow-lg p-8 space-y-5">
+          <h2 className="text-xl font-semibold text-gray-900 text-center mb-6">
+            請選擇要進入的餐廳
+          </h2>
+          
+          {error && <div className="bg-red-50 text-red-700 text-sm p-3 rounded-lg">{error}</div>}
+          
+          <div className="space-y-3">
+            {availableTenants.map(tenant => (
+              <button
+                key={tenant.id}
+                onClick={() => handleSelectTenant(tenant.id)}
+                disabled={loading}
+                className="w-full bg-gray-50 text-gray-800 py-4 px-4 rounded-lg font-medium border border-gray-200 hover:bg-primary-50 hover:border-primary-300 hover:text-primary-700 transition-colors flex items-center justify-between cursor-pointer"
+              >
+                <span>{tenant.name}</span>
+                <span className="text-primary-500">→</span>
+              </button>
+            ))}
+          </div>
+
+          <button
+            onClick={() => setAvailableTenants([])}
+            className="w-full text-center text-sm font-medium text-gray-500 hover:text-gray-700 mt-4 cursor-pointer"
+          >
+            返回重新登入
+          </button>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -158,8 +210,7 @@ export default function Login({ onLogin }: Props) {
               }}
               className="w-full bg-gray-50 text-gray-600 py-2 rounded-lg text-sm font-medium hover:bg-gray-100 transition-colors border border-gray-200 flex items-center justify-center gap-2 mt-3 cursor-pointer"
             >
-              <span>✨</span>
-              <span>一鍵帶入預設管理員</span>
+              一鍵帶入預設管理員
             </button>
           )}
         </form>

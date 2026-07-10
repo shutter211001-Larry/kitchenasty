@@ -337,10 +337,11 @@ export async function inviteStaff(req: Request, res: Response): Promise<void> {
 
   const { email, role } = parsed.data;
 
-  // Check if user already exists
-  const existingUser = await prisma.user.findUnique({ where: { email } });
+  // Check if user already exists in this tenant
+  const requestTenantId = req.user?.tenantId || null;
+  const existingUser = await prisma.user.findFirst({ where: { email, tenantId: requestTenantId } });
   if (existingUser) {
-    res.status(409).json({ success: false, error: 'A user with this email already exists' });
+    res.status(409).json({ success: false, error: 'A user with this email already exists in this tenant' });
     return;
   }
 
@@ -454,10 +455,10 @@ export async function acceptInvite(req: Request, res: Response): Promise<void> {
     return;
   }
 
-  // Check if email already taken
-  const existingUser = await prisma.user.findUnique({ where: { email: invite.email } });
+  // Check if email already taken in this tenant
+  const existingUser = await prisma.user.findFirst({ where: { email: invite.email, tenantId: invite.tenantId } });
   if (existingUser) {
-    res.status(409).json({ success: false, error: 'A user with this email already exists' });
+    res.status(409).json({ success: false, error: 'A user with this email already exists in this tenant' });
     return;
   }
 

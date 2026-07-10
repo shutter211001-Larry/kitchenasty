@@ -34,7 +34,8 @@ export const inviteUser = async (req: AuthenticatedRequest, res: Response) => {
       return res.status(400).json({ error: '電子郵件為必填欄位' });
     }
 
-    const existingUser = await prisma.user.findUnique({ where: { email } });
+    const requestTenantId = req.user?.tenantId || null;
+    const existingUser = await prisma.user.findFirst({ where: { email, tenantId: requestTenantId } });
     if (existingUser) {
       return res.status(400).json({ error: '此電子郵件已被註冊使用' });
     }

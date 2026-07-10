@@ -84,7 +84,7 @@ model Tenant {
 
 model User {
   id                  String                        @id @default(cuid())
-  email               String                        @unique
+  email               String
   password            String
   name                String
   role                Role                          @default(STAFF)
@@ -123,6 +123,7 @@ model User {
   tenantId String?
   tenant   Tenant? @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
+  @@unique([tenantId, email])
   @@map("users")
 }
 

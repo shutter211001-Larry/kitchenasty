@@ -10,6 +10,7 @@ const STOREFRONT_URL = process.env.STORE_URL_PUBLIC || 'http://localhost:5174';
 // STAFF AUTH
 router.get('/staff/setup-status', authController.getSetupStatus);
 router.post('/staff/login', loginRateLimiter, authController.staffLogin);
+router.post('/staff/select-tenant', authController.staffSelectTenant);
 router.post('/staff/register', authenticate, requireRole('SUPER_ADMIN'), registerRateLimiter, authController.staffRegister);
 router.post('/staff/forgot-password', authController.requestStaffPasswordReset);
 router.post('/staff/reset-password', authController.resetStaffPassword);

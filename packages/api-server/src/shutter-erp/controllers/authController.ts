@@ -19,9 +19,10 @@ export const login = async (req: Request, res: Response) => {
       return res.status(400).json({ error: '電子郵件與密碼為必填項目' });
     }
 
-    const user = await prisma.user.findUnique({
+    const user = await prisma.user.findFirst({
       where: { email },
-      include: { tenant: true }
+      include: { tenant: true },
+      orderBy: { createdAt: 'desc' }
     });
 
     if (!user) {

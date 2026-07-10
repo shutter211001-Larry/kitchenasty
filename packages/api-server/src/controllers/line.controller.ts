@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { Client, WebhookEvent, MessageEvent, TextMessage } from '@line/bot-sdk';
 import prisma from '../lib/db.js';
 import { generateToken } from '../middleware/auth.js';
+import { tenantStorage } from '../middleware/tenantStorage.js';
 import { grantRegistrationBonus } from '../lib/registrationBonus.js';
 
 async function getLineConfig(locationId?: string) {
@@ -685,8 +686,9 @@ export async function lineLogin(req: Request, res: Response) {
   try {
     console.log(`[LINE Login] Attempting login for: ${lineDisplayName} (${lineUserId}), Email: ${email}`);
 
-    // 1. Try to find by lineUserId (Strongest match)
-    let customer = await prisma.customer.findUnique({ where: { lineUserId } });
+    const requestTenantId = tenantStorage.getStore()?.tenantId || null;
+    // 1. Try to find by lineUserId (Strongest match) within the tenant
+    let customer = await prisma.customer.findFirst({ where: { lineUserId, tenantId: requestTenantId } });
 
     if (customer) {
       console.log(`[LINE Login] Found existing customer by lineUserId: ${customer.id}`);
@@ -694,7 +696,7 @@ export async function lineLogin(req: Request, res: Response) {
       // 2. If not found by ID, try to find by email
       if (email && email.trim() !== "") {
         console.log(`[LINE Login] User ID not found, searching by email: ${email}`);
-        customer = await prisma.customer.findUnique({ where: { email } });
+        customer = await prisma.customer.findFirst({ where: { email, tenantId: requestTenantId } });
         
         if (customer) {
           if (customer.lineUserId && customer.lineUserId !== lineUserId) {
@@ -718,7 +720,7 @@ export async function lineLogin(req: Request, res: Response) {
       // Safety check: Does this email already exist in our DB? 
       // (Even if it wasn't linked to LINE before, we can't create a duplicate email)
       if (email && email.trim() !== "") {
-        const emailExists = await prisma.customer.findUnique({ where: { email } });
+        const emailExists = await prisma.customer.findFirst({ where: { email, tenantId: requestTenantId } });
         if (emailExists) {
           console.warn(`[LINE Login] Email ${email} already exists. Redirecting to link/login instead.`);
           return res.status(400).json({ 
@@ -728,16 +730,14 @@ export async function lineLogin(req: Request, res: Response) {
         }
       }
 
-      const customerEmail = (email && email.trim() !== "") ? email : null;
-      
       customer = await prisma.customer.create({
         data: {
           lineUserId,
           lineDisplayName,
-          email: customerEmail,
           name: name || lineDisplayName || 'LINE User',
+          email: email && email.trim() !== "" ? email : null,
           password: null,
-          isGuest: false
+          tenantId: requestTenantId
         }
       });
       

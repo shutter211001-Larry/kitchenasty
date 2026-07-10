@@ -7,7 +7,8 @@ export interface AuthenticatedRequest extends Omit<Request, 'user'> {
   user?: {
     id: string;
     email: string;
-    role: 'ADMIN' | 'STAFF';
+    role: 'ADMIN' | 'STAFF' | 'SUPER_ADMIN' | 'MANAGER';
+    tenantId?: string | null;
   };
 }
 
