@@ -72,7 +72,8 @@ export const requireTenant = (req: Request, res: Response, next: NextFunction) =
       req.path.startsWith('/api/docs') ||
       req.path.startsWith('/api/openapi.json') ||
       req.path.startsWith('/uploads') ||
-      req.path.startsWith('/shutter-erp')
+      req.path.startsWith('/shutter-erp') ||
+      req.path.startsWith('/api/settings')
     ) {
       return next();
     }
