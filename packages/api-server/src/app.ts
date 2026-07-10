@@ -126,40 +126,11 @@ export async function createApp() {
       },
     },
   }));
-  const corsOrigins = [
-    process.env.STORE_URL_PUBLIC,
-    process.env.ADMIN_URL_PUBLIC,
-    process.env.ERP_URL_PUBLIC,
-    process.env.SAAS_URL_PUBLIC,
-    'http://localhost:5173', 
-    'http://localhost:5174', 
-    'http://localhost:5175',
-    'http://localhost:3000'
-  ].filter(Boolean).map(url => {
-    let normalized = url!.replace(/\/$/, '');
-    if (!normalized.startsWith('http://') && !normalized.startsWith('https://')) {
-      return normalized.includes('localhost') || normalized.includes('127.0.0.1')
-        ? `http://${normalized}`
-        : `https://${normalized}`;
-    }
-    return normalized;
-  }) as string[];
+  // Configure CORS to dynamically support any custom tenant domains.
+  // Since the API uses Bearer tokens instead of cookies for authentication, CSRF is not a risk,
+  // making it safe to reflect the request's origin (origin: true).
   app.use(cors({
-    origin: (origin, callback) => {
-      if (!origin || corsOrigins.includes('*')) {
-        return callback(null, true);
-      }
-      // Allow configured origins + any local development or internal IPs
-      const isLocal = origin.includes('localhost') || origin.includes('127.0.0.1') || origin.includes('192.168.') || origin.includes('10.') || origin.includes('.railway.internal');
-      const isAllowed = corsOrigins.includes(origin) || isLocal;
-
-      if (isAllowed) {
-        callback(null, true);
-      } else {
-        // Return false instead of throwing a hard error to avoid 500s
-        callback(null, false);
-      }
-    },
+    origin: true, // This automatically reflects the Origin header back as Access-Control-Allow-Origin
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     credentials: true,
   }));
