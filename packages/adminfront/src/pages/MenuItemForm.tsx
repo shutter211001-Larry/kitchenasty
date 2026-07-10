@@ -45,6 +45,7 @@ interface MenuItemData {
   isRewardItem?: boolean;
   rewardPointsPrice?: number;
   cropData?: any;
+  prepTime: number;
 }
 
 interface CategoryOption {
@@ -81,6 +82,7 @@ interface ErpRecipe {
   yieldAmount: number;
   yieldUnit: string;
   allergens?: string[];
+  prepTime?: number;
 }
 
 const emptyOptionValue: OptionValue = { name: '', priceModifier: 0, isDefault: false, sortOrder: 0, trackStock: false, stockQty: 0 };
@@ -113,6 +115,7 @@ export default function MenuItemForm() {
       locationId: '',
       isRewardItem: false,
       rewardPointsPrice: 0,
+      prepTime: 0,
     };
     const LANGUAGES = [
       { code: 'zh-TW', label: t('menuItemForm.traditionalChinese') },
@@ -224,6 +227,7 @@ export default function MenuItemForm() {
           isRewardItem: item.isRewardItem || false,
           rewardPointsPrice: item.rewardPointsPrice || 0,
           cropData: item.cropData || {},
+          prepTime: item.prepTime || 0,
         });
         if (item.image) setImageUrl(item.image);
         if (item.recipeId) {
@@ -445,6 +449,7 @@ export default function MenuItemForm() {
         price: Number(form.price),
         sortOrder: Number(form.sortOrder),
         stockQty: Number(form.stockQty),
+        prepTime: Number(form.prepTime || 0),
         isRewardItem: !!form.isRewardItem,
         rewardPointsPrice: Number(form.rewardPointsPrice || 0),
         options,
@@ -533,6 +538,9 @@ export default function MenuItemForm() {
                               });
                             }
                           }
+                          if (recipe.prepTime !== undefined) {
+                            updateField('prepTime', recipe.prepTime);
+                          }
                         }
                       }
                     }
@@ -591,6 +599,16 @@ export default function MenuItemForm() {
                   <option key={c.id} value={c.id}>{c.name}</option>
                 ))}
               </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">製作時間 (分鐘)</label>
+              <input
+                type="number"
+                min="0"
+                value={form.prepTime}
+                onChange={(e) => updateField('prepTime', parseInt(e.target.value) || 0)}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+              />
             </div>
             <div>
               <label className="block text-sm font-semibold text-gray-750 mb-1">{t('menuItemForm.branchAvailability')}</label>

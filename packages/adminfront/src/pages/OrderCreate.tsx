@@ -92,6 +92,8 @@ export default function OrderCreate() {
     freeDelivery: boolean;
     appliedPromo: { name: string; code?: string } | null;
     manualCouponError: string | null;
+    estimatedWaitMins?: number | null;
+    earliestSlot?: string | null;
   } | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
 
@@ -664,6 +666,20 @@ export default function OrderCreate() {
                   <span className="text-primary-600">${total.toFixed(2)}</span>
                 </div>
               </div>
+
+              {summary?.estimatedWaitMins != null && summary.estimatedWaitMins > 0 && (
+                <div className="mt-4 p-3 bg-blue-50 border border-blue-100 rounded-lg text-blue-800 text-sm flex items-center justify-between">
+                  <span className="font-medium">預計取餐/等候時間</span>
+                  <div className="text-right">
+                    <div className="font-bold">約 {summary.estimatedWaitMins} 分鐘</div>
+                    {summary.earliestSlot && (
+                      <div className="text-xs opacity-75">
+                        {new Date(summary.earliestSlot).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false })}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
 
               <button
                 disabled={submitting || cart.length === 0 || isCalculating}

@@ -478,6 +478,23 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
         return;
       }
 
+      // --- Capacity Validation ---
+      const itemIds = items.map(i => i.menuItemId);
+      const dbItems = await prisma.menuItem.findMany({ where: { id: { in: itemIds } }, select: { id: true, prepTime: true } });
+      const prepTimeMap = new Map(dbItems.map(i => [i.id, i.prepTime || 0]));
+      const cartPrepTime = items.reduce((sum, item) => sum + ((prepTimeMap.get(item.menuItemId) || 0) * item.quantity), 0);
+
+      const enableCapacityLimit = orderSettings.enableCapacityLimit !== false;
+
+      if (cartPrepTime > 0 && locationId && enableCapacityLimit) {
+        const { checkSlotCapacity } = await import('./location.controller.js');
+        const hasCapacity = await checkSlotCapacity(locationId, scheduled, cartPrepTime, orderType);
+        if (!hasCapacity) {
+          res.status(400).json({ success: false, error: 'The selected timeslot has reached maximum capacity. Please choose another time.' });
+          return;
+        }
+      }
+
       // Require phone for scheduled orders
       if (!guestPhone && !customerId) {
         res.status(400).json({ success: false, error: 'Phone number is required for scheduled orders' });
@@ -2560,6 +2577,35 @@ export async function calculateOrderSummary(req: Request, res: Response): Promis
   
   const total = Number(unroundedTotal.toFixed(currencyDecimals));
 
+  let earliestSlot: string | null = null;
+  let estimatedWaitMins: number | null = null;
+  const enableCapacityLimit = orderSettings.enableCapacityLimit !== false; // Default true
+
+  if (locationId && enableCapacityLimit) {
+    const cartPrepTime = items.reduce((sum: number, item: any) => {
+      const dbItem = menuItemMap.get(item.menuItemId);
+      return sum + ((dbItem?.prepTime || 0) * (item.quantity || 1));
+    }, 0);
+
+    const { getAvailableSlots } = await import('./location.controller.js');
+    const simReq = { params: { id: locationId }, query: { orderType, days: '1', cartPrepTime: cartPrepTime.toString() } } as any;
+    let slotsByDay: any[] = [];
+    const simRes = { json: (data: any) => { if (data.success) slotsByDay = data.data; }, status: () => simRes } as any;
+    
+    try {
+      await getAvailableSlots(simReq, simRes);
+      if (slotsByDay.length > 0 && slotsByDay[0].slots.length > 0) {
+        const eSlot = slotsByDay[0].slots[0];
+        earliestSlot = eSlot;
+        const slotTime = new Date(eSlot).getTime();
+        const nowTime = new Date().getTime();
+        estimatedWaitMins = Math.max(0, Math.round((slotTime - nowTime) / 60000));
+      }
+    } catch (err) {
+      // Ignore simulation errors
+    }
+  }
+
   res.json({
     success: true,
     data: {
@@ -2571,7 +2617,9 @@ export async function calculateOrderSummary(req: Request, res: Response): Promis
       total,
       freeDelivery,
       appliedPromo,
-      manualCouponError
+      manualCouponError,
+      earliestSlot,
+      estimatedWaitMins
     }
   });
 }

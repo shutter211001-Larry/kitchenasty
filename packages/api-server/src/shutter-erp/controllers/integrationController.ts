@@ -536,7 +536,12 @@ export const getProductRecipes = async (req: Request, res: Response) => {
         name: true,
         description: true,
         yieldAmount: true,
-        yieldUnit: true
+        yieldUnit: true,
+        steps: {
+          select: {
+            parameters: true
+          }
+        }
       },
       orderBy: {
         createdAt: 'desc'
@@ -551,8 +556,23 @@ export const getProductRecipes = async (req: Request, res: Response) => {
           ing.allergens.forEach((a: any) => allergenNames.add(a.name));
         }
       });
+      
+      let prepTime = 0;
+      if (r.steps) {
+        r.steps.forEach((s) => {
+          const mins = s.parameters.filter(p => p.unit === "min").reduce((sum, p) => sum + p.value, 0);
+          const hrs = s.parameters.filter(p => p.unit === "hr").reduce((sum, p) => sum + p.value, 0);
+          prepTime += mins + hrs * 60;
+        });
+      }
+
       return {
-        ...r,
+        id: r.id,
+        name: r.name,
+        description: r.description,
+        yieldAmount: r.yieldAmount,
+        yieldUnit: r.yieldUnit,
+        prepTime,
         allergens: Array.from(allergenNames)
       };
     }));

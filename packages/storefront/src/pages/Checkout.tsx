@@ -131,6 +131,8 @@ export default function Checkout() {
     freeDelivery: boolean;
     appliedPromo: { name: string, code?: string } | null;
     manualCouponError: string | null;
+    estimatedWaitMins?: number | null;
+    earliestSlot?: string | null;
   } | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
 
@@ -256,7 +258,8 @@ export default function Checkout() {
   // Fetch available slots when location or order type changes
   useEffect(() => {
     if (locationId && orderSettings?.enableFutureOrdering) {
-      fetch(`${API_BASE}/locations/${locationId}/available-slots?orderType=${orderType}`)
+      const cartPrepTime = items.reduce((sum, item) => sum + (item.prepTime || 0) * item.quantity, 0);
+      fetch(`${API_BASE}/locations/${locationId}/available-slots?orderType=${orderType}&cartPrepTime=${cartPrepTime}`)
         .then(res => res.json())
         .then((data) => {
           if (data.success) {
@@ -265,7 +268,7 @@ export default function Checkout() {
         })
         .catch(() => {});
     }
-  }, [locationId, orderType, orderSettings?.enableFutureOrdering]);
+  }, [locationId, orderType, orderSettings?.enableFutureOrdering, items]);
 
   // Intersection Observer for the checkout button
   useEffect(() => {
@@ -710,6 +713,21 @@ export default function Checkout() {
                   </button>
                 ))}
               </div>
+                
+              {/* ASAP Wait Time Hint */}
+              {!scheduledAt && summary?.estimatedWaitMins != null && summary.estimatedWaitMins > 0 && !isClosedNow && (
+                <div className="mt-4 text-sm text-blue-700 bg-blue-50/80 p-2.5 rounded-lg flex items-center justify-between">
+                  <span>預計最快取餐時間</span>
+                  <div className="text-right">
+                    <span className="font-bold">約 {summary.estimatedWaitMins} 分鐘</span>
+                    {summary.earliestSlot && (
+                      <span className="ml-2 text-xs opacity-80">
+                        ({new Date(summary.earliestSlot).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false })})
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 

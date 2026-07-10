@@ -358,6 +358,7 @@ model MenuItem {
   unitTranslations        Json?
   isRewardItem            Boolean                     @default(false)
   rewardPointsPrice       Int                         @default(0)
+  prepTime                Float                       @default(0) // 新增：製作時間 (分鐘)
   allergens               MenuItemAllergen[]
   dietaryPreferences      MenuItemDietaryPreference[]
   mealtimes               MenuItemMealtime[]

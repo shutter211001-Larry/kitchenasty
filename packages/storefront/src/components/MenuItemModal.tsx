@@ -48,6 +48,7 @@ interface MenuItemDetail {
   description: string | null;
   descriptionTranslations?: Record<string, string>;
   price: number;
+  prepTime?: number;
   image: string | null;
   imageVariants?: Record<string, string> | null;
   isActive: boolean;
@@ -173,6 +174,7 @@ export default function MenuItemModal({ itemId, onClose }: Props) {const { t, i1
       redeemedWithPoints: buyWithPoints,
       rewardPointsPrice: buyWithPoints ? item.rewardPointsPrice : undefined,
       isFrozenDelivery: item.category.isFrozenDelivery,
+      prepTime: item.prepTime || 0,
     });
     onClose();
   }

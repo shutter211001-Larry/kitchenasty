@@ -27,6 +27,7 @@ export interface CartItem {
   isFrozenDelivery?: boolean;
   clientId?: string; // For group orders
   guestName?: string; // To display who added it
+  prepTime?: number;
 }
 
 interface CartContextType {
