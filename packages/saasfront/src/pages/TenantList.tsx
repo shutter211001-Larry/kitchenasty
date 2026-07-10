@@ -43,7 +43,7 @@ export default function TenantList() {
       const res = await api.get<{ data: Tenant[] }>('/platform-admin/tenants');
       setTenants(res.data);
     } catch (error) {
-      toast.error('Failed to fetch tenants');
+      toast.error('無法獲取租戶列表');
     } finally {
       setLoading(false);
     }
@@ -55,10 +55,10 @@ export default function TenantList() {
       await api.patch<{ data: Tenant }>(`/platform-admin/tenants/${tenant.id}`, {
         isActive: !tenant.isActive
       });
-      toast.success(tenant.isActive ? 'Tenant suspended' : 'Tenant activated');
+      toast.success(tenant.isActive ? '租戶已停權' : '租戶已啟用');
       fetchTenants();
     } catch (error) {
-      toast.error('Failed to update tenant status');
+      toast.error('無法更新租戶狀態');
     }
   };
 
@@ -67,63 +67,63 @@ export default function TenantList() {
       await api.patch<{ data: Tenant }>(`/platform-admin/tenants/${tenant.id}`, {
         hasErpAccess: !tenant.hasErpAccess
       });
-      toast.success(tenant.hasErpAccess ? 'ERP access disabled' : 'ERP access enabled');
+      toast.success(tenant.hasErpAccess ? 'ERP 存取已停用' : 'ERP 存取已啟用');
       fetchTenants();
     } catch (error) {
-      toast.error('Failed to update ERP access');
+      toast.error('無法更新 ERP 存取權限');
     }
   };
 
   const updateDomain = async (tenant: Tenant) => {
     setOpenMenuId(null);
-    const newDomain = window.prompt('Enter new custom domain (e.g. test.localhost)', tenant.domain || '');
+    const newDomain = window.prompt('請輸入新的自訂網域 (例如 test.localhost)', tenant.domain || '');
     if (newDomain !== null) {
       try {
         await api.patch(`/platform-admin/tenants/${tenant.id}`, { domain: newDomain.toLowerCase().trim() || null });
-        toast.success('Domain updated successfully');
+        toast.success('網域更新成功');
         fetchTenants();
       } catch (error: any) {
-        toast.error(error.message || 'Failed to update domain');
+        toast.error(error.message || '無法更新網域');
       }
     }
   };
 
   const updateExpiration = async (tenant: Tenant) => {
     setOpenMenuId(null);
-    const newDate = window.prompt('Enter new expiration date (YYYY-MM-DD), leave blank for no limit', tenant.subscriptionEndsAt ? new Date(tenant.subscriptionEndsAt).toISOString().split('T')[0] : '');
+    const newDate = window.prompt('請輸入新的到期日 (YYYY-MM-DD)，留空則無期限', tenant.subscriptionEndsAt ? new Date(tenant.subscriptionEndsAt).toISOString().split('T')[0] : '');
     if (newDate !== null) {
       try {
         await api.patch(`/platform-admin/tenants/${tenant.id}`, { subscriptionEndsAt: newDate || null });
-        toast.success('Expiration date updated');
+        toast.success('到期日更新成功');
         fetchTenants();
       } catch (e) {
-        toast.error('Invalid date format or failed to update');
+        toast.error('日期格式無效或更新失敗');
       }
     }
   };
 
   const deleteTenant = async (tenant: Tenant) => {
     setOpenMenuId(null);
-    const confirmName = window.prompt(`[Danger] This will permanently delete "${tenant.name}" and all associated data!\nType the full tenant name to confirm:`);
+    const confirmName = window.prompt(`[危險] 這將永久刪除 "${tenant.name}" 及其所有相關資料！\n請輸入完整的租戶名稱以確認：`);
     
     if (confirmName === null) return;
     
     if (confirmName !== tenant.name) {
-      return toast.error('Name mismatch, deletion cancelled');
+      return toast.error('名稱不符，取消刪除');
     }
 
-    const loadingToast = toast.loading('Deleting tenant and all data...');
+    const loadingToast = toast.loading('正在刪除租戶與所有資料...');
     try {
       await api.delete(`/platform-admin/tenants/${tenant.id}`);
-      toast.success('Tenant permanently deleted', { id: loadingToast });
+      toast.success('租戶已永久刪除', { id: loadingToast });
       fetchTenants();
     } catch (error: any) {
-      toast.error(error.message || 'Deletion failed', { id: loadingToast });
+      toast.error(error.message || '刪除失敗', { id: loadingToast });
     }
   };
 
   if (loading) {
-    return <div className="p-8 text-center text-gray-400 animate-pulse">Loading tenants...</div>;
+    return <div className="p-8 text-center text-gray-400 animate-pulse">正在載入租戶...</div>;
   }
 
   // Dashboard Stats
@@ -145,33 +145,33 @@ export default function TenantList() {
         <div>
           <h1 className="text-2xl font-semibold text-white flex items-center gap-3">
             <Server className="w-6 h-6 text-indigo-400" />
-            Tenant Management
+            租戶管理
           </h1>
-          <p className="text-gray-400 text-sm mt-1">Manage SaaS instances, domains, and subscriptions.</p>
+          <p className="text-gray-400 text-sm mt-1">管理 SaaS 實例、網域與訂閱。</p>
         </div>
         <div className="flex gap-3">
           <button
             onClick={async () => {
-              if (!window.confirm('Reset demo tenant data? This deletes and recreates all demo data.')) return;
-              const loadingToast = toast.loading('Starting demo reset...');
+              if (!window.confirm('確定要重設示範資料嗎？這將刪除並重新建立所有示範資料。')) return;
+              const loadingToast = toast.loading('開始重設示範資料...');
               try {
                 await api.post('/platform-admin/tenants/reset-demo', {});
-                toast.success('Demo reset initiated.', { id: loadingToast });
+                toast.success('已啟動示範資料重設程序。', { id: loadingToast });
                 setTimeout(fetchTenants, 5000);
               } catch (error) {
-                toast.error('Reset failed.', { id: loadingToast });
+                toast.error('重設失敗。', { id: loadingToast });
               }
             }}
             className="bg-gray-800 hover:bg-gray-700 text-gray-300 px-4 py-2 rounded-lg text-sm font-medium transition-colors border border-gray-700"
           >
-            Reset Demo Data
+            重設示範資料
           </button>
           <button
             onClick={() => navigate('/tenants/new')}
             className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-lg shadow-indigo-900/20 flex items-center gap-2"
           >
             <Plus className="w-4 h-4" />
-            New Tenant
+            新增租戶
           </button>
         </div>
       </div>
@@ -179,48 +179,48 @@ export default function TenantList() {
       {/* Top Summary Dashboard */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-gray-900 border border-gray-800 rounded-xl p-5 shadow-sm">
-          <p className="text-gray-400 text-xs font-medium uppercase tracking-wider mb-1">Total Tenants</p>
+          <p className="text-gray-400 text-xs font-medium uppercase tracking-wider mb-1">總租戶數</p>
           <h3 className="text-2xl font-semibold text-white">{tenants.length}</h3>
         </div>
         <div className="bg-gray-900 border border-gray-800 rounded-xl p-5 shadow-sm">
-          <p className="text-gray-400 text-xs font-medium uppercase tracking-wider mb-1">Active Subscriptions</p>
+          <p className="text-gray-400 text-xs font-medium uppercase tracking-wider mb-1">有效訂閱數</p>
           <h3 className="text-2xl font-semibold text-white">{activeTenants}</h3>
         </div>
         <div className="bg-gray-900 border border-gray-800 rounded-xl p-5 shadow-sm">
-          <p className="text-gray-400 text-xs font-medium uppercase tracking-wider mb-1">Pending Renewals</p>
+          <p className="text-gray-400 text-xs font-medium uppercase tracking-wider mb-1">待續約數</p>
           <h3 className="text-2xl font-semibold text-white">{pendingRenewals}</h3>
         </div>
       </div>
 
       {/* Table */}
-      <div className="bg-gray-900 rounded-xl border border-gray-800 overflow-hidden shadow-sm" ref={dropdownRef}>
-        <div className="overflow-x-auto">
+      <div className="bg-gray-900 rounded-xl border border-gray-800 overflow-visible shadow-sm" ref={dropdownRef}>
+        <div className="w-full">
           <table className="w-full text-left text-sm whitespace-nowrap">
             <thead className="bg-gray-900/50 border-b border-gray-800 text-gray-400">
               <tr>
-                <th className="px-6 py-4 font-medium">Tenant</th>
-                <th className="px-6 py-4 font-medium">Status</th>
-                <th className="px-6 py-4 font-medium">Metrics & Access</th>
-                <th className="px-6 py-4 font-medium">Created</th>
-                <th className="px-6 py-4 font-medium text-right">Actions</th>
+                <th className="px-6 py-4 font-medium">租戶</th>
+                <th className="px-6 py-4 font-medium">狀態</th>
+                <th className="px-6 py-4 font-medium">指標與權限</th>
+                <th className="px-6 py-4 font-medium">建立日期</th>
+                <th className="px-6 py-4 font-medium text-right">操作</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-800/50 text-gray-300">
               {tenants.map((t) => {
                 let statusColor = "text-emerald-400 border-emerald-500/20 bg-emerald-500/10";
-                let statusText = "Active";
+                let statusText = "啟用中";
                 
                 if (!t.isActive) {
                   statusColor = "text-red-400 border-red-500/20 bg-red-500/10";
-                  statusText = "Suspended";
+                  statusText = "已停權";
                 } else if (t.subscriptionEndsAt) {
                   const endsAt = new Date(t.subscriptionEndsAt);
                   if (endsAt < now) {
                     statusColor = "text-red-400 border-red-500/20 bg-red-500/10";
-                    statusText = "Expired";
+                    statusText = "已到期";
                   } else if (endsAt <= thirtyDaysFromNow) {
                     statusColor = "text-amber-400 border-amber-500/20 bg-amber-500/10";
-                    statusText = "Expiring Soon";
+                    statusText = "即將到期";
                   }
                 }
 
@@ -233,7 +233,7 @@ export default function TenantList() {
                         </div>
                         <div>
                           <p className="font-medium text-white">{t.name}</p>
-                          <p className="text-xs text-gray-500 font-mono mt-0.5">{t.domain || 'No custom domain'}</p>
+                          <p className="text-xs text-gray-500 font-mono mt-0.5">{t.domain || '無自訂網域'}</p>
                         </div>
                       </div>
                     </td>
@@ -243,14 +243,14 @@ export default function TenantList() {
                       </span>
                       {t.subscriptionEndsAt && (
                         <p className="text-xs text-gray-500 mt-1.5">
-                          Expires: {new Date(t.subscriptionEndsAt).toLocaleDateString()}
+                          到期日：{new Date(t.subscriptionEndsAt).toLocaleDateString()}
                         </p>
                       )}
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex flex-col gap-2">
                         <div className="text-xs text-gray-400">
-                          Users: {t._count?.users || 0} <span className="mx-1 text-gray-600">|</span> Locations: {t._count?.locations || 0}
+                          使用者: {t._count?.users || 0} <span className="mx-1 text-gray-600">|</span> 門市: {t._count?.locations || 0}
                         </div>
                         <div className="flex items-center gap-2">
                           <button 
@@ -259,7 +259,7 @@ export default function TenantList() {
                           >
                             <span className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${t.hasErpAccess ? 'translate-x-3.5' : 'translate-x-0.5'}`} />
                           </button>
-                          <span className="text-xs text-gray-500">ERP Module</span>
+                          <span className="text-xs text-gray-500">ERP 模組</span>
                         </div>
                       </div>
                     </td>
@@ -280,7 +280,7 @@ export default function TenantList() {
                           }}
                           className="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-md text-xs font-medium transition-colors border border-gray-700"
                         >
-                          Open Admin
+                          開啟後台
                         </button>
                         
                         <div className="relative">
@@ -292,34 +292,34 @@ export default function TenantList() {
                           </button>
                           
                           {openMenuId === t.id && (
-                            <div className="absolute right-0 mt-1 w-48 bg-gray-800 border border-gray-700 rounded-lg shadow-xl overflow-hidden z-10 py-1">
+                            <div className="absolute right-0 mt-1 w-48 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-50 py-1">
                               <button
                                 onClick={() => navigate(`/tenants/${t.id}/integrations`, { state: { tenantName: t.name } })}
                                 className="w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white flex items-center gap-2"
                               >
                                 <Key className="w-3.5 h-3.5" />
-                                Integrations
+                                第三方整合
                               </button>
                               <button
                                 onClick={() => updateDomain(t)}
                                 className="w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white flex items-center gap-2"
                               >
                                 <Globe className="w-3.5 h-3.5" />
-                                Edit Domain
+                                編輯網域
                               </button>
                               <button
                                 onClick={() => updateExpiration(t)}
                                 className="w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white flex items-center gap-2"
                               >
                                 <Edit className="w-3.5 h-3.5" />
-                                Edit Expiration
+                                編輯到期日
                               </button>
                               <button
                                 onClick={() => toggleStatus(t)}
                                 className="w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white flex items-center gap-2"
                               >
                                 <Server className="w-3.5 h-3.5" />
-                                Toggle Status
+                                切換狀態
                               </button>
                               <div className="h-px bg-gray-700 my-1"></div>
                               <button
@@ -327,7 +327,7 @@ export default function TenantList() {
                                 className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-gray-700 flex items-center gap-2"
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
-                                Delete Tenant
+                                刪除租戶
                               </button>
                             </div>
                           )}
@@ -340,7 +340,7 @@ export default function TenantList() {
               {tenants.length === 0 && (
                 <tr>
                   <td colSpan={5} className="px-6 py-12 text-center text-gray-500">
-                    No tenants found. Click "New Tenant" to create one.
+                    找不到任何租戶。點擊「新增租戶」來建立一個。
                   </td>
                 </tr>
               )}

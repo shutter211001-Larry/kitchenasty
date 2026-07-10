@@ -188,7 +188,10 @@ export async function requestStaffPasswordReset(req: Request, res: Response): Pr
       return;
     }
 
-    const user = await prisma.user.findUnique({ where: { email } });
+    const user = await prisma.user.findUnique({ 
+      where: { email },
+      include: { tenant: true }
+    });
     if (!user) {
       // 為了安全性，不透露信箱是否存在
       res.status(200).json({ message: '如果信箱存在，密碼重置信已寄出。' });
@@ -206,7 +209,11 @@ export async function requestStaffPasswordReset(req: Request, res: Response): Pr
       }
     });
 
-    const adminUrl = process.env.ADMIN_URL_PUBLIC || process.env.ADMIN_URL || 'http://localhost:5173';
+    let adminUrl = process.env.ADMIN_URL_PUBLIC || process.env.ADMIN_URL || 'http://localhost:5173';
+    if (user.tenant && user.tenant.domain) {
+      const protocol = user.tenant.domain.includes('localhost') ? 'http' : 'https';
+      adminUrl = `${protocol}://admin.${user.tenant.domain}`;
+    }
     const resetLink = `${adminUrl.replace(/\/+$/, '')}/reset-password?token=${token}`;
     
     const emailContent = staffPasswordResetEmail({ email, resetLink });

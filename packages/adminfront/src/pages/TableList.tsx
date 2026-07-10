@@ -42,7 +42,14 @@ export default function TableList() {
       .then(([locRes, tableRes, settingsRes]) => {
         setLocation(locRes.data);
         setTables(tableRes.data);
-        setStorefrontUrl(settingsRes.data.storefrontUrl || import.meta.env.VITE_STORE_URL_PUBLIC || window.location.origin.replace('5173', '5174'));
+        
+        let inferredStoreUrl = import.meta.env.VITE_STORE_URL_PUBLIC || window.location.origin.replace('5173', '5174');
+        const hostname = window.location.hostname;
+        if (hostname.startsWith('admin.') && !hostname.includes('adminfront.shutterorder.pro')) {
+          inferredStoreUrl = `${window.location.protocol}//${hostname.replace(/^admin\./, '')}`;
+        }
+        
+        setStorefrontUrl(settingsRes.data.storefrontUrl || inferredStoreUrl);
         setLoading(false);
       })
       .catch((err) => { setError(err.message); setLoading(false); });
