@@ -475,6 +475,7 @@ export async function sendWelcomeEmailCore(tenant: any) {
     // Convert newlines to <br/> if the user entered plain text
     htmlBody = htmlBody.replace(/\n/g, '<br/>');
 
+    const { tenantStorage } = await import('../middleware/tenantStorage.js');
     tenantStorage.run({ tenantId: null }, () => {
       sendEmail({
         to: adminUser.email,
