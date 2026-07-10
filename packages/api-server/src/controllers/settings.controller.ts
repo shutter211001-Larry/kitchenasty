@@ -439,6 +439,10 @@ const mailSettingsSchema = z.object({
   emailHeaderColor: z.string().optional(),
   emailBgColor: z.string().optional(),
   mailServiceType: z.enum(['SMTP', 'GMAIL_API']).optional(),
+  welcomeEmailTemplate: z.object({
+    subject: z.string().optional(),
+    body: z.string().optional(),
+  }).optional(),
 });
 
 const lineSettingsSchema = z.object({

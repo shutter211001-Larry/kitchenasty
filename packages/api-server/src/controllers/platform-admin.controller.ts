@@ -32,7 +32,7 @@ export const listTenants = async (req: Request, res: Response) => {
 
 export const createTenant = async (req: Request, res: Response) => {
   try {
-    const { name, domain, adminEmail, adminName, adminPassword } = req.body;
+    const { name, domain, adminEmail, adminName, adminPassword, subscriptionEndsAt, sendWelcomeEmail } = req.body;
 
     if (!name || !adminEmail || !adminPassword) {
       return res.status(400).json({ success: false, error: 'Missing required fields' });
@@ -43,11 +43,16 @@ export const createTenant = async (req: Request, res: Response) => {
     const hashedPassword = await bcrypt.default.hash(adminPassword, 10);
 
     const trimmedDomain = domain?.trim() || null;
+    let endsAtDate = null;
+    if (subscriptionEndsAt) {
+      endsAtDate = new Date(subscriptionEndsAt);
+    }
 
     const newTenant = await (prisma as any).tenant.create({
       data: {
         name,
         domain: trimmedDomain,
+        subscriptionEndsAt: endsAtDate,
         users: {
           create: {
             email: adminEmail,
@@ -66,6 +71,10 @@ export const createTenant = async (req: Request, res: Response) => {
         }
       }
     });
+
+    if (sendWelcomeEmail) {
+      sendWelcomeEmailCore(newTenant);
+    }
 
     res.status(201).json({ success: true, data: newTenant });
   } catch (error) {
@@ -398,5 +407,105 @@ export const updateTenantIntegrations = async (req: Request, res: Response) => {
   } catch (error) {
     logger.error({ err: error }, 'Failed to update tenant integrations');
     res.status(500).json({ success: false, error: 'Failed to update tenant integrations' });
+  }
+};
+
+export async function sendWelcomeEmailCore(tenant: any) {
+  try {
+    const { sendEmail } = await import('../lib/email.js');
+    
+    // Fetch global mail settings
+    const settings = await (prisma as any).siteSettings.findUnique({
+      where: { id: 'default' }
+    });
+    
+    const mailSettings = typeof settings?.mailSettings === 'string' 
+      ? JSON.parse(settings.mailSettings) 
+      : (settings?.mailSettings || {});
+      
+    const template = mailSettings.welcomeEmailTemplate;
+    
+    if (!template || !template.subject || !template.body) {
+      logger.warn('Welcome email template is not configured');
+      return;
+    }
+    
+    // Find the tenant admin user
+    const adminUser = await (prisma as any).user.findFirst({
+      where: { tenantId: tenant.id, role: 'SUPER_ADMIN' }
+    });
+    
+    if (!adminUser) {
+      logger.warn(`No admin user found for tenant ${tenant.id}`);
+      return;
+    }
+    
+    // Replace variables
+    let storeUrl = '';
+    let adminUrl = '';
+    let erpUrl = '';
+    
+    if (tenant.domain) {
+      storeUrl = `https://store.${tenant.domain}`;
+      adminUrl = `https://admin.${tenant.domain}`;
+      erpUrl = `https://erp.${tenant.domain}`;
+      if (tenant.domain.endsWith('.shutterorder.pro')) {
+        const subdomain = tenant.domain.replace('.shutterorder.pro', '');
+        storeUrl = `https://${subdomain}.store.shutterorder.pro`;
+        adminUrl = `https://${subdomain}.admin.shutterorder.pro`;
+        erpUrl = `https://${subdomain}.erp.shutterorder.pro`;
+      }
+    } else {
+      storeUrl = process.env.STORE_URL_PUBLIC || 'http://localhost:3000';
+      adminUrl = process.env.ADMIN_URL_PUBLIC || 'http://localhost:5173';
+      erpUrl = process.env.ERP_URL_PUBLIC || 'http://localhost:3002';
+    }
+    
+    const expirationDate = tenant.subscriptionEndsAt 
+      ? new Date(tenant.subscriptionEndsAt).toISOString().split('T')[0] 
+      : '無期限';
+      
+    let htmlBody = template.body
+      .replace(/{tenantName}/g, tenant.name)
+      .replace(/{expirationDate}/g, expirationDate)
+      .replace(/{storeUrl}/g, storeUrl)
+      .replace(/{adminUrl}/g, adminUrl)
+      .replace(/{erpUrl}/g, erpUrl);
+      
+    // Convert newlines to <br/> if the user entered plain text
+    htmlBody = htmlBody.replace(/\n/g, '<br/>');
+
+    tenantStorage.run({ tenantId: null }, () => {
+      sendEmail({
+        to: adminUser.email,
+        subject: template.subject,
+        html: htmlBody
+      });
+    });
+    
+    logger.info(`Welcome email sent to ${adminUser.email}`);
+  } catch (err) {
+    logger.error({ err, tenantId: tenant?.id }, 'Failed to send welcome email');
+  }
+}
+
+export const sendWelcomeEmail = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const tenant = await (prisma as any).tenant.findUnique({
+      where: { id }
+    });
+    
+    if (!tenant) {
+      return res.status(404).json({ success: false, error: 'Tenant not found' });
+    }
+    
+    // Background send
+    sendWelcomeEmailCore(tenant);
+    
+    res.json({ success: true, message: 'Welcome email scheduled' });
+  } catch (error) {
+    logger.error({ err: error }, 'Failed to schedule welcome email');
+    res.status(500).json({ success: false, error: 'Failed to schedule welcome email' });
   }
 };

@@ -11,6 +11,8 @@ export default function TenantCreate() {
     name: '',
     slug: '',
     customDomain: '',
+    subscriptionEndsAt: '',
+    sendWelcomeEmail: false,
     adminEmail: '',
     adminName: '',
     adminPassword: ''
@@ -30,6 +32,8 @@ export default function TenantCreate() {
     const payload = {
       name: formData.name,
       domain: finalDomain,
+      subscriptionEndsAt: formData.subscriptionEndsAt || null,
+      sendWelcomeEmail: formData.sendWelcomeEmail,
       adminEmail: formData.adminEmail,
       adminName: formData.adminName,
       adminPassword: formData.adminPassword
@@ -38,10 +42,10 @@ export default function TenantCreate() {
     setLoading(true);
     try {
       await api.post('/platform-admin/tenants', payload);
-      toast.success('成功建立新租戶');
+      toast.success('成功建立新品牌');
       navigate('/tenants');
     } catch (error: any) {
-      toast.error(error.message || '建立租戶失敗');
+      toast.error(error.message || '建立品牌失敗');
     } finally {
       setLoading(false);
     }
@@ -57,20 +61,20 @@ export default function TenantCreate() {
           <div>
           <h1 className="text-2xl font-bold text-white flex items-center gap-3">
             <Building2 className="w-6 h-6 text-indigo-500" />
-            建立新租戶
+            建立新品牌
           </h1>
-          <p className="text-gray-400 text-sm mt-1">為新餐廳配置系統實例，並指派一位店長或管理員。</p>
+          <p className="text-gray-400 text-sm mt-1">為新品牌配置系統實例，並指派一位店長或管理員。</p>
         </div>
       </div>
     </div>
 
     <form onSubmit={handleSubmit} className="bg-gray-900 rounded-2xl border border-gray-800 shadow-xl p-8 space-y-8">
       <div className="space-y-4">
-        <h2 className="text-lg font-semibold text-white border-b border-gray-800 pb-2">租戶基本資料</h2>
+        <h2 className="text-lg font-semibold text-white border-b border-gray-800 pb-2">品牌基本資料</h2>
         
         <div className="grid grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">餐廳/租戶名稱 <span className="text-red-500">*</span></label>
+            <label className="block text-sm font-medium text-gray-300 mb-2">品牌名稱 <span className="text-red-500">*</span></label>
               <input
                 type="text"
                 required
@@ -96,7 +100,7 @@ export default function TenantCreate() {
               </span>
             </div>
           </div>
-          <div className="col-span-2">
+          <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">自訂獨立網域 (Custom Domain) <span className="text-gray-500 font-normal ml-1">選填</span></label>
             <input
               type="text"
@@ -105,61 +109,80 @@ export default function TenantCreate() {
               className="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all outline-none"
               placeholder="例如: yummysteak.com"
             />
-            <p className="text-xs text-gray-500 mt-2">若填寫此欄位，系統將優先使用此獨立網域 (後台為 admin.自訂網域)。若不填寫，將使用上方代號產生預設網址 (後台為 代號.admin.shutterorder.pro)。</p>
+            <p className="text-xs text-gray-500 mt-2">若填寫此欄位，系統將優先使用此獨立網域 (後台為 admin.自訂網域)。若不填寫，將使用上方代號產生預設網址。</p>
           </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">合約到期日 (Expiration Date) <span className="text-gray-500 font-normal ml-1">選填</span></label>
+            <input
+              type="date"
+              value={formData.subscriptionEndsAt}
+              onChange={e => setFormData({ ...formData, subscriptionEndsAt: e.target.value })}
+              className="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all outline-none"
+            />
           </div>
         </div>
+      </div>
 
-        <div className="space-y-4">
-          <h2 className="text-lg font-semibold text-white border-b border-gray-800 pb-2">初始管理員帳號 (Super Admin)</h2>
-          
-          <div className="grid grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">管理員信箱 Email <span className="text-red-500">*</span></label>
-              <input
-                type="email"
-                required
-                value={formData.adminEmail}
-                onChange={e => setFormData({ ...formData, adminEmail: e.target.value })}
-                className="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                placeholder="admin@yummy-steak.com"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">管理員姓名</label>
-              <input
-                type="text"
-                value={formData.adminName}
-                onChange={e => setFormData({ ...formData, adminName: e.target.value })}
-                className="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                placeholder="王小明"
-              />
-            </div>
-            <div className="col-span-2">
-              <label className="block text-sm font-medium text-gray-300 mb-2">臨時密碼 <span className="text-red-500">*</span></label>
-              <input
-                type="password"
-                required
-                value={formData.adminPassword}
-                onChange={e => setFormData({ ...formData, adminPassword: e.target.value })}
-                className="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                placeholder="初次登入使用"
-              />
-            </div>
+      <div className="space-y-4">
+        <h2 className="text-lg font-semibold text-white border-b border-gray-800 pb-2">初始管理員帳號 (Super Admin)</h2>
+        
+        <div className="grid grid-cols-2 gap-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">管理員信箱 Email <span className="text-red-500">*</span></label>
+            <input
+              type="email"
+              required
+              value={formData.adminEmail}
+              onChange={e => setFormData({ ...formData, adminEmail: e.target.value })}
+              className="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+              placeholder="admin@yummy-steak.com"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">管理員姓名</label>
+            <input
+              type="text"
+              value={formData.adminName}
+              onChange={e => setFormData({ ...formData, adminName: e.target.value })}
+              className="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+              placeholder="王小明"
+            />
+          </div>
+          <div className="col-span-2">
+            <label className="block text-sm font-medium text-gray-300 mb-2">臨時密碼 <span className="text-red-500">*</span></label>
+            <input
+              type="password"
+              required
+              value={formData.adminPassword}
+              onChange={e => setFormData({ ...formData, adminPassword: e.target.value })}
+              className="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+              placeholder="初次登入使用"
+            />
           </div>
         </div>
+      </div>
 
-        <div className="pt-4 flex justify-end">
-          <button
-            type="submit"
-            disabled={loading}
-            className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white px-8 py-3 rounded-xl font-medium transition-all shadow-lg shadow-indigo-600/30 flex items-center gap-2"
-          >
-            {loading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save className="w-5 h-5" />}
-            建立並開通租戶
-          </button>
-        </div>
-      </form>
-    </div>
-  );
+      <div className="pt-4 flex items-center justify-between">
+        <label className="flex items-center gap-2 cursor-pointer text-gray-300">
+          <input 
+            type="checkbox" 
+            className="w-5 h-5 rounded border-gray-700 bg-gray-800 text-indigo-500 focus:ring-indigo-500/20"
+            checked={formData.sendWelcomeEmail}
+            onChange={e => setFormData({ ...formData, sendWelcomeEmail: e.target.checked })}
+          />
+          同時寄送歡迎信給客戶 (包含各系統網址與登入資訊)
+        </label>
+        
+        <button
+          type="submit"
+          disabled={loading}
+          className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white px-8 py-3 rounded-xl font-medium transition-all shadow-lg shadow-indigo-600/30 flex items-center gap-2"
+        >
+          {loading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save className="w-5 h-5" />}
+          建立並開通品牌
+        </button>
+      </div>
+    </form>
+  </div>
+);
 }

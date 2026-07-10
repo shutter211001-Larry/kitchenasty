@@ -17,9 +17,12 @@ export default function SettingsMail() {
   const [gmailClientSecret, setGmailClientSecret] = useState('');
   const [gmailRefreshToken, setGmailRefreshToken] = useState('');
 
-  // Mail Settings (From mailSettings)
   const [senderName, setSenderName] = useState('');
   const [senderEmail, setSenderEmail] = useState('');
+
+  // Welcome Email Template
+  const [welcomeSubject, setWelcomeSubject] = useState('');
+  const [welcomeBody, setWelcomeBody] = useState('');
 
   // Test Email
   const [testEmail, setTestEmail] = useState('');
@@ -36,6 +39,10 @@ export default function SettingsMail() {
       if (mailRes.success && mailRes.data) {
         setSenderName(mailRes.data.senderName || '');
         setSenderEmail(mailRes.data.senderEmail || '');
+        if (mailRes.data.welcomeEmailTemplate) {
+          setWelcomeSubject(mailRes.data.welcomeEmailTemplate.subject || '');
+          setWelcomeBody(mailRes.data.welcomeEmailTemplate.body || '');
+        }
       }
       if (googleRes.success && googleRes.data) {
         setGmailClientId(googleRes.data.gmailClientId || '');
@@ -55,7 +62,11 @@ export default function SettingsMail() {
       const mailPayload = {
         senderName,
         senderEmail,
-        mailServiceType: 'GMAIL_API'
+        mailServiceType: 'GMAIL_API',
+        welcomeEmailTemplate: {
+          subject: welcomeSubject,
+          body: welcomeBody
+        }
       };
       
       const googlePayload = {
@@ -187,7 +198,38 @@ export default function SettingsMail() {
           </div>
         </div>
 
-        {/* Section 3: Test Email */}
+        {/* Section 3: Welcome Email Template */}
+        <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 space-y-4">
+          <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+            ✨ 歡迎信範本 (租約開通信)
+          </h2>
+          <p className="text-xs text-gray-400">
+            設定新增品牌時發送給客戶的通知信。支援以下變數標籤：<br />
+            <span className="text-primary-600 font-mono bg-primary-50 px-1 rounded">{`{tenantName}`}</span> 品牌名稱、
+            <span className="text-primary-600 font-mono bg-primary-50 px-1 rounded">{`{expirationDate}`}</span> 到期日、
+            <span className="text-primary-600 font-mono bg-primary-50 px-1 rounded">{`{storeUrl}`}</span> 前台網址、
+            <span className="text-primary-600 font-mono bg-primary-50 px-1 rounded">{`{adminUrl}`}</span> 後台網址、
+            <span className="text-primary-600 font-mono bg-primary-50 px-1 rounded">{`{erpUrl}`}</span> ERP網址
+          </p>
+
+          <div className="grid grid-cols-1 gap-4">
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1.5">信件主旨</label>
+              <input className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 focus:bg-white focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all duration-200 outline-none placeholder:text-gray-400 shadow-sm" type="text" value={welcomeSubject} onChange={(e) => setWelcomeSubject(e.target.value)} placeholder="例：感謝您使用夏特餐飲管理平台！您的專屬網址已開通" />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1.5">信件內容</label>
+              <textarea 
+                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 focus:bg-white focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all duration-200 outline-none placeholder:text-gray-400 shadow-sm min-h-[200px]" 
+                value={welcomeBody} 
+                onChange={(e) => setWelcomeBody(e.target.value)} 
+                placeholder="親愛的客戶您好，&#10;&#10;感謝您選擇我們的服務！&#10;您的專屬前台網址為：{storeUrl}&#10;後台管理網址為：{adminUrl}&#10;ERP 網址為：{erpUrl}&#10;&#10;租約到期日：{expirationDate}&#10;&#10;祝您生意興隆！"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Section 4: Test Email */}
         <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 space-y-4">
           <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
             ✉️ 發送測試信

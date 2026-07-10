@@ -132,6 +132,16 @@ export default function TenantList() {
     }
   };
 
+  const handleSendWelcomeEmail = async (tenant: Tenant) => {
+    const loadingToast = toast.loading('正在發送歡迎信...');
+    try {
+      await api.post(`/platform-admin/tenants/${tenant.id}/send-welcome-email`, {});
+      toast.success('歡迎信已成功寄出', { id: loadingToast });
+    } catch (error: any) {
+      toast.error(error.message || '發送失敗', { id: loadingToast });
+    }
+  };
+
   if (loading) {
     return <div className="p-8 text-center text-gray-400 animate-pulse">正在載入租戶...</div>;
   }
@@ -154,7 +164,7 @@ export default function TenantList() {
         title={
           <div className="flex items-center gap-3">
             <Server className="w-6 h-6 text-indigo-400" />
-            租戶管理
+            品牌管理
           </div>
         }
         subtitle="管理 SaaS 實例、網域與訂閱。"
@@ -184,7 +194,7 @@ export default function TenantList() {
               className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-lg shadow-indigo-900/20 flex items-center gap-2"
             >
               <Plus className="w-4 h-4" />
-              新增租戶
+              新增品牌
             </button>
           </div>
         }
@@ -193,7 +203,7 @@ export default function TenantList() {
       {/* Top Summary Dashboard */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-gray-900 border border-gray-800 rounded-xl p-5 shadow-sm">
-          <p className="text-gray-400 text-xs font-medium uppercase tracking-wider mb-1">總租戶數</p>
+          <p className="text-gray-400 text-xs font-medium uppercase tracking-wider mb-1">總品牌數</p>
           <h3 className="text-2xl font-semibold text-white">{tenants.length}</h3>
         </div>
         <div className="bg-gray-900 border border-gray-800 rounded-xl p-5 shadow-sm">
@@ -212,7 +222,7 @@ export default function TenantList() {
           <table className="w-full text-left text-sm whitespace-nowrap">
             <thead className="bg-gray-900/50 border-b border-gray-800 text-gray-400">
               <tr>
-                <th className="px-6 py-4 font-medium">租戶</th>
+                <th className="px-6 py-4 font-medium">品牌</th>
                 <th className="px-6 py-4 font-medium">狀態</th>
                 <th className="px-6 py-4 font-medium">指標與權限</th>
                 <th className="px-6 py-4 font-medium">建立日期</th>
@@ -286,6 +296,16 @@ export default function TenantList() {
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-2">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleSendWelcomeEmail(t);
+                            }}
+                            className="px-2 py-1.5 bg-indigo-900/30 hover:bg-indigo-900/50 text-indigo-300 rounded-md text-xs font-medium transition-colors border border-indigo-700/50"
+                          >
+                            發送歡迎信
+                          </button>
+                          
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
