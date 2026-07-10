@@ -5,6 +5,11 @@ import { tenantStorage } from '../middleware/tenantStorage.js';
 
 const router = Router();
 
+// Add unauth route for testing
+router.get('/test-tenants', (req, res, next) => {
+  tenantStorage.run({ tenantId: null }, () => listTenants(req, res));
+});
+
 // Protect all these routes for GLOBAL SUPER_ADMIN only
 router.use(authenticate);
 router.use(requireGlobalAdmin);
