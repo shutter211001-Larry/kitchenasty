@@ -1,6 +1,6 @@
 import i18n from "../i18n";
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import { api } from '../lib/api';
 import { X, Plus, Trash2, Scale, DollarSign, PackageOpen, ListOrdered, Search, Edit, Save, Check } from "lucide-react";
 import { cn } from "../lib/utils";
 import { useTranslation } from "react-i18next";
@@ -57,7 +57,7 @@ export const SupplierPriceModal = ({
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [pricesRes, ingRes] = await Promise.all([axios.get(`http://localhost:3000/api/suppliers/${supplier.id}/prices`), axios.get("http://localhost:3000/api/ingredients?take=500") // fetch all ingredients
+      const [pricesRes, ingRes] = await Promise.all([api.get(`/suppliers/${supplier.id}/prices`), api.get("/ingredients?take=500") // fetch all ingredients
       ]);
       setPrices(pricesRes.data);
       setIngredients(ingRes.data);
@@ -120,7 +120,7 @@ export const SupplierPriceModal = ({
     }
     try {
       setSubmitLoading(true);
-      await axios.post("http://localhost:3000/api/suppliers/price", {
+      await api.post("/suppliers/price", {
         id: editingPriceId || undefined,
         ingredientId: selectedIngredientId,
         supplierId: supplier.id,
@@ -130,7 +130,7 @@ export const SupplierPriceModal = ({
       });
 
       // Refresh pricing list
-      const pricesRes = await axios.get(`http://localhost:3000/api/suppliers/${supplier.id}/prices`);
+      const pricesRes = await api.get(`/suppliers/${supplier.id}/prices`);
       setPrices(pricesRes.data);
 
       // Reset form fields
@@ -164,9 +164,9 @@ export const SupplierPriceModal = ({
   const handleSetDefault = async (priceId: string) => {
     try {
       setLoading(true);
-      await axios.patch(`http://localhost:3000/api/suppliers/prices/${priceId}/default`);
+      await api.patch(`/suppliers/prices/${priceId}/default`);
       // Refresh pricing list
-      const pricesRes = await axios.get(`http://localhost:3000/api/suppliers/${supplier.id}/prices`);
+      const pricesRes = await api.get(`/suppliers/${supplier.id}/prices`);
       setPrices(pricesRes.data);
     } catch (error) {
       console.error("Failed to set default price quote", error);
@@ -178,7 +178,7 @@ export const SupplierPriceModal = ({
   const handleDeletePrice = async (priceId: string) => {
     try {
       setLoading(true);
-      await axios.delete(`http://localhost:3000/api/suppliers/prices/${priceId}`);
+      await api.delete(`/suppliers/prices/${priceId}`);
       setPrices(prev => prev.filter(p => p.id !== priceId));
       if (editingPriceId === priceId) {
         handleCancelEdit();

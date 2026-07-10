@@ -1,7 +1,7 @@
 import i18n from "../i18n";
 import React, { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
-import axios from "axios";
+import { api } from '../lib/api';
 import { X, Save, Search, Plus, Trash2, ChevronRight, GripVertical, LayoutList, ChevronDown, ChevronUp, Check, AlertTriangle } from "lucide-react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { cn } from "../lib/utils";
@@ -145,7 +145,7 @@ const CreateRecipeModal = ({
   useEffect(() => {
     const fetchDictionaries = async () => {
       try {
-        const [actionsRes, unitsRes] = await Promise.all([axios.get("http://localhost:3000/api/dictionaries/actions"), axios.get("http://localhost:3000/api/dictionaries/units")]);
+        const [actionsRes, unitsRes] = await Promise.all([api.get("/dictionaries/actions"), api.get("/dictionaries/units")]);
         setActionGroups(actionsRes.data);
         setUnitGroups(unitsRes.data);
         if (actionsRes.data.length > 0) {
@@ -191,7 +191,7 @@ const CreateRecipeModal = ({
     const fetchResults = async () => {
       try {
         console.log("Searching for:", search);
-        const [ingRes, recRes] = await Promise.all([axios.get(`http://localhost:3000/api/ingredients?search=${search}`), axios.get(`http://localhost:3000/api/recipes`)]);
+        const [ingRes, recRes] = await Promise.all([api.get(`/ingredients?search=${search}`), api.get(`/recipes`)]);
         console.log("Ing results:", ingRes.data.length);
         console.log("Rec results:", recRes.data.length);
         const ingredients = ingRes.data.map((i: any) => ({
@@ -460,7 +460,7 @@ const CreateRecipeModal = ({
         unit: i.unit,
         ingredientName: i.name
       })));
-      const res = await axios.post("http://localhost:3000/api/recipes/ai-nutrition", {
+      const res = await api.post("/recipes/ai-nutrition", {
         recipeItems: allItems,
         outputs,
         cookingMethod: steps.map(s => s.action).join(", ")
@@ -515,9 +515,9 @@ const CreateRecipeModal = ({
       });
       console.log("[DEBUG] Recipe payload:", JSON.stringify(data, null, 2));
       if (initialData?.id) {
-        await axios.put(`http://localhost:3000/api/recipes/${initialData.id}`, data);
+        await api.put(`/recipes/${initialData.id}`, data);
       } else {
-        await axios.post("http://localhost:3000/api/recipes", data);
+        await api.post("/recipes", data);
       }
       onSuccess();
       onClose();
@@ -543,7 +543,7 @@ const CreateRecipeModal = ({
     try {
       setLoading(true);
       console.log("[DEBUG] Sending DELETE request for recipe:", initialData.id);
-      await axios.delete(`http://localhost:3000/api/recipes/${initialData.id}`);
+      await api.delete(`/recipes/${initialData.id}`);
       console.log("[DEBUG] Delete successful!");
       onSuccess();
       onClose();

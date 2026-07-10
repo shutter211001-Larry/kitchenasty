@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import { api } from '../lib/api';
 import { Settings as SettingsIcon, Plus, Trash2, AlertCircle, ChevronDown, ChevronRight, Check } from "lucide-react";
 import { cn } from "../lib/utils";
 import { useTranslation } from "react-i18next";
@@ -8,7 +8,7 @@ import { useAuth } from "../context/AuthContext";
 import { confirm } from "../lib/confirm";
 import { toast } from "react-hot-toast";
 
-const API = "http://localhost:3000/api/dictionaries";
+const API = "/dictionaries";
 export default function Settings() {
   const {
     t
@@ -57,10 +57,10 @@ export default function Settings() {
     try {
       setLoading(true);
       const [actRes, ugRes, settingsRes, mailBrandingRes] = await Promise.all([
-        axios.get(`${API}/actions`), 
-        axios.get(`${API}/units`), 
-        axios.get("http://localhost:3000/api/settings"),
-        axios.get("http://localhost:3000/api/settings/mail-branding").catch(() => ({ data: {} }))
+        api.get(`/actions`), 
+        api.get(`/units`), 
+        api.get("/settings"),
+        api.get("/settings/mail-branding").catch(() => ({ data: {} }))
       ]);
       setActionGroups(actRes.data);
       setUnitGroups(ugRes.data);
@@ -86,7 +86,7 @@ export default function Settings() {
   // ── Group level default units (ActionGroup ↔ UnitGroup) ──
   const toggleGroupDefaultUnit = async (groupId: string, unitGroupId: string, currentIds: string[]) => {
     const newIds = currentIds.includes(unitGroupId) ? currentIds.filter(id => id !== unitGroupId) : [...currentIds, unitGroupId];
-    await axios.put(`${API}/actions/groups/${groupId}/default-units`, {
+    await api.put(`/actions/groups/${groupId}/default-units`, {
       unitGroupIds: newIds
     });
     fetchAll();
@@ -95,7 +95,7 @@ export default function Settings() {
   // ── Action level default units (Action ↔ UnitGroup) ──
   const toggleActionDefaultUnit = async (actionId: string, unitGroupId: string, currentIds: string[]) => {
     const newIds = currentIds.includes(unitGroupId) ? currentIds.filter(id => id !== unitGroupId) : [...currentIds, unitGroupId];
-    await axios.put(`${API}/actions/${actionId}/default-units`, {
+    await api.put(`/actions/${actionId}/default-units`, {
       unitGroupIds: newIds
     });
     fetchAll();
@@ -103,8 +103,8 @@ export default function Settings() {
   const handleCreateGroup = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newGroupName) return;
-    const endpoint = activeTab === "actions" ? `${API}/actions/groups` : `${API}/units/groups`;
-    await axios.post(endpoint, {
+    const endpoint = activeTab === "actions" ? `/actions/groups` : `/units/groups`;
+    await api.post(endpoint, {
       name: newGroupName,
       icon: activeTab === "actions" ? "LayoutList" : undefined
     });
@@ -113,15 +113,15 @@ export default function Settings() {
   };
   const handleDeleteGroup = async (id: string) => {
     if (!await confirm(t("erp_784"))) return;
-    const endpoint = activeTab === "actions" ? `${API}/actions/groups/${id}` : `${API}/units/groups/${id}`;
-    await axios.delete(endpoint);
+    const endpoint = activeTab === "actions" ? `/actions/groups/${id}` : `/units/groups/${id}`;
+    await api.delete(endpoint);
     fetchAll();
   };
   const handleCreateItem = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newItemName || !activeGroupId) return;
-    const endpoint = activeTab === "actions" ? `${API}/actions` : `${API}/units`;
-    await axios.post(endpoint, {
+    const endpoint = activeTab === "actions" ? `/actions` : `/units`;
+    await api.post(endpoint, {
       name: newItemName,
       groupId: activeGroupId
     });
@@ -129,14 +129,14 @@ export default function Settings() {
     fetchAll();
   };
   const handleDeleteItem = async (id: string) => {
-    const endpoint = activeTab === "actions" ? `${API}/actions/${id}` : `${API}/units/${id}`;
-    await axios.delete(endpoint);
+    const endpoint = activeTab === "actions" ? `/actions/${id}` : `/units/${id}`;
+    await api.delete(endpoint);
     fetchAll();
   };
   const handleSaveGlobalSettings = async () => {
     try {
-      const p1 = axios.put("http://localhost:3000/api/settings", globalSettings);
-      const p2 = axios.patch("http://localhost:3000/api/auth/me/language", {
+      const p1 = api.put("/settings", globalSettings);
+      const p2 = api.patch("/auth/me/language", {
         language
       });
       await Promise.all([p1, p2]);
@@ -152,7 +152,7 @@ export default function Settings() {
   const handleSaveMailBranding = async () => {
     try {
       setLoading(true);
-      await axios.put("http://localhost:3000/api/settings/mail-branding", mailBranding);
+      await api.put("/settings/mail-branding", mailBranding);
       toast.error(t("erp_785", "設定儲存成功"));
     } catch (e) {
       console.error("Failed to save mail branding:", e);
@@ -166,7 +166,7 @@ export default function Settings() {
     if (!testEmail) return toast.error("請輸入測試信箱");
     try {
       setLoading(true);
-      const res = await axios.post("http://localhost:3000/api/settings/mail-branding/test", { to: testEmail });
+      const res = await api.post("/settings/mail-branding/test", { to: testEmail });
       toast.error(res.data.message || "測試信件寄出成功");
     } catch (e: any) {
       console.error("Failed to send test email:", e);

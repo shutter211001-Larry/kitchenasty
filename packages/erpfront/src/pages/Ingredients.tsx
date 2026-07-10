@@ -1,6 +1,6 @@
 import i18n from "../i18n";
 import { useState, useEffect } from "react";
-import axios from "axios";
+import { api } from '../lib/api';
 import { Search, Package, Plus, Edit2, ShieldAlert } from "lucide-react";
 import { cn, formatUnit } from "../lib/utils";
 import EditIngredientModal from "../components/EditIngredientModal";
@@ -39,7 +39,7 @@ const Ingredients = () => {
     try {
       setLoading(true);
       const categoryParam = activeCategory !== t("erp_319") ? `&category=${activeCategory}` : "";
-      const [ingredientsRes, settingsRes] = await Promise.all([axios.get(`http://localhost:3000/api/ingredients?search=${search}${categoryParam}`), axios.get("http://localhost:3000/api/settings")]);
+      const [ingredientsRes, settingsRes] = await Promise.all([api.get(`/ingredients?search=${search}${categoryParam}`), api.get("/settings")]);
       setIngredients(ingredientsRes.data);
       setGlobalSettings(settingsRes.data);
     } catch (error) {

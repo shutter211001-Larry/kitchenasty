@@ -1,6 +1,6 @@
 import i18n from "../i18n";
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import { api } from '../lib/api';
 import { Search, Users, Phone, MapPin, Plus, UserPlus, Edit, Trash2, ShieldAlert } from "lucide-react";
 import { SupplierModal } from "../components/SupplierModal";
 import { SupplierPriceModal } from "../components/SupplierPriceModal";
@@ -32,7 +32,7 @@ const Suppliers = () => {
   const fetchSuppliers = async () => {
     try {
       setLoading(true);
-      const response = await axios.get("http://localhost:3000/api/suppliers");
+      const response = await api.get("/suppliers");
       setSuppliers(response.data);
     } catch (error) {
       console.error("Failed to fetch suppliers", error);
@@ -44,7 +44,7 @@ const Suppliers = () => {
     if (!await confirm(`確定要刪除供應商「${name}」嗎？\n此操作將會連帶清除該廠商名下的所有原料報價合約！`)) return;
     try {
       setLoading(true);
-      await axios.delete(`http://localhost:3000/api/suppliers/${id}`);
+      await api.delete(`/suppliers/${id}`);
       fetchSuppliers();
     } catch (error) {
       console.error("Failed to delete supplier", error);

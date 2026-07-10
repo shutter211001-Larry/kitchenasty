@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { DollarSign, CheckCircle2, Clock, Search, Trash2, PieChart as PieChartIcon } from "lucide-react";
 import toast from "react-hot-toast";
-import axios from "axios";
+import { api } from '../lib/api';
 import {
   AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
@@ -62,7 +62,7 @@ export default function Expenses() {
   const fetchExpenses = async () => {
     setLoading(true);
     try {
-      const res = await axios.get("http://localhost:3000/api/expenses");
+      const res = await api.get("/expenses");
       setExpenses(res.data);
     } catch (error) {
       toast.error("無法載入帳務紀錄");
@@ -74,7 +74,7 @@ export default function Expenses() {
   const fetchAnalytics = async () => {
     setAnalyticsLoading(true);
     try {
-      const res = await axios.get(`http://localhost:3000/api/expenses/analytics?days=${analyticsDays}`);
+      const res = await api.get(`/expenses/analytics?days=${analyticsDays}`);
       setAnalytics(res.data.analytics);
       setMetrics(res.data.metrics);
     } catch (error) {
@@ -86,7 +86,7 @@ export default function Expenses() {
 
   const handleUpdateStatus = async (id: string, newStatus: string) => {
     try {
-      const res = await axios.patch(`http://localhost:3000/api/expenses/${id}/status`, { status: newStatus });
+      const res = await api.patch(`/expenses/${id}/status`, { status: newStatus });
       
       if (res.status === 200 || res.status === 204) {
         toast.success(`狀態已更新為 ${newStatus === 'PAID' ? '已付款' : '未付款'}`);
@@ -103,7 +103,7 @@ export default function Expenses() {
   const handleDeleteExpense = async (id: string) => {
     if (!await confirm("確定要刪除這筆帳款嗎？")) return;
     try {
-      const res = await axios.delete(`http://localhost:3000/api/expenses/${id}`);
+      const res = await api.delete(`/expenses/${id}`);
       if (res.status === 204 || res.status === 200) {
         toast.success("已成功刪除帳款");
         fetchExpenses();

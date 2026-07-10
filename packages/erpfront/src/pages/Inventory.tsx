@@ -1,6 +1,6 @@
 import i18n from "../i18n";
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import { api } from '../lib/api';
 import { Package, Search, ArrowUpRight, ArrowDownRight, Scale, History, AlertTriangle, CheckCircle, RotateCw } from "lucide-react";
 import StockAdjustmentModal from "../components/StockAdjustmentModal";
 import { useAuth } from "../context/AuthContext";
@@ -28,7 +28,7 @@ const Inventory: React.FC = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [ingredientsRes, logsRes, settingsRes] = await Promise.all([axios.get("http://localhost:3000/api/ingredients"), axios.get("http://localhost:3000/api/inventory/logs"), axios.get("http://localhost:3000/api/settings")]);
+      const [ingredientsRes, logsRes, settingsRes] = await Promise.all([api.get("/ingredients"), api.get("/inventory/logs"), api.get("/settings")]);
       setIngredients(ingredientsRes.data);
       setLogs(logsRes.data);
       setGlobalSettings(settingsRes.data);

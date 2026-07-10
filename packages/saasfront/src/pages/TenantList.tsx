@@ -378,7 +378,7 @@ export default function TenantList() {
                     {expandedTenantId === t.id && (
                       <tr className="bg-gray-800/40 border-b border-gray-800/50 shadow-inner">
                         <td colSpan={5} className="px-6 py-6 cursor-default">
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-sm">
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 text-sm">
                             
                             {/* Card 1: 購買者基本資料 */}
                             <div className="bg-gray-900/80 border border-gray-800 rounded-xl p-5 shadow-sm">
@@ -454,7 +454,7 @@ export default function TenantList() {
                             <div className="bg-gray-900/80 border border-gray-800 rounded-xl p-5 shadow-sm">
                               <h4 className="font-medium text-gray-400 text-xs tracking-wider uppercase mb-4 flex items-center gap-2">
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-indigo-400" viewBox="0 0 20 20" fill="currentColor"><path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
-                                模組狀態與整合
+                                模組開通狀態
                               </h4>
                               <div className="space-y-5">
                                 <div className="flex items-center justify-between p-3 bg-gray-950/50 rounded-lg border border-gray-800/80">
@@ -466,14 +466,26 @@ export default function TenantList() {
                                     <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${t.hasErpAccess ? 'translate-x-4' : 'translate-x-1'}`} />
                                   </button>
                                 </div>
-                                
+                              </div>
+                            </div>
+
+                            {/* Card 4: 整合金鑰 */}
+                            <div className="bg-gray-900/80 border border-gray-800 rounded-xl p-5 shadow-sm">
+                              <h4 className="font-medium text-gray-400 text-xs tracking-wider uppercase mb-4 flex items-center gap-2">
+                                <Key className="w-4 h-4 text-indigo-400" />
+                                系統金鑰與整合
+                              </h4>
+                              <div className="space-y-5">
+                                <p className="text-xs text-gray-500 leading-relaxed">
+                                  管理此品牌的第三方服務金鑰（如 LINE Login, LINE Pay, Google 登入、電子發票等）。
+                                </p>
                                 <button onClick={() => navigate(`/tenants/${t.id}/integrations`, { state: { tenantName: t.name } })} className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/20 rounded-lg text-xs font-medium transition-colors">
                                   <Key className="w-3.5 h-3.5" /> 第三方整合 (LINE / 支付)
                                 </button>
                               </div>
                             </div>
 
-                            {/* Card 4: 租約與危險操作 */}
+                            {/* Card 5: 租約與危險操作 */}
                             <div className="bg-gray-900/80 border border-gray-800 rounded-xl p-5 shadow-sm">
                               <h4 className="font-medium text-red-400 text-xs tracking-wider uppercase mb-4 flex items-center gap-2">
                                 <AlertTriangle className="w-4 h-4" /> 租約操作

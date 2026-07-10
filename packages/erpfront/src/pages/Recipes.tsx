@@ -1,6 +1,6 @@
 import i18n from "../i18n";
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import { api } from '../lib/api';
 import { ChefHat, Plus, Utensils, Clock, TrendingUp, Pizza } from "lucide-react";
 import CreateRecipeModal from "../components/CreateRecipeModal";
 import RecipeDetailModal from "../components/RecipeDetailModal";
@@ -26,7 +26,7 @@ const Recipes = () => {
   const fetchRecipes = async () => {
     try {
       setLoading(true);
-      const response = await axios.get("http://localhost:3000/api/recipes");
+      const response = await api.get("/recipes");
       setRecipes(response.data);
     } catch (error) {
       console.error("Failed to fetch recipes", error);
@@ -37,7 +37,7 @@ const Recipes = () => {
   const handleEdit = async (e: React.MouseEvent, recipeId: string) => {
     e.stopPropagation();
     try {
-      const response = await axios.get(`http://localhost:3000/api/recipes/${recipeId}`);
+      const response = await api.get(`/recipes/${recipeId}`);
       setEditingRecipe(response.data);
     } catch (error) {
       console.error("Failed to fetch full recipe", error);
@@ -46,7 +46,7 @@ const Recipes = () => {
   };
   const handleView = async (recipeId: string) => {
     try {
-      const response = await axios.get(`http://localhost:3000/api/recipes/${recipeId}`);
+      const response = await api.get(`/recipes/${recipeId}`);
       setSelectedRecipe(response.data);
     } catch (error) {
       console.error("Failed to fetch recipe detail", error);

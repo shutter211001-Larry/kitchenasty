@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import type { FormEvent } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import axios from "axios";
+import { api } from '../lib/api';
 import { Lock, ArrowRight, ShieldCheck, AlertCircle } from "lucide-react";
 
 export default function ResetPassword() {
@@ -41,7 +41,7 @@ export default function ResetPassword() {
     setSubmitting(true);
 
     try {
-      await axios.post("http://localhost:3000/api/auth/reset-password", {
+      await api.post("/auth/reset-password", {
         token: tokenParam,
         newPassword: password,
       });

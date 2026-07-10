@@ -1,6 +1,6 @@
 import i18n from "../i18n";
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import { api } from '../lib/api';
 import { X, Save, AlertTriangle, Scale, Plus, Trash2, ShieldAlert } from "lucide-react";
 import { cn } from "../lib/utils";
 import { AllergenManagerModal } from "./AllergenManagerModal";
@@ -104,7 +104,7 @@ const EditIngredientModal = ({
   const [newMultiplier, setNewMultiplier] = useState<number | "">("");
   const loadSuppliersAndAllergens = async () => {
     try {
-      const [suppRes, allerRes] = await Promise.all([axios.get("http://localhost:3000/api/suppliers"), axios.get("http://localhost:3000/api/allergens")]);
+      const [suppRes, allerRes] = await Promise.all([api.get("/suppliers"), api.get("/allergens")]);
       setSuppliers(suppRes.data);
       setAllAllergens(allerRes.data);
     } catch (error) {
@@ -115,7 +115,7 @@ const EditIngredientModal = ({
     if (isCreate || !ingredient.id) return;
     try {
       setFetchLoading(true);
-      const response = await axios.get(`http://localhost:3000/api/ingredients/${ingredient.id}`);
+      const response = await api.get(`/ingredients/${ingredient.id}`);
       const data = response.data;
       setFormData({
         ...data,
@@ -274,9 +274,9 @@ const EditIngredientModal = ({
         } : null
       };
       if (isCreate) {
-        await axios.post("http://localhost:3000/api/ingredients", payload);
+        await api.post("/ingredients", payload);
       } else {
-        await axios.patch(`http://localhost:3000/api/ingredients/${(ingredient as Ingredient).id}`, payload);
+        await api.patch(`/ingredients/${(ingredient as Ingredient).id}`, payload);
       }
       onSuccess();
       onClose();
@@ -293,7 +293,7 @@ const EditIngredientModal = ({
     if (!await confirm(`確定要刪除食材「${ingredient.name}」嗎？\n\n注意：此操作無法復原，且會一併刪除該食材的所有報價合約。`)) return;
     try {
       setLoading(true);
-      await axios.delete(`http://localhost:3000/api/ingredients/${ingredient.id}`);
+      await api.delete(`/ingredients/${ingredient.id}`);
       onSuccess();
       onClose();
     } catch (error: any) {
@@ -316,7 +316,7 @@ const EditIngredientModal = ({
     }
     try {
       setLoading(true);
-      const response = await axios.post(`http://localhost:3000/api/ingredients/${ingredient.id}/conversions`, {
+      const response = await api.post(`/ingredients/${ingredient.id}/conversions`, {
         fromUnit: newFromUnit,
         toUnit: formData.unit,
         multiplier: Number(newMultiplier)
@@ -339,7 +339,7 @@ const EditIngredientModal = ({
     if (!await confirm(t("erp_86"))) return;
     try {
       setLoading(true);
-      await axios.delete(`http://localhost:3000/api/ingredients/${ingredient.id}/conversions/${convId}`);
+      await api.delete(`/ingredients/${ingredient.id}/conversions/${convId}`);
       setFormData(prev => ({
         ...prev,
         unitConversions: (prev.unitConversions || []).filter(c => c.id !== convId)
@@ -359,7 +359,7 @@ const EditIngredientModal = ({
     }
     try {
       setLoading(true);
-      await axios.post("http://localhost:3000/api/suppliers/price", {
+      await api.post("/suppliers/price", {
         ingredientId: ingredient.id,
         supplierId: priceInfo.supplierId || null,
         packageSize: Number(priceInfo.packageSize),
@@ -384,7 +384,7 @@ const EditIngredientModal = ({
     if (!await confirm(t("erp_90"))) return;
     try {
       setLoading(true);
-      await axios.delete(`http://localhost:3000/api/suppliers/prices/${priceId}`);
+      await api.delete(`/suppliers/prices/${priceId}`);
       await fetchIngredientDetails();
     } catch (error: any) {
       console.error("Failed to delete quote", error);
@@ -396,7 +396,7 @@ const EditIngredientModal = ({
   const handleSetDefaultQuote = async (priceId: string) => {
     try {
       setLoading(true);
-      await axios.patch(`http://localhost:3000/api/suppliers/prices/${priceId}/default`);
+      await api.patch(`/suppliers/prices/${priceId}/default`);
       await fetchIngredientDetails();
     } catch (error: any) {
       console.error("Failed to set default quote", error);

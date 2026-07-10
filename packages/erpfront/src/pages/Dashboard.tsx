@@ -1,6 +1,6 @@
 import i18n from "../i18n";
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import { api } from '../lib/api';
 import { Utensils, Package, Users, AlertTriangle, TrendingDown, TrendingUp, CheckCircle, FileSpreadsheet } from "lucide-react";
 import { cn } from "../lib/utils";
 import { useTranslation } from "react-i18next";
@@ -93,7 +93,7 @@ const Dashboard = () => {
   const fetchStats = async () => {
     try {
       setLoading(true);
-      const response = await axios.get("http://localhost:3000/api/dashboard/stats");
+      const response = await api.get("/dashboard/stats");
       setStats(response.data);
     } catch (error) {
       console.error("Failed to fetch dashboard stats", error);

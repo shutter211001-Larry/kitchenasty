@@ -1,6 +1,6 @@
 import i18n from "../i18n";
 import { useState, useEffect } from "react";
-import axios from "axios";
+import { api } from '../lib/api';
 import { Search, Workflow, Database, Calendar, ShoppingBag, CheckCircle2, AlertOctagon, Save, Link2, Unlink, TrendingUp, RefreshCw, AlertTriangle, Truck, ArrowRight, Sparkles } from "lucide-react";
 import { formatUnit } from "../lib/utils";
 import { useTranslation } from "react-i18next";
@@ -102,15 +102,15 @@ const Integration = () => {
       if (!silent) setLoading(true);else setRefreshing(true);
 
       // 1. Fetch Recipes from ShutterERP
-      const recipesRes = await axios.get("http://localhost:3000/api/recipes");
+      const recipesRes = await api.get("/recipes");
       setRecipes(recipesRes.data);
 
       // 2. Fetch Mappings from ShutterERP
-      const mappingsRes = await axios.get("http://localhost:3000/api/integration/mappings");
+      const mappingsRes = await api.get("/integration/mappings");
       setMappings(mappingsRes.data.data || []);
 
       // 3. Fetch Sync Data (Orders, MenuItems, Reservations) via ShutterERP Integration Controller Proxy
-      const proxyRes = await axios.get("http://localhost:3000/api/integration/shutter-data");
+      const proxyRes = await api.get("/integration/shutter-data");
       const proxyData = proxyRes.data.data;
       setConnectionOk(proxyData.connectionOk);
       setMenuItems(proxyData.menuItems || []);
@@ -119,17 +119,17 @@ const Integration = () => {
 
       // 4. Fetch Forecast from ShutterERP if connected
       if (proxyData.connectionOk) {
-        const forecastRes = await axios.get("http://localhost:3000/api/integration/forecast");
+        const forecastRes = await api.get("/integration/forecast");
         setForecastedIngredients(forecastRes.data.forecastedIngredients || []);
       }
 
       // 5. Fetch Inventory Logs (filter by '線上訂餐' to show ERP deductions)
-      const logsRes = await axios.get("http://localhost:3000/api/inventory/logs");
+      const logsRes = await api.get("/inventory/logs");
       const filteredLogs = (logsRes.data || []).filter((log: any) => log.reason?.includes(i18n.t("erp_337")));
       setDeductionLogs(filteredLogs);
 
       // 6. Fetch Global Settings for unit formatting
-      const settingsRes = await axios.get("http://localhost:3000/api/settings");
+      const settingsRes = await api.get("/settings");
       setGlobalSettings(settingsRes.data);
     } catch (error: any) {
       console.error("Failed to sync ERP data", error);
@@ -153,7 +153,7 @@ const Integration = () => {
     const recipe = recipes.find(r => r.id === recipeId);
     try {
       setRefreshing(true);
-      await axios.post("http://localhost:3000/api/integration/mappings", {
+      await api.post("/integration/mappings", {
         menuItemId: menuItem.id,
         recipeId: recipeId,
         menuItemName: menuItem.name,
@@ -175,7 +175,7 @@ const Integration = () => {
     if (!await confirm(`確定要解除「${menuItemName}」的食譜綁定嗎？\n解除後，該商品的線上訂單將不再自動扣減中央廚房庫存。`)) return;
     try {
       setRefreshing(true);
-      await axios.delete(`http://localhost:3000/api/integration/mappings/${menuItemId}`);
+      await api.delete(`/integration/mappings/${menuItemId}`);
       triggerAlert("success", `已解除「${menuItemName}」的食譜綁定關係。`);
       fetchSyncData(true);
     } catch (error) {

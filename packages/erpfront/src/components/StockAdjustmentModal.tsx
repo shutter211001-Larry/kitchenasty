@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import axios from "axios";
+import { api } from '../lib/api';
 import { X, ArrowDownRight, ArrowUpRight, Scale, AlertCircle } from "lucide-react";
 import { useTranslation } from "react-i18next";
 interface Props {
@@ -74,7 +74,7 @@ const StockAdjustmentModal: React.FC<Props> = ({
     try {
       setLoading(true);
       setError(null);
-      await axios.post("http://localhost:3000/api/inventory/log", {
+      await api.post("/inventory/log", {
         ingredientId: ingredient.id,
         type,
         amount: numAmount,

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import { api } from '../lib/api';
 import { useAuth } from "../context/AuthContext";
 import { Utensils, Lock, Mail, AlertCircle, ArrowRight, ShieldCheck } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -44,7 +44,7 @@ const Login: React.FC = () => {
       setError(null);
       setMessage(null);
       setLoading(true);
-      const res = await axios.post("http://localhost:3000/api/auth/forgot-password", { email });
+      const res = await api.post("/auth/forgot-password", { email });
       setMessage(res.data.message || '重置信已寄出');
     } catch (err: any) {
       setError(err.response?.data?.error || '發送失敗');

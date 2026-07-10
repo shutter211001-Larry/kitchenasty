@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import { api } from '../lib/api';
 import { X, Plus, Trash2, ShieldAlert, Tag } from "lucide-react";
 import { cn } from "../lib/utils";
 import { useTranslation } from "react-i18next";
@@ -29,7 +29,7 @@ export const AllergenManagerModal: React.FC<AllergenManagerModalProps> = ({
   const fetchAllergens = async () => {
     try {
       setLoading(true);
-      const response = await axios.get("http://localhost:3000/api/allergens");
+      const response = await api.get("/allergens");
       setAllergens(response.data);
       setError("");
     } catch (err) {
@@ -50,7 +50,7 @@ export const AllergenManagerModal: React.FC<AllergenManagerModalProps> = ({
     try {
       setLoading(true);
       setError("");
-      const response = await axios.post("http://localhost:3000/api/allergens", {
+      const response = await api.post("/allergens", {
         name: newTagName.trim()
       });
       setAllergens(prev => [...prev, response.data].sort((a, b) => a.name.localeCompare(b.name)));
@@ -68,7 +68,7 @@ export const AllergenManagerModal: React.FC<AllergenManagerModalProps> = ({
     try {
       setLoading(true);
       setError("");
-      await axios.delete(`http://localhost:3000/api/allergens/${id}`);
+      await api.delete(`/allergens/${id}`);
       setAllergens(prev => prev.filter(t => t.id !== id));
       if (onRefreshAllergens) onRefreshAllergens();
     } catch (err) {

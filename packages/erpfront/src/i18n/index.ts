@@ -130,7 +130,7 @@ i18n.use(initReactI18next).init({
   // Only save missing in development
   missingKeyHandler: (lngs, ns, key, fallbackValue) => {
     fetch(
-      `http://localhost:3000/api/i18n/locales/${lngs[0]}/${ns}/missing?project=shutter-erp-frontend`,
+      `/i18n/locales/${lngs[0]}/${ns}/missing?project=shutter-erp-frontend`,
       {
         method: "POST",
         headers: {

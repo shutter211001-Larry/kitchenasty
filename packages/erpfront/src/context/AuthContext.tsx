@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
-import axios from "axios";
+import { api } from '../lib/api';
 import { useTranslation } from "react-i18next";
 interface User {
   id: string;
@@ -25,28 +25,18 @@ export const AuthProvider: React.FC<{
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Sync Axios headers with token
-  const setAuthHeader = (token: string | null) => {
-    if (token) {
-      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-    } else {
-      delete axios.defaults.headers.common["Authorization"];
-    }
-  };
   const checkAuth = async () => {
-    const token = localStorage.getItem("pizza_master_token");
+    const token = localStorage.getItem("token");
     if (!token) {
       setLoading(false);
       return;
     }
     try {
-      setAuthHeader(token);
-      const response = await axios.get("http://localhost:3000/api/auth/me");
+      const response = await api.get("/auth/me");
       setUser(response.data);
     } catch (error) {
       console.error("Auto login check failed, clearing token", error);
-      localStorage.removeItem("pizza_master_token");
-      setAuthHeader(null);
+      localStorage.removeItem("token");
       setUser(null);
     } finally {
       setLoading(false);
@@ -57,24 +47,23 @@ export const AuthProvider: React.FC<{
   }, []);
   const login = async (email: string, password: string) => {
     try {
-      const response = await axios.post("http://localhost:3000/api/auth/login", {
+      const response = await api.post("/auth/login", {
         email,
         password
       });
       const {
         token,
-        user: loggedUser
+        user
       } = response.data;
-      localStorage.setItem("pizza_master_token", token);
-      setAuthHeader(token);
-      setUser(loggedUser);
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || t("erp_294"));
+      localStorage.setItem("token", token);
+      setUser(user);
+    } catch (error) {
+      console.error("Login error", error);
+      throw error;
     }
   };
   const logout = () => {
-    localStorage.removeItem("pizza_master_token");
-    setAuthHeader(null);
+    localStorage.removeItem("token");
     setUser(null);
   };
   return <AuthContext.Provider value={{

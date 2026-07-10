@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import { api } from '../lib/api';
 import { X, Save, Building, User, Phone, MapPin } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-hot-toast";
@@ -58,10 +58,10 @@ export const SupplierModal = ({
     try {
       setLoading(true);
       if (isCreate) {
-        await axios.post("http://localhost:3000/api/suppliers", formData);
+        await api.post("/suppliers", formData);
       } else {
         const sup = supplier as Supplier;
-        await axios.patch(`http://localhost:3000/api/suppliers/${sup.id}`, formData);
+        await api.patch(`/suppliers/${sup.id}`, formData);
       }
       onSuccess();
       onClose();

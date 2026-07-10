@@ -1,6 +1,6 @@
 import i18n from "../i18n";
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import { api } from '../lib/api';
 import { Printer, Settings2, Layers, Database, RotateCcw, Sparkles, Flame, Award, Save, ChefHat, Utensils, ChevronDown, ChevronUp, Sliders, Plus, Trash2 } from "lucide-react";
 import { cn } from "../lib/utils";
 import { QRCodeSVG } from "qrcode.react";
@@ -702,7 +702,7 @@ export const Labels = () => {
   const fetchRecipes = async () => {
     try {
       setLoading(true);
-      const response = await axios.get("http://localhost:3000/api/recipes");
+      const response = await api.get("/recipes");
       setRecipes(response.data);
     } catch (error) {
       console.error("Failed to load recipes", error);
@@ -714,7 +714,7 @@ export const Labels = () => {
   // Load ingredients list
   const fetchIngredients = async () => {
     try {
-      const response = await axios.get("http://localhost:3000/api/ingredients");
+      const response = await api.get("/ingredients");
       setAllIngredients(response.data);
     } catch (error) {
       console.error("Failed to load ingredients", error);
@@ -934,7 +934,7 @@ export const Labels = () => {
     }
     try {
       setCopyingLayoutToRecipe(true);
-      const res = await axios.get(`http://localhost:3000/api/recipes/${targetRecipeIdToCopyTo}`);
+      const res = await api.get(`/recipes/${targetRecipeIdToCopyTo}`);
       const targetRecipe = res.data;
       const oldConfig = targetRecipe.labelConfig || {};
       const updatedConfig = {
@@ -944,7 +944,7 @@ export const Labels = () => {
         groupFontScales,
         customLines
       };
-      await axios.patch(`http://localhost:3000/api/recipes/${targetRecipeIdToCopyTo}/label-config`, {
+      await api.patch(`/recipes/${targetRecipeIdToCopyTo}/label-config`, {
         labelConfig: updatedConfig
       });
       toast.error(t("erp_469"));
@@ -1028,7 +1028,7 @@ export const Labels = () => {
         portionScale,
         expandedIngredients
       };
-      await axios.patch(`http://localhost:3000/api/recipes/${selectedRecipeId}/label-config`, {
+      await api.patch(`/recipes/${selectedRecipeId}/label-config`, {
         labelConfig
       });
       toast.error(t("erp_472"));
@@ -1056,7 +1056,7 @@ export const Labels = () => {
     }
     try {
       setLoading(true);
-      const response = await axios.get(`http://localhost:3000/api/recipes/${recipeId}`);
+      const response = await api.get(`/recipes/${recipeId}`);
       const recipe = response.data;
       setLoadedRecipe(recipe);
       if (recipe.labelConfig) {

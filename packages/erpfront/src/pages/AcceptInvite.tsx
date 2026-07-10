@@ -3,7 +3,7 @@ import type { FormEvent } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useTranslation } from "react-i18next";
-import axios from "axios";
+import { api } from '../lib/api';
 
 export default function AcceptInvite() {
   const { t } = useTranslation();
@@ -31,7 +31,7 @@ export default function AcceptInvite() {
     }
 
     axios
-      .get(`http://localhost:3000/api/auth/invite/${tokenParam}`)
+      .get(`/auth/invite/${tokenParam}`)
       .then((res) => {
         if (!res.data.success) throw new Error("Invalid invite");
         setEmail(res.data.data.email);
@@ -55,7 +55,7 @@ export default function AcceptInvite() {
     setSubmitting(true);
 
     try {
-      const res = await axios.post("http://localhost:3000/api/auth/accept-invite", {
+      const res = await api.post("/auth/accept-invite", {
         token: tokenParam,
         name,
         password,

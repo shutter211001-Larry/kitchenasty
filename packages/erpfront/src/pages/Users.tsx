@@ -1,6 +1,6 @@
 import i18n from "../i18n";
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import { api } from '../lib/api';
 import { Users as UsersIcon, Shield, UserCheck, Trash2, Edit, Plus, X, AlertCircle, Key, RefreshCw } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useTranslation } from "react-i18next";
@@ -34,7 +34,7 @@ const Users: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      const res = await axios.get("http://localhost:3000/api/users");
+      const res = await api.get("/users");
       setUsers(res.data);
     } catch (err: any) {
       console.error(err);
@@ -75,7 +75,7 @@ const Users: React.FC = () => {
       return;
     }
     try {
-      await axios.delete(`http://localhost:3000/api/users/${userId}`);
+      await api.delete(`/users/${userId}`);
       fetchUsers();
     } catch (err: any) {
       toast.error(err.response?.data?.error || t("erp_824"));
@@ -95,13 +95,13 @@ const Users: React.FC = () => {
       setSubmitting(true);
       setSubmitError(null);
       if (modalMode === "create") {
-        await axios.post("http://localhost:3000/api/auth/invite", {
+        await api.post("/auth/invite", {
           email,
           role
         });
         toast.error(t("erp_invite_sent", "Invite Sent Successfully!"));
       } else {
-        await axios.put(`http://localhost:3000/api/users/${selectedUser.id}`, {
+        await api.put(`/users/${selectedUser.id}`, {
           name,
           role,
           password: password.trim() !== "" ? password : undefined
