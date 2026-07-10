@@ -70,9 +70,9 @@ export default function CouponForm() {
         setType(c.type);
         setValue(c.value);
         setMinOrder(c.minOrder);
-        setMaxDiscount(c.maxDiscount !== null ? String(c.maxDiscount) : '');
-        setUsageLimit(c.usageLimit !== null ? String(c.usageLimit) : '');
-        setIsUnlimitedUsage(c.usageLimit === null);
+        setMaxDiscount(c.maxDiscount != null ? String(c.maxDiscount) : '');
+        setUsageLimit(c.usageLimit != null ? String(c.usageLimit) : '');
+        setIsUnlimitedUsage(c.usageLimit == null);
         setPerCustomer(c.perCustomer);
         setIsUnlimitedPerCustomer(c.perCustomer === 0);
         setStartsAt(c.startsAt ? c.startsAt.split('T')[0] : '');

@@ -180,7 +180,7 @@ const Ingredients = () => {
                               {formatUnit(ing.safetyStock, ing.unit, globalSettings).value}{" "}
                               {formatUnit(ing.safetyStock, ing.unit, globalSettings).unit}
                             </span>}
-                          {ing.safetyStock === null && <span className="text-[10px] font-bold text-gray-500">
+                          {ing.safetyStock == null && <span className="text-[10px] font-bold text-gray-500">
                               {t("erp_333")}
                             </span>}
                         </div>
