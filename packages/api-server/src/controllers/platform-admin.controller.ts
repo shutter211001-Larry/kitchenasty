@@ -206,16 +206,12 @@ export const getTenantIntegrations = async (req: Request, res: Response) => {
       where: { tenantId: id }
     });
 
-    if (!settings) {
-      return res.status(404).json({ success: false, error: 'Settings not found' });
-    }
-
-    const line = parseJson(settings.lineSettings);
-    const google = parseJson(settings.googleSettings);
-    const mail = parseJson(settings.mailSettings);
-    const payment = parseJson(settings.paymentSettings);
-    const invoice = parseJson(settings.invoiceSettings);
-    const order = parseJson(settings.orderSettings);
+    const line = parseJson(settings?.lineSettings);
+    const google = parseJson(settings?.googleSettings);
+    const mail = parseJson(settings?.mailSettings);
+    const payment = parseJson(settings?.paymentSettings);
+    const invoice = parseJson(settings?.invoiceSettings);
+    const order = parseJson(settings?.orderSettings);
 
     const data = {
       line: {
@@ -283,12 +279,20 @@ export const updateTenantIntegrations = async (req: Request, res: Response) => {
     const { id } = req.params;
     const { line, google, mail, payment, invoice, logistics } = req.body;
 
-    const currentSettings = await (prisma as any).siteSettings.findFirst({
+    let currentSettings = await (prisma as any).siteSettings.findFirst({
       where: { tenantId: id }
     });
 
     if (!currentSettings) {
-      return res.status(404).json({ success: false, error: 'Settings not found' });
+      currentSettings = await (prisma as any).siteSettings.create({
+        data: {
+          id: require('crypto').randomUUID(),
+          tenantId: id,
+          siteName: 'Shutter',
+          siteTitle: 'Shutter - Order Online',
+          colorPrimary: '#ea580c'
+        }
+      });
     }
 
     const currentLine = parseJson(currentSettings.lineSettings);
