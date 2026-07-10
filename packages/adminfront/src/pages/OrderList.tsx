@@ -15,7 +15,10 @@ interface Order {
   total: number;
   createdAt: string;
   scheduledAt: string | null;
-  customer: { id: string; name: string; email: string } | null;
+  customer: { id: string; name: string; email: string; phone?: string | null } | null;
+  guestName?: string | null;
+  guestPhone?: string | null;
+  guestEmail?: string | null;
   location: { id: string; name: string };
   table?: { id: string; name: string } | null;
   _count: { items: number };
@@ -375,7 +378,12 @@ export default function OrderList() {
                       )}
                     </td>
                     <td className="px-4 py-3">
-                      {order.customer ? order.customer.name : <span className="text-gray-400">{t('common.guest') || t('orderList.guest')}</span>}
+                      <div className="flex flex-col gap-1">
+                        <span>{order.customer?.name || order.guestName || <span className="text-gray-400">{t('common.guest') || t('orderList.guest')}</span>}</span>
+                        {(order.customer?.phone || order.guestPhone) && (
+                          <span className="text-[10px] text-gray-500">{order.customer?.phone || order.guestPhone}</span>
+                        )}
+                      </div>
                     </td>
                     <td className="px-4 py-3">
                       <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${order.orderType === 'DELIVERY' ? 'bg-blue-100 text-blue-700' : order.orderType === 'FROZEN_DELIVERY' ? 'bg-purple-100 text-purple-700' : 'bg-green-100 text-green-700'
@@ -456,8 +464,11 @@ export default function OrderList() {
                         </span>
                       )}
                     </span>
-                    <span className="text-sm font-bold text-gray-900">
-                      {order.customer ? order.customer.name : <span className="text-gray-400 font-normal">{t('common.guest') || t('orderList.guest')}</span>}
+                    <span className="text-sm font-bold text-gray-900 flex items-center gap-2">
+                      {order.customer?.name || order.guestName || <span className="text-gray-400 font-normal">{t('common.guest') || t('orderList.guest')}</span>}
+                      {(order.customer?.phone || order.guestPhone) && (
+                        <span className="text-[10px] text-blue-600 font-bold">{order.customer?.phone || order.guestPhone}</span>
+                      )}
                     </span>
                     {order.scheduledAt && (
                       <span className="text-[10px] text-indigo-600 font-semibold flex items-center gap-1">
