@@ -385,20 +385,44 @@ export const updateTenantIntegrations = async (req: Request, res: Response) => {
           const port = isProd ? '' : ':5173';
           const approvalLink = `${protocol}://${hostname}${port}/approve-integrations?token=${token}`;
           
+          // Fetch global settings for custom template
+          const globalSettings = await (prisma as any).siteSettings.findUnique({
+            where: { id: 'default' }
+          });
+          const mailSettings = typeof globalSettings?.mailSettings === 'string'
+            ? JSON.parse(globalSettings.mailSettings)
+            : (globalSettings?.mailSettings || {});
+            
+          const template = mailSettings.integrationUpdateEmailTemplate;
+          
           tenantStorage.run({ tenantId: null }, () => {
             for (const admin of tenantAdmins) {
-              sendEmail({
-                to: admin.email,
-                subject: 'SaaS 平台系統通知：整合金鑰設定審核',
-                html: `<div style="font-family: sans-serif; padding: 20px;">
+              const defaultSubject = 'SaaS 平台系統通知：整合金鑰設定審核';
+              const defaultHtml = `<div style="font-family: sans-serif; padding: 20px;">
                         <h2>整合金鑰更新確認</h2>
                         <p>親愛的 ${admin.name}，您好：</p>
-                        <p>系統管理員為您的餐廳配置了新的第三方整合金鑰（LINE, Google, 信箱或金流）。</p>
+                        <p>系統管理員為您的餐廳配置了新的第三方整合金鑰。</p>
                         <p>請點擊下方按鈕進行確認並套用設定：</p>
                         <a href="${approvalLink}" style="display: inline-block; padding: 12px 24px; background-color: #ea580c; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 20px 0;">確認並套用設定</a>
                         <p style="color: #666; font-size: 14px;">如果您沒有提出此要求，請忽略此信件。</p>
                         <p>祝您生意興隆！<br/>夏特點餐系統 團隊</p>
-                       </div>`
+                       </div>`;
+                       
+              let subject = defaultSubject;
+              let htmlBody = defaultHtml;
+              
+              if (template && template.subject && template.body) {
+                subject = template.subject;
+                let rawBody = template.body
+                  .replace(/\{adminName\}/g, admin.name || '')
+                  .replace(/\{approvalLink\}/g, approvalLink);
+                htmlBody = rawBody.replace(/\n/g, '<br/>');
+              }
+              
+              sendEmail({
+                to: admin.email,
+                subject,
+                html: htmlBody
               });
             }
           });

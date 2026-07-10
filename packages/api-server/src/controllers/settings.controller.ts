@@ -443,6 +443,10 @@ const mailSettingsSchema = z.object({
     subject: z.string().optional(),
     body: z.string().optional(),
   }).optional(),
+  integrationUpdateEmailTemplate: z.object({
+    subject: z.string().optional(),
+    body: z.string().optional(),
+  }).optional(),
 });
 
 const lineSettingsSchema = z.object({

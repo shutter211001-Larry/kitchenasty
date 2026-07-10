@@ -76,8 +76,8 @@ export async function getLineStatus(req: Request, res: Response) {
 }
 
 export async function handleWebhook(req: Request, res: Response) {
-  const tenantId = req.params.tenantId;
-  const locationId = req.params.locationId; // Optional
+  const tenantId = req.params.tenantId as string;
+  const locationId = req.params.locationId as string | undefined;
 
   if (!tenantId) {
     return res.status(400).end();
@@ -108,13 +108,21 @@ export async function handleWebhook(req: Request, res: Response) {
   });
 }
 
-async function handleEvent(client: Client, event: WebhookEvent) {
+async function handleEvent(client: Client, event: WebhookEvent, locationId?: string) {
   const userId = event.source.userId;
   if (!userId) return;
 
   // Retrieve LIFF ID & settings for URL fallback
   const settings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
-  const lineSettings = (settings?.lineSettings as any) || {};
+  
+  let lineSettings = (settings?.lineSettings as any) || {};
+  if (locationId && settings?.advancedSettings) {
+    const advanced = settings.advancedSettings as any;
+    if (advanced.locationOverrides && advanced.locationOverrides[locationId]?.lineSettings) {
+      lineSettings = { ...lineSettings, ...advanced.locationOverrides[locationId].lineSettings };
+    }
+  }
+  
   const liffId = lineSettings.liffId || '';
   const storefrontUrl = process.env.STORE_URL_PUBLIC || 'http://localhost:5174';
   const liffUrl = liffId ? `https://liff.line.me/${liffId}` : storefrontUrl;

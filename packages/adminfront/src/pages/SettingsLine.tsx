@@ -7,7 +7,7 @@ import { toast } from "react-hot-toast";
 export default function SettingsLine() {
   const { t } = useTranslation();
 
-  const { token } = useAuth();
+  const { token, user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -116,7 +116,10 @@ export default function SettingsLine() {
     );
   }
 
-  const webhookUrl = `${window.location.origin.replace('admin.', '')}/api/line/webhook`;
+  const backendApi = import.meta.env.VITE_API_URL || 'https://api.shutterorder.pro';
+  const webhookUrl = selectedLocationId 
+    ? `${backendApi}/api/line/webhook/${user?.tenantId}/${selectedLocationId}`
+    : `${backendApi}/api/line/webhook/${user?.tenantId}`;
 
   return (
     <div className="max-w-4xl">

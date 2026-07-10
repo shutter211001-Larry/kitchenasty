@@ -167,6 +167,35 @@ export default function TenantIntegrations() {
         <div className="flex-1 bg-gray-900 border border-gray-800 rounded-2xl p-8 shadow-xl">
           {activeTab === 'line' && (
             <div className="space-y-8 animate-fadeIn">
+              
+              <div className="bg-orange-500/10 border border-orange-500/20 rounded-xl p-5 mb-6">
+                <h3 className="text-orange-400 font-semibold mb-2 flex items-center gap-2">
+                  <MessageSquare className="w-5 h-5" />
+                  LINE Webhook URL (總部預設)
+                </h3>
+                <p className="text-gray-400 text-sm mb-3">
+                  請將以下網址複製並貼上至 LINE Developer Console 的 Webhook URL 欄位。<br/>
+                  <span className="text-orange-300/80">⚠️ 注意：若您的品牌門市為「加盟店或各自擁有獨立官方帳號」，請勿使用此總部預設網址，請登入該品牌的「門市管理後台」取得各門市專屬的 Webhook。</span>
+                </p>
+                <div className="flex items-center gap-3">
+                  <input 
+                    type="text" 
+                    readOnly 
+                    value={`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/line/webhook/${id}`} 
+                    className="flex-1 bg-gray-900 border border-gray-700 rounded-lg px-4 py-2.5 text-gray-300 font-mono text-sm outline-none"
+                  />
+                  <button 
+                    onClick={() => {
+                      navigator.clipboard.writeText(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/line/webhook/${id}`);
+                      toast.success('已複製 Webhook 網址');
+                    }}
+                    className="px-4 py-2.5 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg text-sm font-medium transition-colors border border-gray-700 whitespace-nowrap"
+                  >
+                    複製網址
+                  </button>
+                </div>
+              </div>
+
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold text-white border-b border-gray-800 pb-2">LINE 官方帳號 (Messaging API)</h3>
                 <div className="grid grid-cols-2 gap-5">

@@ -24,6 +24,10 @@ export default function SettingsMail() {
   const [welcomeSubject, setWelcomeSubject] = useState('');
   const [welcomeBody, setWelcomeBody] = useState('');
 
+  // Integration Update Email Template
+  const [integrationSubject, setIntegrationSubject] = useState('');
+  const [integrationBody, setIntegrationBody] = useState('');
+
   // Test Email
   const [testEmail, setTestEmail] = useState('');
   const [testSending, setTestSending] = useState(false);
@@ -42,6 +46,10 @@ export default function SettingsMail() {
         if (mailRes.data.welcomeEmailTemplate) {
           setWelcomeSubject(mailRes.data.welcomeEmailTemplate.subject || '');
           setWelcomeBody(mailRes.data.welcomeEmailTemplate.body || '');
+        }
+        if (mailRes.data.integrationUpdateEmailTemplate) {
+          setIntegrationSubject(mailRes.data.integrationUpdateEmailTemplate.subject || '');
+          setIntegrationBody(mailRes.data.integrationUpdateEmailTemplate.body || '');
         }
       }
       if (googleRes.success && googleRes.data) {
@@ -66,6 +74,10 @@ export default function SettingsMail() {
         welcomeEmailTemplate: {
           subject: welcomeSubject,
           body: welcomeBody
+        },
+        integrationUpdateEmailTemplate: {
+          subject: integrationSubject,
+          body: integrationBody
         }
       };
       
@@ -229,7 +241,35 @@ export default function SettingsMail() {
           </div>
         </div>
 
-        {/* Section 4: Test Email */}
+        {/* Section 4: Integration Update Email Template */}
+        <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 space-y-4">
+          <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+            ✨ 金鑰更新確認信範本
+          </h2>
+          <p className="text-xs text-gray-400">
+            設定當管理員修改品牌金鑰時，發送給品牌擁有者進行確認的通知信。支援以下變數標籤：<br />
+            <span className="text-primary-600 font-mono bg-primary-50 px-1 rounded">{`{adminName}`}</span> 管理員名稱、
+            <span className="text-primary-600 font-mono bg-primary-50 px-1 rounded">{`{approvalLink}`}</span> 確認連結
+          </p>
+
+          <div className="grid grid-cols-1 gap-4">
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1.5">信件主旨</label>
+              <input className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 focus:bg-white focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all duration-200 outline-none placeholder:text-gray-400 shadow-sm" type="text" value={integrationSubject} onChange={(e) => setIntegrationSubject(e.target.value)} placeholder="例：SaaS 平台系統通知：整合金鑰設定審核" />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1.5">信件內容</label>
+              <textarea 
+                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 focus:bg-white focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all duration-200 outline-none placeholder:text-gray-400 shadow-sm min-h-[200px]" 
+                value={integrationBody} 
+                onChange={(e) => setIntegrationBody(e.target.value)} 
+                placeholder="親愛的 {adminName}，您好：&#10;&#10;系統管理員為您的餐廳配置了新的第三方整合金鑰。&#10;請點擊下方按鈕進行確認並套用設定：&#10;&#10;確認連結：{approvalLink}&#10;&#10;祝您生意興隆！"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Section 5: Test Email */}
         <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 space-y-4">
           <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
             ✉️ 發送測試信
