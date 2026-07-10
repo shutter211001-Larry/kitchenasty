@@ -8,7 +8,7 @@ const router = Router();
 router.get('/status', authenticate, requireStaff, getLineStatus);
 
 // Public webhook
-router.post('/webhook/:tenantId', handleWebhook);
+router.post('/webhook/:tenantId/:locationId?', handleWebhook);
 
 // Public login
 router.post('/login', lineLogin);

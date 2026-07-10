@@ -13,6 +13,9 @@ export default function TenantIntegrations() {
   const [activeTab, setActiveTab] = useState<'line' | 'google' | 'mail' | 'invoice' | 'payment' | 'logistics'>('line');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [originalKeys, setOriginalKeys] = useState<typeof keys | null>(null);
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [changedCategories, setChangedCategories] = useState<{ id: string; name: string; icon: any }[]>([]);
 
   const [keys, setKeys] = useState({
     line: {
@@ -52,6 +55,7 @@ export default function TenantIntegrations() {
     try {
       const res = await api.get<{ data: any }>(`/platform-admin/tenants/${id}/integrations`);
       setKeys(res.data);
+      setOriginalKeys(res.data);
     } catch (error) {
       toast.error('無法載入金鑰資料');
     } finally {
@@ -59,7 +63,36 @@ export default function TenantIntegrations() {
     }
   };
 
-  const handleSave = async () => {
+  const tabs = [
+    { id: 'line', name: 'LINE 整合設定', icon: MessageSquare },
+    { id: 'google', name: 'Google API 設定', icon: MapPin },
+    { id: 'mail', name: '電子郵件發送', icon: Mail },
+    { id: 'invoice', name: '電子發票介接', icon: FileText },
+    { id: 'payment', name: '第三方金流', icon: CreditCard },
+    { id: 'logistics', name: '物流與店到店', icon: Truck },
+  ] as const;
+
+  const handleSaveClick = () => {
+    if (!originalKeys) return;
+    
+    const changes = tabs.filter(tab => {
+      const original = originalKeys[tab.id as keyof typeof originalKeys] as any;
+      const current = keys[tab.id as keyof typeof keys] as any;
+      if (!original || !current) return false;
+      return Object.keys(current).some(k => current[k] !== original[k]);
+    });
+
+    if (changes.length === 0) {
+      toast.error('目前沒有任何欄位被修改', { icon: 'ℹ️', duration: 3000 });
+      return;
+    }
+
+    setChangedCategories(changes);
+    setIsConfirmModalOpen(true);
+  };
+
+  const confirmSave = async () => {
+    setIsConfirmModalOpen(false);
     setSaving(true);
     try {
       await api.put(`/platform-admin/tenants/${id}/integrations`, keys);
@@ -82,14 +115,7 @@ export default function TenantIntegrations() {
     }));
   };
 
-  const tabs = [
-    { id: 'line', name: 'LINE 整合設定', icon: MessageSquare },
-    { id: 'google', name: 'Google API 設定', icon: MapPin },
-    { id: 'mail', name: '電子郵件發送', icon: Mail },
-    { id: 'invoice', name: '電子發票介接', icon: FileText },
-    { id: 'payment', name: '第三方金流', icon: CreditCard },
-    { id: 'logistics', name: '物流與店到店', icon: Truck },
-  ] as const;
+
 
   if (loading) {
     return <div className="p-8 text-center text-gray-400 animate-pulse">載入金鑰資料中...</div>;
@@ -110,7 +136,7 @@ export default function TenantIntegrations() {
           <p className="text-gray-400 text-sm mt-1">您正在修改該店家的第三方服務金鑰。隱藏的金鑰會顯示為 ********，若不修改請保持原樣。</p>
         </div>
         <div className="flex gap-3">
-          <button onClick={handleSave} disabled={saving} className="bg-orange-600 hover:bg-orange-700 disabled:opacity-50 text-white px-6 py-3 rounded-xl text-sm font-medium transition-all shadow-lg shadow-orange-600/20 flex items-center gap-2">
+          <button onClick={handleSaveClick} disabled={saving} className="bg-orange-600 hover:bg-orange-700 disabled:opacity-50 text-white px-6 py-3 rounded-xl text-sm font-medium transition-all shadow-lg shadow-orange-600/20 flex items-center gap-2">
             <Save className="w-4 h-4" />
             {saving ? '處理中...' : '儲存並發送確認信給店家'}
           </button>
@@ -408,6 +434,41 @@ export default function TenantIntegrations() {
           )}
         </div>
       </div>
+      {isConfirmModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fadeIn">
+          <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 w-full max-w-md shadow-2xl">
+            <h3 className="text-xl font-bold text-white mb-2">確認發送更動</h3>
+            <p className="text-gray-400 text-sm mb-4">
+              以下模組的設定已被修改，送出後將會發送確認信給該品牌的超級管理員進行最終授權：
+            </p>
+            <ul className="space-y-2 mb-6">
+              {changedCategories.map(cat => {
+                const Icon = cat.icon;
+                return (
+                  <li key={cat.id} className="flex items-center gap-2 text-orange-400 bg-orange-500/10 px-3 py-2 rounded-lg text-sm font-medium border border-orange-500/20">
+                    <Icon className="w-4 h-4" />
+                    {cat.name}
+                  </li>
+                );
+              })}
+            </ul>
+            <div className="flex gap-3 justify-end">
+              <button 
+                onClick={() => setIsConfirmModalOpen(false)}
+                className="px-4 py-2 text-sm font-medium text-gray-400 hover:text-white transition-colors"
+              >
+                取消
+              </button>
+              <button 
+                onClick={confirmSave}
+                className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-xl text-sm font-medium transition-all shadow-lg shadow-orange-600/20"
+              >
+                確認並發送
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

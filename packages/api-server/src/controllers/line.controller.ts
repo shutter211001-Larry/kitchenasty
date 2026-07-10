@@ -76,26 +76,36 @@ export async function getLineStatus(req: Request, res: Response) {
 }
 
 export async function handleWebhook(req: Request, res: Response) {
-  const config = await getLineConfig();
-  if (!config) {
-    console.error('LINE settings not configured');
-    return res.status(200).end(); // Always return 200 to LINE if not configured to avoid retries
-  }
+  const tenantId = req.params.tenantId;
+  const locationId = req.params.locationId; // Optional
 
-  const client = new Client(config);
-  const events: WebhookEvent[] = req.body.events;
-
-  if (!events || !Array.isArray(events)) {
+  if (!tenantId) {
     return res.status(400).end();
   }
 
-  try {
-    await Promise.all(events.map(event => handleEvent(client, event)));
-    res.status(200).json({ success: true });
-  } catch (err) {
-    console.error('LINE Webhook Error:', err);
-    res.status(200).end(); // Return 200 to LINE to acknowledge receipt even on error
-  }
+  // Wrap the entire execution in tenant context so Prisma selects the correct tenant
+  await tenantStorage.run({ tenantId }, async () => {
+    const config = await getLineConfig(locationId);
+    if (!config) {
+      console.error(`LINE settings not configured for tenant ${tenantId} (location: ${locationId || 'default'})`);
+      return res.status(200).end(); // Always return 200 to LINE if not configured to avoid retries
+    }
+
+    const client = new Client(config);
+    const events: WebhookEvent[] = req.body.events;
+
+    if (!events || !Array.isArray(events)) {
+      return res.status(400).end();
+    }
+
+    try {
+      await Promise.all(events.map(event => handleEvent(client, event, locationId)));
+      res.status(200).json({ success: true });
+    } catch (err) {
+      console.error('LINE Webhook Error:', err);
+      res.status(200).end(); // Return 200 to LINE to acknowledge receipt even on error
+    }
+  });
 }
 
 async function handleEvent(client: Client, event: WebhookEvent) {
