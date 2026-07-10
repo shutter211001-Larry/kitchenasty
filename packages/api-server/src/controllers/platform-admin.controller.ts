@@ -10,6 +10,15 @@ export const listTenants = async (req: Request, res: Response) => {
       include: {
         _count: {
           select: { users: true, locations: true, orders: true }
+        },
+        users: {
+          where: { role: 'SUPER_ADMIN' },
+          take: 1,
+          select: {
+            name: true,
+            email: true,
+            phone: true
+          }
         }
       }
     });

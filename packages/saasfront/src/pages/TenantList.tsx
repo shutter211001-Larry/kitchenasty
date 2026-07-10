@@ -17,12 +17,18 @@ interface Tenant {
     locations: number;
     orders: number;
   };
+  users?: {
+    name: string;
+    email: string;
+    phone: string | null;
+  }[];
 }
 
 export default function TenantList() {
   const [tenants, setTenants] = useState<Tenant[]>([]);
   const [loading, setLoading] = useState(true);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const [expandedTenantId, setExpandedTenantId] = useState<string | null>(null);
   const navigate = useNavigate();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -225,8 +231,12 @@ export default function TenantList() {
                 }
 
                 return (
-                  <tr key={t.id} className="hover:bg-gray-800/30 transition-colors group">
-                    <td className="px-6 py-4">
+                  <React.Fragment key={t.id}>
+                    <tr 
+                      className="hover:bg-gray-800/30 transition-colors group cursor-pointer"
+                      onClick={() => setExpandedTenantId(expandedTenantId === t.id ? null : t.id)}
+                    >
+                      <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center text-gray-400 font-medium border border-gray-700">
                           {t.name.charAt(0).toUpperCase()}
@@ -254,7 +264,7 @@ export default function TenantList() {
                         </div>
                         <div className="flex items-center gap-2">
                           <button 
-                            onClick={() => toggleErpAccess(t)}
+                            onClick={(e) => { e.stopPropagation(); toggleErpAccess(t); }}
                             className={`relative inline-flex h-4 w-7 items-center rounded-full transition-colors focus:outline-none ${t.hasErpAccess ? 'bg-indigo-500' : 'bg-gray-700'}`}
                           >
                             <span className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${t.hasErpAccess ? 'translate-x-3.5' : 'translate-x-0.5'}`} />
@@ -269,8 +279,11 @@ export default function TenantList() {
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2">
                         <button
-                          onClick={() => {
-                            if (t.domain) {
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.startsWith('192.168.');
+                            
+                            if (t.domain && !isLocal) {
                               const protocol = t.domain.includes('localhost') ? 'http' : 'https';
                               window.open(`${protocol}://admin.${t.domain}`, '_blank');
                             } else {
@@ -285,7 +298,7 @@ export default function TenantList() {
                         
                         <div className="relative">
                           <button
-                            onClick={() => setOpenMenuId(openMenuId === t.id ? null : t.id)}
+                            onClick={(e) => { e.stopPropagation(); setOpenMenuId(openMenuId === t.id ? null : t.id); }}
                             className="p-1.5 text-gray-400 hover:text-white rounded-md hover:bg-gray-800 transition-colors"
                           >
                             <MoreHorizontal className="w-4 h-4" />
@@ -294,28 +307,28 @@ export default function TenantList() {
                           {openMenuId === t.id && (
                             <div className="absolute right-0 mt-1 w-48 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-50 py-1">
                               <button
-                                onClick={() => navigate(`/tenants/${t.id}/integrations`, { state: { tenantName: t.name } })}
+                                onClick={(e) => { e.stopPropagation(); navigate(`/tenants/${t.id}/integrations`, { state: { tenantName: t.name } }); }}
                                 className="w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white flex items-center gap-2"
                               >
                                 <Key className="w-3.5 h-3.5" />
                                 第三方整合
                               </button>
                               <button
-                                onClick={() => updateDomain(t)}
+                                onClick={(e) => { e.stopPropagation(); updateDomain(t); }}
                                 className="w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white flex items-center gap-2"
                               >
                                 <Globe className="w-3.5 h-3.5" />
                                 編輯網域
                               </button>
                               <button
-                                onClick={() => updateExpiration(t)}
+                                onClick={(e) => { e.stopPropagation(); updateExpiration(t); }}
                                 className="w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white flex items-center gap-2"
                               >
                                 <Edit className="w-3.5 h-3.5" />
                                 編輯到期日
                               </button>
                               <button
-                                onClick={() => toggleStatus(t)}
+                                onClick={(e) => { e.stopPropagation(); toggleStatus(t); }}
                                 className="w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white flex items-center gap-2"
                               >
                                 <Server className="w-3.5 h-3.5" />
@@ -323,7 +336,7 @@ export default function TenantList() {
                               </button>
                               <div className="h-px bg-gray-700 my-1"></div>
                               <button
-                                onClick={() => deleteTenant(t)}
+                                onClick={(e) => { e.stopPropagation(); deleteTenant(t); }}
                                 className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-gray-700 flex items-center gap-2"
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
@@ -334,7 +347,41 @@ export default function TenantList() {
                         </div>
                       </div>
                     </td>
-                  </tr>
+                    </tr>
+                    {expandedTenantId === t.id && (
+                      <tr className="bg-gray-800/40 border-b border-gray-800/50">
+                        <td colSpan={5} className="px-6 py-5">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-sm text-gray-300 px-2">
+                            <div>
+                              <h4 className="font-semibold text-white mb-3 pb-2 border-b border-gray-700">購買者基本資料</h4>
+                              <div className="space-y-2">
+                                <p><span className="text-gray-500 inline-block w-20">姓名：</span> {t.users?.[0]?.name || '未提供'}</p>
+                                <p><span className="text-gray-500 inline-block w-20">信箱：</span> {t.users?.[0]?.email || '未提供'}</p>
+                                <p><span className="text-gray-500 inline-block w-20">電話：</span> {t.users?.[0]?.phone || '未提供'}</p>
+                              </div>
+                            </div>
+                            <div>
+                              <h4 className="font-semibold text-white mb-3 pb-2 border-b border-gray-700">租約與模組狀態</h4>
+                              <div className="space-y-2">
+                                <p>
+                                  <span className="text-gray-500 inline-block w-24">租約狀態：</span> 
+                                  {t.isActive ? <span className="text-emerald-400 font-medium">啟用中</span> : <span className="text-red-400 font-medium">已停權</span>}
+                                </p>
+                                <p>
+                                  <span className="text-gray-500 inline-block w-24">到期日：</span> 
+                                  {t.subscriptionEndsAt ? new Date(t.subscriptionEndsAt).toLocaleDateString() : '無期限'}
+                                </p>
+                                <p>
+                                  <span className="text-gray-500 inline-block w-24">各模組生效：</span> 
+                                  ERP模組 ({t.hasErpAccess ? <span className="text-emerald-400 font-medium">已啟用</span> : <span className="text-gray-500 font-medium">未啟用</span>})
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </React.Fragment>
                 );
               })}
               {tenants.length === 0 && (

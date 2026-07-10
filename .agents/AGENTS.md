@@ -150,3 +150,7 @@ When working on any of these areas, always refer to this architecture to ensure 
 ## 25. 嚴禁無意義圖示與 Emoji (No Meaningless Icons/Emojis)
 **Trigger**: When designing, generating, or modifying User Interface (UI) components or text content.
 **Rule**: You MUST NOT use emojis (like 👥, 🏪, ✅, 🚀, etc.) or unnecessary icons simply for decoration. The project requires a clean, professional, and minimalist aesthetic. Only use standard icons (like Lucide icons) when they carry clear semantic meaning or are necessary for UX (e.g., action buttons). Never clutter text with decorative icons.
+
+## 26. Tailwind 表格下拉選單防裁切 (Dropdown Clipping Prevention)
+**Trigger**: When designing or generating React/Tailwind tables or lists that contain inline absolute-positioned dropdown menus (e.g., action menus for each row).
+**Rule**: You MUST NOT use `overflow-hidden` or `overflow-x-auto` on the immediate table wrapper if the dropdown is rendered inline (without a React Portal). Doing so will clip the dropdown menu. You MUST use `overflow-visible` on the table container and ensure the dropdown has a high `z-index` (e.g., `z-50`).
