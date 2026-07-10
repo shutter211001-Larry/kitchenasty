@@ -105,7 +105,7 @@ export default function TenantCreate() {
               className="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all outline-none"
               placeholder="例如: yummysteak.com"
             />
-            <p className="text-xs text-gray-500 mt-2">若填寫此欄位，系統將優先使用此獨立網域 (如: admin.yummysteak.com)。若不填寫，將使用上方代號產生預設網址。</p>
+            <p className="text-xs text-gray-500 mt-2">若填寫此欄位，系統將優先使用此獨立網域 (後台為 admin.自訂網域)。若不填寫，將使用上方代號產生預設網址 (後台為 代號.admin.shutterorder.pro)。</p>
           </div>
           </div>
         </div>

@@ -28,6 +28,9 @@ export const tenantMiddleware = async (req: Request, res: Response, next: NextFu
   // 讓 admin.yummy-steak.com, store.yummy-steak.com 都能精準對應到 yummy-steak.com
   if (domain) {
     domain = domain.replace(/^(admin|store|erp|www)\./i, '');
+    // 支援 Option A 架構 (例如 demo.admin.shutterorder.pro -> demo.shutterorder.pro)
+    domain = domain.replace(/\.admin\./i, '.');
+    domain = domain.replace(/\.store\./i, '.');
   }
 
   if (!tenantId && domain) {

@@ -285,7 +285,12 @@ export default function TenantList() {
                             
                             if (t.domain && !isLocal) {
                               const protocol = t.domain.includes('localhost') ? 'http' : 'https';
-                              window.open(`${protocol}://admin.${t.domain}`, '_blank');
+                              let adminHost = `admin.${t.domain}`;
+                              if (t.domain.endsWith('.shutterorder.pro')) {
+                                const subdomain = t.domain.replace('.shutterorder.pro', '');
+                                adminHost = `${subdomain}.admin.shutterorder.pro`;
+                              }
+                              window.open(`${protocol}://${adminHost}`, '_blank');
                             } else {
                               const baseUrl = import.meta.env.VITE_ADMIN_URL_PUBLIC || 'http://localhost:5173';
                               window.open(`${baseUrl}?set_tenant_id=${t.id}`, '_blank');
