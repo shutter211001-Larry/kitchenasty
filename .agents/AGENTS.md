@@ -146,3 +146,7 @@ When working on any of these areas, always refer to this architecture to ensure 
 - For backend changes, ensure the server builds or runs (e.g., `npm run build -w packages/api-server`).
 - You MUST wait for the build/test task to finish successfully.
 - ONLY AFTER local verification passes, are you allowed to commit the code, push to the remote repository, and report completion to the user. NEVER push untested code.
+
+## 25. 嚴禁無意義圖示與 Emoji (No Meaningless Icons/Emojis)
+**Trigger**: When designing, generating, or modifying User Interface (UI) components or text content.
+**Rule**: You MUST NOT use emojis (like 👥, 🏪, ✅, 🚀, etc.) or unnecessary icons simply for decoration. The project requires a clean, professional, and minimalist aesthetic. Only use standard icons (like Lucide icons) when they carry clear semantic meaning or are necessary for UX (e.g., action buttons). Never clutter text with decorative icons.
