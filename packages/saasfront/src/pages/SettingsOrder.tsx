@@ -1,4 +1,4 @@
-﻿import { api } from '../lib/api';
+import { api } from '../lib/api';
 import { useTranslation } from 'react-i18next';
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
@@ -28,6 +28,7 @@ export default function SettingsOrder() {
   const [frozenLeadTime, setFrozenLeadTime] = useState(0);
   const [frozenDeliveryFee, setFrozenDeliveryFee] = useState(0);
   const [enableFutureOrdering, setEnableFutureOrdering] = useState(false);
+  const [enableCapacityLimit, setEnableCapacityLimit] = useState(true);
   const [preOpeningBuffer, setPreOpeningBuffer] = useState(30);
   const [postClosingBuffer, setPostClosingBuffer] = useState(30);
   const [timeSlotInterval, setTimeSlotInterval] = useState(15);
@@ -91,6 +92,7 @@ export default function SettingsOrder() {
           if (d.frozenLeadTime !== undefined) setFrozenLeadTime(d.frozenLeadTime);
           if (d.frozenDeliveryFee !== undefined) setFrozenDeliveryFee(d.frozenDeliveryFee);
           if (d.enableFutureOrdering !== undefined) setEnableFutureOrdering(d.enableFutureOrdering);
+          if (d.enableCapacityLimit !== undefined) setEnableCapacityLimit(d.enableCapacityLimit);
           if (d.preOpeningBuffer !== undefined) setPreOpeningBuffer(d.preOpeningBuffer);
           if (d.postClosingBuffer !== undefined) setPostClosingBuffer(d.postClosingBuffer);
           if (d.timeSlotInterval !== undefined) setTimeSlotInterval(d.timeSlotInterval);
@@ -306,6 +308,14 @@ export default function SettingsOrder() {
             title={t('settingsOrder.allowScheduledOrders')}
             checked={enableFutureOrdering}
             onChange={setEnableFutureOrdering}
+            className="bg-transparent border-none p-2"
+          />
+
+          <ToggleRow
+            title={t('settingsOrder.enableCapacityLimit') || '啟用智能產能控制 (防爆單)'}
+            description={t('settingsOrder.enableCapacityLimitDesc') || '根據餐點的製作時間與設定的取餐間隔，自動控管並關閉超出產能的時段。同時預測現場等候時間。'}
+            checked={enableCapacityLimit}
+            onChange={setEnableCapacityLimit}
             className="bg-transparent border-none p-2"
           />
 
