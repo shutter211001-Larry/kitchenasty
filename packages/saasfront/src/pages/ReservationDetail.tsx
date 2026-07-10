@@ -43,14 +43,14 @@ export default function ReservationDetail() {
   const token = localStorage.getItem('token') || '';
 
   useEffect(() => {
-    api.get<any>(`/api/reservations/${id}`)
+    api.get<any>(`/reservations/${id}`)
       .then((res) => {
         return res.json();
       })
       .then((data) => {
         setReservation(data.data);
         // Fetch tables for the location
-        return api.get<any>(`/api/locations/${data.data.location.id}/tables`);
+        return api.get<any>(`/locations/${data.data.location.id}/tables`);
       })
       
       .then((data) => setTables(data.data || []))
@@ -61,7 +61,7 @@ export default function ReservationDetail() {
   async function updateReservation(updates: Record<string, unknown>) {
     setUpdating(true);
     try {
-      const data = await api.patch<any>(`/api/reservations/${id}`, {});
+      const data = await api.patch<any>(`/reservations/${id}`, {});
       setReservation(data.data);
     } catch (err: any) {
       setError(err.message);

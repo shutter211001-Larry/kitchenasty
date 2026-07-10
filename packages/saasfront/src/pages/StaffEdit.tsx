@@ -104,9 +104,9 @@ export default function StaffEdit() {
 
   useEffect(() => {
     Promise.all([
-      api.get<any>(`/api/staff/${id}`),
-      api.get<any>('/api/locations?limit=100'),
-      api.get<any>('/api/job-roles'),
+      api.get<any>(`/staff/${id}`),
+      api.get<any>('/locations?limit=100'),
+      api.get<any>('/job-roles'),
     ])
       .then(([staffData, locData, rolesData]) => {
         if (!staffData.success) throw new Error(staffData.error || 'Failed to load staff');
@@ -162,7 +162,7 @@ export default function StaffEdit() {
     setSaving(true);
 
     try {
-      const data = await api.patch<any>(`/api/staff/${id}`, {});
+      const data = await api.patch<any>(`/staff/${id}`, {});
       navigate('/staff');
     } catch (err: any) {
       setError(err.message);
@@ -175,7 +175,7 @@ export default function StaffEdit() {
     if (!window.confirm(t('staff.deleteConfirm') || 'Are you sure you want to delete this staff member? This action cannot be undone.')) return;
     setDeleting(true);
     try {
-      const data = await api.delete<any>(`/api/staff/${id}`);
+      const data = await api.delete<any>(`/staff/${id}`);
       navigate('/staff');
     } catch (err: any) {
       setError(err.message);

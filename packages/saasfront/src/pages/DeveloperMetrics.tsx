@@ -61,8 +61,8 @@ export default function DeveloperMetrics() {
     const params = new URLSearchParams({ hours: String(hours) });
 
     Promise.all([
-      api.get<any>(`/api/developer/metrics?${params}`),
-      api.get<any>(`/api/developer/metrics/endpoints?${params}`),
+      api.get<any>(`/developer/metrics?${params}`),
+      api.get<any>(`/developer/metrics/endpoints?${params}`),
     ])
       .then(([metricsRes, endpointsRes]) => {
         if (metricsRes.success) {
@@ -91,7 +91,7 @@ export default function DeveloperMetrics() {
             onClick={async () => {
               if (!confirm(t('developerMetrics.confirmSyncDatabase'))) return;
               try {
-                const data = await api.post<any>('/api/developer/sync-db', {});
+                const data = await api.post<any>('/developer/sync-db', {});
                 if (data.success) {
                   alert(t('developerMetrics.databaseSyncSuccess'));
                 } else {
@@ -114,7 +114,7 @@ export default function DeveloperMetrics() {
               if (!confirm(t('developerMetrics.confirmAiTranslation'))) return;
               setSyncingLocales(true);
               try {
-                const data = await api.post<any>('/api/developer/sync-locales', {});
+                const data = await api.post<any>('/developer/sync-locales', {});
                 if (data.success) {
                   alert(`語系同步成功！已補齊 ${data.updatedCount} 筆翻譯。`);
                 } else {

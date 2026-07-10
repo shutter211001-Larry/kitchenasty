@@ -38,7 +38,7 @@ export default function ConsentLog() {
   const token = localStorage.getItem('token') || '';
 
   useEffect(() => {
-    api.get<any>('/api/consent/stats')
+    api.get<any>('/consent/stats')
       
       .then((res) => {
         if (res.success) setStats(res.data);
@@ -51,7 +51,7 @@ export default function ConsentLog() {
     const params = new URLSearchParams({ page: String(page), limit: '20' });
     if (categoryFilter) params.set('categoryId', categoryFilter);
 
-    api.get<any>(`/api/consent?${params}`)
+    api.get<any>(`/consent?${params}`)
       
       .then((res) => {
         if (res.success) {

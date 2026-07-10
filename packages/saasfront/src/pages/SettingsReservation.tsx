@@ -23,7 +23,7 @@ export default function SettingsReservation() {
   const [autoConfirm, setAutoConfirm] = useState(false);
 
   useEffect(() => {
-    api.get<any>('/api/settings/reservation')
+    api.get<any>('/settings/reservation')
       
       .then((res) => {
         if (res.success && res.data) {
@@ -45,7 +45,7 @@ export default function SettingsReservation() {
     setError('');
     setSuccess('');
     try {
-      const data = await api.put<any>('/api/settings/reservation', {});
+      const data = await api.put<any>('/settings/reservation', {});
       if (data.success) {
         setSuccess('Reservation settings updated');
         setTimeout(() => setSuccess(''), 3000);

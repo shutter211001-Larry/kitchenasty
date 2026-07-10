@@ -18,7 +18,7 @@ export default function LegalPageList() {
   const token = localStorage.getItem('token') || '';
 
   useEffect(() => {
-    api.get<any>('/api/legal')
+    api.get<any>('/legal')
       
       .then((res) => {
         if (res.success) setPages(res.data);

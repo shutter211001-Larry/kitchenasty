@@ -207,7 +207,7 @@ export default function CounterDisplay() {
   });
 
   useEffect(() => {
-    api.get<any>('/api/locations?limit=100')
+    api.get<any>('/locations?limit=100')
       
       .then(res => {
         if (res.success && Array.isArray(res.data)) {
@@ -253,7 +253,7 @@ export default function CounterDisplay() {
     if (localLeadTime !== null) {
       setBoardLeadTime(parseInt(localLeadTime) || 60);
     } else {
-      api.get<any>('/api/settings/order')
+      api.get<any>('/settings/order')
         
         .then(res => {
           if (res.success && res.data && res.data.boardLeadTime !== undefined) {

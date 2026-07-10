@@ -31,7 +31,7 @@ export default function SettingsPayments() {
   const [cashEnabled, setCashEnabled] = useState(true);
 
   useEffect(() => {
-    api.get<any>('/api/settings/payment')
+    api.get<any>('/settings/payment')
       
       .then((res) => {
         if (res.success && res.data) {
@@ -56,7 +56,7 @@ export default function SettingsPayments() {
     setError('');
     setSuccess('');
     try {
-      const data = await api.put<any>('/api/settings/payment', {});
+      const data = await api.put<any>('/settings/payment', {});
       if (data.success) {
         if (data.data) {
           if (data.data.stripeSecretKey) setStripeSecretKey(data.data.stripeSecretKey);

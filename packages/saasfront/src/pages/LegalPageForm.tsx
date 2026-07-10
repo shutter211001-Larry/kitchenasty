@@ -14,7 +14,7 @@ export default function LegalPageForm() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    api.get<any>(`/api/legal/${slug}`)
+    api.get<any>(`/legal/${slug}`)
       
       .then((res) => {
         if (res.success && res.data) {
@@ -35,7 +35,7 @@ export default function LegalPageForm() {
     setError('');
 
     try {
-      const data = await api.put<any>(`/api/legal/${slug}`, {});
+      const data = await api.put<any>(`/legal/${slug}`, {});
       if (data.success) {
         navigate('/legal/pages');
       } else {

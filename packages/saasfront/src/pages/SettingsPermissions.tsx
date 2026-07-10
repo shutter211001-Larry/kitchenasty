@@ -27,7 +27,7 @@ export default function SettingsPermissions() {
   });
 
   useEffect(() => {
-    api.get<any>('/api/settings/general')
+    api.get<any>('/settings/general')
       
       .then(res => {
         if (res.success && res.data) {
@@ -45,7 +45,7 @@ export default function SettingsPermissions() {
     setError('');
     setSuccess('');
     try {
-      const data = await api.put<any>('/api/settings/general', {});
+      const data = await api.put<any>('/settings/general', {});
       if (data.success) {
         setSuccess(t('settingsPermissions.permissionsUpdated'));
         setTimeout(() => setSuccess(''), 3000);

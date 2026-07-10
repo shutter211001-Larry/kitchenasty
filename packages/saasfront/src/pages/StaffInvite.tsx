@@ -22,7 +22,7 @@ export default function StaffInvite() {
     setLoading(true);
 
     try {
-      const data = await api.post<any>('/api/staff/invite', {});
+      const data = await api.post<any>('/staff/invite', {});
       setSuccess(true);
     } catch (err: any) {
       setError(err.message);

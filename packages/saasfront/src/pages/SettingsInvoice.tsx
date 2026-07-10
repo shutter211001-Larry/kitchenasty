@@ -21,7 +21,7 @@ export default function SettingsInvoice() {
   const [hashIv, setHashIv] = useState('');
 
   useEffect(() => {
-    api.get<any>('/api/settings/invoice')
+    api.get<any>('/settings/invoice')
       
       .then((res) => {
         if (res.success && res.data) {
@@ -41,7 +41,7 @@ export default function SettingsInvoice() {
     setError('');
     setSuccess('');
     try {
-      const data = await api.put<any>('/api/settings/invoice', {});
+      const data = await api.put<any>('/settings/invoice', {});
       if (data.success) {
         if (data.data?.hashKey) setHashKey(data.data.hashKey);
         if (data.data?.hashIv) setHashIv(data.data.hashIv);

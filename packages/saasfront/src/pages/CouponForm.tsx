@@ -62,7 +62,7 @@ export default function CouponForm() {
 
     if (!id) return;
     setLoading(true);
-    api.get<any>(`/api/coupons/${id}`)
+    api.get<any>(`/coupons/${id}`)
       .then((res) => {
         return res.json();
       })

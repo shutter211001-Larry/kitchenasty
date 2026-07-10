@@ -133,7 +133,7 @@ export default function AdminChatWidget() {
     setInput('');
 
     try {
-      const data = await api.post<any>('/api/chat/messages', {});
+      const data = await api.post<any>('/chat/messages', {});
       if (!data.success) {
         console.error('Failed to send message:', data.message);
       }

@@ -152,7 +152,7 @@ export default function KitchenDisplay() {
   });
 
   useEffect(() => {
-    api.get<any>('/api/locations?limit=100')
+    api.get<any>('/locations?limit=100')
       
       .then(res => {
         if (res.success && Array.isArray(res.data)) {
@@ -174,7 +174,7 @@ export default function KitchenDisplay() {
     }
 
     if (localLeadTime === null || localCounter === null) {
-      api.get<any>('/api/settings/order')
+      api.get<any>('/settings/order')
         
         .then(res => {
           if (res.success && res.data) {

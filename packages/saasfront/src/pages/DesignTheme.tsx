@@ -62,7 +62,7 @@ export default function DesignTheme() {
   const [darkMode, setDarkMode] = useState<'light' | 'dark' | 'system'>('light');
 
   useEffect(() => {
-    api.get<any>('/api/settings')
+    api.get<any>('/settings')
       
       .then((res) => {
         if (res.success && res.data) {
@@ -80,7 +80,7 @@ export default function DesignTheme() {
     setError('');
     setSuccess('');
     try {
-      const data = await api.put<any>('/api/settings', {});
+      const data = await api.put<any>('/settings', {});
       if (data.success) {
         setSuccess(t('designTheme.themeSettingsUpdated'));
         setTimeout(() => setSuccess(''), 3000);

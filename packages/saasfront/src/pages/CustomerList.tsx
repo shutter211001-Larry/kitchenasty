@@ -61,7 +61,7 @@ export default function CustomerList() {
     if (search) params.set('search', search);
     if (isGuestFilter) params.set('isGuest', isGuestFilter);
 
-    api.get<any>(`/api/customers?${params}`)
+    api.get<any>(`/customers?${params}`)
       .then((res) => {
         return res.json();
       })
@@ -82,7 +82,7 @@ export default function CustomerList() {
     setPromoSending(true);
     setPromoStatus('');
     try {
-      const data = await api.post<any>('/api/customers/promo-email', {});
+      const data = await api.post<any>('/customers/promo-email', {});
       setPromoStatus('success');
       setPromoSubject('');
       setPromoContent('');
@@ -114,7 +114,7 @@ export default function CustomerList() {
     if (!editingCustomer) return;
     setEditLoading(true);
     try {
-      const res = await api.get<any>(`/api/customers/${editingCustomer.id}`);
+      const res = await api.get<any>(`/customers/${editingCustomer.id}`);
       setShowEditModal(false);
       fetchCustomers();
     } catch (err: any) {
@@ -128,7 +128,7 @@ export default function CustomerList() {
     if (!deletingId) return;
     setDeleteLoading(true);
     try {
-      const res = await api.get<any>(`/api/customers/${deletingId}`);
+      const res = await api.get<any>(`/customers/${deletingId}`);
       setShowDeleteModal(false);
       fetchCustomers();
     } catch (err: any) {

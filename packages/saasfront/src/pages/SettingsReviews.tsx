@@ -21,7 +21,7 @@ export default function SettingsReviews() {
   const [minimumRating, setMinimumRating] = useState(1);
 
   useEffect(() => {
-    api.get<any>('/api/settings/review')
+    api.get<any>('/settings/review')
       
       .then((res) => {
         if (res.success && res.data) {
@@ -41,7 +41,7 @@ export default function SettingsReviews() {
     setError('');
     setSuccess('');
     try {
-      const data = await api.put<any>('/api/settings/review', {});
+      const data = await api.put<any>('/settings/review', {});
       if (data.success) {
         setSuccess(t('settingsReviews.reviewSettingsUpdated'));
         setTimeout(() => setSuccess(''), 3000);

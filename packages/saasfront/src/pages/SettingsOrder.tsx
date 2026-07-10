@@ -63,7 +63,7 @@ export default function SettingsOrder() {
   const [ecpayHashIv, setEcpayHashIv] = useState('');
 
   useEffect(() => {
-    api.get<any>('/api/settings/order')
+    api.get<any>('/settings/order')
       
       .then((res) => {
         if (res.success && res.data) {
@@ -116,7 +116,7 @@ export default function SettingsOrder() {
     setSuccess('');
     const tipOptions = tipOptionsStr.split(',').map((s) => parseFloat(s.trim())).filter((n) => !isNaN(n));
     try {
-      const data = await api.put<any>('/api/settings/order', {});
+      const data = await api.put<any>('/settings/order', {});
       if (data.success) {
         setSuccess(t('settingsOrder.orderSettingsUpdated'));
         setTimeout(() => setSuccess(''), 3000);

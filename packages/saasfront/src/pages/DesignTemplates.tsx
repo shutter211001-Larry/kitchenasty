@@ -306,7 +306,7 @@ export default function DesignTemplates() {
   const [current, setCurrent] = useState('classic');
 
   useEffect(() => {
-    api.get<any>('/api/settings')
+    api.get<any>('/settings')
       
       .then((res) => {
         if (res.success && res.data) {
@@ -322,7 +322,7 @@ export default function DesignTemplates() {
     setError('');
     setSuccess('');
     try {
-      const data = await api.put<any>('/api/settings', {});
+      const data = await api.put<any>('/settings', {});
       if (data.success) {
         setCurrent(id);
         setSuccess(`模板 "${templates.find((t) => t.id === id)?.name}" 已成功套用`);

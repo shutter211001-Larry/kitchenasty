@@ -12,7 +12,7 @@ function IPBlacklistManager({ token }: { token: string }) {
   const [loading, setLoading] = useState(false);
 
   const fetchList = () => {
-    api.get<any>('/api/settings/ip-blacklist')
+    api.get<any>('/settings/ip-blacklist')
       
       .then(res => { if (res.success) setList(res.data); });
   };
@@ -92,7 +92,7 @@ export default function SettingsAdvanced() {
   const [inventorySyncFrequency, setInventorySyncFrequency] = useState('6h');
 
   useEffect(() => {
-    api.get<any>('/api/settings/advanced')
+    api.get<any>('/settings/advanced')
       
       .then((res) => {
         if (res.success && res.data) {
@@ -112,7 +112,7 @@ export default function SettingsAdvanced() {
     setError('');
     setSuccess('');
     try {
-      const data = await api.get<any>('/api/settings/advanced');
+      const data = await api.get<any>('/settings/advanced');
       if (data.success) {
         setSuccess('進階設定已更新');
         setTimeout(() => setSuccess(''), 3000);

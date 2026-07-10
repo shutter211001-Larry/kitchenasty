@@ -22,7 +22,7 @@ export default function DesignBranding() {
   const faviconInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    api.get<any>('/api/settings')
+    api.get<any>('/settings')
       
       .then((res) => {
         if (res.success && res.data) {
@@ -42,7 +42,7 @@ export default function DesignBranding() {
     setError('');
     setSuccess('');
     try {
-      const data = await api.put<any>('/api/settings', {});
+      const data = await api.put<any>('/settings', {});
       if (data.success) {
         setSuccess(t('designBranding.brandSettingsUpdated'));
         setTimeout(() => setSuccess(''), 3000);
@@ -61,7 +61,7 @@ export default function DesignBranding() {
     formData.append(type, file);
 
     try {
-      const data = await api.post<any>(`/api/settings/${type}`, {});
+      const data = await api.post<any>(`/settings/${type}`, {});
       if (data.success && data.data) {
         if (type === 'logo') setLogo(getFullUrl(data.data.logo));
         else setFavicon(getFullUrl(data.data.favicon));

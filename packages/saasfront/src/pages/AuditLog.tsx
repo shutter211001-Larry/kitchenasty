@@ -47,7 +47,7 @@ export default function AuditLog() {
     if (actionFilter) params.set('action', actionFilter);
     if (search) params.set('search', search);
 
-    api.get<any>(`/api/developer/audit-logs?${params}`)
+    api.get<any>(`/developer/audit-logs?${params}`)
       
       .then((res) => {
         if (res.success) {
