@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext.js';
 import { api } from '../lib/api.js';
 import { PageHeader } from '../components/layout/PageHeader';
 import { PageContent } from '../components/layout/PageContent';
+import { toast } from "react-hot-toast";
 
 interface Order {
   id: string;
@@ -51,6 +52,9 @@ export default function OrderList() {
   const [page, setPage] = useState(1);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [deleteTimeoutId, setDeleteTimeoutId] = useState<number | null>(null);
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [exportStartDate, setExportStartDate] = useState(() => new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
+  const [exportEndDate, setExportEndDate] = useState(() => new Date().toISOString().split('T')[0]);
   const [statusFilter, setStatusFilter] = useState('');
   const [typeFilter, setTypeFilter] = useState('');
   const { user } = useAuth();
@@ -122,24 +126,23 @@ export default function OrderList() {
   }
 
   async function handleExport() {
-    const startDate = prompt(t('orderList.enterStartDate'), new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
-    const endDate = prompt(t('orderList.enterEndDate'), new Date().toISOString().split('T')[0]);
-
-    if (!startDate || !endDate) return;
+    if (!exportStartDate || !exportEndDate) return;
+    setShowExportModal(false);
 
     try {
       setLoading(true);
-      const res = await api.get(`orders/export?startDate=${startDate}&endDate=${endDate}`);
+      const res = await api.get(`orders/export?startDate=${exportStartDate}&endDate=${exportEndDate}`);
       const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `orders_${startDate}_${endDate}.xlsx`;
+      a.download = `orders_${exportStartDate}_${exportEndDate}.csv`;
       document.body.appendChild(a);
       a.click();
       a.remove();
+      window.URL.revokeObjectURL(url);
     } catch (err: any) {
-      setError(err.message);
+      toast.error(err.message);
     } finally {
       setLoading(false);
     }
@@ -155,7 +158,7 @@ export default function OrderList() {
     try {
       setLoading(true);
       const res = await api.upload<{ data: { success: number, failed: number, errors: string[] } }>('/orders/import', formData);
-      alert(`匯入完成！成功: ${res.data.success}, 失敗: ${res.data.failed}`);
+      toast.error(`匯入完成！成功: ${res.data.success}, 失敗: ${res.data.failed}`);
       if (res.data.errors.length > 0) {
         console.error('Import errors:', res.data.errors);
       }
@@ -192,7 +195,7 @@ export default function OrderList() {
       setLoading(true);
       const res = await api.post('orders/reminders');
       const data = res;
-      alert(`提醒已發送！\n${data.data.message}`);
+      toast.error(`提醒已發送！\n${data.data.message}`);
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -221,7 +224,7 @@ export default function OrderList() {
             <div className="grid grid-cols-2 sm:flex sm:flex-row items-center gap-2 w-full sm:w-auto">
               {canManage && (
                 <button
-                  onClick={handleExport}
+                  onClick={() => setShowExportModal(true)}
                   className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-700 transition-colors flex items-center justify-center gap-2 w-full sm:w-auto text-center shadow-sm"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -518,6 +521,48 @@ export default function OrderList() {
             </div>
           )}
         </>
+      )}
+
+      {showExportModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-slate-900 border border-slate-700 rounded-xl max-w-sm w-full p-6 shadow-2xl">
+            <h3 className="text-lg font-medium text-white mb-4">{t('orderList.exportOrders')}</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm text-slate-400 mb-1">{t('orderList.enterStartDate')}</label>
+                <input
+                  type="date"
+                  value={exportStartDate}
+                  onChange={(e) => setExportStartDate(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white"
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-slate-400 mb-1">{t('orderList.enterEndDate')}</label>
+                <input
+                  type="date"
+                  value={exportEndDate}
+                  onChange={(e) => setExportEndDate(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-3 mt-6">
+              <button
+                onClick={() => setShowExportModal(false)}
+                className="px-4 py-2 text-sm text-slate-300 hover:text-white transition-colors"
+              >
+                {t('common.cancel')}
+              </button>
+              <button
+                onClick={handleExport}
+                className="px-4 py-2 text-sm bg-primary-600 text-white rounded-lg hover:bg-primary-500 transition-colors"
+              >
+                {t('common.export')}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
       </PageContent>
     </div>

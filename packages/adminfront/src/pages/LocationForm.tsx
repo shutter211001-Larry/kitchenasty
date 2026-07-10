@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext.js';
 import { OpenLocationCode } from 'open-location-code';
 import { PageHeader } from '../components/layout/PageHeader';
 import { PageContent } from '../components/layout/PageContent';
+import { confirm } from "../lib/confirm";
 
 interface OperatingHour {
   dayOfWeek: number;
@@ -107,7 +108,7 @@ export default function LocationForm() {
   const [activeTab, setActiveTab] = useState<'basic' | 'hours' | 'hr' | 'delivery'>('basic');
 
   const handleDelete = async () => {
-    if (!window.confirm(t('locationForm.confirmDeleteStore'))) {
+    if (!await confirm(t('locationForm.confirmDeleteStore'))) {
       return;
     }
     setDeleting(true);

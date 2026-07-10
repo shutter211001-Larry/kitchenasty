@@ -3,6 +3,8 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../lib/api.js';
 import { getFullUrl } from '../utils/url.js';
+import { confirm } from "../lib/confirm";
+import { toast } from "react-hot-toast";
 
 interface MenuItem {
   id: string;
@@ -65,12 +67,12 @@ export default function MenuItemList() {
   }, [search, categoryFilter]);
 
   const handleDelete = async (id: string, name: string) => {
-    if (!confirm(`確定要刪除產品 "${name}" 嗎？`)) return;
+    if (!await confirm(`確定要刪除產品 "${name}" 嗎？`)) return;
     try {
       await api.delete(`/menu/items/${id}`);
       fetchItems(pagination.page);
     } catch (err: any) {
-      alert(err.message);
+      toast.error(err.message);
     }
   };
 

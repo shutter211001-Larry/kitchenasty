@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api } from '../lib/api.js';
+import { toast } from "react-hot-toast";
 
 interface StaffRosterSettingsModalProps {
   isOpen: boolean;
@@ -64,10 +65,10 @@ export default function StaffRosterSettingsModal({ isOpen, onClose, locationId }
         availabilities,
         timeOffs,
       });
-      alert(t('staff.actions.saveSuccess') || '儲存成功！');
+      toast.error(t('staff.actions.saveSuccess') || '儲存成功！');
     } catch (err) {
       console.error(err);
-      alert('儲存失敗');
+      toast.error('儲存失敗');
     } finally {
       setSaving(false);
     }

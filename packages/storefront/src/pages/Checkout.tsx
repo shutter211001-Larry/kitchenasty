@@ -1,4 +1,4 @@
-﻿import { api } from '../lib/api';
+import { api } from '../lib/api';
 import { useState, useEffect, FormEvent, useRef } from 'react';
 import { API_BASE } from '../lib/api.js';
 import { Link, useNavigate } from 'react-router-dom';
@@ -11,6 +11,7 @@ import { getTranslated } from '../utils/translation.js';
 import { useRecentOrders } from '../hooks/useRecentOrders.js';
 import { formatToLocalDate, formatToLocalTime, formatToFullDateTime, getDateFriendlyLabel } from '../utils/date.js';
 import taiwanDistricts from '../lib/taiwan-districts.json';
+import { confirm } from "../lib/confirm";
 
 type OrderType = 'delivery' | 'pickup' | 'frozen_delivery';
 type PaymentMethod = 'cash' | 'stripe' | 'paypal' | 'linepay';
@@ -234,7 +235,7 @@ export default function Checkout() {
   // Check busy mode on mount
   useEffect(() => {
     fetch(`${API_BASE}/locations`)
-      
+      .then(res => res.json())
       .then((data) => {
         const loc = data.data?.[0];
         if (loc) {
@@ -256,7 +257,7 @@ export default function Checkout() {
   useEffect(() => {
     if (locationId && orderSettings?.enableFutureOrdering) {
       fetch(`${API_BASE}/locations/${locationId}/available-slots?orderType=${orderType}`)
-        
+        .then(res => res.json())
         .then((data) => {
           if (data.success) {
             setSlotsByDay(data.data);
@@ -309,7 +310,7 @@ export default function Checkout() {
       fetch(`${API_BASE}/loyalty/balance`, {
         headers: { Authorization: `Bearer ${token}` },
       })
-        
+        .then(res => res.json())
         .then((data) => {
           if (data.success) setLoyaltyBalance(data.data.points);
         })
@@ -670,8 +671,8 @@ export default function Checkout() {
               ) : (
                 <button 
                   type="button" 
-                  onClick={() => {
-                    if(window.confirm(t('groupOrder.confirmLeaveGroup'))) {
+                  onClick={async () => {
+                    if(await confirm(t('groupOrder.confirmLeaveGroup'))) {
                       setGroupSession(null, null);
                     }
                   }}

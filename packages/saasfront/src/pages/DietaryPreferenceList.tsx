@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api } from '../lib/api.js';
+import { confirm } from "../lib/confirm";
+import { toast } from "react-hot-toast";
 
 interface DietaryPreference {
   id: string;
@@ -60,19 +62,19 @@ export default function DietaryPreferenceList() {
       setIsAdding(false);
       fetchPreferences();
     } catch (err: any) {
-      alert(err.message);
+      toast.error(err.message);
     } finally {
       setIsSaving(false);
     }
   }
 
   async function handleDelete(id: string) {
-    if (!confirm(t('dietaryPreferenceList.confirmDeleteDietary'))) return;
+    if (!await confirm(t('dietaryPreferenceList.confirmDeleteDietary'))) return;
     try {
       await api.delete(`/menu/dietary/${id}`);
       fetchPreferences();
     } catch (err: any) {
-      alert(err.message);
+      toast.error(err.message);
     }
   }
 

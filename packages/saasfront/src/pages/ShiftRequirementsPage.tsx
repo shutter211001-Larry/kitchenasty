@@ -6,6 +6,7 @@ import { api } from '../lib/api.js';
 import { useAuth } from '../context/AuthContext.js';
 import { Calendar as CalendarIcon, Clock, Plus, Trash2, Save, ArrowLeft } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
+import { toast } from "react-hot-toast";
 
 interface JobRole {
   id: string;
@@ -79,17 +80,17 @@ export function ShiftRequirementsPage() {
         locationId,
         requirements: weeklyReqs
       });
-      alert('每週範本已儲存');
+      toast.error('每週範本已儲存');
     } catch (err) {
       console.error(err);
-      alert('儲存失敗');
+      toast.error('儲存失敗');
     } finally {
       setSaving(false);
     }
   };
 
   const addWeeklyReq = (dayOfWeek: number) => {
-    if (jobRoles.length === 0) return alert('請先設定職位');
+    if (jobRoles.length === 0) return toast.error('請先設定職位');
     setWeeklyReqs([...weeklyReqs, { dayOfWeek, jobRoleId: jobRoles[0].id, startTime: '09:00', endTime: '18:00', count: 1 }]);
   };
 
@@ -144,7 +145,7 @@ export function ShiftRequirementsPage() {
   };
 
   const addDateReq = () => {
-    if (jobRoles.length === 0) return alert('請先設定職位');
+    if (jobRoles.length === 0) return toast.error('請先設定職位');
     setDateReqs([...dateReqs, { jobRoleId: jobRoles[0].id, startTime: '09:00', endTime: '18:00', count: 1 }]);
   };
 
@@ -167,10 +168,10 @@ export function ShiftRequirementsPage() {
         requirements: dateReqs
       });
       setIsOverride(true);
-      alert(`${selectedDate} 需求已儲存 (已覆蓋範本)`);
+      toast.error(`${selectedDate} 需求已儲存 (已覆蓋範本)`);
     } catch (err) {
       console.error(err);
-      alert('儲存失敗');
+      toast.error('儲存失敗');
     } finally {
       setSaving(false);
     }

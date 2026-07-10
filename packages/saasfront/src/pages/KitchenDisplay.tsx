@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useTranslation } from 'react-i18next';
 import { api } from '../lib/api.js';
+import { confirm } from "../lib/confirm";
 
 interface OrderItem {
   id: string;
@@ -480,9 +481,9 @@ export default function KitchenDisplay() {
                             </span>
                             <span className="ml-2 text-gray-400">{t('kitchen.itemsCount', { count: order.items.length })}</span>
                             <button
-                              onClick={(e) => {
+                              onClick={async (e) => {
                                 e.stopPropagation();
-                                if (window.confirm(t('kitchen.cancelConfirm'))) {
+                                if (await confirm(t('kitchen.cancelConfirm'))) {
                                   handleStatusUpdate(order.id, 'CANCELLED');
                                 }
                               }}
@@ -760,7 +761,7 @@ export default function KitchenDisplay() {
                         <button
                           onClick={async (e) => {
                             e.stopPropagation();
-                            if (window.confirm(t('kitchenDisplay.confirmCancelOrder'))) {
+                            if (await confirm(t('kitchenDisplay.confirmCancelOrder'))) {
                               handleStatusUpdate(order.id, 'CANCELLED');
                             }
                           }}

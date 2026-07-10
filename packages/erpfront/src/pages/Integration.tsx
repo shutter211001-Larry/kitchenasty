@@ -4,6 +4,9 @@ import axios from "axios";
 import { Search, Workflow, Database, Calendar, ShoppingBag, CheckCircle2, AlertOctagon, Save, Link2, Unlink, TrendingUp, RefreshCw, AlertTriangle, Truck, ArrowRight, Sparkles } from "lucide-react";
 import { formatUnit } from "../lib/utils";
 import { useTranslation } from "react-i18next";
+import { confirm } from "../lib/confirm";
+import { toast } from "react-hot-toast";
+
 interface MenuItem {
   id: string;
   name: string;
@@ -169,7 +172,7 @@ const Integration = () => {
 
   // Remove binding mapping
   const handleRemoveBinding = async (menuItemId: string, menuItemName: string) => {
-    if (!confirm(`確定要解除「${menuItemName}」的食譜綁定嗎？\n解除後，該商品的線上訂單將不再自動扣減中央廚房庫存。`)) return;
+    if (!await confirm(`確定要解除「${menuItemName}」的食譜綁定嗎？\n解除後，該商品的線上訂單將不再自動扣減中央廚房庫存。`)) return;
     try {
       setRefreshing(true);
       await axios.delete(`http://localhost:3000/api/integration/mappings/${menuItemId}`);
@@ -185,7 +188,7 @@ const Integration = () => {
 
   // Alert Supplier Simulation
   const handleAlertSupplier = (ingredientName: string, amount: number, unit: string) => {
-    alert(`【採購請求送出】\n已自動向預設供應商發送「${ingredientName}」的緊急採購單！\n預計補貨數量：${Math.ceil(amount * 1.5)} ${unit}（含安全備料）`);
+    toast.error(`【採購請求送出】\n已自動向預設供應商發送「${ingredientName}」的緊急採購單！\n預計補貨數量：${Math.ceil(amount * 1.5)} ${unit}（含安全備料）`);
     triggerAlert("success", `已送出「${ingredientName}」緊急採購通知！`);
   };
 

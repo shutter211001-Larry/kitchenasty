@@ -6,6 +6,7 @@ import { ToggleSwitch } from '../components/ui/ToggleRow';
 import { useTranslation } from 'react-i18next';
 import { PageHeader } from '../components/layout/PageHeader';
 import { PageContent } from '../components/layout/PageContent';
+import { confirm } from "../lib/confirm";
 
 interface Staff {
   id: string;
@@ -172,7 +173,7 @@ export default function StaffEdit() {
   }
 
   async function handleDelete() {
-    if (!window.confirm(t('staff.deleteConfirm') || 'Are you sure you want to delete this staff member? This action cannot be undone.')) return;
+    if (!await confirm(t('staff.deleteConfirm') || 'Are you sure you want to delete this staff member? This action cannot be undone.')) return;
     setDeleting(true);
     try {
       const data = await api.delete<any>(`/staff/${id}`);

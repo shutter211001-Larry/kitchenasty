@@ -2,6 +2,8 @@ import { useTranslation } from 'react-i18next';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../lib/api.js';
+import { confirm } from "../lib/confirm";
+import { toast } from "react-hot-toast";
 
 interface Category {
   id: string;
@@ -34,12 +36,12 @@ export default function CategoryList() {
   const topLevel = categories.filter((c) => !c.parentId);
 
   const handleDelete = async (id: string, name: string) => {
-    if (!confirm(`確定要刪除分類 "${name}" 嗎？`)) return;
+    if (!await confirm(`確定要刪除分類 "${name}" 嗎？`)) return;
     try {
       await api.delete(`/menu/categories/${id}`);
       setCategories((prev) => prev.filter((c) => c.id !== id));
     } catch (err: any) {
-      alert(err.message);
+      toast.error(err.message);
     }
   };
 

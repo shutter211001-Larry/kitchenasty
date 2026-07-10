@@ -2,6 +2,8 @@ import { useTranslation } from 'react-i18next';
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../lib/api.js';
+import { confirm } from "../lib/confirm";
+import { toast } from "react-hot-toast";
 
 interface Coupon {
   id: string;
@@ -65,13 +67,13 @@ export default function CouponList() {
   }
 
   async function handleDelete(id: string, code: string) {
-    if (!window.confirm(`您確定要刪除優惠券 ${code} 嗎？此操作將無法復原。`)) return;
+    if (!await confirm(`您確定要刪除優惠券 ${code} 嗎？此操作將無法復原。`)) return;
     try {
       const res = await api.delete(`coupons/${id}`);
       const data = res;
       setCoupons((prev) => prev.filter((c) => c.id !== id));
     } catch (err: any) {
-      alert(err.message);
+      toast.error(err.message);
     }
   }
 

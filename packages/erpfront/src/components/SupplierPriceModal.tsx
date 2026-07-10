@@ -4,6 +4,8 @@ import axios from "axios";
 import { X, Plus, Trash2, Scale, DollarSign, PackageOpen, ListOrdered, Search, Edit, Save, Check } from "lucide-react";
 import { cn } from "../lib/utils";
 import { useTranslation } from "react-i18next";
+import { toast } from "react-hot-toast";
+
 interface Ingredient {
   id: string;
   name: string;
@@ -113,7 +115,7 @@ export const SupplierPriceModal = ({
   const handleSubmitPrice = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedIngredientId || !packageSize || !packageUnit || !price) {
-      alert(t("erp_267"));
+      toast.error(t("erp_267"));
       return;
     }
     try {
@@ -139,7 +141,7 @@ export const SupplierPriceModal = ({
       setPrice("");
     } catch (error) {
       console.error("Failed to save supplier price quote", error);
-      alert(editingPriceId ? t("erp_268") : t("erp_89"));
+      toast.error(editingPriceId ? t("erp_268") : t("erp_89"));
     } finally {
       setSubmitLoading(false);
     }
@@ -168,7 +170,7 @@ export const SupplierPriceModal = ({
       setPrices(pricesRes.data);
     } catch (error) {
       console.error("Failed to set default price quote", error);
-      alert(t("erp_92"));
+      toast.error(t("erp_92"));
     } finally {
       setLoading(false);
     }
@@ -183,7 +185,7 @@ export const SupplierPriceModal = ({
       }
     } catch (error) {
       console.error("Failed to delete price quote", error);
-      alert(t("erp_91"));
+      toast.error(t("erp_91"));
     } finally {
       setLoading(false);
     }

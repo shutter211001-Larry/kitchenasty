@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { X, Save, Building, User, Phone, MapPin } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { toast } from "react-hot-toast";
+
 interface Supplier {
   id?: string;
   name: string;
@@ -50,7 +52,7 @@ export const SupplierModal = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name.trim()) {
-      alert(t("erp_254"));
+      toast.error(t("erp_254"));
       return;
     }
     try {
@@ -65,7 +67,7 @@ export const SupplierModal = ({
       onClose();
     } catch (error) {
       console.error("Failed to save supplier", error);
-      alert(t("erp_255"));
+      toast.error(t("erp_255"));
     } finally {
       setLoading(false);
     }

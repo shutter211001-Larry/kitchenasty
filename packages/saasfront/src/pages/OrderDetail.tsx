@@ -5,6 +5,8 @@ import { api } from '../lib/api';
 import { useAuth } from '../context/AuthContext.js';
 import { PageHeader } from '../components/layout/PageHeader';
 import { PageContent } from '../components/layout/PageContent';
+import { confirm } from "../lib/confirm";
+import { toast } from "react-hot-toast";
 
 interface OrderItem {
   id: string;
@@ -159,7 +161,7 @@ export default function OrderDetailPage() {
   async function handleUpdateDiscount() {
     const val = Number(adjustedTotalInput);
     if (isNaN(val) || val < 0) {
-      alert(t('orderDetail.enterValidDiscountedPrice'));
+      toast.error(t('orderDetail.enterValidDiscountedPrice'));
       return;
     }
     setUpdating(true);
@@ -169,7 +171,7 @@ export default function OrderDetailPage() {
       const unrounded = data.data.subtotal + data.data.tax + data.data.deliveryFee - data.data.discount;
       const roundedTotal = Number(unrounded.toFixed(currencyDecimals));
       setAdjustedTotalInput(roundedTotal.toString());
-      alert(t('orderDetail.discountAppliedSuccessfully'));
+      toast.error(t('orderDetail.discountAppliedSuccessfully'));
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -178,7 +180,7 @@ export default function OrderDetailPage() {
   }
 
   async function handleDelete() {
-    if (!window.confirm(t('orderDetail.confirmDeleteOrder'))) return;
+    if (!await confirm(t('orderDetail.confirmDeleteOrder'))) return;
     try {
       setUpdating(true);
       await api.delete<any>(`/orders/${id}`);

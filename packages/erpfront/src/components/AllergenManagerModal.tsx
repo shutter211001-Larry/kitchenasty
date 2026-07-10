@@ -3,6 +3,8 @@ import axios from "axios";
 import { X, Plus, Trash2, ShieldAlert, Tag } from "lucide-react";
 import { cn } from "../lib/utils";
 import { useTranslation } from "react-i18next";
+import { confirm } from "../lib/confirm";
+
 interface Allergen {
   id: string;
   name: string;
@@ -62,7 +64,7 @@ export const AllergenManagerModal: React.FC<AllergenManagerModalProps> = ({
     }
   };
   const handleDeleteTag = async (id: string, name: string) => {
-    if (!confirm(`確認刪除過敏原標籤「${name}」？此操作將會移除所有食材與此標籤的連結。`)) return;
+    if (!await confirm(`確認刪除過敏原標籤「${name}」？此操作將會移除所有食材與此標籤的連結。`)) return;
     try {
       setLoading(true);
       setError("");

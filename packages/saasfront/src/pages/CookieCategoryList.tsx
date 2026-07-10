@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { useState, useEffect } from 'react';
 import { Trash2, Edit2, Check, X, Plus } from 'lucide-react';
 import { api } from '../lib/api';
+import { confirm } from "../lib/confirm";
 
 interface CookieCategory {
   id: string;
@@ -62,7 +63,7 @@ export default function CookieCategoryList() {
   }
 
   async function handleDelete(id: string) {
-    if (!confirm(t('cookieCategoryList.confirmDeleteCookieCategory'))) return;
+    if (!await confirm(t('cookieCategoryList.confirmDeleteCookieCategory'))) return;
     try {
       const data = await api.delete<any>(`/legal/cookie-categories/${id}`);
       if (data.success) loadCategories();

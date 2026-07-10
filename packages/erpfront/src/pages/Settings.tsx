@@ -5,6 +5,9 @@ import { cn } from "../lib/utils";
 import { useTranslation } from "react-i18next";
 import { SUPPORTED_LANGUAGES } from "../i18n";
 import { useAuth } from "../context/AuthContext";
+import { confirm } from "../lib/confirm";
+import { toast } from "react-hot-toast";
+
 const API = "http://localhost:3000/api/dictionaries";
 export default function Settings() {
   const {
@@ -109,7 +112,7 @@ export default function Settings() {
     fetchAll();
   };
   const handleDeleteGroup = async (id: string) => {
-    if (!window.confirm(t("erp_784"))) return;
+    if (!await confirm(t("erp_784"))) return;
     const endpoint = activeTab === "actions" ? `${API}/actions/groups/${id}` : `${API}/units/groups/${id}`;
     await axios.delete(endpoint);
     fetchAll();
@@ -140,34 +143,34 @@ export default function Settings() {
       i18n.changeLanguage(language);
 
       // Need to re-check auth to update context user if needed (although checkAuth isn't exported directly, we can just trigger a reload or rely on next refresh)
-      alert(t("erp_785"));
+      toast.error(t("erp_785"));
     } catch (e) {
       console.error("Failed to save settings:", e);
-      alert(t("erp_786"));
+      toast.error(t("erp_786"));
     }
   };
   const handleSaveMailBranding = async () => {
     try {
       setLoading(true);
       await axios.put("http://localhost:3000/api/settings/mail-branding", mailBranding);
-      alert(t("erp_785", "設定儲存成功"));
+      toast.error(t("erp_785", "設定儲存成功"));
     } catch (e) {
       console.error("Failed to save mail branding:", e);
-      alert(t("erp_786", "儲存失敗，請重試"));
+      toast.error(t("erp_786", "儲存失敗，請重試"));
     } finally {
       setLoading(false);
     }
   };
 
   const handleTestMailBranding = async () => {
-    if (!testEmail) return alert("請輸入測試信箱");
+    if (!testEmail) return toast.error("請輸入測試信箱");
     try {
       setLoading(true);
       const res = await axios.post("http://localhost:3000/api/settings/mail-branding/test", { to: testEmail });
-      alert(res.data.message || "測試信件寄出成功");
+      toast.error(res.data.message || "測試信件寄出成功");
     } catch (e: any) {
       console.error("Failed to send test email:", e);
-      alert(e.response?.data?.error || "發送測試信失敗");
+      toast.error(e.response?.data?.error || "發送測試信失敗");
     } finally {
       setLoading(false);
     }

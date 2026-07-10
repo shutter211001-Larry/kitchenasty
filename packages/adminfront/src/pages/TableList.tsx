@@ -2,6 +2,8 @@ import { useTranslation } from 'react-i18next';
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { api } from '../lib/api.js';
+import { confirm } from "../lib/confirm";
+import { toast } from "react-hot-toast";
 
 interface Table {
   id: string;
@@ -89,18 +91,18 @@ export default function TableList() {
       setShowForm(false);
       fetchTables();
     } catch (err: any) {
-      alert(err.message);
+      toast.error(err.message);
     }
     setSaving(false);
   };
 
   const handleDelete = async (id: string, name: string) => {
-    if (!confirm(`確定要刪除桌位 "${name}" 嗎？`)) return;
+    if (!await confirm(`確定要刪除桌位 "${name}" 嗎？`)) return;
     try {
       await api.delete(`/locations/${locationId}/tables/${id}`);
       setTables((prev) => prev.filter((t) => t.id !== id));
     } catch (err: any) {
-      alert(err.message);
+      toast.error(err.message);
     }
   };
 
@@ -108,8 +110,8 @@ export default function TableList() {
     const baseUrl = storefrontUrl.replace(/\/$/, '');
     const url = `${baseUrl}/?table=${encodeURIComponent(tableName)}`;
     navigator.clipboard.writeText(url)
-      .then(() => alert(`已複製桌號 ${tableName} 的專屬網址：\n${url}`))
-      .catch(() => alert(t('tableList.copyFailedManualCopy') + url));
+      .then(() => toast.error(`已複製桌號 ${tableName} 的專屬網址：\n${url}`))
+      .catch(() => toast.error(t('tableList.copyFailedManualCopy') + url));
   };
 
   if (loading) return <p className="text-gray-500">{t('tableList.loadingTableData')}</p>;

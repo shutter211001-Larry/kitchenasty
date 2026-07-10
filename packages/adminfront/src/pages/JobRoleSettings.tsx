@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api } from '../lib/api.js';
+import { confirm } from "../lib/confirm";
+import { toast } from "react-hot-toast";
 
 interface User {
   id: string;
@@ -56,7 +58,7 @@ export default function JobRoleSettings() {
   };
 
   const handleDeleteRole = async (id: string) => {
-    if (!window.confirm('確定要刪除此職位嗎？')) return;
+    if (!await confirm('確定要刪除此職位嗎？')) return;
     try {
       await api.delete(`/job-roles/${id}`);
       fetchRoles();
@@ -107,7 +109,7 @@ export default function JobRoleSettings() {
       fetchRoles();
     } catch (err) {
       console.error('Failed to assign users', err);
-      alert('指派失敗，請稍後再試');
+      toast.error('指派失敗，請稍後再試');
     } finally {
       setSavingAssign(false);
     }

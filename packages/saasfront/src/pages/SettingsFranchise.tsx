@@ -5,6 +5,7 @@ import { ArrowLeft } from 'lucide-react';
 import { api } from '../lib/api.js';
 import { PageHeader } from '../components/layout/PageHeader';
 import { PageContent } from '../components/layout/PageContent';
+import { toast } from "react-hot-toast";
 
 interface FranchiseStore {
   id: string;
@@ -115,7 +116,7 @@ export default function SettingsFranchise() {
 
   const handleSaveStore = async () => {
     if (!editStore.name || !editStore.owner) {
-      alert(t('settingsFranchise.fillBranchAndFranchiseeName'));
+      toast.error(t('settingsFranchise.fillBranchAndFranchiseeName'));
       return;
     }
     
@@ -156,7 +157,7 @@ export default function SettingsFranchise() {
       setSuccess(t('settingsFranchise.franchiseSyncSuccess'));
       setTimeout(() => setSuccess(''), 3000);
     } catch (err: any) {
-      alert(`同步更新失敗: ${err.message}`);
+      toast.error(`同步更新失敗: ${err.message}`);
     }
   };
 
@@ -177,7 +178,7 @@ export default function SettingsFranchise() {
       setSuccess(`✓ 已成功切換 ${store.name} 實體分店之營運狀態！`);
       setTimeout(() => setSuccess(''), 2000);
     } catch (err: any) {
-      alert(`切換營運狀態失敗: ${err.message}`);
+      toast.error(`切換營運狀態失敗: ${err.message}`);
     }
   };
 
@@ -221,7 +222,7 @@ export default function SettingsFranchise() {
   };
 
   const triggerSupplierAlert = (warning: IngredientWarning) => {
-    alert(`📢 系統已向 ${warning.storeName} 採購系統發出預警通知！\n建議補貨量：${warning.suggestedOrder} kg`);
+    toast.error(`📢 系統已向 ${warning.storeName} 採購系統發出預警通知！\n建議補貨量：${warning.suggestedOrder} kg`);
   };
 
   if (loading) {

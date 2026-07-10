@@ -4,6 +4,9 @@ import axios from "axios";
 import { Users as UsersIcon, Shield, UserCheck, Trash2, Edit, Plus, X, AlertCircle, Key, RefreshCw } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useTranslation } from "react-i18next";
+import { confirm } from "../lib/confirm";
+import { toast } from "react-hot-toast";
+
 const Users: React.FC = () => {
   const {
     t
@@ -65,17 +68,17 @@ const Users: React.FC = () => {
   };
   const handleDelete = async (userId: string) => {
     if (userId === currentUser?.id) {
-      alert(t("erp_822"));
+      toast.error(t("erp_822"));
       return;
     }
-    if (!window.confirm(t("erp_823"))) {
+    if (!await confirm(t("erp_823"))) {
       return;
     }
     try {
       await axios.delete(`http://localhost:3000/api/users/${userId}`);
       fetchUsers();
     } catch (err: any) {
-      alert(err.response?.data?.error || t("erp_824"));
+      toast.error(err.response?.data?.error || t("erp_824"));
     }
   };
   const handleSubmit = async (e: React.FormEvent) => {
@@ -96,7 +99,7 @@ const Users: React.FC = () => {
           email,
           role
         });
-        alert(t("erp_invite_sent", "Invite Sent Successfully!"));
+        toast.error(t("erp_invite_sent", "Invite Sent Successfully!"));
       } else {
         await axios.put(`http://localhost:3000/api/users/${selectedUser.id}`, {
           name,

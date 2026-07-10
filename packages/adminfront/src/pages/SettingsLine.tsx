@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext.js';
 import { api } from '../lib/api.js';
+import { toast } from "react-hot-toast";
 
 export default function SettingsLine() {
   const { t } = useTranslation();
@@ -196,7 +197,7 @@ export default function SettingsLine() {
                 <button
                   onClick={() => {
                     navigator.clipboard.writeText(webhookUrl);
-                    alert(t('settingsLine.copiedToClipboard'));
+                    toast.error(t('settingsLine.copiedToClipboard'));
                   }}
                   className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50"
                 >

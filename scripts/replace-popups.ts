@@ -86,6 +86,10 @@ for (const pkg of packages) {
 let modifiedFiles = 0;
 
 for (const sourceFile of project.getSourceFiles()) {
+  const filePath = sourceFile.getFilePath();
+  if (filePath.endsWith('lib/confirm.ts') || filePath.endsWith('ConfirmGlobal.tsx')) {
+    continue;
+  }
   let needsSave = false;
   let needsConfirmImport = false;
   let needsToastImport = false;
@@ -93,6 +97,8 @@ for (const sourceFile of project.getSourceFiles()) {
   const calls = sourceFile.getDescendantsOfKind(SyntaxKind.CallExpression);
   
   for (const call of calls) {
+    if (call.wasForgotten()) continue;
+    
     const expr = call.getExpression();
     const text = expr.getText();
     
@@ -110,7 +116,7 @@ for (const sourceFile of project.getSourceFiles()) {
           parentFunc.setIsAsync(true);
         }
         
-        expr.replaceWithText('await confirm');
+        call.replaceWithText('await confirm(' + call.getArguments().map(a => a.getText()).join(', ') + ')');
         needsConfirmImport = true;
         needsSave = true;
       }
@@ -120,7 +126,7 @@ for (const sourceFile of project.getSourceFiles()) {
     if (text === 'alert' || text === 'window.alert') {
       const symbol = expr.getSymbol();
       if (!symbol || symbol.getDeclarations().some(d => d.getSourceFile().getFilePath().includes('lib.dom.d.ts'))) {
-        expr.replaceWithText('toast.error');
+        call.replaceWithText('toast.error(' + call.getArguments().map(a => a.getText()).join(', ') + ')');
         needsToastImport = true;
         needsSave = true;
       }
@@ -162,8 +168,8 @@ for (const sourceFile of project.getSourceFiles()) {
   if (needsSave) {
     sourceFile.saveSync();
     modifiedFiles++;
-    console.log(\`Updated \${sourceFile.getFilePath()}\`);
+    console.log("Updated " + sourceFile.getFilePath());
   }
 }
 
-console.log(\`Successfully updated \${modifiedFiles} files.\`);
+console.log("Successfully updated " + modifiedFiles + " files.");

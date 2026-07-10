@@ -3,6 +3,8 @@ import React, { useEffect, useState } from 'react';
 import { api } from '../lib/api.js';
 import { PageHeader } from '../components/layout/PageHeader';
 import { PageContent } from '../components/layout/PageContent';
+import { confirm } from "../lib/confirm";
+import { toast } from "react-hot-toast";
 
 interface Category {
   id: string;
@@ -141,7 +143,7 @@ export default function StockManagement() {
       setSavedFeedbackId(itemId);
       setTimeout(() => setSavedFeedbackId(null), 1500);
     } catch (err: any) {
-      alert(`更新商品庫存失敗: ${err.message}`);
+      toast.error(`更新商品庫存失敗: ${err.message}`);
     } finally {
       setSavingId(null);
     }
@@ -173,7 +175,7 @@ export default function StockManagement() {
       setSavedFeedbackId(valueId);
       setTimeout(() => setSavedFeedbackId(null), 1500);
     } catch (err: any) {
-      alert(`更新選項庫存失敗: ${err.message}`);
+      toast.error(`更新選項庫存失敗: ${err.message}`);
     } finally {
       setSavingId(null);
     }
@@ -201,7 +203,7 @@ export default function StockManagement() {
       setSavedFeedbackId(categoryId);
       setTimeout(() => setSavedFeedbackId(null), 1500);
     } catch (err: any) {
-      alert(`更新分類共用庫存失敗: ${err.message}`);
+      toast.error(`更新分類共用庫存失敗: ${err.message}`);
     } finally {
       setSavingId(null);
     }
@@ -210,7 +212,7 @@ export default function StockManagement() {
   // Save recipe mapping
   const handleSaveBinding = async (menuItem: MenuItem, recipeId: string) => {
     if (!recipeId) {
-      alert(t('stockManagement.selectRecipeToBind'));
+      toast.error(t('stockManagement.selectRecipeToBind'));
       return;
     }
 
@@ -242,7 +244,7 @@ export default function StockManagement() {
       setSavedFeedbackId(menuItem.id);
       setTimeout(() => setSavedFeedbackId(null), 1500);
     } catch (err: any) {
-      alert(`儲存食譜連結關係失敗: ${err.message}`);
+      toast.error(`儲存食譜連結關係失敗: ${err.message}`);
     } finally {
       setSavingId(null);
     }
@@ -250,7 +252,7 @@ export default function StockManagement() {
 
   // Remove recipe mapping
   const handleRemoveBinding = async (menuItem: MenuItem) => {
-    if (!confirm(`確定要解除「${menuItem.name}」的食譜綁定嗎？\n解除後，該商品的線上訂單將不再自動扣減中央廚房庫存。`)) return;
+    if (!await confirm(`確定要解除「${menuItem.name}」的食譜綁定嗎？\n解除後，該商品的線上訂單將不再自動扣減中央廚房庫存。`)) return;
     
     setSavingId(menuItem.id);
     setSavedFeedbackId(null);
@@ -270,7 +272,7 @@ export default function StockManagement() {
       setSavedFeedbackId(menuItem.id);
       setTimeout(() => setSavedFeedbackId(null), 1500);
     } catch (err: any) {
-      alert(`解除綁定失敗: ${err.message}`);
+      toast.error(`解除綁定失敗: ${err.message}`);
     } finally {
       setSavingId(null);
     }
@@ -345,7 +347,7 @@ export default function StockManagement() {
                   }
                 }
                 if (!url) {
-                  alert(t('stockManagement.erpUrlNotConfigured'));
+                  toast.error(t('stockManagement.erpUrlNotConfigured'));
                   return;
                 }
                 window.open(url, '_blank');

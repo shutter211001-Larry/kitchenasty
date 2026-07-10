@@ -1,6 +1,8 @@
 import { useTranslation } from 'react-i18next';
 import { useEffect, useState } from 'react';
 import { api } from '../lib/api.js';
+import { confirm } from "../lib/confirm";
+import { toast } from "react-hot-toast";
 
 interface Mealtime {
   id: string;
@@ -62,19 +64,19 @@ export default function MealtimeList() {
       setForm({ name: '', nameTranslations: {}, startTime: '09:00', endTime: '22:00', days: [0, 1, 2, 3, 4, 5, 6], isActive: true });
       fetchMealtimes();
     } catch (err: any) {
-      alert(err.message);
+      toast.error(err.message);
     } finally {
       setIsSaving(false);
     }
   }
 
   async function handleDelete(id: string) {
-    if (!confirm('Are you sure?')) return;
+    if (!await confirm('Are you sure?')) return;
     try {
       await api.delete(`/menu/mealtimes/${id}`);
       fetchMealtimes();
     } catch (err: any) {
-      alert(err.message);
+      toast.error(err.message);
     }
   }
 

@@ -6,6 +6,7 @@ import {
   AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
 } from 'recharts';
+import { confirm } from "../lib/confirm";
 
 interface Expense {
   id: string;
@@ -100,7 +101,7 @@ export default function Expenses() {
   };
 
   const handleDeleteExpense = async (id: string) => {
-    if (!window.confirm("確定要刪除這筆帳款嗎？")) return;
+    if (!await confirm("確定要刪除這筆帳款嗎？")) return;
     try {
       const res = await axios.delete(`http://localhost:3000/api/expenses/${id}`);
       if (res.status === 204 || res.status === 200) {

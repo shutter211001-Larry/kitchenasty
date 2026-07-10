@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { api } from '../lib/api.js';
 import { PageHeader } from '../components/layout/PageHeader';
 import { PageContent } from '../components/layout/PageContent';
+import { confirm } from "../lib/confirm";
 
 interface OrderItem {
   id: string;
@@ -574,9 +575,9 @@ export default function CounterDisplay() {
                             </span>
                             <span className="ml-2 text-gray-400">{t('kitchen.itemsCount', { count: order.items.length })}</span>
                             <button
-                              onClick={(e) => {
+                              onClick={async (e) => {
                                 e.stopPropagation();
-                                if (window.confirm(t('kitchen.cancelConfirm'))) {
+                                if (await confirm(t('kitchen.cancelConfirm'))) {
                                   handleStatusUpdate(order.id, 'CANCELLED');
                                 }
                               }}
@@ -1028,7 +1029,7 @@ export default function CounterDisplay() {
                       <button
                         onClick={async (e) => {
                           e.stopPropagation();
-                          if (window.confirm(t('counterDisplay.confirmCancelOrder'))) {
+                          if (await confirm(t('counterDisplay.confirmCancelOrder'))) {
                             handleStatusUpdate(order.id, 'CANCELLED');
                           }
                         }}

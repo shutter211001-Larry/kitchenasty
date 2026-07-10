@@ -5,6 +5,9 @@ import { Search, Users, Phone, MapPin, Plus, UserPlus, Edit, Trash2, ShieldAlert
 import { SupplierModal } from "../components/SupplierModal";
 import { SupplierPriceModal } from "../components/SupplierPriceModal";
 import { useTranslation } from "react-i18next";
+import { confirm } from "../lib/confirm";
+import { toast } from "react-hot-toast";
+
 interface Supplier {
   id: string;
   name: string;
@@ -38,14 +41,14 @@ const Suppliers = () => {
     }
   };
   const handleDelete = async (id: string, name: string) => {
-    if (!confirm(`確定要刪除供應商「${name}」嗎？\n此操作將會連帶清除該廠商名下的所有原料報價合約！`)) return;
+    if (!await confirm(`確定要刪除供應商「${name}」嗎？\n此操作將會連帶清除該廠商名下的所有原料報價合約！`)) return;
     try {
       setLoading(true);
       await axios.delete(`http://localhost:3000/api/suppliers/${id}`);
       fetchSuppliers();
     } catch (error) {
       console.error("Failed to delete supplier", error);
-      alert(t("erp_809"));
+      toast.error(t("erp_809"));
     } finally {
       setLoading(false);
     }

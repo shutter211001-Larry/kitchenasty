@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../lib/api.js';
+import { confirm } from "../lib/confirm";
 
 interface AutomationRule {
   id: string;
@@ -45,7 +46,7 @@ export default function AutomationRuleList() {
   };
 
   const deleteRule = async (id: string) => {
-    if (!confirm(t('automation.messages.confirmDelete'))) return;
+    if (!await confirm(t('automation.messages.confirmDelete'))) return;
     try {
       await api.delete(`/automation-rules/${id}`);
       setRules((prev) => prev.filter((r) => r.id !== id));

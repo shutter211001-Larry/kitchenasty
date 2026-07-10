@@ -1,5 +1,7 @@
 
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
+import { ConfirmGlobal } from './components/ConfirmGlobal.tsx';
+import { Toaster } from 'react-hot-toast';
 import Layout from "./components/Layout";
 import Dashboard from "./pages/Dashboard";
 import Ingredients from "./pages/Ingredients";
@@ -72,6 +74,8 @@ function App() {
     <AuthProvider>
       <Router>
         <AppContent />
+        <ConfirmGlobal />
+        <Toaster position="top-center" />
       </Router>
     </AuthProvider>
   );

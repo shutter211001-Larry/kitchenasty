@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { ToggleRow } from '../components/ui/ToggleRow';
 import { PageHeader } from '../components/layout/PageHeader';
 import { PageContent } from '../components/layout/PageContent';
+import { confirm } from "../lib/confirm";
 
 function IPBlacklistManager({ token }: { token: string }) {
   const [list, setList] = useState<{ ip: string; reason: string | null; createdAt: string }[]>([]);
@@ -30,7 +31,7 @@ function IPBlacklistManager({ token }: { token: string }) {
   };
 
   const handleRemove = async (ip: string) => {
-    if (!confirm(`確定要解除封鎖 ${ip} 嗎？`)) return;
+    if (!await confirm(`確定要解除封鎖 ${ip} 嗎？`)) return;
     await api.delete<any>(`/settings/ip-blacklist/${ip}`);
     fetchList();
   };

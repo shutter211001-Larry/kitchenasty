@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { useState, useEffect, FormEvent } from 'react';
 import { useParams } from 'react-router-dom';
 import { api } from '../lib/api.js';
+import { confirm } from "../lib/confirm";
 
 interface DeliveryZone {
   id: string;
@@ -87,7 +88,7 @@ export default function DeliveryZoneList() {
   };
 
   const deleteZone = async (id: string) => {
-    if (!confirm(t('deliveryZoneList.confirmDeleteDeliveryZone'))) return;
+    if (!await confirm(t('deliveryZoneList.confirmDeleteDeliveryZone'))) return;
     try {
       await api.delete(`/locations/${locationId}/delivery-zones/${id}`);
       setZones((prev) => prev.filter((z) => z.id !== id));

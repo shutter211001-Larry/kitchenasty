@@ -43,6 +43,8 @@ function getStepIndex(steps: { key: string; label: string }[], status: string): 
 }
 import { getTranslated } from '../utils/translation.js';
 import { useRecentOrders } from '../hooks/useRecentOrders.js';
+import { confirm } from "../lib/confirm";
+import { toast } from "react-hot-toast";
 
 export default function OrderStatus() {const { t, i18n } = useTranslation();
   const { id } = useParams();
@@ -101,7 +103,7 @@ export default function OrderStatus() {const { t, i18n } = useTranslation();
   }, [order?.scheduledAt, t]);
 
   async function handleCancel() {
-    if (!window.confirm(t('common.confirmCancel') || t('orderStatus.confirmCancelOrder'))) return;
+    if (!await confirm(t('common.confirmCancel') || t('orderStatus.confirmCancelOrder'))) return;
     
     setCancelling(true);
     try {
@@ -109,10 +111,10 @@ export default function OrderStatus() {const { t, i18n } = useTranslation();
       if (data.success) {
         setOrder({ ...order, status: 'CANCELLED' });
       } else {
-        alert(data.error || t('orderStatus.cancelFailed'));
+        toast.error(data.error || t('orderStatus.cancelFailed'));
       }
     } catch (e) {
-      alert(t('orderStatus.cancelFailedTryLater'));
+      toast.error(t('orderStatus.cancelFailedTryLater'));
     } finally {
       setCancelling(false);
     }
@@ -191,10 +193,10 @@ export default function OrderStatus() {const { t, i18n } = useTranslation();
         setClaimSuccess(true);
         setOrder({ ...order, customerId: user?.id });
       } else {
-        alert(t('orders.claimOrderError'));
+        toast.error(t('orders.claimOrderError'));
       }
     } catch (e) {
-      alert(t('orders.claimOrderError'));
+      toast.error(t('orders.claimOrderError'));
     } finally {
       setClaiming(false);
     }

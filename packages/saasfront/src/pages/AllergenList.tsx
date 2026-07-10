@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api } from '../lib/api.js';
+import { confirm } from "../lib/confirm";
+import { toast } from "react-hot-toast";
 
 interface Allergen {
   id: string;
@@ -58,19 +60,19 @@ export default function AllergenList() {
       setIsAdding(false);
       fetchAllergens();
     } catch (err: any) {
-      alert(err.message);
+      toast.error(err.message);
     } finally {
       setIsSaving(false);
     }
   }
 
   async function handleDelete(id: string) {
-    if (!confirm(t('allergenList.confirmDeleteAllergen'))) return;
+    if (!await confirm(t('allergenList.confirmDeleteAllergen'))) return;
     try {
       await api.delete(`/menu/allergens/${id}`);
       fetchAllergens();
     } catch (err: any) {
-      alert(err.message);
+      toast.error(err.message);
     }
   }
 

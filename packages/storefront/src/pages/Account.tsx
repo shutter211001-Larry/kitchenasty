@@ -4,6 +4,8 @@ import { Navigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext.js';
 import { API_BASE, api } from '../lib/api';
+import { confirm } from "../lib/confirm";
+import { toast } from "react-hot-toast";
 
 export default function Account() {
   const { t } = useTranslation();
@@ -80,10 +82,10 @@ export default function Account() {
         updateUser(data.data);
         setIsEditing(false);
       } else {
-        alert(data.error || t('account.updateFailed'));
+        toast.error(data.error || t('account.updateFailed'));
       }
     } catch (err) {
-      alert(t('account.updateFailedCheckNetwork'));
+      toast.error(t('account.updateFailedCheckNetwork'));
     } finally {
       setIsSaving(false);
     }
@@ -91,7 +93,7 @@ export default function Account() {
 
   const handleChangePassword = async () => {
     if (newPassword.length < 6) {
-      alert(t('auth.passwordTooShort') || t('account.passwordMinLengthRequired'));
+      toast.error(t('auth.passwordTooShort') || t('account.passwordMinLengthRequired'));
       return;
     }
     setIsChangingPassword(true);
@@ -109,7 +111,7 @@ export default function Account() {
       });
       const data = await res.json();
       if (data.success) {
-        alert(t('common.success') || t('account.setupSuccess'));
+        toast.error(t('common.success') || t('account.setupSuccess'));
         setShowPasswordModal(false);
         setNewPassword('');
         setOldPassword('');
@@ -117,10 +119,10 @@ export default function Account() {
         const meData = await api.get<any>('/auth/me');
         if (meData.success) updateUser(meData.data.customer);
       } else {
-        alert(data.error || t('account.setupFailed'));
+        toast.error(data.error || t('account.setupFailed'));
       }
     } catch (err) {
-      alert(t('account.operationFailed'));
+      toast.error(t('account.operationFailed'));
     } finally {
       setIsChangingPassword(false);
     }
@@ -141,10 +143,10 @@ export default function Account() {
       if (data.success) {
         window.location.reload();
       } else {
-        alert(data.error);
+        toast.error(data.error);
       }
     } catch (err) {
-      alert(t('account.actionFailed'));
+      toast.error(t('account.actionFailed'));
     }
   };
 
@@ -152,7 +154,7 @@ export default function Account() {
     try {
       const liff = (window as any).liff;
       if (!liff) {
-        alert(t('account.lineSdkNotLoaded'));
+        toast.error(t('account.lineSdkNotLoaded'));
         return;
       }
       await liff.init({ liffId: settings.lineSettings!.liffId });
@@ -176,7 +178,7 @@ export default function Account() {
       const data = await res.json();
 
       if (res.ok && data.success) {
-        alert(t('account.lineLinkSuccess'));
+        toast.error(t('account.lineLinkSuccess'));
         window.location.reload();
       } else {
         const errorMsg = data.error || '';
@@ -185,17 +187,17 @@ export default function Account() {
           setIsSocialVerified(true);
           setShowMergePrompt({ provider: 'line', id: profile.userId });
         } else {
-          alert(errorMsg || t('account.linkFailed'));
+          toast.error(errorMsg || t('account.linkFailed'));
         }
       }
     } catch (err) {
-      alert(t('account.executionFailed'));
+      toast.error(t('account.executionFailed'));
     }
   };
 
   const handleSetPasswordAndUnbind = async () => {
     if (newPassword.length < 6) {
-      alert(t('account.passwordMinLengthError'));
+      toast.error(t('account.passwordMinLengthError'));
       return;
     }
     setIsSettingPassword(true);
@@ -211,14 +213,14 @@ export default function Account() {
       });
       const pData = await pRes.json();
       if (!pData.success) {
-        alert(pData.error || t('account.passwordSetupFailed'));
+        toast.error(pData.error || t('account.passwordSetupFailed'));
         setIsSettingPassword(false);
         return;
       }
       // 2. Then unbind
       await handleUnbind();
     } catch (err) {
-      alert(t('account.systemErrorTryLater'));
+      toast.error(t('account.systemErrorTryLater'));
       setIsSettingPassword(false);
     }
   };
@@ -241,13 +243,13 @@ export default function Account() {
       });
       const data = await res.json();
       if (data.success) {
-        alert(data.message || t('account.accountIntegrationSuccess'));
+        toast.error(data.message || t('account.accountIntegrationSuccess'));
         window.location.reload();
       } else {
-        alert(data.error || t('account.integrationFailed'));
+        toast.error(data.error || t('account.integrationFailed'));
       }
     } catch (err) {
-      alert(t('account.integrationError'));
+      toast.error(t('account.integrationError'));
     } finally {
       setIsMerging(false);
     }
@@ -768,12 +770,12 @@ export default function Account() {
 
               {user.lineUserId ? (
                 <button
-                  onClick={() => {
+                  onClick={async () => {
                     if (!(user as any).hasPassword) {
                       setShowPasswordSetup(true);
                       window.scrollTo({ top: 400, behavior: 'smooth' });
                     } else {
-                      if (confirm(t('account.confirmUnlinkLine'))) handleUnbind();
+                      if (await confirm(t('account.confirmUnlinkLine'))) handleUnbind();
                     }
                   }}
                   className="px-6 py-2.5 text-sm font-bold text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl border border-red-200 dark:border-red-800 transition-all active:scale-95"
@@ -839,16 +841,16 @@ export default function Account() {
                       setShowPasswordSetup(true);
                       window.scrollTo({ top: 400, behavior: 'smooth' });
                     } else {
-                      if (!confirm(t('account.confirmUnlinkGoogle'))) return;
+                      if (!await confirm(t('account.confirmUnlinkGoogle'))) return;
                       try {
                         const data = await api.post<any>('/auth/google/unbind', {});
                         if (data.success) {
                           window.location.reload();
                         } else {
-                          alert(data.error);
+                          toast.error(data.error);
                         }
                       } catch (err) {
-                        alert(t('account.processFailed'));
+                        toast.error(t('account.processFailed'));
                       }
                     }
                   }}
@@ -888,8 +890,8 @@ export default function Account() {
                 </p>
                 <button
                   onClick={async () => {
-                    if (!confirm(t('footer.deleteAccountWarning'))) return;
-                    if (!confirm(t('footer.deleteAccountFinalCheck'))) return;
+                    if (!await confirm(t('footer.deleteAccountWarning'))) return;
+                    if (!await confirm(t('footer.deleteAccountFinalCheck'))) return;
 
                     try {
                       const res = await fetch(`${API_BASE}/auth/me`, {
@@ -898,13 +900,13 @@ export default function Account() {
                       });
                       const data = await res.json();
                       if (data.success) {
-                        alert(t('account.accountDeletedSuccessfully'));
+                        toast.error(t('account.accountDeletedSuccessfully'));
                         logout();
                       } else {
-                        alert(data.error || t('account.deleteFailed'));
+                        toast.error(data.error || t('account.deleteFailed'));
                       }
                     } catch (err) {
-                      alert(t('account.deleteFailedContactSupport'));
+                      toast.error(t('account.deleteFailedContactSupport'));
                     }
                   }}
                   className="w-full sm:w-auto px-8 py-3 bg-red-600 text-white font-black rounded-xl hover:bg-red-700 shadow-lg shadow-red-500/30 transition-all active:scale-95"

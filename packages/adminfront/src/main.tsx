@@ -85,6 +85,8 @@ import { ShiftRequirementsPage } from './pages/ShiftRequirementsPage.js';
 import ApproveIntegrations from './pages/ApproveIntegrations.js';
 
 import './index.css';
+import { ConfirmGlobal } from './components/ConfirmGlobal.tsx';
+import { Toaster } from 'react-hot-toast';
 
 function AppRoutes() {
   const { token, user, loading, login, logout } = useAuth();
@@ -212,6 +214,8 @@ function App() {
       <TenantProvider>
         <AuthProvider>
           <AppRoutes />
+          <ConfirmGlobal />
+          <Toaster position="top-center" />
         </AuthProvider>
       </TenantProvider>
     </BrowserRouter>

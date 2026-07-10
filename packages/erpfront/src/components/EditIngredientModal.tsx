@@ -5,6 +5,9 @@ import { X, Save, AlertTriangle, Scale, Plus, Trash2, ShieldAlert } from "lucide
 import { cn } from "../lib/utils";
 import { AllergenManagerModal } from "./AllergenManagerModal";
 import { useTranslation } from "react-i18next";
+import { confirm } from "../lib/confirm";
+import { toast } from "react-hot-toast";
+
 interface UnitConversion {
   id: string;
   fromUnit: string;
@@ -280,14 +283,14 @@ const EditIngredientModal = ({
     } catch (error: any) {
       console.error("Failed to save ingredient", error);
       const errMsg = error.response?.data?.details || error.response?.data?.error || error.message;
-      alert(`儲存失敗: ${errMsg}`);
+      toast.error(`儲存失敗: ${errMsg}`);
     } finally {
       setLoading(false);
     }
   };
   const handleDelete = async () => {
     if (ingredient === "new" || !ingredient?.id) return;
-    if (!window.confirm(`確定要刪除食材「${ingredient.name}」嗎？\n\n注意：此操作無法復原，且會一併刪除該食材的所有報價合約。`)) return;
+    if (!await confirm(`確定要刪除食材「${ingredient.name}」嗎？\n\n注意：此操作無法復原，且會一併刪除該食材的所有報價合約。`)) return;
     try {
       setLoading(true);
       await axios.delete(`http://localhost:3000/api/ingredients/${ingredient.id}`);
@@ -295,20 +298,20 @@ const EditIngredientModal = ({
       onClose();
     } catch (error: any) {
       console.error("Failed to delete ingredient", error);
-      alert(error.response?.data?.error || t("erp_82"));
+      toast.error(error.response?.data?.error || t("erp_82"));
     } finally {
       setLoading(false);
     }
   };
   const handleAddConversion = async () => {
     if (!newFromUnit || newMultiplier === "" || Number(newMultiplier) <= 0) {
-      alert(t("erp_83"));
+      toast.error(t("erp_83"));
       return;
     }
     if (isCreate || !ingredient.id) return;
     const exists = (formData.unitConversions || []).some((c: any) => c.fromUnit.trim().toLowerCase() === newFromUnit.trim().toLowerCase());
     if (exists) {
-      alert(t("erp_84"));
+      toast.error(t("erp_84"));
       return;
     }
     try {
@@ -326,14 +329,14 @@ const EditIngredientModal = ({
       setNewMultiplier("");
     } catch (error) {
       console.error("Failed to add conversion", error);
-      alert(t("erp_85"));
+      toast.error(t("erp_85"));
     } finally {
       setLoading(false);
     }
   };
   const handleDeleteConversion = async (convId: string) => {
     if (isCreate || !ingredient.id) return;
-    if (!confirm(t("erp_86"))) return;
+    if (!await confirm(t("erp_86"))) return;
     try {
       setLoading(true);
       await axios.delete(`http://localhost:3000/api/ingredients/${ingredient.id}/conversions/${convId}`);
@@ -343,7 +346,7 @@ const EditIngredientModal = ({
       }));
     } catch (error) {
       console.error("Failed to delete conversion", error);
-      alert(t("erp_87"));
+      toast.error(t("erp_87"));
     } finally {
       setLoading(false);
     }
@@ -351,7 +354,7 @@ const EditIngredientModal = ({
   const handleAddQuote = async () => {
     if (isCreate || !ingredient.id) return;
     if (!priceInfo.packageSize || !priceInfo.packageUnit || !priceInfo.price) {
-      alert(t("erp_88"));
+      toast.error(t("erp_88"));
       return;
     }
     try {
@@ -372,20 +375,20 @@ const EditIngredientModal = ({
       }));
     } catch (error: any) {
       console.error("Failed to add quote", error);
-      alert(error.response?.data?.error || t("erp_89"));
+      toast.error(error.response?.data?.error || t("erp_89"));
     } finally {
       setLoading(false);
     }
   };
   const handleDeleteQuote = async (priceId: string) => {
-    if (!confirm(t("erp_90"))) return;
+    if (!await confirm(t("erp_90"))) return;
     try {
       setLoading(true);
       await axios.delete(`http://localhost:3000/api/suppliers/prices/${priceId}`);
       await fetchIngredientDetails();
     } catch (error: any) {
       console.error("Failed to delete quote", error);
-      alert(error.response?.data?.error || t("erp_91"));
+      toast.error(error.response?.data?.error || t("erp_91"));
     } finally {
       setLoading(false);
     }
@@ -397,7 +400,7 @@ const EditIngredientModal = ({
       await fetchIngredientDetails();
     } catch (error: any) {
       console.error("Failed to set default quote", error);
-      alert(error.response?.data?.error || t("erp_92"));
+      toast.error(error.response?.data?.error || t("erp_92"));
     } finally {
       setLoading(false);
     }

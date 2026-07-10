@@ -5,6 +5,7 @@ import { PageContent } from '../components/layout/PageContent';
 import { api } from '../lib/api';
 import { useParams, useNavigate } from 'react-router-dom';
 import { FileText, Play, CheckCircle, Clock } from 'lucide-react';
+import { confirm } from "../lib/confirm";
 
 interface PayrollPeriod {
   id: string;
@@ -65,7 +66,7 @@ export default function PayrollDetail() {
   }
 
   async function handleGenerate() {
-    if (!window.confirm('確定要產生薪資單嗎？這將會覆蓋目前草稿狀態的薪資單。 (Are you sure? This will overwrite existing draft payslips for this period.)')) return;
+    if (!await confirm('確定要產生薪資單嗎？這將會覆蓋目前草稿狀態的薪資單。 (Are you sure? This will overwrite existing draft payslips for this period.)')) return;
     
     try {
       setGenerating(true);

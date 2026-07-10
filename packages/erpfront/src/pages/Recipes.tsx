@@ -6,6 +6,8 @@ import CreateRecipeModal from "../components/CreateRecipeModal";
 import RecipeDetailModal from "../components/RecipeDetailModal";
 import { cn } from "../lib/utils";
 import { useTranslation } from "react-i18next";
+import { toast } from "react-hot-toast";
+
 const isPortionUnit = (unit: string) => {
   if (!unit) return false;
   const portionUnits = [i18n.t("erp_15"), i18n.t("erp_68"), "pcs", "piece", i18n.t("erp_202"), i18n.t("erp_203"), i18n.t("erp_204"), i18n.t("erp_205")];
@@ -39,7 +41,7 @@ const Recipes = () => {
       setEditingRecipe(response.data);
     } catch (error) {
       console.error("Failed to fetch full recipe", error);
-      alert(t("erp_758"));
+      toast.error(t("erp_758"));
     }
   };
   const handleView = async (recipeId: string) => {

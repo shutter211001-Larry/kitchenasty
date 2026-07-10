@@ -5,6 +5,8 @@ import {
   AreaChart, Area, BarChart, Bar,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts';
+import { confirm } from "../lib/confirm";
+import { toast } from "react-hot-toast";
 
 interface MetricsSummary {
   totalRequests: number;
@@ -89,16 +91,16 @@ export default function DeveloperMetrics() {
         <div className="flex gap-2">
           <button
             onClick={async () => {
-              if (!confirm(t('developerMetrics.confirmSyncDatabase'))) return;
+              if (!await confirm(t('developerMetrics.confirmSyncDatabase'))) return;
               try {
                 const data = await api.post<any>('/developer/sync-db', {});
                 if (data.success) {
-                  alert(t('developerMetrics.databaseSyncSuccess'));
+                  toast.error(t('developerMetrics.databaseSyncSuccess'));
                 } else {
-                  alert(`同步失敗: ${data.error}`);
+                  toast.error(`同步失敗: ${data.error}`);
                 }
               } catch (err) {
-                alert(t('developerMetrics.errorCheckConsole'));
+                toast.error(t('developerMetrics.errorCheckConsole'));
               }
             }}
             className="px-4 py-1.5 text-sm font-medium bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-2"
@@ -111,17 +113,17 @@ export default function DeveloperMetrics() {
           
           <button
             onClick={async () => {
-              if (!confirm(t('developerMetrics.confirmAiTranslation'))) return;
+              if (!await confirm(t('developerMetrics.confirmAiTranslation'))) return;
               setSyncingLocales(true);
               try {
                 const data = await api.post<any>('/developer/sync-locales', {});
                 if (data.success) {
-                  alert(`語系同步成功！已補齊 ${data.updatedCount} 筆翻譯。`);
+                  toast.error(`語系同步成功！已補齊 ${data.updatedCount} 筆翻譯。`);
                 } else {
-                  alert(`同步失敗: ${data.error}`);
+                  toast.error(`同步失敗: ${data.error}`);
                 }
               } catch (err) {
-                alert(t('developerMetrics.errorCheckConsole'));
+                toast.error(t('developerMetrics.errorCheckConsole'));
               } finally {
                 setSyncingLocales(false);
               }

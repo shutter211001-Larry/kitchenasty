@@ -6,6 +6,9 @@ import { cn } from "../lib/utils";
 import { QRCodeSVG } from "qrcode.react";
 import { useTranslation } from "react-i18next";
 import { SUPPORTED_LANGUAGES } from "../i18n";
+import { confirm } from "../lib/confirm";
+import { toast } from "react-hot-toast";
+
 interface IngredientItem {
   id: string;
   name: string;
@@ -902,12 +905,12 @@ export const Labels = () => {
       groupFontScales,
       customLines
     }));
-    alert(t("erp_463"));
+    toast.error(t("erp_463"));
   };
   const handlePasteLayoutFromClipboard = () => {
     const data = localStorage.getItem("shutter_layout_clipboard");
     if (!data) {
-      alert(t("erp_464"));
+      toast.error(t("erp_464"));
       return;
     }
     try {
@@ -915,18 +918,18 @@ export const Labels = () => {
       if (parsed.groupLayouts) setGroupLayouts(parsed.groupLayouts);
       if (parsed.groupFontScales) setGroupFontScales(parsed.groupFontScales);
       if (parsed.customLines !== undefined) setCustomLines(parsed.customLines);
-      alert(t("erp_465"));
+      toast.error(t("erp_465"));
     } catch (e) {
-      alert(t("erp_466"));
+      toast.error(t("erp_466"));
     }
   };
   const handleCopyLayoutToRecipe = async () => {
     if (!selectedRecipeId) {
-      alert(t("erp_467"));
+      toast.error(t("erp_467"));
       return;
     }
     if (!targetRecipeIdToCopyTo) {
-      alert(t("erp_468"));
+      toast.error(t("erp_468"));
       return;
     }
     try {
@@ -944,18 +947,18 @@ export const Labels = () => {
       await axios.patch(`http://localhost:3000/api/recipes/${targetRecipeIdToCopyTo}/label-config`, {
         labelConfig: updatedConfig
       });
-      alert(t("erp_469"));
+      toast.error(t("erp_469"));
       setTargetRecipeIdToCopyTo("");
     } catch (error) {
       console.error("Failed to copy layout to recipe", error);
-      alert(t("erp_470"));
+      toast.error(t("erp_470"));
     } finally {
       setCopyingLayoutToRecipe(false);
     }
   };
   const handleSaveLabelConfig = async () => {
     if (!selectedRecipeId) {
-      alert(t("erp_471"));
+      toast.error(t("erp_471"));
       return;
     }
     try {
@@ -1028,7 +1031,7 @@ export const Labels = () => {
       await axios.patch(`http://localhost:3000/api/recipes/${selectedRecipeId}/label-config`, {
         labelConfig
       });
-      alert(t("erp_472"));
+      toast.error(t("erp_472"));
       if (loadedRecipe) {
         setLoadedRecipe({
           ...loadedRecipe,
@@ -1037,7 +1040,7 @@ export const Labels = () => {
       }
     } catch (error) {
       console.error("Failed to save label design", error);
-      alert(t("erp_473"));
+      toast.error(t("erp_473"));
     } finally {
       setSavingLabelConfig(false);
     }
@@ -1063,7 +1066,7 @@ export const Labels = () => {
       }
     } catch (error) {
       console.error("Failed to load recipe details", error);
-      alert(t("erp_474"));
+      toast.error(t("erp_474"));
     } finally {
       setLoading(false);
     }
@@ -1330,7 +1333,7 @@ export const Labels = () => {
       printLanguage
     };
     localStorage.setItem("shuttererp_label_settings", JSON.stringify(settings));
-    alert(t("erp_504"));
+    toast.error(t("erp_504"));
   };
   const renderLabelLogo = () => {
     if (logoType === "upload" && uploadedLogo) {
@@ -2699,8 +2702,8 @@ export const Labels = () => {
                       <Plus className="w-3.5 h-3.5" />
                       <span>{t("erp_680")}</span>
                     </button>
-                    {customLines.length > 0 && <button type="button" onClick={() => {
-                  if (confirm(t("erp_681"))) {
+                    {customLines.length > 0 && <button type="button" onClick={async () => {
+                  if (await confirm(t("erp_681"))) {
                     setCustomLines([]);
                   }
                 }} className="px-3 py-2 bg-red-50 hover:bg-red-100 border border-red-200 text-red-700 rounded-xl font-bold text-xs transition-all active:scale-95 flex items-center justify-center gap-1 cursor-pointer">

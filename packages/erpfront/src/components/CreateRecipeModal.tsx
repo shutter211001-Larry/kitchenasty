@@ -6,6 +6,9 @@ import { X, Save, Search, Plus, Trash2, ChevronRight, GripVertical, LayoutList, 
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { cn } from "../lib/utils";
 import { useTranslation } from "react-i18next";
+import { confirm } from "../lib/confirm";
+import { toast } from "react-hot-toast";
+
 interface Props {
   initialData?: any;
   onClose: () => void;
@@ -320,7 +323,7 @@ const CreateRecipeModal = ({
   const addStepOutputToStep = (targetStepId: string, sourceStep: any) => {
     const remaining = calculateRemainingOutput(sourceStep.id, steps);
     if (remaining <= 0) {
-      alert(t("erp_17"));
+      toast.error(t("erp_17"));
       return;
     }
     setSteps(steps.map(s => {
@@ -463,16 +466,16 @@ const CreateRecipeModal = ({
         cookingMethod: steps.map(s => s.action).join(", ")
       });
       setOutputs(res.data.outputs);
-      alert(t("erp_20"));
+      toast.error(t("erp_20"));
     } catch (err: any) {
-      alert(`AI 計算失敗: ${err.response?.data?.error || err.message}`);
+      toast.error(`AI 計算失敗: ${err.response?.data?.error || err.message}`);
     } finally {
       setLoading(false);
     }
   };
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (steps.length === 0) return alert(t("erp_21"));
+    if (steps.length === 0) return toast.error(t("erp_21"));
     try {
       setLoading(true);
       const data = {
@@ -520,7 +523,7 @@ const CreateRecipeModal = ({
       onClose();
     } catch (error: any) {
       console.error("Failed to save recipe", error);
-      alert(error.response?.data?.error || `儲存失敗：${error.message}`);
+      toast.error(error.response?.data?.error || `儲存失敗：${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -534,7 +537,7 @@ const CreateRecipeModal = ({
       console.log("[DEBUG] initialData?.id is falsy!");
       return;
     }
-    const confirmed = window.confirm(`確定要刪除食譜「${initialData.name}」嗎？\n\n此操作無法復原！`);
+    const confirmed = await confirm(`確定要刪除食譜「${initialData.name}」嗎？\n\n此操作無法復原！`);
     console.log("[DEBUG] confirm result:", confirmed);
     if (!confirmed) return;
     try {
@@ -546,7 +549,7 @@ const CreateRecipeModal = ({
       onClose();
     } catch (error: any) {
       console.error("[DEBUG] Failed to delete recipe", error);
-      alert(error.response?.data?.error || t("erp_22"));
+      toast.error(error.response?.data?.error || t("erp_22"));
     } finally {
       setLoading(false);
     }

@@ -7,6 +7,8 @@ import { List, Calendar as CalendarIcon, Printer } from 'lucide-react';
 import StaffRosterSettingsModal from '../components/StaffRosterSettingsModal.js';
 import { PageHeader } from '../components/layout/PageHeader';
 import { PageContent } from '../components/layout/PageContent';
+import { confirm } from "../lib/confirm";
+import { toast } from "react-hot-toast";
 
 interface Shift {
   id: string;
@@ -142,7 +144,7 @@ export default function RosterManagement() {
 
   const handleAutoSchedule = async (mode: 'COST_OPTIMIZED' | 'FAIR') => {
     if (!selectedLocation || !startDate || !endDate) return;
-    if (!window.confirm(`確定要執行 ${mode === 'COST_OPTIMIZED' ? '支出優化' : '公平分配'} 自動排班嗎？這將覆蓋現有班表！`)) return;
+    if (!await confirm(`確定要執行 ${mode === 'COST_OPTIMIZED' ? '支出優化' : '公平分配'} 自動排班嗎？這將覆蓋現有班表！`)) return;
     
     setGenerating(true);
     try {
@@ -152,11 +154,11 @@ export default function RosterManagement() {
         endDate,
         mode
       });
-      alert('排班指令已發送！如有人力不足的缺額將會標示於班表中。');
+      toast.error('排班指令已發送！如有人力不足的缺額將會標示於班表中。');
       fetchRosterData();
     } catch (err) {
       console.error(err);
-      alert('自動排班失敗，請確認是否已設定門市需求與員工可用時段。');
+      toast.error('自動排班失敗，請確認是否已設定門市需求與員工可用時段。');
     } finally {
       setGenerating(false);
     }

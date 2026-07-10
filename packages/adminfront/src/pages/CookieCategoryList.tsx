@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { useState, useEffect } from 'react';
 import { api } from '../lib/api.js';
+import { confirm } from "../lib/confirm";
 
 interface CookieCategory {
   id: string;
@@ -63,7 +64,7 @@ export default function CookieCategoryList() {
   }
 
   async function handleDelete(id: string) {
-    if (!confirm(t('cookieCategoryList.confirmDeleteCookieCategory'))) return;
+    if (!await confirm(t('cookieCategoryList.confirmDeleteCookieCategory'))) return;
     try {
       const res = await api.delete<any>(`legal/cookie-categories/${id}`);
       const data = res;

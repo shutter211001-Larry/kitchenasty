@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import { useCart } from '../context/CartContext.js';
 import { API_BASE, api } from '../lib/api';
+import { confirm } from "../lib/confirm";
 
 export default function GroupOrderDialog() {
   const { t } = useTranslation();
@@ -94,8 +95,8 @@ export default function GroupOrderDialog() {
               <span className="text-xl font-black tracking-widest">{groupPin}</span>
             </div>
             <button 
-              onClick={() => {
-                if(window.confirm(t('groupOrder.confirmLeaveGroup'))) {
+              onClick={async () => {
+                if(await confirm(t('groupOrder.confirmLeaveGroup'))) {
                   setGroupSession(null, null);
                 }
               }}

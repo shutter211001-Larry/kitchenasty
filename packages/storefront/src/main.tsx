@@ -23,6 +23,8 @@ import NotFound from './pages/NotFound.js';
 import LinePayConfirm from './pages/LinePayConfirm.js';
 import './i18n/index.js';
 import './index.css';
+import { ConfirmGlobal } from './components/ConfirmGlobal.tsx';
+import { Toaster } from 'react-hot-toast';
 
 import { Navigate } from 'react-router-dom';
 import { useTheme } from './context/ThemeContext.js';
@@ -100,6 +102,8 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
             </Route>
           </Routes>
         </BrandingGuard>
+        <ConfirmGlobal />
+        <Toaster position="top-center" />
         </CartProvider>
       </AuthProvider>
       </ThemeProvider>

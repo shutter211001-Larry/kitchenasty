@@ -17,6 +17,8 @@ import SettingsMail from './pages/SettingsMail.tsx';
 import SettingsPermissions from './pages/SettingsPermissions.tsx';
 import SettingsAdvanced from './pages/SettingsAdvanced.tsx';
 import './index.css';
+import { ConfirmGlobal } from './components/ConfirmGlobal.tsx';
+import { Toaster } from 'react-hot-toast';
 
 function AppRoutes() {
   const { token, user, loading, login, logout } = useAuth();
@@ -65,6 +67,8 @@ function App() {
     <BrowserRouter basename={import.meta.env.BASE_URL}>
       <AuthProvider>
         <AppRoutes />
+        <ConfirmGlobal />
+        <Toaster position="top-center" />
       </AuthProvider>
     </BrowserRouter>
   );
