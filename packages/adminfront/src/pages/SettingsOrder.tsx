@@ -62,7 +62,7 @@ export default function SettingsOrder() {
   const [ecpayMerchantId, setEcpayMerchantId] = useState('');
   const [ecpayHashKey, setEcpayHashKey] = useState('');
   const [ecpayHashIv, setEcpayHashIv] = useState('');
-  const [enableCapacityLimit, setEnableCapacityLimit] = useState(true);
+
 
   useEffect(() => {
     api.get('settings/order')
@@ -99,7 +99,7 @@ export default function SettingsOrder() {
           if (d.timeSlotInterval !== undefined) setTimeSlotInterval(d.timeSlotInterval);
           if (d.enableTipping !== undefined) setEnableTipping(d.enableTipping);
           if (d.enableCounterDisplay !== undefined) setEnableCounterDisplay(d.enableCounterDisplay);
-          if (d.enableCapacityLimit !== undefined) setEnableCapacityLimit(d.enableCapacityLimit);
+
           if (d.tipOptions) setTipOptionsStr(d.tipOptions.join(','));
           if (d.taxRate !== undefined) setTaxRate(d.taxRate);
           if (d.boardLeadTime !== undefined) setBoardLeadTime(d.boardLeadTime);
@@ -137,7 +137,7 @@ export default function SettingsOrder() {
           preOpeningBuffer,
           postClosingBuffer,
           timeSlotInterval,
-          enableCapacityLimit,
+
           enableTipping, 
           enableCounterDisplay,
           tipOptions, 

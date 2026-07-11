@@ -44,7 +44,7 @@ interface MenuItemData {
   locationId: string;
   isRewardItem?: boolean;
   rewardPointsPrice?: number;
-  prepTime?: number;
+
   cropData?: any;
   prepTime: number;
 }
@@ -229,7 +229,7 @@ export default function MenuItemForm() {
           rewardPointsPrice: item.rewardPointsPrice || 0,
           prepTime: item.prepTime || 0,
           cropData: item.cropData || {},
-          prepTime: item.prepTime || 0,
+
         });
         if (item.image) setImageUrl(item.image);
         if (item.recipeId) {
@@ -454,7 +454,7 @@ export default function MenuItemForm() {
         prepTime: Number(form.prepTime || 0),
         isRewardItem: !!form.isRewardItem,
         rewardPointsPrice: Number(form.rewardPointsPrice || 0),
-        prepTime: Number(form.prepTime || 0),
+
         options,
         allergenIds: selectedAllergens,
         mealtimeIds: selectedMealtimes,

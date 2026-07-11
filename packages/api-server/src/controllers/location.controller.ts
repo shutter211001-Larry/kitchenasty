@@ -290,7 +290,6 @@ export async function getAvailableSlots(req: Request, res: Response): Promise<vo
   // Deduplicate and sort all slots
   allRawSlots = Array.from(new Set(allRawSlots)).sort();
 
-  const enableCapacityLimit = orderSettings.enableCapacityLimit !== false; // Default true
   if (enableCapacityLimit) {
     const cartPrepTime = parseInt(req.query.cartPrepTime as string) || 0;
 
