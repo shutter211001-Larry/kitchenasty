@@ -44,6 +44,7 @@ interface MenuItemData {
   locationId: string;
   isRewardItem?: boolean;
   rewardPointsPrice?: number;
+  prepTime?: number;
   cropData?: any;
 }
 
@@ -113,6 +114,7 @@ export default function MenuItemForm() {
       locationId: '',
       isRewardItem: false,
       rewardPointsPrice: 0,
+      prepTime: 0,
     };
     const LANGUAGES = [
       { code: 'zh-TW', label: t('menuItemForm.traditionalChinese') },
@@ -213,6 +215,7 @@ export default function MenuItemForm() {
           description: item.description || '',
           descriptionTranslations: item.descriptionTranslations || {},
           price: item.price,
+          prepTime: item.prepTime || 0,
           isActive: item.isActive,
           sortOrder: item.sortOrder,
           trackStock: item.trackStock,
@@ -443,6 +446,7 @@ export default function MenuItemForm() {
       const body = {
         ...form,
         price: Number(form.price),
+        prepTime: Number(form.prepTime || 0),
         sortOrder: Number(form.sortOrder),
         stockQty: Number(form.stockQty),
         isRewardItem: !!form.isRewardItem,
@@ -464,81 +468,122 @@ export default function MenuItemForm() {
         (body as any).recipeId = null;
         (body as any).recipeName = null;
       }
-
-      if (isEdit) {
-        const { slug: _, ...updateBody } = body;
-        await api.patch(`/menu/items/${id}`, updateBody);
-      } else {
-        await api.post('/menu/items', body);
+        const payload = {
+          ...form,
+          price: Number(form.price),
+          sortOrder: Number(form.sortOrder),
+          stockQty: Number(form.stockQty),
+          prepTime: Number(form.prepTime || 0),
+          rewardPointsPrice: Number(form.rewardPointsPrice || 0),
+          allergens: selectedAllergens,
+          mealtimes: selectedMealtimes,
+          dietary: selectedDietary,
+          options: options.map(o => ({
+            ...o,
+            minSelect: Number(o.minSelect),
+            maxSelect: Number(o.maxSelect),
+            sortOrder: Number(o.sortOrder),
+            values: o.values.map(v => ({
+              ...v,
+              priceModifier: Number(v.priceModifier),
+              sortOrder: Number(v.sortOrder),
+              stockQty: Number(v.stockQty)
+            }))
+          })),
+          erpRecipeId: selectedErpRecipeId || null
+        };
+  
+        formData.append('data', JSON.stringify(payload));
+        if (imageFile) {
+          formData.append('image', imageFile);
+        } else if (form.cropData) {
+            // handle base64 image data
+            const res = await fetch(form.cropData);
+            const blob = await res.blob();
+            formData.append('image', blob, 'cropped.jpg');
+        }
+  
+        if (isEdit) {
+          await api.put(`/menu/items/${id}`, formData);
+        } else {
+          await api.post('/menu/items', formData);
+        }
+        navigate('/menu-items');
+      } catch (err: any) {
+        console.error(err);
+        setError(err.response?.data?.error || err.message || t('menuItemForm.saveFailed'));
+      } finally {
+        setSubmitting(false);
       }
-      navigate('/menu/items');
-    } catch (err: any) {
-      setError(err.data || err.message);
-      setSaving(false);
-    }
-  };
-
-  if (loading) return <p className="text-gray-500">{t('menuItemForm.loading')}</p>;
-
-  return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-semibold text-gray-800">
-          {isEdit ? t('menuItemForm.editProduct') : t('menuItemForm.addProduct')}
-        </h2>
-        <button onClick={() => navigate('/menu/items')} className="text-gray-500 hover:text-gray-700 text-sm">
-          {t('menuItemForm.backToProductList')}
-        </button>
-      </div>
-
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-6">
-          {typeof error === 'string' ? error : (Array.isArray(error) ? (error as any).map((err: any, i: number) => <div key={i}>{err.message || JSON.stringify(err)}</div>) : JSON.stringify(error))}
+    };
+  
+    return (
+      <div className="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => navigate('/menu-items')}
+              className="p-2 -ml-2 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-full transition-colors"
+            >
+              <ArrowLeft size={24} />
+            </button>
+            <h1 className="text-2xl font-bold text-gray-900">
+              {isEdit ? t('menuItemForm.editItem') : t('menuItemForm.createItem')}
+            </h1>
+          </div>
         </div>
-      )}
-
-      <form onSubmit={handleSubmit} className="space-y-8">
-        {/* 基本資訊 */}
-        <section className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-medium text-gray-900">{t('menuItemForm.basicInformation')}</h3>
-            {erpRecipes.length > 0 && (
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-primary-600 font-bold bg-primary-50 px-2 py-1 rounded">
-                  {isEdit ? t('menuItemForm.linkErpRecipe') : t('menuItemForm.importFromErpRecipe')}
-                </span>
-                <select
-                  value={selectedErpRecipeId}
-                  onChange={(e) => {
-                    const id = e.target.value;
-                    setSelectedErpRecipeId(id);
-                    if (id) {
-                      const recipe = erpRecipes.find(r => r.id === id);
-                      if (recipe) {
-                        if (!isEdit) {
-                          updateField('name', recipe.name);
-                          autoSlug(recipe.name);
-                          updateField('description', recipe.description || '');
-                          updateField('unit', recipe.yieldUnit || t('menuItemForm.portion'));
-                          
-                          // Auto-fill allergens by matching names
-                          if (recipe.allergens && recipe.allergens.length > 0) {
-                            const matchedIds = recipe.allergens
-                              .map(aName => allergens.find(localA => localA.name === aName)?.id)
-                              .filter(Boolean) as string[];
-                            if (matchedIds.length > 0) {
-                              setSelectedAllergens(prev => {
-                                const newSet = new Set([...prev, ...matchedIds]);
-                                return Array.from(newSet);
-                              });
+  
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-600 rounded-lg">
+            {typeof error === 'string' ? error : (Array.isArray(error) ? (error as any).map((err: any, i: number) => <div key={i}>{err.message || JSON.stringify(err)}</div>) : JSON.stringify(error))}
+          </div>
+        )}
+  
+        <form onSubmit={handleSubmit} className="space-y-8">
+          {/* 基本資訊 */}
+          <section className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-medium text-gray-900">{t('menuItemForm.basicInformation')}</h3>
+              {erpRecipes.length > 0 && (
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-primary-600 font-bold bg-primary-50 px-2 py-1 rounded">
+                    {isEdit ? t('menuItemForm.linkErpRecipe') : t('menuItemForm.importFromErpRecipe')}
+                  </span>
+                  <select
+                    value={selectedErpRecipeId}
+                    onChange={(e) => {
+                      const id = e.target.value;
+                      setSelectedErpRecipeId(id);
+                      if (id) {
+                        const recipe = erpRecipes.find(r => r.id === id);
+                        if (recipe) {
+                          if (!isEdit) {
+                            updateField('name', recipe.name);
+                            autoSlug(recipe.name);
+                            updateField('description', recipe.description || '');
+                            updateField('unit', recipe.yieldUnit || t('menuItemForm.portion'));
+                            
+                            // Auto-fill allergens by matching names
+                            if (recipe.allergens && recipe.allergens.length > 0) {
+                              const matchedIds = recipe.allergens
+                                .map(aName => allergens.find(localA => localA.name === aName)?.id)
+                                .filter(Boolean) as string[];
+                              if (matchedIds.length > 0) {
+                                setSelectedAllergens(prev => {
+                                  const newSet = new Set([...prev, ...matchedIds]);
+                                  return Array.from(newSet);
+                                });
+                              }
                             }
+                          }
+                          
+                          if (recipe.prepTime !== undefined) {
+                            updateField('prepTime', recipe.prepTime);
                           }
                         }
                       }
-                    }
-                  }}
+                    }}
                   className="border border-primary-200 text-sm rounded-lg px-2 py-1 focus:ring-primary-500 outline-none"
-                >
                   <option value="">-- {isEdit ? t('menuItemForm.selectErpRecipeAutoUpdate') : t('menuItemForm.selectErpRecipeAutoBind')} --</option>
                   {erpRecipes.map(r => (
                     <option key={r.id} value={r.id}>{r.name}</option>
@@ -620,6 +665,16 @@ export default function MenuItemForm() {
                 required
                 min={0}
                 step={0.01}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('menuItemForm.prepTime')}</label>
+              <input
+                type="number"
+                value={form.prepTime}
+                onChange={(e) => updateField('prepTime', e.target.value)}
+                min={0}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
               />
             </div>

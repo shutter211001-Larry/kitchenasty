@@ -1242,7 +1242,8 @@
     "cancel": "取消",
     "saving": "儲存中...",
     "updateProductDetails": "更新產品資料",
-    "createNewProduct": "建立新產品"
+    "createNewProduct": "建立新產品",
+    "prepTime": "Preparation Time (Mins)"
   },
   "menuItemList": {
     "productManagement": "產品管理 (Menu Items)",
@@ -1326,7 +1327,10 @@
     "enterPromoCode": "Enter Promo Code",
     "manualDeliveryFee": "Manual Delivery Fee",
     "leaveBlankAutoCalc": "Leave blank to auto-calculate",
-    "manualTax": "Manual Tax"
+    "manualTax": "Manual Tax",
+    "estimatedWaitTime": "Estimated Wait Time",
+    "minutes": "mins",
+    "expectedReadyTime": "Expected Ready"
   },
   "orderDetail": {
     "fulfillOrder": "배송 정보 입력",

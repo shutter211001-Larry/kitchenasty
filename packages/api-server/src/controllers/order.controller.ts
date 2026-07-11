@@ -559,6 +559,16 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
         return;
       }
 
+      const enableCapacityLimit = orderSettings.enableCapacityLimit !== false;
+      if (cartPrepTime > 0 && locationId && enableCapacityLimit && orderType !== 'FROZEN_DELIVERY') {
+        const { checkSlotCapacity } = await import('./location.controller.js');
+        const hasCapacity = await checkSlotCapacity(locationId, scheduled, cartPrepTime, orderType);
+        if (!hasCapacity) {
+          res.status(400).json({ success: false, error: 'The selected timeslot has reached maximum capacity. Please choose another time.' });
+          return;
+        }
+      }
+
       const check = isWithinHours(
         scheduled,
         location.operatingHours,
@@ -2564,7 +2574,25 @@ export async function calculateOrderSummary(req: Request, res: Response): Promis
   let estimatedWaitMins: number | null = null;
   let earliestSlot: string | null = null;
 
-  if (cartPrepTime > 0 || leadTime > 0) {
+  const enableCapacityLimit = orderSettings.enableCapacityLimit !== false; // Default true
+
+  if (locationId && enableCapacityLimit) {
+    const simReq = { params: { id: locationId }, query: { orderType, days: '1', cartPrepTime: cartPrepTime.toString() } } as any;
+    let slotsByDay: any[] = [];
+    const simRes = { json: (data: any) => { if (data.success) slotsByDay = data.data; }, status: () => simRes } as any;
+    
+    const { getAvailableSlots } = await import('./location.controller.js');
+    await getAvailableSlots(simReq, simRes);
+
+    if (slotsByDay.length > 0 && slotsByDay[0].slots.length > 0) {
+      const firstSlotStr = String(slotsByDay[0].slots[0]);
+      earliestSlot = firstSlotStr;
+      const targetTime = new Date(firstSlotStr).getTime();
+      const now = new Date();
+      const wait = (targetTime - now.getTime()) / 60000;
+      estimatedWaitMins = Math.max(0, Math.ceil(wait));
+    }
+  } else if (cartPrepTime > 0 || leadTime > 0) {
     estimatedWaitMins = Math.ceil(cartPrepTime + leadTime);
     const now = new Date();
     now.setMinutes(now.getMinutes() + estimatedWaitMins);

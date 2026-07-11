@@ -1242,7 +1242,8 @@
     "cancel": "取消",
     "saving": "儲存中...",
     "updateProductDetails": "更新產品資料",
-    "createNewProduct": "建立新產品"
+    "createNewProduct": "建立新產品",
+    "prepTime": "製作時間 (分鐘)"
   },
   "menuItemList": {
     "productManagement": "產品管理 (Menu Items)",
@@ -1326,7 +1327,10 @@
     "enterPromoCode": "輸入優惠碼",
     "manualDeliveryFee": "手動運費",
     "leaveBlankAutoCalc": "留空自動計算",
-    "manualTax": "手動稅額"
+    "manualTax": "手動稅額",
+    "estimatedWaitTime": "Estimated Wait Time",
+    "minutes": "mins",
+    "expectedReadyTime": "Expected Ready"
   },
   "orderDetail": {
     "fulfillOrder": "填寫出貨資訊",
