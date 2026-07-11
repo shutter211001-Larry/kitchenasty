@@ -158,16 +158,17 @@ interface EmailOptions {
  * Sends an email using the configured service (Gmail API, Mailgun, or SMTP).
  * Optimized to be truly non-blocking.
  */
-export async function sendEmail(options: EmailOptions): Promise<void> {
+export async function sendEmail(options: EmailOptions & { throwOnError?: boolean }): Promise<void> {
   if (process.env.NODE_ENV === 'test') return;
   if (options.to && options.to.endsWith('@line.shutterorder.com')) return;
 
   const currentTenantId = tenantStorage.getStore()?.tenantId || null;
 
   // Run in a self-contained async block to avoid blocking the caller's thread
-  tenantStorage.run({ tenantId: currentTenantId }, () => {
-    (async () => {
-      try {
+  return new Promise((resolve, reject) => {
+    tenantStorage.run({ tenantId: currentTenantId }, () => {
+      (async () => {
+        try {
       // Load Settings from DB
       let mailSettings: any = {};
       let googleSettings: any = {};
@@ -245,11 +246,15 @@ export async function sendEmail(options: EmailOptions): Promise<void> {
           html: brandedOptions.html,
           text: brandedOptions.text,
         });
+        }
+        resolve();
+      } catch (err) {
+        emailLogger.error({ err, options }, 'Background email sending failed');
+        if (options.throwOnError) reject(err);
+        else resolve();
       }
-    } catch (err) {
-      emailLogger.error({ err, options }, 'Background email sending failed');
-    }
-  })();
+    })();
+  });
   });
 }
 

@@ -16,10 +16,12 @@
     "build": "npm run build -w packages/shared && npm run build -w packages/api-server && npm run build -w packages/adminfront && npm run build -w packages/storefront && npm run build -w packages/erpfront && npm run build -w packages/saasfront",
     "build:docs": "npm run build -w packages/docs",
     "lint": "eslint packages/*/src --ext .ts,.tsx",
-    "test": "npm run test:unit && npm run test:integration",
+    "test": "node scripts/verify-prisma-sync.js && npm run test:unit && npm run test:integration",
     "test:unit": "npm run test -w packages/shared && npm run test:unit -w packages/api-server",
     "test:integration": "npm run test:integration -w packages/api-server",
-    "test:e2e": "npx playwright test"
+    "test:e2e": "npx playwright test",
+    "verify-prisma": "node scripts/verify-prisma-sync.js",
+    "db:push": "echo 'CRITICAL ERROR: NEVER use db push! It will DROP all tables belonging to other schemas. Use migrate dev instead.' && exit 1"
   },
   "devDependencies": {
     "@playwright/test": "^1.58.2",

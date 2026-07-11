@@ -477,31 +477,38 @@ export const updateTenantIntegrations = async (req: Request, res: Response) => {
 
     if (notifyEmail) {
       // Send email notification dynamically to the provided email
-      (async () => {
-        try {
-          const tenant = await (prisma as any).tenant.findUnique({ where: { id } });
-          if (tenant) {
-            const { tenantStorage } = await import('../middleware/tenantStorage.js');
-            const { sendEmail } = await import('../lib/email.js');
-            
-            tenantStorage.run({ tenantId: null }, () => {
-              sendEmail({
-                to: notifyEmail,
-                subject: 'SaaS 平台系統通知：整合金鑰設定已更新',
-                html: `<div style="font-family: sans-serif; padding: 20px;">
-                          <h2>第三方服務整合金鑰已更新</h2>
-                          <p>您好：</p>
-                          <p>系統管理員已為您的餐廳（${tenant.name}）配置了新的第三方整合金鑰或服務串接。</p>
-                          <p>若有任何疑問，請聯繫 SaaS 平台客服中心。</p>
-                          <p>祝您生意興隆！<br/>夏特點餐系統 團隊</p>
-                         </div>`
-              });
+      try {
+        const tenant = await (prisma as any).tenant.findUnique({ where: { id } });
+        if (tenant) {
+          const { tenantStorage } = await import('../middleware/tenantStorage.js');
+          const { sendEmail } = await import('../lib/email.js');
+          
+          await new Promise<void>((resolve, reject) => {
+            tenantStorage.run({ tenantId: null }, async () => {
+              try {
+                await sendEmail({
+                  to: notifyEmail,
+                  subject: 'SaaS 平台系統通知：整合金鑰設定已更新',
+                  throwOnError: true,
+                  html: `<div style="font-family: sans-serif; padding: 20px;">
+                            <h2>第三方服務整合金鑰已更新</h2>
+                            <p>您好：</p>
+                            <p>系統管理員已為您的餐廳（${tenant.name}）配置了新的第三方整合金鑰或服務串接。</p>
+                            <p>若有任何疑問，請聯繫 SaaS 平台客服中心。</p>
+                            <p>祝您生意興隆！<br/>夏特點餐系統 團隊</p>
+                           </div>`
+                });
+                resolve();
+              } catch (err) {
+                reject(err);
+              }
             });
-          }
-        } catch (err) {
-          logger.error({ err }, 'Failed to send integration update email to ' + notifyEmail);
+          });
         }
-      })();
+      } catch (err) {
+        logger.error({ err }, 'Failed to send integration update email to ' + notifyEmail);
+        return res.status(500).json({ success: false, error: '設定已儲存，但寄送確認信失敗' });
+      }
     }
 
     res.json({ success: true, message: notifyEmail ? '設定已儲存並發送通知' : '設定已儲存' });
@@ -591,17 +598,26 @@ export async function sendWelcomeEmailCore(tenant: any) {
     htmlBody = htmlBody.replace(/\n/g, '<br/>');
 
     const { tenantStorage } = await import('../middleware/tenantStorage.js');
-    tenantStorage.run({ tenantId: null }, () => {
-      sendEmail({
-        to: adminUser.email,
-        subject: subject,
-        html: htmlBody
+    await new Promise<void>((resolve, reject) => {
+      tenantStorage.run({ tenantId: null }, async () => {
+        try {
+          await sendEmail({
+            to: adminUser.email,
+            subject: subject,
+            throwOnError: true,
+            html: htmlBody
+          });
+          resolve();
+        } catch (err) {
+          reject(err);
+        }
       });
     });
     
     logger.info(`Welcome email sent to ${adminUser.email}`);
   } catch (err) {
     logger.error({ err, tenantId: tenant?.id }, 'Failed to send welcome email');
+    throw err; // Re-throw so caller knows it failed
   }
 }
 
@@ -616,12 +632,11 @@ export const sendWelcomeEmail = async (req: Request, res: Response) => {
       return res.status(404).json({ success: false, error: 'Tenant not found' });
     }
     
-    // Background send
-    sendWelcomeEmailCore(tenant);
+    await sendWelcomeEmailCore(tenant);
     
-    res.json({ success: true, message: 'Welcome email scheduled' });
+    res.json({ success: true, message: 'Welcome email sent' });
   } catch (error) {
-    logger.error({ err: error }, 'Failed to schedule welcome email');
-    res.status(500).json({ success: false, error: 'Failed to schedule welcome email' });
+    logger.error({ err: error }, 'Failed to send welcome email');
+    res.status(500).json({ success: false, error: 'Failed to send welcome email' });
   }
 };
