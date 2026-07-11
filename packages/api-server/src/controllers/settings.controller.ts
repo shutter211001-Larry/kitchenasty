@@ -68,10 +68,23 @@ const updateSettingsSchema = z.object({
   }).optional(),
 });
 
-async function getOrCreateSettings() {
+export async function getOrCreateSettings() {
+  const store = (await import('../middleware/tenantStorage.js')).tenantStorage.getStore();
+  const tenantId = store?.tenantId;
+
+  if (!tenantId) {
+    let settings = await (prisma as any).siteSettings.findUnique({ where: { id: 'default' } });
+    if (!settings) {
+      settings = await (prisma as any).siteSettings.create({
+        data: { id: 'default', tenantId: null }
+      });
+    }
+    return settings;
+  }
+
   let settings = await prisma.siteSettings.findFirst();
   if (!settings) {
-    settings = await prisma.siteSettings.create({ data: { id: require('crypto').randomUUID() } });
+    settings = await prisma.siteSettings.create({ data: { id: require('crypto').randomUUID(), tenantId } });
   }
   return settings;
 }
@@ -525,7 +538,7 @@ const invoiceSettingsSchema = z.object({
 
 export const getGeneralSettings = async (req: Request, res: Response) => {
   try {
-    const settings = await prisma.siteSettings.findFirst();
+    const settings = await getOrCreateSettings();
     
     // Fetch current tenant to get the domain
     const store = (await import('../middleware/tenantStorage.js')).tenantStorage.getStore();
