@@ -3,8 +3,9 @@ import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
 
-const targetUrl = process.env.VITE_API_URL_PUBLIC ? 
-  (process.env.VITE_API_URL_PUBLIC.startsWith('http') ? process.env.VITE_API_URL_PUBLIC : `https://${process.env.VITE_API_URL_PUBLIC}`) 
+const rawApiUrl = process.env.VITE_API_URL_PUBLIC || process.env.API_URL_PUBLIC;
+const targetUrl = rawApiUrl ? 
+  (rawApiUrl.startsWith('http') ? rawApiUrl : `https://${rawApiUrl}`) 
   : 'http://localhost:3000';
 
 const proxyConfig = {
