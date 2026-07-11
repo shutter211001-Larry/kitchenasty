@@ -542,11 +542,20 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
       const scheduled = new Date(scheduledAt);
       const now = new Date();
       
-      // Check if scheduled time is in the past or before lead time
+      // Check if scheduled time is in the past or before lead time + prep time
+      const menuItemIds = (req.body.items || []).map((i: any) => i.menuItemId);
+      const tempMenuItems = await prisma.menuItem.findMany({ where: { id: { in: menuItemIds } }});
+      let cartPrepTime = 0;
+      for (const item of (req.body.items || [])) {
+        const mi = tempMenuItems.find(m => m.id === item.menuItemId);
+        if (mi) cartPrepTime += ((mi as any).prepTime || 0) * (item.quantity || 1);
+      }
+
+      const totalWaitMins = leadTime + Math.ceil(cartPrepTime);
       const minTime = new Date(now);
-      minTime.setMinutes(minTime.getMinutes() + leadTime);
+      minTime.setMinutes(minTime.getMinutes() + totalWaitMins);
       if (scheduled < minTime) {
-        res.status(400).json({ success: false, error: `Scheduled time must be at least ${leadTime} minutes from now` });
+        res.status(400).json({ success: false, error: `Scheduled time must be at least ${totalWaitMins} minutes from now to account for preparation` });
         return;
       }
 
@@ -2399,9 +2408,12 @@ export async function calculateOrderSummary(req: Request, res: Response): Promis
     quantity: number;
   }> = [];
 
+  let cartPrepTime = 0;
   for (const item of items) {
     const menuItem = menuItemMap.get(item.menuItemId);
     if (!menuItem || !menuItem.isActive) continue;
+
+    cartPrepTime += ((menuItem as any).prepTime || 0) * (item.quantity || 1);
 
     let unitPrice = menuItem.price;
     (item.options || []).forEach((opt: any) => {
@@ -2548,6 +2560,17 @@ export async function calculateOrderSummary(req: Request, res: Response): Promis
   
   const total = Number(unroundedTotal.toFixed(currencyDecimals));
 
+  const leadTime = orderType === 'DELIVERY' ? location.deliveryLeadTime : location.pickupLeadTime;
+  let estimatedWaitMins: number | null = null;
+  let earliestSlot: string | null = null;
+
+  if (cartPrepTime > 0 || leadTime > 0) {
+    estimatedWaitMins = Math.ceil(cartPrepTime + leadTime);
+    const now = new Date();
+    now.setMinutes(now.getMinutes() + estimatedWaitMins);
+    earliestSlot = now.toISOString();
+  }
+
   res.json({
     success: true,
     data: {
@@ -2559,7 +2582,10 @@ export async function calculateOrderSummary(req: Request, res: Response): Promis
       total,
       freeDelivery,
       appliedPromo,
-      manualCouponError
+      manualCouponError,
+      cartPrepTime,
+      estimatedWaitMins,
+      earliestSlot
     }
   });
 }

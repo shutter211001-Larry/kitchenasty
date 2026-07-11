@@ -25,6 +25,7 @@ export interface CartItem {
   redeemedWithPoints?: boolean;
   rewardPointsPrice?: number;
   isFrozenDelivery?: boolean;
+  prepTime?: number;
   clientId?: string; // For group orders
   guestName?: string; // To display who added it
 }
