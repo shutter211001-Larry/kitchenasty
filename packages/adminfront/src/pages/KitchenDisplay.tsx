@@ -458,7 +458,7 @@ export default function KitchenDisplay() {
                     <div className="px-3 pb-3">
                       <div className="flex flex-wrap gap-3">
                         {groupOrders.map((order) => (
-                          <div key={order.id} className="bg-white rounded-lg border border-indigo-100 px-3 py-2 text-xs shadow-sm">
+                          <div key={order.id} className="bg-white rounded-lg border border-indigo-100 px-3 py-2 text-xs shadow-sm cursor-pointer hover:border-indigo-300 transition-colors" onClick={() => toggleExpand(order.id)}>
                             <span className="font-mono font-bold text-gray-900">#{order.orderNumber}</span>
                             <span className={`ml-2 px-1.5 py-0.5 rounded font-medium ${order.orderType === 'DELIVERY' ? 'bg-blue-100 text-blue-700' : order.orderType === 'FROZEN_DELIVERY' ? 'bg-purple-100 text-purple-700' : 'bg-green-100 text-green-700'
                               }`}>
@@ -506,6 +506,27 @@ export default function KitchenDisplay() {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                               </svg>
                             </button>
+                            {expandedOrders[order.id] && (
+                              <div className="mt-3 pt-3 border-t border-indigo-50 space-y-2" onClick={(e) => e.stopPropagation()}>
+                                {order.items.map((item) => (
+                                  <div key={item.id} className="flex items-start gap-2 text-gray-700">
+                                    <span className="font-bold text-gray-600 min-w-[20px]">{item.quantity}x</span>
+                                    <div className="flex-1">
+                                      <span className="font-medium">{item.name}</span>
+                                      {item.options.length > 0 && (
+                                        <p className="text-[10px] text-gray-500">{item.options.map((o) => `${o.name}: ${o.value}`).join(', ')}</p>
+                                      )}
+                                      {item.comment && <p className="text-[10px] text-amber-600 italic">"{item.comment}"</p>}
+                                    </div>
+                                  </div>
+                                ))}
+                                {order.comment && (
+                                  <div className="bg-amber-50 border border-amber-200 rounded p-1.5 mt-2">
+                                    <p className="text-[10px] text-amber-700">{order.comment}</p>
+                                  </div>
+                                )}
+                              </div>
+                            )}
                           </div>
                         ))}
                       </div>
