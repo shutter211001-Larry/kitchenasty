@@ -318,7 +318,9 @@
     "homeDelivery": "宅配便",
     "storeToStore": "コンビニ受取",
     "storeToStoreDetails": "[EN] 取件門市資訊 (Store Details)",
-    "storeBranchPlaceholder": "[EN] 例如：7-11 信義店 (店號: 123456)"
+    "storeBranchPlaceholder": "[EN] 例如：7-11 信義店 (店號: 123456)",
+    "estimatedWaitTime": "Estimated Wait Time",
+    "minutes": "minutes"
   },
   "orderConfirmation": {
     "title": "注文が完了しました！",

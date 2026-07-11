@@ -234,7 +234,9 @@
   },
   "checkout": {
     "orderNotes": "注文メモ",
-    "roundingAdjustment": "端数調整 (Rounding)"
+    "roundingAdjustment": "端数調整 (Rounding)",
+    "estimatedWaitTime": "Estimated Wait Time",
+    "minutes": "minutes"
   },
   "reservations": {
     "location": "店舗の場所"

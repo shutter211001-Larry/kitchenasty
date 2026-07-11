@@ -234,7 +234,9 @@
   },
   "checkout": {
     "orderNotes": "訂單備註",
-    "roundingAdjustment": "結算調整 (Rounding)"
+    "roundingAdjustment": "結算調整 (Rounding)",
+    "estimatedWaitTime": "預計等候時間",
+    "minutes": "分鐘"
   },
   "reservations": {
     "location": "分店位置"

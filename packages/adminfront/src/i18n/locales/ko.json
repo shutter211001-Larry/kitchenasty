@@ -234,7 +234,9 @@
   },
   "checkout": {
     "orderNotes": "주문 비고",
-    "roundingAdjustment": "반올림 조정 (Rounding)"
+    "roundingAdjustment": "반올림 조정 (Rounding)",
+    "estimatedWaitTime": "Estimated Wait Time",
+    "minutes": "minutes"
   },
   "reservations": {
     "location": "지점 위치"

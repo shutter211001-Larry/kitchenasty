@@ -320,7 +320,9 @@
     "We are currently closed for immediate orders. Please select a future pickup time.": "We are currently closed for immediate orders. Please select a future pickup time.",
     "Scheduled time must be within business hours considering preparation buffers.": "Scheduled time must be within business hours considering preparation buffers.",
     "storeToStoreDetails": "[EN] 取件門市資訊 (Store Details)",
-    "storeBranchPlaceholder": "[EN] 例如：7-11 信義店 (店號: 123456)"
+    "storeBranchPlaceholder": "[EN] 例如：7-11 信義店 (店號: 123456)",
+    "estimatedWaitTime": "Estimated Wait Time",
+    "minutes": "minutes"
   },
   "orderConfirmation": {
     "title": "Order Placed!",

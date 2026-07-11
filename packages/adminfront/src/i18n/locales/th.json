@@ -234,7 +234,9 @@
   },
   "checkout": {
     "orderNotes": "Order Notes",
-    "roundingAdjustment": "Rounding Adjustment"
+    "roundingAdjustment": "Rounding Adjustment",
+    "estimatedWaitTime": "Estimated Wait Time",
+    "minutes": "minutes"
   },
   "reservations": {
     "location": "Location"
