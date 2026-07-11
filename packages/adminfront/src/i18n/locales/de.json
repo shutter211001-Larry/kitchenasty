@@ -2046,5 +2046,8 @@
     "thursday": "星期四 (Thu)",
     "friday": "星期五 (Fri)",
     "saturday": "星期六 (Sat)"
+  },
+  "orderStatus": {
+    "history": "Status History"
   }
 }
