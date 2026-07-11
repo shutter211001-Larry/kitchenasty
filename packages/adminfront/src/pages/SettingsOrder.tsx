@@ -62,6 +62,7 @@ export default function SettingsOrder() {
   const [ecpayMerchantId, setEcpayMerchantId] = useState('');
   const [ecpayHashKey, setEcpayHashKey] = useState('');
   const [ecpayHashIv, setEcpayHashIv] = useState('');
+  const [enableCapacityLimit, setEnableCapacityLimit] = useState(true);
 
   useEffect(() => {
     api.get('settings/order')
@@ -98,6 +99,7 @@ export default function SettingsOrder() {
           if (d.timeSlotInterval !== undefined) setTimeSlotInterval(d.timeSlotInterval);
           if (d.enableTipping !== undefined) setEnableTipping(d.enableTipping);
           if (d.enableCounterDisplay !== undefined) setEnableCounterDisplay(d.enableCounterDisplay);
+          if (d.enableCapacityLimit !== undefined) setEnableCapacityLimit(d.enableCapacityLimit);
           if (d.tipOptions) setTipOptionsStr(d.tipOptions.join(','));
           if (d.taxRate !== undefined) setTaxRate(d.taxRate);
           if (d.boardLeadTime !== undefined) setBoardLeadTime(d.boardLeadTime);
@@ -135,6 +137,7 @@ export default function SettingsOrder() {
           preOpeningBuffer,
           postClosingBuffer,
           timeSlotInterval,
+          enableCapacityLimit,
           enableTipping, 
           enableCounterDisplay,
           tipOptions, 
@@ -196,6 +199,11 @@ export default function SettingsOrder() {
           <label className="flex items-center gap-3">
             <input type="checkbox" checked={enabled} onChange={(e) => setEnabled(e.target.checked)} className="w-4 h-4 text-primary-600 rounded" />
             <span className="text-sm font-medium text-gray-700">{t('settingsOrder.enableSiteWideOnlineOrdering')}</span>
+          </label>
+          
+          <label className="flex items-center gap-3">
+            <input type="checkbox" checked={enableCapacityLimit} onChange={(e) => setEnableCapacityLimit(e.target.checked)} className="w-4 h-4 text-primary-600 rounded" />
+            <span className="text-sm font-medium text-gray-700">智慧產能排單 (Smart Capacity Scheduling)</span>
           </label>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-4 bg-gray-50 rounded-lg">

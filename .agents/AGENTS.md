@@ -8,8 +8,9 @@
 ## 2. Prisma Migration Requirement
 **Trigger**: When making any changes to the Prisma schema (`schema.prisma` or `shutter-erp.prisma`).
 **Rule**: Because this project is deployed remotely (e.g., on Railway) and relies on `npx prisma migrate deploy` during startup, you MUST generate a Prisma migration file whenever you modify the database schema. 
-- Do NOT just run `npx prisma db push` without generating a migration file. 
+- CRITICAL (Multi-Schema Danger): NEVER run `npx prisma db push`! This project uses multiple schemas (`schema.prisma` and `shutter-erp.prisma`) sharing the same database. Running `db push` will cause Prisma to aggressively DROP all tables belonging to the other schema, leading to massive data loss.
 - If you are operating in a non-interactive environment where `npx prisma migrate dev` fails, you must manually create a timestamped folder under `prisma/migrations` containing a `migration.sql` script with the exact SQL DDL statements for your changes.
+- To apply a manual `migration.sql` locally, you MUST use `npx prisma db execute --file <path_to_sql> --schema <schema.prisma>`, and then mark it as applied using `npx prisma migrate resolve --applied <migration_folder_name>`.
 - CRITICAL (BOM Prevention): When creating `migration.sql` manually, you MUST use the native `write_to_file` tool to ensure it is saved as UTF-8 without BOM. NEVER use Windows PowerShell commands (like `Add-Content` or `>`) to generate the file, as PowerShell injects a `\u{feff}` BOM that will crash PostgreSQL on Railway.
 - CRITICAL (Idempotency): You MUST write idempotent SQL to prevent `502 Bad Gateway` deployment crash loops on Railway. **Prisma does NOT generate idempotent SQL automatically**. After running `npx prisma migrate dev`, you MUST manually edit the generated `migration.sql` file and apply the following idempotency patterns:
   - Change `CREATE TABLE "table"` to `CREATE TABLE IF NOT EXISTS "table"`.
@@ -154,3 +155,9 @@ When working on any of these areas, always refer to this architecture to ensure 
 ## 26. Tailwind 表格下拉選單防裁切 (Dropdown Clipping Prevention)
 **Trigger**: When designing or generating React/Tailwind tables or lists that contain inline absolute-positioned dropdown menus (e.g., action menus for each row).
 **Rule**: You MUST NOT use `overflow-hidden` or `overflow-x-auto` on the immediate table wrapper if the dropdown is rendered inline (without a React Portal). Doing so will clip the dropdown menu. You MUST use `overflow-visible` on the table container and ensure the dropdown has a high `z-index` (e.g., `z-50`).
+
+## 27. 精準檔案修改原則 (Targeted File Replacements in JSX/TSX)
+**Trigger**: When editing React components or any large files (JSX/TSX).
+**Rule**: Do NOT use `replace_file_content` to replace massive blocks of code (e.g. replacing an entire component body, or replacing large segments spanning over 20-30 lines) all at once. Doing so is highly prone to dropping closing tags (`</div>`, `</>`), breaking braces, and unintentionally overwriting existing state variables or logic.
+- Instead, you MUST break down your edits and use `multi_replace_file_content` to make multiple small, surgical, and targeted replacements on the exact lines that need to be modified.
+- Keep the `TargetContent` and `ReplacementContent` as minimal as possible while remaining unique.

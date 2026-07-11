@@ -538,7 +538,7 @@ export const getProductRecipes = async (req: Request, res: Response) => {
         yieldAmount: true,
         yieldUnit: true,
         steps: {
-          select: {
+          include: {
             parameters: true
           }
         }
@@ -559,9 +559,9 @@ export const getProductRecipes = async (req: Request, res: Response) => {
       
       let prepTime = 0;
       if (r.steps) {
-        r.steps.forEach((s) => {
-          const mins = s.parameters.filter(p => p.unit === "min").reduce((sum, p) => sum + p.value, 0);
-          const hrs = s.parameters.filter(p => p.unit === "hr").reduce((sum, p) => sum + p.value, 0);
+        r.steps.forEach((s: any) => {
+          const mins = s.parameters.filter((p: any) => p.unit === "min").reduce((sum: number, p: any) => sum + p.value, 0);
+          const hrs = s.parameters.filter((p: any) => p.unit === "hr").reduce((sum: number, p: any) => sum + p.value, 0);
           prepTime += mins + hrs * 60;
         });
       }

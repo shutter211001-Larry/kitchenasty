@@ -6,6 +6,7 @@ import { getDatabase } from '../lib/db/database.js';
 import { useAuth } from '../context/AuthContext.js';
 import { PageHeader } from '../components/layout/PageHeader';
 import { PageContent } from '../components/layout/PageContent';
+import { Clock } from 'lucide-react';
 
 const ROLE_LABELS: Record<string, string> = {
   SUPER_ADMIN: 'staff.roles.superAdmin',
@@ -660,6 +661,23 @@ export default function OrderCreate() {
                     </>
                   )}
                 </div>
+
+                {summary?.estimatedWaitMins != null && (
+                  <div className="flex justify-between items-center text-sm font-medium pt-3 mt-3 border-t border-gray-100">
+                    <div className="flex items-center gap-2">
+                      <Clock className="w-4 h-4 text-orange-500" />
+                      <span className="text-gray-700">{t('orderCreate.estimatedWaitTime') || '預估製作時間'}</span>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-orange-600 font-bold">{summary.estimatedWaitMins} {t('orderCreate.minutes') || '分鐘'}</span>
+                      {summary.earliestSlot && (
+                        <div className="text-xs text-gray-500 font-normal mt-0.5">
+                          {t('orderCreate.expectedReadyTime') || '預計取餐'}: {new Date(summary.earliestSlot).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
 
                 <div className="flex justify-between text-lg font-bold pt-3 mt-3 border-t border-gray-200">
                   <span>{t('orderCreate.total')}</span>

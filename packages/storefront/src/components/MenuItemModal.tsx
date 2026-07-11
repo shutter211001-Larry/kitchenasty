@@ -171,7 +171,7 @@ export default function MenuItemModal({ itemId, onClose }: Props) {const { t, i1
       redeemedWithPoints: buyWithPoints,
       rewardPointsPrice: buyWithPoints ? item.rewardPointsPrice : undefined,
       isFrozenDelivery: item.category.isFrozenDelivery,
-      prepTime: item.prepTime || 0,
+      prepTime: (item as any).prepTime || 0,
     });
     onClose();
   }

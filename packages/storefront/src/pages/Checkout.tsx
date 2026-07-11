@@ -190,6 +190,8 @@ export default function Checkout() {
   const freeDelivery = summary?.freeDelivery ?? false;
   const manualCouponError = summary?.manualCouponError ?? null;
   const appliedPromo = summary?.appliedPromo ?? null;
+  const estimatedWaitMins = summary?.estimatedWaitMins ?? null;
+  const earliestSlot = summary?.earliestSlot ?? null;
 
   // Set defaults based on settings
   useEffect(() => {
@@ -1487,6 +1489,12 @@ export default function Checkout() {
                 }
                 return null;
               })()}
+              {estimatedWaitMins != null && estimatedWaitMins > 0 && !scheduledAt && orderType !== 'frozen_delivery' && (
+                <div className="flex justify-between text-primary-600 font-medium bg-primary-50 p-2 rounded-lg mt-2 mb-2">
+                  <span>{t('checkout.estimatedWaitTime') || '預計最快取餐時間'}</span>
+                  <span>{estimatedWaitMins} {t('checkout.minutes') || '分鐘'}</span>
+                </div>
+              )}
               <div className={`flex justify-between border-t border-input pt-2 font-bold text-lg transition-opacity ${isCalculating ? 'opacity-50' : 'opacity-100'}`}>
                 <span className="text-main">{t('checkout.total')}</span>
                 <span className="text-primary-600">${Number(total.toFixed((settings as any).currencyDecimals ?? 2)).toFixed((settings as any).currencyDecimals ?? 2)}</span>

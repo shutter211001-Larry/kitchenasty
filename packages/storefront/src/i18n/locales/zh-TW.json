@@ -318,7 +318,9 @@
     "homeDelivery": "宅配",
     "storeToStore": "店到店",
     "storeToStoreDetails": "取件門市資訊",
-    "storeBranchPlaceholder": "例如：7-11 信義店 (店號: 123456)"
+    "storeBranchPlaceholder": "例如：7-11 信義店 (店號: 123456)",
+    "estimatedWaitTime": "預計等候時間",
+    "minutes": "分鐘"
   },
   "orderConfirmation": {
     "title": "點餐成功！",
@@ -398,7 +400,8 @@
     "preOrderNotice": "這是您的預訂訂單。店家將於預約時間前開始為您新鮮製作。請在預訂時間留意您的外送動態或前往分店取餐！",
     "tax": "稅金 (Tax)",
     "freeDelivery": "免運費",
-    "roundingAdjustment": "結算調整 (Rounding)"
+    "roundingAdjustment": "結算調整 (Rounding)",
+    "history": "歷史紀錄"
   },
   "reservations": {
     "title": "桌位預約",

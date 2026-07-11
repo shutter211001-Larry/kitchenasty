@@ -559,12 +559,31 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
       const scheduled = new Date(scheduledAt);
       const now = new Date();
       
-      // Check if scheduled time is in the past or before lead time
+      // Check if scheduled time is in the past or before lead time + prep time
+      const menuItemIds = (req.body.items || []).map((i: any) => i.menuItemId);
+      const tempMenuItems = await prisma.menuItem.findMany({ where: { id: { in: menuItemIds } }});
+      let cartPrepTime = 0;
+      for (const item of (req.body.items || [])) {
+        const mi = tempMenuItems.find(m => m.id === item.menuItemId);
+        if (mi) cartPrepTime += ((mi as any).prepTime || 0) * (item.quantity || 1);
+      }
+
+      const totalWaitMins = leadTime + Math.ceil(cartPrepTime);
       const minTime = new Date(now);
-      minTime.setUTCMinutes(minTime.getUTCMinutes() + leadTime);
+      minTime.setUTCMinutes(minTime.getUTCMinutes() + totalWaitMins);
       if (scheduled < minTime) {
-        res.status(400).json({ success: false, error: `Scheduled time must be at least ${leadTime} minutes from now` });
+        res.status(400).json({ success: false, error: `Scheduled time must be at least ${totalWaitMins} minutes from now to account for preparation` });
         return;
+      }
+
+      const enableCapacityLimit = orderSettings.enableCapacityLimit !== false;
+      if (cartPrepTime > 0 && locationId && enableCapacityLimit && orderType !== 'FROZEN_DELIVERY') {
+        const { checkSlotCapacity } = await import('./location.controller.js');
+        const hasCapacity = await checkSlotCapacity(locationId, scheduled, cartPrepTime, orderType);
+        if (!hasCapacity) {
+          res.status(400).json({ success: false, error: 'The selected timeslot has reached maximum capacity. Please choose another time.' });
+          return;
+        }
       }
 
       const check = isWithinHours(
@@ -2428,9 +2447,12 @@ export async function calculateOrderSummary(req: Request, res: Response): Promis
     quantity: number;
   }> = [];
 
+  let cartPrepTime = 0;
   for (const item of items) {
     const menuItem = menuItemMap.get(item.menuItemId);
     if (!menuItem || !menuItem.isActive) continue;
+
+    cartPrepTime += ((menuItem as any).prepTime || 0) * (item.quantity || 1);
 
     let unitPrice = menuItem.price;
     (item.options || []).forEach((opt: any) => {
@@ -2577,8 +2599,9 @@ export async function calculateOrderSummary(req: Request, res: Response): Promis
   
   const total = Number(unroundedTotal.toFixed(currencyDecimals));
 
-  let earliestSlot: string | null = null;
+  const leadTime = orderType === 'DELIVERY' ? location.deliveryLeadTime : location.pickupLeadTime;
   let estimatedWaitMins: number | null = null;
+  let earliestSlot: string | null = null;
   const enableCapacityLimit = orderSettings.enableCapacityLimit !== false; // Default true
 
   if (locationId && enableCapacityLimit) {
@@ -2591,19 +2614,25 @@ export async function calculateOrderSummary(req: Request, res: Response): Promis
     const simReq = { params: { id: locationId }, query: { orderType, days: '1', cartPrepTime: cartPrepTime.toString() } } as any;
     let slotsByDay: any[] = [];
     const simRes = { json: (data: any) => { if (data.success) slotsByDay = data.data; }, status: () => simRes } as any;
-    
+
     try {
       await getAvailableSlots(simReq, simRes);
       if (slotsByDay.length > 0 && slotsByDay[0].slots.length > 0) {
-        const eSlot = slotsByDay[0].slots[0];
-        earliestSlot = eSlot;
-        const slotTime = new Date(eSlot).getTime();
-        const nowTime = new Date().getTime();
-        estimatedWaitMins = Math.max(0, Math.round((slotTime - nowTime) / 60000));
+        const firstSlotStr = String(slotsByDay[0].slots[0]);
+        earliestSlot = firstSlotStr;
+        const targetTime = new Date(firstSlotStr).getTime();
+        const now = new Date();
+        const wait = (targetTime - now.getTime()) / 60000;
+        estimatedWaitMins = Math.max(0, Math.ceil(wait));
       }
     } catch (err) {
       // Ignore simulation errors
     }
+  } else if (cartPrepTime > 0 || leadTime > 0) {
+    estimatedWaitMins = Math.ceil(cartPrepTime + leadTime);
+    const now = new Date();
+    now.setMinutes(now.getMinutes() + estimatedWaitMins);
+    earliestSlot = now.toISOString();
   }
 
   res.json({
@@ -2618,8 +2647,9 @@ export async function calculateOrderSummary(req: Request, res: Response): Promis
       freeDelivery,
       appliedPromo,
       manualCouponError,
-      earliestSlot,
-      estimatedWaitMins
+      cartPrepTime,
+      estimatedWaitMins,
+      earliestSlot
     }
   });
 }

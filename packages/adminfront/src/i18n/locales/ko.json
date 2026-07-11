@@ -234,7 +234,9 @@
   },
   "checkout": {
     "orderNotes": "주문 비고",
-    "roundingAdjustment": "반올림 조정 (Rounding)"
+    "roundingAdjustment": "반올림 조정 (Rounding)",
+    "estimatedWaitTime": "Estimated Wait Time",
+    "minutes": "minutes"
   },
   "reservations": {
     "location": "지점 위치"
@@ -1244,7 +1246,8 @@
     "cancel": "取消",
     "saving": "儲存中...",
     "updateProductDetails": "更新產品資料",
-    "createNewProduct": "建立新產品"
+    "createNewProduct": "建立新產品",
+    "prepTime": "Preparation Time (Mins)"
   },
   "menuItemList": {
     "productManagement": "產品管理 (Menu Items)",
@@ -1328,7 +1331,10 @@
     "enterPromoCode": "Enter Promo Code",
     "manualDeliveryFee": "Manual Delivery Fee",
     "leaveBlankAutoCalc": "Leave blank to auto-calculate",
-    "manualTax": "Manual Tax"
+    "manualTax": "Manual Tax",
+    "estimatedWaitTime": "Estimated Wait Time",
+    "minutes": "mins",
+    "expectedReadyTime": "Expected Ready"
   },
   "orderDetail": {
     "fulfillOrder": "배송 정보 입력",
@@ -2044,5 +2050,8 @@
     "thursday": "星期四 (Thu)",
     "friday": "星期五 (Fri)",
     "saturday": "星期六 (Sat)"
+  },
+  "orderStatus": {
+    "history": "Status History"
   }
 }

@@ -44,6 +44,7 @@ interface MenuItemData {
   locationId: string;
   isRewardItem?: boolean;
   rewardPointsPrice?: number;
+  prepTime?: number;
   cropData?: any;
   prepTime: number;
 }
@@ -226,6 +227,7 @@ export default function MenuItemForm() {
           locationId: item.locationId || '',
           isRewardItem: item.isRewardItem || false,
           rewardPointsPrice: item.rewardPointsPrice || 0,
+          prepTime: item.prepTime || 0,
           cropData: item.cropData || {},
           prepTime: item.prepTime || 0,
         });
@@ -452,6 +454,7 @@ export default function MenuItemForm() {
         prepTime: Number(form.prepTime || 0),
         isRewardItem: !!form.isRewardItem,
         rewardPointsPrice: Number(form.rewardPointsPrice || 0),
+        prepTime: Number(form.prepTime || 0),
         options,
         allergenIds: selectedAllergens,
         mealtimeIds: selectedMealtimes,
@@ -541,6 +544,9 @@ export default function MenuItemForm() {
                           if (recipe.prepTime !== undefined) {
                             updateField('prepTime', recipe.prepTime);
                           }
+                        }
+                        if (recipe.prepTime !== undefined) {
+                          updateField('prepTime', recipe.prepTime);
                         }
                       }
                     }
@@ -638,6 +644,16 @@ export default function MenuItemForm() {
                 required
                 min={0}
                 step={0.01}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('menuItemForm.prepTime')}</label>
+              <input
+                type="number"
+                value={form.prepTime}
+                onChange={(e) => updateField('prepTime', e.target.value)}
+                min={0}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
               />
             </div>
