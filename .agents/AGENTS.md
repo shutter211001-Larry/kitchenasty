@@ -8,8 +8,9 @@
 ## 2. Prisma Migration Requirement
 **Trigger**: When making any changes to the Prisma schema (`schema.prisma` or `shutter-erp.prisma`).
 **Rule**: Because this project is deployed remotely (e.g., on Railway) and relies on `npx prisma migrate deploy` during startup, you MUST generate a Prisma migration file whenever you modify the database schema. 
-- Do NOT just run `npx prisma db push` without generating a migration file. 
+- CRITICAL (Multi-Schema Danger): NEVER run `npx prisma db push`! This project uses multiple schemas (`schema.prisma` and `shutter-erp.prisma`) sharing the same database. Running `db push` will cause Prisma to aggressively DROP all tables belonging to the other schema, leading to massive data loss.
 - If you are operating in a non-interactive environment where `npx prisma migrate dev` fails, you must manually create a timestamped folder under `prisma/migrations` containing a `migration.sql` script with the exact SQL DDL statements for your changes.
+- To apply a manual `migration.sql` locally, you MUST use `npx prisma db execute --file <path_to_sql> --schema <schema.prisma>`, and then mark it as applied using `npx prisma migrate resolve --applied <migration_folder_name>`.
 - CRITICAL (BOM Prevention): When creating `migration.sql` manually, you MUST use the native `write_to_file` tool to ensure it is saved as UTF-8 without BOM. NEVER use Windows PowerShell commands (like `Add-Content` or `>`) to generate the file, as PowerShell injects a `\u{feff}` BOM that will crash PostgreSQL on Railway.
 - CRITICAL (Idempotency): You MUST write idempotent SQL to prevent `502 Bad Gateway` deployment crash loops on Railway. **Prisma does NOT generate idempotent SQL automatically**. After running `npx prisma migrate dev`, you MUST manually edit the generated `migration.sql` file and apply the following idempotency patterns:
   - Change `CREATE TABLE "table"` to `CREATE TABLE IF NOT EXISTS "table"`.
