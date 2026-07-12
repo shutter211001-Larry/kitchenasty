@@ -37,11 +37,12 @@ import {
   deleteDietaryPreference,
 } from '../controllers/dietary.controller.js';
 import { authenticate, requireStaff, requireRole } from '../middleware/auth.js';
+import { recoverTenantContext } from '../middleware/tenantMiddleware.js';
 
 const router = Router();
 
 // AI Menu Detection - requires Manager+
-router.post('/ai-detect', authenticate, requireStaff, requireRole('SUPER_ADMIN', 'MANAGER'), upload.array('images', 10), detectMenuFromImages);
+router.post('/ai-detect', authenticate, requireStaff, requireRole('SUPER_ADMIN', 'MANAGER'), upload.array('images', 10), recoverTenantContext, detectMenuFromImages);
 router.post('/ai-detect/import', authenticate, requireStaff, requireRole('SUPER_ADMIN', 'MANAGER'), importMenuAndTranslate);
 
 // Categories - read is open, write requires Manager+
@@ -50,7 +51,7 @@ router.get('/categories/:id', getCategory);
 router.post('/categories', authenticate, requireStaff, requireRole('SUPER_ADMIN', 'MANAGER'), createCategory);
 router.patch('/categories/:id', authenticate, requireStaff, requireRole('SUPER_ADMIN', 'MANAGER'), updateCategory);
 router.delete('/categories/:id', authenticate, requireStaff, requireRole('SUPER_ADMIN'), deleteCategory);
-router.post('/categories/:id/image', authenticate, requireStaff, requireRole('SUPER_ADMIN', 'MANAGER'), upload.single('image'), uploadCategoryImage);
+router.post('/categories/:id/image', authenticate, requireStaff, requireRole('SUPER_ADMIN', 'MANAGER'), upload.single('image'), recoverTenantContext, uploadCategoryImage);
 router.delete('/categories/:id/image', authenticate, requireStaff, requireRole('SUPER_ADMIN', 'MANAGER'), deleteCategoryImage);
 
 // Menu items - read is open, write requires Manager+
@@ -59,7 +60,7 @@ router.get('/items/:id', getMenuItem);
 router.post('/items', authenticate, requireStaff, requireRole('SUPER_ADMIN', 'MANAGER'), createMenuItem);
 router.patch('/items/:id', authenticate, requireStaff, requireRole('SUPER_ADMIN', 'MANAGER'), updateMenuItem);
 router.delete('/items/:id', authenticate, requireStaff, requireRole('SUPER_ADMIN'), deleteMenuItem);
-router.post('/items/:id/image', authenticate, requireStaff, requireRole('SUPER_ADMIN', 'MANAGER'), upload.single('image'), uploadMenuItemImage);
+router.post('/items/:id/image', authenticate, requireStaff, requireRole('SUPER_ADMIN', 'MANAGER'), upload.single('image'), recoverTenantContext, uploadMenuItemImage);
 router.delete('/items/:id/image', authenticate, requireStaff, requireRole('SUPER_ADMIN', 'MANAGER'), deleteMenuItemImage);
 
 // ERP Integration proxy - accessible to staff

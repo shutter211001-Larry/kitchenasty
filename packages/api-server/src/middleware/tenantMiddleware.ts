@@ -65,6 +65,13 @@ export const tenantMiddleware = async (req: Request, res: Response, next: NextFu
   });
 };
 
+export const recoverTenantContext = (req: Request, res: Response, next: NextFunction) => {
+  const tenantId = (req as any).tenantId || null;
+  tenantStorage.run({ tenantId }, () => {
+    next();
+  });
+};
+
 export const requireTenant = (req: Request, res: Response, next: NextFunction) => {
   const store = tenantStorage.getStore();
   if (!store?.tenantId) {

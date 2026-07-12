@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { authenticate, requireStaff, requireRole, requirePermission } from '../middleware/auth.js';
 import { upload } from '../middleware/upload.js';
+import { recoverTenantContext } from '../middleware/tenantMiddleware.js';
 import prisma from '../lib/db.js';
 import {
   getSettings,
@@ -84,9 +85,9 @@ router.get('/debug', debugSettings);
 // Existing branding/design routes
 router.get('/', getSettings);
 router.put('/', authenticate, requireStaff, updateSettings);
-router.post('/logo', authenticate, requireStaff, upload.single('logo'), uploadLogo);
-router.post('/favicon', authenticate, requireStaff, upload.single('favicon'), uploadFavicon);
-router.post('/hero-background', authenticate, requireStaff, upload.single('image'), uploadHeroBackground);
+router.post('/logo', authenticate, requireStaff, upload.single('logo'), recoverTenantContext, uploadLogo);
+router.post('/favicon', authenticate, requireStaff, upload.single('favicon'), recoverTenantContext, uploadFavicon);
+router.post('/hero-background', authenticate, requireStaff, upload.single('image'), recoverTenantContext, uploadHeroBackground);
 
 // General — MANAGER+
 router.get('/general', authenticate, requirePermission('UPDATE_GENERAL_SETTINGS', ['SUPER_ADMIN', 'MANAGER']), getGeneralSettings);
