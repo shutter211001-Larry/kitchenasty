@@ -9,7 +9,6 @@ interface Tenant {
   id: string;
   name: string;
   domain: string | null;
-  customDomain: string | null;
   isActive: boolean;
   hasErpAccess: boolean;
   subscriptionEndsAt: string | null;
@@ -34,8 +33,6 @@ export default function TenantList() {
   // Inline editing states
   const [editingDomainId, setEditingDomainId] = useState<string | null>(null);
   const [domainValue, setDomainValue] = useState('');
-  const [editingCustomDomainId, setEditingCustomDomainId] = useState<string | null>(null);
-  const [customDomainValue, setCustomDomainValue] = useState('');
   
   const [editingExpId, setEditingExpId] = useState<string | null>(null);
   const [expValue, setExpValue] = useState('');
@@ -89,22 +86,11 @@ export default function TenantList() {
   const saveDomain = async (tenant: Tenant) => {
     try {
       await api.patch(`/platform-admin/tenants/${tenant.id}`, { domain: domainValue.toLowerCase().trim() || null });
-      toast.success('基礎網域已更新');
+      toast.success('網域更新成功');
       setEditingDomainId(null);
       fetchTenants();
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const saveCustomDomain = async (tenant: Tenant) => {
-    try {
-      await api.patch(`/platform-admin/tenants/${tenant.id}`, { customDomain: customDomainValue.toLowerCase().trim() || null });
-      toast.success('白牌網域 (BYOD) 已更新');
-      setEditingCustomDomainId(null);
-      fetchTenants();
-    } catch (error) {
-      console.error(error);
+    } catch (error: any) {
+      toast.error(error.message || '無法更新網域');
     }
   };
 
@@ -316,10 +302,10 @@ export default function TenantList() {
                               e.stopPropagation();
                               const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.startsWith('192.168.');
                               
-                              if ((t.customDomain || t.domain) && !isLocal) {
-                                const protocol = (t.customDomain || t.domain)!.includes('localhost') ? 'http' : 'https';
-                                let targetHost = `store.${t.customDomain || t.domain}`;
-                                if (!t.customDomain && t.domain && t.domain.endsWith('.shutterorder.pro')) {
+                              if (t.domain && !isLocal) {
+                                const protocol = t.domain.includes('localhost') ? 'http' : 'https';
+                                let targetHost = `store.${t.domain}`;
+                                if (t.domain.endsWith('.shutterorder.pro')) {
                                   const subdomain = t.domain.replace('.shutterorder.pro', '');
                                   targetHost = `${subdomain}.store.shutterorder.pro`;
                                 }
@@ -339,10 +325,10 @@ export default function TenantList() {
                               e.stopPropagation();
                               const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.startsWith('192.168.');
                               
-                              if ((t.customDomain || t.domain) && !isLocal) {
-                                const protocol = (t.customDomain || t.domain)!.includes('localhost') ? 'http' : 'https';
-                                let targetHost = `admin.${t.customDomain || t.domain}`;
-                                if (!t.customDomain && t.domain && t.domain.endsWith('.shutterorder.pro')) {
+                              if (t.domain && !isLocal) {
+                                const protocol = t.domain.includes('localhost') ? 'http' : 'https';
+                                let targetHost = `admin.${t.domain}`;
+                                if (t.domain.endsWith('.shutterorder.pro')) {
                                   const subdomain = t.domain.replace('.shutterorder.pro', '');
                                   targetHost = `${subdomain}.admin.shutterorder.pro`;
                                 }
@@ -442,7 +428,7 @@ export default function TenantList() {
                                 </div>
                                 <div>
                                   <div className="flex items-center justify-between mb-1">
-                                    <p className="text-gray-500 text-xs">基礎網域 (Base)</p>
+                                    <p className="text-gray-500 text-xs">自訂網域</p>
                                     {editingDomainId !== t.id && (
                                       <button onClick={(e) => { e.stopPropagation(); setEditingDomainId(t.id); setDomainValue(t.domain || ''); }} className="text-indigo-400 hover:text-indigo-300">
                                         <Edit className="w-3 h-3" />
@@ -457,25 +443,6 @@ export default function TenantList() {
                                     </div>
                                   ) : (
                                     <p className="text-gray-100 font-mono font-medium">{t.domain || '未設定'}</p>
-                                  )}
-                                </div>
-                                <div className="mt-3">
-                                  <div className="flex items-center justify-between mb-1">
-                                    <p className="text-gray-500 text-xs">白牌網域 (BYOD)</p>
-                                    {editingCustomDomainId !== t.id && (
-                                      <button onClick={(e) => { e.stopPropagation(); setEditingCustomDomainId(t.id); setCustomDomainValue(t.customDomain || ''); }} className="text-indigo-400 hover:text-indigo-300">
-                                        <Edit className="w-3 h-3" />
-                                      </button>
-                                    )}
-                                  </div>
-                                  {editingCustomDomainId === t.id ? (
-                                    <div className="flex items-center gap-1 mt-1">
-                                      <input type="text" value={customDomainValue} onChange={(e) => setCustomDomainValue(e.target.value)} placeholder="例如 www.mybrand.com" className="bg-gray-950 border border-gray-700 text-white text-xs rounded px-2 py-1 flex-1 focus:outline-none focus:border-indigo-500" />
-                                      <button onClick={() => saveCustomDomain(t)} className="p-1 bg-indigo-600 text-white rounded"><Check className="w-3 h-3" /></button>
-                                      <button onClick={() => setEditingCustomDomainId(null)} className="p-1 bg-gray-700 text-white rounded"><X className="w-3 h-3" /></button>
-                                    </div>
-                                  ) : (
-                                    <p className="text-gray-100 font-mono font-medium">{t.customDomain || '未設定'}</p>
                                   )}
                                 </div>
                               </div>

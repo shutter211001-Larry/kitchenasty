@@ -25,13 +25,13 @@ export default function TenantCreate() {
       return toast.error('請填寫所有必填欄位');
     }
 
-    const baseDomain = `${formData.slug.trim().toLowerCase()}.shutterorder.pro`;
-    const finalCustomDomain = formData.customDomain.trim() ? formData.customDomain.trim().toLowerCase() : null;
+    const finalDomain = formData.customDomain.trim() 
+      ? formData.customDomain.trim().toLowerCase() 
+      : `${formData.slug.trim().toLowerCase()}.shutterorder.pro`;
 
     const payload = {
       name: formData.name,
-      domain: baseDomain,
-      customDomain: finalCustomDomain,
+      domain: finalDomain,
       subscriptionEndsAt: formData.subscriptionEndsAt || null,
       sendWelcomeEmail: formData.sendWelcomeEmail,
       adminEmail: formData.adminEmail,

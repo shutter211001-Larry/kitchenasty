@@ -12,7 +12,6 @@ model Tenant {
   id           String   @id @default(cuid())
   name         String
   domain       String?  @unique
-  customDomain String?  @unique
   isActive             Boolean   @default(true)
   hasErpAccess         Boolean   @default(false)
   subscriptionEndsAt   DateTime? @db.Timestamptz

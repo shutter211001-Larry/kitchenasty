@@ -32,7 +32,7 @@ export const listTenants = async (req: Request, res: Response) => {
 
 export const createTenant = async (req: Request, res: Response) => {
   try {
-    const { name, domain, customDomain, adminEmail, adminName, adminPassword, subscriptionEndsAt, sendWelcomeEmail } = req.body;
+    const { name, domain, adminEmail, adminName, adminPassword, subscriptionEndsAt, sendWelcomeEmail } = req.body;
 
     if (!name || !adminEmail || !adminPassword) {
       return res.status(400).json({ success: false, error: 'Missing required fields' });
@@ -43,7 +43,6 @@ export const createTenant = async (req: Request, res: Response) => {
     const hashedPassword = await bcrypt.default.hash(adminPassword, 10);
 
     const trimmedDomain = domain?.trim() || null;
-    const trimmedCustomDomain = customDomain?.trim() || null;
     let endsAtDate = null;
     if (subscriptionEndsAt) {
       endsAtDate = new Date(subscriptionEndsAt);
@@ -53,7 +52,6 @@ export const createTenant = async (req: Request, res: Response) => {
       data: {
         name,
         domain: trimmedDomain,
-        customDomain: trimmedCustomDomain,
         subscriptionEndsAt: endsAtDate,
         users: {
           create: {
@@ -93,14 +91,13 @@ export const createTenant = async (req: Request, res: Response) => {
 export const updateTenant = async (req: Request, res: Response) => {
   try {
     const id = req.params.id as string;
-    const { name, domain, customDomain, isActive, hasErpAccess, subscriptionEndsAt } = req.body;
+    const { name, domain, isActive, hasErpAccess, subscriptionEndsAt } = req.body;
 
     const tenant = await (prisma as any).tenant.update({
       where: { id },
       data: {
         name,
-        domain: domain || null,
-        customDomain: customDomain || null,
+        domain,
         isActive,
         hasErpAccess,
         subscriptionEndsAt: subscriptionEndsAt ? new Date(subscriptionEndsAt) : null
