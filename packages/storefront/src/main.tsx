@@ -25,6 +25,7 @@ import './i18n/index.js';
 import './index.css';
 import { ConfirmGlobal } from './components/ConfirmGlobal.tsx';
 import { Toaster } from 'react-hot-toast';
+import GlobalLanding from './pages/GlobalLanding.js';
 
 import { Navigate } from 'react-router-dom';
 import { useTheme } from './context/ThemeContext.js';
@@ -41,7 +42,7 @@ function ConditionalRoute({
 }
 
 function BrandingGuard({ children }: { children: React.ReactNode }) {
-  const { isInitialized } = useTheme();
+  const { isInitialized, settings } = useTheme();
   
   if (!isInitialized) {
     return (
@@ -51,6 +52,10 @@ function BrandingGuard({ children }: { children: React.ReactNode }) {
         </div>
       </div>
     );
+  }
+
+  if (settings.id === 'default') {
+    return <GlobalLanding />;
   }
   
   return <>{children}</>;
