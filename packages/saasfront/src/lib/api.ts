@@ -7,22 +7,11 @@ export const API_URL = rawApiUrl.replace(/\/$/, '').replace(/\/api$/, '');
 export const API_BASE = `${API_URL}/api`;
 export const RESOURCE_BASE = API_URL;
 
-const getTenantId = () => {
-  const saved = localStorage.getItem('tenantId');
-  if (saved) return saved;
-  // SaaS Platform does not belong to a tenant, never infer from subdomain
-  return '';
-};
-
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const token = localStorage.getItem('token');
-  const tenantId = getTenantId();
-  const domain = window.location.hostname;
   
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
-    ...(tenantId ? { 'x-tenant-id': tenantId } : {}),
-    'x-tenant-domain': domain,
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
   };
 
@@ -70,11 +59,7 @@ export const api = {
     request<T>(path, { method: 'DELETE' }),
   upload: async <T>(path: string, formData: FormData): Promise<T> => {
     const token = localStorage.getItem('token');
-    const tenantId = getTenantId();
-    const domain = window.location.hostname;
     const headers: Record<string, string> = {};
-    if (tenantId) headers['x-tenant-id'] = tenantId;
-    headers['x-tenant-domain'] = domain;
     if (token) headers.Authorization = `Bearer ${token}`;
 
     const res = await fetch(`${API_BASE}${path}`, {

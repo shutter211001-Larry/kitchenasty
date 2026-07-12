@@ -131,7 +131,7 @@ export default function OrderList() {
     try {
       setLoading(true);
       const res = await fetch(`${API_BASE}/orders/export?startDate=${exportStartDate}&endDate=${exportEndDate}`, {
-        headers: { Authorization: `Bearer ${token}`, "x-tenant-id": localStorage.getItem("tenantId") || "default" }
+        headers: { Authorization: `Bearer ${token}` }
       });
       if (!res.ok) throw new Error(t('orderList.exportFailed'));
       const blob = await res.blob();
@@ -177,7 +177,7 @@ export default function OrderList() {
     try {
       setLoading(true);
       const res = await fetch('/api/orders/template', {
-        headers: { Authorization: `Bearer ${token}`, "x-tenant-id": localStorage.getItem("tenantId") || "default" }
+        headers: { Authorization: `Bearer ${token}` }
       });
       if (!res.ok) throw new Error(t('orderList.downloadFailed'));
       const blob = await res.blob();
