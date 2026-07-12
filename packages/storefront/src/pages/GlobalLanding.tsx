@@ -1,8 +1,19 @@
 import { Mail, ArrowRight, Building2, Store, Laptop } from 'lucide-react';
-// import { env } from '../lib/env.js'; // Use meta env directly
+import { useState, useEffect } from 'react';
+import { api } from '../lib/api.js';
 
 export default function GlobalLanding() {
-  const adminUrl = import.meta.env.VITE_ADMIN_URL || '/'; 
+  const [adminUrl, setAdminUrl] = useState(import.meta.env.VITE_ADMIN_URL || '/');
+
+  useEffect(() => {
+    api.get<any>('/settings/public-env')
+      .then(res => {
+        if (res && res.adminUrl) {
+          setAdminUrl(res.adminUrl);
+        }
+      })
+      .catch(console.error);
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white relative overflow-hidden font-sans">
