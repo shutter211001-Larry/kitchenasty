@@ -511,6 +511,13 @@ const advancedSettingsSchema = z.object({
     isRedeemable: z.boolean(),
     maxRedemptionAmount: z.number(),
   })).optional(),
+  s3Settings: z.object({
+    endpoint: z.string(),
+    bucket: z.string(),
+    accessKey: z.string(),
+    secretKey: z.string(),
+    publicUrl: z.string(),
+  }).optional(),
 });
 
 const googleSettingsSchema = z.object({
