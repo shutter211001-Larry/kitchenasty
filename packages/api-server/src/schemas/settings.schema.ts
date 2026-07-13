@@ -1,0 +1,61 @@
+import { z } from 'zod';
+
+export const updateSettingsSchema = z.object({
+  siteName: z.string().min(1).optional(),
+  siteTitle: z.string().min(1).optional(),
+  siteDescription: z.string().optional(),
+  colorPrimary: z.string().regex(/^#[0-9a-fA-F]{6}$/).optional(),
+  colorSecondary: z.string().regex(/^#[0-9a-fA-F]{6}$/).optional(),
+  darkMode: z.enum(['light', 'dark', 'system']).optional(),
+  storefrontTemplate: z.string().optional(),
+  heroSection: z.object({
+    title: z.string().optional(),
+    subtitle: z.string().optional(),
+    ctaPrimaryText: z.string().optional(),
+    ctaPrimaryLink: z.string().optional(),
+    ctaSecondaryText: z.string().optional(),
+    ctaSecondaryLink: z.string().optional(),
+    backgroundImage: z.string().optional(),
+  }).optional(),
+  featuresSection: z.array(z.object({
+    icon: z.string(),
+    title: z.string(),
+    description: z.string(),
+  })).optional(),
+  ctaSection: z.object({
+    title: z.string().optional(),
+    description: z.string().optional(),
+    buttonText: z.string().optional(),
+    buttonLink: z.string().optional(),
+  }).optional(),
+  menuSection: z.object({
+    title: z.string().optional(),
+    description: z.string().optional(),
+    imageAspectRatio: z.string().optional(),
+  }).optional(),
+  lineSettings: z.object({
+    liffId: z.string().optional(),
+    officialAccountUrl: z.string().optional(),
+    channelAccessToken: z.string().optional(),
+    channelSecret: z.string().optional(),
+    notifications: z.record(z.object({
+      enabled: z.boolean().optional(),
+      message: z.string().optional(),
+    })).optional(),
+  }).optional(),
+  orderSettings: z.object({
+    emailNotifications: z.record(z.boolean()).optional(),
+    loyaltyEarnRate: z.number().min(0).optional(),
+    loyaltyRedeemRate: z.number().min(1).optional(),
+    enableTCat: z.boolean().optional(),
+    enablePelican: z.boolean().optional(),
+    enableECPay: z.boolean().optional(),
+    tcatCustomerId: z.string().optional(),
+    tcatApiKey: z.string().optional(),
+    pelicanMerchantId: z.string().optional(),
+    pelicanApiKey: z.string().optional(),
+    ecpayMerchantId: z.string().optional(),
+    ecpayHashKey: z.string().optional(),
+    ecpayHashIv: z.string().optional(),
+  }).optional(),
+});
