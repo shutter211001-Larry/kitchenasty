@@ -123,3 +123,16 @@ export const receiveRequisition = async (req: any, res: any) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+export const getTenantIngredients = async (req: any, res: any) => {
+  try {
+    const tenantId = req.tenantId;
+    const ingredients = await prisma.ingredient.findMany({
+      where: { tenantId },
+      orderBy: { name: 'asc' },
+    });
+    res.json(ingredients);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+};
