@@ -98,37 +98,39 @@ export async function handleWebhook(req: Request, res: Response): Promise<void> 
         const orderId = paymentIntent.metadata.orderId;
 
         if (orderId) {
-          const existingOrder = await prisma.order.findUnique({
-            where: { id: orderId },
-            select: { paymentStatus: true }
+          const updatedOrder = await prisma.$transaction(async (tx) => {
+            // Optimistic Concurrency check using updateMany
+            const updateResult = await tx.order.updateMany({
+              where: { id: orderId, paymentStatus: { not: 'PAID' } },
+              data: { status: 'CONFIRMED', paymentStatus: 'PAID' },
+            });
+            
+            if (updateResult.count === 0) {
+              return null; // 冪等性：如果已經付款成功（或訂單不存在），則不再重複觸發後續邏輯
+            }
+
+            // Update payment status
+            await tx.payment.updateMany({
+              where: { transactionId: paymentIntent.id },
+              data: { status: 'COMPLETED' },
+            });
+
+            // Return the updated order for emitting
+            return tx.order.findUnique({ where: { id: orderId } });
           });
-          
-          if (!existingOrder || existingOrder.paymentStatus === 'PAID') {
-            break; // 冪等性：如果已經付款成功，則不再重複觸發後續邏輯
+
+          if (updatedOrder) {
+            emitOrderStatusUpdate({
+              id: updatedOrder.id,
+              orderNumber: updatedOrder.orderNumber,
+              status: updatedOrder.status,
+              orderType: updatedOrder.orderType,
+              customerId: updatedOrder.customerId,
+              locationId: updatedOrder.locationId,
+              paymentStatus: updatedOrder.paymentStatus,
+              tenantId: (updatedOrder as any).tenantId,
+            } as any);
           }
-
-          // Update payment status
-          await prisma.payment.updateMany({
-            where: { transactionId: paymentIntent.id },
-            data: { status: 'COMPLETED' },
-          });
-
-          // Update order status to confirmed and paymentStatus to PAID
-          const updatedOrder = await prisma.order.update({
-            where: { id: orderId },
-            data: { status: 'CONFIRMED', paymentStatus: 'PAID' },
-          });
-
-          emitOrderStatusUpdate({
-            id: updatedOrder.id,
-            orderNumber: updatedOrder.orderNumber,
-            status: updatedOrder.status,
-            orderType: updatedOrder.orderType,
-            customerId: updatedOrder.customerId,
-            locationId: updatedOrder.locationId,
-            paymentStatus: updatedOrder.paymentStatus,
-            tenantId: updatedOrder.tenantId,
-          } as any);
         }
         break;
       }

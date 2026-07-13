@@ -23,56 +23,9 @@ import { guestNames, asapLabels, linePrefixLocales, defaultStatusLocales } from 
 // ============================================================
 // HELPERS
 // ============================================================
+import { OrderService } from '../services/order.service.js';
 
-function formatNotificationMessage(template: string, order: any, customer?: any, timezone?: string) {
-  const userLang = order.language || 'zh-TW';
-  
-  const guestNamesMap = guestNames;
-  
-  const userName = customer?.name || order.guestName || guestNamesMap[userLang] || guestNamesMap['en'];
-  const orderNumber = `#${order.orderNumber}`;
-  
-  const itemsList = order.items?.map((i: any) => {
-    let itemName = i.name;
-    if (userLang !== 'zh-TW' && i.menuItem?.nameTranslations) {
-      try {
-        const trans = typeof i.menuItem.nameTranslations === 'string'
-          ? JSON.parse(i.menuItem.nameTranslations)
-          : i.menuItem.nameTranslations;
-        if (trans && trans[userLang]) {
-          itemName = trans[userLang];
-        }
-      } catch (e) {}
-    }
-    return `${itemName} x${i.quantity}`;
-  }).join(', ') || '';
-
-  const asapLabelsMap = asapLabels;
-
-  const pickupTime = order.scheduledAt 
-    ? new Date(order.scheduledAt).toLocaleString(
-        userLang === 'zh-TW' ? 'zh-TW' : 
-        userLang === 'ko' ? 'ko-KR' : 
-        userLang === 'ja' ? 'ja-JP' : 
-        userLang === 'de' ? 'de-DE' :
-        userLang === 'es' ? 'es-ES' :
-        userLang === 'fr' ? 'fr-FR' :
-        userLang === 'id' ? 'id-ID' :
-        userLang === 'it' ? 'it-IT' :
-        userLang === 'pt' ? 'pt-PT' :
-        userLang === 'th' ? 'th-TH' :
-        userLang === 'tl' ? 'fil-PH' :
-        userLang === 'vi' ? 'vi-VN' : 'en-US', 
-        { timeZone: timezone || 'Asia/Taipei', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }
-      )
-    : (asapLabelsMap[userLang] || asapLabelsMap['en']);
-
-  return template
-    .replace(/{使用者}/g, userName)
-    .replace(/{訂單編號}/g, orderNumber)
-    .replace(/{餐點內容}/g, itemsList)
-    .replace(/{取餐時間\/做好馬上取}/g, pickupTime);
-}
+import { NotificationService, formatNotificationMessage } from '../services/notification.service.js';
 
 const orderItemOptionSchema = z.object({
   menuOptionValueId: z.string().min(1),
@@ -800,287 +753,57 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
     tableId = table.id;
   }
 
-  const order = await (prisma.order.create as any)({
-    data: {
-      orderNumber: generateOrderNumber(),
-      idempotencyKey,
-      pickupNumber,
-      customerId,
-      locationId: location.id,
-      orderType,
-      frozenDeliveryMethod,
-      paymentStatus: 'UNPAID',
-      subtotal,
-      tax,
-      deliveryFee,
-      discount: loyaltyDiscount + couponDiscount,
-      couponId: appliedCouponId,
-      total,
-      comment,
-      scheduledAt: scheduledAt ? new Date(scheduledAt) : null,
-      guestName: customerId ? undefined : finalGuestName,
-      guestEmail: customerId ? undefined : guestEmail,
-      guestPhone: guestPhone || undefined,
-      userLat,
-      userLon,
-      distance,
-      isRemote,
-      language: userLang,
-      tableId,
-      groupId: groupSessionId || undefined,
-      trackingNumber,
-      logisticsProvider,
-      items: { create: orderItemsData },
-    } as any,
-    include: {
-      items: { include: { options: true, menuItem: { select: { id: true, nameTranslations: true } } } },
-      customer: { select: { id: true, name: true, email: true } },
-      table: { select: { id: true, name: true } },
-    },
-  });
+  const orderData = {
+    orderNumber: generateOrderNumber(),
+    idempotencyKey,
+    pickupNumber,
+    customerId,
+    locationId: location.id,
+    orderType,
+    frozenDeliveryMethod,
+    paymentStatus: 'UNPAID',
+    subtotal,
+    tax,
+    deliveryFee,
+    discount: loyaltyDiscount + couponDiscount,
+    couponId: appliedCouponId,
+    total,
+    comment,
+    scheduledAt: scheduledAt ? new Date(scheduledAt) : null,
+    guestName: customerId ? undefined : finalGuestName,
+    guestEmail: customerId ? undefined : guestEmail,
+    guestPhone: guestPhone || undefined,
+    userLat,
+    userLon,
+    distance,
+    isRemote,
+    language: userLang,
+    tableId,
+    groupId: groupSessionId || undefined,
+    trackingNumber,
+    logisticsProvider,
+    items: { create: orderItemsData },
+  };
 
-  // Increment usage count for the coupon if applied
-  if (appliedCouponId) {
-    await prisma.coupon.update({
-      where: { id: appliedCouponId },
-      data: { usageCount: { increment: 1 } },
-    });
-  }
-
-  // Decrement stock for tracked items and category shared stock
-  for (const item of items) {
-    const menuItem = menuItemMap.get(item.menuItemId)!;
-    
-    // 1. Decrement product independent stock
-    if (menuItem.trackStock) {
-      const result = await prisma.menuItem.updateMany({
-        where: { id: item.menuItemId, stockQty: { gte: item.quantity } },
-        data: { stockQty: { decrement: item.quantity } },
-      });
-      if (result.count === 0) {
-        throw new Error(`Insufficient stock for item: ${menuItem.name}`);
-      }
-    }
-
-    // 2. Decrement category shared stock
-    if (menuItem.category && (menuItem.category as any).trackSharedStock) {
-      const result = await (prisma.category as any).updateMany({
-        where: { id: menuItem.categoryId, sharedStockQty: { gte: item.quantity } },
-        data: { sharedStockQty: { decrement: item.quantity } },
-      });
-      if (result.count === 0) {
-        throw new Error(`Insufficient shared stock for category of item: ${menuItem.name}`);
-      }
-    }
+  const order = await OrderService.saveOrderWithTransaction(
+    orderData,
+    items,
+    menuItemMap,
+    appliedCouponId,
+    customerId,
+    guestPhone,
+    address,
+    subtotal,
+    earnRate,
+    loyaltyPointsRedeem,
+    totalRewardPointsCost
+  );
 
 
-  }
+  // Send notifications
+  await NotificationService.notifyNewOrder(order, customerId, guestEmail);
 
-  // Earn loyalty points using dynamic loyaltyEarnRate
-  if (customerId) {
-    const pointsEarned = Math.floor(subtotal * earnRate);
-    const currentCustomer = await prisma.customer.findUnique({ where: { id: customerId }, select: { phone: true, address: true } });
-    
-    const updateData: any = {};
-    if (pointsEarned > 0) {
-      updateData.loyaltyPoints = { increment: pointsEarned };
-    }
-    
-    // Always sync/update phone if provided and changed
-    if (guestPhone && guestPhone !== currentCustomer?.phone) {
-      updateData.phone = guestPhone;
-    }
-    
-    // Always sync/update address if provided (line1) and changed
-    const incomingAddress = address?.line1;
-    if (incomingAddress && incomingAddress !== currentCustomer?.address) {
-      updateData.address = incomingAddress;
-    }
-
-    if (Object.keys(updateData).length > 0) {
-      await prisma.customer.update({
-        where: { id: customerId },
-        data: updateData,
-      });
-    }
-    if (pointsEarned > 0) {
-      await prisma.loyaltyTransaction.create({
-        data: {
-          customerId,
-          type: 'EARN',
-          points: pointsEarned,
-          description: `Earned from order #${order.orderNumber}`,
-          orderId: order.id,
-        },
-      });
-    }
-
-    // Redeem loyalty points (cash discount and reward item redemptions)
-    const totalPointsDeducted = (loyaltyPointsRedeem || 0) + totalRewardPointsCost;
-    if (totalPointsDeducted > 0) {
-      await prisma.customer.update({
-        where: { id: customerId },
-        data: { loyaltyPoints: { decrement: totalPointsDeducted } },
-      });
-      
-      if (loyaltyPointsRedeem && loyaltyPointsRedeem > 0) {
-        await prisma.loyaltyTransaction.create({
-          data: {
-            customerId,
-            type: 'REDEEM',
-            points: -loyaltyPointsRedeem,
-            description: `Redeemed on order #${order.orderNumber} for cash discount`,
-            orderId: order.id,
-          },
-        });
-      }
-      
-      if (totalRewardPointsCost > 0) {
-        await prisma.loyaltyTransaction.create({
-          data: {
-            customerId,
-            type: 'REDEEM',
-            points: -totalRewardPointsCost,
-            description: `Redeemed on order #${order.orderNumber} for reward items`,
-            orderId: order.id,
-          },
-        });
-      }
-    }
-  }
-
-  // Send confirmation email/LINE if enabled
-  const customer = customerId ? await prisma.customer.findUnique({ where: { id: customerId } }) : null;
-  const recipientEmail = customer?.email || guestEmail;
-  
-  if (recipientEmail) {
-    let shouldSendEmail = true;
-    try {
-      const settings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
-      const orderSettings = (settings?.orderSettings as any) || {};
-      const notifications = orderSettings.emailNotifications || {};
-      if (notifications['PLACED'] === false) {
-        shouldSendEmail = false;
-      }
-      
-      // Check customer preference
-      if (customer && customer.emailNotificationsEnabled === false) {
-        shouldSendEmail = false;
-      }
-    } catch (e) {}
-
-    if (shouldSendEmail) {
-      const orderLang = (order as any).language || 'zh-TW';
-      const emailContent = orderConfirmationEmail({
-        orderNumber: order.orderNumber,
-        orderType: order.orderType,
-        total: order.total,
-        items: (order as any).items.map((i: any) => {
-          let itemName = i.name;
-          if (orderLang !== 'zh-TW' && i.menuItem?.nameTranslations) {
-            try {
-              const trans = typeof i.menuItem.nameTranslations === 'string'
-                ? JSON.parse(i.menuItem.nameTranslations)
-                : i.menuItem.nameTranslations;
-              if (trans && trans[orderLang]) {
-                itemName = trans[orderLang];
-              }
-            } catch (e) {}
-          }
-          return { name: itemName, quantity: i.quantity, subtotal: i.subtotal };
-        }),
-      }, orderLang);
-
-      sendEmail({
-        to: recipientEmail,
-        subject: emailContent.subject,
-        html: emailContent.html,
-        locationId: order.locationId,
-      }).catch(() => {});
-    }
-  }
-
-  // Send LINE push for new order if customer has bound LINE and preference is enabled
-  if (customer?.lineUserId && customer.lineNotificationsEnabled !== false) {
-    try {
-      const { sendLinePush } = await import('./line.controller.js');
-      const settings = await prisma.siteSettings.findUnique({ where: { id: 'default' } });
-      const lineSettings = (settings?.lineSettings as any) || {};
-      const generalSettings = (settings?.generalSettings as any) || {};
-      const timezone = generalSettings.timezone || 'Asia/Taipei';
-      const lineNotifications = lineSettings.notifications || {};
-      
-      const isEnabled = lineNotifications['PLACED']?.enabled !== false;
-      const orderLang = (order as any).language || 'zh-TW';
-      const langKey = defaultStatusLocales[orderLang] ? orderLang : 'en';
-
-      const customConfig = lineNotifications['PLACED'];
-      let template = '';
-      let isPreTranslated = false;
-
-      if (customConfig) {
-        if (langKey === 'zh-TW') {
-          template = customConfig.message || '';
-          isPreTranslated = true;
-        } else if (customConfig.translations?.[langKey]) {
-          template = customConfig.translations[langKey];
-          isPreTranslated = true;
-        } else if (customConfig.message) {
-          template = customConfig.message;
-        }
-      }
-
-      if (!template) {
-        template = defaultStatusLocales[langKey]['PLACED'];
-        isPreTranslated = true;
-      }
-
-      if (isEnabled && template) {
-        const formattedMessage = formatNotificationMessage(template, order, customer, timezone);
-        const prefixObj = linePrefixLocales[langKey] || linePrefixLocales['en'];
-        const prefix = prefixObj.placed;
-        
-        const sendLinePlacedPushAsync = async () => {
-          let lineMessage = `${prefix}\n${prefixObj.orderNumber}：#${order.orderNumber}\n${prefixObj.total}：$${order.total.toFixed(2)}\n${formattedMessage}`;
-
-          if (!isPreTranslated && customConfig?.message) {
-            try {
-              const { translateContent } = await import('../lib/ai.js');
-              const rawMessageToTranslate = `${prefix}\n${prefixObj.total}：$${order.total.toFixed(2)}\n${formattedMessage}`;
-              const transResult = await translateContent(rawMessageToTranslate, [orderLang], 'Traditional Chinese');
-              if (transResult && transResult[orderLang]) {
-                lineMessage = `${prefix}\n${prefixObj.orderNumber}：#${order.orderNumber}\n${transResult[orderLang]}`;
-              }
-            } catch (err) {
-              console.error('[AI Translation] LINE placed order dynamic translation fallback failed:', err);
-            }
-          }
-
-          sendLinePush(customer.lineUserId!, lineMessage).catch(() => {});
-        };
-        sendLinePlacedPushAsync().catch(() => {});
-      }
-    } catch (err) {
-      console.error('[LINE Notify] Error in createOrder notification logic:', err);
-    }
-  }
-
-  emitNewOrder({
-    id: order.id,
-    orderNumber: order.orderNumber,
-    status: order.status,
-    orderType: order.orderType,
-    locationId: order.locationId,
-    paymentStatus: order.paymentStatus,
-    tenantId: (order as any).tenantId,
-  });
-
-  // Emit event for automation rules
-  try {
-    const { appEvents } = await import('../lib/events.js');
-    appEvents.emit('order.created', { order });
-  } catch {}
-    res.status(201).json({ success: true, data: order });
+  res.status(201).json({ success: true, data: order });
   } catch (err: any) {
     console.error('Error creating order:', err);
     res.status(500).json({ 
