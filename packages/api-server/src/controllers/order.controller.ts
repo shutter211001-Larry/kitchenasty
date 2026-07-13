@@ -844,7 +844,7 @@ export async function listOrders(req: Request, res: Response): Promise<void> {
         table: { select: { id: true, name: true } },
         payments: true,
         _count: { select: { items: true } },
-        ...(includeItems ? { items: { include: { options: true } } } : {}),
+        ...(includeItems ? { items: { select: { id: true, name: true, quantity: true, unitPrice: true, subtotal: true, comment: true, menuItemId: true, options: { select: { id: true, name: true, value: true, priceModifier: true } } } } } : {}),
       },
     }),
     prisma.order.count({ where }),

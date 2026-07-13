@@ -37,13 +37,47 @@ const tenantAwareModels = [
   'Unit', 'UnitConversion', 'ErpSetting', 'LabelManufacturer'
 ];
 
-// 3. Extend Prisma Client to automatically inject tenantId (Row-Level Security concept)
+const softDeleteModels = ['User', 'Order', 'MenuItem', 'Category'];
+
+// 3. Extend Prisma Client to automatically inject tenantId (Row-Level Security concept) and Soft Deletes
 export const prisma = basePrisma.$extends({
   query: {
     $allModels: {
       async $allOperations({ model, operation, args, query }) {
         const store = tenantStorage.getStore();
         const tenantId = store?.tenantId;
+
+        // Soft Delete Logic
+        if (softDeleteModels.includes(model)) {
+          if (
+            operation === 'findUnique' ||
+            operation === 'findUniqueOrThrow' ||
+            operation === 'findFirst' ||
+            operation === 'findFirstOrThrow' ||
+            operation === 'findMany' ||
+            operation === 'count' ||
+            operation === 'aggregate' ||
+            operation === 'groupBy' ||
+            operation === 'update' ||
+            operation === 'updateMany'
+          ) {
+            (args as any).where = { ...(args as any).where, deletedAt: null };
+          }
+
+          if (operation === 'delete') {
+            return (basePrisma as any)[model].update({
+              where: (args as any).where,
+              data: { deletedAt: new Date() },
+            });
+          }
+
+          if (operation === 'deleteMany') {
+            return (basePrisma as any)[model].updateMany({
+              where: (args as any).where,
+              data: { deletedAt: new Date() },
+            });
+          }
+        }
 
         // Only inject if there's an active tenantId and the model is tenant-aware
         if (tenantId && tenantAwareModels.includes(model)) {

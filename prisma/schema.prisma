@@ -96,6 +96,7 @@ model User {
   preferredLanguage   String                        @default("zh-TW")
   createdAt           DateTime                      @default(now()) @db.Timestamptz
   updatedAt           DateTime                      @updatedAt @db.Timestamptz
+  deletedAt           DateTime?                     @db.Timestamptz
   locationId          String?
   lineDisplayName     String?
   lineUserId          String?                       @unique
@@ -318,6 +319,7 @@ model Category {
   locationId              String?
   createdAt               DateTime   @default(now()) @db.Timestamptz
   updatedAt               DateTime   @updatedAt @db.Timestamptz
+  deletedAt               DateTime?  @db.Timestamptz
   descriptionTranslations Json?
   nameTranslations        Json?
   trackSharedStock        Boolean    @default(false)
@@ -352,6 +354,7 @@ model MenuItem {
   locationId              String?
   createdAt               DateTime                    @default(now()) @db.Timestamptz
   updatedAt               DateTime                    @updatedAt @db.Timestamptz
+  deletedAt               DateTime?                   @db.Timestamptz
   descriptionTranslations Json?
   nameTranslations        Json?
   unit                    String?                     @default("份")
@@ -496,6 +499,7 @@ model Order {
   guestPhone           String?
   createdAt            DateTime             @default(now()) @db.Timestamptz
   updatedAt            DateTime             @updatedAt @db.Timestamptz
+  deletedAt            DateTime?            @db.Timestamptz
   distance             Float?
   isRemote             Boolean              @default(false)
   pickupNumber         String?              @db.VarChar(10)

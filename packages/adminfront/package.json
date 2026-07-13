@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.12.0",
+    "@sentry/browser": "^10.65.0",
+    "@sentry/react": "^10.65.0",
     "@shutter/shared": "*",
     "dexie": "^4.4.4",
     "html5-qrcode": "^2.3.8",

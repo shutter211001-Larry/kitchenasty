@@ -1,5 +1,21 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import * as Sentry from '@sentry/react';
+
+if (import.meta.env.VITE_SENTRY_DSN) {
+  Sentry.init({
+    dsn: import.meta.env.VITE_SENTRY_DSN,
+    integrations: [
+      Sentry.browserTracingIntegration(),
+      Sentry.replayIntegration(),
+    ],
+    tracesSampleRate: 1.0,
+    tracePropagationTargets: ['localhost', /^https:\/\/yourserver\.io\/api/],
+    replaysSessionSampleRate: 0.1,
+    replaysOnErrorSampleRate: 1.0,
+  });
+}
+
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext.js';
 import { CartProvider } from './context/CartContext.js';
@@ -63,9 +79,10 @@ function BrandingGuard({ children }: { children: React.ReactNode }) {
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <BrowserRouter>
-      <ThemeProvider>
-      <AuthProvider>
+    <Sentry.ErrorBoundary fallback={<div className="p-8 text-center"><h1 className="text-2xl font-bold text-red-600 mb-4">Something went wrong</h1><p>We have been notified and are working on a fix.</p></div>}>
+      <BrowserRouter>
+        <ThemeProvider>
+        <AuthProvider>
         <CartProvider>
         <BrandingGuard>
           <Routes>
@@ -110,8 +127,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         <ConfirmGlobal />
         <Toaster position="top-center" />
         </CartProvider>
-      </AuthProvider>
-      </ThemeProvider>
-    </BrowserRouter>
-  </React.StrictMode>,
+        </AuthProvider>
+        </ThemeProvider>
+      </BrowserRouter>
+    </Sentry.ErrorBoundary>
+  </React.StrictMode>
 );

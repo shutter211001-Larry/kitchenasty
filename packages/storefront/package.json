@@ -10,6 +10,8 @@
     "translate": "tsx scripts/translate.ts"
   },
   "dependencies": {
+    "@sentry/browser": "^10.65.0",
+    "@sentry/react": "^10.65.0",
     "@shutter/shared": "*",
     "express": "^5.2.1",
     "http-proxy-middleware": "^4.1.1",

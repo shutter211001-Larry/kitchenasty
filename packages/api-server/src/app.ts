@@ -75,8 +75,14 @@ import { tenantMiddleware } from './middleware/tenantMiddleware.js';
 import './lib/events.js';
 import { scheduleImageCleanup } from './cron/image-cleanup.cron.js';
 
+import { initSentry } from './lib/sentry.js';
+
 export async function createApp() {
   const app = express();
+  
+  // Initialize Sentry first so it can hook into Express
+  initSentry(app);
+  
   // On Railway/Cloud providers, we trust the first proxy
   app.set('trust proxy', 1);
 
