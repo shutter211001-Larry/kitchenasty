@@ -11,7 +11,7 @@
     "dev:storefront": "npm run dev -w packages/storefront",
     "dev:erpfront": "npm run dev -w packages/erpfront",
     "dev:docs": "npm run dev -w packages/docs",
-    "dev:mobile": "npm run start -w packages/mobile",
+    
     "dev:saasfront": "npm run dev -w packages/saasfront",
     "build": "npm run build -w packages/shared && npm run build -w packages/api-server && npm run build -w packages/adminfront && npm run build -w packages/storefront && npm run build -w packages/erpfront && npm run build -w packages/saasfront",
     "build:docs": "npm run build -w packages/docs",
