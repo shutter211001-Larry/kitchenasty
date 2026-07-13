@@ -1,46 +1,58 @@
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 
-const localesDir = path.join(process.cwd(), 'packages', 'adminfront', 'src', 'i18n', 'locales');
-const files = fs.readdirSync(localesDir).filter(f => f.endsWith('.json'));
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const localesDir = path.join(__dirname, 'packages/adminfront/src/i18n/locales');
+
+const locales = [
+  'en', 'es', 'fr', 'de', 'it', 'ja', 'ko', 'pt', 'th', 'tl', 'vi', 'id', 'zh-TW'
+];
 
 const newKeys = {
-  "attendanceCorrections": {
-    "title": "補打卡申請",
-    "requestCorrection": "提出補打卡申請",
-    "reason": "補打卡原因",
-    "requestedCheckIn": "申請上班時間",
-    "requestedCheckOut": "申請下班時間",
-    "status": "狀態",
-    "statusPending": "待審核",
-    "statusApproved": "已核准",
-    "statusRejected": "已拒絕",
-    "approve": "核准",
-    "reject": "拒絕",
-    "submit": "送出申請",
-    "success": "申請已送出",
-    "updateSuccess": "狀態已更新",
-    "noRecords": "目前沒有申請紀錄",
-    "cancel": "取消",
-    "selectDate": "選擇日期",
-    "checkInMissing": "忘記打上班卡",
-    "checkOutMissing": "忘記打下班卡",
-    "bothMissing": "忘記打上下班卡",
-    "employee": "員工",
-    "manager": "審核主管",
-    "date": "日期"
-  }
+  isFranchise: "This is a franchise store",
+  franchiseeName: "Franchisee Name",
+  royaltyRate: "Royalty Rate (%)",
+  inventory: "Store Inventory"
 };
 
-files.forEach(file => {
-  const filePath = path.join(localesDir, file);
-  const data = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
-  
-  if (!data.attendanceCorrections) {
-    data.attendanceCorrections = newKeys.attendanceCorrections;
-    fs.writeFileSync(filePath, JSON.stringify(data, null, 2) + '\n', 'utf-8');
-    console.log(`Updated ${file}`);
-  } else {
-    console.log(`Already exists in ${file}`);
+const newKeysTw = {
+  isFranchise: "這是一間加盟門市",
+  franchiseeName: "加盟主姓名",
+  royaltyRate: "抽成比例 (%)",
+  inventory: "門市庫存"
+};
+
+for (const locale of locales) {
+  const filePath = path.join(localesDir, `${locale}.json`);
+  if (!fs.existsSync(filePath)) continue;
+
+  let content = fs.readFileSync(filePath, 'utf8');
+  let data = JSON.parse(content);
+
+  if (!data.locationForm) {
+    data.locationForm = {};
   }
-});
+  
+  if (locale === 'zh-TW') {
+    data.locationForm.isFranchise = newKeysTw.isFranchise;
+    data.locationForm.franchiseeName = newKeysTw.franchiseeName;
+    data.locationForm.royaltyRate = newKeysTw.royaltyRate;
+    data.locationForm.inventory = newKeysTw.inventory;
+    
+    content = JSON.stringify(data, null, 2);
+    content = content.replace(/分店/g, '門市');
+    content = content.replace(/加盟店/g, '加盟門市');
+    fs.writeFileSync(filePath, content, 'utf8');
+  } else {
+    data.locationForm.isFranchise = newKeys.isFranchise;
+    data.locationForm.franchiseeName = newKeys.franchiseeName;
+    data.locationForm.royaltyRate = newKeys.royaltyRate;
+    data.locationForm.inventory = newKeys.inventory;
+    
+    fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf8');
+  }
+  
+  console.log(`Updated ${locale}.json`);
+}

@@ -43,6 +43,9 @@ interface LocationData {
   pickupLeadTime: number;
   lat?: number;
   lng?: number;
+  isFranchise?: boolean;
+  franchiseeName?: string;
+  royaltyRate?: number;
   hourlyNationalHolidayMultiplier: number;
   monthlyNationalHolidayOvertime: boolean;
   enableOvertimePay: boolean;
@@ -79,6 +82,9 @@ const emptyLocation: LocationData = {
   pickupLeadTime: 15,
   lat: 0,
   lng: 0,
+  isFranchise: false,
+  franchiseeName: '',
+  royaltyRate: 5.0,
   hourlyNationalHolidayMultiplier: 2.0,
   monthlyNationalHolidayOvertime: true,
   enableOvertimePay: true,
@@ -105,7 +111,7 @@ export default function LocationForm() {
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'basic' | 'hours' | 'hr' | 'delivery'>('basic');
+  const [activeTab, setActiveTab] = useState<'basic' | 'hours' | 'hr' | 'delivery' | 'inventory'>('basic');
 
   const handleDelete = async () => {
     if (!await confirm(t('locationForm.confirmDeleteStore'))) {
@@ -292,7 +298,8 @@ export default function LocationForm() {
           { id: 'basic', label: t('locationForm.basicInformation') || '基本設定' },
           { id: 'hours', label: t('locationForm.businessHoursSettings') || '營業時間' },
           { id: 'hr', label: t('locationForm.humanResources') || '人力資源' },
-          { id: 'delivery', label: t('locationForm.deliveryArea') || '外送區域' }
+          { id: 'delivery', label: t('locationForm.deliveryArea') || '外送區域' },
+          { id: 'inventory', label: t('locationForm.inventory') || '門市庫存' }
         ].map(tab => (
           <button
             type="button"
@@ -499,6 +506,46 @@ export default function LocationForm() {
               />
             </div>
           </div>
+        </section>
+
+        {/* Franchise Settings */}
+        <section className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mt-8">
+          <h3 className="text-lg font-medium text-gray-900 mb-4">{t('locationForm.isFranchise') || '加盟設定'}</h3>
+          <label className="flex items-center gap-2 mb-4">
+            <input
+              type="checkbox"
+              checked={form.isFranchise}
+              onChange={(e) => updateField('isFranchise', e.target.checked)}
+              className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+            />
+            <span className="text-sm font-medium text-gray-700">{t('locationForm.isFranchise') || '這是一間加盟門市'}</span>
+          </label>
+          
+          {form.isFranchise && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-2 duration-300">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('locationForm.franchiseeName') || '加盟主姓名'}</label>
+                <input
+                  type="text"
+                  value={form.franchiseeName || ''}
+                  onChange={(e) => updateField('franchiseeName', e.target.value)}
+                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm shadow-sm transition-all duration-200 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('locationForm.royaltyRate') || '抽成比例 (%)'}</label>
+                <input
+                  type="number"
+                  value={form.royaltyRate ?? 5.0}
+                  onChange={(e) => updateField('royaltyRate', parseFloat(e.target.value))}
+                  min={0}
+                  max={100}
+                  step={0.1}
+                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm shadow-sm transition-all duration-200 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                />
+              </div>
+            </div>
+          )}
         </section>
 
                   </div>
@@ -870,6 +917,22 @@ export default function LocationForm() {
               </button>
             </div>
           </section>
+        )}
+
+        {activeTab === 'inventory' && (
+          <div className="space-y-8 animate-in fade-in duration-300">
+            <section className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h3 className="text-lg font-bold text-gray-900">{t('locationForm.inventory') || '門市庫存'}</h3>
+                  <p className="text-sm text-gray-500">在此管理本門市的專屬庫存與安全水位。這與中央廚房的庫存是完全獨立的。</p>
+                </div>
+              </div>
+              <div className="text-center py-10 bg-gray-50 border border-dashed border-gray-300 rounded-lg">
+                <p className="text-sm text-gray-500">庫存管理模組建置中... (Inventory Module Coming Soon)</p>
+              </div>
+            </section>
+          </div>
         )}
 
         {/* Submit */}

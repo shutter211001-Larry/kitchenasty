@@ -63,10 +63,13 @@ export const checkIn = async (req: Request, res: Response) => {
     }
   }
 
-  if (!finalLocationId && userId) {
+  let isSupport = false;
+  if (userId) {
     const currentUser = await prisma.user.findUnique({ where: { id: userId } });
-    if (currentUser?.locationId) {
+    if (!finalLocationId && currentUser?.locationId) {
       finalLocationId = currentUser.locationId;
+    } else if (finalLocationId && currentUser?.locationId && currentUser.locationId !== finalLocationId) {
+      isSupport = true;
     }
   }
 
@@ -123,6 +126,7 @@ export const checkIn = async (req: Request, res: Response) => {
       lng: lng ?? null,
       device: isQR ? `${device || 'Unknown'} (QR Scan)` : device,
       isOutOfRange,
+      isSupport,
       checkIn: checkInTime ? new Date(checkInTime) : new Date()
     }
   });

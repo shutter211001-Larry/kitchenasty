@@ -31,6 +31,8 @@ const createLocationSchema = z.object({
   isBusy: z.boolean().optional(),
   busyMessage: z.string().nullable().optional(),
   owner: z.string().nullable().optional(),
+  isFranchise: z.boolean().default(false).optional(),
+  franchiseeName: z.string().nullable().optional(),
   royaltyRate: z.number().optional(),
   apiEndpoint: z.string().nullable().optional(),
   contractStart: z.string().optional(),

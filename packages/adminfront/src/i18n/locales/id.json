@@ -1110,7 +1110,12 @@
     "payrollSettings": "薪資設定 (Payroll)",
     "payrollSettingsDescription": "設定此門市的國定假日計薪標準。",
     "hourlyHolidayMultiplier": "時薪制國定假日薪資倍率",
-    "monthlyHolidayOvertime": "月薪制國定假日發給加班費"
+    "monthlyHolidayOvertime": "月薪制國定假日發給加班費",
+    "humanResources": "Human Resources",
+    "isFranchise": "This is a franchise store",
+    "franchiseeName": "Franchisee Name",
+    "royaltyRate": "Royalty Rate (%)",
+    "inventory": "Store Inventory"
   },
   "locationList": {
     "branchManagement": "分店管理 (Locations)",

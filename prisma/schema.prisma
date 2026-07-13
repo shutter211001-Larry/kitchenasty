@@ -245,6 +245,8 @@ model Location {
   isBusy                          Boolean                  @default(false)
   busyMessage                     String?
   owner                           String?                  @default("未指派")
+  isFranchise                     Boolean                  @default(false)
+  franchiseeName                  String?
   royaltyRate                     Float?                   @default(5.0)
   hourlyNationalHolidayMultiplier Float                    @default(2.0)
   monthlyNationalHolidayOvertime  Boolean                  @default(true)
@@ -999,6 +1001,7 @@ model StaffAttendance {
   device             String?
   isOutOfRange       Boolean                       @default(false)
   isIgnored          Boolean                       @default(false)
+  isSupport          Boolean                       @default(false)
   createdAt          DateTime                      @default(now()) @db.Timestamptz
   updatedAt          DateTime                      @updatedAt @db.Timestamptz
   correctionRequests AttendanceCorrectionRequest[]
