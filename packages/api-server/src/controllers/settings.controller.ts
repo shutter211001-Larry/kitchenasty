@@ -342,10 +342,36 @@ export async function getSettingsGroup(field: SettingsField, locationId?: string
   const settings = await getOrCreateSettings();
   let data = (settings[field] as Record<string, any>) || {};
 
-  if (locationId && settings.advancedSettings) {
-    const advanced = settings.advancedSettings as any;
-    if (advanced.locationOverrides && advanced.locationOverrides[locationId] && advanced.locationOverrides[locationId][field]) {
-      data = { ...data, ...advanced.locationOverrides[locationId][field] };
+  if (locationId) {
+    if (settings.advancedSettings) {
+      const advanced = settings.advancedSettings as any;
+      if (advanced.locationOverrides && advanced.locationOverrides[locationId] && advanced.locationOverrides[locationId][field]) {
+        data = { ...data, ...advanced.locationOverrides[locationId][field] };
+      }
+    }
+    
+    // Explicit Hard Fail override for third-party integrations
+    if (field === 'lineSettings' || field === 'paymentSettings' || field === 'mailSettings') {
+      const location = await prisma.location.findUnique({ where: { id: locationId } });
+      if (location?.integrationSettings) {
+        const ints = location.integrationSettings as any;
+        
+        if (field === 'lineSettings' && ints.linePayMode === 'CUSTOM') {
+          if (!ints.linePayChannelId || !ints.linePayChannelSecret) {
+            throw new Error('HARD_FAIL: 門市設定為獨立 LINE Pay (CUSTOM)，但缺乏完整的頻道金鑰，為了保護帳務正確性，已強制阻斷結帳。');
+          }
+          data.linePayChannelId = ints.linePayChannelId;
+          data.linePayChannelSecret = ints.linePayChannelSecret;
+        }
+
+        if (field === 'lineSettings' && ints.socialMode === 'CUSTOM') {
+          if (!ints.lineLoginChannelId || !ints.lineLoginChannelSecret) {
+            throw new Error('HARD_FAIL: 門市設定為獨立 LINE Login (CUSTOM)，但缺乏完整的頻道金鑰，為了保護登入安全性，已強制阻斷社群登入。');
+          }
+          data.lineLoginChannelId = ints.lineLoginChannelId;
+          data.lineLoginChannelSecret = ints.lineLoginChannelSecret;
+        }
+      }
     }
   }
 

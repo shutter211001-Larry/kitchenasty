@@ -39,14 +39,6 @@ async function getMailConfig(locationId?: string | null): Promise<{ transporter:
     
     let mail = (settings?.mailSettings as Record<string, any>) || {};
 
-    if (locationId) {
-      const advanced = (settings?.advancedSettings as Record<string, any>) || {};
-      const overrides = advanced.locationOverrides || {};
-      if (overrides[locationId]?.mailSettings) {
-        mail = overrides[locationId].mailSettings;
-      }
-    }
-
     if (mail.smtpHost) host = mail.smtpHost;
     if (mail.smtpPort) port = mail.smtpPort;
     if (mail.smtpUser) user = mail.smtpUser;
@@ -55,7 +47,28 @@ async function getMailConfig(locationId?: string | null): Promise<{ transporter:
     if (mail.senderEmail) senderEmail = mail.senderEmail;
     if (mail.encryption === 'ssl') secure = true;
     if (mail.encryption === 'tls') requireTLS = true;
-  } catch {
+
+    if (locationId) {
+      const location = await prisma.location.findUnique({ where: { id: locationId } });
+      if (location?.integrationSettings) {
+        const ints = location.integrationSettings as any;
+        if (ints.smtpMode === 'CUSTOM') {
+          if (!ints.smtpHost || !ints.smtpUser || !ints.smtpPass) {
+            throw new Error('HARD_FAIL: 門市設定為獨立 SMTP (CUSTOM)，但缺乏完整的 SMTP 設定，已強制阻斷發信。');
+          }
+          host = ints.smtpHost;
+          port = ints.smtpPort ? parseInt(ints.smtpPort) : port;
+          user = ints.smtpUser;
+          pass = ints.smtpPass;
+          if (ints.smtpFrom) {
+            senderEmail = ints.smtpFrom;
+            senderName = location.name;
+          }
+        }
+      }
+    }
+  } catch (err: any) {
+    if (err.message.includes('HARD_FAIL')) throw err;
     // DB unavailable — fall back to env vars
   }
 

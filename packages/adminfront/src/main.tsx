@@ -99,6 +99,7 @@ import RosterManagement from './pages/RosterManagement.js';
 import Finance from './pages/Finance.js';
 import { ShiftRequirementsPage } from './pages/ShiftRequirementsPage.js';
 import ApproveIntegrations from './pages/ApproveIntegrations.js';
+import LocationLayout from './pages/locations/LocationLayout.js';
 
 import './index.css';
 import { ConfirmGlobal } from './components/ConfirmGlobal.tsx';
@@ -145,9 +146,8 @@ function AppRoutes() {
         {/* MANAGER+ */}
         <Route path="/locations" element={<RequireRole roles={['SUPER_ADMIN', 'MANAGER']}><LocationList /></RequireRole>} />
         <Route path="/locations/new" element={<RequireRole roles={['SUPER_ADMIN', 'MANAGER']}><LocationForm /></RequireRole>} />
-        <Route path="/locations/:id" element={<RequireRole roles={['SUPER_ADMIN', 'MANAGER']}><LocationForm /></RequireRole>} />
-        <Route path="/locations/:locationId/tables" element={<RequireRole roles={['SUPER_ADMIN', 'MANAGER']}><TableList /></RequireRole>} />
-        <Route path="/locations/:locationId/delivery-zones" element={<RequireRole roles={['SUPER_ADMIN', 'MANAGER']}><DeliveryZoneList /></RequireRole>} />
+        <Route path="/locations/:id/*" element={<RequireRole roles={['SUPER_ADMIN', 'MANAGER']}><LocationLayout /></RequireRole>} />
+        
         <Route path="/menu" element={<RequireRole roles={['SUPER_ADMIN', 'MANAGER']}><Navigate to="/menu/items" replace /></RequireRole>} />
         <Route path="/menu/categories" element={<RequireRole roles={['SUPER_ADMIN', 'MANAGER']}><CategoryList /></RequireRole>} />
         <Route path="/menu/categories/new" element={<RequireRole roles={['SUPER_ADMIN', 'MANAGER']}><CategoryForm /></RequireRole>} />

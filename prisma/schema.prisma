@@ -262,6 +262,7 @@ model Location {
   apiEndpoint                     String?
   contractStart                   String?                  @default("2025-01-01")
   contractEnd                     String?                  @default("2028-12-31")
+  integrationSettings             Json?
   
   isMainStore                     Boolean                  @default(false)
   parentLocationId                String?

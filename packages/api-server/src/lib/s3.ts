@@ -33,22 +33,19 @@ export function parseS3Settings(settings: any): S3Settings | null {
  * If tenantId is not provided, it fetches the global SaaS platform settings.
  * It strictly avoids falling back to SaaS global settings for tenant uploads.
  */
-export async function getResolvedS3Settings(tenantId?: string | null): Promise<S3Settings | null> {
+export async function getResolvedS3Settings(tenantId?: string | null, locationId?: string | null): Promise<S3Settings | null> {
   let s3Settings = null;
 
   if (tenantId) {
-    // 租戶上傳：只讀取租戶自己的設定，絕對不退回到 SaaS 全域設定。
     const tenantSettings = await (prisma as any).siteSettings.findUnique({
       where: { tenantId }
     });
-    // 相容舊資料被雙重字串化的情況
     let advanced = tenantSettings?.advancedSettings;
     if (typeof advanced === 'string') {
       try { advanced = JSON.parse(advanced); } catch {}
     }
     s3Settings = parseS3Settings(advanced?.s3Settings);
   } else {
-    // SaaS 全域上傳：讀取 id: 'default'
     const globalSettings = await (prisma as any).siteSettings.findUnique({
       where: { id: 'default' }
     });
@@ -57,6 +54,30 @@ export async function getResolvedS3Settings(tenantId?: string | null): Promise<S
       try { globalAdvanced = JSON.parse(globalAdvanced); } catch {}
     }
     s3Settings = parseS3Settings(globalAdvanced?.s3Settings);
+  }
+
+  if (locationId) {
+    const location = await (prisma as any).location.findUnique({
+      where: { id: locationId }
+    });
+
+    if (location?.integrationSettings) {
+      const ints = location.integrationSettings as any;
+      if (ints.s3Mode === 'CUSTOM') {
+        const customS3Settings = {
+          endpoint: ints.s3Endpoint || '',
+          bucket: ints.s3Bucket || '',
+          accessKey: ints.s3AccessKeyId || '',
+          secretKey: ints.s3SecretAccessKey || '',
+          publicUrl: ints.s3Endpoint || '' 
+        };
+        const parsed = parseS3Settings(customS3Settings);
+        if (!parsed) {
+          throw new Error('HARD_FAIL: 門市設定為獨立 S3 (CUSTOM)，但缺乏完整的 S3 金鑰設定，為了保護檔案正確性，已強制阻斷上傳。');
+        }
+        s3Settings = parsed;
+      }
+    }
   }
 
   return s3Settings;

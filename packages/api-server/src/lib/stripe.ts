@@ -10,22 +10,33 @@ export async function getStripe(locationId?: string): Promise<Stripe> {
 
   let secretKey = process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder';
 
-  try {
-    const settings = await prisma.siteSettings.findFirst();
-    let payment = (settings?.paymentSettings as Record<string, any>) || {};
-    
-    if (locationId && settings?.advancedSettings) {
-      const advanced = settings.advancedSettings as any;
-      if (advanced.locationOverrides && advanced.locationOverrides[locationId]?.paymentSettings) {
-        payment = { ...payment, ...advanced.locationOverrides[locationId].paymentSettings };
+  const settings = await prisma.siteSettings.findFirst();
+  let globalPayment = (settings?.paymentSettings as Record<string, any>) || {};
+  if (globalPayment.stripeSecretKey) {
+    secretKey = globalPayment.stripeSecretKey;
+  }
+
+  // Check Location explicitly
+  if (locationId) {
+    const location = await prisma.location.findUnique({
+      where: { id: locationId }
+    });
+
+    if (location?.integrationSettings) {
+      const ints = location.integrationSettings as any;
+      if (ints.stripeMode === 'CUSTOM') {
+        if (!ints.stripeSecretKey) {
+          throw new Error('HARD_FAIL: 門市設定為獨立 Stripe 金流 (CUSTOM)，但缺乏 Stripe Secret Key，為了保護帳務正確性，已強制阻斷結帳。');
+        }
+        secretKey = ints.stripeSecretKey;
+      } else if (ints.stripeMode === 'HEADQUARTERS') {
+        // Explicitly using Headquarters, secretKey is already set to globalPayment
       }
     }
+  }
 
-    if (payment.stripeSecretKey) {
-      secretKey = payment.stripeSecretKey;
-    }
-  } catch {
-    // DB unavailable — fall back to env var
+  if (!secretKey) {
+    throw new Error('Stripe Secret Key not configured');
   }
 
   const cacheKey = `${tenantId}:${secretKey}`;
