@@ -34,7 +34,7 @@ export function applyOverridesToMenuItems(items: any[], currentLocationId?: stri
       item.isActive = override.isActive;
       item.trackStock = override.trackStock;
       item.stockQty = override.stockQty;
-    } else if (currentLocationId && item.locationId && item.locationId !== currentLocationId) {
+    } else if (currentLocationId && item.locationId !== currentLocationId) {
       item.stockQty = 0;
     }
     delete item.locationOverrides;
@@ -48,7 +48,7 @@ export function applyOverridesToMenuItems(items: any[], currentLocationId?: stri
               val.isActive = vOverride.isActive;
               val.trackStock = vOverride.trackStock;
               val.stockQty = vOverride.stockQty;
-            } else if (currentLocationId && item.locationId && item.locationId !== currentLocationId) {
+            } else if (currentLocationId && item.locationId !== currentLocationId) {
               val.stockQty = 0;
             }
             delete val.locationOverrides;

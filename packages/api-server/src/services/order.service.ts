@@ -56,23 +56,18 @@ export class OrderService {
               throw new Error(`Insufficient stock for item: ${menuItem.name}`);
             }
           } else {
-            // Follow + Plugin item, deduct from override
-            const override = await (tx as any).menuItemLocationOverride.upsert({
+            // Follow + Plugin item, deduct from override using updateMany to avoid creating temporary ones
+            const result = await (tx as any).menuItemLocationOverride.updateMany({
               where: {
-                menuItemId_locationId: { menuItemId: item.menuItemId, locationId: orderData.locationId }
-              },
-              create: {
                 menuItemId: item.menuItemId,
                 locationId: orderData.locationId,
-                stockQty: menuItem.stockQty - item.quantity,
-                trackStock: true,
-                isActive: true
+                stockQty: { gte: item.quantity }
               },
-              update: {
+              data: {
                 stockQty: { decrement: item.quantity }
               }
             });
-            if (override.stockQty < 0) {
+            if (result.count === 0) {
               throw new Error(`Insufficient stock for item: ${menuItem.name}`);
             }
           }

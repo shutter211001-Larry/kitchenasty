@@ -81,7 +81,7 @@ const updateMenuItemSchema = createMenuItemSchema.partial().extend({
   contextLocationId: z.string().nullable().optional()
 }).omit({ slug: true });
 
-async function enrichRandomDispatchPools(items: any[]) {
+async function enrichRandomDispatchPools(items: any[], locationId?: string) {
   const poolItemIds = new Set<string>();
   items.forEach(item => {
     if (item.isRandomDispatch && Array.isArray(item.randomDispatchPool)) {
@@ -96,8 +96,26 @@ async function enrichRandomDispatchPools(items: any[]) {
 
   const poolItems = await prisma.menuItem.findMany({
     where: { id: { in: Array.from(poolItemIds) } },
-    select: { id: true, name: true, nameTranslations: true, image: true, price: true, trackStock: true, stockQty: true, isActive: true }
+    select: { 
+      id: true, name: true, nameTranslations: true, image: true, price: true, trackStock: true, stockQty: true, isActive: true, locationId: true,
+      ...(locationId ? { locationOverrides: { where: { locationId } } } : {})
+    }
   });
+
+  if (locationId) {
+    poolItems.forEach(item => {
+      if (item.locationOverrides && item.locationOverrides.length > 0) {
+        const override = item.locationOverrides[0];
+        item.isActive = override.isActive;
+        item.trackStock = override.trackStock;
+        item.stockQty = override.stockQty;
+      } else if (item.locationId !== locationId) {
+        item.stockQty = 0;
+      }
+      delete (item as any).locationOverrides;
+    });
+  }
+
   const poolItemMap = new Map(poolItems.map(p => [p.id, p]));
 
   items.forEach(item => {
@@ -196,7 +214,7 @@ export async function listMenuItems(req: Request, res: Response): Promise<void> 
         item.isActive = override.isActive;
         item.trackStock = override.trackStock;
         item.stockQty = override.stockQty;
-      } else if (item.locationId && item.locationId !== originalLocationId) {
+      } else if (item.locationId !== originalLocationId) {
         item.stockQty = 0;
       }
       delete item.locationOverrides;
@@ -209,7 +227,7 @@ export async function listMenuItems(req: Request, res: Response): Promise<void> 
                 const vOverride = val.locationOverrides[0];
                 val.trackStock = vOverride.trackStock;
                 val.stockQty = vOverride.stockQty;
-              } else if (item.locationId && item.locationId !== originalLocationId) {
+              } else if (item.locationId !== originalLocationId) {
                 val.stockQty = 0;
               }
               delete val.locationOverrides;
@@ -220,7 +238,7 @@ export async function listMenuItems(req: Request, res: Response): Promise<void> 
     });
   }
 
-  await enrichRandomDispatchPools(items);
+  await enrichRandomDispatchPools(items, originalLocationId);
 
   res.json({
     success: true,
@@ -272,7 +290,7 @@ export async function getMenuItem(req: Request<{ id: string }>, res: Response): 
       item.isActive = override.isActive;
       item.trackStock = override.trackStock;
       item.stockQty = override.stockQty;
-    } else if (item.locationId && item.locationId !== locationId) {
+    } else if (item.locationId !== locationId) {
       item.stockQty = 0;
     }
     delete item.locationOverrides;
@@ -285,7 +303,7 @@ export async function getMenuItem(req: Request<{ id: string }>, res: Response): 
               const vOverride = val.locationOverrides[0];
               val.trackStock = vOverride.trackStock;
               val.stockQty = vOverride.stockQty;
-            } else if (item.locationId && item.locationId !== locationId) {
+            } else if (item.locationId !== locationId) {
               val.stockQty = 0;
             }
             delete val.locationOverrides;
@@ -295,7 +313,7 @@ export async function getMenuItem(req: Request<{ id: string }>, res: Response): 
     }
   }
 
-  await enrichRandomDispatchPools([item]);
+  await enrichRandomDispatchPools([item], locationId);
 
   // Fetch recipe mapping from ERP if available
   let recipeId = null;

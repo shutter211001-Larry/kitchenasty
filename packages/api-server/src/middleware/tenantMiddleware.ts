@@ -27,6 +27,26 @@ export const tenantMiddleware = async (req: Request, res: Response, next: NextFu
     tenantId = 'tenant-1';
   }
 
+  // SINGLE_TENANT_MODE: Automatically resolve to the first available tenant in the database
+  if (process.env.SINGLE_TENANT_MODE === 'true') {
+    // If we already cached the default tenant, use it immediately (avoid DB roundtrips)
+    const cachedDefault = domainCache.get('__SINGLE_TENANT_DEFAULT__');
+    if (cachedDefault && cachedDefault.expiresAt > Date.now()) {
+      tenantId = cachedDefault.tenantId;
+    } else {
+      try {
+        const firstTenant = await (prisma as any).tenant.findFirst();
+        if (firstTenant) {
+          tenantId = firstTenant.id;
+          // Cache it for 5 minutes
+          domainCache.set('__SINGLE_TENANT_DEFAULT__', { tenantId, expiresAt: Date.now() + CACHE_TTL });
+        }
+      } catch (err) {
+        logger.error({ err }, 'Failed to resolve default tenant for SINGLE_TENANT_MODE');
+      }
+    }
+  }
+
   let domain = req.headers['x-tenant-domain'] as string;
 
   // 智慧去頭機制 (Smart Subdomain Stripping): 
