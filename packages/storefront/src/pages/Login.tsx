@@ -53,7 +53,12 @@ export default function Login() {
       const userEmail = liff.getDecodedIDToken()?.email;
 
       console.log('[Login] LINE Profile obtained, authenticating with backend...');
-      const data = await api.get<any>(`${API_BASE}/line/login`);
+      const data = await api.post<any>('/line/login', {
+        lineUserId: profile.userId,
+        lineDisplayName: profile.displayName,
+        email: userEmail,
+        name: profile.displayName
+      });
       if (data.success) {
         console.log('[Login] LINE Login successful!');
         setSuccess(true);

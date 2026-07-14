@@ -35,7 +35,12 @@ export default function Register() {
             const profile = await liff.getProfile();
             const userEmail = liff.getDecodedIDToken()?.email;
             
-            const data = await api.get<any>(`${API_BASE}/line/login`);
+            const data = await api.post<any>('/line/login', {
+              lineUserId: profile.userId,
+              lineDisplayName: profile.displayName,
+              email: userEmail,
+              name: profile.displayName
+            });
             if (data.success) {
               localStorage.setItem('token', data.data.token);
               window.location.href = redirectPath;
