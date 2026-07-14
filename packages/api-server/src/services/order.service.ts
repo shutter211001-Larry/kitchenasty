@@ -1,7 +1,4 @@
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
-
+import { prisma } from '../lib/db.js';
 export class OrderService {
   /**
    * Saves the order and executes all side-effects (inventory, coupons, loyalty) in a strict database transaction.

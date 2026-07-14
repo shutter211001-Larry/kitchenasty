@@ -1,11 +1,8 @@
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../lib/db.js';
 import { sendEmail, orderConfirmationEmail, orderStatusEmail } from '../lib/email.js';
 import { emitNewOrder, emitOrderStatusUpdate } from '../lib/socket.js';
 import { guestNames, asapLabels, linePrefixLocales, defaultStatusLocales } from '../constants/locales.js';
 // We use dynamic imports for line.controller and ai to avoid circular dependencies if they are controllers
-
-const prisma = new PrismaClient();
-
 export function formatNotificationMessage(template: string, order: any, customer?: any, timezone?: string) {
   const userLang = order.language || 'zh-TW';
   

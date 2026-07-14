@@ -1,9 +1,8 @@
 import { Server as HttpServer } from 'http';
 import { Server, Socket } from 'socket.io';
 import { Expo, ExpoPushMessage } from 'expo-server-sdk';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from './db.js';
 
-const prisma = new PrismaClient();
 const expo = new Expo();
 
 let io: Server | null = null;
