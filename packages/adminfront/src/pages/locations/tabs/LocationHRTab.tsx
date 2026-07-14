@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Briefcase, Save, Loader2, Info } from 'lucide-react';
-import { api } from '../../../../lib/api.js';
+import { api } from '../../../lib/api.js';
 import toast from 'react-hot-toast';
 
 export default function LocationHRTab({ locationId }: { locationId: string }) {
@@ -22,7 +22,7 @@ export default function LocationHRTab({ locationId }: { locationId: string }) {
 
   useEffect(() => {
     api.get<{ data: any }>(`/locations/${locationId}`)
-      .then(res => {
+      .then((res: any) => {
         if (res.data) {
           setForm({
             hourlyNationalHolidayMultiplier: res.data.hourlyNationalHolidayMultiplier ?? 2.0,

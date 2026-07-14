@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Clock, Plus, Trash2, Save, Loader2 } from 'lucide-react';
-import { api } from '../../../../lib/api.js';
+import { api } from '../../../lib/api.js';
 import toast from 'react-hot-toast';
 
 interface OperatingHour {
@@ -28,9 +28,9 @@ export default function LocationHoursTab({ locationId }: { locationId: string })
 
   useEffect(() => {
     api.get<{ data: { operatingHours?: any[] } }>(`/locations/${locationId}`)
-      .then(res => {
+      .then((res: any) => {
         if (res.data.operatingHours?.length) {
-          setHours(res.data.operatingHours.map(h => ({
+          setHours(res.data.operatingHours.map((h: any) => ({
             dayOfWeek: h.dayOfWeek,
             openTime: h.openTime,
             closeTime: h.closeTime,

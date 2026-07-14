@@ -300,13 +300,9 @@ export async function requestStaffPasswordReset(req: Request, res: Response): Pr
 
     let adminUrl = process.env.ADMIN_URL_PUBLIC || process.env.ADMIN_URL || 'http://localhost:5173';
     if (user.tenant && user.tenant.domain) {
+      const { getTenantUrls } = await import('../utils/url.js');
       const protocol = user.tenant.domain.includes('localhost') ? 'http' : 'https';
-      if (user.tenant.domain.endsWith('.shutterorder.pro')) {
-        const subdomain = user.tenant.domain.replace('.shutterorder.pro', '');
-        adminUrl = `${protocol}://${subdomain}.admin.shutterorder.pro`;
-      } else {
-        adminUrl = `${protocol}://admin.${user.tenant.domain}`;
-      }
+      adminUrl = getTenantUrls(user.tenant.domain, protocol).adminUrl;
     }
     const resetLink = `${adminUrl.replace(/\/+$/, '')}/reset-password?token=${token}`;
     

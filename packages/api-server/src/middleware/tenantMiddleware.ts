@@ -49,13 +49,9 @@ export const tenantMiddleware = async (req: Request, res: Response, next: NextFu
 
   let domain = req.headers['x-tenant-domain'] as string;
 
-  // 智慧去頭機制 (Smart Subdomain Stripping): 
-  // 讓 admin.yummy-steak.com, store.yummy-steak.com 都能精準對應到 yummy-steak.com
   if (domain) {
-    domain = domain.replace(/^(admin|store|erp|www)\./i, '');
-    // 支援 Option A 架構 (例如 demo.admin.shutterorder.pro -> demo.shutterorder.pro)
-    domain = domain.replace(/\.admin\./i, '.');
-    domain = domain.replace(/\.store\./i, '.');
+    const { resolveTenantDomain } = await import('../utils/url.js');
+    domain = resolveTenantDomain(domain);
   }
 
   if (!tenantId && domain) {

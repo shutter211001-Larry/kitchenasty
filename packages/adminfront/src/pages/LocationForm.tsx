@@ -7,6 +7,7 @@ import { OpenLocationCode } from 'open-location-code';
 import { PageHeader } from '../components/layout/PageHeader';
 import { PageContent } from '../components/layout/PageContent';
 import { confirm } from "../lib/confirm";
+import { toast } from 'react-hot-toast';
 import LocationInventoryPanel from '../components/inventory/LocationInventoryPanel.js';
 
 interface OperatingHour {
@@ -350,88 +351,11 @@ export default function LocationForm({ isTabMode = false }: { isTabMode?: boolea
       <PageHeader
         title={isEdit ? t('locationForm.editStore') : t('locationForm.addStore')}
         backUrl="/locations"
-        actions={isEdit ? <button onClick={handleDelete} disabled={deleting} className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700">{deleting ? t('locationForm.deleting') : t('locationForm.deleteStore')}</button> : undefined}
+        action={isEdit ? <button onClick={handleDelete} disabled={deleting} className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700">{deleting ? t('locationForm.deleting') : t('locationForm.deleteStore')}</button> : undefined}
       />
-          <button
-            type="button"
-            onClick={() => navigate('/locations')}
-            className="px-6 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50"
-          >
-            {t('locationForm.cancel')}
-          </button>
-          <button
-            type="submit"
-            disabled={saving}
-            className="px-6 py-2 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700 disabled:opacity-50 transition-colors"
-          >
-            {saving ? t('locationForm.saving') : isEdit ? t('locationForm.updateStoreInfo') : t('locationForm.createStore')}
-          </button>
-        </div>
-      </form>
-        {activeTab === 'menu' && isEdit && (
-        <div className="space-y-6">
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">{t('locationForm.b81019') || (t('locationForm.b81019') || '店家菜單管理')}</h3>
-            <p className="text-gray-500 text-sm mb-6">
-              {t('locationForm.3b34e5') || (t('locationForm.3b34e5') || '管理此店家的專屬菜單與分類。進入菜單管理後，系統會自動過濾並僅顯示此店家的菜品。若開啟跟隨主店家，您可以外加上架自己的專屬菜品。')}</p>
-            <div className="flex gap-4">
-              <button 
-                onClick={() => navigate(`/menu/categories?locationId=${id}`)}
-                className="btn-secondary"
-              >
-                {t('locationForm.cb3fbd') || (t('locationForm.cb3fbd') || '管理菜單分類')}</button>
-              <button 
-                onClick={() => navigate(`/menu/items?locationId=${id}`)}
-                className="btn-primary"
-              >
-                {t('locationForm.808dcb') || (t('locationForm.808dcb') || '管理菜單品項')}</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {activeTab === 'integrations' && isEdit && (
-        <div className="space-y-6">
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">{t('locationForm.aeca94') || (t('locationForm.aeca94') || '店家整合設定')}</h3>
-            {form.syncSettingsWithMain && form.parentLocationId ? (
-              <div className="bg-gray-50 border border-gray-200 p-6 rounded-lg text-center">
-                <div className="mx-auto w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-3">
-                  <svg className="w-6 h-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                  </svg>
-                </div>
-                <h4 className="text-gray-900 font-medium">{t('locationForm.b90896') || (t('locationForm.b90896') || '此分店目前跟隨主店家設定')}</h4>
-                <p className="text-gray-500 text-sm mt-1">{t('locationForm.10eadc') || (t('locationForm.10eadc') || '如需自訂此分店專屬的整合金鑰與設定，請先在「基本設定」中取消「跟隨主店家設定」。')}</p>
-              </div>
-            ) : (
-              <>
-                <p className="text-gray-500 text-sm mb-6">
-                  {t('locationForm.3fe459') || (t('locationForm.3fe459') || '設定此店家的專屬 LINE 官方帳號、支付串接、Google 登入與信件通知等獨立憑證。')}</p>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <button onClick={() => navigate(`/settings/line?locationId=${id}`)} className="p-4 border border-gray-200 rounded-xl hover:border-primary-500 hover:bg-primary-50 transition-colors text-left">
-                    <h4 className="font-medium text-gray-900">{t('locationForm.5b8a19') || (t('locationForm.5b8a19') || 'LINE 整合設定')}</h4>
-                    <p className="text-sm text-gray-500 mt-1">{t('locationForm.fcbf1b') || (t('locationForm.fcbf1b') || '設定獨立的 LINE OA、LINE Login 與 LINE Pay。')}</p>
-                  </button>
-                  <button onClick={() => navigate(`/settings/payments?locationId=${id}`)} className="p-4 border border-gray-200 rounded-xl hover:border-primary-500 hover:bg-primary-50 transition-colors text-left">
-                    <h4 className="font-medium text-gray-900">{t('locationForm.ff081c') || (t('locationForm.ff081c') || '支付串接設定')}</h4>
-                    <p className="text-sm text-gray-500 mt-1">{t('locationForm.938035') || (t('locationForm.938035') || '設定獨立的 Stripe 或綠界科技金鑰。')}</p>
-                  </button>
-                  <button onClick={() => navigate(`/settings/google?locationId=${id}`)} className="p-4 border border-gray-200 rounded-xl hover:border-primary-500 hover:bg-primary-50 transition-colors text-left">
-                    <h4 className="font-medium text-gray-900">{t('locationForm.2acbc6') || (t('locationForm.2acbc6') || 'Google 整合設定')}</h4>
-                    <p className="text-sm text-gray-500 mt-1">{t('locationForm.474279') || (t('locationForm.474279') || '設定獨立的 Google SSO 與 Google Maps API。')}</p>
-                  </button>
-                  <button onClick={() => navigate(`/settings/mail?locationId=${id}`)} className="p-4 border border-gray-200 rounded-xl hover:border-primary-500 hover:bg-primary-50 transition-colors text-left">
-                    <h4 className="font-medium text-gray-900">{t('locationForm.244d85') || (t('locationForm.244d85') || '信件通知設定')}</h4>
-                    <p className="text-sm text-gray-500 mt-1">{t('locationForm.375bfd') || (t('locationForm.375bfd') || '設定獨立的 SMTP 信件伺服器。')}</p>
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-      )}
-    </PageContent>
+      <PageContent>
+        {formContent}
+      </PageContent>
     </div>
   );
 }

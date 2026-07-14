@@ -362,13 +362,9 @@ export async function inviteStaff(req: Request, res: Response): Promise<void> {
   const tenant = req.user?.tenantId ? await prisma.tenant.findUnique({ where: { id: req.user.tenantId } }) : null;
   let adminUrl = process.env.ADMIN_URL_PUBLIC || process.env.ADMIN_URL || 'http://localhost:5173';
   if (tenant && tenant.domain) {
+    const { getTenantUrls } = await import('../utils/url.js');
     const protocol = tenant.domain.includes('localhost') ? 'http' : 'https';
-    if (tenant.domain.endsWith('.shutterorder.pro')) {
-      const subdomain = tenant.domain.replace('.shutterorder.pro', '');
-      adminUrl = `${protocol}://${subdomain}.admin.shutterorder.pro`;
-    } else {
-      adminUrl = `${protocol}://admin.${tenant.domain}`;
-    }
+    adminUrl = getTenantUrls(tenant.domain, protocol).adminUrl;
   }
   const inviteLink = `${adminUrl.replace(/\/+$/, '')}/accept-invite?token=${token}`;
   const emailContent = staffInvitationEmail({ email, role: role || 'STAFF', inviteLink });

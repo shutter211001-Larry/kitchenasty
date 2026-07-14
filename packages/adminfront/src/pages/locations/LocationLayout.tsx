@@ -83,8 +83,8 @@ export default function LocationLayout() {
             <Route path="/" element={<Navigate to="basic" replace />} />
             <Route path="basic" element={<LocationForm isTabMode />} />
             <Route path="hours" element={<LocationHoursTab locationId={id!} />} />
-            <Route path="delivery-zones" element={<DeliveryZoneList locationId={id!} />} />
-            <Route path="tables" element={<TableList locationId={id!} />} />
+            <Route path="delivery-zones" element={<DeliveryZoneList />} />
+            <Route path="tables" element={<TableList />} />
             <Route path="menu" element={<LocationMenuTab locationId={id!} />} />
             <Route path="inventory" element={<div className="bg-white p-6 rounded-lg border border-gray-200"><LocationInventoryPanel locationId={id!} /></div>} />
             <Route path="hr" element={<LocationHRTab locationId={id!} />} />

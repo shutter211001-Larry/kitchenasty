@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Key, Save, Loader2, AlertTriangle } from 'lucide-react';
-import { api } from '../../../../lib/api.js';
+import { api } from '../../../lib/api.js';
 import toast from 'react-hot-toast';
 
 interface IntegrationSettings {
@@ -49,7 +49,7 @@ export default function LocationIntegrationsTab({ locationId }: { locationId: st
 
   useEffect(() => {
     api.get<{ data: { integrationSettings?: any } }>(`/locations/${locationId}`)
-      .then(res => {
+      .then((res: any) => {
         if (res.data.integrationSettings) {
           setForm({ ...defaultSettings, ...res.data.integrationSettings });
         }

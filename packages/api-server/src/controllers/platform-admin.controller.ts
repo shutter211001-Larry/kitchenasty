@@ -560,11 +560,9 @@ export const updateTenantIntegrations = async (req: Request, res: Response) => {
               try {
                 let adminUrl = process.env.ADMIN_URL_PUBLIC || 'http://localhost:5173';
                 if (tenant.domain) {
-                  adminUrl = `https://admin.${tenant.domain}`;
-                  if (tenant.domain.endsWith('.shutterorder.pro')) {
-                    const subdomain = tenant.domain.replace('.shutterorder.pro', '');
-                    adminUrl = `https://${subdomain}.admin.shutterorder.pro`;
-                  }
+                  const { getTenantUrls } = await import('../utils/url.js');
+                  const protocol = tenant.domain.includes('localhost') ? 'http' : 'https';
+                  adminUrl = getTenantUrls(tenant.domain, protocol).adminUrl;
                 }
                 
                 // Get the token we just saved
@@ -658,15 +656,11 @@ export async function sendWelcomeEmailCore(tenant: any) {
     let erpUrl = '';
     
     if (tenant.domain) {
-      storeUrl = `https://store.${tenant.domain}`;
-      adminUrl = `https://admin.${tenant.domain}`;
-      erpUrl = `https://erp.${tenant.domain}`;
-      if (tenant.domain.endsWith('.shutterorder.pro')) {
-        const subdomain = tenant.domain.replace('.shutterorder.pro', '');
-        storeUrl = `https://${subdomain}.store.shutterorder.pro`;
-        adminUrl = `https://${subdomain}.admin.shutterorder.pro`;
-        erpUrl = `https://${subdomain}.erp.shutterorder.pro`;
-      }
+      const { getTenantUrls } = await import('../utils/url.js');
+      const urls = getTenantUrls(tenant.domain, 'https');
+      storeUrl = urls.storeUrl;
+      adminUrl = urls.adminUrl;
+      erpUrl = urls.erpUrl;
     } else {
       storeUrl = process.env.STORE_URL_PUBLIC || 'http://localhost:3000';
       adminUrl = process.env.ADMIN_URL_PUBLIC || 'http://localhost:5173';
