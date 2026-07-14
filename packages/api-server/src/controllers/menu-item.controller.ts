@@ -197,7 +197,6 @@ export async function listMenuItems(req: Request, res: Response): Promise<void> 
         item.trackStock = override.trackStock;
         item.stockQty = override.stockQty;
       } else if (item.locationId && item.locationId !== originalLocationId) {
-        item.trackStock = false;
         item.stockQty = 0;
       }
       delete item.locationOverrides;
@@ -211,7 +210,6 @@ export async function listMenuItems(req: Request, res: Response): Promise<void> 
                 val.trackStock = vOverride.trackStock;
                 val.stockQty = vOverride.stockQty;
               } else if (item.locationId && item.locationId !== originalLocationId) {
-                val.trackStock = false;
                 val.stockQty = 0;
               }
               delete val.locationOverrides;
@@ -275,7 +273,6 @@ export async function getMenuItem(req: Request<{ id: string }>, res: Response): 
       item.trackStock = override.trackStock;
       item.stockQty = override.stockQty;
     } else if (item.locationId && item.locationId !== locationId) {
-      item.trackStock = false;
       item.stockQty = 0;
     }
     delete item.locationOverrides;
@@ -289,7 +286,6 @@ export async function getMenuItem(req: Request<{ id: string }>, res: Response): 
               val.trackStock = vOverride.trackStock;
               val.stockQty = vOverride.stockQty;
             } else if (item.locationId && item.locationId !== locationId) {
-              val.trackStock = false;
               val.stockQty = 0;
             }
             delete val.locationOverrides;
