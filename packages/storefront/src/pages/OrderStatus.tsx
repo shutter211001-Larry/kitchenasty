@@ -40,7 +40,6 @@ interface OrderDetail {
 }
 
 function getStepIndex(steps: { key: string; label: string }[], status: string): number {
-    const { t } = useTranslation();
   return steps.findIndex((s) => s.key === status);
 }
 import { getTranslated } from '../utils/translation.js';

@@ -1551,7 +1551,6 @@ export default function Checkout() {
 }
 
 function getDefaultScheduleTime(): string {
-    const { t } = useTranslation();
   const d = new Date();
   d.setHours(d.getHours() + 1, 0, 0, 0);
   return d.toISOString().slice(0, 16);

@@ -13,22 +13,18 @@ import { PageContent } from "../components/layout/PageContent";
 import { useTranslation } from "react-i18next";
 
 const formatDate = (date: Date) => {
-    const { t } = useTranslation();
   return date.toISOString().split('T')[0];
 };
 
 const getStartOfMonth = (date: Date) => {
-    const { t } = useTranslation();
   return new Date(date.getFullYear(), date.getMonth(), 1);
 };
 
 const getEndOfMonth = (date: Date) => {
-    const { t } = useTranslation();
   return new Date(date.getFullYear(), date.getMonth() + 1, 0);
 };
 
 const subDays = (date: Date, days: number) => {
-    const { t } = useTranslation();
   const result = new Date(date);
   result.setDate(result.getDate() - days);
   return result;

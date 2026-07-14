@@ -26,7 +26,6 @@ function hslToHex(h: number, s: number, l: number): string {
   l /= 100;
   const a = s * Math.min(l, 1 - l);
   const f = (n: number) => {
-  const { t } = useTranslation();
 
     const k = (n + h / 30) % 12;
     const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
