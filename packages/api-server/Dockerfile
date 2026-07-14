@@ -45,6 +45,6 @@ COPY --from=builder /app/packages/api-server/dist/ packages/api-server/dist/
 
 EXPOSE 3000
 
-CMD ["sh", "-c", "npx prisma migrate deploy --schema prisma/schema.prisma && node packages/api-server/dist/index.js"]
+CMD ["sh", "-c", "npx prisma migrate resolve --rolled-back 20260713145600_unify_store_franchise_and_support --schema prisma/schema.prisma || true && npx prisma migrate deploy --schema prisma/schema.prisma && node packages/api-server/dist/index.js"]
 
 
