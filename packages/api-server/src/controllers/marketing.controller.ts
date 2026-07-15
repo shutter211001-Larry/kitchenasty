@@ -9,7 +9,7 @@ export async function getMarketingStats(req: Request, res: Response): Promise<vo
     if (startDate) dateFilter.gte = new Date(startDate as string);
     if (endDate) dateFilter.lte = new Date(endDate as string);
 
-    const where: any = { status: 'COMPLETED' };
+    const where: any = { status: { not: 'CANCELLED' } };
     if (Object.keys(dateFilter).length > 0) {
       where.createdAt = dateFilter;
     }
