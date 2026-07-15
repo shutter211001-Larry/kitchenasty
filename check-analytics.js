@@ -3,11 +3,14 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 async function main() {
-  const tenants = await prisma.tenant.findMany({
-    select: { id: true, domain: true }
+  const events = await prisma.analyticsEvent.groupBy({
+    by: ['eventType'],
+    _count: {
+      _all: true
+    }
   });
-  console.log("Tenants:");
-  console.table(tenants);
+  console.log("All Events in DB:");
+  console.table(events);
 }
 
 main().catch(console.error).finally(() => prisma.$disconnect());

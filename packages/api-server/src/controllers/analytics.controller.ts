@@ -6,6 +6,7 @@ export async function recordEvent(req: Request, res: Response): Promise<void> {
   try {
     const store = tenantStorage.getStore();
     const tenantId = store?.tenantId;
+    console.log('[DEBUG] recordEvent', { headers: req.headers, tenantId });
     if (!tenantId) {
       res.status(400).json({ success: false, error: 'Tenant ID required' });
       return;
