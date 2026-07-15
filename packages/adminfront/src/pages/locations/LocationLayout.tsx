@@ -51,6 +51,11 @@ export default function LocationLayout() {
         <PageHeader 
           title={locationName} 
           subtitle={isMainStore ? t('locations.mainStoreBadge', '主店家 (旗艦店)') : t('locations.branchBadge', '分店')}
+          breadcrumbs={[
+            { label: t('navigation.home', '首頁'), href: '/', isHome: true },
+            { label: t('navigation.locations', '門市管理'), href: '/locations' },
+            { label: locationName }
+          ]}
         />
       </div>
 

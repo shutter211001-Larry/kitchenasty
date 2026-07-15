@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Briefcase, Save, Loader2, Info } from 'lucide-react';
+import { SkeletonForm } from '../../../components/ui/Skeleton.js';
 import { api } from '../../../lib/api.js';
 import toast from 'react-hot-toast';
 
@@ -62,7 +63,7 @@ export default function LocationHRTab({ locationId }: { locationId: string }) {
     setForm((prev: any) => ({ ...prev, [field]: value }));
   };
 
-  if (loading) return <div className="p-8 text-center text-gray-500"><Loader2 className="w-6 h-6 animate-spin mx-auto" /></div>;
+  if (loading) return <div className="p-8"><SkeletonForm /></div>;
 
   return (
     <div className="bg-white rounded-lg border border-gray-200 shadow-sm">

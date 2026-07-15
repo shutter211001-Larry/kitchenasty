@@ -4,6 +4,9 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext.js';
 import { PageHeader } from '../../components/layout/PageHeader';
 import { PageContent } from '../../components/layout/PageContent';
+import { EmptyState } from '../../components/ui/EmptyState';
+import { SkeletonList } from '../../components/ui/Skeleton';
+import { Users } from 'lucide-react';
 import { api } from '../../lib/api.js';
 
 interface Staff {
@@ -113,15 +116,29 @@ export default function StaffList() {
       </div>
 
       {loading && (
-        <div className="flex justify-center py-12">
-          <div className="w-8 h-8 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin" role="status" aria-label={t('staffList.loading')} />
+        <div className="py-6">
+          <SkeletonList />
         </div>
       )}
 
       {error && <div className="bg-red-50 text-red-700 p-4 rounded-lg mb-4">{error}</div>}
 
       {!loading && !error && staff.length === 0 && (
-        <p className="text-gray-500 text-center py-12">{t('staff.notFound')}</p>
+        <div className="py-8">
+          <EmptyState 
+            icon={Users}
+            title={t('staff.notFound') || '目前沒有員工'}
+            description={t('staff.emptyDescription') || '點擊右上角「邀請員工」按鈕，立即發送系統邀請信！'}
+            action={
+              <Link
+                to="/staff/invite"
+                className="inline-flex items-center bg-primary-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary-700 transition-colors shadow-sm"
+              >
+                {t('staff.actions.invite')}
+              </Link>
+            }
+          />
+        </div>
       )}
 
       {!loading && staff.length > 0 && (

@@ -131,7 +131,7 @@ export default function LocationForm({ isTabMode = false }: { isTabMode?: boolea
   }, [id]);
 
   const handleDelete = async () => {
-    if (!await confirm(t('locationForm.confirmDeleteStore'))) {
+    if (!await confirm({ message: t('locationForm.confirmDeleteStore'), isDanger: true })) {
       return;
     }
     setDeleting(true);
