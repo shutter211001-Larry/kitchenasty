@@ -51,10 +51,12 @@ export function ProgressiveImage({
 
   return (
     <div className={`relative overflow-hidden ${className}`}>
-      {/* Skeleton Loading Animation */}
-      {!isLoaded && !thumbLoaded && !thumbError && (
-        <div className="absolute inset-0 w-full h-full bg-gray-200 animate-pulse z-10" />
-      )}
+      {/* Base Background / Skeleton Loading Animation */}
+      <div 
+        className={`absolute inset-0 w-full h-full bg-gray-200 z-0 transition-opacity duration-500 ${
+          isLoaded ? 'opacity-0' : 'opacity-100'
+        } ${!thumbLoaded && !thumbError && !isLoaded ? 'animate-pulse' : ''}`} 
+      />
 
       {/* Thumbnail / Placeholder */}
       {thumbSrc && !thumbError && (
