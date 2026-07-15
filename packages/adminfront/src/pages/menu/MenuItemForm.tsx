@@ -692,16 +692,7 @@ export default function MenuItemForm() {
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:bg-gray-100 disabled:text-gray-500"
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('menuItemForm.prepTime')}</label>
-              <input
-                type="number"
-                value={form.prepTime}
-                onChange={(e) => updateField('prepTime', e.target.value)}
-                min={0}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-              />
-            </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">{t('menuItemForm.unitExample')}</label>
               <input

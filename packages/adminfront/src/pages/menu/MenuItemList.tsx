@@ -25,6 +25,7 @@ interface MenuItem {
   category: { id: string; name: string };
   _count: { options: number; allergens: number; mealtimes: number; dietaryPreferences: number };
   locationId: string | null;
+  location?: { id: string; name: string } | null;
 }
 
 interface Category {
@@ -175,9 +176,13 @@ export default function MenuItemList() {
                       <div>
                         <div className="text-sm font-medium text-gray-900 flex items-center gap-2">
                           {item.name}
-                          {locationId && item.locationId !== locationId && (
+                          {item.locationId ? (
+                            <Badge variant="info">
+                              {item.location ? `${item.location.name} 專屬` : t('menuItemList.branchCustom') || '門市專屬'}
+                            </Badge>
+                          ) : (
                             <Badge variant="warning">
-                              {t('menuItemList.inheritedFromMain') || '總部同步'}
+                              {t('menuItemList.inheritedFromMain') || '總部公版'}
                             </Badge>
                           )}
                         </div>
