@@ -35,7 +35,14 @@ export default function MarketingDashboard() {
 
   // Store URL fallback logic
   const storeUrl = import.meta.env.VITE_STORE_URL_PUBLIC || window.location.origin.replace('admin.', 'store.');
-  const generatedLink = `${storeUrl}?utm_source=${encodeURIComponent(utmSource)}&utm_medium=${encodeURIComponent(utmMedium)}&utm_campaign=${encodeURIComponent(utmCampaign)}`;
+  
+  const queryParams = new URLSearchParams();
+  if (utmSource) queryParams.append('utm_source', utmSource);
+  if (utmMedium) queryParams.append('utm_medium', utmMedium);
+  if (utmCampaign) queryParams.append('utm_campaign', utmCampaign);
+  
+  const queryString = queryParams.toString();
+  const generatedLink = queryString ? `${storeUrl}?${queryString}` : storeUrl;
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(generatedLink);

@@ -18,9 +18,9 @@ export function ProgressiveImage({
   const [thumbLoaded, setThumbLoaded] = useState(false);
   const [thumbError, setThumbError] = useState(false);
 
-  // We no longer automatically derive _thumb.webp because missing thumbnails 
-  // return XML 404s from R2, triggering CORB errors which severely lag the browser.
-  const thumbSrc = null;
+  // Derive thumbnail URL if the src is a webp uploaded by our system
+  const isWebp = src?.includes('.webp');
+  const thumbSrc = isWebp ? src.replace('.webp', '_thumb.webp') : null;
 
   useEffect(() => {
     setIsLoaded(false);
