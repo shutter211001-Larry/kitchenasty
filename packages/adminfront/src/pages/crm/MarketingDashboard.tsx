@@ -214,8 +214,8 @@ export default function MarketingDashboard() {
             { label: t('marketingDashboard.beginCheckout', '開始結帳'), value: funnel.BEGIN_CHECKOUT, color: 'bg-purple-500' },
             { label: t('marketingDashboard.purchase', '完成購買'), value: funnel.PURCHASE, color: 'bg-green-500' }
           ].map((step, idx, arr) => {
-            const maxVal = Math.max(funnel.VIEW_MENU, 1);
-            const heightPerc = Math.max(10, Math.round((step.value / maxVal) * 100));
+            const maxVal = Math.max(funnel.VIEW_MENU, funnel.ADD_TO_CART, funnel.BEGIN_CHECKOUT, funnel.PURCHASE, 1);
+            const heightPerc = Math.min(100, Math.max(10, Math.round((step.value / maxVal) * 100)));
             const prevVal = idx === 0 ? step.value : arr[idx - 1].value;
             const dropoff = prevVal === 0 ? 0 : Math.round(((prevVal - step.value) / prevVal) * 100);
 
