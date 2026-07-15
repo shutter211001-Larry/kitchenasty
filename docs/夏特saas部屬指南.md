@@ -236,8 +236,20 @@ LINE Pay 在 Sandbox 或正式環境中，**強制要求伺服器必須有固定
   1. `cd packages/cf-worker`
   2. `npx wrangler login` (登入 Cloudflare 帳號)
   3. 修改 `wrangler.toml` 內的 `id` 為您的 KV Namespace ID。
-  4. `npx wrangler deploy` (發布上線)
+  4. 修改 `wrangler.toml` 內的 `[vars]` 區塊，設定 `ORIGIN_URL` 為您後端 API 的正式網址（例如：`"https://api.pizzastudio26.com"`）。這能確保直接使用 `.workers.dev` 測試時，Worker 知道該去哪裡拿資料。
+  5. `npx wrangler deploy` (發布上線)
+
+> [!WARNING]
+> **常見雷區：不要把環境變數放進 KV 空間！**
+> KV (Key-Value) 空間是用來存放系統動態快取的資料（例如菜單的 JSON）。Worker 需要的環境變數（如 `ORIGIN_URL`）必須設定在 `wrangler.toml` 的 `[vars]` 中，或者是 Cloudflare 後台 Worker 專案的「Settings > Variables & Secrets」裡面。
+
 - **綁定路由**：發布後，請至 Cloudflare 網頁後台 > Workers & Pages > `shutter-menu-cache` > Triggers，將您的後端正式 API 網址（如 `api.您的網域.com/api/menu/*`）加入路由，即可實現完美攔截。
+
+> [!TIP]
+> **FAQ：為什麼我的 KV 指標 (Reads / Writes) 都是 0？**
+> KV 指標大約會有 3~5 分鐘的延遲。但最常見的原因是：**您的請求根本沒有經過 Cloudflare Worker！**
+> 如果您是在本地端開發 (`localhost`)，或是直接透過瀏覽器呼叫 Railway 的後端 API（而沒有經過綁定了 Worker 的自訂網域），流量自然不會進到 Worker，KV 也不會有任何讀寫紀錄。
+> 解決方法：如果您想要立即看到指標，請確保您在 `wrangler.toml` 設好了 `ORIGIN_URL`，然後直接在瀏覽器呼叫 `https://您的worker名稱.workers.dev/api/menu/items` 來觸發快取。
 
 ### 3. Monorepo Watch Paths 設定 (重要最佳化)
 
