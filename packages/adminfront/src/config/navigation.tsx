@@ -59,6 +59,19 @@ export const navItems: NavItem[] = [
     ]
   },
   {
+    id: 'menu_management',
+    label: 'nav.menu',
+    icon: <ChefHat size={20} />,
+    roles: ['SUPER_ADMIN', 'MANAGER'],
+    children: [
+      { path: '/menu/categories', label: 'nav.categories', roles: ['SUPER_ADMIN', 'MANAGER'] },
+      { path: '/menu/items', label: 'nav.menuItems', roles: ['SUPER_ADMIN', 'MANAGER'] },
+      { path: '/menu/allergens', label: 'nav.allergens', roles: ['SUPER_ADMIN', 'MANAGER'] },
+      { path: '/menu/dietary', label: 'nav.dietary', roles: ['SUPER_ADMIN', 'MANAGER'] },
+      { path: '/menu/mealtimes', label: 'nav.mealtimes', roles: ['SUPER_ADMIN', 'MANAGER'] },
+    ]
+  },
+  {
     id: 'operations',
     label: 'adminLayout.0168dd',
     icon: <Wallet size={20} />,
@@ -101,24 +114,45 @@ export const navItems: NavItem[] = [
     ]
   },
   {
+    id: 'design',
+    label: 'nav.design',
+    icon: <Palette size={20} />,
+    roles: ['SUPER_ADMIN'],
+    children: [
+      { path: '/design/landing', label: 'nav.landingPage', roles: ['SUPER_ADMIN'] },
+      { path: '/design/branding', label: 'nav.branding', roles: ['SUPER_ADMIN'] },
+      { path: '/design/theme', label: 'nav.theme', roles: ['SUPER_ADMIN'] },
+      { path: '/design/templates', label: 'nav.templates', roles: ['SUPER_ADMIN'] },
+    ]
+  },
+  {
+    id: 'legal',
+    label: 'nav.legal',
+    icon: <Scale size={20} />,
+    roles: ['SUPER_ADMIN'],
+    children: [
+      { path: '/legal/pages', label: 'nav.legalPages', roles: ['SUPER_ADMIN'] },
+      { path: '/legal/cookies', label: 'nav.cookieCategories', roles: ['SUPER_ADMIN'] },
+      { path: '/legal/consent', label: 'nav.consentLog', roles: ['SUPER_ADMIN'] },
+    ]
+  },
+  {
+    id: 'developer',
+    label: 'nav.developer',
+    icon: <Activity size={20} />,
+    roles: ['SUPER_ADMIN'],
+    children: [
+      { path: '/developer/metrics', label: 'nav.apiMetrics', roles: ['SUPER_ADMIN'] },
+      { path: '/developer/audit-log', label: 'nav.auditLog', roles: ['SUPER_ADMIN'] },
+    ]
+  },
+  {
     id: 'system',
     label: 'adminLayout.af21b0',
     icon: <Settings size={20} />,
     roles: ['SUPER_ADMIN'],
     children: [
       { path: '/settings', label: 'nav.settings', roles: ['SUPER_ADMIN'] },
-      { path: '/menu/allergens', label: 'nav.allergens', roles: ['SUPER_ADMIN', 'MANAGER'] },
-      { path: '/menu/dietary', label: 'nav.dietary', roles: ['SUPER_ADMIN', 'MANAGER'] },
-      { path: '/menu/mealtimes', label: 'nav.mealtimes', roles: ['SUPER_ADMIN', 'MANAGER'] },
-      { path: '/design/landing', label: 'nav.landingPage', roles: ['SUPER_ADMIN'] },
-      { path: '/design/branding', label: 'nav.branding', roles: ['SUPER_ADMIN'] },
-      { path: '/design/theme', label: 'nav.theme', roles: ['SUPER_ADMIN'] },
-      { path: '/design/templates', label: 'nav.templates', roles: ['SUPER_ADMIN'] },
-      { path: '/legal/pages', label: 'nav.legalPages', roles: ['SUPER_ADMIN'] },
-      { path: '/legal/cookies', label: 'nav.cookieCategories', roles: ['SUPER_ADMIN'] },
-      { path: '/legal/consent', label: 'nav.consentLog', roles: ['SUPER_ADMIN'] },
-      { path: '/developer/metrics', label: 'nav.apiMetrics', roles: ['SUPER_ADMIN'] },
-      { path: '/developer/audit-log', label: 'nav.auditLog', roles: ['SUPER_ADMIN'] },
     ]
   }
 ];

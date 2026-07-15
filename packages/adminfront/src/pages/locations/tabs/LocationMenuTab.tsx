@@ -24,7 +24,7 @@ export default function LocationMenuTab({ locationId }: { locationId: string }) 
             本系統採用集中式的菜單主檔庫架構。若您需要覆寫該門市的品項價格、設定售完狀態 (Sold Out)，或是新增該門市專屬的私房菜色，請前往統一的菜單管理介面。
           </p>
           <button
-            onClick={() => navigate('/menu/items')}
+            onClick={() => navigate(`/menu/items?locationId=${locationId}`)}
             className="inline-flex items-center px-4 py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 transition-colors"
           >
             前往菜單主檔庫
