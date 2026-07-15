@@ -238,8 +238,8 @@ export async function createApp() {
   app.use('/api/roster', rosterRoutes);
   app.use('/api/payroll', payrollRoutes);
   app.use('/api/platform-admin', platformAdminRoutes);
-  app.use('/api/marketing', marketingRoutes);
-  app.use('/api/analytics', analyticsRoutes);
+  app.use('/api/campaigns', marketingRoutes);
+  app.use('/api/store-events', analyticsRoutes);
   app.use('/shutter-erp', shutterErpRouter);
 
   // 404 handler

@@ -67,11 +67,11 @@ export default function MarketingDashboard() {
         ? `?startDate=${start.toISOString()}&endDate=${end.toISOString()}`
         : '';
 
-      const res = await api.get<{ success: boolean; data: { stats: UTMStats[]; summary: any } }>(`/marketing/stats${query}`);
+      const res = await api.get<{ success: boolean; data: { stats: UTMStats[]; summary: any } }>(`/campaigns/stats${query}`);
       setStats(res.data.stats);
       setSummary(res.data.summary);
 
-      const funnelRes = await api.get<{ success: boolean; data: Record<string, number> }>(`/analytics/funnel${query}`);
+      const funnelRes = await api.get<{ success: boolean; data: Record<string, number> }>(`/store-events/funnel${query}`);
       if (funnelRes.success && funnelRes.data) {
         setFunnel({
           VIEW_MENU: funnelRes.data.VIEW_MENU || 0,

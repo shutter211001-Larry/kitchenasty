@@ -15,7 +15,7 @@ export function useAnalytics() {
   const trackEvent = useCallback((eventType: 'VIEW_MENU' | 'ADD_TO_CART' | 'BEGIN_CHECKOUT', metadata?: any) => {
     const sessionId = getSessionId();
     // Fire and forget
-    api.post('/analytics/events', {
+    api.post('/store-events/events', {
       sessionId,
       eventType,
       metadata
