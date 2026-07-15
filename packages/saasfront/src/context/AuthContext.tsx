@@ -52,12 +52,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setUser(fetchedUser);
         }
       })
-      .catch(() => {
+      .catch((error) => {
         if (!cancelled) {
           // Token invalid — clear it
           localStorage.removeItem('token');
           setToken('');
           setUser(null);
+          // Show alert to explain why they were kicked out
+          alert("登入失敗：" + (error.message || "您使用的是一般餐廳帳號，SaaS 總部需要專屬的最高管理員帳號！"));
         }
       })
       .finally(() => {

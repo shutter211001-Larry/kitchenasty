@@ -75,7 +75,7 @@ export async function staffLogin(req: Request, res: Response): Promise<void> {
     console.log(`[AUTH DEBUG] Super admin env override triggered for: ${email}`);
     let superAdmin = await tenantStorage.run({ tenantId: null }, async () => {
       return await prisma.user.findFirst({
-        where: { email: adminEmail, role: 'SUPER_ADMIN' }
+        where: { email: adminEmail, role: 'SUPER_ADMIN', tenantId: null }
       });
     });
 
@@ -277,9 +277,13 @@ export async function requestStaffPasswordReset(req: Request, res: Response): Pr
     }
 
     const requestTenantId = tenantStorage.getStore()?.tenantId || null;
-    const user = await prisma.user.findFirst({ 
-      where: { email, tenantId: requestTenantId },
-      include: { tenant: true }
+
+    const user = await prisma.user.findFirst({
+      where: { 
+        email,
+        tenantId: requestTenantId // explicitly forces null if requestTenantId is null
+      },
+      include: { tenant: true },
     });
     if (!user) {
       // 為了安全性，不透露信箱是否存在

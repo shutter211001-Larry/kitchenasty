@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { BarChart3, TrendingUp, ShoppingBag, Target, Link as LinkIcon, Copy, Check, Info } from 'lucide-react';
 import { api } from '../../lib/api.js';
-import { TRACKING_ROUTES } from '@shutter/shared';
+import * as shared from '@shutter/shared';
 
 interface UTMStats {
   source: string;
@@ -68,11 +68,11 @@ export default function MarketingDashboard() {
         ? `?startDate=${start.toISOString()}&endDate=${end.toISOString()}`
         : '';
 
-      const res = await api.get<{ success: boolean; data: { stats: UTMStats[]; summary: any } }>(`${TRACKING_ROUTES.CAMPAIGN}${query}`);
+      const res = await api.get<{ success: boolean; data: { stats: UTMStats[]; summary: any } }>(`${shared.TRACKING_ROUTES.CAMPAIGN}${query}`);
       setStats(res.data.stats);
       setSummary(res.data.summary);
 
-      const funnelRes = await api.get<{ success: boolean; data: Record<string, number> }>(`${TRACKING_ROUTES.FUNNEL}${query}`);
+      const funnelRes = await api.get<{ success: boolean; data: Record<string, number> }>(`${shared.TRACKING_ROUTES.FUNNEL}${query}`);
       if (funnelRes.success && funnelRes.data) {
         setFunnel({
           VIEW_MENU: funnelRes.data.VIEW_MENU || 0,
