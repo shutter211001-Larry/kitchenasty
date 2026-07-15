@@ -8,6 +8,7 @@ import LanguageSwitcher from './LanguageSwitcher.js';
 import { headerVariants } from '../templates/headers/index.js';
 import type { TemplateId } from '../templates/index.js';
 import { useRecentOrders } from '../hooks/useRecentOrders.js';
+import { ProgressiveImage } from './ui/ProgressiveImage.js';
 
 function ClassicHeader() {
   const { t } = useTranslation();
@@ -61,7 +62,7 @@ function ClassicHeader() {
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2">
             {settings.logo ? (
-              <img src={settings.logo} alt={settings.siteName} className="w-8 h-8 rounded-lg object-cover" />
+              <ProgressiveImage src={settings.logo} alt={settings.siteName} className="w-8 h-8 rounded-lg object-cover" />
             ) : (
               <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-sm">{settings.siteName.charAt(0)}</span>

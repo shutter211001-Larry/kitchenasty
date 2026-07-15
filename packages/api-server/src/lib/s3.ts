@@ -94,11 +94,19 @@ export async function uploadImage(
   s3Settings: S3Settings | null
 ): Promise<string> {
   const filename = `${randomUUID()}.webp`;
+  const thumbFilename = filename.replace('.webp', '_thumb.webp');
   
-  // Compress and convert to WebP
+  // Compress and convert to WebP (Original)
   const optimizedBuffer = await sharp(file.buffer)
     .resize({ width: 1200, withoutEnlargement: true })
     .webp({ quality: 80 })
+    .toBuffer();
+
+  // Compress and convert to WebP (Thumbnail)
+  const thumbBuffer = await sharp(file.buffer)
+    .resize({ width: 120, withoutEnlargement: true })
+    .blur(1) // add slight blur to reduce file size further
+    .webp({ quality: 30 })
     .toBuffer();
   
   const mimetype = 'image/webp';
@@ -114,14 +122,24 @@ export async function uploadImage(
         },
       });
 
-      const command = new PutObjectCommand({
+      const commandOriginal = new PutObjectCommand({
         Bucket: s3Settings.bucket,
         Key: filename,
         Body: optimizedBuffer,
         ContentType: mimetype,
       });
 
-      await s3Client.send(command);
+      const commandThumb = new PutObjectCommand({
+        Bucket: s3Settings.bucket,
+        Key: thumbFilename,
+        Body: thumbBuffer,
+        ContentType: mimetype,
+      });
+
+      await Promise.all([
+        s3Client.send(commandOriginal),
+        s3Client.send(commandThumb)
+      ]);
 
       // Construct public URL
       const baseUrl = s3Settings.publicUrl.endsWith('/')
@@ -145,7 +163,12 @@ export async function uploadImage(
   }
 
   const filePath = path.join(uploadDir, filename);
-  await fs.writeFile(filePath, optimizedBuffer);
+  const thumbFilePath = path.join(uploadDir, thumbFilename);
+  
+  await Promise.all([
+    fs.writeFile(filePath, optimizedBuffer),
+    fs.writeFile(thumbFilePath, thumbBuffer)
+  ]);
   
   return `/uploads/${filename}`;
 }

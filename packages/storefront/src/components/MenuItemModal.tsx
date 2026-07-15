@@ -8,6 +8,7 @@ import { getTranslated } from '../utils/translation.js';
 import { useApi } from '../hooks/useApi.js';
 import { API_BASE } from '../lib/api.js';
 import { getFullUrl } from '../utils/url.js';
+import { ProgressiveImage } from './ui/ProgressiveImage.js';
 
 interface OptionValue {
   id: string;
@@ -219,7 +220,7 @@ export default function MenuItemModal({ itemId, onClose }: Props) {const { t, i1
             {/* Image */}
             <div className={containerClass}>
               {item.image || item.imageVariants ? (
-                <img src={item.imageVariants?.[imgAspectRatio] || item.image || ''} alt={getTranslated(item.name, item.nameTranslations, i18n.language)} className="w-full h-full object-cover" />
+                <ProgressiveImage src={item.imageVariants?.[imgAspectRatio] || item.image || ''} alt={getTranslated(item.name, item.nameTranslations, i18n.language)} className="w-full h-full object-cover" />
               ) : (
                 <div className="w-full h-full bg-gradient-to-br from-primary-100 to-primary-200 flex items-center justify-center">
                   <svg className="w-16 h-16 text-primary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">

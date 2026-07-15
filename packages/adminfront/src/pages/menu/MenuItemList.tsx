@@ -14,6 +14,7 @@ import { Badge } from '../../components/ui/Badge.js';
 import { SkeletonList } from '../../components/ui/Skeleton.js';
 import { EmptyState } from '../../components/ui/EmptyState.js';
 import { PackageSearch } from 'lucide-react';
+import { ProgressiveImage } from '../../components/ui/ProgressiveImage.js';
 
 interface MenuItem {
   id: string;
@@ -179,7 +180,7 @@ export default function MenuItemList() {
                   <TableCell>
                     <div className="flex items-center gap-3">
                       {item.image ? (
-                        <img src={getFullUrl(item.image)!} alt={item.name} className="w-10 h-10 rounded object-cover" />
+                        <ProgressiveImage src={getFullUrl(item.image)!} alt={item.name} className="w-10 h-10 rounded object-cover" />
                       ) : (
                         <div className="w-10 h-10 rounded bg-gray-100 flex items-center justify-center">
                           <svg className="w-5 h-5 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">

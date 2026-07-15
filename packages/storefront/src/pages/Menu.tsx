@@ -8,6 +8,7 @@ import { useTheme } from '../context/ThemeContext.js';
 import MenuItemModal from '../components/MenuItemModal.js';
 import { getTranslated } from '../utils/translation.js';
 import { getFullUrl } from '../utils/url.js';
+import { ProgressiveImage } from '../components/ui/ProgressiveImage.js';
 import { API_BASE } from '../lib/api.js';
 
 interface Category {
@@ -291,7 +292,7 @@ export default function Menu() {const { t, i18n } = useTranslation();
                     className="surface-card rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow text-left"
                   >
                     {item.image || (item as any).imageVariants ? (
-                      <img 
+                      <ProgressiveImage 
                         src={(item as any).imageVariants?.[imgAspectRatio] || item.image || ''} 
                         alt={getTranslated(item.name, item.nameTranslations, i18n.language)} 
                         className={imageClass} 
