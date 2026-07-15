@@ -39,7 +39,8 @@
     "checkIn": "Clock In",
     "attendanceRecords": "Attendance Records",
     "logout": "Logout",
-    "finance": "Tài chính"
+    "finance": "Tài chính",
+    "marketingDashboard": "Bảng Điều Khiển Tiếp Thị"
   },
   "staff": {
     "title": "Staff Management",

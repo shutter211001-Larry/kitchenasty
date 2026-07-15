@@ -39,7 +39,8 @@
     "checkIn": "Clock In",
     "attendanceRecords": "Attendance Records",
     "logout": "Logout",
-    "finance": "Finanzas"
+    "finance": "Finanzas",
+    "marketingDashboard": "Panel de Marketing"
   },
   "staff": {
     "title": "Staff Management",
