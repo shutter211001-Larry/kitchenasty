@@ -1211,7 +1211,8 @@
     "d8252a": "外送區域",
     "d99511": "門市庫存",
     "e28bd7": "整合設定",
-    "dc0456": "時薪制國定假日薪資倍率"
+    "dc0456": "時薪制國定假日薪資倍率",
+    "closed": "Fechado"
   },
   "locationList": {
     "branchManagement": "店家管理 (Locations)",
