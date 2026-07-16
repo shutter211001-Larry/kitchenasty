@@ -94,8 +94,11 @@ export default function Menu() {
   // Build items URL with filters
   const itemsUrl = buildItemsUrl(selectedCategory, debouncedSearch, page, selectedLocation);
   
+  const rawFetcher = (url: string) => api.get<any>(url);
+
   const { data: menuResponse, isLoading: itemsLoading, error: itemsError } = useApi<any>(
-    selectedCategory ? itemsUrl : null
+    selectedCategory ? itemsUrl : null,
+    rawFetcher
   );
 
   const items = useMemo<MenuItem[]>(() => {
@@ -171,7 +174,7 @@ export default function Menu() {
 
   function handleCategoryHover(catId: string) {
     const url = buildItemsUrl(catId, debouncedSearch, 1, selectedLocation);
-    preloadApi(url);
+    preloadApi(url, (u) => api.get<any>(u));
   }
 
   function handlePageChange(newPage: number) {
