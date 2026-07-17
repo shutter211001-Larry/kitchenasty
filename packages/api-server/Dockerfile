@@ -45,6 +45,6 @@ COPY --from=builder /app/packages/api-server/dist/ packages/api-server/dist/
 
 EXPOSE 3000
 
-CMD ["sh", "-c", "npx prisma migrate resolve --rolled-back 20260717022535_add_accounting_fields --schema prisma/schema.prisma || true && npx prisma migrate deploy --schema prisma/schema.prisma && node packages/api-server/dist/index.js"]
+CMD ["sh", "-c", "npx prisma migrate resolve --rolled-back 20260717022535_add_accounting_fields --schema prisma/schema.prisma || true && npx prisma migrate resolve --rolled-back 20260717032100_add_pos_invoice_fields --schema prisma/schema.prisma || true && npx prisma migrate deploy --schema prisma/schema.prisma && node packages/api-server/dist/index.js"]
 
 

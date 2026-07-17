@@ -11,8 +11,9 @@ EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 
--- AlterEnum (Idempotent)
-ALTER TYPE "OrderType" ADD VALUE IF NOT EXISTS 'DINE_IN';
+-- AlterEnum
+-- By omitting IF NOT EXISTS, Prisma detects this and safely disables the transaction block.
+ALTER TYPE "OrderType" ADD VALUE 'DINE_IN';
 
 -- AlterTable (Idempotent)
 ALTER TABLE "orders" ADD COLUMN IF NOT EXISTS "source" "OrderSource" DEFAULT 'STOREFRONT';
