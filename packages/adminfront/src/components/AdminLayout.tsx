@@ -49,14 +49,12 @@ export default function AdminLayout({ children, onLogout }: { children: React.Re
 
     async function fetchData() {
       try {
-        const statsRes = await api.get('dashboard/stats');
-        const statsData = await statsRes.json();
+        const statsData = await api.get<{success: boolean, data: {pendingOrders: number}}>('/dashboard/stats');
         if (statsData.success && statsData.data) {
           setPendingCount(statsData.data.pendingOrders ?? 0);
         }
 
-        const settingsRes = await api.get('settings/order');
-        const settingsData = await settingsRes.json();
+        const settingsData = await api.get<{success: boolean, data: {enableCounterDisplay: boolean}}>('/settings/order');
         if (settingsData.success && settingsData.data) {
           setEnableCounterDisplay(!!settingsData.data.enableCounterDisplay);
         }

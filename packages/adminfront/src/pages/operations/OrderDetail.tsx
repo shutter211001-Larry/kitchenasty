@@ -86,12 +86,8 @@ export default function OrderDetailPage() {
 
   useEffect(() => {
     Promise.all([
-      api.get(`orders/${id}`).then(res => {
-        return res.json();
-      }),
-      api.get(`settings/order`).then(res => {
-        return res.json();
-      })
+      api.get<any>(`/orders/${id}`),
+      api.get<any>(`/settings/order`)
     ])
       .then(([orderData, settingsData]) => {
         setOrder(orderData.data);

@@ -91,12 +91,12 @@
 **Trigger**: When writing Prisma Client code to `create` a new `SiteSettings` record (e.g., as a nested `create` when creating a `Tenant`).
 **Rule**: The `SiteSettings` model in `schema.prisma` defines its primary key as `id String @id @default("default")`. If you do not explicitly provide an `id` when creating a record, Prisma will attempt to insert "default", leading to a `P2002` Unique Constraint violation if a settings record already exists. You MUST ALWAYS explicitly provide a generated UUID (e.g., `id: require('crypto').randomUUID()`) for the `id` field when creating a `SiteSettings` record.
 
-## 18. AdminFront API Client Requirement (No Native Fetch)
-**Trigger**: When modifying, creating, or refactoring components/hooks in "adminfront" that make HTTP requests.
-**Rule**: NEVER use the native `fetch()` API. The backend requires multi-tenant headers (`x-tenant-id`) to authorize requests on "localhost". The native `fetch()` does not append these headers, causing 401 Unauthorized or 400 Bad Request errors. You MUST always import the custom API client (`import { api } from '../lib/api.js';`) and use `api.get`, `api.post`, `api.put`, etc. 
+## 18. Frontend API Client Requirement (All Workspaces)
+**Trigger**: When modifying, creating, or refactoring components/hooks in ANY frontend workspace (`adminfront`, `storefront`, `saasfront`, `erpfront`) that make HTTP requests.
+**Rule**: NEVER use the native `fetch()` API. The backend requires multi-tenant headers (`x-tenant-id`) and proper error handling. The native `fetch()` does not append these headers, causing 401 Unauthorized or 400 Bad Request errors. You MUST always import the custom API client (e.g., `import { api } from '../lib/api.js';`) and use `api.get`, `api.post`, `api.put`, etc. 
 
 When refactoring from `fetch` or writing new API calls, strictly follow these API Client usage rules:
-- **No `.json()`**: The client automatically parses and returns the JSON payload. NEVER chain `await res.json()`, as it will throw a `TypeError: res.json is not a function` and crash the app. Use the return value directly (e.g., `const data = await api.get('/path');`).
+- **No `.json()`**: The client automatically parses and returns the JSON payload. NEVER chain `await res.json()`. If you do, it will throw a `TypeError: res.json is not a function` (or in production builds with minification, `TypeError: Y.json is not a function` where `Y` is a minified variable). Use the return value directly (e.g., `const data = await api.get('/path');`).
 - **No `res.ok` Checks**: The client automatically throws an error for non-2xx responses. The returned value is the raw JSON data object (which does NOT have an `ok` property). NEVER write `if (!res.ok)` checks, as it will evaluate to true and falsely throw errors on successful requests.
 - **Leading Slashes**: ALWAYS start the API path with a forward slash `/` (e.g., `api.post('/auth/login')`) to prevent broken URL concatenation (e.g., `/apiauth/login` 404 Not Found).
 - **No Manual Stringification**: The client automatically stringifies the request body. Pass the raw object directly (e.g., `api.post('/path', { email })`), do NOT use `JSON.stringify()`, which would double-stringify the payload and cause `Unexpected token '"'` 400 Bad Request errors in the backend.
