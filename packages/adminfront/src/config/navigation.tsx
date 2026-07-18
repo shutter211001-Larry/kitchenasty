@@ -78,6 +78,7 @@ export const navItems: NavItem[] = [
     roles: ['SUPER_ADMIN', 'MANAGER', 'STAFF'],
     children: [
       { path: '/kitchen', label: 'nav.kitchen', roles: ['SUPER_ADMIN', 'MANAGER', 'STAFF'] },
+      { path: '/orders/new', label: 'nav.pos', roles: ['SUPER_ADMIN', 'MANAGER', 'STAFF'] },
       { path: '/orders', label: 'nav.orders', roles: ['SUPER_ADMIN', 'MANAGER', 'STAFF'] },
       { path: '/reservations', label: 'nav.reservations', roles: ['SUPER_ADMIN', 'MANAGER', 'STAFF'] },
       { path: '/finance', label: 'nav.finance', roles: ['SUPER_ADMIN', 'MANAGER'], isErp: true },

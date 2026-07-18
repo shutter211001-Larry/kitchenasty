@@ -582,6 +582,11 @@ model Order {
   utmSource            String?
   utmMedium            String?
   utmCampaign          String?
+  invoiceType          String?              @db.VarChar(50)
+  invoiceCarrier       String?              @db.VarChar(255)
+  taxId                String?              @db.VarChar(50)
+  companyTitle         String?              @db.VarChar(255)
+  donationCode         String?              @db.VarChar(50)
   loyaltyTransactions  LoyaltyTransaction[]
   items                OrderItem[]
   address              Address?             @relation(fields: [addressId], references: [id])

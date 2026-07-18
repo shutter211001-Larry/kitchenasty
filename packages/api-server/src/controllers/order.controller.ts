@@ -111,6 +111,11 @@ const createOrderSchema = z.object({
   utmSource: z.string().optional(),
   utmMedium: z.string().optional(),
   utmCampaign: z.string().optional(),
+  invoiceType: z.string().optional(),
+  invoiceCarrier: z.string().optional(),
+  taxId: z.string().optional(),
+  companyTitle: z.string().optional(),
+  donationCode: z.string().optional(),
 });
 
 function generateOrderNumber(): string {
@@ -140,7 +145,8 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
     guestName, guestEmail, guestPhone, loyaltyPointsRedeem,
     userLat, userLon, locationId, honeypot, couponCode, tableName, groupSessionId, frozenDeliveryMethod,
     manualDiscount, manualDeliveryFee, manualTax, trackingNumber, logisticsProvider, idempotencyKey,
-    utmSource, utmMedium, utmCampaign
+    utmSource, utmMedium, utmCampaign,
+    invoiceType, invoiceCarrier, taxId, companyTitle, donationCode
   } = parsedData;
 
   // Pre-process items: if any item is a Random Dispatch (blind box), we resolve it immediately!
@@ -964,6 +970,11 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
     utmSource,
     utmMedium,
     utmCampaign,
+    invoiceType,
+    invoiceCarrier,
+    taxId,
+    companyTitle,
+    donationCode,
     items: { create: orderItemsData },
   };
 

@@ -1,3 +1,4 @@
+import { Html5QrcodeScanner } from 'html5-qrcode';
 import { useTranslation } from 'react-i18next';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -73,6 +74,13 @@ export default function OrderCreate() {
   const [logisticsProvider, setLogisticsProvider] = useState('');
   const [comment, setComment] = useState('');
   
+  const [invoiceType, setInvoiceType] = useState('CLOUD');
+  const [invoiceCarrier, setInvoiceCarrier] = useState('');
+  const [taxId, setTaxId] = useState('');
+  const [companyTitle, setCompanyTitle] = useState('');
+  const [donationCode, setDonationCode] = useState('');
+  const [showScanner, setShowScanner] = useState(false);
+  
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string[]>>({});
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
@@ -111,6 +119,28 @@ export default function OrderCreate() {
       }
     }).catch(err => setError(err.message)).finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    if (showScanner) {
+      const scanner = new Html5QrcodeScanner(
+        "reader",
+        { fps: 10, qrbox: { width: 250, height: 250 } },
+        false
+      );
+      
+      scanner.render((decodedText) => {
+        scanner.clear();
+        setShowScanner(false);
+        setInvoiceCarrier(decodedText);
+      }, (err) => {
+        // ignore scan errors
+      });
+
+      return () => {
+        scanner.clear().catch(console.error);
+      };
+    }
+  }, [showScanner]);
 
   useEffect(() => {
     if (!selectedLocationId) return;
@@ -268,6 +298,11 @@ export default function OrderCreate() {
         trackingNumber: trackingNumber || undefined,
         logisticsProvider: logisticsProvider || undefined,
         comment: comment || undefined,
+        invoiceType: invoiceType || undefined,
+        invoiceCarrier: invoiceCarrier || undefined,
+        taxId: taxId || undefined,
+        companyTitle: companyTitle || undefined,
+        donationCode: donationCode || undefined,
       };
 
       if (orderType === 'DELIVERY' || orderType === 'FROZEN_DELIVERY') {
@@ -655,10 +690,7 @@ export default function OrderCreate() {
                         <div className="relative">
                           <span className="absolute left-2 top-1.5 text-gray-500 text-sm">$</span>
                           <input
-                            type="number"
-                            min="0"
-                            value={manualTax}
-                            onChange={e => setManualTax(e.target.value === '' ? '' : parseFloat(e.target.value))}
+onChange={e => setManualTax(e.target.value === '' ? '' : parseFloat(e.target.value))}
                             className="w-full pl-7 pr-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-primary-500/20 outline-none shadow-sm transition-all duration-200"
                             placeholder={t('orderCreate.3cdca2') || '留空自動計算'}
                           />
@@ -677,6 +709,108 @@ export default function OrderCreate() {
                     placeholder={t('orderCreate.commentPlaceholder') || '輸入訂單備註...'}
                     rows={2}
                   />
+                </div>
+
+                <div className="pt-3 border-t border-gray-50">
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="block text-xs font-medium text-gray-700">{t('orderCreate.invoiceTitle') || '發票與稅務'}</label>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-3 mb-3">
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1">{t('orderCreate.invoiceType') || '發票類型'}</label>
+                      <select
+                        value={invoiceType}
+                        onChange={(e) => setInvoiceType(e.target.value)}
+                        className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-primary-500/20 outline-none"
+                      >
+                        <option value="CLOUD">{t('orderCreate.invoiceCloud') || '雲端載具'}</option>
+                        <option value="COMPANY">{t('orderCreate.invoiceCompany') || '公司統編'}</option>
+                        <option value="DONATE">{t('orderCreate.invoiceDonate') || '捐贈發票'}</option>
+                      </select>
+                    </div>
+                    
+                    {invoiceType === 'CLOUD' && (
+                      <div>
+                        <label className="block text-xs text-gray-500 mb-1">{t('orderCreate.invoiceCarrier') || '手機載具'}</label>
+                        <div className="relative">
+                          <input
+                            type="text"
+                            value={invoiceCarrier}
+                            onChange={(e) => setInvoiceCarrier(e.target.value.toUpperCase())}
+                            placeholder="/ABC1234"
+                            className="w-full pl-3 pr-8 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-primary-500/20 outline-none uppercase"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowScanner(!showScanner)}
+                            className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-primary-600 transition-colors"
+                            title={t('orderCreate.scanCarrier') || '掃描載具'}
+                          >
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                            </svg>
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {invoiceType === 'COMPANY' && (
+                      <>
+                        <div>
+                          <label className="block text-xs text-gray-500 mb-1">{t('orderCreate.taxId') || '統一編號'}</label>
+                          <input
+                            type="text"
+                            value={taxId}
+                            onChange={(e) => setTaxId(e.target.value.replace(/\D/g, '').slice(0, 8))}
+                            maxLength={8}
+                            placeholder="12345678"
+                            className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-primary-500/20 outline-none"
+                          />
+                        </div>
+                        <div className="col-span-2">
+                          <label className="block text-xs text-gray-500 mb-1">{t('orderCreate.companyTitle') || '公司抬頭'}</label>
+                          <input
+                            type="text"
+                            value={companyTitle}
+                            onChange={(e) => setCompanyTitle(e.target.value)}
+                            placeholder="公司名稱"
+                            className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-primary-500/20 outline-none"
+                          />
+                        </div>
+                      </>
+                    )}
+                    
+                    {invoiceType === 'DONATE' && (
+                      <div>
+                        <label className="block text-xs text-gray-500 mb-1">{t('orderCreate.donationCode') || '愛心碼'}</label>
+                        <input
+                          type="text"
+                          value={donationCode}
+                          onChange={(e) => setDonationCode(e.target.value.replace(/\D/g, '').slice(0, 7))}
+                          maxLength={7}
+                          placeholder="123456"
+                          className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-primary-500/20 outline-none"
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  {showScanner && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+                      <div className="bg-white rounded-2xl p-6 w-full max-w-sm relative">
+                        <h3 className="text-lg font-bold text-center mb-4">{t('orderCreate.scanCarrier') || '掃描載具'}</h3>
+                        <div id="reader" className="w-full rounded-xl overflow-hidden mb-4 border-2 border-gray-100"></div>
+                        <button
+                          type="button"
+                          onClick={() => setShowScanner(false)}
+                          className="w-full py-3 bg-gray-100 text-gray-700 font-medium rounded-xl hover:bg-gray-200 transition-colors"
+                        >
+                          {t('orderCreate.closeCamera') || '關閉相機'}
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {summary?.estimatedWaitMins != null && (
