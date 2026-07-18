@@ -8,6 +8,7 @@ import {
 } from 'recharts';
 import { confirm } from "../lib/confirm";
 import { useTranslation } from "react-i18next";
+import { ExpenseFormModal } from "../components/ExpenseFormModal";
 
 interface Expense {
   id: string;
@@ -25,6 +26,16 @@ interface Expense {
       unit: string;
     };
   };
+  category?: string;
+  accountingCode?: string;
+  voucherNumber?: string;
+  invoiceNumber?: string;
+  vendorTaxId?: string;
+  taxAmount?: number;
+  isTaxInclusive?: boolean;
+  payee?: string;
+  paymentMethod?: string;
+  transactionDate?: string;
 }
 
 interface AnalyticsData {
@@ -46,6 +57,9 @@ export default function Expenses() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [filter, setFilter] = useState("ALL"); // ALL, PENDING, PAID
+  
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
   
   // Analytics state
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
@@ -134,7 +148,17 @@ export default function Expenses() {
           <p className="text-sm text-gray-500 mt-1">{t('expenses.d0f983') || (t('expenses.d0f983') || '追蹤庫存進貨應付帳款與支出')}</p>
         </div>
         
-        <div className="flex bg-gray-100 rounded-lg p-1 shrink-0" role="tablist">
+        <div className="flex items-center gap-3">
+          <button 
+            onClick={() => {
+              setEditingExpense(null);
+              setIsModalOpen(true);
+            }}
+            className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors font-medium flex items-center gap-2"
+          >
+            <span>+</span> 新增支出
+          </button>
+          <div className="flex bg-gray-100 rounded-lg p-1 shrink-0" role="tablist">
           <button
             onClick={() => setTab('overview')}
             className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${
@@ -152,6 +176,7 @@ export default function Expenses() {
           >
             <PieChartIcon className="w-4 h-4" />
             {t('expenses.49a5ed') || (t('expenses.49a5ed') || '統計分析')}</button>
+          </div>
         </div>
       </div>
 
@@ -220,7 +245,9 @@ export default function Expenses() {
               <thead>
                 <tr className="bg-gray-50/50">
                   <th className="py-4 px-6 font-semibold text-gray-600 border-b border-gray-100">{t('expenses.4ff1e7') || (t('expenses.4ff1e7') || '日期')}</th>
-                  <th className="py-4 px-6 font-semibold text-gray-600 border-b border-gray-100">{t('expenses.3bdd08') || (t('expenses.3bdd08') || '描述')}</th>
+                  <th className="py-4 px-6 font-semibold text-gray-600 border-b border-gray-100">會計科目</th>
+                  <th className="py-4 px-6 font-semibold text-gray-600 border-b border-gray-100">發票/傳票號</th>
+                  <th className="py-4 px-6 font-semibold text-gray-600 border-b border-gray-100">{t('expenses.3bdd08') || (t('expenses.3bdd08') || '描述/收款人')}</th>
                   <th className="py-4 px-6 font-semibold text-gray-600 border-b border-gray-100 text-right">{t('expenses.635541') || (t('expenses.635541') || '金額')}</th>
                   <th className="py-4 px-6 font-semibold text-gray-600 border-b border-gray-100">{t('expenses.bd91f6') || (t('expenses.bd91f6') || '狀態')}</th>
                   <th className="py-4 px-6 font-semibold text-gray-600 border-b border-gray-100 text-right">{t('expenses.2b6bc0') || (t('expenses.2b6bc0') || '操作')}</th>
@@ -243,11 +270,18 @@ export default function Expenses() {
                 ) : (
                   filteredExpenses.map((expense) => (
                     <tr key={expense.id} className="hover:bg-gray-50/50 transition-colors">
-                      <td className="py-4 px-6 text-gray-600">
-                        {new Date(expense.createdAt).toLocaleDateString('zh-TW')}
+                      <td className="py-4 px-6 text-gray-600 whitespace-nowrap">
+                        {expense.transactionDate ? new Date(expense.transactionDate).toLocaleDateString('zh-TW') : new Date(expense.createdAt).toLocaleDateString('zh-TW')}
+                      </td>
+                      <td className="py-4 px-6 text-gray-600 font-mono text-sm whitespace-nowrap">
+                        {expense.accountingCode || '-'}
+                      </td>
+                      <td className="py-4 px-6 text-gray-600 font-mono text-sm whitespace-nowrap">
+                        {expense.invoiceNumber || expense.voucherNumber || '-'}
                       </td>
                       <td className="py-4 px-6 text-gray-900 font-medium">
                         {expense.description}
+                        {expense.payee && <div className="text-xs text-gray-500 font-normal mt-0.5">收款: {expense.payee}</div>}
                       </td>
                       <td className="py-4 px-6 text-gray-900 font-bold text-right">
                         ${expense.amount.toLocaleString()}
@@ -276,6 +310,15 @@ export default function Expenses() {
                             >
                               {t('expenses.12328c') || (t('expenses.12328c') || '撤銷')}</button>
                           )}
+                          <button
+                            onClick={() => {
+                              setEditingExpense(expense);
+                              setIsModalOpen(true);
+                            }}
+                            className="px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg text-xs font-bold transition-colors"
+                          >
+                            編輯
+                          </button>
                           <button
                             onClick={() => handleDeleteExpense(expense.id)}
                             className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
@@ -403,6 +446,16 @@ export default function Expenses() {
           )}
         </div>
       )}
+
+      <ExpenseFormModal 
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        expense={editingExpense}
+        onSuccess={() => {
+          fetchExpenses();
+          fetchAnalytics();
+        }}
+      />
     </div>
   );
 }

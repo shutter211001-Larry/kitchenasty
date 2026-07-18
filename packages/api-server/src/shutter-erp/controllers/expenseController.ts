@@ -43,6 +43,74 @@ export const updateExpenseStatus = async (req: AuthenticatedRequest, res: Respon
   }
 };
 
+export const createExpense = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const { 
+      amount, description, status,
+      category, accountingCode, voucherNumber,
+      invoiceNumber, vendorTaxId, taxAmount,
+      isTaxInclusive, payee, paymentMethod, transactionDate
+    } = req.body;
+
+    const expense = await prisma.expense.create({
+      data: {
+        amount: Number(amount),
+        description,
+        status: status || 'PENDING',
+        category,
+        accountingCode,
+        voucherNumber,
+        invoiceNumber,
+        vendorTaxId,
+        taxAmount: taxAmount ? Number(taxAmount) : undefined,
+        isTaxInclusive: isTaxInclusive ?? false,
+        payee,
+        paymentMethod,
+        transactionDate: transactionDate ? new Date(transactionDate) : new Date(),
+      }
+    });
+    res.status(201).json(expense);
+  } catch (error) {
+    console.error('Failed to create expense:', error);
+    res.status(500).json({ error: 'Failed to create expense' });
+  }
+};
+
+export const updateExpense = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const id = req.params.id as string;
+    const { 
+      amount, description, status,
+      category, accountingCode, voucherNumber,
+      invoiceNumber, vendorTaxId, taxAmount,
+      isTaxInclusive, payee, paymentMethod, transactionDate
+    } = req.body;
+
+    const expense = await prisma.expense.update({
+      where: { id },
+      data: {
+        amount: amount !== undefined ? Number(amount) : undefined,
+        description,
+        status,
+        category,
+        accountingCode,
+        voucherNumber,
+        invoiceNumber,
+        vendorTaxId,
+        taxAmount: taxAmount !== undefined ? Number(taxAmount) : undefined,
+        isTaxInclusive,
+        payee,
+        paymentMethod,
+        transactionDate: transactionDate ? new Date(transactionDate) : undefined,
+      }
+    });
+    res.json(expense);
+  } catch (error) {
+    console.error('Failed to update expense:', error);
+    res.status(500).json({ error: 'Failed to update expense' });
+  }
+};
+
 export const deleteExpense = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const id = req.params.id as string;
