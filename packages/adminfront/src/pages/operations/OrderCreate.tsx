@@ -71,6 +71,7 @@ export default function OrderCreate() {
   const [manualTax, setManualTax] = useState<number | ''>('');
   const [trackingNumber, setTrackingNumber] = useState('');
   const [logisticsProvider, setLogisticsProvider] = useState('');
+  const [comment, setComment] = useState('');
   
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string[]>>({});
@@ -263,6 +264,7 @@ export default function OrderCreate() {
         frozenDeliveryMethod: orderType === 'FROZEN_DELIVERY' ? frozenDeliveryMethod : undefined,
         trackingNumber: trackingNumber || undefined,
         logisticsProvider: logisticsProvider || undefined,
+        comment: comment || undefined,
       };
 
       if (orderType === 'DELIVERY' || orderType === 'FROZEN_DELIVERY') {
@@ -657,6 +659,17 @@ export default function OrderCreate() {
                       </div>
                     </>
                   )}
+                </div>
+
+                <div className="pt-3 border-t border-gray-50">
+                  <label className="block text-xs font-medium text-gray-700 mb-1">{t('orderCreate.comment') || '備註'}</label>
+                  <textarea
+                    value={comment}
+                    onChange={e => setComment(e.target.value)}
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-primary-500/20 outline-none shadow-sm transition-all duration-200 resize-none"
+                    placeholder={t('orderCreate.commentPlaceholder') || '輸入訂單備註...'}
+                    rows={2}
+                  />
                 </div>
 
                 {summary?.estimatedWaitMins != null && (
