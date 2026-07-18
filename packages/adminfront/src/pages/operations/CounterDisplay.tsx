@@ -273,7 +273,7 @@ export default function CounterDisplay() {
     
     const socket = io(SOCKET_URL, {
       path: '/socket.io',
-      transports: ['websocket', 'polling'],
+      transports: ['websocket'],
       auth: { token }
     });
 

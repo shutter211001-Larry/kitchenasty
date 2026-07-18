@@ -15,11 +15,11 @@ clientsClaim();
 cleanupOutdatedCaches();
 precacheAndRoute(self.__WB_MANIFEST || []);
 
-// 1. Caching API GET Requests (Offline Fallback for Menus/Settings)
-// Cache /api/ GET requests using StaleWhileRevalidate
+// 1. Caching API GET Requests (Offline Fallback)
+// Cache /api/ GET requests using NetworkFirst to prevent stale data
 registerRoute(
   ({ request, url }) => url.pathname.startsWith('/api/') && request.method === 'GET',
-  new StaleWhileRevalidate({
+  new NetworkFirst({
     cacheName: 'api-cache',
   })
 );
