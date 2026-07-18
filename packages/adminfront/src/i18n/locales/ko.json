@@ -1507,7 +1507,8 @@
     "donationCode": "Donation Code",
     "invoiceCloud": "Cloud Invoice",
     "invoiceCompany": "Company Invoice",
-    "invoiceDonate": "Donate Invoice"
+    "invoiceDonate": "Donate Invoice",
+    "outOfStock": "품절"
   },
   "orderDetail": {
     "fulfillOrder": "배송 정보 입력",

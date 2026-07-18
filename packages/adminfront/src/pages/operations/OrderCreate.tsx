@@ -20,6 +20,8 @@ interface MenuItem {
   price: number;
   image: string | null;
   isActive: boolean;
+  trackStock?: boolean;
+  stockQty?: number;
   category: { id: string; name: string };
   options: {
     id: string;
@@ -384,7 +386,12 @@ export default function OrderCreate() {
                             key={item.id}
                             type="button"
                             onClick={() => openItemModal(item)}
-                            className="flex items-center gap-4 p-3 border border-gray-100 rounded-lg hover:bg-gray-50 transition-colors text-left group bg-white shadow-sm"
+                            disabled={item.trackStock && (item.stockQty ?? 0) <= 0}
+                            className={`flex items-center gap-4 p-3 border rounded-lg text-left group bg-white shadow-sm transition-all ${
+                              item.trackStock && (item.stockQty ?? 0) <= 0
+                                ? 'opacity-50 cursor-not-allowed border-gray-200 grayscale'
+                                : 'border-gray-100 hover:bg-gray-50 hover:border-primary-100'
+                            }`}
                           >
                             {item.image ? (
                               <img src={item.image} alt={item.name} className="w-16 h-16 rounded-md object-cover" />
@@ -396,7 +403,14 @@ export default function OrderCreate() {
                               </div>
                             )}
                             <div className="flex-1">
-                              <div className="font-medium text-gray-900 group-hover:text-primary-600 transition-colors">{item.name}</div>
+                              <div className="font-medium text-gray-900 group-hover:text-primary-600 transition-colors">
+                                {item.name}
+                                {item.trackStock && (item.stockQty ?? 0) <= 0 && (
+                                  <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
+                                    {t('orderCreate.outOfStock') || '缺貨'}
+                                  </span>
+                                )}
+                              </div>
                               <div className="text-sm text-gray-500">${item.price.toFixed(2)}</div>
                             </div>
                             <div className="text-primary-600 opacity-0 group-hover:opacity-100 transition-opacity">

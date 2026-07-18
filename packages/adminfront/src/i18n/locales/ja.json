@@ -1507,7 +1507,8 @@
     "donationCode": "Donation Code",
     "invoiceCloud": "Cloud Invoice",
     "invoiceCompany": "Company Invoice",
-    "invoiceDonate": "Donate Invoice"
+    "invoiceDonate": "Donate Invoice",
+    "outOfStock": "在庫切れ"
   },
   "orderDetail": {
     "fulfillOrder": "発送情報を入力",

@@ -1507,7 +1507,8 @@
     "donationCode": "愛心碼",
     "invoiceCloud": "雲端載具",
     "invoiceCompany": "公司統編",
-    "invoiceDonate": "捐贈發票"
+    "invoiceDonate": "捐贈發票",
+    "outOfStock": "缺貨"
   },
   "orderDetail": {
     "fulfillOrder": "填寫出貨資訊",
