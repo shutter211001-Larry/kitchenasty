@@ -77,7 +77,7 @@ const orderItemSchema = z.object({
 const sanitizeHTML = (val: string | undefined) => val ? val.replace(/[<>]/g, '') : val;
 
 const createOrderSchema = z.object({
-  orderType: z.enum(['DELIVERY', 'PICKUP', 'FROZEN_DELIVERY']),
+  orderType: z.enum(['DELIVERY', 'PICKUP', 'FROZEN_DELIVERY', 'DINE_IN']),
   items: z.array(orderItemSchema).min(1).max(100, 'Order exceeds maximum allowed items'),
   comment: z.string().optional().transform(sanitizeHTML),
   scheduledAt: z.string().optional(),

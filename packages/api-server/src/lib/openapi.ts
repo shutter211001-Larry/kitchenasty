@@ -138,7 +138,7 @@ export const openApiSpec = {
         security: [{ bearerAuth: [] }],
         requestBody: {
           required: true,
-          content: { 'application/json': { schema: { type: 'object' as const, properties: { orderType: { type: 'string' as const, enum: ['DELIVERY', 'PICKUP'] }, items: { type: 'array' as const }, comment: { type: 'string' as const }, scheduledAt: { type: 'string' as const } }, required: ['orderType', 'items'] } } },
+          content: { 'application/json': { schema: { type: 'object' as const, properties: { orderType: { type: 'string' as const, enum: ['DELIVERY', 'PICKUP', 'FROZEN_DELIVERY', 'DINE_IN'] }, items: { type: 'array' as const }, comment: { type: 'string' as const }, scheduledAt: { type: 'string' as const } }, required: ['orderType', 'items'] } } },
         },
         responses: { '201': { description: 'Order created' }, '400': { description: 'Validation error' } },
       },

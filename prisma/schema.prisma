@@ -980,6 +980,7 @@ enum OrderType {
   DELIVERY
   PICKUP
   FROZEN_DELIVERY
+  DINE_IN
 }
 
 enum OrderStatus {
