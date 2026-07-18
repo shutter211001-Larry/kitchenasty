@@ -46,6 +46,7 @@ export async function staffLogin(req: Request, res: Response): Promise<void> {
       type: 'staff',
       role: user.role,
       tenantId: user.tenantId,
+      locationId: user.locationId,
     });
   
     res.json({

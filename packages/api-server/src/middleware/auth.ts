@@ -65,6 +65,33 @@ export async function authenticate(req: Request, res: Response, next: NextFuncti
   }
 }
 
+export async function optionalAuthenticate(req: Request, res: Response, next: NextFunction): Promise<void> {
+  const authHeader = req.headers.authorization;
+  if (!authHeader?.startsWith('Bearer ')) {
+    return next();
+  }
+
+  try {
+    const token = authHeader.slice(7);
+    const decoded = verifyToken(token);
+    
+    const { tenantStorage } = await import('./tenantStorage.js');
+    const store = tenantStorage.getStore();
+    const currentTenantId = store?.tenantId || null;
+    
+    if (currentTenantId !== null && decoded.tenantId !== currentTenantId) {
+      if (decoded.role !== 'SUPER_ADMIN') {
+        return next(); // Just act as unauthenticated
+      }
+    }
+
+    req.user = decoded;
+    next();
+  } catch {
+    next(); // Invalid token, but since it's optional, proceed unauthenticated
+  }
+}
+
 export function requireStaff(req: Request, res: Response, next: NextFunction): void {
   if (!req.user || req.user.type !== 'staff') {
     res.status(403).json({ success: false, error: 'Staff access required' });
@@ -165,4 +192,26 @@ export async function optionalAuth(req: Request, _res: Response, next: NextFunct
     }
   }
   next();
+}
+
+export function requireLocationAccess(getLocationId: (req: Request) => string | undefined | null) {
+  return (req: Request, res: Response, next: NextFunction): void => {
+    if (!req.user || req.user.type !== 'staff') {
+      res.status(403).json({ success: false, error: 'Staff access required' });
+      return;
+    }
+
+    if (req.user.role === 'SUPER_ADMIN') {
+      next();
+      return;
+    }
+
+    const requestedLocationId = getLocationId(req);
+    if (requestedLocationId && req.user.locationId !== requestedLocationId) {
+      res.status(403).json({ success: false, error: 'Unauthorized branch access' });
+      return;
+    }
+
+    next();
+  };
 }

@@ -63,8 +63,18 @@ export async function listLocations(req: Request, res: Response): Promise<void> 
   const limit = Math.min(50, Math.max(1, parseInt(req.query.limit as string) || 20));
   const skip = (page - 1) * limit;
 
+  let where: any = {};
+  if (req.user && req.user.type === 'staff' && req.user.role !== 'SUPER_ADMIN') {
+    if (req.user.locationId) {
+      where.id = req.user.locationId;
+    } else {
+      where.id = 'NONE'; // Staff with no assigned location sees nothing
+    }
+  }
+
   const [locations, total] = await Promise.all([
     prisma.location.findMany({
+      where,
       skip,
       take: limit,
       orderBy: { name: 'asc' },
@@ -73,7 +83,7 @@ export async function listLocations(req: Request, res: Response): Promise<void> 
         _count: { select: { deliveryZones: true, tables: true, orders: true } },
       },
     }),
-    prisma.location.count(),
+    prisma.location.count({ where }),
   ]);
 
   res.json({
@@ -90,6 +100,13 @@ export async function listLocations(req: Request, res: Response): Promise<void> 
 
 export async function getLocation(req: Request<{ id: string }>, res: Response): Promise<void> {
   const { id } = req.params;
+
+  if (req.user && req.user.type === 'staff' && req.user.role !== 'SUPER_ADMIN') {
+    if (req.user.locationId !== id) {
+      res.status(403).json({ success: false, error: 'Unauthorized branch access' });
+      return;
+    }
+  }
 
   const location = await prisma.location.findUnique({
     where: { id },

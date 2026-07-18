@@ -470,6 +470,14 @@ export async function updateMenuItem(req: Request<{ id: string }>, res: Response
 
   const { options, allergenIds, mealtimeIds, dietaryPreferenceIds, recipeId, recipeName, contextLocationId, ...data } = parsed.data;
 
+  // Enforce Location RBAC: if modifying branch-specific data, ensure they have access to that branch
+  if (contextLocationId && req.user && req.user.type === 'staff' && req.user.role !== 'SUPER_ADMIN') {
+    if (req.user.locationId !== contextLocationId) {
+      res.status(403).json({ success: false, error: 'Unauthorized branch access' });
+      return;
+    }
+  }
+
   const isFollowedItem = contextLocationId && existing.locationId !== contextLocationId;
 
   if (isFollowedItem) {
