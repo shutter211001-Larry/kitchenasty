@@ -40,7 +40,8 @@
     "attendanceRecords": "Attendance Records",
     "logout": "로그아웃",
     "finance": "재무",
-    "marketingDashboard": "마케팅 대시보드"
+    "marketingDashboard": "마케팅 대시보드",
+    "pos": "POS Register"
   },
   "staff": {
     "title": "직원 관리 (Staff)",
@@ -1495,7 +1496,18 @@
     "625fb2": "取消",
     "c81347": "加入購物車",
     "comment": "Comment",
-    "commentPlaceholder": "Enter order comment..."
+    "commentPlaceholder": "Enter order comment...",
+    "invoiceTitle": "Invoice Details",
+    "invoiceType": "Invoice Type",
+    "invoiceCarrier": "Mobile Carrier",
+    "scanCarrier": "Scan Carrier",
+    "closeCamera": "Close Camera",
+    "taxId": "Tax ID",
+    "companyTitle": "Company Title",
+    "donationCode": "Donation Code",
+    "invoiceCloud": "Cloud Invoice",
+    "invoiceCompany": "Company Invoice",
+    "invoiceDonate": "Donate Invoice"
   },
   "orderDetail": {
     "fulfillOrder": "배송 정보 입력",

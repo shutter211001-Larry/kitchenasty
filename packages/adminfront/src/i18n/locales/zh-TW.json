@@ -40,7 +40,8 @@
     "attendanceRecords": "出勤紀錄",
     "logout": "登出",
     "finance": "財務損益",
-    "marketingDashboard": "行銷儀表板"
+    "marketingDashboard": "行銷儀表板",
+    "pos": "POS收銀台"
   },
   "staff": {
     "title": "員工管理 (Staff)",
@@ -1495,7 +1496,18 @@
     "625fb2": "取消",
     "c81347": "加入購物車",
     "comment": "備註",
-    "commentPlaceholder": "輸入訂單備註..."
+    "commentPlaceholder": "輸入訂單備註...",
+    "invoiceTitle": "發票與稅務",
+    "invoiceType": "發票類型",
+    "invoiceCarrier": "手機載具",
+    "scanCarrier": "掃描載具",
+    "closeCamera": "關閉相機",
+    "taxId": "統一編號",
+    "companyTitle": "公司抬頭",
+    "donationCode": "愛心碼",
+    "invoiceCloud": "雲端載具",
+    "invoiceCompany": "公司統編",
+    "invoiceDonate": "捐贈發票"
   },
   "orderDetail": {
     "fulfillOrder": "填寫出貨資訊",

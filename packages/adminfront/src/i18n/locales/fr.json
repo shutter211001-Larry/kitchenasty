@@ -40,7 +40,8 @@
     "attendanceRecords": "Attendance Records",
     "logout": "Logout",
     "finance": "Finances",
-    "marketingDashboard": "Tableau de Bord Marketing"
+    "marketingDashboard": "Tableau de Bord Marketing",
+    "pos": "POS Register"
   },
   "staff": {
     "title": "Staff Management",
@@ -1495,7 +1496,18 @@
     "625fb2": "取消",
     "c81347": "加入購物車",
     "comment": "Comment",
-    "commentPlaceholder": "Enter order comment..."
+    "commentPlaceholder": "Enter order comment...",
+    "invoiceTitle": "Invoice Details",
+    "invoiceType": "Invoice Type",
+    "invoiceCarrier": "Mobile Carrier",
+    "scanCarrier": "Scan Carrier",
+    "closeCamera": "Close Camera",
+    "taxId": "Tax ID",
+    "companyTitle": "Company Title",
+    "donationCode": "Donation Code",
+    "invoiceCloud": "Cloud Invoice",
+    "invoiceCompany": "Company Invoice",
+    "invoiceDonate": "Donate Invoice"
   },
   "orderDetail": {
     "fulfillOrder": "Fulfill Order",
