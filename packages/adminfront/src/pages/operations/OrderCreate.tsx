@@ -110,18 +110,10 @@ export default function OrderCreate() {
       }
     }).catch(err => setError(err.message)).finally(() => setLoading(false));
 
-    // 從本地 RxDB 讀取菜單資料 (支援離線 0 延遲渲染)
-    let sub: any;
-    getDatabase().then((db: any) => {
-      sub = db.menuItems.find().$.subscribe((items: any) => {
-        // @ts-ignore
-        setMenuItems(items.map(i => i.toJSON()).filter(i => i.isActive));
-      });
-    });
-
-    return () => {
-      if (sub) sub.unsubscribe();
-    };
+    // Fetch menu items from API
+    api.get<{ data: MenuItem[] }>('/menu/items').then((res) => {
+      setMenuItems(res.data.filter(i => i.isActive));
+    }).catch(err => console.error('Failed to load menu items:', err));
   }, []);
 
   useEffect(() => {
