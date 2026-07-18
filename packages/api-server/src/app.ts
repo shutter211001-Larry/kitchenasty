@@ -78,6 +78,7 @@ import { tenantMiddleware } from './middleware/tenantMiddleware.js';
 // Initialize automation event listeners
 import './lib/events.js';
 import { scheduleImageCleanup } from './cron/image-cleanup.cron.js';
+import { scheduleMenuTranslationResume } from './cron/menu-translation.cron.js';
 
 import { initSentry } from './lib/sentry.js';
 
@@ -115,6 +116,8 @@ export async function createApp() {
     
     // Start image cleanup cron job
     scheduleImageCleanup();
+    // Start menu translation resume cron job
+    scheduleMenuTranslationResume();
   }
   // -------------------------------------
 

@@ -112,34 +112,68 @@ async function backgroundMissingTranslations(tenantId: string) {
     try {
       logger.info(`Starting background menu translation for tenant ${tenantId}`);
       
-      const categories = await prisma.category.findMany();
+      const categories = await prisma.category.findMany({
+        where: { translationStatus: { in: ['PENDING', 'FAILED'] } }
+      });
+      
       for (const cat of categories) {
-        const nameTrans = (cat.nameTranslations as Record<string, string>) || {};
-        if (Object.keys(nameTrans).length < SUPPORTED_LANGUAGES.length) {
-          const translatedCatData = await autoTranslateCategory(cat);
+        try {
+          const nameTrans = (cat.nameTranslations as Record<string, string>) || {};
+          if (Object.keys(nameTrans).length < SUPPORTED_LANGUAGES.length) {
+            const translatedCatData = await autoTranslateCategory(cat);
+            await prisma.category.update({
+              where: { id: cat.id },
+              data: {
+                nameTranslations: translatedCatData.nameTranslations,
+                descriptionTranslations: translatedCatData.descriptionTranslations,
+                translationStatus: 'TRANSLATED'
+              }
+            });
+          } else {
+            await prisma.category.update({
+              where: { id: cat.id },
+              data: { translationStatus: 'TRANSLATED' }
+            });
+          }
+        } catch (err) {
+          logger.error(err as any, `Failed to translate category ${cat.id}`);
           await prisma.category.update({
             where: { id: cat.id },
-            data: {
-              nameTranslations: translatedCatData.nameTranslations,
-              descriptionTranslations: translatedCatData.descriptionTranslations
-            }
+            data: { translationStatus: 'FAILED' }
           });
         }
       }
 
-      const items = await prisma.menuItem.findMany();
+      const items = await prisma.menuItem.findMany({
+        where: { translationStatus: { in: ['PENDING', 'FAILED'] } }
+      });
+
       for (const item of items) {
-        const nameTrans = (item.nameTranslations as Record<string, string>) || {};
-        const descTrans = (item.descriptionTranslations as Record<string, string>) || {};
-        if (Object.keys(nameTrans).length < SUPPORTED_LANGUAGES.length || (item.description && Object.keys(descTrans).length < SUPPORTED_LANGUAGES.length)) {
-          const translatedItemData = await autoTranslateMenuItem(item);
+        try {
+          const nameTrans = (item.nameTranslations as Record<string, string>) || {};
+          const descTrans = (item.descriptionTranslations as Record<string, string>) || {};
+          if (Object.keys(nameTrans).length < SUPPORTED_LANGUAGES.length || (item.description && Object.keys(descTrans).length < SUPPORTED_LANGUAGES.length)) {
+            const translatedItemData = await autoTranslateMenuItem(item);
+            await prisma.menuItem.update({
+              where: { id: item.id },
+              data: {
+                nameTranslations: translatedItemData.nameTranslations,
+                descriptionTranslations: translatedItemData.descriptionTranslations,
+                unitTranslations: translatedItemData.unitTranslations,
+                translationStatus: 'TRANSLATED'
+              }
+            });
+          } else {
+            await prisma.menuItem.update({
+              where: { id: item.id },
+              data: { translationStatus: 'TRANSLATED' }
+            });
+          }
+        } catch (err) {
+          logger.error(err as any, `Failed to translate menu item ${item.id}`);
           await prisma.menuItem.update({
             where: { id: item.id },
-            data: {
-              nameTranslations: translatedItemData.nameTranslations,
-              descriptionTranslations: translatedItemData.descriptionTranslations,
-              unitTranslations: translatedItemData.unitTranslations
-            }
+            data: { translationStatus: 'FAILED' }
           });
         }
       }
@@ -149,6 +183,26 @@ async function backgroundMissingTranslations(tenantId: string) {
       logger.error(error as any, `Background translation failed for tenant ${tenantId}`);
     }
   });
+}
+
+export async function autoResumeAllMenuTranslations() {
+  logger.info('Running global background menu translation resume...');
+  try {
+    const [categories, items] = await Promise.all([
+      prisma.$queryRaw<{tenantId: string}[]>`SELECT DISTINCT "tenantId" FROM "categories" WHERE "translationStatus" IN ('PENDING'::"TranslationStatus", 'FAILED'::"TranslationStatus")`,
+      prisma.$queryRaw<{tenantId: string}[]>`SELECT DISTINCT "tenantId" FROM "menu_items" WHERE "translationStatus" IN ('PENDING'::"TranslationStatus", 'FAILED'::"TranslationStatus")`
+    ]);
+    
+    const tenantIds = new Set<string>();
+    categories.forEach(c => c.tenantId && tenantIds.add(c.tenantId));
+    items.forEach(i => i.tenantId && tenantIds.add(i.tenantId));
+
+    for (const tenantId of tenantIds) {
+      await backgroundMissingTranslations(tenantId);
+    }
+  } catch (error) {
+    logger.error(error as any, 'Failed to run global menu translation resume');
+  }
 }
 
 export async function importMenuAndTranslate(req: Request, res: Response): Promise<void> {
@@ -163,12 +217,10 @@ export async function importMenuAndTranslate(req: Request, res: Response): Promi
     const store = tenantStorage.getStore();
     const tenantId = store?.tenantId;
     
-    // Process sequentially to avoid DB locks or overwhelming AI translations
     for (const cat of categories) {
       let categoryId = '';
       
       if (cat.action === 'MERGE' && cat.targetCategoryId) {
-        // Verify target category exists
         const existingCat = await prisma.category.findUnique({
           where: { id: cat.targetCategoryId }
         });
@@ -177,13 +229,13 @@ export async function importMenuAndTranslate(req: Request, res: Response): Promi
         }
         categoryId = existingCat.id;
       } else {
-        // Create category data
         const catData = {
           name: cat.name,
           slug: await generateSlug(cat.name, 'category'),
           isActive: true,
           sortOrder: 0,
-          nameTranslations: { 'zh-TW': cat.name }
+          nameTranslations: { 'zh-TW': cat.name },
+          translationStatus: 'PENDING' as any
         };
         
         const createdCategory = await prisma.category.create({
@@ -192,9 +244,7 @@ export async function importMenuAndTranslate(req: Request, res: Response): Promi
         categoryId = createdCategory.id;
       }
 
-      // Create items for this category
       for (const item of cat.items) {
-        // Check if item already exists in this category
         const existingItem = await prisma.menuItem.findFirst({
           where: {
             categoryId: categoryId,
@@ -203,12 +253,11 @@ export async function importMenuAndTranslate(req: Request, res: Response): Promi
         });
 
         if (existingItem) {
-          // Update price only
           await prisma.menuItem.update({
             where: { id: existingItem.id },
             data: { price: item.price }
           });
-          continue; // Skip creating options for updated items to avoid complexity
+          continue;
         }
 
         const itemData = {
@@ -219,10 +268,11 @@ export async function importMenuAndTranslate(req: Request, res: Response): Promi
           isActive: true,
           sortOrder: 0,
           categoryId: categoryId,
-          unit: '份', // Default unit
+          unit: '份',
           nameTranslations: { 'zh-TW': item.name },
           descriptionTranslations: item.description ? { 'zh-TW': item.description } : {},
-          unitTranslations: { 'zh-TW': '份' }
+          unitTranslations: { 'zh-TW': '份' },
+          translationStatus: 'PENDING' as any
         };
         
         let optionsToCreate: any = undefined;
@@ -259,7 +309,6 @@ export async function importMenuAndTranslate(req: Request, res: Response): Promi
       }
     }
 
-    // Trigger background translation job
     if (tenantId) {
       backgroundMissingTranslations(tenantId).catch(err => logger.error(err as any, 'Background translation job rejected'));
     }
@@ -272,17 +321,15 @@ export async function importMenuAndTranslate(req: Request, res: Response): Promi
 
 export async function getMissingTranslations(req: Request, res: Response): Promise<void> {
   try {
-    const categories = await prisma.category.findMany();
-    const missingCats = categories.filter(c => {
-      const trans = (c.nameTranslations as Record<string, string>) || {};
-      return Object.keys(trans).length < SUPPORTED_LANGUAGES.length;
-    }).map(c => ({ id: c.id, name: c.name }));
+    const categories = await prisma.category.findMany({
+      where: { translationStatus: { in: ['PENDING', 'FAILED'] } }
+    });
+    const missingCats = categories.map(c => ({ id: c.id, name: c.name, status: c.translationStatus }));
 
-    const items = await prisma.menuItem.findMany();
-    const missingItems = items.filter(i => {
-      const trans = (i.nameTranslations as Record<string, string>) || {};
-      return Object.keys(trans).length < SUPPORTED_LANGUAGES.length;
-    }).map(i => ({ id: i.id, name: i.name }));
+    const items = await prisma.menuItem.findMany({
+      where: { translationStatus: { in: ['PENDING', 'FAILED'] } }
+    });
+    const missingItems = items.map(i => ({ id: i.id, name: i.name, status: i.translationStatus }));
 
     res.json({ success: true, data: { categories: missingCats, items: missingItems } });
   } catch (error: any) {

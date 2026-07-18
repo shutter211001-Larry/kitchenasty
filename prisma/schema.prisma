@@ -356,6 +356,7 @@ model Category {
   deletedAt               DateTime?  @db.Timestamptz
   descriptionTranslations Json?
   nameTranslations        Json?
+  translationStatus       TranslationStatus @default(PENDING)
   trackSharedStock        Boolean    @default(false)
   sharedStockQty          Int        @default(0)
   sharedStockThreshold    Int        @default(5)
@@ -391,6 +392,7 @@ model MenuItem {
   deletedAt               DateTime?                   @db.Timestamptz
   descriptionTranslations Json?
   nameTranslations        Json?
+  translationStatus       TranslationStatus           @default(PENDING)
   unit                    String?                     @default("份")
   unitTranslations        Json?
   isRewardItem            Boolean                     @default(false)
@@ -1798,4 +1800,11 @@ model LabelManufacturer {
 
   tenantId String?
   tenant   Tenant? @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+}
+
+
+enum TranslationStatus {
+  PENDING
+  TRANSLATED
+  FAILED
 }
