@@ -1,1 +1,0 @@
-import { PrismaClient } from '@prisma/client'; const prisma = new PrismaClient(); async function main() { console.log('Checking IDs...'); const users = await prisma.user.findMany(); console.log('User IDs:', users.map(u => u.id)); const settings = await prisma.siteSettings.findMany(); console.log('SiteSettings IDs:', settings.map(s => s.id)); } main();
