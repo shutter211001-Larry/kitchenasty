@@ -252,7 +252,7 @@ export default function MarketingDashboard() {
             <select 
               value={dimension}
               onChange={(e) => setDimension(e.target.value)}
-              className="rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm py-1.5 px-3 focus:ring-primary-500 focus:border-primary-500 shadow-sm"
+              className="rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm py-1.5 px-3 focus:ring-primary-500 focus:border-primary-500 shadow-sm"
             >
               <option value="utmSource">{t('marketingDashboard.dimSource', '來源 (Source)')}</option>
               <option value="utmMedium">{t('marketingDashboard.dimMedium', '媒介 (Medium)')}</option>

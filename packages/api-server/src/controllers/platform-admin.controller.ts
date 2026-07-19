@@ -168,7 +168,6 @@ export const deleteTenant = async (req: Request, res: Response) => {
 
       await sendEmail({
         to: notifyEmail,
-        bcc: saasAdminEmail,
         subject: '【重要警告】您的夏特點餐系統帳號即將被刪除',
         html: `
           <div style="font-family: sans-serif; padding: 20px;">

@@ -1,6 +1,6 @@
 import cron from 'node-cron';
 import prisma from '../lib/db.js';
-import { logger } from '../utils/logger.js';
+import logger from '../lib/logger.js';
 
 // Run every day at 03:00 AM
 export const startTenantCleanupCron = () => {
