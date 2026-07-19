@@ -22,7 +22,7 @@ interface MenuItem {
   isActive: boolean;
   trackStock?: boolean;
   stockQty?: number;
-  category: { id: string; name: string };
+  category: { id: string; name: string; sortOrder?: number };
   options: {
     id: string;
     name: string;
@@ -325,12 +325,15 @@ export default function OrderCreate() {
   const groupedItems = menuItems.reduce((acc, item) => {
     const catId = item.category?.id || 'uncategorized';
     const catName = item.category?.name || t('orderCreate.uncategorized') || (t('orderCreate.15bfc5') || '未分類');
+    const sortOrder = item.category?.sortOrder ?? 999;
     if (!acc[catId]) {
-      acc[catId] = { name: catName, items: [] };
+      acc[catId] = { id: catId, name: catName, sortOrder, items: [] };
     }
     acc[catId].items.push(item);
     return acc;
-  }, {} as Record<string, { name: string, items: MenuItem[] }>);
+  }, {} as Record<string, { id: string, name: string, sortOrder: number, items: MenuItem[] }>);
+
+  const sortedCategories = Object.values(groupedItems).sort((a, b) => a.sortOrder - b.sortOrder);
 
   return (
     <div className="pb-12">
@@ -365,7 +368,8 @@ export default function OrderCreate() {
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <h2 className="text-lg font-semibold mb-4">{t('orderCreate.selectProduct')}</h2>
             <div className="space-y-4">
-              {Object.entries(groupedItems).map(([categoryId, group]) => {
+              {sortedCategories.map((group) => {
+                const categoryId = group.id;
                 const isExpanded = expandedCategories[categoryId] !== false; // Default true (expanded)
                 return (
                   <div key={categoryId} className="border border-gray-200 rounded-lg overflow-hidden bg-white">

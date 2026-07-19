@@ -44,7 +44,7 @@ export async function getFunnelStats(req: Request, res: Response): Promise<void>
       return;
     }
 
-    const { startDate, endDate } = req.query;
+    const { startDate, endDate, campaigns: campaignsQuery } = req.query;
     const dateFilter: any = {};
     if (startDate) dateFilter.gte = new Date(startDate as string);
     if (endDate) dateFilter.lte = new Date(endDate as string);
@@ -54,7 +54,55 @@ export async function getFunnelStats(req: Request, res: Response): Promise<void>
       where.createdAt = dateFilter;
     }
 
-    // 取得所有事件
+    if (campaignsQuery) {
+      const campaigns = (campaignsQuery as string).split(',').map(c => c.trim()).filter(Boolean);
+      const result: Record<string, Record<string, number>> = {};
+
+      for (const campaign of campaigns) {
+        // 取得該代碼的所有事件
+        const events = await prisma.analyticsEvent.groupBy({
+          by: ['eventType'],
+          where: {
+            ...where,
+            metadata: {
+              path: ['utmCampaign'],
+              equals: campaign
+            }
+          },
+          _count: {
+            _all: true
+          }
+        });
+
+        // 計算該代碼的訂單數
+        const ordersCount = await prisma.order.count({
+          where: {
+            tenantId,
+            status: { not: 'CANCELLED' },
+            utmCampaign: campaign,
+            ...(Object.keys(dateFilter).length > 0 ? { createdAt: dateFilter } : {})
+          }
+        });
+
+        const counts: Record<string, number> = {
+          VIEW_MENU: 0,
+          ADD_TO_CART: 0,
+          BEGIN_CHECKOUT: 0,
+          PURCHASE: ordersCount
+        };
+
+        events.forEach(event => {
+          counts[event.eventType] = event._count._all;
+        });
+
+        result[campaign] = counts;
+      }
+
+      res.json({ success: true, data: result, isGrouped: true });
+      return;
+    }
+
+    // 取得所有事件 (預設全局漏斗)
     const events = await prisma.analyticsEvent.groupBy({
       by: ['eventType'],
       where,

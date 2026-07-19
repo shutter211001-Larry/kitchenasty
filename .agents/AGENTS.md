@@ -175,3 +175,15 @@ When working on any of these areas, always refer to this architecture to ensure 
 - Do NOT place them in package directories (like `packages/api-server/`).
 - NEVER push these files to Git.
 - After using a file with keys/secrets, you MUST ensure it is moved to or saved in the `scratch/` folder.
+
+## 30. Prisma Raw SQL Soft Delete Bypass Prevention
+**Trigger**: When writing or modifying raw SQL queries using `prisma.$queryRaw` or `Prisma.sql` against models that support soft deletes (e.g., `Order`, `User`, `MenuItem`, `Category`).
+**Rule**: The Prisma extension in `db.ts` that automatically filters out soft-deleted records (`deletedAt: null`) DOES NOT intercept raw SQL queries. 
+- You MUST manually append `AND "deletedAt" IS NULL` to the `WHERE` clause of every raw SQL query targeting these models. 
+- Failure to do so will result in soft-deleted (test or cancelled) records appearing in aggregated metrics and dashboards.
+
+## 31. Strict Revenue Calculation Standard
+**Trigger**: When writing or modifying queries (Prisma or SQL) that calculate "Revenue" or "Sales Total" in the dashboard, analytics, or ERP modules.
+**Rule**: You MUST explicitly verify that the order has been paid. 
+- Never rely solely on `status != 'CANCELLED'`.
+- You MUST explicitly filter by `"paymentStatus" = 'PAID'` (or in Prisma: `paymentStatus: 'PAID'`) to ensure unpaid test orders, abandoned carts, or pending cash-on-delivery orders are not prematurely counted as realized revenue.

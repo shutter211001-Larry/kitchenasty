@@ -13,13 +13,24 @@ export function useAnalytics() {
     return sid;
   }, []);
 
-  const trackEvent = useCallback((eventType: 'VIEW_MENU' | 'ADD_TO_CART' | 'BEGIN_CHECKOUT', metadata?: any) => {
+  const trackEvent = useCallback((eventType: 'VIEW_MENU' | 'ADD_TO_CART' | 'BEGIN_CHECKOUT', metadata: any = {}) => {
     const sessionId = getSessionId();
+    
+    // Automatically attach UTM parameters if available
+    const utmSource = sessionStorage.getItem('utmSource');
+    const utmMedium = sessionStorage.getItem('utmMedium');
+    const utmCampaign = sessionStorage.getItem('utmCampaign');
+    
+    const enrichedMetadata = { ...metadata };
+    if (utmSource) enrichedMetadata.utmSource = utmSource;
+    if (utmMedium) enrichedMetadata.utmMedium = utmMedium;
+    if (utmCampaign) enrichedMetadata.utmCampaign = utmCampaign;
+
     // Fire and forget
     api.post(TRACKING_ROUTES.EVENTS, {
       sessionId,
       eventType,
-      metadata
+      metadata: enrichedMetadata
     }).catch(err => {
       console.warn('Failed to track analytics event:', err);
     });

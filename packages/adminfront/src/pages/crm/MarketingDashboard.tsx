@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { BarChart3, TrendingUp, ShoppingBag, Target, Link as LinkIcon, Copy, Check, Info } from 'lucide-react';
+import { BarChart3, TrendingUp, ShoppingBag, Target, Link as LinkIcon, Copy, Check, Info, Plus, X } from 'lucide-react';
 import { api } from '../../lib/api.js';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer } from 'recharts';
 
 
 interface UTMStats {
@@ -17,7 +18,13 @@ export default function MarketingDashboard() {
   const [stats, setStats] = useState<UTMStats[]>([]);
   const [summary, setSummary] = useState({ totalUTMOrders: 0, totalUTMRevenue: 0 });
   
+  // Campaign Compare State
+  const [compareCampaigns, setCompareCampaigns] = useState<string[]>([]);
+  const [campaignInput, setCampaignInput] = useState('');
+
   // Funnel State
+  const [funnelData, setFunnelData] = useState<any[]>([]);
+  const [isGroupedFunnel, setIsGroupedFunnel] = useState(false);
   const [funnel, setFunnel] = useState<Record<string, number>>({
     VIEW_MENU: 0,
     ADD_TO_CART: 0,
@@ -53,7 +60,7 @@ export default function MarketingDashboard() {
 
   useEffect(() => {
     fetchStats();
-  }, [dateRange]);
+  }, [dateRange, compareCampaigns]);
 
   const fetchStats = async () => {
     try {
@@ -64,22 +71,54 @@ export default function MarketingDashboard() {
       if (dateRange === '30d') start.setDate(start.getDate() - 30);
       if (dateRange === '90d') start.setDate(start.getDate() - 90);
       
-      const query = dateRange !== 'all' 
-        ? `?startDate=${start.toISOString()}&endDate=${end.toISOString()}`
-        : '';
-
-      const res = await api.get<{ success: boolean; data: { stats: UTMStats[]; summary: any } }>(`/m9x4v${query}`);
+      const queryParamsObj = new URLSearchParams();
+      if (dateRange !== 'all') {
+        queryParamsObj.append('startDate', start.toISOString());
+        queryParamsObj.append('endDate', end.toISOString());
+      }
+      
+      // Fetch marketing stats
+      const queryStr = queryParamsObj.toString();
+      const finalQuery = queryStr ? `?${queryStr}` : '';
+      const res = await api.get<{ success: boolean; data: { stats: UTMStats[]; summary: any } }>(`/m9x4v${finalQuery}`);
       setStats(res.data.stats);
       setSummary(res.data.summary);
 
-      const funnelRes = await api.get<{ success: boolean; data: Record<string, number> }>(`/b3k1s${query}`);
+      // Fetch funnel stats
+      if (compareCampaigns.length > 0) {
+        queryParamsObj.append('campaigns', compareCampaigns.join(','));
+      }
+      const funnelQueryStr = queryParamsObj.toString();
+      const funnelFinalQuery = funnelQueryStr ? `?${funnelQueryStr}` : '';
+      
+      const funnelRes = await api.get<{ success: boolean; data: any; isGrouped?: boolean }>(`/b3k1s${funnelFinalQuery}`);
       if (funnelRes.success && funnelRes.data) {
-        setFunnel({
-          VIEW_MENU: funnelRes.data.VIEW_MENU || 0,
-          ADD_TO_CART: funnelRes.data.ADD_TO_CART || 0,
-          BEGIN_CHECKOUT: funnelRes.data.BEGIN_CHECKOUT || 0,
-          PURCHASE: funnelRes.data.PURCHASE || 0
-        });
+        if (funnelRes.isGrouped) {
+          setIsGroupedFunnel(true);
+          const steps = [
+            { key: 'VIEW_MENU', label: t('marketingDashboard.viewMenu', '瀏覽菜單') },
+            { key: 'ADD_TO_CART', label: t('marketingDashboard.addToCart', '加入購物車') },
+            { key: 'BEGIN_CHECKOUT', label: t('marketingDashboard.beginCheckout', '開始結帳') },
+            { key: 'PURCHASE', label: t('marketingDashboard.purchase', '完成購買') }
+          ];
+          
+          const chartData = steps.map(step => {
+            const dataPoint: any = { name: step.label };
+            compareCampaigns.forEach(camp => {
+              dataPoint[camp] = funnelRes.data[camp]?.[step.key] || 0;
+            });
+            return dataPoint;
+          });
+          setFunnelData(chartData);
+        } else {
+          setIsGroupedFunnel(false);
+          setFunnel({
+            VIEW_MENU: funnelRes.data.VIEW_MENU || 0,
+            ADD_TO_CART: funnelRes.data.ADD_TO_CART || 0,
+            BEGIN_CHECKOUT: funnelRes.data.BEGIN_CHECKOUT || 0,
+            PURCHASE: funnelRes.data.PURCHASE || 0
+          });
+        }
       }
     } catch (err) {
       console.error('Failed to fetch marketing stats', err);
@@ -205,45 +244,113 @@ export default function MarketingDashboard() {
       </div>
 
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">{t('marketingDashboard.funnelAnalysis', '購物漏斗轉換分析 (Shopping Funnel Analysis)')}</h2>
-        
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-          {[
-            { label: t('marketingDashboard.viewMenu', '瀏覽菜單'), value: funnel.VIEW_MENU, color: 'bg-blue-500' },
-            { label: t('marketingDashboard.addToCart', '加入購物車'), value: funnel.ADD_TO_CART, color: 'bg-indigo-500' },
-            { label: t('marketingDashboard.beginCheckout', '開始結帳'), value: funnel.BEGIN_CHECKOUT, color: 'bg-purple-500' },
-            { label: t('marketingDashboard.purchase', '完成購買'), value: funnel.PURCHASE, color: 'bg-green-500' }
-          ].map((step, idx, arr) => {
-            const maxVal = Math.max(funnel.VIEW_MENU, funnel.ADD_TO_CART, funnel.BEGIN_CHECKOUT, funnel.PURCHASE, 1);
-            const heightPerc = Math.min(100, Math.max(10, Math.round((step.value / maxVal) * 100)));
-            const prevVal = idx === 0 ? step.value : arr[idx - 1].value;
-            const dropoff = prevVal === 0 ? 0 : Math.round(((prevVal - step.value) / prevVal) * 100);
-
-            return (
-              <React.Fragment key={idx}>
-                <div className="flex flex-col items-center flex-1 w-full">
-                  <div className="h-40 w-full flex items-end justify-center mb-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg p-2">
-                    <div 
-                      className={`${step.color} w-16 md:w-20 rounded-t-md transition-all duration-1000 ease-in-out flex items-start justify-center pt-2`}
-                      style={{ height: `${heightPerc}%` }}
-                    >
-                      <span className="text-white font-bold text-sm drop-shadow-md">{step.value}</span>
-                    </div>
-                  </div>
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{step.label}</span>
-                </div>
-                
-                {idx < arr.length - 1 && (
-                  <div className="flex flex-col items-center justify-center px-2">
-                    <span className="text-xs text-red-500 font-medium mb-1 whitespace-nowrap">{t('marketingDashboard.dropoff', '流失')} {dropoff}%</span>
-                    <div className="hidden md:block w-8 h-px bg-gray-300 dark:bg-gray-600"></div>
-                    <div className="md:hidden h-8 w-px bg-gray-300 dark:bg-gray-600"></div>
-                  </div>
-                )}
-              </React.Fragment>
-            );
-          })}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{t('marketingDashboard.funnelAnalysis', '購物漏斗轉換分析 (Shopping Funnel Analysis)')}</h2>
+          
+          <div className="flex items-center gap-2">
+            <div className="relative flex items-center shadow-sm">
+              <input 
+                type="text" 
+                value={campaignInput}
+                onChange={(e) => setCampaignInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && campaignInput.trim()) {
+                    if (!compareCampaigns.includes(campaignInput.trim())) {
+                      setCompareCampaigns([...compareCampaigns, campaignInput.trim()]);
+                    }
+                    setCampaignInput('');
+                  }
+                }}
+                placeholder={t('marketingDashboard.addCampaign', '輸入代碼並按 Enter')}
+                className="rounded-l-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm py-1.5 focus:ring-primary-500 focus:border-primary-500 w-48"
+              />
+              <button 
+                onClick={() => {
+                  if (campaignInput.trim() && !compareCampaigns.includes(campaignInput.trim())) {
+                    setCompareCampaigns([...compareCampaigns, campaignInput.trim()]);
+                    setCampaignInput('');
+                  }
+                }}
+                className="bg-primary-600 hover:bg-primary-700 text-white p-2 rounded-r-lg"
+              >
+                <Plus size={18} />
+              </button>
+            </div>
+          </div>
         </div>
+
+        {compareCampaigns.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-6">
+            {compareCampaigns.map(camp => (
+              <div key={camp} className="flex items-center gap-1 bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 px-3 py-1 rounded-full text-sm font-medium border border-primary-200 dark:border-primary-800">
+                {camp}
+                <button onClick={() => setCompareCampaigns(compareCampaigns.filter(c => c !== camp))} className="hover:text-primary-900 dark:hover:text-white hover:bg-primary-200 dark:hover:bg-primary-800 rounded-full p-0.5 transition-colors">
+                  <X size={14} />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+        
+        {isGroupedFunnel && compareCampaigns.length > 0 ? (
+          <div className="h-[300px] w-full mt-4">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={funnelData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#374151" opacity={0.2} />
+                <XAxis dataKey="name" tick={{ fill: '#6B7280', fontSize: 12 }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fill: '#6B7280', fontSize: 12 }} axisLine={false} tickLine={false} />
+                <RechartsTooltip 
+                  contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)', backgroundColor: 'var(--tw-bg-opacity, rgba(255, 255, 255, 0.95))' }}
+                  cursor={{ fill: '#F3F4F6', opacity: 0.4 }}
+                />
+                <Legend iconType="circle" wrapperStyle={{ fontSize: '12px', paddingTop: '20px' }} />
+                {compareCampaigns.map((camp, idx) => {
+                  const colors = ['#3B82F6', '#10B981', '#F59E0B', '#6366F1', '#EC4899', '#8B5CF6'];
+                  const color = colors[idx % colors.length];
+                  return <Bar key={camp} dataKey={camp} name={camp} fill={color} radius={[4, 4, 0, 0]} maxBarSize={60} />;
+                })}
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        ) : (
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            {[
+              { label: t('marketingDashboard.viewMenu', '瀏覽菜單'), value: funnel.VIEW_MENU, color: 'bg-blue-500' },
+              { label: t('marketingDashboard.addToCart', '加入購物車'), value: funnel.ADD_TO_CART, color: 'bg-indigo-500' },
+              { label: t('marketingDashboard.beginCheckout', '開始結帳'), value: funnel.BEGIN_CHECKOUT, color: 'bg-purple-500' },
+              { label: t('marketingDashboard.purchase', '完成購買'), value: funnel.PURCHASE, color: 'bg-green-500' }
+            ].map((step, idx, arr) => {
+              const maxVal = Math.max(funnel.VIEW_MENU, funnel.ADD_TO_CART, funnel.BEGIN_CHECKOUT, funnel.PURCHASE, 1);
+              const heightPerc = Math.min(100, Math.max(10, Math.round((step.value / maxVal) * 100)));
+              const prevVal = idx === 0 ? step.value : arr[idx - 1].value;
+              const dropoff = prevVal === 0 ? 0 : Math.round(((prevVal - step.value) / prevVal) * 100);
+
+              return (
+                <React.Fragment key={idx}>
+                  <div className="flex flex-col items-center flex-1 w-full">
+                    <div className="h-40 w-full flex items-end justify-center mb-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg p-2">
+                      <div 
+                        className={`${step.color} w-16 md:w-20 rounded-t-md transition-all duration-1000 ease-in-out flex items-start justify-center pt-2`}
+                        style={{ height: `${heightPerc}%` }}
+                      >
+                        <span className="text-white font-bold text-sm drop-shadow-md">{step.value}</span>
+                      </div>
+                    </div>
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{step.label}</span>
+                  </div>
+                  
+                  {idx < arr.length - 1 && (
+                    <div className="flex flex-col items-center justify-center px-2">
+                      <span className="text-xs text-red-500 font-medium mb-1 whitespace-nowrap">{t('marketingDashboard.dropoff', '流失')} {dropoff}%</span>
+                      <div className="hidden md:block w-8 h-px bg-gray-300 dark:bg-gray-600"></div>
+                      <div className="md:hidden h-8 w-px bg-gray-300 dark:bg-gray-600"></div>
+                    </div>
+                  )}
+                </React.Fragment>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
