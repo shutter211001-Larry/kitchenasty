@@ -31,15 +31,15 @@ export async function getDashboardStats(req: Request, res: Response): Promise<vo
     const [orderMetrics] = await prisma.$queryRaw<any[]>`
       SELECT
         COUNT(CASE WHEN "createdAt" >= ${todayStart} THEN 1 END)::bigint AS "ordersToday",
-        COALESCE(SUM(CASE WHEN "createdAt" >= ${todayStart} AND status != 'CANCELLED' THEN total ELSE 0 END), 0)::double precision AS "revenueToday",
+        COALESCE(SUM(CASE WHEN "createdAt" >= ${todayStart} AND status != 'CANCELLED' AND "paymentStatus" = 'PAID' THEN total ELSE 0 END), 0)::double precision AS "revenueToday",
         COUNT(CASE WHEN "createdAt" >= ${weekStart} THEN 1 END)::bigint AS "ordersThisWeek",
-        COALESCE(SUM(CASE WHEN "createdAt" >= ${weekStart} AND status != 'CANCELLED' THEN total ELSE 0 END), 0)::double precision AS "revenueThisWeek",
+        COALESCE(SUM(CASE WHEN "createdAt" >= ${weekStart} AND status != 'CANCELLED' AND "paymentStatus" = 'PAID' THEN total ELSE 0 END), 0)::double precision AS "revenueThisWeek",
         COUNT(CASE WHEN "createdAt" >= ${monthStart} THEN 1 END)::bigint AS "ordersThisMonth",
-        COALESCE(SUM(CASE WHEN "createdAt" >= ${monthStart} AND status != 'CANCELLED' THEN total ELSE 0 END), 0)::double precision AS "revenueThisMonth",
+        COALESCE(SUM(CASE WHEN "createdAt" >= ${monthStart} AND status != 'CANCELLED' AND "paymentStatus" = 'PAID' THEN total ELSE 0 END), 0)::double precision AS "revenueThisMonth",
         COUNT(*)::bigint AS "totalOrders",
-        COALESCE(SUM(CASE WHEN status != 'CANCELLED' THEN total ELSE 0 END), 0)::double precision AS "totalRevenue"
+        COALESCE(SUM(CASE WHEN status != 'CANCELLED' AND "paymentStatus" = 'PAID' THEN total ELSE 0 END), 0)::double precision AS "totalRevenue"
       FROM "orders"
-      WHERE "tenantId" = ${tenantId}
+      WHERE "tenantId" = ${tenantId} AND "deletedAt" IS NULL
     `;
 
     const [
@@ -133,9 +133,9 @@ export async function getAnalytics(req: Request, res: Response): Promise<void> {
       SELECT
         TO_CHAR("createdAt"::date, 'YYYY-MM-DD') AS date,
         COUNT(*)::bigint AS orders,
-        COALESCE(SUM(CASE WHEN status != 'CANCELLED' THEN total ELSE 0 END), 0) AS revenue
+        COALESCE(SUM(CASE WHEN status != 'CANCELLED' AND "paymentStatus" = 'PAID' THEN total ELSE 0 END), 0) AS revenue
       FROM "orders"
-      WHERE "createdAt" >= ${startDate} AND "tenantId" = ${tenantId}
+      WHERE "createdAt" >= ${startDate} AND "tenantId" = ${tenantId} AND "deletedAt" IS NULL
       GROUP BY "createdAt"::date
       ORDER BY "createdAt"::date
     `
