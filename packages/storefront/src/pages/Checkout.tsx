@@ -17,7 +17,7 @@ import { CustomGoogleLoginButton } from '../components/ui/CustomGoogleLoginButto
 import { useLocations } from '../hooks/useLocations.js';
 
 type OrderType = 'delivery' | 'pickup' | 'frozen_delivery';
-type PaymentMethod = 'cash' | 'stripe' | 'paypal' | 'linepay';
+type PaymentMethod = 'cash' | 'stripe' | 'paypal' | 'linepay' | 'bank_transfer';
 
 // Default tax rate fallback if settings not loaded
 const DEFAULT_TAX_RATE = 0;
@@ -236,7 +236,8 @@ export default function Checkout() {
         (current === 'stripe' && paymentSettings.stripeEnabled) ||
         (current === 'paypal' && paymentSettings.paypalEnabled) ||
         (current === 'linepay' && paymentSettings.linePayEnabled) ||
-        (current === 'cash' && paymentSettings.cashEnabled);
+        (current === 'cash' && paymentSettings.cashEnabled) ||
+        (current === 'bank_transfer' && paymentSettings.bankTransferEnabled && orderType === 'frozen_delivery');
       return isValid ? current : null;
     });
   }, [paymentSettings]);
@@ -1168,7 +1169,7 @@ export default function Checkout() {
           </div>
 
           {/* Payment method */}
-          {paymentSettings?.stripeEnabled || paymentSettings?.paypalEnabled || paymentSettings?.cashEnabled || paymentSettings?.linePayEnabled ? (
+          {paymentSettings?.stripeEnabled || paymentSettings?.paypalEnabled || paymentSettings?.cashEnabled || paymentSettings?.linePayEnabled || (paymentSettings?.bankTransferEnabled && orderType === 'frozen_delivery') ? (
             <div 
               ref={paymentSectionRef}
               className={`surface-card rounded-xl shadow-sm border p-6 transition-all duration-300 ${
@@ -1274,6 +1275,30 @@ export default function Checkout() {
                   <div className="flex flex-col">
                     <span className="text-sm font-bold">LINE Pay</span>
                     <span className="text-[10px] opacity-70">{t('checkout.payWithLinePay')}</span>
+                  </div>
+                </label>
+                )}
+                {paymentSettings?.bankTransferEnabled && orderType === 'frozen_delivery' && (
+                  <label
+                    className={`flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition-colors ${
+                    paymentMethod === 'bank_transfer'
+                      ? 'border-primary-600 bg-primary-50 text-primary-700 shadow-sm'
+                      : 'border-input hover:border-gray-300 text-sub'
+                  }`}
+                  >
+                  <input
+                    type="radio"
+                    name="payment"
+                    checked={paymentMethod === 'bank_transfer'}
+                    onChange={() => {
+                      setPaymentMethod('bank_transfer');
+                      setShowPaymentError(false);
+                    }}
+                    className="accent-primary-600 w-4 h-4"
+                  />
+                  <div className="flex flex-col">
+                    <span className="text-sm font-bold">{t('checkout.bankTransfer', '匯款後出貨')}</span>
+                    <span className="text-[10px] opacity-70">{t('checkout.payWithBankTransfer', '下單後上傳匯款帳號後五碼')}</span>
                   </div>
                 </label>
                 )}

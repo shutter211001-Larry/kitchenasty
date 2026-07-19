@@ -41,7 +41,8 @@
     "logout": "로그아웃",
     "finance": "재무",
     "marketingDashboard": "마케팅 대시보드",
-    "pos": "POS Register"
+    "pos": "POS Register",
+    "reconciliation": "Bank Reconciliation"
   },
   "staff": {
     "title": "직원 관리 (Staff)",

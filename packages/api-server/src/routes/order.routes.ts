@@ -6,7 +6,8 @@ import {
   createOrder, listOrders, listCustomerOrders, getOrder, 
   updateOrderStatus, deleteOrder, exportOrders, importOrders, 
   downloadOrderTemplate, checkOrderReminders, lookupOrder, claimOrder,
-  cancelOrder, updateOrderDiscount, updateOrderPaymentStatus, addOrderPayment, calculateOrderSummary
+  cancelOrder, updateOrderDiscount, updateOrderPaymentStatus, addOrderPayment, calculateOrderSummary,
+  submitBankTransferDetails, confirmBankTransfer
 } from '../controllers/order.controller.js';
 import { checkIPBlacklist, checkCustomerBlacklist, orderRateLimiter } from '../middleware/security.js';
 
@@ -41,6 +42,8 @@ router.patch('/:id/status', authenticate, requirePermission('MANAGE_ORDERS', ['S
 router.patch('/:id/payment-status', authenticate, requirePermission('MANAGE_ORDERS', ['SUPER_ADMIN', 'MANAGER', 'STAFF']), updateOrderPaymentStatus);
 router.post('/:id/payments', authenticate, requirePermission('MANAGE_ORDERS', ['SUPER_ADMIN', 'MANAGER', 'STAFF']), addOrderPayment);
 router.patch('/:id/discount', authenticate, requirePermission('MANAGE_ORDERS', ['SUPER_ADMIN', 'MANAGER']), updateOrderDiscount);
+router.post('/:id/bank-transfer', optionalAuth, checkIPBlacklist, checkCustomerBlacklist, submitBankTransferDetails);
+router.post('/:id/confirm-payment', authenticate, requirePermission('MANAGE_ORDERS', ['SUPER_ADMIN', 'MANAGER', 'STAFF']), confirmBankTransfer);
 router.post('/reminders', authenticate, requireStaff, checkOrderReminders);
 router.delete('/:id', authenticate, requireRole('SUPER_ADMIN', 'MANAGER'), deleteOrder);
 

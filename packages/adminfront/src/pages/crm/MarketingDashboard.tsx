@@ -18,9 +18,9 @@ export default function MarketingDashboard() {
   const [stats, setStats] = useState<UTMStats[]>([]);
   const [summary, setSummary] = useState({ totalUTMOrders: 0, totalUTMRevenue: 0 });
   
-  // Campaign Compare State
-  const [compareCampaigns, setCompareCampaigns] = useState<string[]>([]);
-  const [campaignInput, setCampaignInput] = useState('');
+  // Analytics Dimension State
+  const [dimension, setDimension] = useState<string>('utmSource');
+  const [topDimensions, setTopDimensions] = useState<string[]>([]);
 
   // Funnel State
   const [funnelData, setFunnelData] = useState<any[]>([]);
@@ -60,7 +60,7 @@ export default function MarketingDashboard() {
 
   useEffect(() => {
     fetchStats();
-  }, [dateRange, compareCampaigns]);
+  }, [dateRange, dimension]);
 
   const fetchStats = async () => {
     try {
@@ -85,16 +85,16 @@ export default function MarketingDashboard() {
       setSummary(res.data.summary);
 
       // Fetch funnel stats
-      if (compareCampaigns.length > 0) {
-        queryParamsObj.append('campaigns', compareCampaigns.join(','));
-      }
+      queryParamsObj.append('dimension', dimension);
       const funnelQueryStr = queryParamsObj.toString();
       const funnelFinalQuery = funnelQueryStr ? `?${funnelQueryStr}` : '';
       
-      const funnelRes = await api.get<{ success: boolean; data: any; isGrouped?: boolean }>(`/b3k1s${funnelFinalQuery}`);
+      const funnelRes = await api.get<{ success: boolean; data: any; isGrouped?: boolean, topDimensions?: string[] }>(`/b3k1s${funnelFinalQuery}`);
       if (funnelRes.success && funnelRes.data) {
         if (funnelRes.isGrouped) {
           setIsGroupedFunnel(true);
+          const topDims = funnelRes.topDimensions || [];
+          setTopDimensions(topDims);
           const steps = [
             { key: 'VIEW_MENU', label: t('marketingDashboard.viewMenu', '瀏覽菜單') },
             { key: 'ADD_TO_CART', label: t('marketingDashboard.addToCart', '加入購物車') },
@@ -104,7 +104,7 @@ export default function MarketingDashboard() {
           
           const chartData = steps.map(step => {
             const dataPoint: any = { name: step.label };
-            compareCampaigns.forEach(camp => {
+            topDims.forEach(camp => {
               dataPoint[camp] = funnelRes.data[camp]?.[step.key] || 0;
             });
             return dataPoint;
@@ -248,51 +248,31 @@ export default function MarketingDashboard() {
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{t('marketingDashboard.funnelAnalysis', '購物漏斗轉換分析 (Shopping Funnel Analysis)')}</h2>
           
           <div className="flex items-center gap-2">
-            <div className="relative flex items-center shadow-sm">
-              <input 
-                type="text" 
-                value={campaignInput}
-                onChange={(e) => setCampaignInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && campaignInput.trim()) {
-                    if (!compareCampaigns.includes(campaignInput.trim())) {
-                      setCompareCampaigns([...compareCampaigns, campaignInput.trim()]);
-                    }
-                    setCampaignInput('');
-                  }
-                }}
-                placeholder={t('marketingDashboard.addCampaign', '輸入代碼並按 Enter')}
-                className="rounded-l-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm py-1.5 focus:ring-primary-500 focus:border-primary-500 w-48"
-              />
-              <button 
-                onClick={() => {
-                  if (campaignInput.trim() && !compareCampaigns.includes(campaignInput.trim())) {
-                    setCompareCampaigns([...compareCampaigns, campaignInput.trim()]);
-                    setCampaignInput('');
-                  }
-                }}
-                className="bg-primary-600 hover:bg-primary-700 text-white p-2 rounded-r-lg"
-              >
-                <Plus size={18} />
-              </button>
-            </div>
+            <span className="text-sm text-gray-500 font-medium">{t('marketingDashboard.dimensionLabel', '分析維度:')}</span>
+            <select 
+              value={dimension}
+              onChange={(e) => setDimension(e.target.value)}
+              className="rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm py-1.5 px-3 focus:ring-primary-500 focus:border-primary-500 shadow-sm"
+            >
+              <option value="utmSource">{t('marketingDashboard.dimSource', '來源 (Source)')}</option>
+              <option value="utmMedium">{t('marketingDashboard.dimMedium', '媒介 (Medium)')}</option>
+              <option value="utmCampaign">{t('marketingDashboard.dimCampaign', '活動 (Campaign)')}</option>
+            </select>
           </div>
         </div>
 
-        {compareCampaigns.length > 0 && (
-          <div className="flex flex-wrap gap-2 mb-6">
-            {compareCampaigns.map(camp => (
+        {topDimensions.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-6 items-center">
+            <span className="text-xs text-gray-500">{t('marketingDashboard.topResults', 'Top 5 結果:')}</span>
+            {topDimensions.map(camp => (
               <div key={camp} className="flex items-center gap-1 bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 px-3 py-1 rounded-full text-sm font-medium border border-primary-200 dark:border-primary-800">
                 {camp}
-                <button onClick={() => setCompareCampaigns(compareCampaigns.filter(c => c !== camp))} className="hover:text-primary-900 dark:hover:text-white hover:bg-primary-200 dark:hover:bg-primary-800 rounded-full p-0.5 transition-colors">
-                  <X size={14} />
-                </button>
               </div>
             ))}
           </div>
         )}
         
-        {isGroupedFunnel && compareCampaigns.length > 0 ? (
+        {isGroupedFunnel && topDimensions.length > 0 ? (
           <div className="h-[300px] w-full mt-4">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={funnelData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
@@ -304,7 +284,7 @@ export default function MarketingDashboard() {
                   cursor={{ fill: '#F3F4F6', opacity: 0.4 }}
                 />
                 <Legend iconType="circle" wrapperStyle={{ fontSize: '12px', paddingTop: '20px' }} />
-                {compareCampaigns.map((camp, idx) => {
+                {topDimensions.map((camp, idx) => {
                   const colors = ['#3B82F6', '#10B981', '#F59E0B', '#6366F1', '#EC4899', '#8B5CF6'];
                   const color = colors[idx % colors.length];
                   return <Bar key={camp} dataKey={camp} name={camp} fill={color} radius={[4, 4, 0, 0]} maxBarSize={60} />;

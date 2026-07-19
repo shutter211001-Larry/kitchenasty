@@ -69,10 +69,12 @@ export interface SiteSettings {
     loyaltyRedeemRate?: number;
   };
   paymentSettings?: {
-    cashEnabled?: boolean;
     stripeEnabled?: boolean;
     paypalEnabled?: boolean;
     linePayEnabled?: boolean;
+    cashEnabled?: boolean;
+    bankTransferEnabled?: boolean;
+    bankTransferInfo?: string;
   };
   reservationSettings?: {
     enabled?: boolean;

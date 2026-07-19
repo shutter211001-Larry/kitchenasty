@@ -19,12 +19,19 @@ export async function recordEvent(req: Request, res: Response): Promise<void> {
       return;
     }
 
+    const utmSource = metadata?.utmSource || null;
+    const utmMedium = metadata?.utmMedium || null;
+    const utmCampaign = metadata?.utmCampaign || null;
+
     await prisma.analyticsEvent.create({
       data: {
         tenantId,
         sessionId,
         eventType,
         metadata: metadata || {},
+        utmSource,
+        utmMedium,
+        utmCampaign
       }
     });
 
@@ -44,7 +51,7 @@ export async function getFunnelStats(req: Request, res: Response): Promise<void>
       return;
     }
 
-    const { startDate, endDate, campaigns: campaignsQuery } = req.query;
+    const { startDate, endDate, dimension } = req.query;
     const dateFilter: any = {};
     if (startDate) dateFilter.gte = new Date(startDate as string);
     if (endDate) dateFilter.lte = new Date(endDate as string);
@@ -54,51 +61,64 @@ export async function getFunnelStats(req: Request, res: Response): Promise<void>
       where.createdAt = dateFilter;
     }
 
-    if (campaignsQuery) {
-      const campaigns = (campaignsQuery as string).split(',').map(c => c.trim()).filter(Boolean);
+    if (dimension && typeof dimension === 'string' && ['utmSource', 'utmMedium', 'utmCampaign'].includes(dimension)) {
+      // 1. Group events by dimension and eventType
+      const events = await prisma.analyticsEvent.groupBy({
+        by: ['eventType', dimension as any],
+        where: {
+          ...where,
+          [dimension]: { not: null }
+        },
+        _count: { _all: true }
+      });
+
+      // 2. Group orders by dimension
+      const ordersCount = await prisma.order.groupBy({
+        by: [dimension as any],
+        where: {
+          tenantId,
+          status: { not: 'CANCELLED' },
+          paymentStatus: 'PAID',
+          [dimension]: { not: null },
+          ...(Object.keys(dateFilter).length > 0 ? { createdAt: dateFilter } : {})
+        },
+        _count: { _all: true }
+      });
+
+      // 3. Find top N dimensions by total event/order volume
+      const volumeMap: Record<string, number> = {};
+      events.forEach(e => {
+        const val = (e as any)[dimension];
+        if (val) volumeMap[val] = (volumeMap[val] || 0) + e._count._all;
+      });
+      ordersCount.forEach(o => {
+        const val = (o as any)[dimension];
+        if (val) volumeMap[val] = (volumeMap[val] || 0) + o._count._all;
+      });
+
+      const topDimensions = Object.keys(volumeMap)
+        .sort((a, b) => volumeMap[b] - volumeMap[a])
+        .slice(0, 5);
+
       const result: Record<string, Record<string, number>> = {};
+      topDimensions.forEach(dim => {
+        result[dim] = { VIEW_MENU: 0, ADD_TO_CART: 0, BEGIN_CHECKOUT: 0, PURCHASE: 0 };
+      });
 
-      for (const campaign of campaigns) {
-        // 取得該代碼的所有事件
-        const events = await prisma.analyticsEvent.groupBy({
-          by: ['eventType'],
-          where: {
-            ...where,
-            metadata: {
-              path: ['utmCampaign'],
-              equals: campaign
-            }
-          },
-          _count: {
-            _all: true
-          }
-        });
+      events.forEach(e => {
+        const val = (e as any)[dimension];
+        if (val && topDimensions.includes(val)) {
+          result[val][e.eventType] = e._count._all;
+        }
+      });
+      ordersCount.forEach(o => {
+        const val = (o as any)[dimension];
+        if (val && topDimensions.includes(val)) {
+          result[val]['PURCHASE'] = o._count._all;
+        }
+      });
 
-        // 計算該代碼的訂單數
-        const ordersCount = await prisma.order.count({
-          where: {
-            tenantId,
-            status: { not: 'CANCELLED' },
-            utmCampaign: campaign,
-            ...(Object.keys(dateFilter).length > 0 ? { createdAt: dateFilter } : {})
-          }
-        });
-
-        const counts: Record<string, number> = {
-          VIEW_MENU: 0,
-          ADD_TO_CART: 0,
-          BEGIN_CHECKOUT: 0,
-          PURCHASE: ordersCount
-        };
-
-        events.forEach(event => {
-          counts[event.eventType] = event._count._all;
-        });
-
-        result[campaign] = counts;
-      }
-
-      res.json({ success: true, data: result, isGrouped: true });
+      res.json({ success: true, data: result, isGrouped: true, topDimensions });
       return;
     }
 
@@ -116,6 +136,7 @@ export async function getFunnelStats(req: Request, res: Response): Promise<void>
       where: {
         tenantId,
         status: { not: 'CANCELLED' },
+        paymentStatus: 'PAID',
         ...(Object.keys(dateFilter).length > 0 ? { createdAt: dateFilter } : {})
       }
     });

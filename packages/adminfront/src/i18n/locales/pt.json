@@ -41,7 +41,8 @@
     "logout": "Logout",
     "finance": "Finanças",
     "marketingDashboard": "Painel de Marketing",
-    "pos": "POS Register"
+    "pos": "POS Register",
+    "reconciliation": "Bank Reconciliation"
   },
   "staff": {
     "title": "Staff Management",

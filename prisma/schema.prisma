@@ -90,13 +90,19 @@ model AnalyticsEvent {
   tenantId  String
   sessionId String
   eventType String // 'VIEW_MENU', 'ADD_TO_CART', 'BEGIN_CHECKOUT'
-  metadata  Json?
-  createdAt DateTime @default(now()) @db.Timestamptz
+  metadata    Json?
+  utmSource   String?
+  utmMedium   String?
+  utmCampaign String?
+  createdAt   DateTime @default(now()) @db.Timestamptz
 
   tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   @@index([tenantId, eventType, createdAt])
   @@index([sessionId])
+  @@index([utmSource])
+  @@index([utmMedium])
+  @@index([utmCampaign])
   @@map("analytics_events")
 }
 
@@ -1006,6 +1012,7 @@ enum PaymentMethod {
   STRIPE
   PAYPAL
   LINE_PAY
+  BANK_TRANSFER
 }
 
 enum PaymentStatus {

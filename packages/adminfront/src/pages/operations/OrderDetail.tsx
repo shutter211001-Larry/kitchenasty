@@ -45,6 +45,7 @@ interface OrderDetail {
   isRemote?: boolean;
   distance?: number | null;
   paymentStatus?: string | null;
+  payments?: any[];
 }
 
 const STATUSES = [
@@ -397,6 +398,45 @@ export default function OrderDetailPage() {
           {/* Payment status update */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
             <h2 className="text-lg font-semibold text-gray-900 mb-4 font-sans">{t('orderDetail.updatePaymentStatus')}</h2>
+            
+            {(() => {
+              const pendingBank = order.payments?.find((p: any) => p.method === 'BANK_TRANSFER' && p.status === 'PENDING');
+              if (pendingBank) {
+                return (
+                  <div className="mb-4 bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+                    <h3 className="font-semibold text-yellow-800 mb-2">匯款對帳 (待確認)</h3>
+                    <p className="text-sm text-yellow-700 mb-1">匯款後五碼: <span className="font-mono bg-white px-1 rounded">{pendingBank.metadata?.last5Digits || '尚未填寫'}</span></p>
+                    <p className="text-sm text-yellow-700 mb-3">匯款日期: {pendingBank.metadata?.transferDate || '尚未填寫'}</p>
+                    <button
+                      onClick={async () => {
+                        if (!await confirm('確認已收到匯款嗎？確認後將無法撤回。')) return;
+                        setUpdating(true);
+                        try {
+                          const res = await api.post(`orders/${id}/confirm-payment`, {});
+                          if (res.success) {
+                            toast.success('匯款確認成功');
+                            const updated = await api.get<any>(`orders/${id}`);
+                            setOrder(updated.data || updated);
+                          } else {
+                            toast.error(res.error || '確認失敗');
+                          }
+                        } catch (err: any) {
+                          toast.error(err.message || '確認失敗');
+                        } finally {
+                          setUpdating(false);
+                        }
+                      }}
+                      disabled={updating || !pendingBank.metadata?.last5Digits}
+                      className="w-full py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded font-medium disabled:opacity-50 transition-colors"
+                    >
+                      {updating ? '處理中...' : '確認收款'}
+                    </button>
+                  </div>
+                );
+              }
+              return null;
+            })()}
+
             <div className="flex gap-2">
               <button
                 disabled={updating || order.paymentStatus === 'PAID'}

@@ -41,7 +41,8 @@
     "logout": "登出",
     "finance": "財務損益",
     "marketingDashboard": "行銷儀表板",
-    "pos": "POS收銀台"
+    "pos": "POS收銀台",
+    "reconciliation": "匯款對帳管理"
   },
   "staff": {
     "title": "員工管理 (Staff)",

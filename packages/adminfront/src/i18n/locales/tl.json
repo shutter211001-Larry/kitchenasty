@@ -41,7 +41,8 @@
     "logout": "Logout",
     "finance": "Pananalapi",
     "marketingDashboard": "Marketing Dashboard",
-    "pos": "POS Register"
+    "pos": "POS Register",
+    "reconciliation": "Bank Reconciliation"
   },
   "staff": {
     "title": "Staff Management",

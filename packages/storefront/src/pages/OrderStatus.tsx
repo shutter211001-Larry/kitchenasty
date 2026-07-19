@@ -60,6 +60,9 @@ export default function OrderStatus() {const { t, i18n } = useTranslation();
   const [cancelling, setCancelling] = useState(false);
   const [timeLeftStr, setTimeLeftStr] = useState('');
   const [gachaResults, setGachaResults] = useState<GachaResult[]>([]);
+  const [bankLast5, setBankLast5] = useState('');
+  const [bankTransferDate, setBankTransferDate] = useState(new Date().toISOString().split('T')[0]);
+  const [submittingBank, setSubmittingBank] = useState(false);
 
   useEffect(() => {
     try {
@@ -135,6 +138,32 @@ export default function OrderStatus() {const { t, i18n } = useTranslation();
       toast.error(t('orderStatus.cancelFailedTryLater'));
     } finally {
       setCancelling(false);
+    }
+  }
+
+  async function handleBankTransferSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!bankLast5 || bankLast5.length !== 5) {
+      toast.error(t('orderStatus.invalidBankDigits') || '請輸入正確的帳號後五碼');
+      return;
+    }
+    setSubmittingBank(true);
+    try {
+      const data = await api.post<any>(`/orders/${id}/bank-transfer`, {
+        last5Digits: bankLast5,
+        transferDate: bankTransferDate
+      });
+      if (data.success) {
+        toast.success(t('orderStatus.bankTransferSubmitted') || '匯款資訊已送出，請等待管理員確認');
+        const updatedOrder = await api.get<any>(`/orders/${id}`);
+        setOrder(updatedOrder.data || updatedOrder);
+      } else {
+        toast.error(data.error || 'Submit failed');
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Submit failed');
+    } finally {
+      setSubmittingBank(false);
     }
   }
 
@@ -478,6 +507,71 @@ export default function OrderStatus() {const { t, i18n } = useTranslation();
       )}
 
       {/* Order Items */}
+      {/* Bank Transfer Form Section */}
+      {order.payments?.some((p: any) => p.method === 'BANK_TRANSFER' && p.status === 'PENDING') && (
+        <div className="surface-card rounded-xl shadow-sm border p-6 mb-6">
+          <h2 className="text-lg font-semibold text-main mb-4">{t('orderStatus.bankTransferTitle') || '匯款資訊'}</h2>
+          
+          {(() => {
+            const p = order.payments.find((p: any) => p.method === 'BANK_TRANSFER' && p.status === 'PENDING');
+            if (p.metadata?.last5Digits) {
+              return (
+                <div className="bg-yellow-50 text-yellow-800 p-4 rounded-lg">
+                  <p className="font-medium">{t('orderStatus.bankTransferSubmittedMsg') || '您的匯款資訊已送出，等待管理員對帳中...'}</p>
+                  <p className="text-sm mt-1">
+                    {t('orderStatus.last5Digits') || '後五碼'}: {p.metadata.last5Digits} <br/>
+                    {t('orderStatus.transferDate') || '匯款日期'}: {p.metadata.transferDate}
+                  </p>
+                </div>
+              );
+            }
+            
+            return (
+              <form onSubmit={handleBankTransferSubmit} className="space-y-4">
+                <div className="bg-primary-50 text-primary-800 p-4 rounded-lg mb-4 text-sm">
+                  <p className="font-medium mb-1">{t('orderStatus.bankInfoTitle') || '請匯款至以下帳戶：'}</p>
+                  <pre className="whitespace-pre-wrap font-mono">{settings.paymentSettings?.bankTransferInfo || '銀行：未設定\n帳號：未設定'}</pre>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-main mb-1">{t('orderStatus.inputLast5') || '帳號後五碼'}</label>
+                  <input
+                    type="text"
+                    required
+                    maxLength={5}
+                    minLength={5}
+                    pattern="\d{5}"
+                    placeholder="12345"
+                    className="w-full px-4 py-2 bg-input border border-input rounded-lg text-main focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
+                    value={bankLast5}
+                    onChange={(e) => setBankLast5(e.target.value.replace(/\D/g, ''))}
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-main mb-1">{t('orderStatus.inputTransferDate') || '匯款日期'}</label>
+                  <input
+                    type="date"
+                    required
+                    className="w-full px-4 py-2 bg-input border border-input rounded-lg text-main focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
+                    value={bankTransferDate}
+                    onChange={(e) => setBankTransferDate(e.target.value)}
+                  />
+                </div>
+                
+                <button
+                  type="submit"
+                  disabled={submittingBank || bankLast5.length !== 5}
+                  className="w-full bg-primary-600 hover:bg-primary-700 text-white font-medium py-3 px-4 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {submittingBank ? t('checkout.processing') : (t('orderStatus.submitBankInfo') || '送出對帳資訊')}
+                </button>
+              </form>
+            );
+          })()}
+        </div>
+      )}
+
       <div className="surface-card rounded-xl shadow-sm border overflow-hidden mb-6">
         <div className="p-4 border-b border-input bg-surface-soft">
           <h3 className="font-bold text-main">{t('orders.items')}</h3>

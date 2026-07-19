@@ -46,6 +46,7 @@ import DietaryPreferenceList from './pages/menu/DietaryPreferenceList.js';
 import MealtimeList from './pages/menu/MealtimeList.js';
 import TableList from './pages/operations/TableList.js';
 import OrderList from './pages/operations/OrderList.js';
+import BankReconciliation from './pages/operations/BankReconciliation.js';
 import OrderCreate from './pages/operations/OrderCreate.js';
 import OrderDetailPage from './pages/operations/OrderDetail.js';
 import ReservationList from './pages/operations/ReservationList.js';
@@ -135,6 +136,7 @@ function AppRoutes() {
         <Route path="/" element={<Dashboard />} />
         <Route path="/approve-integrations" element={<RequireRole roles={['SUPER_ADMIN']}><ApproveIntegrations /></RequireRole>} />
         <Route path="/orders" element={<OrderList />} />
+        <Route path="/reconciliation" element={<RequireRole roles={['SUPER_ADMIN', 'MANAGER']}><BankReconciliation /></RequireRole>} />
         <Route path="/orders/new" element={<OrderCreate />} />
         <Route path="/orders/:id" element={<OrderDetailPage />} />
         <Route path="/reservations" element={<ReservationList />} />

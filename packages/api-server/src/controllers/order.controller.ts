@@ -116,6 +116,7 @@ const createOrderSchema = z.object({
   taxId: z.string().optional(),
   companyTitle: z.string().optional(),
   donationCode: z.string().optional(),
+  paymentMethod: z.string().optional(),
 });
 
 function generateOrderNumber(): string {
@@ -146,7 +147,7 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
     userLat, userLon, locationId, honeypot, couponCode, tableName, groupSessionId, frozenDeliveryMethod,
     manualDiscount, manualDeliveryFee, manualTax, trackingNumber, logisticsProvider, idempotencyKey,
     utmSource, utmMedium, utmCampaign,
-    invoiceType, invoiceCarrier, taxId, companyTitle, donationCode
+    invoiceType, invoiceCarrier, taxId, companyTitle, donationCode, paymentMethod
   } = parsedData;
 
   // Pre-process items: if any item is a Random Dispatch (blind box), we resolve it immediately!
@@ -992,6 +993,24 @@ export async function createOrder(req: Request, res: Response): Promise<void> {
     totalRewardPointsCost
   );
 
+  if (paymentMethod === 'bank_transfer') {
+    await prisma.payment.create({
+      data: {
+        orderId: order.id,
+        method: 'BANK_TRANSFER',
+        status: 'PENDING',
+        amount: order.total,
+        metadata: {}
+      }
+    });
+    if (order.paymentStatus !== 'PENDING') {
+      await prisma.order.update({
+        where: { id: order.id },
+        data: { paymentStatus: 'PENDING' }
+      });
+      order.paymentStatus = 'PENDING';
+    }
+  }
 
   // Send notifications
   await NotificationService.notifyNewOrder(order, customerId, guestEmail);
@@ -1014,6 +1033,8 @@ export async function listOrders(req: Request, res: Response): Promise<void> {
   const status = req.query.status as string | undefined;
   const orderType = req.query.orderType as string | undefined;
   const locationId = req.query.locationId as string | undefined;
+  const paymentStatus = req.query.paymentStatus as string | undefined;
+  const paymentMethod = req.query.paymentMethod as string | undefined;
 
   const includeItems = req.query.includeItems === 'true';
 
@@ -1023,6 +1044,12 @@ export async function listOrders(req: Request, res: Response): Promise<void> {
     where.status = statuses.length === 1 ? statuses[0] : { in: statuses };
   }
   if (orderType) where.orderType = orderType;
+  if (paymentStatus) where.paymentStatus = paymentStatus;
+  if (paymentMethod) {
+    where.payments = {
+      some: { method: paymentMethod }
+    };
+  }
 
   // RBAC: enforce location visibility
   if (req.user?.role === 'MANAGER' || req.user?.role === 'STAFF') {
@@ -2042,7 +2069,7 @@ export async function addOrderPayment(req: Request<{ id: string }>, res: Respons
     return;
   }
 
-  const validMethods = ['CASH', 'STRIPE', 'PAYPAL', 'LINE_PAY', 'CREDIT_CARD'];
+  const validMethods = ['CASH', 'STRIPE', 'PAYPAL', 'LINE_PAY', 'CREDIT_CARD', 'BANK_TRANSFER'];
   if (!validMethods.includes(method)) {
     res.status(400).json({ success: false, error: `Invalid method. Must be one of: ${validMethods.join(', ')}` });
     return;
@@ -2369,5 +2396,98 @@ export async function calculateOrderSummary(req: Request, res: Response): Promis
       earliestSlot
     }
   });
+}
+
+export async function submitBankTransferDetails(req: Request<{ id: string }>, res: Response): Promise<void> {
+  const { id } = req.params;
+  const { last5Digits, transferDate } = req.body;
+  
+  if (!last5Digits || !transferDate) {
+    res.status(400).json({ success: false, error: 'last5Digits and transferDate are required' });
+    return;
+  }
+
+  const order = await prisma.order.findUnique({
+    where: { id },
+    include: { payments: true }
+  });
+
+  if (!order) {
+    res.status(404).json({ success: false, error: 'Order not found' });
+    return;
+  }
+
+  // Create or update a pending BANK_TRANSFER payment record
+  let payment = order.payments.find(p => p.method === 'BANK_TRANSFER' && p.status === 'PENDING');
+  if (payment) {
+    await prisma.payment.update({
+      where: { id: payment.id },
+      data: { metadata: { last5Digits, transferDate } }
+    });
+  } else {
+    await prisma.payment.create({
+      data: {
+        orderId: id,
+        method: 'BANK_TRANSFER',
+        status: 'PENDING',
+        amount: order.total,
+        metadata: { last5Digits, transferDate }
+      }
+    });
+  }
+
+  if (order.paymentStatus !== 'PENDING') {
+    await prisma.order.update({
+      where: { id },
+      data: { paymentStatus: 'PENDING' }
+    });
+  }
+
+  res.json({ success: true });
+}
+
+export async function confirmBankTransfer(req: Request<{ id: string }>, res: Response): Promise<void> {
+  const { id } = req.params;
+
+  const order = await prisma.order.findUnique({
+    where: { id },
+    include: { payments: true }
+  });
+
+  if (!order) {
+    res.status(404).json({ success: false, error: 'Order not found' });
+    return;
+  }
+
+  const pendingPayment = order.payments.find(p => p.method === 'BANK_TRANSFER' && p.status === 'PENDING');
+  
+  if (!pendingPayment) {
+    res.status(400).json({ success: false, error: 'No pending bank transfer payment found for this order' });
+    return;
+  }
+
+  await prisma.payment.update({
+    where: { id: pendingPayment.id },
+    data: { status: 'COMPLETED' }
+  });
+
+  const updatedOrder = await prisma.order.update({
+    where: { id },
+    data: { paymentStatus: 'PAID' },
+    include: { payments: true }
+  });
+
+  emitOrderStatusUpdate({
+    id: updatedOrder.id,
+    orderNumber: updatedOrder.orderNumber,
+    status: updatedOrder.status,
+    orderType: updatedOrder.orderType,
+    customerId: updatedOrder.customerId,
+    locationId: updatedOrder.locationId,
+    paymentStatus: updatedOrder.paymentStatus,
+    tenantId: (updatedOrder as any).tenantId,
+  } as any);
+
+  res.json({ success: true, data: updatedOrder });
 }
 

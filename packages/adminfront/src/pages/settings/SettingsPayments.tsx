@@ -33,6 +33,10 @@ export default function SettingsPayments() {
   // Cash
   const [cashEnabled, setCashEnabled] = useState(true);
 
+  // Bank Transfer
+  const [bankTransferEnabled, setBankTransferEnabled] = useState(false);
+  const [bankTransferInfo, setBankTransferInfo] = useState('');
+
   useEffect(() => {
     setLoading(true);
     api.get(locationId ? `settings/payment?locationId=${locationId}` : 'settings/payment')
@@ -48,6 +52,8 @@ export default function SettingsPayments() {
           if (d.paypalClientSecret) setPaypalClientSecret(d.paypalClientSecret);
           if (d.paypalSandbox !== undefined) setPaypalSandbox(d.paypalSandbox);
           if (d.cashEnabled !== undefined) setCashEnabled(d.cashEnabled);
+          if (d.bankTransferEnabled !== undefined) setBankTransferEnabled(d.bankTransferEnabled);
+          if (d.bankTransferInfo) setBankTransferInfo(d.bankTransferInfo);
         }
       })
       .catch(() => {})
@@ -63,7 +69,8 @@ export default function SettingsPayments() {
       const res = await api.put(endpoint, JSON.stringify({
           stripeEnabled, stripePublishableKey, stripeSecretKey, stripeWebhookSecret,
           paypalEnabled, paypalClientId, paypalClientSecret, paypalSandbox,
-          cashEnabled
+          cashEnabled,
+          bankTransferEnabled, bankTransferInfo
         }));
       const data = res;
       if (data.success) {
@@ -173,14 +180,38 @@ export default function SettingsPayments() {
         </div>
 
         {/* Cash */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
+        <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
           <ToggleRow
-            title={t('settingsPayments.cashOnDeliveryOrStore')}
+            title={t('settingsPayments.cashPayment') || '現金付款'}
             checked={cashEnabled}
             onChange={setCashEnabled}
             className="bg-transparent border-none p-0"
           />
         </div>
+
+        {/* Bank Transfer */}
+        <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
+          <ToggleRow
+            title={t('settingsPayments.bankTransfer') || '匯款後出貨 (僅冷凍宅配)'}
+            checked={bankTransferEnabled}
+            onChange={setBankTransferEnabled}
+            className="bg-transparent border-none p-0 mb-4"
+          />
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1.5">{t('settingsPayments.bankTransferInfo') || '匯款帳號資訊'}</label>
+              <textarea 
+                className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 focus:bg-white focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all duration-200 outline-none placeholder:text-gray-400 shadow-sm" 
+                rows={4}
+                value={bankTransferInfo} 
+                onChange={(e) => setBankTransferInfo(e.target.value)} 
+                placeholder="例如：\n銀行代碼：004 台灣銀行\n帳號：123456789012" 
+              />
+              <p className="mt-1 text-xs text-gray-500">{t('settingsPayments.bankTransferDesc') || '設定後，選擇匯款的顧客結帳時將會看到此資訊。'}</p>
+            </div>
+          </div>
+        </div>
+
       </PageContent>
     </div>
   );

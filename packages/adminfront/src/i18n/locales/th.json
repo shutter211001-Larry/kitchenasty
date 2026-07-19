@@ -41,7 +41,8 @@
     "logout": "Logout",
     "finance": "การเงิน",
     "marketingDashboard": "แดชบอร์ดการตลาด",
-    "pos": "POS Register"
+    "pos": "POS Register",
+    "reconciliation": "Bank Reconciliation"
   },
   "staff": {
     "title": "Staff Management",
