@@ -147,7 +147,7 @@ export default function OrderCreate() {
   useEffect(() => {
     if (!selectedLocationId) return;
     // Fetch menu items from API for the specific location
-    api.get<{ data: MenuItem[] }>(`/menu/items?locationId=${selectedLocationId}`).then((res) => {
+    api.get<{ data: MenuItem[] }>(`/menu/items?limit=1000&locationId=${selectedLocationId}`).then((res) => {
       setMenuItems(res.data.filter(i => i.isActive));
     }).catch(err => console.error('Failed to load menu items:', err));
   }, [selectedLocationId]);
