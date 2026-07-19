@@ -12,7 +12,8 @@ import { useAnalytics } from '../hooks/useAnalytics.js';
 import { formatToLocalDate, formatToLocalTime, formatToFullDateTime, getDateFriendlyLabel } from '../utils/date.js';
 import taiwanDistricts from '../lib/taiwan-districts.json';
 import { confirm } from "../lib/confirm.js";
-import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
+import { GoogleOAuthProvider } from '@react-oauth/google';
+import { CustomGoogleLoginButton } from '../components/ui/CustomGoogleLoginButton';
 import { useLocations } from '../hooks/useLocations.js';
 
 type OrderType = 'delivery' | 'pickup' | 'frozen_delivery';
@@ -1294,11 +1295,10 @@ export default function Checkout() {
                       {settings.googleSettings?.googleLoginClientId && (
                         <div className="flex items-center">
                           <GoogleOAuthProvider clientId={settings.googleSettings.googleLoginClientId}>
-                            <GoogleLogin
-                              onSuccess={(credentialResponse) => handleGoogleSuccess(credentialResponse.credential)}
+                            <CustomGoogleLoginButton
+                              onSuccess={(token) => handleGoogleSuccess(token)}
                               onError={() => setError('Google Login Failed')}
-                              useOneTap
-                              shape="rectangular"
+                              label={t('auth.googleSignIn') || 'Google 登入'}
                             />
                           </GoogleOAuthProvider>
                         </div>

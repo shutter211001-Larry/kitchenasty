@@ -6,7 +6,8 @@ import { useTheme } from '../context/ThemeContext.js';
 import { API_BASE, api } from '../lib/api';
 import { confirm } from "../lib/confirm";
 import { toast } from "react-hot-toast";
-import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
+import { GoogleOAuthProvider } from '@react-oauth/google';
+import { CustomGoogleLoginButton } from '../components/ui/CustomGoogleLoginButton';
 
 export default function Account() {
   const { t } = useTranslation();
@@ -348,12 +349,10 @@ export default function Account() {
                         settings.googleSettings?.googleLoginClientId ? (
                           <div className="flex justify-center w-full">
                             <GoogleOAuthProvider clientId={settings.googleSettings.googleLoginClientId}>
-                              <GoogleLogin
-                                onSuccess={(res) => handleGoogleSuccess(res.credential, true)}
+                              <CustomGoogleLoginButton
+                                onSuccess={(token) => handleGoogleSuccess(token, true)}
                                 onError={() => toast.error('Google Auth Failed')}
-                                useOneTap
-                                shape="rectangular"
-                                width="100%"
+                                label={t('auth.googleSignIn') || 'Google 登入'}
                               />
                             </GoogleOAuthProvider>
                           </div>
@@ -861,13 +860,12 @@ export default function Account() {
                 </button>
               ) : (
                 settings.googleSettings?.googleLoginClientId && (
-                  <div className="flex items-center">
+                  <div className="flex items-center w-full sm:w-auto">
                     <GoogleOAuthProvider clientId={settings.googleSettings.googleLoginClientId}>
-                      <GoogleLogin
-                        onSuccess={(res) => handleGoogleSuccess(res.credential, false)}
+                      <CustomGoogleLoginButton
+                        onSuccess={(token) => handleGoogleSuccess(token, false)}
                         onError={() => toast.error('Google Auth Failed')}
-                        useOneTap
-                        shape="rectangular"
+                        label={t('account.linkGoogleForLogin') || '連結 Google 帳號'}
                       />
                     </GoogleOAuthProvider>
                   </div>

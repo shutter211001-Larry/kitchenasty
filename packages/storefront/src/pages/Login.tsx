@@ -5,7 +5,8 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext.js';
 import { useTheme } from '../context/ThemeContext.js';
 import { API_BASE } from '../lib/api.js';
-import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
+import { GoogleOAuthProvider } from '@react-oauth/google';
+import { CustomGoogleLoginButton } from '../components/ui/CustomGoogleLoginButton';
 
 export default function Login() {
   const { t } = useTranslation();
@@ -211,12 +212,11 @@ export default function Login() {
             {settings.googleSettings?.googleLoginClientId && (
               <div className="w-full flex justify-center">
                 <GoogleOAuthProvider clientId={settings.googleSettings.googleLoginClientId}>
-                  <GoogleLogin
-                    onSuccess={(credentialResponse) => handleGoogleSuccess(credentialResponse.credential)}
+                  <CustomGoogleLoginButton
+                    onSuccess={(token) => handleGoogleSuccess(token)}
                     onError={() => setError('Google Login Failed')}
                     useOneTap
-                    width="100%"
-                    shape="rectangular"
+                    label={t('auth.googleSignIn') || 'Google 登入'}
                   />
                 </GoogleOAuthProvider>
               </div>

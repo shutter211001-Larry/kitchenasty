@@ -508,18 +508,45 @@ export async function verifyGoogleToken(req: Request, res: Response): Promise<vo
     }
 
     // 2. Verify Token
-    const client = new OAuth2Client(clientId);
-    const ticket = await client.verifyIdToken({
-      idToken: token,
-      audience: clientId,
-    });
-    const payload = ticket.getPayload();
-    if (!payload || !payload.email) {
-      res.status(400).json({ success: false, error: '無效的 Google Token' });
-      return;
-    }
+    let email: string;
+    let googleId: string;
+    let name: string | undefined;
 
-    const { email, sub: googleId, name } = payload;
+    // Check if token is an ID Token (JWT has 3 parts separated by dots)
+    const isIdToken = token.split('.').length === 3;
+
+    if (isIdToken) {
+      const client = new OAuth2Client(clientId);
+      const ticket = await client.verifyIdToken({
+        idToken: token,
+        audience: clientId,
+      });
+      const payload = ticket.getPayload();
+      if (!payload || !payload.email) {
+        res.status(400).json({ success: false, error: '無效的 Google Token' });
+        return;
+      }
+      email = payload.email;
+      googleId = payload.sub;
+      name = payload.name;
+    } else {
+      // Access Token flow
+      const userInfoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!userInfoRes.ok) {
+        res.status(400).json({ success: false, error: '無效的 Google Token' });
+        return;
+      }
+      const userInfo = await userInfoRes.json();
+      if (!userInfo || !userInfo.email) {
+        res.status(400).json({ success: false, error: '無法取得 Google 使用者資訊' });
+        return;
+      }
+      email = userInfo.email;
+      googleId = userInfo.sub;
+      name = userInfo.name;
+    }
 
     // Manual Auth Check for linking
     let loggedInUserId: string | null = null;
