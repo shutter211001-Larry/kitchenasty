@@ -47,6 +47,8 @@ interface CartContextType {
   setTableName: (name: string | null) => void;
   locationId: string | null;
   setLocationId: (id: string | null) => void;
+  isLocationModalOpen: boolean;
+  setLocationModalOpen: (open: boolean) => void;
   
   // Group Ordering
   clientId: string;
@@ -87,6 +89,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [locationId, setLocationId] = useState<string | null>(() => {
     try { return localStorage.getItem('shutter-cart-location'); } catch { return null; }
   });
+  const [isLocationModalOpen, setLocationModalOpen] = useState(false);
   
   const [groupSessionId, setGroupSessionId] = useState<string | null>(() => {
     try { return sessionStorage.getItem('shutter-group-session'); } catch { return null; }
@@ -227,10 +230,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         itemCount,
         subtotal,
         tableName,
-        setTableName,
-        locationId,
-        setLocationId,
-        clientId,
+      setTableName,
+      locationId,
+      setLocationId,
+      isLocationModalOpen,
+      setLocationModalOpen,
+      clientId,
         groupSessionId, groupPin, setGroupSession 
     }}>
       {children}

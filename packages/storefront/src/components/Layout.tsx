@@ -6,6 +6,7 @@ import Footer from './Footer.js';
 import CartDrawer from './CartDrawer.js';
 import CookieBanner from './CookieBanner.js';
 import GroupOrderDialog from './GroupOrderDialog.js';
+import LocationSelectorModal from './LocationSelectorModal.js';
 
 import { useUTMTracking } from '../hooks/useUTMTracking.js';
 
@@ -44,6 +45,7 @@ export default function Layout() {
       <CartDrawer />
       <CookieBanner />
       <GroupOrderDialog />
+      <LocationSelectorModal />
     </div>
   );
 }

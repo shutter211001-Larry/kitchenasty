@@ -6,6 +6,7 @@ import { useTheme } from '../context/ThemeContext.js';
 import { API_BASE, api } from '../lib/api';
 import { confirm } from "../lib/confirm";
 import { toast } from "react-hot-toast";
+import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 
 export default function Account() {
   const { t } = useTranslation();
@@ -22,7 +23,7 @@ export default function Account() {
   const [isChangingPassword, setIsChangingPassword] = useState(false);
 
   // Merge State
-  const [showMergePrompt, setShowMergePrompt] = useState<{ provider: 'google' | 'line', id: string } | null>(null);
+  const [showMergePrompt, setShowMergePrompt] = useState<{ provider: 'google' | 'line', socialId: string } | null>(null);
   const [mergePassword, setMergePassword] = useState('');
   const [isMerging, setIsMerging] = useState(false);
   const [isSocialVerified, setIsSocialVerified] = useState(false);
@@ -57,7 +58,7 @@ export default function Account() {
     const verified = params.get('verified');
 
     if (error === 'conflict' && provider) {
-      setShowMergePrompt({ provider, id: socialId || '' });
+      setShowMergePrompt({ provider, socialId: socialId || '' });
       if (verified === 'true') {
         setIsSocialVerified(true);
       }
@@ -171,7 +172,7 @@ export default function Account() {
         if (errorMsg.includes(t('account.linkedByAnotherMember')) || errorMsg.includes(t('account.boundByAnotherMember'))) {
           console.log('Conflict detected, opening merge prompt for:', profile.userId);
           setIsSocialVerified(true);
-          setShowMergePrompt({ provider: 'line', id: profile.userId });
+          setShowMergePrompt({ provider: 'line', socialId: profile.userId });
         } else {
           toast.error(errorMsg || t('account.linkFailed'));
         }
@@ -209,7 +210,7 @@ export default function Account() {
     try {
       const data = await api.post<any>('/auth/social/merge', {
         provider: showMergePrompt.provider,
-        socialId: showMergePrompt.id,
+        socialId: showMergePrompt.socialId,
         password: mergePassword
       });
       if (data.success) {
@@ -224,6 +225,33 @@ export default function Account() {
       setIsMerging(false);
     }
   };
+
+  async function handleGoogleSuccess(credential: string | undefined, isMergeAuth: boolean = false) {
+    if (!credential) return;
+    try {
+      const data = await api.post<any>('/auth/google/verify', { token: credential, action: 'link' });
+      if (data.success) {
+        if (isMergeAuth) {
+          setIsSocialVerified(true);
+        } else {
+          toast.success(t('account.bindSuccess') || '綁定成功');
+          window.location.reload();
+        }
+      } else {
+        throw new Error(data.error);
+      }
+    } catch (err: any) {
+      if (err.status === 409 || err.message?.includes('conflict')) {
+        if (isMergeAuth) {
+          setIsSocialVerified(true);
+        } else {
+          setShowMergePrompt({ provider: 'google', socialId: err.socialId || 'unknown' });
+        }
+      } else {
+        toast.error(err.message || 'Google Auth Failed');
+      }
+    }
+  }
 
   if (isLoading) {
     return (
@@ -315,21 +343,33 @@ export default function Account() {
                       </button>
                     </div>
                   ) : (
-                    <button
-                      onClick={() => {
-                        if (showMergePrompt.provider === 'google') {
-                          window.location.href = `${API_BASE}/auth/google?prompt=select_account&state=${encodeURIComponent('link=true')}&redirectUri=${encodeURIComponent(window.location.origin + '/account')}`;
-                        } else {
-                          handleLineAuth();
-                        }
-                      }}
-                      className="w-full py-3.5 border-2 border-input text-main text-sm font-bold rounded-xl hover:bg-surface-soft hover:border-primary-500/30 transition-all flex items-center justify-center gap-2"
-                    >
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                      </svg>
-                      {t('auth.orContinue')} {showMergePrompt.provider === 'google' ? 'Google' : 'LINE'}
-                    </button>
+                    <div className="w-full">
+                      {showMergePrompt.provider === 'google' ? (
+                        settings.googleSettings?.googleLoginClientId ? (
+                          <div className="flex justify-center w-full">
+                            <GoogleOAuthProvider clientId={settings.googleSettings.googleLoginClientId}>
+                              <GoogleLogin
+                                onSuccess={(res) => handleGoogleSuccess(res.credential, true)}
+                                onError={() => toast.error('Google Auth Failed')}
+                                useOneTap
+                                shape="rectangular"
+                                width="100%"
+                              />
+                            </GoogleOAuthProvider>
+                          </div>
+                        ) : null
+                      ) : (
+                        <button
+                          onClick={handleLineAuth}
+                          className="w-full py-3.5 border-2 border-input text-main text-sm font-bold rounded-xl hover:bg-surface-soft hover:border-primary-500/30 transition-all flex items-center justify-center gap-2"
+                        >
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                          </svg>
+                          {t('auth.orContinue')} LINE
+                        </button>
+                      )}
+                    </div>
                   )}
                 </div>
 
@@ -820,12 +860,18 @@ export default function Account() {
                   {t('account.unbind')}
                 </button>
               ) : (
-                <a
-                  href={`${API_BASE}/auth/google?prompt=select_account&state=${encodeURIComponent(JSON.stringify({ link: true, token: token, redirect: '/account' }))}`}
-                  className="px-8 py-3.5 text-sm font-black bg-surface text-main rounded-xl border-2 border-input hover:border-primary-500/50 transition-all shadow-sm active:scale-95 flex items-center gap-2"
-                >
-                  {t('account.bind')} Google
-                </a>
+                settings.googleSettings?.googleLoginClientId && (
+                  <div className="flex items-center">
+                    <GoogleOAuthProvider clientId={settings.googleSettings.googleLoginClientId}>
+                      <GoogleLogin
+                        onSuccess={(res) => handleGoogleSuccess(res.credential, false)}
+                        onError={() => toast.error('Google Auth Failed')}
+                        useOneTap
+                        shape="rectangular"
+                      />
+                    </GoogleOAuthProvider>
+                  </div>
+                )
               )}
             </div>
           </div>

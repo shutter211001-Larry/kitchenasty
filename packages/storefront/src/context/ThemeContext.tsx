@@ -90,6 +90,9 @@ export interface SiteSettings {
   orderStatusMessage?: string;
   orderStatusMessageTranslations?: Record<string, string>;
   showLanguageEmoji?: boolean;
+  googleSettings?: {
+    googleLoginClientId?: string;
+  };
 }
 
 interface ThemeContextType {
