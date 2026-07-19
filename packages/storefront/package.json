@@ -14,14 +14,14 @@
     "@sentry/browser": "^10.65.0",
     "@sentry/react": "^10.65.0",
     "@shutter/shared": "*",
-    "express": "^5.2.1",
+    "express": "^4.22.2",
     "http-proxy-middleware": "^4.1.1",
     "i18next": "^25.8.10",
     "i18next-browser-languagedetector": "^8.2.1",
     "react": "^18.3.0",
     "react-dom": "^18.3.0",
     "react-i18next": "^16.5.4",
-    "react-router-dom": "^6.28.0",
+    "react-router-dom": "^7.18.1",
     "socket.io-client": "^4.8.3",
     "swr": "^2.4.2"
   },
@@ -30,10 +30,10 @@
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.3.0",
     "autoprefixer": "^10.4.0",
-    "intlayer": "^8.1.2",
+    "intlayer": "^8.12.4",
     "postcss": "^8.4.0",
     "tailwindcss": "^3.4.0",
-    "vite": "^6.0.0",
+    "vite": "^6.4.3",
     "vite-plugin-pwa": "^1.3.0"
   }
 }
