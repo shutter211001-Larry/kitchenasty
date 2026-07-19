@@ -501,7 +501,7 @@ export async function verifyGoogleToken(req: Request, res: Response): Promise<vo
         : settings.googleSettings;
     }
     
-    const clientId = googleSettings.googleLoginClientId;
+    const clientId = googleSettings.googleLoginClientId?.trim();
     if (!clientId) {
       res.status(400).json({ success: false, error: '此商店尚未設定 Google SSO' });
       return;
@@ -636,7 +636,7 @@ export async function verifyGoogleToken(req: Request, res: Response): Promise<vo
     });
   } catch (error: any) {
     console.error('[Google Verify] Error:', error);
-    res.status(401).json({ success: false, error: 'Google 驗證失敗' });
+    res.status(401).json({ success: false, error: 'Google 驗證失敗: ' + (error.message || String(error)) });
   }
 }
 

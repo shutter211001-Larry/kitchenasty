@@ -76,12 +76,13 @@ export default function OrderCreate() {
   const [logisticsProvider, setLogisticsProvider] = useState('');
   const [comment, setComment] = useState('');
   
-  const [invoiceType, setInvoiceType] = useState('CLOUD');
   const [invoiceCarrier, setInvoiceCarrier] = useState('');
   const [taxId, setTaxId] = useState('');
   const [companyTitle, setCompanyTitle] = useState('');
   const [donationCode, setDonationCode] = useState('');
   const [showScanner, setShowScanner] = useState(false);
+  const [scanTarget, setScanTarget] = useState<'CARRIER' | 'COUPON'>('CARRIER');
+  const [availableCoupons, setAvailableCoupons] = useState<{ id: string, code: string, name: string }[]>([]);
   
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string[]>>({});
@@ -120,6 +121,11 @@ export default function OrderCreate() {
         setSelectedLocationId(res.data[0].id);
       }
     }).catch(err => setError(err.message)).finally(() => setLoading(false));
+
+    // 獲取有效優惠碼
+    api.get<{ data: any[] }>('/coupons?isActive=true&withCode=true&limit=100').then((res) => {
+      setAvailableCoupons(res.data);
+    }).catch(err => console.error(err));
   }, []);
 
   useEffect(() => {
@@ -133,7 +139,11 @@ export default function OrderCreate() {
       scanner.render((decodedText) => {
         scanner.clear();
         setShowScanner(false);
-        setInvoiceCarrier(decodedText);
+        if (scanTarget === 'CARRIER') {
+          setInvoiceCarrier(decodedText);
+        } else {
+          setCouponCode(decodedText);
+        }
       }, (err) => {
         // ignore scan errors
       });
@@ -142,7 +152,7 @@ export default function OrderCreate() {
         scanner.clear().catch(console.error);
       };
     }
-  }, [showScanner]);
+  }, [showScanner, scanTarget]);
 
   useEffect(() => {
     if (!selectedLocationId) return;
@@ -300,7 +310,6 @@ export default function OrderCreate() {
         trackingNumber: trackingNumber || undefined,
         logisticsProvider: logisticsProvider || undefined,
         comment: comment || undefined,
-        invoiceType: invoiceType || undefined,
         invoiceCarrier: invoiceCarrier || undefined,
         taxId: taxId || undefined,
         companyTitle: companyTitle || undefined,
@@ -660,13 +669,42 @@ export default function OrderCreate() {
                 <div className="space-y-3 pt-3 border-t border-gray-50">
                   <div>
                     <label className="block text-xs font-medium text-gray-700 mb-1">{t('orderCreate.couponCode') || (t('orderCreate.03a46b') || '優惠碼')}</label>
-                    <input
-                      type="text"
-                      value={couponCode}
-                      onChange={e => setCouponCode(e.target.value)}
-                      className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-primary-500/20 outline-none shadow-sm transition-all duration-200"
-                      placeholder={t('orderCreate.bada06') || '輸入優惠碼'}
-                    />
+                    <div className="relative flex items-center gap-2 mb-2">
+                      <div className="relative flex-1">
+                        <input
+                          type="text"
+                          value={couponCode}
+                          onChange={e => setCouponCode(e.target.value)}
+                          className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-primary-500/20 outline-none shadow-sm transition-all duration-200 uppercase"
+                          placeholder={t('orderCreate.bada06') || '輸入優惠碼'}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setScanTarget('COUPON');
+                            setShowScanner(true);
+                          }}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-primary-600 transition-colors"
+                          title={t('orderCreate.scanCoupon') || '掃描優惠碼'}
+                        >
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                    {availableCoupons.length > 0 && (
+                      <select
+                        value={couponCode}
+                        onChange={e => setCouponCode(e.target.value)}
+                        className="w-full px-3 py-1.5 mb-1 bg-white border border-gray-200 rounded-lg text-xs text-gray-600 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                      >
+                        <option value="">-- {t('orderCreate.selectAvailableCoupon') || '選擇可用優惠碼'} --</option>
+                        {availableCoupons.map(c => (
+                          <option key={c.id} value={c.code}>{c.name} ({c.code})</option>
+                        ))}
+                      </select>
+                    )}
                     {summary?.manualCouponError && (
                       <p className="text-xs text-red-500 mt-1">{summary.manualCouponError}</p>
                     )}
@@ -735,83 +773,66 @@ onChange={e => setManualTax(e.target.value === '' ? '' : parseFloat(e.target.val
                   </div>
                   
                   <div className="grid grid-cols-2 gap-3 mb-3">
-                    <div>
-                      <label className="block text-xs text-gray-500 mb-1">{t('orderCreate.invoiceType') || '發票類型'}</label>
-                      <select
-                        value={invoiceType}
-                        onChange={(e) => setInvoiceType(e.target.value)}
-                        className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-primary-500/20 outline-none"
-                      >
-                        <option value="CLOUD">{t('orderCreate.invoiceCloud') || '雲端載具'}</option>
-                        <option value="COMPANY">{t('orderCreate.invoiceCompany') || '公司統編'}</option>
-                        <option value="DONATE">{t('orderCreate.invoiceDonate') || '捐贈發票'}</option>
-                      </select>
-                    </div>
-                    
-                    {invoiceType === 'CLOUD' && (
-                      <div>
-                        <label className="block text-xs text-gray-500 mb-1">{t('orderCreate.invoiceCarrier') || '手機載具'}</label>
-                        <div className="relative">
-                          <input
-                            type="text"
-                            value={invoiceCarrier}
-                            onChange={(e) => setInvoiceCarrier(e.target.value.toUpperCase())}
-                            placeholder="/ABC1234"
-                            className="w-full pl-3 pr-8 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-primary-500/20 outline-none uppercase"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => setShowScanner(!showScanner)}
-                            className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-primary-600 transition-colors"
-                            title={t('orderCreate.scanCarrier') || '掃描載具'}
-                          >
-                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                            </svg>
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                    
-                    {invoiceType === 'COMPANY' && (
-                      <>
-                        <div>
-                          <label className="block text-xs text-gray-500 mb-1">{t('orderCreate.taxId') || '統一編號'}</label>
-                          <input
-                            type="text"
-                            value={taxId}
-                            onChange={(e) => setTaxId(e.target.value.replace(/\D/g, '').slice(0, 8))}
-                            maxLength={8}
-                            placeholder="12345678"
-                            className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-primary-500/20 outline-none"
-                          />
-                        </div>
-                        <div className="col-span-2">
-                          <label className="block text-xs text-gray-500 mb-1">{t('orderCreate.companyTitle') || '公司抬頭'}</label>
-                          <input
-                            type="text"
-                            value={companyTitle}
-                            onChange={(e) => setCompanyTitle(e.target.value)}
-                            placeholder="公司名稱"
-                            className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-primary-500/20 outline-none"
-                          />
-                        </div>
-                      </>
-                    )}
-                    
-                    {invoiceType === 'DONATE' && (
-                      <div>
-                        <label className="block text-xs text-gray-500 mb-1">{t('orderCreate.donationCode') || '愛心碼'}</label>
+                    <div className="col-span-2 md:col-span-1">
+                      <label className="block text-xs text-gray-500 mb-1">{t('orderCreate.invoiceCarrier') || '手機載具'}</label>
+                      <div className="relative">
                         <input
                           type="text"
-                          value={donationCode}
-                          onChange={(e) => setDonationCode(e.target.value.replace(/\D/g, '').slice(0, 7))}
-                          maxLength={7}
-                          placeholder="123456"
-                          className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-primary-500/20 outline-none"
+                          value={invoiceCarrier}
+                          onChange={(e) => setInvoiceCarrier(e.target.value.toUpperCase())}
+                          placeholder="/ABC1234"
+                          className="w-full pl-3 pr-8 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-primary-500/20 outline-none uppercase"
                         />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setScanTarget('CARRIER');
+                            setShowScanner(true);
+                          }}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-primary-600 transition-colors"
+                          title={t('orderCreate.scanCarrier') || '掃描載具'}
+                        >
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                          </svg>
+                        </button>
                       </div>
-                    )}
+                    </div>
+
+                    <div className="col-span-2 md:col-span-1">
+                      <label className="block text-xs text-gray-500 mb-1">{t('orderCreate.donationCode') || '愛心碼'}</label>
+                      <input
+                        type="text"
+                        value={donationCode}
+                        onChange={(e) => setDonationCode(e.target.value.replace(/\D/g, '').slice(0, 7))}
+                        maxLength={7}
+                        placeholder="123456"
+                        className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-primary-500/20 outline-none"
+                      />
+                    </div>
+
+                    <div className="col-span-2 md:col-span-1">
+                      <label className="block text-xs text-gray-500 mb-1">{t('orderCreate.taxId') || '統一編號'}</label>
+                      <input
+                        type="text"
+                        value={taxId}
+                        onChange={(e) => setTaxId(e.target.value.replace(/\D/g, '').slice(0, 8))}
+                        maxLength={8}
+                        placeholder="12345678"
+                        className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-primary-500/20 outline-none"
+                      />
+                    </div>
+                    
+                    <div className="col-span-2 md:col-span-1">
+                      <label className="block text-xs text-gray-500 mb-1">{t('orderCreate.companyTitle') || '公司抬頭'}</label>
+                      <input
+                        type="text"
+                        value={companyTitle}
+                        onChange={(e) => setCompanyTitle(e.target.value)}
+                        placeholder="公司名稱"
+                        className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-primary-500/20 outline-none"
+                      />
+                    </div>
                   </div>
 
                   {showScanner && (

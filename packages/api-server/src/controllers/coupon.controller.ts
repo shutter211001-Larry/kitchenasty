@@ -60,13 +60,21 @@ export async function listCoupons(req: Request, res: Response): Promise<void> {
   const limit = Math.min(50, Math.max(1, parseInt(req.query.limit as string) || 20));
   const skip = (page - 1) * limit;
 
+  const isActiveStr = req.query.isActive as string | undefined;
+  const withCodeStr = req.query.withCode as string | undefined;
+
+  const where: any = {};
+  if (isActiveStr !== undefined) where.isActive = isActiveStr === 'true';
+  if (withCodeStr === 'true') where.code = { not: null };
+
   const [coupons, total] = await Promise.all([
     prisma.coupon.findMany({
+      where,
       skip,
       take: limit,
       orderBy: { createdAt: 'desc' },
     }),
-    prisma.coupon.count(),
+    prisma.coupon.count({ where }),
   ]);
 
   res.json({

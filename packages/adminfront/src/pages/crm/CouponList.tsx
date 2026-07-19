@@ -4,6 +4,8 @@ import { Link } from 'react-router-dom';
 import { api } from '../../lib/api.js';
 import { confirm } from '../../lib/confirm';
 import { toast } from "react-hot-toast";
+import { QRCodeSVG } from 'qrcode.react';
+import { QrCode } from 'lucide-react';
 
 interface Coupon {
   id: string;
@@ -42,6 +44,7 @@ export default function CouponList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [page, setPage] = useState(1);
+  const [selectedQrCode, setSelectedQrCode] = useState<string | null>(null);
 
   const token = localStorage.getItem('token') || '';
 
@@ -119,7 +122,20 @@ export default function CouponList() {
               <tbody>
                 {coupons.map((coupon) => (
                   <tr key={coupon.id} className="border-b border-gray-100 hover:bg-gray-50">
-                    <td className="px-4 py-3 font-mono text-xs font-bold">{coupon.code}</td>
+                    <td className="px-4 py-3 font-mono text-xs font-bold">
+                      <div className="flex items-center gap-2">
+                        {coupon.code}
+                        {coupon.code && (
+                          <button
+                            onClick={() => setSelectedQrCode(coupon.code)}
+                            className="p-1 text-gray-400 hover:text-primary-600 transition-colors"
+                            title={t('couponList.showQrCode') || '顯示 QR Code'}
+                          >
+                            <QrCode className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
+                    </td>
                     <td className="px-4 py-3">
                       <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-gray-100 text-gray-700">
                         {TYPE_LABELS[coupon.type] || coupon.type}
@@ -211,6 +227,24 @@ export default function CouponList() {
             </div>
           )}
         </>
+      )}
+
+      {selectedQrCode && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-sm relative">
+            <h3 className="text-lg font-bold text-center mb-4">{t('couponList.qrCode') || '優惠碼 QR Code'}</h3>
+            <div className="flex justify-center mb-4">
+              <QRCodeSVG value={selectedQrCode} size={200} />
+            </div>
+            <p className="text-center font-mono font-bold text-xl mb-6">{selectedQrCode}</p>
+            <button
+              onClick={() => setSelectedQrCode(null)}
+              className="w-full py-2 bg-gray-100 text-gray-700 font-medium rounded-xl hover:bg-gray-200 transition-colors"
+            >
+              {t('common.close') || '關閉'}
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );
